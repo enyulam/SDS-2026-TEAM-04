@@ -131,6 +131,30 @@ _The entries below record verified history prior to this log's creation. They ar
 - **Commit:** **still pending** — the governance baseline is staged only; no commit, tag, remote, or push.
 - **Next permitted action:** Step 5B3 — create and verify the single local governance-baseline commit.
 
+## 2026-07-22 02:23:13 +0800 — Governance-baseline commit (migration Step 5B3)
+
+- **Checkpoint:** Step 5B3 — create and verify the governance-baseline commit.
+- **Scope:** one local, documentation-only commit from the seven-file staged set accepted in Step 5B2.
+- **Commit:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce` (short `c7c27e5`)
+- **Message:** `docs(governance): install reconciled MVP baseline`
+- **Parent:** `4de3f93c64ffea4883655f411d2f35a9a35f15d6`
+- **Summary:** **7 files**, **2697 insertions**, 0 deletions — `CLAUDE.md`, Specification v3, Amendment 001, Implementation Plan, `STATUS.md`, `BUILD_NOTES.md`, `DEMO_TO_MVP_MIGRATION.md`.
+- **Documentation-only commit** — no application, package, lockfile, or configuration file was touched.
+- **Automated verification:** **none run by design** (documentation-only checkpoint) — no typecheck, lint, build, dependency operation, or application/dev-server run.
+- **Document verification passed:** Specification v3 integrity confirmed byte-for-byte identical to `governance-source` (`64d54aa2…`); Amendment 001 verified to contain **A-001 through A-013**; all `CLAUDE.md` path references resolve; the Implementation Plan's procedural-authority note confirmed; migration copy byte-identical to the workspace tracker.
+- **Stale-requirement scan:** **no active stale requirement** for Node 20, mandatory GitHub setup, Phase 1 parent evidence access, an absolute parent-evidence prohibition, Stitch as a Phase 0 prerequisite, the AI Breakdown as a Phase 0 blocker, or `STATUS.md` as the sole continuity file. Remaining phrases are authoritative-baseline (superseded), quoted, historical, or explanatory.
+- **Result:** working tree clean; exactly two commits; **no tag, no remote, nothing pushed**.
+
+## 2026-07-22 — Step 5 closure and record synchronization (migration Step 5B4)
+
+- **Checkpoint:** Step 5B4 — governance closure synchronization (**administrative only**).
+- **Step 5 is accepted and substantively complete** — the governance deliverable was accepted at commit `c7c27e5`.
+- **Records synchronized after the governance commit:** the workspace migration tracker was updated (Step 5B2/5B3 accepted, Step 5B4 opened, Step 5 closed, Step 6/6A opened, MVP repository record, decision log **D-051 … D-059**), and the active migration copy `docs/progress/DEMO_TO_MVP_MIGRATION.md` was re-synchronized byte-for-byte.
+- **Next checkpoint:** **Step 6A — orchestrator prerequisite and architecture-decision inventory.**
+- **Phase 0 has not started.** Prerequisite verification remains required: Supabase project + Singapore region, Supabase and LLM credential presence (values never printed), the ORM/data-access decision, and the `.env.local` / `.env.example` contract.
+- **The administrative synchronization commit is pending review** — this entry is written before that commit exists.
+- **No product, governance-rule, application, dependency, or secret content changed** in this checkpoint; only progress records (`DEMO_TO_MVP_MIGRATION.md`, `STATUS.md`, `BUILD_NOTES.md`) were modified.
+
 ---
 
-_Next permitted action: Step 5B3 — create and verify one local governance-baseline commit from the seven-file staged set (no tag, no remote, no push), then record the commit hash here and in `STATUS.md`._
+_Next permitted action: commit the Step 5B4 administrative synchronization (three progress files), then perform the read-only Step 6A prerequisite inventory. Do not start Phase 0 implementation._

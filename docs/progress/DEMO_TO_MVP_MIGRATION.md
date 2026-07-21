@@ -4,9 +4,9 @@
 
 **Scope:** This tracker governs only the demo-to-MVP migration. It ends when every relevant demo asset has been ported, rejected, or superseded and the MVP has no dependency on demo-only architecture.
 
-**Current checkpoint:** Step 5B2 — Install active migration copy and stage governance baseline  
-**Checkpoint status:** In progress  
-**Current permitted action:** Copy the updated migration tracker into the MVP, update the permanent continuity records, stage the exact governance baseline, review it, and stop before committing.
+**Current checkpoint:** Step 6A — Orchestrator prerequisite and architecture-decision inventory  
+**Checkpoint status:** Pending  
+**Current permitted action:** After the Step 5B4 administrative synchronization commit is accepted, inventory the Phase 0 prerequisites, verify local secret presence without revealing values, resolve the ORM/data-access decision, and determine readiness — without implementing Phase 0.
 
 ---
 
@@ -477,8 +477,10 @@ This is the point at which the MVP's `docs/progress/BUILD_NOTES.md` begins. Ever
 
 ## Step 5 — Install and reconcile MVP governance documents
 
-**Status:** Pending  
-**Accepted by orchestrator:** No
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
+
+> **Substantive deliverable accepted at governance commit `c7c27e5e2f772725d88fbed1b5e1459d509960ce`.** The later Step 5B4 commit is an **administrative synchronization** of progress records only and does **not** reopen the accepted governance content.
 
 ### Objective
 
@@ -554,39 +556,94 @@ Step 5 remains **Pending** until the governance-baseline commit is created and v
 
 ### Step 5B2 — Install active migration copy and stage governance baseline
 
-**Status:** In progress  
-**Accepted by orchestrator:** No
-
-Tasks:
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
 
 - [x] Record Step 5A acceptance and the ratified reconciliation decisions in this tracker.
 - [x] Record Step 5B1 acceptance in this tracker.
 - [x] Copy this tracker byte-for-byte to `docs/progress/DEMO_TO_MVP_MIGRATION.md` (the **active migration record**, retained as archived migration history at closure).
 - [x] Update `docs/progress/STATUS.md` and append a `BUILD_NOTES.md` entry.
 - [x] Stage exactly the seven governance files and review the staged set.
-- [ ] Stop before committing — commit is Step 5B3.
+- [x] Stop before committing — commit performed in Step 5B3.
+
+**Recorded result (2026-07-21):**
+
+- Workspace tracker updated (Step 5A/5B1 acceptance, ratified reconciliation decisions, sub-checkpoint structure, MVP repository record, decision log D-035 … D-050).
+- **Active migration copy installed byte-for-byte** at `docs/progress/DEMO_TO_MVP_MIGRATION.md`.
+- `docs/progress/STATUS.md` and `docs/progress/BUILD_NOTES.md` updated.
+- **Exactly seven governance files were staged**; staged review passed (7 additions / 0 modifications / 0 deletions; 2697 insertions; nothing outside the approved paths; no file >5 MB).
+- **An inter-turn worktree rollback was detected, disclosed, and recovered without changing Git history** — the tracker and the two continuity files had reverted to their pre-5B2 state while the Git index retained the correct content; the tracker was restored byte-for-byte from the migration copy and the worktree was resynced from the index (`git restore --worktree`). No history was amended, reset, or rebased.
+- No application, package, dependency, secret, demo, or UI file changed.
 
 ### Step 5B3 — Create and verify the governance-baseline commit
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
+
+- [x] Create one coherent local governance-baseline commit from the accepted staged set.
+- [x] Verify the commit and the resulting working-tree state.
+- [x] No tag, no remote, no push.
+
+**Recorded result (2026-07-22):**
+
+- **Commit:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce` (short `c7c27e5`)
+- **Date:** `2026-07-22 02:23:13 +0800`
+- **Message:** `docs(governance): install reconciled MVP baseline`
+- **Parent:** `4de3f93c64ffea4883655f411d2f35a9a35f15d6`
+- **Summary:** `7 files changed, 2697 insertions, 0 deletions`
+- **Exactly two commits now exist**; working tree clean after commit; **no tag, no remote, nothing pushed**.
+- Specification v3 remained **byte-for-byte unchanged** (`64d54aa2…`); Amendment 001 contains **A-001 through A-013**; document verification passed; **no active stale requirement remained** (Node 20, mandatory GitHub, Phase 1 parent evidence, absolute parent-evidence prohibition, Stitch as Phase 0 prerequisite, AI Breakdown as Phase 0 blocker, `STATUS.md` as sole continuity file).
+
+### Step 5B4 — Governance closure synchronization
+
+**Status:** In progress  
+**Accepted by orchestrator:** No
+
+**Scope (administrative only):**
+
+- Close Step 5 in the records.
+- Synchronize the tracker copy into the MVP.
+- Update the permanent continuity documents.
+- Stage only the three progress files.
+- Stop before the administrative closure commit.
+
+This checkpoint changes **progress records only**. It does not reopen, alter, or re-litigate the accepted governance content committed at `c7c27e5`.
+
+---
+
+## Step 6 — Phase 0 prerequisite readiness (verify orchestrator-only prerequisites)
 
 **Status:** Pending  
 **Accepted by orchestrator:** No
 
-Tasks:
-
-- [ ] Create one coherent local governance-baseline commit from the accepted staged set.
-- [ ] Verify the commit and the resulting working-tree state.
-- [ ] No tag, no remote, no push.
-- [ ] Only after this is accepted may Step 5 be marked complete.
-
----
-
-## Step 6 — Verify orchestrator-only prerequisites
-
-**Status:** Blocked by Step 5
-
 ### Objective
 
 Verify prerequisites Claude Code cannot invent or safely perform autonomously.
+
+### Step 6A — Orchestrator prerequisite and architecture-decision inventory
+
+**Status:** Pending
+
+**Scope:**
+
+- [ ] Verify whether a Supabase project has been created.
+- [ ] Verify the project region from orchestrator-provided evidence.
+- [ ] Confirm the intended region is **Singapore**.
+- [ ] Verify whether the Supabase project URL, anon key, and service-role key are available locally — **without printing their values**.
+- [ ] Verify whether the selected LLM provider and API key are available locally — **without printing their values**.
+- [ ] Select and record the production **ORM/data-access approach**.
+- [ ] Define the required `.env.local` variable **names**.
+- [ ] Define a safe `.env.example` with **placeholders only**.
+- [ ] Verify the existing local-only Git and governance prerequisites.
+- [ ] Determine whether Phase 0 is **ready or blocked**.
+- [ ] **Do not implement Phase 0 in Step 6A.**
+
+**Standing constraints for this checkpoint:**
+
+- **Claude Code cannot create the Supabase project or perform any browser/OAuth setup** — the orchestrator must complete those actions.
+- **No secret value may be pasted into reports, committed, or printed** — presence/absence only.
+- **Stitch assets and the missing AI Features Breakdown do not block Phase 0** (Amendment 001 A-011, A-013).
+- **Phase 0 must not start** until all mandatory orchestrator prerequisites are verified.
 
 ### Required evidence
 
@@ -860,7 +917,16 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - Framework: `Next.js 16.2.10` (App Router, TypeScript, Tailwind, ESLint, Turbopack, root `/app`, alias `@/*`, React Compiler off); React/React DOM `19.2.4`
 - Initial scaffold verification: **Accepted** (tsc/lint/build exit 0; starter HTTP 200)
 - Remote/GitHub: None (everything local; nothing pushed)
-- Current phase: Not started (Phase 0 pending; governance baseline **installed but uncommitted**)
+- **Latest accepted governance commit:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce` (`docs(governance): install reconciled MVP baseline`)
+- **Total committed baseline:** two commits (`4de3f93` scaffold → `c7c27e5` governance)
+- **Governance baseline:** installed, committed, and **accepted**
+- **Working tree before Step 5B4:** clean; no tag; no remote; nothing pushed
+- Current phase: **Phase 0 not started**
+- **Next checkpoint:** Step 6A — orchestrator prerequisite and architecture-decision inventory
+- **Active migration copy:** synchronized during Step 5B4
+- **AI Features Breakdown:** missing but **non-blocking** for Phase 0 and current MVP scope
+- **Stitch assets:** not installed; disposition deferred
+- **npm advisories:** two moderate findings deferred for reviewed handling
 - Supabase project: Not yet verified
 - **Governance documents: INSTALLED (uncommitted, staged at Step 5B2)**
   - Root `CLAUDE.md` installed (reconciled to Amendment 001)
@@ -930,6 +996,15 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 | D-048 | 2026-07-21 | **A-011** The missing AI Features Breakdown v2 is non-blocking for governance, Phase 0, and Phases 1–4; it must not be fabricated and is required before a deferred aggregate-AI feature enters scope. | Accepted |
 | D-049 | 2026-07-21 | **A-012** The Implementation Plan is procedural and cannot override the specification or a ratified amendment. | Accepted |
 | D-050 | 2026-07-21 | **A-013** Stitch/UI export installation is deferred until after accepted Phase 0 and an approved asset disposition. | Accepted |
+| D-051 | 2026-07-22 | The Step 5B2 staged governance set (seven files) was reviewed and accepted. | Accepted |
+| D-052 | 2026-07-22 | The governance baseline commit `c7c27e5e2f772725d88fbed1b5e1459d509960ce` is accepted. | Accepted |
+| D-053 | 2026-07-22 | Step 5 is substantively complete — governance documents installed, reconciled, verified, and committed. | Accepted |
+| D-054 | 2026-07-22 | Step 5B4 is an administrative progress-record synchronization only; it does not reopen or alter accepted governance content. | Accepted |
+| D-055 | 2026-07-22 | Phase 0 remains blocked until the orchestrator-only prerequisites are verified in Step 6A. | Accepted |
+| D-056 | 2026-07-22 | Supabase project creation and all browser/OAuth setup remain orchestrator-only actions that Claude Code cannot perform. | Accepted |
+| D-057 | 2026-07-22 | Secret values must never be printed, reported, or committed — presence/absence verification only. | Accepted |
+| D-058 | 2026-07-22 | Stitch assets and the missing AI Features Breakdown are **not** Phase 0 prerequisites. | Accepted |
+| D-059 | 2026-07-22 | The ORM/data-access approach must be resolved during Step 6A before Phase 0 implementation begins. | Accepted |
 
 ---
 
@@ -949,4 +1024,6 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 
 ## 9. Next permitted action
 
-**Step 5B3 (Pending):** create and verify **one** local governance-baseline commit from the seven-file staged set accepted in Step 5B2 (`CLAUDE.md`, the Specification v3, Amendment 001, the Implementation Plan, `STATUS.md`, `BUILD_NOTES.md`, `DEMO_TO_MVP_MIGRATION.md`). Verify the resulting commit and working-tree state, then update `STATUS.md`/`BUILD_NOTES.md` with the commit hash. Do not create a tag, configure a remote, or push; do not amend or reset existing history; do not modify the frozen demo, `governance-source`, the installed Specification v3, or any application/package file. Step 5 may be marked complete only after this commit is created and verified.
+**Step 6A (Pending):** after the Step 5B4 administrative synchronization commit is accepted, perform a **read-only** Phase 0 prerequisite inventory and architecture-decision review — verify whether the Supabase project exists and its region is Singapore (from orchestrator-provided evidence), verify **presence only** of the Supabase URL/anon/service-role keys and the LLM provider key locally, select and record the ORM/data-access approach, define the required `.env.local` variable **names** and a placeholder-only `.env.example`, and determine whether Phase 0 is ready or blocked.
+
+**Do not:** implement Phase 0; create the Supabase project or perform browser/OAuth setup (orchestrator-only); print, report, or commit any secret value; create `.env.local`; install dependencies; run typecheck/lint/build or the application; configure a remote or push; modify the frozen demo, `governance-source`, or any accepted governance document. Stitch assets and the missing AI Features Breakdown are **not** Phase 0 prerequisites.

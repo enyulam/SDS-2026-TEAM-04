@@ -2,27 +2,31 @@
 
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 
-_Last updated: 2026-07-21 (Step 5B2 — governance baseline staged for commit review)._
+_Last updated: 2026-07-22 (Step 5B4 — governance closure synchronization)._
 
 ---
 
-## Project state
+## Current project state
 
 - **Project:** B.E.S.T Coach MVP
-- **Current lifecycle stage:** Pre-Phase 0 — governance baseline commit pending
-- **Current migration checkpoint:** Step 5B2 — governance baseline staged for commit review
+- **Lifecycle stage:** Pre-Phase 0 — orchestrator prerequisites pending
+- **Migration status:** Step 5 governance installation **completed and accepted**
+- **Current checkpoint:** Step 6A — Orchestrator prerequisite and architecture-decision inventory
 - **Current implementation phase:** Phase 0 not started
-- **Current permitted next action:** create and verify one local governance-baseline commit from the accepted staged set
-- **Latest committed MVP HEAD:** `4de3f93c64ffea4883655f411d2f35a9a35f15d6`
-- **Working-tree state:** governance baseline pending commit (seven files staged, uncommitted)
-- **Remote state:** local-only, no remote, no push
+- **Latest accepted governance baseline:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce`
+- **Repository:** local-only, no tag, no remote, no push
 
-### Accepted this checkpoint
+## Completed governance state
 
 - **Step 5A accepted** — governance inventory and reconciliation plan complete.
-- **Step 5B1 accepted** — reconciled governance baseline installed (six files).
-- **Amendment 001 is ratified** (A-001 … A-013); Specification v3 installed byte-for-byte and never edited in place.
-- **Active migration copy installed** at `docs/progress/DEMO_TO_MVP_MIGRATION.md` (byte-for-byte copy of the workspace tracker).
+- **Step 5B1 accepted** — reconciled governance baseline installed.
+- **Step 5B2 accepted** — active migration copy installed; governance baseline staged and reviewed.
+- **Step 5B3 accepted** — governance baseline committed as `c7c27e5`.
+- **Specification v3 installed unchanged** (byte-for-byte, `64d54aa2…`); never edited in place.
+- **Amendment 001 ratified** (A-001 … A-013).
+- **Root `CLAUDE.md` and the Implementation Plan reconciled** to Amendment 001.
+- **Active migration record synchronized** at `docs/progress/DEMO_TO_MVP_MIGRATION.md`.
+- **Permanent `STATUS.md` and `BUILD_NOTES.md` active** and updated at every accepted stopping point.
 
 ---
 
@@ -40,9 +44,9 @@ _Last updated: 2026-07-21 (Step 5B2 — governance baseline staged for commit re
 
 - **Path:** `C:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\SDS Project Final (BEST Coach)`
 - **Branch:** `main`
-- **Latest accepted commit:** `4de3f93c64ffea4883655f411d2f35a9a35f15d6` (`chore(mvp): initialize fresh Next.js scaffold`)
-- **History:** one accepted scaffold commit; the governance baseline is **staged but not yet committed** (Step 5B3)
-- **Remote:** none
+- **Latest accepted commit:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce` (`docs(governance): install reconciled MVP baseline`)
+- **History:** two accepted commits — `4de3f93` (scaffold) → `c7c27e5` (governance baseline)
+- **Remote:** none (no tag, nothing pushed)
 
 ---
 
@@ -59,12 +63,14 @@ _Last updated: 2026-07-21 (Step 5B2 — governance baseline staged for commit re
 
 ---
 
-## Current blockers and follow-ups
+## Current blockers
 
-- Supabase project **not verified** (Phase −1 orchestrator setup).
-- **Singapore region not verified.**
-- LLM provider / API key **not verified**.
-- ORM / data-layer choice **unresolved** (Prisma vs Drizzle).
+- **Supabase project creation not yet verified** (orchestrator-only action).
+- **Singapore region not yet verified.**
+- **Supabase credentials (URL, anon key, service-role key) not yet verified locally** — presence only will be checked; values are never printed or committed.
+- **LLM provider and API key not yet verified locally** — presence only.
+- **ORM / data-access decision unresolved** (to be resolved in Step 6A before Phase 0).
+- **`.env.local` and `.env.example` contract not yet verified** (variable names defined in Step 6A; `.env.example` placeholders only).
 - `BEST_Coach_AI_Features_Breakdown_v2.docx` **missing** — non-blocking for MVP Phases 0–4 (A-011); required before either deferred aggregate AI feature is scoped.
 - **Stitch asset disposition not started** (A-013) — Stitch/UI exports installed selectively after accepted Phase 0.
 - **Two moderate npm advisories** from the scaffold remain for a later reviewed security/dependency checkpoint (no auto-fix without review).
@@ -72,6 +78,8 @@ _Last updated: 2026-07-21 (Step 5B2 — governance baseline staged for commit re
 
 ---
 
-## Next checkpoint
+## Next permitted action
 
-**Step 5B3 — create and verify the governance-baseline commit** (one local commit from the seven-file staged set; no tag, no remote, no push).
+**Perform a read-only Step 6A prerequisite inventory and architecture-decision review. Do not start Phase 0 implementation.**
+
+Claude Code cannot create the Supabase project or perform browser/OAuth setup — those remain orchestrator-only. No secret value may be printed, reported, or committed. Stitch assets and the missing AI Features Breakdown do **not** block Phase 0.
