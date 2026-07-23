@@ -4,9 +4,9 @@
 
 **Scope:** This tracker governs only the demo-to-MVP migration. It ends when every relevant demo asset has been ported, rejected, or superseded and the MVP has no dependency on demo-only architecture.
 
-**Current checkpoint:** Step 6A — Orchestrator prerequisite and architecture-decision inventory  
+**Current checkpoint:** Step 7A — Phase 0 foundation-slice planning  
 **Checkpoint status:** Pending  
-**Current permitted action:** After the Step 5B4 administrative synchronization commit is accepted, inventory the Phase 0 prerequisites, verify local secret presence without revealing values, resolve the ORM/data-access decision, and determine readiness — without implementing Phase 0.
+**Current permitted action:** After the Step 6B2 record-synchronization commit is accepted, perform a **read-only Phase 0 planning review**, define the **first bounded implementation slice** and its **tests**, and **stop before implementation**.
 
 ---
 
@@ -480,7 +480,9 @@ This is the point at which the MVP's `docs/progress/BUILD_NOTES.md` begins. Ever
 **Status:** Completed  
 **Accepted by orchestrator:** Yes
 
-> **Substantive deliverable accepted at governance commit `c7c27e5e2f772725d88fbed1b5e1459d509960ce`.** The later Step 5B4 commit is an **administrative synchronization** of progress records only and does **not** reopen the accepted governance content.
+> **Substantive deliverable accepted at governance commit `c7c27e5e2f772725d88fbed1b5e1459d509960ce`.** The subsequent administrative synchronization commit `a39ed21` covers progress records only and does **not** reopen the accepted governance content.
+>
+> **Step 5 is fully closed at MVP HEAD `a39ed21d4ecf405b3425db711e63a2f71f0f1586`.** All sub-checkpoints (5A, 5B1, 5B2, 5B3, 5B4, 5B5) are complete and accepted. The next permitted checkpoint is **Step 6A**.
 
 ### Objective
 
@@ -596,8 +598,8 @@ Step 5 remains **Pending** until the governance-baseline commit is created and v
 
 ### Step 5B4 — Governance closure synchronization
 
-**Status:** In progress  
-**Accepted by orchestrator:** No
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
 
 **Scope (administrative only):**
 
@@ -607,7 +609,44 @@ Step 5 remains **Pending** until the governance-baseline commit is created and v
 - Stage only the three progress files.
 - Stop before the administrative closure commit.
 
-This checkpoint changes **progress records only**. It does not reopen, alter, or re-litigate the accepted governance content committed at `c7c27e5`.
+**Recorded result (2026-07-22):**
+
+- **Step 5 closure was synchronized** across the workspace tracker and the MVP records.
+- The **workspace tracker and the MVP migration copy matched at the time of staging** (`74a981c57aaed22fbe9d99ec8c95c5dd75039c50bc4d45372e59df09ad1500fc`).
+- **`STATUS.md` and `BUILD_NOTES.md` were updated** (current state advanced; Step 5B3 commit entry and Step 5 closure entry appended).
+- **Exactly three progress-file modifications were staged** — `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`.
+- **Staged-set and document-consistency reviews passed** (0 additions / 3 modifications / 0 deletions; nothing outside the approved paths; no secret; no broken links).
+- **No product, governance-policy, application, dependency, or secret content changed.**
+
+This checkpoint changed **progress records only**. It did not reopen, alter, or re-litigate the accepted governance content committed at `c7c27e5`.
+
+### Step 5B5 — Administrative governance-closure synchronization commit
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
+
+**Recorded result (2026-07-22):**
+
+- **Commit:** `a39ed21d4ecf405b3425db711e63a2f71f0f1586` (short `a39ed21`)
+- **Date:** `2026-07-22 03:34:42 +0800`
+- **Message:** `docs(progress): synchronize migration and continuity records`
+- **Parent:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce`
+- **Summary:** `3 files changed, 152 insertions, 43 deletions`
+- **Committed files (exactly three progress files):**
+  - `docs/progress/BUILD_NOTES.md`
+  - `docs/progress/DEMO_TO_MVP_MIGRATION.md`
+  - `docs/progress/STATUS.md`
+- **Repository clean after commit**; **exactly three commits exist** (`a39ed21` ← `c7c27e5` ← `4de3f93`); **no tag, no remote, nothing pushed**.
+- **All record and integrity checks passed** — migration copy ≡ workspace tracker; Specification v3 unchanged (`64d54aa2…`); `CLAUDE.md`, Amendment 001, and the Implementation Plan unchanged since `c7c27e5`; application/package/configuration files unchanged; no secret present; no broken relative links.
+
+**Commit-message discrepancy — resolved as accepted, not a failure.** A later prompt proposed the wording `docs(progress): close governance installation`. The commit retains its original message `docs(progress): synchronize migration and continuity records`, accepted because:
+
+- the existing message **accurately describes the change**;
+- the **committed files, parent, and diff are correct** and match the approved staged set exactly;
+- the **commit was already created before the later prompt was issued**;
+- **rewriting clean Git history solely to change equivalent wording was unnecessary** (and would have changed the hash for no substantive gain).
+
+This commit is **accepted**. It is **not** classified as a failure.
 
 ---
 
@@ -622,28 +661,262 @@ Verify prerequisites Claude Code cannot invent or safely perform autonomously.
 
 ### Step 6A — Orchestrator prerequisite and architecture-decision inventory
 
-**Status:** Pending
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
 
-**Scope:**
+- [x] Verify whether a Supabase project has been created.
+- [x] Verify the project region from orchestrator-provided evidence.
+- [x] Confirm the intended region is **Singapore**.
+- [x] Verify Supabase URL / publishable key / secret key availability locally — **without printing values**.
+- [x] Verify the selected LLM provider and API key availability locally — **without printing values**.
+- [x] Select and record the production **data-access approach**.
+- [x] Define the required `.env.local` variable **names**.
+- [x] Define a safe `.env.example` with **placeholders only** (defined; file creation deferred to Step 6B2).
+- [x] Verify the existing local-only Git and governance prerequisites.
+- [x] Determine whether Phase 0 is **ready or blocked**.
+- [x] **Phase 0 was not implemented in Step 6A.**
 
-- [ ] Verify whether a Supabase project has been created.
-- [ ] Verify the project region from orchestrator-provided evidence.
-- [ ] Confirm the intended region is **Singapore**.
-- [ ] Verify whether the Supabase project URL, anon key, and service-role key are available locally — **without printing their values**.
-- [ ] Verify whether the selected LLM provider and API key are available locally — **without printing their values**.
-- [ ] Select and record the production **ORM/data-access approach**.
-- [ ] Define the required `.env.local` variable **names**.
-- [ ] Define a safe `.env.example` with **placeholders only**.
-- [ ] Verify the existing local-only Git and governance prerequisites.
-- [ ] Determine whether Phase 0 is **ready or blocked**.
-- [ ] **Do not implement Phase 0 in Step 6A.**
-
-**Standing constraints for this checkpoint:**
+**Standing constraints (remain in force):**
 
 - **Claude Code cannot create the Supabase project or perform any browser/OAuth setup** — the orchestrator must complete those actions.
 - **No secret value may be pasted into reports, committed, or printed** — presence/absence only.
 - **Stitch assets and the missing AI Features Breakdown do not block Phase 0** (Amendment 001 A-011, A-013).
-- **Phase 0 must not start** until all mandatory orchestrator prerequisites are verified.
+- **Phase 0 must not start** until all mandatory prerequisites — including local tooling — are verified and accepted.
+
+**Step 6A closure statement:**
+
+- **Supabase project and Singapore region are verified.**
+- **Required Supabase configuration is present locally** (ignored `.env.local`).
+- **OpenAI provider, model, and key are present locally.**
+- **Environment safeguards pass.**
+- **Data-access architecture is resolved.**
+- **Phase 0 product implementation has not started.**
+- **Local implementation tooling remains outstanding** (Docker-compatible runtime and Supabase CLI) — addressed in Step 6B.
+
+#### Step 6A1 — Phase 0 prerequisite inventory and architecture-decision verification
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes
+
+**Recorded result (2026-07-22, read-only):**
+
+- Repository and governance integrity **passed**; **Phase 0 had not started**.
+- **Supabase project, region, and credentials were initially unverified** — no `supabase/config.toml`, no `supabase/migrations/`, no `.supabase/`, no SDK dependency, no local project reference.
+- **No environment file initially existed** in the MVP root.
+- **No LLM provider or model was initially ratified** — Specification v3 is deliberately provider-agnostic (§17, §19, ADR-5).
+- **Supabase CLI and a Docker-compatible runtime were absent** (verified by installed-command discovery only; nothing downloaded, installed, or started).
+- **Environment-variable contract defined** (six names):
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  - `SUPABASE_SECRET_KEY`
+  - `LLM_PROVIDER`
+  - `LLM_MODEL`
+  - `LLM_API_KEY`
+- **No legacy Supabase variable name was selected** (`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` all rejected as the primary contract).
+- **No secret may use a `NEXT_PUBLIC_` prefix.**
+- The inventory was **strictly read-only** — no file created or modified, no network call, no secret read or exposed.
+
+**Data-access decision — `RESOLVED — SUPABASE-NATIVE, NO GENERAL-PURPOSE ORM`:**
+
+- `@supabase/ssr` for cookie-aware Next.js browser/server clients.
+- `@supabase/supabase-js` as the underlying SDK.
+- **RLS-scoped user-session clients** for normal access.
+- **Governance-carrying writes** only through server actions or route handlers.
+- **PostgreSQL functions/RPCs** for atomic state transition **plus** audit insertion in one transaction.
+- **Invoker rights by default**; tightly reviewed **`SECURITY DEFINER` only where justified** (fixed `search_path`, restricted execute grants, security review).
+- **Separate server-only elevated client** using `SUPABASE_SECRET_KEY`, never bound to browser cookies or a user session; every elevated operation performs its own authorization checks because the secret key bypasses RLS.
+- **Supabase SQL migrations** are the schema source of truth (no dashboard-only change without a migration).
+- **Generated database TypeScript types** committed; domain/validation types kept separate; strict TS.
+- **An ORM may be added only through a later ADR and orchestrator approval.**
+
+#### Step 6A2 — Orchestrator prerequisite verification
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Result:** `READY — CREDENTIAL AND PROVIDER PREREQUISITES VERIFIED`
+
+**Supabase:**
+
+- Project creation: **Orchestrator confirmed**.
+- Region: **Southeast Asia (Singapore) — `ap-southeast-1`**.
+- Region evidence: **Orchestrator personally verified in the Supabase dashboard**.
+- Project URL: **present and nonempty** in ignored `.env.local`.
+- Publishable key: **present and nonempty** in ignored `.env.local`.
+- Secret key: **present and nonempty** in ignored `.env.local`.
+- **No Supabase network validation was performed by Claude Code.**
+
+**OpenAI:**
+
+- Provider: **OpenAI** · Model: **`gpt-5.6-terra`**
+- API: **Responses API** · Output contract: **Structured Outputs with strict JSON Schema**
+- API key: **present and nonempty** in ignored `.env.local`.
+- Provider selector verified equal to `openai`; model selector verified equal to `gpt-5.6-terra`.
+- **No OpenAI network validation was performed by Claude Code.**
+- **Synthetic-data-only remains mandatory** (ADR-6).
+
+**Official model verification supplied by orchestrator:** the orchestrator separately verified against current official OpenAI API documentation that the model identifier **`gpt-5.6-terra` exists**, that the **Responses API is supported**, and that **Structured Outputs are supported**. Claude Code did **not** perform this web verification; it is recorded here as **orchestrator-supplied external verification**.
+
+**Environment safeguards:**
+
+- `.env.local` **exists**; **exactly the six approved application variables** are declared (no extras).
+- `.env.local` is **ignored** (`.gitignore` `.env*`), **untracked**, and **unstaged**; Git working tree remained **clean**.
+- **No legacy Supabase variable** is used as the primary contract.
+- **No database password, access token, or direct Postgres connection string** is part of the six-variable application contract.
+- **No secret value was exposed** — presence-only classification; no value, length, prefix, suffix, or format reported.
+
+### Step 6B — Local Phase 0 tooling setup
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-23
+
+Credential and provider prerequisites were verified in Step 6A. What remained before Phase 0 was **local implementation tooling**, delivered across four bounded sub-checkpoints — 6B1 (Docker runtime), 6B2A (CLI install and scaffold), 6B2B (verification and staging), and 6B2C (commit) — all now completed and accepted.
+
+**Step 6B closure record:**
+
+- [x] **Docker Desktop with WSL 2 accepted** as the local container runtime.
+- [x] **Linux Docker engine and Compose verified** — engine/client `29.6.2`, Compose `v5.3.1`, `OSType=linux`, `Architecture=x86_64`.
+- [x] **Project-local pinned Supabase CLI installed** — `supabase@2.109.1`, exact pin, dev dependency, never global.
+- [x] **Local Supabase configuration initialized** — `supabase/config.toml` (project ID `best-coach-mvp`) and `supabase/.gitignore`, committed as `0cdb782`.
+- [x] **Safe `.env.example` committed** — six approved variable names, placeholder-only, no real credential.
+- [x] **Secret `.env.local` remains ignored and untracked** — never printed, hashed, copied, or committed.
+- [x] **The local stack has NOT yet been started** — `supabase start` was never run; no container or image exists.
+- [x] **The remote project has NOT been linked** — no `supabase login`, no `supabase link`, no access token on this machine.
+- [x] **Phase 0 product/schema implementation has NOT started.**
+
+#### Step 6B1 — Orchestrator Docker-compatible runtime setup
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-23
+
+**Scope executed (orchestrator-only — required browser and administrator access):**
+
+- [x] **Docker Desktop for Windows installed** by the orchestrator.
+- [x] **WSL 2 backend** selected (Hyper-V backend not selected).
+- [x] **Docker Desktop started and running.**
+- [x] Docker **client**, **Compose plugin**, and **engine** verified available.
+- [x] **MVP repository not changed.**
+- [x] **Supabase CLI not installed.**
+- [x] **Supabase not initialized.**
+- [x] **Phase 0 not started.**
+
+**Accepted evidence (non-secret tooling versions only):**
+
+| Item | Recorded value |
+|---|---|
+| Docker Desktop | Installed and **running** |
+| Backend | **WSL 2** |
+| Docker client version | `29.6.2` (build `dfc4efb`) |
+| Docker engine/server version | `29.6.2` |
+| Docker Compose version | `v5.3.1` |
+| Engine OS type | `linux` |
+| Architecture | `x86_64` |
+| Operating system | `Docker Desktop` |
+| Insecure daemon exposure on TCP port `2375` | **Disabled** |
+| Kubernetes | **Not enabled** |
+
+**Verification record:**
+
+- [x] `docker --version` succeeds — matches the orchestrator evidence.
+- [x] `docker compose version` succeeds — matches the orchestrator evidence.
+- [x] `docker info` succeeds **without exposing sensitive configuration** — only `ServerVersion`, `OSType`, `Architecture`, and `OperatingSystem` were read; full `docker info` was **not** printed.
+- [x] Docker Desktop settings **visually confirmed by the orchestrator**: WSL 2 selected; Hyper-V not selected; insecure TCP daemon exposure on port `2375` disabled; Kubernetes not enabled.
+- [x] MVP repository **remained clean** (`git status --short` produced no output, confirmed independently by the orchestrator and at Step 6B1 closure).
+- [x] **No repository file changed.**
+- [x] **No container was run** (no `docker run`, no `docker pull`, no test container).
+- [x] **No Supabase CLI was installed.**
+- [x] **Phase 0 did not start.**
+
+#### Step 6B2A — Project-scoped Supabase CLI and local-project initialization
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-23
+
+**Executed and verified:**
+
+- [x] **`supabase@2.109.1` verified as the approved stable version** — resolved from the registry as the `latest` dist-tag; the `beta` tag pointed to a different version (`2.110.0-beta.36`); no prerelease suffix; no registry-integrity error.
+- [x] Installed as an **exact project development dependency** — `npm install --save-dev --save-exact supabase@2.109.1` (exit 0); `devDependencies.supabase = "2.109.1"` with **no caret or tilde**; `package-lock.json` purely additive (**237 insertions, 0 deletions**), so no existing dependency version changed.
+- [x] **No global Supabase CLI installed** — `command -v supabase` absent; `npm ls -g` shows no supabase.
+- [x] **Project-local CLI verified through `npx --no-install`** — `npx --no-install supabase --version` returned `2.109.1`.
+- [x] **`supabase init` completed** (exit 0, `Finished supabase init.`), run non-interactively (no `-i`), so **no IDE-settings prompt or generation** occurred (`.vscode`, `deno.json` absent).
+- [x] **Generated:** `supabase/.gitignore` and `supabase/config.toml` — the complete generated set, enumerated after the fact rather than assumed.
+- [x] **Generated project identifier normalized** from the folder-derived `"SDS_Project_Final_BEST_Coach_"` to **`best-coach-mvp`** — a single-line edit; no other generated setting altered (file size moved 15,610 → 15,595 B, exactly the identifier shortening; line count unchanged at 414).
+- [x] **`.gitignore` retained `.env*`** (line 34) and **added `!.env.example`** immediately after it (line 35) — one line added, no other ignore rule touched, no protection weakened.
+- [x] **`.env.example` created** with exactly the **six approved variables** and **no real credentials** — only the two non-secret ratified selectors carry values (`LLM_PROVIDER=openai`, `LLM_MODEL=gpt-5.6-terra`); no URL, key, password, token, connection string, or legacy Supabase variable.
+- [x] **`.env.local` remained ignored, untracked, unstaged, and unopened** — presence-only checks throughout; no value, length, prefix, suffix, or format read or reported; never copied.
+- [x] **No authentication, linking, migration, container start, or hosted-project operation occurred** — no `supabase login`, `supabase link`, or `supabase start`; Docker reported `Containers=0` and `Images=0` after init; no `%USERPROFILE%\.supabase\` directory or access token exists.
+- [x] **No schema implementation began.**
+
+**Generated Supabase configuration — sensitive-content review passed:** no hosted Supabase URL, API key, database password, access token, or project secret. Every secret-shaped setting is a commented template, an empty string, or an `env(...)` reference; all URL values are loopback defaults (`http://127.0.0.1`, `http://127.0.0.1:3000`) or a relative path.
+
+#### Step 6B2B — Supabase tooling scaffold verification and staging
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-23
+
+**Exact six-file staged set:**
+
+| Path | Status |
+|---|---|
+| `.env.example` | Added |
+| `.gitignore` | Modified |
+| `package.json` | Modified |
+| `package-lock.json` | Modified |
+| `supabase/.gitignore` | Added |
+| `supabase/config.toml` | Added |
+
+- [x] **Composition:** `3 modifications, 3 additions, 0 deletions`.
+- [x] **`672 insertions, 0 deletions`.**
+- [x] **Typecheck passed** — `npx tsc --noEmit`, exit 0.
+- [x] **Lint passed** — `npm run lint`, exit 0.
+- [x] **Production build passed** — `npm run build`, exit 0 (Next.js 16.2.10 Turbopack; 4/4 static pages).
+- [x] **No warnings and no errors** from any of the three commands.
+- [x] **Staged-content and secret scans passed** — `sk-`, `eyJ`, `.supabase.co`, `postgres://`, `postgresql://`, `ANON_KEY`, `PASSWORD=` all 0; the only `service_role` / `access_token` matches were generated documentation comments in `config.toml`, not values. `git diff --cached --check` clean.
+- [x] **No unstaged or untracked files remained** (0 / 0). No staged file exceeded 5 MB (largest 236 KB). Build artifacts `.next`, `next-env.d.ts`, `tsconfig.tsbuildinfo`, `node_modules` confirmed ignored and unstaged.
+- [x] **No Supabase service or container was started.**
+- [x] Staging used an explicit path-scoped `git add --` with the six paths; `git add -A` was **not** used.
+
+#### Step 6B2C — Commit local Supabase tooling scaffold
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-23
+
+| Field | Value |
+|---|---|
+| **Full commit** | `0cdb7825b0d4bcd9ad9b40323a3e90228065f006` |
+| **Short commit** | `0cdb782` |
+| **Date** | `2026-07-23 11:08:38 +0800` |
+| **Message** | `chore(tooling): initialize local Supabase scaffold` |
+| **Parent** | `a39ed21d4ecf405b3425db711e63a2f71f0f1586` |
+| **Summary** | `6 files changed, 672 insertions, 0 deletions` |
+
+- [x] Message is a **single subject line with an empty body** — byte-exact, no trailer added.
+- [x] **Post-commit typecheck, lint, and build all passed** (exit 0 each; no warnings, no errors).
+- [x] **Working tree clean.**
+- [x] **Exactly four commits now exist** — `4de3f93` → `c7c27e5` → `a39ed21` → `0cdb782`.
+- [x] **No tag, remote, or push.**
+- [x] **No Supabase runtime, linking, authentication, or migrations occurred.**
+- [x] **Phase 0 schema implementation remained unstarted** — `supabase/migrations`, `supabase/functions`, `supabase/seed.sql`, `src/`, `lib/`, `db/`, `server/` all absent.
+- [x] Exactly one commit was created — no amend, reset, rebase, or second commit.
+
+#### Dependency advisory record (accepted observed state, 2026-07-23)
+
+- **3 current advisories — 1 moderate, 2 high.**
+
+| Package | Severity | Relationship |
+|---|---|---|
+| `next` | high | direct dependency |
+| `sharp` | high | transitive, via `next` |
+| `postcss` | moderate | transitive, via `next` |
+
+- **None was attributed to `supabase@2.109.1`** or to any of the 8 packages it newly installed (`supabase`, `@supabase/cli-windows-x64`, `eciesjs`, `jose`, `@ecies/ciphers`, `@noble/ciphers`, `@noble/curves`, `@noble/hashes`).
+- The advisory state **changed relative to the earlier snapshot** (previously recorded as two moderate) **because the npm advisory database changed** — the affected `next` dependency itself is unchanged.
+- **No `npm audit fix` was run** and no dependency was installed, removed, or updated for remediation.
+- **These advisories are NOT resolved.** Remediation remains **deferred to a reviewed dependency/security checkpoint**.
 
 ### Required evidence
 
@@ -662,9 +935,41 @@ Verify prerequisites Claude Code cannot invent or safely perform autonomously.
 
 ---
 
-## Step 7 — Complete MVP Phase 0 foundations
+## Step 7 — Phase 0 Foundations
 
-**Status:** Blocked by Step 6
+**Status:** Pending  
+**Accepted by orchestrator:** No
+
+_(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by Step 6`. Step 6 closed on 2026-07-23, so this step is now unblocked and retitled; the objective and exit evidence below are unchanged.)_
+
+### Step 7A — Phase 0 foundation-slice planning
+
+**Status:** Pending  
+**Accepted by orchestrator:** No
+
+**Scope (read-only planning — no implementation):**
+
+- [ ] **Re-read the governing Phase 0 sections** of the Specification v3, Amendment 001, root `CLAUDE.md`, and the Implementation Plan.
+- [ ] **Inspect the committed local Supabase scaffold** (`supabase/config.toml`, `supabase/.gitignore`, `.env.example`) at commit `0cdb782`.
+- [ ] **Determine the exact first bounded Phase 0 implementation slice.**
+- [ ] **Decide the sequence** for:
+  - [ ] starting and verifying the **local Supabase stack**;
+  - [ ] installing **`@supabase/ssr`** and **`@supabase/supabase-js`**;
+  - [ ] introducing **server-only boundaries**;
+  - [ ] creating the **first SQL migration**;
+  - [ ] defining **generated database-type placement**;
+  - [ ] **linking to the hosted Singapore project only when explicitly approved**.
+- [ ] **Define tests and stopping conditions** for the slice.
+- [ ] **Do not implement Phase 0 during Step 7A.**
+
+**Explicit constraints carried into Step 7A:**
+
+- Local **`supabase start` belongs to Phase 0 execution**, not to the completed tooling setup — it was deliberately not run in Step 6B.
+- **Hosted-project linking and remote migrations require a separate explicit checkpoint** and explicit orchestrator approval.
+- **No real child, parent, trainer, or academy data may be used.**
+- **Synthetic data only.**
+- The **append-only audit hash chain**, the **RLS proof**, and the **core schema** remain **mandatory Phase 0 deliverables**.
+- **No Phase 1–4 feature may be built early.**
 
 ### Objective
 
@@ -917,17 +1222,49 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - Framework: `Next.js 16.2.10` (App Router, TypeScript, Tailwind, ESLint, Turbopack, root `/app`, alias `@/*`, React Compiler off); React/React DOM `19.2.4`
 - Initial scaffold verification: **Accepted** (tsc/lint/build exit 0; starter HTTP 200)
 - Remote/GitHub: None (everything local; nothing pushed)
-- **Latest accepted governance commit:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce` (`docs(governance): install reconciled MVP baseline`)
-- **Total committed baseline:** two commits (`4de3f93` scaffold → `c7c27e5` governance)
-- **Governance baseline:** installed, committed, and **accepted**
-- **Working tree before Step 5B4:** clean; no tag; no remote; nothing pushed
+- **Latest HEAD:** `a39ed21d4ecf405b3425db711e63a2f71f0f1586` (short `a39ed21`)
+- **Total commits:** `3` — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization)
+- **Working tree:** `Clean`
+- **Governance installation:** `Completed and accepted` (commit `c7c27e5`)
+- **Governance closure synchronization:** `Completed and accepted` (commit `a39ed21`)
+- **Phase 0:** `Not started`
+- **Next checkpoint:** `Step 7A` — Phase 0 foundation-slice planning
+- **Tag:** `None` · **Remote:** `None` · **Push:** `None`
+
+**Local tooling state (accepted at Step 6B, 2026-07-23 — non-secret tooling evidence only; no credential value or project URL recorded):**
+
+- **HEAD:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006` · **Short HEAD:** `0cdb782`
+- **Total commits:** `4` · **Working tree:** `Clean`
+- **Docker Desktop:** `Running with WSL 2` (client and engine `29.6.2`, Compose `v5.3.1`, Linux engine, `x86_64`; insecure TCP 2375 disabled; Kubernetes not enabled)
+- **Supabase CLI:** `2.109.1` — **project-local and exact-pinned** (dev dependency; no global install; invoked via `npx --no-install`)
+- **Local Supabase scaffold:** `Initialized` (`supabase/config.toml`, `supabase/.gitignore`)
+- **Project identifier:** `best-coach-mvp`
+- **Local Supabase stack:** `Not started` (`supabase start` never run; 0 containers, 0 images)
+- **Hosted Supabase project:** `Not linked through CLI` (no login, no link, no access token on this machine)
+- **`.env.example`:** `Committed, placeholder-only` (six approved variable names; only the non-secret selectors carry values)
+- **`.env.local`:** `Present, ignored, and untracked` (never printed, hashed, copied, or committed)
+- **Phase 0:** `Not started`
+- **Next checkpoint:** `Step 7A`
+
+**Phase 0 prerequisite state (accepted at Step 6A, 2026-07-22 — no credential value recorded):**
+
+- `.env.local`: **present, ignored, and untracked** (six approved application variables; contents never read)
+- **Supabase project:** confirmed
+- **Supabase region:** Singapore (`ap-southeast-1`), **orchestrator-verified** in the dashboard
+- **Supabase configuration:** present locally (URL, publishable key, secret key)
+- **LLM provider:** OpenAI · **LLM model:** `gpt-5.6-terra` · **LLM key:** present locally
+- **AI contract:** Responses API with Structured Outputs (strict JSON Schema)
+- **Data access:** Supabase-native, **no general-purpose ORM**
+- **Supabase CLI:** not installed · **Docker-compatible runtime:** **installed and verified at Step 6B1** (Docker Desktop `29.6.2`, WSL 2 backend, Compose `v5.3.1`, Linux engine)
+
+> **Tracker/copy synchronization note.** The MVP migration copy (`docs/progress/DEMO_TO_MVP_MIGRATION.md`) was re-synchronized **byte-for-byte** from this tracker during **Step 6B2D**, absorbing the Step 5 closure lead and the whole of Step 6. Per **D-060 … D-066**, this record does not contain the hash of the commit that will carry it; that closure commit hash is recorded in the **next** normal progress-record update rather than through a self-referential administrative commit. The resulting one-update lead is intentional and is not drift.
 - Current phase: **Phase 0 not started**
-- **Next checkpoint:** Step 6A — orchestrator prerequisite and architecture-decision inventory
-- **Active migration copy:** synchronized during Step 5B4
+- **Next checkpoint:** Step 7A — Phase 0 foundation-slice planning
+- **Active migration copy:** re-synchronized during Step 6B2D (byte-identical to this tracker)
 - **AI Features Breakdown:** missing but **non-blocking** for Phase 0 and current MVP scope
 - **Stitch assets:** not installed; disposition deferred
 - **npm advisories:** two moderate findings deferred for reviewed handling
-- Supabase project: Not yet verified
+- Supabase project: **Confirmed; Singapore region orchestrator-verified (Step 6A2)**
 - **Governance documents: INSTALLED (uncommitted, staged at Step 5B2)**
   - Root `CLAUDE.md` installed (reconciled to Amendment 001)
   - Specification v3 installed **unchanged** (`64d54aa2…`)
@@ -1005,6 +1342,42 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 | D-057 | 2026-07-22 | Secret values must never be printed, reported, or committed — presence/absence verification only. | Accepted |
 | D-058 | 2026-07-22 | Stitch assets and the missing AI Features Breakdown are **not** Phase 0 prerequisites. | Accepted |
 | D-059 | 2026-07-22 | The ORM/data-access approach must be resolved during Step 6A before Phase 0 implementation begins. | Accepted |
+| D-060 | 2026-07-22 | A correct local commit will **not** be amended solely to match subsequently proposed, semantically equivalent commit-message wording. Commit `a39ed21` is accepted as-is. | Accepted |
+| D-061 | 2026-07-22 | Progress documents committed within an administrative synchronization may legitimately name the **preceding substantive commit** rather than their own hash. | Accepted |
+| D-062 | 2026-07-22 | The latest administrative commit hash may be recorded in the workspace tracker at the **next** checkpoint. | Accepted |
+| D-063 | 2026-07-22 | Do **not** create an additional standalone commit solely to make a committed progress document record its own commit hash (self-referential recursion is prohibited). | Accepted |
+| D-064 | 2026-07-22 | The workspace tracker may temporarily **lead** the committed MVP migration copy by one tracker-only administrative update. | Accepted |
+| D-065 | 2026-07-22 | The next normal progress synchronization will reconcile the workspace tracker and the MVP migration copy. | Accepted |
+| D-066 | 2026-07-22 | This temporary tracker/copy difference is **intentional** and is **not** repository drift or a failed integrity condition. | Accepted |
+| D-067 | 2026-07-22 | **Supabase-native data access with no general-purpose ORM** is ratified (`@supabase/ssr` + `@supabase/supabase-js`, RLS-scoped clients, server-action writes, PostgreSQL functions/RPCs for atomic transition+audit, separate elevated client, SQL migrations as schema source of truth). An ORM may be added only via a later ADR. | Accepted |
+| D-068 | 2026-07-22 | The **six-variable environment contract** is ratified: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`. No legacy Supabase variable; no secret may carry a `NEXT_PUBLIC_` prefix. | Accepted |
+| D-069 | 2026-07-22 | The **Supabase project and Singapore region (`ap-southeast-1`) are orchestrator-verified** via personal dashboard review. | Accepted |
+| D-070 | 2026-07-22 | Supabase **URL, publishable key, and secret key are present locally** in ignored, untracked `.env.local` and are protected. | Accepted |
+| D-071 | 2026-07-22 | **OpenAI** is the ratified LLM provider. | Accepted |
+| D-072 | 2026-07-22 | **`gpt-5.6-terra`** is the ratified LLM model. | Accepted |
+| D-073 | 2026-07-22 | The **Responses API with strict Structured Outputs (JSON Schema)** is the required AI contract for the grounding pipeline. | Accepted |
+| D-074 | 2026-07-22 | **Official OpenAI documentation verification was supplied by the orchestrator** (model exists; Responses API supported; Structured Outputs supported). Claude Code performed no web verification. | Accepted |
+| D-075 | 2026-07-22 | `.env.local` is **ignored, untracked, and must never be printed or committed** — presence-only verification always. | Accepted |
+| D-076 | 2026-07-22 | **Credential and provider prerequisites are accepted** (Step 6A2: `READY — CREDENTIAL AND PROVIDER PREREQUISITES VERIFIED`). | Accepted |
+| D-077 | 2026-07-22 | **Phase 0 remains not started** until local tooling is installed and accepted. | Accepted |
+| D-078 | 2026-07-22 | **Docker Desktop setup (WSL 2 backend) is the next orchestrator-only action** (Step 6B1). | Accepted |
+| D-079 | 2026-07-22 | The **Supabase CLI will be installed as a pinned project development dependency** (run via `npx supabase`), only **after** Docker verification is accepted. | Accepted |
+| D-080 | 2026-07-23 | **Docker Desktop with the WSL 2 backend is the accepted local container runtime** for this MVP (client and engine `29.6.2`, Compose `v5.3.1`). Hyper-V backend is not used. | Accepted |
+| D-081 | 2026-07-23 | **Linux containers are the required mode** (`OSType=linux`, `Architecture=x86_64`). Windows-container mode is not supported for this project. | Accepted |
+| D-082 | 2026-07-23 | **Insecure Docker daemon TCP exposure (port `2375`) remains disabled** and must stay disabled for the life of this project. | Accepted |
+| D-083 | 2026-07-23 | **Kubernetes is not required for this MVP** and remains disabled in Docker Desktop. | Accepted |
+| D-084 | 2026-07-23 | The **Supabase CLI must be installed project-locally and pinned** to an exact version as an MVP development dependency, and invoked through the project-local executable — **never installed globally and never version-ranged**. | Accepted |
+| D-085 | 2026-07-23 | **Remote Supabase linking and authentication are deferred** beyond local initialization — Step 6B2 performs local scaffolding only (no `supabase login`, no `supabase link`, no remote migrations). | Accepted |
+| D-086 | 2026-07-23 | **Supabase CLI `2.109.1` is the accepted exact project-local tooling version** — pinned without a range in `devDependencies` and resolved identically in `package-lock.json`. | Accepted |
+| D-087 | 2026-07-23 | The **CLI must continue to be invoked through the project-local executable** (`npx --no-install supabase`) — never installed or run globally. | Accepted |
+| D-088 | 2026-07-23 | **`supabase/config.toml` with project ID `best-coach-mvp` is accepted** as the local Supabase project configuration; the folder-derived default identifier was normalized. | Accepted |
+| D-089 | 2026-07-23 | **`.env.example` is committed** (placeholder-only, six approved variable names) **while `.env.local` remains ignored and untracked** — enabled by `.env*` plus the `!.env.example` exception. | Accepted |
+| D-090 | 2026-07-23 | **Local Supabase initialization does not constitute Phase 0 schema implementation** — it is tooling configuration only. | Accepted |
+| D-091 | 2026-07-23 | **Starting the local stack (`supabase start`) belongs to a later explicit Phase 0 checkpoint**, not to the completed tooling setup. | Accepted |
+| D-092 | 2026-07-23 | **Remote linking and hosted migrations require explicit orchestrator approval** in a separate, dedicated checkpoint. | Accepted |
+| D-093 | 2026-07-23 | **The tooling commit `0cdb782`** (`chore(tooling): initialize local Supabase scaffold`, parent `a39ed21`, 6 files, 672 insertions) **is accepted**. | Accepted |
+| D-094 | 2026-07-23 | **Step 6B is complete** — Docker runtime, project-local pinned CLI, local scaffold, and safe environment example are all in place and accepted. | Accepted |
+| D-095 | 2026-07-23 | **The next checkpoint is read-only Phase 0 foundation-slice planning (Step 7A)** — no implementation, no local stack start, no remote linking. | Accepted |
 
 ---
 
@@ -1024,6 +1397,10 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 
 ## 9. Next permitted action
 
-**Step 6A (Pending):** after the Step 5B4 administrative synchronization commit is accepted, perform a **read-only** Phase 0 prerequisite inventory and architecture-decision review — verify whether the Supabase project exists and its region is Singapore (from orchestrator-provided evidence), verify **presence only** of the Supabase URL/anon/service-role keys and the LLM provider key locally, select and record the ORM/data-access approach, define the required `.env.local` variable **names** and a placeholder-only `.env.example`, and determine whether Phase 0 is ready or blocked.
+**Step 6B is Completed and Accepted (2026-07-23)** — Docker Desktop `29.6.2` (WSL 2, Compose `v5.3.1`, Linux engine), project-local pinned Supabase CLI `2.109.1`, initialized local scaffold (`project_id = "best-coach-mvp"`), and a placeholder-only `.env.example`, all committed as `0cdb782`.
+
+**Step 7A (Pending — next checkpoint, read-only):** after the Step 6B2 record-synchronization commit is accepted, re-read the governing Phase 0 sections, inspect the committed local Supabase scaffold, determine the **first bounded Phase 0 implementation slice**, decide the sequence for starting the local stack, installing `@supabase/ssr` and `@supabase/supabase-js`, introducing server-only boundaries, creating the first SQL migration, and placing generated database types, define **tests and stopping conditions**, and **stop before implementation**.
+
+**Do not:** implement Phase 0; run `supabase start` (that belongs to Phase 0 execution); authenticate to or link the hosted Supabase project (`supabase login` / `supabase link` require a separate explicit checkpoint); run local or remote migrations; install dependencies; expose, print, hash, or commit any credential value; use real child, parent, trainer, or academy data (synthetic only); build any Phase 1–4 feature early; modify the frozen demo or `governance-source`; configure a remote or push.
 
 **Do not:** implement Phase 0; create the Supabase project or perform browser/OAuth setup (orchestrator-only); print, report, or commit any secret value; create `.env.local`; install dependencies; run typecheck/lint/build or the application; configure a remote or push; modify the frozen demo, `governance-source`, or any accepted governance document. Stitch assets and the missing AI Features Breakdown are **not** Phase 0 prerequisites.

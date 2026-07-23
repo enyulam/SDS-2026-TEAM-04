@@ -155,6 +155,48 @@ _The entries below record verified history prior to this log's creation. They ar
 - **The administrative synchronization commit is pending review** — this entry is written before that commit exists.
 - **No product, governance-rule, application, dependency, or secret content changed** in this checkpoint; only progress records (`DEMO_TO_MVP_MIGRATION.md`, `STATUS.md`, `BUILD_NOTES.md`) were modified.
 
+## 2026-07-23 — Project-scoped Supabase CLI + local scaffold (migration Step 6B2A)
+
+- **Checkpoint:** Step 6B2A — install the pinned project-scoped Supabase CLI, initialize the local Supabase scaffold, create the safe environment example.
+- **CLI version:** **`supabase@2.109.1`** — verified before install as the registry `latest` dist-tag; the `beta` tag pointed elsewhere (`2.110.0-beta.36`); no prerelease suffix; no registry-integrity error.
+- **Installation command:** `npm install --save-dev --save-exact supabase@2.109.1` (exit 0) — 8 packages added, 365 audited. `devDependencies.supabase = "2.109.1"`, **exact pin, no caret or tilde**. `package-lock.json` gained **237 insertions with 0 deletions**, so no existing dependency version changed. **No global CLI installed**; verified through `npx --no-install supabase --version` → `2.109.1`.
+- **Initialization:** `npx --no-install supabase init` (exit 0, `Finished supabase init.`), run non-interactively — **no prompt appeared** for IDE settings, overwrite, authentication, linking, or a token.
+- **Generated files:** `supabase/.gitignore` (72 B) and `supabase/config.toml` (414 lines) — the complete generated set, enumerated after the run rather than assumed. **No `.vscode` or Deno file was created.**
+- **Normalized project identifier:** the folder-derived `"SDS_Project_Final_BEST_Coach_"` was changed to **`best-coach-mvp`** — a single-line edit; no other generated setting touched (size 15,610 → 15,595 B, exactly the identifier shortening; line count unchanged).
+- **Configuration review passed:** no hosted Supabase URL, API key, database password, access token, or project secret. Every secret-shaped setting is a commented template, an empty string, or an `env(...)` reference; all URL values are loopback defaults.
+- **`.env.example` safeguard:** `.gitignore` kept the broad `.env*` rule and gained **`!.env.example`** immediately after it (one line, no other rule touched). `git check-ignore` confirms `.env.local` **still ignored** and `.env.example` **not ignored**. The example holds exactly the six approved variable names with **no real credential** — only the non-secret ratified selectors `LLM_PROVIDER=openai` and `LLM_MODEL=gpt-5.6-terra` carry values.
+- **`.env.local` was never opened, read, printed, hashed, or copied** — presence-only checks throughout; no value, length, prefix, suffix, or format reported.
+- **No container, authentication, linking, or migration** — `supabase start`, `supabase login`, and `supabase link` were never run; Docker reported `Containers=0` and `Images=0` after init; no `%USERPROFILE%\.supabase\` directory or access token exists.
+
+## 2026-07-23 — Supabase tooling verification and staging (migration Step 6B2B)
+
+- **Checkpoint:** Step 6B2B — validate the Step 6B2A changes, run the automated baseline, stage exactly the approved files, stop before committing.
+- **Six-file staged set:** `.env.example` (A), `.gitignore` (M), `package.json` (M), `package-lock.json` (M), `supabase/.gitignore` (A), `supabase/config.toml` (A) — **3 modifications, 3 additions, 0 deletions; 672 insertions, 0 deletions**. Staged with an explicit path-scoped `git add --`; **`git add -A` was not used**.
+- **Automated baseline — all PASS:** `npx tsc --noEmit` exit 0; `npm run lint` exit 0; `npm run build` exit 0 (Next.js 16.2.10 Turbopack, 4/4 static pages). **No warnings and no errors** from any command.
+- **Secret and path review passed:** `sk-`, `eyJ`, `.supabase.co`, `postgres://`, `postgresql://`, `ANON_KEY`, `PASSWORD=` all 0 in staged content; the only `service_role` / `access_token` matches were generated documentation comments. `git diff --cached --check` clean. No staged file exceeded 5 MB (largest 236 KB). Build artifacts (`.next`, `next-env.d.ts`, `tsconfig.tsbuildinfo`, `node_modules`) confirmed ignored and unstaged. No unstaged or untracked change remained.
+- **Advisory state observed:** **3 total — 1 moderate, 2 high** (`next` high/direct, `sharp` high/transitive, `postcss` moderate/transitive). **None attributable to `supabase@2.109.1`.** `npm audit fix` was **not** run.
+- **No commit existed at this point** — the checkpoint stopped at staging for orchestrator approval.
+
+## 2026-07-23 11:08:38 +0800 — Local Supabase tooling commit (migration Step 6B2C)
+
+- **Checkpoint:** Step 6B2C — create exactly one local commit from the reviewed six-file staged set.
+- **Commit:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006` (short `0cdb782`)
+- **Message:** `chore(tooling): initialize local Supabase scaffold`
+- **Parent:** `a39ed21d4ecf405b3425db711e63a2f71f0f1586`
+- **Summary:** **6 files**, **672 insertions**, 0 deletions.
+- **Post-commit verification passed:** `npx tsc --noEmit`, `npm run lint`, and `npm run build` each exit 0 with **no warnings and no errors**.
+- **Repository clean** — working tree empty, branch `main`, **exactly four commits** (`4de3f93` → `c7c27e5` → `a39ed21` → `0cdb782`).
+- **No remote or push** — and no tag, amend, reset, or second commit. Generated build artifacts remained ignored and never entered the commit.
+- **No Supabase runtime, linking, authentication, or migration occurred**; `.env.local` remained ignored, untracked, and unopened.
+
+## 2026-07-23 — Step 6 closure and record synchronization (migration Step 6B2D)
+
+- **Step 6B is completed and accepted** — Docker Desktop with WSL 2, the project-local pinned Supabase CLI `2.109.1`, the initialized local scaffold (`project_id = "best-coach-mvp"`), and the placeholder-only `.env.example` are all in place, committed as `0cdb782`.
+- **Phase 0 remains not started** — `supabase/migrations`, `supabase/functions`, `supabase/seed.sql`, `src/`, `lib/`, `db/`, and `server/` are all absent. The local stack has never been started and the hosted project has never been linked; each requires its own explicit checkpoint.
+- **Step 7A is next** — read-only Phase 0 foundation-slice planning: re-read the governing Phase 0 sections, inspect the committed scaffold, define the first bounded slice with its tests and stopping conditions, and stop before implementation.
+- **The administrative progress synchronization is pending commit** — this entry is written before that commit exists (per the anti-recursion rule, D-060 … D-066).
+- **No application or schema implementation occurred in this record update**; only progress records (`DEMO_TO_MVP_MIGRATION.md`, `STATUS.md`, `BUILD_NOTES.md`) were modified. Dependency advisories remain **unresolved** (1 moderate, 2 high) and deferred to a reviewed security/dependency checkpoint.
+
 ---
 
-_Next permitted action: commit the Step 5B4 administrative synchronization (three progress files), then perform the read-only Step 6A prerequisite inventory. Do not start Phase 0 implementation._
+_Next permitted action: commit the Step 6B2D administrative synchronization (three progress files), then perform the read-only Step 7A Phase 0 foundation-slice planning review. Do not start the local Supabase stack or implement Phase 0._
