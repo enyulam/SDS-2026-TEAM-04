@@ -197,6 +197,56 @@ _The entries below record verified history prior to this log's creation. They ar
 - **The administrative progress synchronization is pending commit** — this entry is written before that commit exists (per the anti-recursion rule, D-060 … D-066).
 - **No application or schema implementation occurred in this record update**; only progress records (`DEMO_TO_MVP_MIGRATION.md`, `STATUS.md`, `BUILD_NOTES.md`) were modified. Dependency advisories remain **unresolved** (1 moderate, 2 high) and deferred to a reviewed security/dependency checkpoint.
 
+## 2026-07-23 — Phase 0 foundation-slice planning (Step 7A)
+
+- **Checkpoint:** Step 7A — read-only Phase 0 foundation-slice planning. **Planning only; no implementation.**
+- **Sources read:** Specification v3 (Parts III–V, §3, §13, §14, §18–§26), Amendment 001 (A-001 … A-013), root `CLAUDE.md` (§2, §4, §5, §6, §9, §10, §11, §12), the Implementation Plan (Phase 0), `STATUS.md`, `BUILD_NOTES.md`, the migration copy, plus `package.json`, `tsconfig.json`, `next.config.ts`, `eslint.config.mjs`, `.gitignore`, `.env.example`, `supabase/config.toml`, and `app/`.
+- **Accepted checkpoint sequence:** **7B** local runtime → **7C** dependencies → **7D** clients and `server-only` boundaries → **7E** first SQL migration → **7F** Auth and synthetic identities → **7G** RLS relationship proof → **7H** audit hash chain → **7I** authorised server action → **7J** generated database types → **7K** automated and manual Phase 0 evidence → **7L** separately approved hosted linking and remote migration.
+- **Recommended first slice — runtime only.** Local Supabase startup and health verification, chosen over "startup + dependencies" and "startup + clients + boundaries": it isolates the single highest-variance risk (container runtime) in the one checkpoint that produces **zero Git diff**, so a failure requires no rollback. It also had to precede client work because the local CLI emits credentials distinct from the hosted ones, and the environment-selection design depends on observing that.
+- **Unresolved findings recorded, none silently resolved:** (1) **data-layer governance tension** — v3 §18 / `CLAUDE.md` §9 name a typed client (Prisma or Drizzle) while D-067 selects Supabase-native access with no ORM, and the tracker cannot override higher-precedence documents; formal ratification is required **before Step 7E or 7J** but did not block 7B/7C. (2) **New tables are not auto-exposed** — migrations must use deliberate `GRANT`s, and a missing grant must not be misdiagnosed as an RLS failure. (3) **PostgreSQL 17 has built-in `sha256(bytea)`** — `pgcrypto` is not required solely for audit hashing. (4) **Schema/audit ambiguities** — `public` profile vs `auth.users`, audit target representation, report-status storage values, audit chain scope, SHA-256 ratification, and genesis representation, each due before its dependent checkpoint.
+- **No mutation:** no file created, modified, or deleted; no dependency installed; no stack started; no image pulled; no migration, seed, Auth user, generated type, or source code; no hosted operation; no Git mutation.
+
+## 2026-07-23 — Initial local Supabase stack verification (Step 7B, first attempt — FAILED service-health gate)
+
+- **Cold start:** `npx --no-install supabase start`, exit 0, **124 seconds** from a completely empty Docker cache.
+- **Images and containers:** **13 images pulled** (8.588 GB), **12 project containers created**. The CLI intentionally stopped `imgproxy` and `pooler` per the committed configuration.
+- **Healthy core services:** PostgreSQL 17, Auth (GoTrue), REST (PostgREST), Studio, Storage, Realtime, Kong, Mail (Mailpit), Postgres Meta and Edge Runtime were all operational. Auth, REST and Studio probes each returned **HTTP 200**. The `public` schema contained **0 application tables**.
+- **Vector failure — definite root cause.** `supabase_vector` crash-looped (**10 restarts**, `health=unhealthy`). Its own logs showed the `docker_logs` source failing with `Listing currently running containers failed`, all sources finishing, and the container exiting 0 and restarting. Startup had warned: *Analytics on Windows requires Docker daemon exposed on `tcp://localhost:2375`* — an exposure **deliberately disabled** under D-082.
+- **The checkpoint failed its service-health gate**, correctly and deliberately: the gate was not waived, `--ignore-health-check` was not used, and no workaround was applied, even though every service Phase 0 depends on was healthy.
+- **Also observed:** `supabase start` created `supabase/snippets/` as an **empty, non-ignored** directory — invisible to `git status` only because Git does not track empty directories.
+- **Clean shutdown:** `supabase stop` exit 0; all containers removed, all ports released; 13 images and 3 volumes retained.
+- **No repository change** — working tree clean throughout; `.env.local` never opened; no secret exposed; no schema or application implementation.
+
+## 2026-07-23 — Windows local-stack remediation and verification (Step 7B-R1)
+
+- **Exact two-file remediation.** `supabase/config.toml`: `[analytics] enabled = true` → **`false`** (one line; `port = 54327` and `backend = "postgres"` untouched; `project_id`, `major_version = 17` and all six service ports unchanged; the enabled-flag census moved by exactly one). `supabase/.gitignore`: added **`snippets/`** only, preserving all five prior rules.
+- **Migrations stay governed** — `supabase/migrations/*.sql` and `supabase/seed.sql` verified **not** ignored; no broad `*.sql` rule added. SQL migrations, not Studio snippets, remain the source of truth.
+- **Rejected alternative:** enabling insecure Docker TCP 2375 — a security regression contradicting D-082. **Docker TCP 2375 remained disabled throughout.**
+- **Warm start:** exit 0 in **25 seconds** using cached images (**no pulls**), with **zero warnings and zero errors** — the prior `tcp://localhost:2375` warning no longer occurred.
+- **Ten required containers ran** — Kong, PostgreSQL, Studio, Auth, Storage, Realtime, Mail, Postgres Meta, REST, Edge Runtime — with **0 unhealthy and 0 restarting** (every container `restarts=0`). Logflare Analytics and Vector were **absent by configuration** (0 containers each; port 54327 unbound and unreachable).
+- **Functional probes:** Auth health **HTTP 200**, REST **HTTP 200**, Studio **HTTP 200**.
+- **Database:** **PostgreSQL major version 17** verified; `public` schema still contained **0 application tables**. No write was issued.
+- **No migration, seed, Auth user, generated type or source code was created.**
+- **Shutdown and staging:** `supabase stop` exit 0; all project ports released; 13 images and 3 volumes preserved; networks back to Docker's three defaults. Exactly the two approved files were staged (`2 files changed, 2 insertions(+), 1 deletion(-)`), with no other repository-visible change. CLI `2.109.1` exposes no read-only local config validation command (`supabase config` offers only `push`, a hosted mutation), so the successful start is the operational validation.
+
+## 2026-07-23 14:16:15 +0800 — Commit Windows local-stack remediation (Step 7B-R2)
+
+- **Commit:** `25551c5d733fa581844db35ae3647c0ca8d52190` (short `25551c5`)
+- **Message:** `chore(supabase): stabilize local Windows stack`
+- **Parent:** `a83ec7aa66a32b7da33b9d9d84cd01be81426581`
+- **Summary:** **2 files**, **2 insertions**, **1 deletion**.
+- **Clean repository** — working tree empty after commit; exactly **six commits** (`4de3f93` → `c7c27e5` → `a39ed21` → `0cdb782` → `a83ec7a` → `25551c5`).
+- **No tag, remote or push.** No runtime operation occurred during the commit checkpoint; the stack stayed stopped and Docker TCP 2375 stayed disabled.
+- Committed content re-verified from `HEAD`: analytics `enabled = false`, `project_id = "best-coach-mvp"`, `major_version = 17`, all ports unchanged, `snippets/` present, migrations and `seed.sql` still trackable.
+
+## 2026-07-23 — Step 7B closure and record synchronization (Step 7B-R3)
+
+- **Local runtime verified** — the local Supabase stack starts, serves, and stops cleanly on Windows with all required Phase 0 services healthy.
+- **Phase 0 is now `In progress`.** Local-runtime execution has begun and passed. **Schema, Auth, RLS, audit and application implementation have not started** — `supabase/migrations`, `supabase/seed.sql`, `server/`, `src/`, `lib/`, `db/` are all absent, and `@supabase/ssr` / `@supabase/supabase-js` are not installed. The earlier blanket phrasing "Phase 0 has not started" is superseded by this three-part formulation.
+- **Step 7C is next** — Supabase runtime dependency selection and installation, dependency-only, stopping before commit and before any source code.
+- **The administrative progress synchronization is pending commit** — this entry is written before that commit exists (anti-recursion rule, D-060 … D-066, D-101).
+- **No application or schema implementation occurred in this record update**; only the workspace tracker and the three progress records were modified. Advisories remain **unresolved** (1 moderate, 2 high).
+
 ---
 
-_Next permitted action: commit the Step 6B2D administrative synchronization (three progress files), then perform the read-only Step 7A Phase 0 foundation-slice planning review. Do not start the local Supabase stack or implement Phase 0._
+_Next permitted action: commit the Step 7B-R3 administrative synchronization (three progress files), then perform Step 7C dependency selection and installation. Do not create Supabase clients, migrations, or any application code._

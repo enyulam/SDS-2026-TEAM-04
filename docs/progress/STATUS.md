@@ -2,20 +2,33 @@
 
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 
-_Last updated: 2026-07-23 (Step 6B2D — Supabase tooling record synchronization)._
+_Last updated: 2026-07-23 (Step 7B-R3 — Phase 0 planning and local-runtime record synchronization)._
 
 ---
 
 ## Current project state
 
 - **Project:** B.E.S.T Coach MVP
-- **Lifecycle stage:** Phase 0 ready — first implementation slice planning pending
+- **Lifecycle stage:** Phase 0 in progress — local runtime verified, dependency checkpoint pending
 - **Migration/tooling status:** Step 6 local tooling **completed and accepted**
-- **Current checkpoint:** Step 7A — Phase 0 foundation-slice planning
-- **Current implementation phase:** Phase 0 not started
-- **Latest accepted MVP HEAD:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006`
+- **Current checkpoint:** Step 7C — Supabase runtime dependency selection and installation
+- **Current implementation state:** local Supabase runtime **verified**; **schema/application implementation not started**
+- **Latest accepted MVP HEAD:** `25551c5d733fa581844db35ae3647c0ca8d52190`
 - **Latest accepted governance baseline:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce`
-- **Repository:** local-only, no tag, no remote, no push
+- **Repository:** local-only, clean, no tag, no remote, no push
+
+## Phase 0 progress (Steps 7A–7B, accepted 2026-07-23)
+
+- **Step 7A completed and accepted** — read-only planning produced the requirement matrix, the accepted 7B–7L checkpoint sequence, and four recorded unresolved findings. No repository or runtime mutation occurred.
+- **Step 7B completed after Windows-specific remediation** — the first attempt correctly failed its service-health gate because Vector crash-looped; the accepted fix disabled optional local Analytics/Vector and ignored `supabase/snippets/`, committed as `25551c5`.
+- **Required local services are healthy** — Kong (API gateway), PostgreSQL, Studio, Auth, Storage, Realtime, Mail, Postgres Meta, REST and Edge Runtime: 10 containers, **0 unhealthy, 0 restarting**.
+- **Analytics and Vector disabled locally** — optional, and incompatible with the accepted Windows security posture.
+- **Docker TCP 2375 remains disabled** — enabling it was evaluated and rejected as a security regression.
+- **PostgreSQL 17 verified** — `public` schema contains **0 application tables**.
+- **Local stack currently stopped** — 0 containers; 13 images and 3 volumes retained for fast restart.
+- **Hosted project not linked** — no `supabase login`, no `supabase link`, no access token on this machine.
+- **No migrations, Auth users, RLS, audit chain or application clients exist yet.**
+- **Step 7C is dependency-only** — no clients, no migrations, no source code.
 
 ## Completed tooling state (Step 6, accepted 2026-07-23)
 
@@ -24,9 +37,6 @@ _Last updated: 2026-07-23 (Step 6B2D — Supabase tooling record synchronization
 - **Local scaffold initialized** — `supabase/config.toml` (`project_id = "best-coach-mvp"`) and `supabase/.gitignore`, committed as `0cdb782`.
 - **`.env.example` committed safely** — six approved variable names, placeholder-only; only the non-secret ratified selectors (`LLM_PROVIDER=openai`, `LLM_MODEL=gpt-5.6-terra`) carry values.
 - **`.env.local` protected** — ignored via `.env*`, untracked, never printed, hashed, copied, or committed; `!.env.example` is the only exception to the broad rule.
-- **Local stack NOT started** — `supabase start` has never been run; 0 containers, 0 images.
-- **Remote project NOT linked** — no `supabase login`, no `supabase link`, no access token on this machine.
-- **Step 7A is planning only** — no implementation, no stack start, no remote linking.
 
 ## Completed governance state
 
@@ -56,8 +66,8 @@ _Last updated: 2026-07-23 (Step 6B2D — Supabase tooling record synchronization
 
 - **Path:** `C:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\SDS Project Final (BEST Coach)`
 - **Branch:** `main`
-- **Latest accepted commit:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006` (`chore(tooling): initialize local Supabase scaffold`)
-- **History:** four accepted commits — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (local Supabase tooling scaffold)
+- **Latest accepted commit:** `25551c5d733fa581844db35ae3647c0ca8d52190` (`chore(supabase): stabilize local Windows stack`)
+- **History:** six accepted commits — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (local Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation)
 - **Remote:** none (no tag, nothing pushed)
 
 ---
@@ -77,8 +87,9 @@ _Last updated: 2026-07-23 (Step 6B2D — Supabase tooling record synchronization
 
 ## Current follow-ups
 
-- **Dependency advisories remain unresolved — 1 moderate and 2 high** (`next` high/direct, `sharp` high/transitive, `postcss` moderate/transitive). None is attributable to `supabase@2.109.1`. No `npm audit fix` has been run; remediation is deferred to a reviewed security/dependency checkpoint.
-- **The Supabase local runtime has not yet been started** — `supabase start` belongs to Phase 0 execution.
+- **Current npm advisories remain unresolved — 1 moderate and 2 high** (`next` high/direct, `sharp` high/transitive, `postcss` moderate/transitive). None is attributable to `supabase@2.109.1`. No `npm audit fix` has been run; remediation is deferred to a reviewed security/dependency checkpoint.
+- **Formal data-layer governance clarification required before Step 7E/7J** — Specification v3 §18 and `CLAUDE.md` §9 describe a typed client (Prisma or Drizzle), while the accepted Supabase-native / no-ORM decision is recorded only in the lowest-precedence document. An Amendment 002 or an explicit `CLAUDE.md` edit is needed; it does **not** block Step 7C.
+- **Schema and audit ambiguities require resolution before their relevant checkpoints** — the `public` profile table's relationship to `auth.users`; audit target representation; report-status storage values; audit chain scope; SHA-256 ratification; genesis representation.
 - **Hosted project linking remains deferred** — `supabase login` / `supabase link` require a separate explicit checkpoint.
 - `BEST_Coach_AI_Features_Breakdown_v2.docx` **remains missing** — **non-blocking** for MVP Phases 0–4 (A-011); required before either deferred aggregate AI feature is scoped.
 - **Stitch disposition remains pending and non-blocking** (A-013) — Stitch/UI exports installed selectively after accepted Phase 0.
@@ -97,6 +108,8 @@ _Last updated: 2026-07-23 (Step 6B2D — Supabase tooling record synchronization
 
 ## Next permitted action
 
-**Perform a read-only Step 7A planning review. Do not start the local stack or implement Phase 0 yet.**
+**Perform Step 7C dependency selection and installation only after this record synchronization is committed and accepted.**
 
-Step 7A re-reads the governing Phase 0 sections, inspects the committed local Supabase scaffold, defines the first bounded implementation slice with its tests and stopping conditions, and stops before implementation. `supabase start`, hosted-project linking, and remote migrations each require their own explicit checkpoint. No secret value may be printed, reported, or committed. Synthetic data only.
+Step 7C re-checks current stable npm metadata, verifies Node 24 compatibility and peer/engine constraints, exact-pins `@supabase/ssr`, `@supabase/supabase-js`, and `server-only`, installs only those runtime dependencies, reports dependency and advisory deltas, runs typecheck/lint/build, stages only `package.json` and `package-lock.json`, and stops before committing or writing application/server code.
+
+It must **not** install an ORM or test dependencies, create Supabase clients (Step 7D), create migrations, start the stack during installation without separate approval, resolve the data-layer governance tension by implication, or link the hosted project. No secret value may be printed, reported, or committed. Synthetic data only.
