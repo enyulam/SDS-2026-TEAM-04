@@ -247,6 +247,43 @@ _The entries below record verified history prior to this log's creation. They ar
 - **The administrative progress synchronization is pending commit** — this entry is written before that commit exists (anti-recursion rule, D-060 … D-066, D-101).
 - **No application or schema implementation occurred in this record update**; only the workspace tracker and the three progress records were modified. Advisories remain **unresolved** (1 moderate, 2 high).
 
+## 2026-07-24 — Supabase runtime dependency verification, installation and staging (Step 7C1)
+
+- **Checkpoint:** Step 7C1 — verify current stable Supabase runtime packages and Node/peer compatibility, install exact runtime pins, run the automated baseline, and stage only the package files. **Dependency-only; no source, schema, runtime, or hosted operation.**
+- **Toolchain:** Node `v24.16.0`, npm `11.13.0`.
+- **Package metadata and compatibility verified:** `@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, and `server-only` `0.0.1` each confirmed as the current `latest` dist-tag with no prerelease suffix. `@supabase/supabase-js` requires `node >=22.0.0` — satisfied by Node 24; `@supabase/ssr` peer `^2.110.5` is satisfied by `@supabase/supabase-js` `2.110.8`; none of the three declares a React or Next.js peer, so React 19.2.4 and Next.js 16.2.10 are unconstrained.
+- **Exact installation:** `npm install --save --save-exact @supabase/ssr@0.12.3 @supabase/supabase-js@2.110.8 server-only@0.0.1` (exit 0). All three pinned exactly (no ranges) in `dependencies` and resolved identically in `package-lock.json`.
+- **Dependency delta: 11 packages added, 0 removed, 0 changed** — the three direct packages plus `@supabase/auth-js`, `@supabase/storage-js`, `@supabase/realtime-js`, `@supabase/functions-js`, `@supabase/postgrest-js` (all `2.110.8`), `@supabase/phoenix` `0.4.5`, `iceberg-js` `0.8.1`, and `cookie` `1.1.1`. **No ORM or test dependency** (prisma, drizzle, typeorm, sequelize, kysely, knex, vitest, jest, Playwright, Testing Library all absent; pre-existing dev-only transitive `axe-core@4.12.1` unchanged, so A-009 is not engaged).
+- **Automated baseline — all PASS:** `npx tsc --noEmit` exit 0; `npm run lint` exit 0; `npm run build` exit 0. No warnings, no errors.
+- **Staged set:** exactly `package.json` (M) and `package-lock.json` (M) — **2 modifications, 0 additions, 0 deletions; 132 insertions, 2 deletions** — via explicit path-scoped `git add --` (`git add -A` not used). The only `package.json` deletion was the `react-dom` line re-emitted with a trailing comma; its version is unchanged.
+- **No source, schema, runtime, or hosted operation** — no client, server module, migration, seed, Auth user, or generated type; local stack never started; no `supabase login` / `link`; `.env.local` never opened.
+
+## 2026-07-24 — Advisory movement (Step 7C1)
+
+- **Advisory count unchanged by the install: 3 total — 0 moderate, 3 high, 0 critical**, before and after (zero advisory delta).
+- **Same affected packages:** `next` (high, direct), `postcss` (high, transitive via `next`), `sharp` (high, transitive via `next`). Every path terminates at `next`.
+- **`postcss` severity changed due to npm advisory-database movement**, not a dependency change — a second `postcss` advisory (arbitrary file read / information disclosure via attacker-controlled `sourceMappingURL`) was published alongside the existing XSS finding, raising it from moderate to high. The pre-install audit already showed 3 high against the tree exactly as committed at `329f03c`.
+- **No finding attributable to the Supabase packages** — neither `@supabase/ssr`, `@supabase/supabase-js`, `server-only`, nor any added transitive package appears in any advisory `via`/`effects` chain.
+- **No `npm audit fix` was run.** Findings remain **unresolved** and deferred to a reviewed security/dependency checkpoint. The earlier "1 moderate, 2 high" figure is superseded only as a current-state summary; the dated historical snapshots (Step 4B, Step 6B2A, D-034, D-099) are preserved.
+
+## 2026-07-24 14:59:58 +0800 — Commit Supabase runtime dependencies (Step 7C2)
+
+- **Checkpoint:** Step 7C2 — one local commit from the reviewed two-file staged set.
+- **Commit:** `ffd9eef8677f9183175a66f7de00f9fef1223fab` (short `ffd9eef`)
+- **Message:** `chore(deps): add Supabase runtime clients`
+- **Parent:** `329f03c253cc3afc356be5873c963efc2eb35e12`
+- **Summary:** **2 files**, **132 insertions**, **2 deletions** (`package.json`, `package-lock.json`).
+- **Post-commit verification passed:** `npx tsc --noEmit`, `npm run lint`, and `npm run build` each exit 0, no warnings or errors; `npm ls --depth=0` exit 0 (no missing, invalid, extraneous, or peer-conflicting package).
+- **Repository clean** — working tree empty; **exactly eight commits** (`4de3f93` → `c7c27e5` → `a39ed21` → `0cdb782` → `a83ec7a` → `25551c5` → `329f03c` → `ffd9eef`).
+- **No tag, remote or push.** No source, schema, runtime, or hosted operation occurred; the stack stayed stopped and `.env.local` remained ignored, untracked, and unopened.
+
+## 2026-07-24 — Step 7C closure and record synchronization (Step 7C3)
+
+- **Step 7C is completed and accepted** — Supabase runtime dependencies exact-pinned, installed, verified, and committed as `ffd9eef`; Node and peer compatibility passed; the automated baseline passed; the current advisory state is **3 high, 0 moderate, unresolved**.
+- **Step 7D is next** — Supabase clients, explicit local-versus-hosted environment selection, and `server-only` boundaries; it stops before commit and before any schema work.
+- **No client, server-boundary, schema, or application implementation exists yet** — `supabase/migrations`, `supabase/seed.sql`, `server/`, `src/`, `lib/`, `db/` remain absent; installing Supabase-native packages did **not** resolve the data-layer governance tension (D-108 still gates Step 7E/7J).
+- **The administrative progress synchronization is pending commit** — this entry is written before that commit exists (anti-recursion rule, D-060 … D-066, D-101, D-121). Only the workspace tracker and the three progress records were modified in this update; no application, schema, dependency, or secret content changed.
+
 ---
 
-_Next permitted action: commit the Step 7B-R3 administrative synchronization (three progress files), then perform Step 7C dependency selection and installation. Do not create Supabase clients, migrations, or any application code._
+_Next permitted action: commit the Step 7C administrative synchronization (three progress files), then perform Step 7D — create only the Supabase client boundaries and explicit local-versus-hosted environment selection, prove `server-only` isolation, run the automated baseline, and stop before commit or schema work. Do not create migrations, seed data, Auth users, RLS, an audit chain, or any application code, and do not link the hosted project._
