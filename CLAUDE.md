@@ -20,17 +20,33 @@ If a change you're about to make would let AI-generated content reach a parent o
 
 These documents govern this build. Read the specification and its ratified amendment fully before starting Phase 0, and re-read the relevant section before starting any new phase or module.
 
-**Precedence (highest first):** Specification v3 → ratified amendments (Amendment 001) → this `CLAUDE.md` → Implementation Plan → Stitch/UI reference → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker.
+**Precedence (highest first):** Specification v3 → ratified amendments (Amendment 001, then Amendment 002 for the clauses each names) → this `CLAUDE.md` → Implementation Plan → **Figma Design 2** (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker.
 
 | Document | Location | What it governs |
 |---|---|---|
 | **Complete MVP Prototype Specification (v3)** | `docs/spec/BEST_Coach_Complete_MVP_Specification_v3.md` | The authoritative build spec — product, framework, governance, architecture, data model, build plan. This file is **the source of truth**. If code and spec disagree, the spec wins; flag the discrepancy to the orchestrator rather than silently reconciling it. |
-| **Specification v3 Amendment 001 (Ratified)** | `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md` | Orchestrator-ratified reconciliations that **supersede only the specific v3 clauses named in its supersession table** (parent-evidence policy, evidence phase ordering, Phase 2 exit, Parent UAT, local-only Git, Node 24 toolchain, audit-mirror phasing, permanent continuity docs, testing/accessibility, audit-mutation verification, AI-Breakdown status, Stitch timing). Where it names a clause, it wins over v3 for that clause; everything else in v3 stands. |
+| **Specification v3 Amendment 001 (Ratified)** | `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md` | Orchestrator-ratified reconciliations that **supersede only the specific v3 clauses named in its supersession table** (parent-evidence policy, evidence phase ordering, Phase 2 exit, Parent UAT, local-only Git, Node 24 toolchain, audit-mirror phasing, permanent continuity docs, testing/accessibility, audit-mutation verification, AI-Breakdown status, UI-export timing). Where it names a clause, it wins over v3 for that clause; everything else in v3 stands. **A-001 … A-012 remain fully active. A-013 is superseded by Amendment 002 A-022 only for the UI-reference source and its install timing** — its "no visual asset without an explicit disposition" discipline still applies, now to Figma Design 2 assets. |
+| **Specification v3 Amendment 002 (Ratified)** | `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md` | Orchestrator-ratified **final MVP scope and product decisions** (**A-014 … A-024**), ratified 2026-07-30: the one-centre / three-flow boundary; the Centre → Class Grade → Class Module → Class Session hierarchy; mandatory nine-dimension assessment (Quick mode removed); attendance defaults; management administration scope; the profile/invitation model; one canonical role-aware feedback report; **Figma Design 2 as the final UI authority**; **Supabase-native data access with no general-purpose ORM**; and the revised three-flow phasing and UAT. It supersedes only the clauses named in its supersession table, and **does not weaken any privacy, approval, audit, or evidence control**. |
 | **AI Features Breakdown (v2)** | `docs/spec/BEST_Coach_AI_Features_Breakdown_v2.docx` — **currently unavailable / not installed** | Deep detail on the two **deferred** future AI features (Weekly Class Health Brief, Child Progress Digest). Its absence is **non-blocking** for MVP Phases 0–4 (per Amendment 001 A-011): v3 already incorporated its aggregate-AI detail. Do not fabricate it. It must be obtained and reviewed before either deferred feature is pulled into scope — see §8. |
 | **Implementation Plan** | `docs/plan/BEST_Coach_Implementation_Plan.md` | **Procedural** — the orchestrator's execution and review script. It may add Phase 5 (final integration/UAT/quality) and review detail, but cannot override the specification or a ratified amendment (Amendment 001 A-012). |
-| **Stitch-generated UI screens** | `docs/ui-screens/` — **installed selectively later, after accepted Phase 0** (Amendment 001 A-013) | Visual reference only — see §7. Not a source of truth for data model, business logic, or governance behaviour. Not present during governance setup; their absence does not block Phase 0. |
+| **Figma Design 2 UI reference** | Figma prototype (link in §7); per-screen frames **not yet installed** — governed by Amendment 002 A-022 and by the disposition discipline carried over from A-013 | **Visual and interaction reference only** — see §7. Not a source of truth for data model, business logic, or governance behaviour. Its absence does not block Phase 0 or the first SQL migration. |
+| **Figma Design 2 screen implementation matrix** | `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` | **Procedural planning artefact** — the per-screen inventory, the implementation-readiness gate, and the "Orchestrator Figma Porting Actions" checklist. It cannot override the spec, an amendment, or this file. |
 
 **Do not proceed past a section of the spec you haven't read.** If you're asked to build the Review & Approve screen and haven't read spec §11–13 (the AI Draft Assistant, grounding design, and state machine) in this session, read them first.
+
+### 1.1 The final MVP boundary (Amendment 002 A-014, A-015) — read this before scoping anything
+
+The completed MVP contains **exactly three complete human-user flows**:
+
+1. **Management**
+2. **Trainer**
+3. **Parent**
+
+These three are the **required final-MVP roles**. The MVP must include every screen, page, interaction, function, permission and persisted record those three flows need to work **end to end**.
+
+**The MVP operates for one centre only.** It does **not** require centre creation, centre deletion, centre switching, multi-centre administration, cross-centre analytics, cross-centre transfers, an HQ role, or a super-admin role. A **real `centres` entity and centre-scoped relationships are retained** so multi-centre support stays additive — but the MVP uses **exactly one synthetic/seeded centre**, with **no centre-selection UI** and **no centre-management UI**. There is **one named management account** for that centre; never model or describe it as shared credentials used by several staff.
+
+**Teaching Assistant is not a required completed persona.** TA screens, the TA login flow, and TA-specific UAT are **deferred** and are **not** MVP completion gates. This is a scope decision, not a security decision: **Amendment 001's evidence safeguards (A-001 gating, A-003 prohibited/permitted exit, A-004 both-direction Parent UAT) are preserved in full and apply whenever evidence is implemented.** Whether evidence media remains a completion requirement — and **who uploads it if it does** — is **UNRESOLVED**. Do **not** invent a replacement uploader and do **not** silently transfer TA evidence-upload permissions to management or trainer.
 
 ---
 
@@ -46,9 +62,10 @@ These are decided (spec §16, ADR-1 through ADR-7). Do not propose alternatives 
 | ADR-4 | **Supabase Auth** for authentication. **Authorization is decided by RLS policies + server-side guards**, never by token claims and never by hiding UI. Do not put trainer-class assignment or parent-child relationship into JWT custom claims — check them live against the DB (RLS) on every request. |
 | ADR-5 | **AI drafting is synchronous** in the MVP — call the LLM inside an awaited server action with a loading state. Keep the **idempotency key** and the **full grounding-validation pipeline** even though it's sync; do not simplify these away because "it's not async yet." An async queue (pg-boss or Cloud Tasks) is a future upgrade, not an MVP requirement. |
 | ADR-6 | **Region-pin everything to Singapore** (database, storage, compute) from project creation. Use only synthetic/seed data — never real student data — until told otherwise. |
-| ADR-7 | **Management access is branch-scoped, single-tier, no HQ/corporate role.** Each management account is assigned to exactly one centre (`management_centre_assignments`) and sees only that centre's data via RLS, joined through `classes.centre_id`. No cross-branch or HQ view exists in this MVP — confirmed by the orchestrator. If ever needed, an HQ tier is additive (a new role granted visibility across multiple centres), not a redesign of this decision. |
+| ADR-7 | **Management access is centre-scoped, single-tier, no HQ/corporate role.** Each management account is assigned to exactly one centre (`management_centre_assignments`) and sees only that centre's data via RLS, joined through the centre-linked class hierarchy. No cross-branch or HQ view exists in this MVP — confirmed by the orchestrator. **(Amendment 002 A-015):** the MVP operates for **exactly one seeded centre**, with **one named management account**, **no centre-selection UI** and **no centre-management UI** — while keeping the real `centres` entity and its relationships so multi-centre support stays additive. If ever needed, an HQ tier is additive (a new role granted visibility across multiple centres), not a redesign of this decision. |
+| **ADR-8** *(Amendment 002 A-023)* | **Data access is Supabase-native; no general-purpose ORM is part of this MVP.** Use `@supabase/ssr` and `@supabase/supabase-js`. **Supabase SQL migration files are the schema source of truth**; **generated Supabase database TypeScript types are authoritative for application data types**. Normal user access is **RLS-scoped**; governance-carrying writes go through **reviewed server actions or route handlers**; atomic state-transition-plus-audit operations use **reviewed PostgreSQL functions/RPCs** where required; elevated access uses a **separate server-only client** and **requires explicit authorization** because the secret key bypasses RLS. **No Prisma, Drizzle, or other general-purpose ORM.** An ORM may be introduced **only** through a later explicit ADR **and** orchestrator approval. This formally resolves the previously recorded data-layer governance tension against spec §18's "Prisma or Drizzle" wording. |
 
-**Stack:** Next.js + TypeScript (App Router) · Supabase (Postgres + Auth + Storage + RLS) · Tailwind (paired with whatever Stitch's export uses) · an LLM API called only from server code. No Firebase, no separate Express/NestJS API layer, no microservices.
+**Stack:** Next.js + TypeScript (App Router) · Supabase (Postgres + Auth + Storage + RLS) · Tailwind (the MVP design system, built from the approved Figma Design 2 tokens — never from generated export CSS) · an LLM API called only from server code. No Firebase, no separate Express/NestJS API layer, no microservices, **no ORM (ADR-8)**.
 
 **Ratified toolchain (Amendment 001 A-006):** Node.js **24 LTS** (`.nvmrc` `24`, engines `>=24 <25`) · **npm** (`packageManager` `npm@11.13.0`) · Next.js App Router · TypeScript · Tailwind CSS · ESLint · **Turbopack** · root-level `/app`, no `/src` · **React Compiler disabled** initially. This supersedes any older "Node 20 LTS" recommendation. The MVP already exists as a **local** Next.js repository scaffolded on this toolchain.
 
@@ -91,10 +108,10 @@ These are lenses for *you* to reason through, not separate agents to simulate li
 - Structured AI output is validated against a schema before it is ever persisted as a `report_version`.
 
 ### 3.5 Frontend engineer / accessibility specialist
-**Mandate:** WCAG 2.2 AA compliance and production-quality component structure — not a pixel-for-pixel Stitch copy with inline styles and no semantics.
-- Semantic HTML, correct landmark roles, real form labels, sane focus order, full keyboard operability for every interactive Stitch element (calendars, chip selectors, the approval checklist).
+**Mandate:** WCAG 2.2 AA compliance and production-quality component structure — not a pixel-for-pixel Figma copy with inline styles and no semantics.
+- Semantic HTML, correct landmark roles, real form labels, sane focus order, full keyboard operability for every interactive element in the Figma Design 2 screens (calendars, chip selectors, the approval checklist, attendance toggles).
 - Color contrast is checked against the standard, not eyeballed.
-- Responsive behaviour is implemented with real breakpoints, not fixed pixel widths copied from a Stitch export.
+- Responsive behaviour is implemented with real breakpoints from the approved token scale, not fixed pixel widths copied from a Figma export.
 - No client-side-only validation without a server-side equivalent — the server is authoritative per ADR-3, the client check is UX convenience only.
 
 ### 3.6 QA / test engineer
@@ -147,7 +164,7 @@ Full detail in spec §3. Summary so you don't have to re-derive it every session
 - **5 Speech Linguistics Pattern dimensions:** Eye Contact, Vocal Projection, Emotional Expression, Sentence Flow, Audience Awareness.
 - **Scale (all 9 dimensions):** `Emerging` → `Developing` → `Secure` → `Advanced`. Each level has a specific behavioural anchor (spec §3.3) — carry the anchor text alongside the rating wherever it's used for AI generation; never just pass the bare enum value to the LLM.
 - **Polarity bands** (used by grounding validation): Emerging = `needs_support`; Developing = `developing`; Secure/Advanced = `positive`.
-- **Two capture modes:** Quick mode = the 4 Competency dimensions only (live-class speed). Full mode = all 9.
+- **All nine dimensions are mandatory for every assessment (Amendment 002 A-017).** There is **one** capture mode: the full nine. **Quick mode is removed completely**, **every four-dimension-only completion path is removed**, and **no four-dimension fallback mode is retained.** An assessment cannot be completed until all nine dimensions are rated — validate this **server-side**, not only in the form. Any older "Quick mode / Full mode", "quick = 4 Competency", "per mode" or `observations.mode` wording elsewhere (spec §3.5 decision 1, §8, §9, §10, §15, §20, §26; the Implementation Plan; the legacy state screenshots) is **superseded and historical** — do not implement it, and do not carry a `mode` toggle into a schema, a component prop, a validator, or a test.
 - **A separate, different instrument exists** — the End-of-Term Performance Report (7 criteria, `Excellent`/`Good`/`Needs Improvement` scale). Its **evidence is captured now** (`term_evidence_notes`) but its **generator is not built in the MVP** (spec §28). Do not build term-report generation unless explicitly asked.
 
 **Do not invent your own dimension names or scale.** If unsure which of the 9 dimensions or which rating word applies in a schema, component prop, or seed data, check spec §3 — do not fall back to the older, superseded placeholder framework (Eye Contact/Body Movement/Speech Clarity/Structure/Active Listening/Confidence on a Needs Support→Strong scale). That placeholder should not appear anywhere in new code.
@@ -158,9 +175,30 @@ Full detail in spec §3. Summary so you don't have to re-derive it every session
 
 ## 6. Data model, roles, and state machine — build to the spec, not to convenience
 
-- **Schema:** follow spec §20 (tables, enums, relationships) as the baseline. `observation_ratings` normalises the 9 dimensions per observation — don't collapse this into a single JSON blob on `observations` unless the orchestrator agrees aggregation needs are light enough to justify it.
-- **Roles:** Trainer, TA, Parent, Management, plus the AI worker as a non-human actor with its own restricted boundary (spec §14). Every table touched by more than one role needs an explicit RLS policy — don't rely on the application layer alone to filter rows.
-- **Management access is branch-scoped, single-tier, confirmed by the orchestrator (ADR-7).** iSpeak has multiple branches. `centres` is a new table (one row per branch); `classes.centre_id` links every class to one centre; `management_centre_assignments` links each management account to exactly one centre — same relationship-table pattern as `trainer_class_assignments`/`parent_child_links`. Every management-facing query (Management Calendar, Class Overview, Class Statistics) must be scoped by RLS through this join — a management account must never see another centre's classes, reports, or statistics. There is no HQ/corporate tier in this MVP; do not build a "see all branches" view or role.
+- **Schema:** follow spec §20 (tables, enums, relationships) as the baseline, **as amended by Amendment 002 A-016** (the canonical hierarchy below). `observation_ratings` normalises the 9 dimensions per observation — don't collapse this into a single JSON blob on `observations` unless the orchestrator agrees aggregation needs are light enough to justify it. **Schema is decided by ratified governance plus the Step 7E preflight — never inferred from a visual frame (A-022).**
+- **Canonical academic hierarchy (Amendment 002 A-016) — this replaces the older "Centre → Class" assumption:**
+
+  ```
+  Centre → Class Grade → Class Module → Class Session → downstream records
+                                                        (attendance, observations, reports, evidence)
+  ```
+
+  - **The only Class Grade values in the MVP are `Beginner`, `Intermediate`, `Advanced`.** No fourth value is creatable.
+  - **Use the term "Class Grade" in active requirements. "Academic Level" is not the current canonical term** — do not use it as one in schema, code, copy, or documentation.
+  - **The UI action may be labelled "Create Class", but the persisted academic entity it creates is the Class Module, under a selected Class Grade.** Do **not** introduce an additional hidden `classes` entity between Class Grade and Class Module unless the orchestrator explicitly reopens this decision.
+  - **Ratified conceptual relationships:** one centre has many class grades; one class grade has many class modules; one class module has many class sessions; **students enrol in class modules**; **attendance belongs to one student and one class session**; observations and assessments belong to the appropriate student and class session; reports are derived from the governed assessment and review workflow; **trainer assignment is authoritative at class-session level**; **calendars are projections of class-session records and their assignments**; and **management and trainer calendars must not store separate duplicated event records.**
+- **Roles:** **Management, Trainer and Parent are the three required completed MVP flows (A-014)**, plus the AI worker as a non-human actor with its own restricted boundary (spec §14). **TA remains a modelled role in the spec but is not a required completed MVP persona** — its screens, login flow and UAT are deferred. Every table touched by more than one role still needs an explicit RLS policy — don't rely on the application layer alone to filter rows.
+- **Identity vs profile (Amendment 002 A-020) — do not conflate these.** The **authenticated Supabase Auth identity** and the **application/domain profile** are distinct. A profile row is not a login; a login is not a profile.
+  - Management has **one named active account** for the sole centre.
+  - **Parent profiles are separate from parent Auth identities**; **trainer profiles are separate from trainer Auth identities**.
+  - **Management initiates parent and trainer invitations**, sent to the supplied email address. The recipient **verifies the account** and **establishes their own login credentials**.
+  - **No plaintext generated password is ever stored, displayed, or emailed** — not in a UI, not in a notification, not in a log, not in a report to the orchestrator.
+  - **Invitation states must support at least `pending`, `accepted`, `expired`, `revoked`.**
+  - **A profile that has not completed activation must not be treated as an active login identity.**
+  - **Authorization sources:** parent → **live parent–student relationships**; trainer → **live class-session assignments**; management → the **sole centre-management relationship**. All enforced through **RLS and server-side guards**. **UI visibility and JWT convenience claims are not authorization** (ADR-4, spec §21 claims-staleness rule).
+- **Management access is centre-scoped, single-tier, confirmed by the orchestrator (ADR-7), and the MVP runs on exactly one centre (A-015).** `centres` is a real table; the class hierarchy is centre-linked; `management_centre_assignments` links the management account to exactly one centre — same relationship-table pattern as `trainer_class_assignments`/`parent_child_links`. Every management-facing query must be scoped by RLS through this join — a management account must never see another centre's data. There is no HQ/corporate tier and no super-admin in this MVP; do not build a "see all branches" view or role, a centre picker, or centre create/delete/switch UI. **Keep the centre relationships real** — the one-centre MVP must not be achieved by hardcoding the centre away.
+- **Management is an administrative role as well as a read role (Amendment 002 A-019).** Management must be able to: create a **Class Module** under a selected **Class Grade**; enter the module details required by the approved final form; create **one or more dated Class Sessions** (date, start time, end time where the approved design supports them); **assign one specific trainer to each Class Session**; see created sessions in the **management calendar**; cause an assigned session to appear in the **assigned trainer's calendar**; create **student profiles**; **enrol students in a Class Module**; create **parent profiles and account invitations**; **link** the appropriate student profile(s) to a parent; create **trainer profiles and account invitations**; **view submitted reports** in the canonical format; and **never edit feedback-report content**. **Every management write must be server-side, centre-scoped, validated, authorized and auditable** (ADR-3, §4).
+- **Attendance (Amendment 002 A-018).** When a valid class-session roster is initialized, **each enrolled student is `Present` by default**. The **trainer** may toggle an individual student to `Absent`. The final state **persists for that specific student and that specific class session**, and **attendance uniqueness is enforced conceptually for student + class session** (one record per student per session). **Absence must never create or expose a fabricated assessment or report.** **Attendance changes must be auditable.**
 - **Report state machine** (spec §13): `Incomplete → Observation Saved → Drafting → Draft Ready → Needs Edit / Evidence Pending → Approved → Submitted`. Every transition is a guarded, compare-and-set operation inside a transaction (current state check + optimistic-lock version bump), with the audit write in the same transaction. Do not implement transitions as simple unconditional status updates. The `reports` table needs three boolean columns for the Quality Checklist — `checklist_evidence_confirmed`, `checklist_ai_reviewed`, `checklist_privacy_checked` — so the guarded `approve` transition can require all three `true` server-side, not just on the client.
 - **Editing content resets the Quality Checklist, confirmed by the orchestrator.** The "Edit Report" screen's "Save Changes & Finalize" saves the edit and returns to Review & Approve (it does not itself approve — Approve & Submit remains the only path to `Approved`). But any save from Edit Report must reset all three `checklist_*` columns to `false`, the same way an edit already bumps `lock_version`. Otherwise a trainer could check "AI Draft reviewed," edit the draft afterward, and the checklist would keep certifying content that was never actually reviewed in its edited form — the checklist's whole purpose is to attest to *this exact text*, not to editing having happened at some point.
 - **Any per-student action button on any management screen must gate on report status — caught on Class Overview, generalized after catching the same risk on Class Statistics.** This applies to Management Class Overview's "Student Report Status" table **and** Class Statistics' "Students Needing Follow-up" table — any place management can click into a specific student's report. **Only rows whose report has reached `Submitted` may link to actual report content.** Rows in `Pending Review` or `Draft Ready` must show **"Send Reminder to Trainer"** — the row-level action for those two states specifically, not a page-level Quick Action. **Rows with `No Report` status get no action button at all** (or a plain "—", matching how the Parent Calendar disables "Access" for absent students) — "Send Reminder to Trainer" doesn't apply when no report was ever started. Never expose draft text or internal notes for any non-`Submitted` row, even though the row's button may look identical to an approved row's button. Do not implement this as one generic "view report" handler shared across all rows/screens regardless of status; every such handler must check status first, independently.
@@ -195,29 +233,78 @@ Full detail in spec §3. Summary so you don't have to re-derive it every session
      Sentence: "Recommended next action: [looked-up sentence]."
 
   This is the literal, exhaustive set for the MVP. No freeform generation, ever — expanding this into AI-authored prose silently pulls the deferred Weekly Class Health Brief (§28.1) into current scope, which stays out per §8.
-- **"Approve & Submit" is one user action performing two transitions, confirmed by the orchestrator.** Clicking it triggers a confirmation modal ("Approve and submit [Student]'s report? This will save the final report, notify parent and management, and update the student record." / Approve & Submit / Cancel) — a simple confirm dialog, reusing the same modal visual pattern already established by the future-session-lock modal (centered card, icon, title, description, primary + secondary button). **No dedicated Stitch mockup is needed for this** — build it directly from this description. On confirm, the server performs **both** the `approve` and `publish` transitions (spec §13) in sequence within the same server action — audit events for both, in the same guarded, transactional pattern as every other transition. Critically: **this modal is a UX safeguard against accidental clicks, not a security boundary.** It does not replace the checklist gate — the button that opens it only appears enabled once all three checklist items are checked (§ above), and the server independently re-verifies all three `checklist_*` columns before executing either transition, exactly as already specified. A confirmation dialog with nothing underneath enforcing the checklist would not satisfy this requirement.
+- **"Approve & Submit" is one user action performing two transitions, confirmed by the orchestrator.** Clicking it triggers a confirmation modal ("Approve and submit [Student]'s report? This will save the final report, notify parent and management, and update the student record." / Approve & Submit / Cancel) — a simple confirm dialog, reusing the same modal visual pattern already established by the future-session-lock modal (centered card, icon, title, description, primary + secondary button). **No dedicated design mockup is needed for this** — build it directly from this description, matching the approved Figma Design 2 modal pattern if one exists. On confirm, the server performs **both** the `approve` and `publish` transitions (spec §13) in sequence within the same server action — audit events for both, in the same guarded, transactional pattern as every other transition. Critically: **this modal is a UX safeguard against accidental clicks, not a security boundary.** It does not replace the checklist gate — the button that opens it only appears enabled once all three checklist items are checked (§ above), and the server independently re-verifies all three `checklist_*` columns before executing either transition, exactly as already specified. A confirmation dialog with nothing underneath enforcing the checklist would not satisfy this requirement.
 - **Visibility rules** (spec §14, §14.1): parents only ever see `report_versions` where `kind = approval_snapshot` and `audience = parent`, for students in their `parent_child_links`. Management only sees approved completion/evidence/statistics — never drafts, never raw ratings, never internal notes.
-- **One confirmed parent-view leak, and one confirmed parent-view feature with specific required gating.** (1) **No per-dimension rating grid on the Parent Feedback Report, in any form or wording — this is a caught leak, fix it.** A screen was found showing a "Performance Summary" grid of raw B.E.S.T dimension:rating pairs (e.g. "Eye Contact — Needs Attention") directly to a parent — a clear violation of spec §8's explicit rule for this screen ("No internal trainer notes, raw B.E.S.T ratings, or AI draft history"). The screen's "simplified performance summary" requirement is satisfied by the prose panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway) — do not add a second panel that restates the same per-dimension ratings in grid form, even with softened wording; that recreates the same leak. (2) **Per-child evidence video on the Parent Feedback Report is a confirmed feature, not a leak — but only under specific gating, confirmed by the orchestrator.** **(Amendment 001 A-001 ratifies this gated feature and supersedes spec §21's absolute "parents never receive evidence URLs"; the parent evidence workflow and this access are implemented and tested in Phase 2, not Phase 1 — A-002/A-003.)** TA evidence capture is per-individual-child (each student filmed during their own presentation/assessment turn), and `evidence` rows are already scoped to one `student_id` per spec §20, so showing a parent their own child's evidence clip is intentional. It must be gated on all three of: **(a)** the associated report has reached `Submitted` — never show evidence tied to a draft or unapproved report, the same rule that governs every other field on this screen; **(b)** the `evidence_media` consent scope (spec §22) is granted for that student; **(c)** access is via a short-TTL, server-minted signed URL scoped to the requesting parent's `parent_child_link`, same as every other evidence access path. The guarantee that a clip contains only one child is a filming-process assumption, not something the app verifies — flag this to whoever trains TAs on capture, but it isn't a code-level fix.
+- **One canonical, role-aware feedback report (Amendment 002 A-021) — do not build three formats.** There is **one canonical feedback-report format**, taken from the approved Figma Design 2 report frame. Build **one shared submitted-report read model** and **one reusable presentation architecture** used by trainer, management and parent.
+
+  | Role | Behaviour |
+  |---|---|
+  | **Trainer** | View **and edit**, within the governed report workflow |
+  | **Management** | **View only** |
+  | **Parent** | **View only**, and **only for linked students** |
+
+  **Governance rules that survive unchanged and must be enforced server-side:**
+  - management and parent read **only the submitted/approved report snapshot**;
+  - management and parent **cannot access drafts**, **internal trainer notes**, **raw private assessment data** (unless a later amendment explicitly authorizes it), or **AI generation history**;
+  - **hiding an Edit button is not authorization** — the **server must reject** a management or parent edit attempt even when the call bypasses the UI entirely;
+  - trainer edits operate on the **governed editable report version** and **must not mutate a submitted approval snapshot in place**;
+  - **editing resets the quality checklist** where the governed workflow requires it, and **requires review and approval again**;
+  - **AI never publishes directly.**
+
+  **The exact report sections, labels, field arrangement, component hierarchy, visible content, and presentation styling come from the approved Figma Design 2 report frame — and that frame has not yet been verified.** **Do not fabricate report fields.** Until the frame is supplied, the authoritative content baseline is spec §8's parent panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway) plus the confirmed prohibition on any per-dimension rating grid in the parent view (below). If a required field cannot be established from an authoritative document or a verified frame, **stop and ask** — do not invent it.
+- **One confirmed parent-view leak, and one confirmed parent-view feature with specific required gating.** (1) **No per-dimension rating grid on the Parent Feedback Report, in any form or wording — this is a caught leak, fix it.** A screen was found showing a "Performance Summary" grid of raw B.E.S.T dimension:rating pairs (e.g. "Eye Contact — Needs Attention") directly to a parent — a clear violation of spec §8's explicit rule for this screen ("No internal trainer notes, raw B.E.S.T ratings, or AI draft history"). The screen's "simplified performance summary" requirement is satisfied by the prose panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway) — do not add a second panel that restates the same per-dimension ratings in grid form, even with softened wording; that recreates the same leak. (2) **Per-child evidence video on the Parent Feedback Report is a confirmed feature, not a leak — but only under specific gating, confirmed by the orchestrator.** **(Amendment 001 A-001 ratifies this gated feature and supersedes spec §21's absolute "parents never receive evidence URLs"; the parent evidence workflow and this access are implemented and tested in Phase 2, not Phase 1 — A-002/A-003.)** **(Amendment 002 A-014 — conditional):** whether evidence media remains in MVP scope, and **who uploads it now that the TA flow is deferred**, are **UNRESOLVED**; the safeguards below are **not weakened** and apply in full whenever evidence is implemented, but no replacement uploader may be invented. Evidence capture is per-individual-child (each student filmed during their own presentation/assessment turn), and `evidence` rows are already scoped to one `student_id` per spec §20, so showing a parent their own child's evidence clip is intentional. It must be gated on all three of: **(a)** the associated report has reached `Submitted` — never show evidence tied to a draft or unapproved report, the same rule that governs every other field on this screen; **(b)** the `evidence_media` consent scope (spec §22) is granted for that student; **(c)** access is via a short-TTL, server-minted signed URL scoped to the requesting parent's `parent_child_link`, same as every other evidence access path. The guarantee that a clip contains only one child is a filming-process assumption, not something the app verifies — flag this to whoever trains TAs on capture, but it isn't a code-level fix.
 - **"Follow-up for Next Session" is one field, surfaced on two screens — confirmed by the orchestrator.** The B.E.S.T Form's "Follow-up for Next Session" field and the Review & Approve screen's "Coach Notes (Internal Only)" field are **the same `observations.follow_up_notes` column**, not two separate notes. The Review & Approve screen must load the trainer's current value into that field (not render it blank) so the trainer is editing their earlier note after seeing the AI draft and evidence, not overwriting it unknowingly. Whatever server action saves this field must be callable from both screens against the same column.
-- **The "Approve & Submit" button is gated on the Quality Checklist, confirmed by the orchestrator.** All three checklist items (Evidence confirms rating / AI Draft reviewed / Privacy check passed) must be checked before the button is enabled — it should render visually disabled until then, not merely clickable-with-a-warning. This is a real interaction rule that the static Stitch mockups can't demonstrate themselves; build it as described here rather than inferring it from the screen alone. This is the concrete implementation of the "trainer approval checklist and Approve & Submit gate" in spec §8, and backs the guarded `approve` transition in the state machine (spec §13). **The disabled button is a UX convenience only** — the `approve` transition's server-side guard must independently check the three `checklist_*` columns above are all `true` before allowing the transition, per ADR-3. A disabled button with no server-side check is not a real gate.
+- **The "Approve & Submit" button is gated on the Quality Checklist, confirmed by the orchestrator.** All three checklist items (Evidence confirms rating / AI Draft reviewed / Privacy check passed) must be checked before the button is enabled — it should render visually disabled until then, not merely clickable-with-a-warning. This is a real interaction rule that a static design frame can't demonstrate itself; build it as described here rather than inferring it from the screen alone. This is the concrete implementation of the "trainer approval checklist and Approve & Submit gate" in spec §8, and backs the guarded `approve` transition in the state machine (spec §13). **The disabled button is a UX convenience only** — the `approve` transition's server-side guard must independently check the three `checklist_*` columns above are all `true` before allowing the transition, per ADR-3. A disabled button with no server-side check is not a real gate.
 
 ---
 
-## 7. Working with the Stitch UI screens
+## 7. Working with the Figma Design 2 UI screens
 
-The screens in `/docs/ui-screens/` are Google Stitch exports — **visual layer only**. Treat them as:
+**(Amendment 002 A-022.)** The final UI reference for this MVP is the orchestrator's Figma prototype:
 
-- **Authoritative for:** layout, visual hierarchy, component composition, copy/microcopy tone, which fields appear on which screen.
-- **Not authoritative for:** data shapes, validation rules, state transitions, access control, or anything governance-related. If a Stitch screen implies a field, action, or flow that isn't in the spec (e.g. it shows a control the spec doesn't mention), **flag it to the orchestrator** rather than building it — it may be a Stitch generation artifact rather than an intended feature.
-- **Adaptation, not copy-paste:** rebuild each screen as Next.js/React components using the project's data model and server actions, applying the persona §3.5 accessibility standard. Preserve the visual design; do not preserve any hardcoded mock data, inline "business logic," or client-side-only validation from the Stitch export — that logic must move to the server layer per ADR-3.
+`https://www.figma.com/proto/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=391-2&t=lRaOIpHfwA4ZaNMZ-1`
 
-When starting a new screen, name it and cross-reference it against spec §8 (Screen & Page Inventory) so you know which audience, which data, and which of the governance rules in §14 apply to it.
+Use the **"Design 2"** screens as the canonical visual and interaction reference for the three final MVP flows (Management, Trainer, Parent). **Figma Design 2 replaces Google Stitch as the final UI authority.** Any older instruction to work from Stitch exports in `docs/ui-screens/` is **superseded and historical**; that directory is not the UI source of truth.
 
-### 7.1 B.E.S.T Form state variants — apply the pattern, not the content
+**Figma Design 2 IS authoritative for:** visual layout · visual hierarchy · component composition · visible fields · screen labels · microcopy · page relationships · screen-to-screen interaction intent · visual states · responsive visual behaviour **where explicitly shown**.
 
-Three additional reference screens exist for the B.E.S.T Form beyond its default state: a validation state (required fields missing, banner + jump-to-first-missing-field), a loading state (draft generating, spinner + disabled actions), and a failure state (AI generation failed, retry offered, assessment preserved). These map directly to spec behavior — §13's `Incomplete`/`Drafting` states and §15's failure-and-recovery design — and their **visual patterns are correct and should be built**: banner placement/color/icon per state, the button changing to a "Generating…" spinner state, the retry messaging, the required-field highlighting.
+**Figma Design 2 is NOT authoritative for:** database schema · foreign-key design · RLS · server authorization · report lifecycle · audit behaviour · Auth implementation · AI governance · persistence architecture · state-machine rules · transaction boundaries. That split is the whole point — **visual authority and governance authority are separate**, and where a frame and a ratified rule disagree, **the ratified rule wins and the discrepancy gets reported**, not quietly resolved.
 
-However, these three reference screens were captured **before** the form was corrected to the real 9-dimension B.E.S.T framework (spec §3) — they still show the old 6-criteria placeholder content (Eye contact, Body movement, Speech clarity, Structure, Active listening, Confidence). **Do not copy that content.** Build these three states as overlays/variants on top of the already-corrected 9-dimension, quick/full-mode form (see §5), using only the *behavior and visual treatment* from these references — banner style, loading state, retry pattern, required-field indicator style. The specific fields marked "required" in the validation state should follow whatever the current mode (quick = 4 Competency, full = all 9) actually requires, not the old screen's specific field selection.
+**Screen inclusion.** All Design 2 screens belonging to Management, Trainer and Parent are part of the intended final MVP **unless** a screen is clearly an obsolete exploration, a duplicated alternative, outside the three confirmed flows, or inconsistent with a ratified governance rule.
+
+**Adaptation, not copy-paste.** Rebuild each screen as Next.js/React components using the project's data model and server actions, applying the persona §3.5 accessibility standard. Preserve the visual design; never preserve hardcoded mock data, inline "business logic," or client-side-only validation — that logic lives on the server per ADR-3.
+
+When starting a new screen, name it and cross-reference it against the **Figma Design 2 screen implementation matrix** (`docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md`) and spec §8, so you know which flow, which data, and which of the §14 / A-021 governance rules apply to it.
+
+### 7.1 Mandatory Figma Design 2 implementation-readiness gate (A-022.1)
+
+**Before the first Figma-based UI implementation checkpoint**, the orchestrator must **provide or verify, for each approved screen**:
+
+- a node-specific Figma `/design/` link where possible; the authoritative screen name; the applicable user flow; the intended route;
+- desktop, mobile or responsive variants where applicable;
+- component states; interaction states; **loading, empty, validation, error, success and disabled** states;
+- design variables or an approved **token inventory** — typography, colours, spacing, radii, shadows;
+- approved **logos**, **SVGs**, **icons**, and **image assets**;
+- prototype transitions or interaction notes not evident from a static frame;
+- any **discrepancy between Figma and a ratified governance or domain rule**.
+
+**Blocking classification (A-022.3):** this handoff is **not a blocker for the first SQL migration (Step 7E) unless an unresolved visible field changes the actual domain relationship model**. It **is a blocker for the corresponding UI implementation checkpoint**.
+
+### 7.2 Approved and prohibited Figma porting (A-022.2)
+
+**Port only approved presentation information and approved assets.**
+
+**Never blindly port:** generated React code · Figma mock data · prototype-only navigation · fake authentication · static hard-coded user identities · duplicated calendar records · client-side authorization assumptions · database schema inferred from a visual frame · business logic inferred only from a visual frame · report permissions inferred only from whether an Edit button is visible · generated CSS or components that conflict with the MVP design system · prototype shortcuts that bypass Supabase, RLS or server-side validation.
+
+**Stop-and-ask rule.** When a required **node-specific frame**, **approved asset**, **interaction state**, **responsive state**, or **visible field definition** is missing — **stop and request orchestrator input.** **Do not guess and do not silently recreate a missing requirement.** A blocked screen reported honestly is fine; an invented field that later turns out to be wrong is a rebuild.
+
+**Asset discipline (carried over from Amendment 001 A-013).** No visual asset is copied into this repository until the orchestrator records an explicit `PORT` / `REFERENCE ONLY` / `REBUILD` / `REJECT` / `NOT APPLICABLE` disposition for it.
+
+### 7.3 Form state variants — apply the pattern, not the content
+
+Every screen needs its non-happy-path states built, not just its default: a **validation** state (required fields missing, banner + jump-to-first-missing-field), a **loading** state (draft generating, spinner + disabled actions), a **failure/retry** state (AI generation failed, retry offered, assessment preserved), plus **empty**, **success** and **disabled** states where applicable. These map directly to spec behaviour — §13's `Incomplete`/`Drafting` states and §15's failure-and-recovery design — and their visual treatment comes from the corresponding Design 2 state frames.
+
+**Legacy state screenshots are content-stale — do not copy their content.** Any older reference screen showing the 6-criteria placeholder framework (Eye contact, Body movement, Speech clarity, Structure, Active listening, Confidence) or a **Quick/Full mode toggle** is superseded. Build every state on top of the **mandatory nine-dimension form** (§5, A-017): the fields marked "required" in the validation state are **all nine dimensions**, always. If a Design 2 frame itself still shows Quick mode or a four-dimension form, that frame **conflicts with A-017** — governance wins; report the discrepancy rather than building it.
 
 ---
 
@@ -237,29 +324,39 @@ If asked to "add the parent digest" or similar mid-build, treat that as the orch
 
 ## 9. Repo structure
 
-Follow spec §18. Server code lives under `/server/modules/*`, one directory per module, each owning its own tables:
+Follow spec §18, **as amended by Amendment 002 A-023 (no ORM) and A-016 (entity naming)**. Server code lives under `/server/modules/*`, one directory per module, each owning its own tables:
 
 ```
-/app                      → routes & UI (Stitch-derived components)
+/app                      → routes & UI (components built from Figma Design 2)
+/lib
+  /supabase               → client-safe public config + browser client boundary
 /server
+  /platform               → env validation + server-only Supabase client boundaries
   /modules
-    /identity-access
-    /class-session
-    /attendance
-    /observation
+    /identity-access      → Auth identity ↔ domain profile, invitations, activation,
+                            authz guards (role + assignment + relationship)
+    /class-session        → class grades, class modules, class sessions, enrolment,
+                            trainer assignment, calendar projections, session lock
+    /attendance           → Present-by-default capture; trainer Absent toggle
+    /observation          → B.E.S.T ratings (all 9 dims, mandatory), chips, notes,
+                            follow-up, term-evidence
     /report-workflow      → the state machine
     /ai-drafting          → skeleton build, draft job, grounding validation
-    /evidence
+    /evidence             → conditional; only if evidence stays in scope
     /parent-view
     /management-view
     /consent-retention
     /audit
     /notifications
-  /db                     → schema + typed client (Prisma or Drizzle)
+  /db                     → Supabase SQL migrations (the schema source of truth) +
+                            generated Supabase database TypeScript types.
+                            NO Prisma, NO Drizzle, NO general-purpose ORM (ADR-8).
 /docs
-  /spec                   → the three source-of-truth documents
-  /ui-screens              → Stitch exports
+  /spec                   → specification + ratified amendments (001, 002)
+  /plan                   → Implementation Plan + Figma Design 2 screen matrix
 ```
+
+**Naming follows the canonical hierarchy (A-016).** Use **Class Grade**, **Class Module** and **Class Session** in module code, table names, types, and copy. Do **not** use "Academic Level", and do **not** introduce a hidden intermediate `classes` entity between Class Grade and Class Module.
 
 **Module boundary rules (spec §18, persona §3.9) — enforce these in every PR-sized change:**
 1. A module owns its tables. No other module reads/writes them directly — go through the module's exported service functions.
@@ -271,7 +368,9 @@ Follow spec §18. Server code lives under `/server/modules/*`, one directory per
 
 ## 10. Build order — phase-gated, do not skip ahead
 
-This is the single most important section. **Each phase has an explicit exit condition, including which personas must sign off. Do not start the next phase until the orchestrator has confirmed the current phase's exit condition is met** — even if you believe the code is ready. This mirrors spec §26 exactly; do not reorder or parallelize across phases.
+This is the single most important section. **Each phase has an explicit exit condition, including which personas must sign off. Do not start the next phase until the orchestrator has confirmed the current phase's exit condition is met** — even if you believe the code is ready. This mirrors spec §26 **as amended by Amendment 002 A-024**; do not reorder or parallelize across phases.
+
+> **(Amendment 002 A-024) — the ratified implementation sequence inside Phases 1–3.** Phase 0 foundations and Phase 4 PDPA hardening are unchanged in intent; the governed-slice and breadth work is now ordered as: **(1)** governance and schema-preflight decisions · **(2)** centre, class-grade, class-module and class-session foundations · **(3)** identity, profile and invitation foundations · **(4)** management setup and creation flows · **(5)** trainer assignment and calendar projection · **(6)** student enrolment and roster projection · **(7)** trainer attendance · **(8)** nine-dimension assessment · **(9)** AI draft, review, edit and approval · **(10)** shared submitted-report projection · **(11)** parent invitation, activation and linked-student view · **(12)** management report view and remaining Design 2 management screens · **(13)** full three-flow integration and UAT. **Final UAT covers Management, Trainer and Parent only; TA UAT is not an MVP completion gate.** The Implementation Plan holds the detailed gates and review checklists for this sequence.
 
 **Before Phase 0 — orchestrator-only setup.** Claude Code cannot perform these (no browser/OAuth access) — the orchestrator completes them before the first session begins:
 - Create the Supabase project via the dashboard; confirm the **Singapore** region at creation; record the project URL, anon key, and service role key.
@@ -280,7 +379,7 @@ This is the single most important section. **Each phase has an explicit exit con
 
 **(Amendment 001 A-005):** the MVP is **already a local Git repository** (`main`, scaffold committed) — **GitHub creation, a remote, and cloning are NOT prerequisites for Phase 0.** A remote or push happens only on explicit orchestrator instruction. Any older "create the git repository (e.g. on GitHub) and clone it" wording is superseded.
 
-**Governance documents** (this file, the specification, Amendment 001, the Implementation Plan) are already installed at the §1 paths. **(A-013):** Stitch/UI exports are installed **selectively later, after accepted Phase 0**, not now — their absence does not block Phase 0. **(A-011):** the AI Features Breakdown v2 DOCX is currently unavailable and is **non-blocking** for Phases 0–4.
+**Governance documents** (this file, the specification, Amendment 001, **Amendment 002**, the Implementation Plan) are already installed at the §1 paths. **(A-013 as superseded by A-022):** UI reference assets are installed **selectively later, after an approved disposition** — the source is now **Figma Design 2**, not Stitch — and their absence does not block Phase 0 or the first SQL migration. **(A-011):** the AI Features Breakdown v2 DOCX is currently unavailable and is **non-blocking** for Phases 0–4.
 
 Start Phase 0 once the Supabase project, the LLM key, and `.env.local` exist — the repository, governance docs, `STATUS.md`, and `BUILD_NOTES.md` are already in place.
 
@@ -290,18 +389,20 @@ Build: Supabase project (confirm Singapore region), Next.js scaffold with the mo
 **Persona sign-off:** §3.2 (schema/migrations reversible and constrained), §3.1 (RLS skeleton present, secrets not leaked, region confirmed), §3.7 (envs separated, region pinned).
 
 ### Phase 1 — Governed vertical slice (the heart of the build)
-Build one complete path: Dashboard → Roster (with previous-focus continuity) → B.E.S.T Form (9 dimensions, quick/full mode, rubric anchors surfaced) → Save (validated per mode, future-session lock enforced) → synchronous AI draft through the **full** grounding pipeline → Review & Approve (compare-with-notes via source map, approval snapshot) → Parent-facing approved view **only**. **(Amendment 001 A-002):** the Phase 1 parent-facing view is **text-only** — **no parent evidence-media access in Phase 1**. Phase 1 may define schema/typed interfaces evidence will later need, but must not expose media to parents; TA upload, consent enforcement, scan status, and parent signed-URL access are all Phase 2.
+Build one complete path, following the A-024 sequence above: hierarchy and identity foundations → management setup/creation flows → trainer assignment and calendar projection → enrolment and roster → **attendance (Present by default, trainer Absent toggle)** → Dashboard → Roster (with previous-focus continuity) → **B.E.S.T Form (all 9 dimensions mandatory — no Quick mode, no four-dimension completion path — rubric anchors surfaced)** → Save (server-validated against all nine, future-session lock enforced) → synchronous AI draft through the **full** grounding pipeline → Review & Approve (compare-with-notes via source map, approval snapshot) → **one shared canonical submitted-report projection** → Parent invitation/activation and the parent-facing approved view **only**. **(Amendment 001 A-002):** the Phase 1 parent-facing view is **text-only** — **no parent evidence-media access in Phase 1**. Phase 1 may define schema/typed interfaces evidence will later need, but must not expose media to parents; evidence upload, consent enforcement, scan status, and parent signed-URL access all belong to the **conditional** Phase 2 (A-014 — evidence scope and uploader unresolved; TA flow deferred).
 **Exit condition:** (a) a draft whose language contradicts a rating's polarity band is rejected by the system, not merely fixable by the trainer; (b) an approved report's exact content is recoverable from its audit trail by hash; (c) a session's follow-up note appears as the next session's previous focus. Demonstrate all three to the orchestrator before moving on.
 **Persona sign-off:** §3.4 (grounding validation proven with a deliberate failure case), §3.3 (guarded transitions + idempotency tested), §3.6 (the three QA tests in §3.6 exist and pass), §3.5 (the built screens meet WCAG 2.2 AA), §3.8 (continuity and failure states match the designed experience, not generic errors).
 
-### Phase 2 — Evidence & TA
-TA upload/re-upload, malware/content scan status, signed-URL access (short-TTL, server-minted), evidence-gated approval, consent-gated media upload. This phase owns the **gated parent evidence access** ratified in Amendment 001 A-001 (see §6).
+### Phase 2 — Evidence (conditional) — **TA flow deferred (Amendment 002 A-014, A-024)**
+**This phase is no longer an MVP completion gate.** The **TA flow — its screens, its login, and its UAT — is deferred** and is not required for MVP completion. Whether **evidence media** remains a completion requirement, and **who uploads it** if it does, are **UNRESOLVED orchestrator decisions**; do not invent an uploader and do not transfer TA upload permissions to management or trainer.
+
+**If and when evidence is implemented**, this phase's content and every Amendment 001 safeguard apply **in full, unweakened**: upload/re-upload, malware/content scan status, signed-URL access (short-TTL, server-minted), evidence-gated approval, consent-gated media upload, and the **gated parent evidence access** ratified in Amendment 001 A-001 (see §6).
 **Exit condition (Amendment 001 A-003 — supersedes the absolute "no evidence URL under any code path"):** demonstrate that **all prohibited paths fail** — unauthorized, unrelated-child, pre-`Submitted`, unconsented, unscanned, expired-URL, direct-storage-path, and public access — **and** that a correctly linked parent can retrieve **only their child's** `Submitted`, consented evidence via a valid short-TTL, server-minted signed URL. Both directions must be demonstrated, not just the refusal.
 **Persona sign-off:** §3.1 (signed URLs, no public objects, consent gating), §3.6 (automated tests that (a) fail every prohibited parent-evidence path and (b) succeed only for the linked child's submitted, consented evidence).
 
 ### Phase 3 — Management breadth
-Management calendar, class overview, class statistics — all built as read projections from approved data.
-**Exit condition:** demonstrate there is no code path from any management view to an unapproved draft or internal note.
+Management calendar, class overview, class statistics, the **canonical management report view**, and the remaining Design 2 management screens — all **read** surfaces built as projections from approved data, scoped to the sole centre. **Management's creation/administration flows (A-019) are not deferred to this phase** — they are built earlier in the A-024 sequence because trainer, roster, attendance and parent work all depend on them.
+**Exit condition:** demonstrate there is no code path from any management view to an unapproved draft, internal note, raw private rating, or AI generation history — **and** that a management edit attempt on report content is **rejected server-side**, not merely hidden.
 **Persona sign-off:** §3.1 (RLS/projections re-verified for the new views), §3.9 (module boundaries held as the view layer grew).
 
 ### Phase 4 — PDPA hardening & ops
@@ -321,7 +422,7 @@ Retention jobs, erasure-request endpoints, data-subject access/correction endpoi
 - **(Amendment 001 A-009):** Vitest, React Testing Library, and Playwright are **pre-approved** by this contract — install them without a separate flag. **Accessibility: use Lighthouse first**; do not add an additional accessibility package (e.g. `axe-core`) unless later justified and approved. Serious/critical accessibility findings must be resolved before a phase is accepted.
 
 ### Seed / synthetic data (use this shape everywhere a fixture is needed, unless told otherwise)
-- 2 trainers, 1 TA, 2 classes, 3–4 students per class, 2 parent accounts each linked to exactly one child, 1 management account.
+- **(Amendment 002 A-014/A-015/A-016):** **exactly one centre**; **one named management account**; the three Class Grades (`Beginner`, `Intermediate`, `Advanced`); 2 trainers; 2 class modules with dated class sessions; 3–4 enrolled students per module; 2 parent accounts each linked to exactly one child. **A TA fixture is optional and non-blocking** — the TA flow is deferred and is not an MVP completion gate.
 - At least one observation with a deliberately mixed rating set (some `Emerging`, some `Advanced`) specifically to exercise the grounding-validation contradiction test in persona §3.4.
 - **Never** use real names, photos, or anything resembling actual children — synthetic data only, per ADR-6, even in local development.
 
@@ -346,8 +447,10 @@ Claude Code has no memory of prior sessions beyond this file, the code, and git 
 
 Proceed autonomously on implementation details (component structure, exact query shape, naming within the conventions above). **Stop and ask** when:
 
-- A Stitch screen implies behaviour the spec doesn't cover.
+- A Figma Design 2 screen implies behaviour the spec doesn't cover, or contradicts a ratified governance or domain rule.
+- A required **node-specific frame, approved asset, interaction state, responsive state, or visible field definition is missing** (§7.2) — stop and request it; never guess and never silently recreate it.
 - You're tempted to simplify, stub, or defer any of the four §4 non-negotiables, for any reason, even temporarily.
+- You're about to reintroduce a **Quick mode / four-dimension completion path**, an **ORM**, a **duplicated calendar record**, a **second report format**, a **centre picker**, or an **HQ/super-admin role** — all of these are ratified out (A-017, A-023, A-016, A-021, A-015).
 - A phase's exit condition (§10) seems met and you're about to start the next phase.
 - A persona checklist item in §3 can't be satisfied without a design decision you're not sure is yours to make.
 - Something in the spec's §3.6 "pending client ratification" items needs to be treated as final rather than provisional.
@@ -365,6 +468,6 @@ When in doubt, a short question to the orchestrator costs little; a governance m
 A throwaway trainer-flow **demo** was built and frozen locally before this MVP (frozen at its Step-14 baseline, tagged `demo-freeze-step14-2026-07-21`). It exists only as a **visual and interaction reference**. This MVP is a **separate repository** and shares no code with it.
 
 - **Never import demo architecture into the MVP:** its React Context / in-memory state, hardcoded users/classes/students/schedules/reports, cosmetic login (any-input-succeeds), its demo AI route, forced-failure controls, or browser object-URL "persistence." None of these satisfy the ADRs, RLS, grounding, audit, or state-machine requirements above.
-- **Demo visual assets are not free to copy.** Any Stitch/reference export or component may be reused only after an explicit disposition — `PORT`, `REFERENCE ONLY`, `REBUILD`, `REJECT`, or `NOT APPLICABLE` — recorded by the orchestrator (Amendment 001 A-013). Until then, treat the demo as read-only reference, not a source directory.
+- **Demo visual assets are not free to copy.** Any reference export or component may be reused only after an explicit disposition — `PORT`, `REFERENCE ONLY`, `REBUILD`, `REJECT`, or `NOT APPLICABLE` — recorded by the orchestrator (Amendment 001 A-013, whose disposition discipline survives Amendment 002 A-022). Until then, treat the demo as read-only reference, not a source directory. **The demo's Stitch exports are not the UI source of truth — Figma Design 2 is (§7).**
 - **Rebuild, don't lift:** presentation and proven interaction patterns may inspire the MVP build; data flow, persistence, auth, authorization, workflow, AI governance, evidence handling, and audit are always built fresh against this contract and the specification.
 - The demo's own `AGENTS.md`, `DEMO_BUILD_PLAN.md`, and `progress_tracking.md` are **migration provenance only** and never govern the MVP.

@@ -4,9 +4,12 @@
 
 **Scope:** This tracker governs only the demo-to-MVP migration. It ends when every relevant demo asset has been ported, rejected, or superseded and the MVP has no dependency on demo-only architecture.
 
-**Current checkpoint:** Step 7E0 — Data-layer governance and first-migration ratification  
-**Checkpoint status:** Pending — authorization required  
-**Current permitted action:** After the Step 7D record-synchronization commit and final tracker acceptance are complete, perform a planning-only Step 7E0 review to ratify the data-access, identity, status, audit, grant, and first-migration decisions. Do not modify governance documents or write SQL until the resulting ratification is approved.
+**Current checkpoint:** Step 7E0 — Final MVP scope and schema-preflight governance reconciliation (**documentation only**)  
+**Checkpoint status:** Staged — commit pending, orchestrator acceptance pending  
+**Current permitted action:** Orchestrator review of the staged documentation change set. Do not commit, tag, push, write SQL, create schema/seed/Auth data, or begin Step 7E until this checkpoint is reviewed, committed and accepted.  
+**Resumed by orchestrator:** Yes · **Resume date:** 2026-07-30 · **Prior pause point:** after complete acceptance of Step 7D and before Step 7E0 · **The earlier pause (2026-07-30, D-175 … D-177) is closed by this explicit orchestrator instruction; it is preserved below as accepted history.**
+
+> **Step 7D remains historically unchanged and accepted.** This checkpoint changes **documentation only**. It creates **Specification v3 Amendment 002** (A-014 … A-024) and the Figma Design 2 screen implementation matrix, and aligns the active governance, plan and progress documents with the orchestrator's final confirmed MVP scope. **No schema or application implementation is authorized by it.**
 
 ---
 
@@ -93,8 +96,8 @@ The following hierarchy must be reconciled and recorded before Phase 0 implement
 3. `BEST_Coach_Implementation_Plan.md`
    - orchestrator's execution and review script.
    - may add checkpoints and a final quality/UAT phase, but must not override the specification.
-4. Stitch exports
-   - visual reference only.
+4. Figma Design 2 (superseded Stitch as the final UI authority at Step 7E0, Amendment 002 A-022)
+   - visual and interaction reference only; never authoritative for schema, RLS, authorization, report lifecycle, audit, Auth, persistence, state-machine rules, or transaction boundaries.
 5. `docs/progress/STATUS.md`
    - concise current state and next permitted work.
 6. `docs/progress/BUILD_NOTES.md`
@@ -1433,6 +1436,53 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 - [x] **No tag, remote or push.**
 - [x] **No dependency, schema, Auth, runtime, hosted, or application operation occurred.**
 
+#### Step 7D3 — Synchronize and stage Supabase client-boundary records
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+- [x] **Workspace tracker synchronized byte-for-byte into `docs/progress/DEMO_TO_MVP_MIGRATION.md`.**
+- [x] **`STATUS.md` and `BUILD_NOTES.md` updated** — current-state fields, Phase 0 progress, follow-ups, and chronological Step 7D1 / Step 7D2 / Step 7D-closure entries.
+- [x] **Exactly three progress files staged** — staged composition: **3 modifications, 0 additions, 0 deletions; 302 insertions, 63 deletions**.
+- [x] **Tracker and migration-copy hashes matched** (byte-identical; `cmp` clean).
+- [x] **Step 7D1 and Step 7D2 records were synchronized.**
+- [x] **Step 7D closure, the Step 7E block, and the Step 7E0 planning checkpoint were recorded.**
+- [x] **No implementation, dependency, runtime, schema, governance, or hosted operation occurred.**
+
+**`/compact` recovery.** During Step 7D3 an accidental `/compact` interrupted execution:
+
+- `/compact` changed **conversation context only**;
+- it did **not** mutate files, Git staging, commits, or runtime state;
+- execution stopped cleanly **after Section 9 and before Section 10**;
+- the existing synchronization work was verified before resuming (tracker and migration copy byte-identical; HEAD, staging, and hashes intact);
+- **no work was lost**;
+- no duplicate, malformed, truncated, or inconsistent content remained;
+- the interruption caused **no lasting issue**.
+
+#### Step 7D4 — Commit Supabase client-boundary records
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+| Field | Value |
+|---|---|
+| **Full commit** | `e07b2138c9b670ebd3feda41c89782056cb8a6d5` |
+| **Short commit** | `e07b213` |
+| **Date** | `2026-07-30 10:20:13 +0800` |
+| **Message** | `docs(progress): record Supabase client boundaries` |
+| **Parent** | `455a0706b5555c0b4f083327dfd5613d3aa23245` |
+| **Summary** | `3 files changed, 302 insertions, 63 deletions` |
+
+- [x] **Repository clean after commit; exactly eleven commits.**
+- [x] **No tag, remote, or push.**
+- [x] **Tracker and committed migration copy remained byte-identical before this tracker-only update.**
+- [x] **Compact-recovery integrity verification passed.**
+- [x] **No dependency, implementation, runtime, schema, governance, or hosted operation occurred.**
+
+> The committed progress files correctly identify **substantive implementation commit `455a070`**. Their lack of self-reference to **administrative commit `e07b213`** is **intentional and not a defect** (anti-recursion rule, D-060 … D-066, D-101, D-121, D-145, D-169).
+
 #### Step 7D sequence closure
 
 **All of the following are Completed and Accepted (2026-07-30):**
@@ -1441,7 +1491,118 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 |---|---|
 | **Step 7D1** — implement and stage environment/client boundaries | Completed · Accepted |
 | **Step 7D2** — implementation commit (`455a070`) | Completed · Accepted |
+| **Step 7D3** — record synchronization and staging | Completed · Accepted |
+| **Step 7D4** — administrative progress commit (`e07b213`) | Completed · Accepted |
 | **Step 7D** — overall | **Completed · Accepted** |
+
+**The complete Step 7D sequence is closed and accepted (2026-07-30)** and the Supabase environment/client-boundary foundation is accepted. Preserved implementation state: `lib/supabase/public-config.ts`, `lib/supabase/browser.ts`, `server/platform/env.ts`, `server/platform/supabase/request.ts`, and `server/platform/supabase/elevated.ts` implemented; explicit local-versus-hosted target classification; six approved environment names validated; browser client publishable-only; request client request-scoped and publishable-key; elevated client server-only, session-free, secret-key; negative `server-only` proof, client-bundle private-name isolation, and IPv6 loopback (`::1`) handling all passed; typecheck, lint, and production build passed; implementation commit `455a070` and administrative progress commit `e07b213` accepted; structural credential validation does **not** prove hosted-project ownership; no Auth flow, query, schema, RLS, audit chain, hosted connection, or domain functionality exists. **The workflow is paused by the orchestrator before Step 7E0** (see the checkpoint header and Section 9).
+
+### Step 7E0 — Final MVP scope and schema-preflight governance reconciliation
+
+**Status:** Staged — documentation only  
+**Accepted by orchestrator:** No  
+**Authorized:** Yes  
+**Authorized date:** 2026-07-30  
+**Commit:** Pending  
+**Position:** immediately **after** the complete accepted Step 7D sequence and immediately **before** Step 7E
+
+**Scope executed (documentation only):**
+
+- [x] **Step 7D remains historically unchanged and accepted** — Step 7D1, Step 7D2, Step 7D3, Step 7D4 and Step 7D overall are untouched. The product decisions ratified here **do not invalidate the accepted Step 7D client-boundary work**; Step 7D created client boundaries only and committed the project to no domain shape.
+- [x] **This checkpoint changes documentation only** — no application code, database schema, SQL migration, dependency, Supabase operation, Auth user, seed data, UI component, route, server action, test, or Figma asset.
+- [x] **Step 7E schema migration is blocked** until Amendment 002 and the aligned active documents are **reviewed, committed and accepted**.
+- [x] **The MVP contains exactly three completed flows: Management, Trainer and Parent** (Amendment 002 A-014).
+- [x] **The MVP operates for one centre only** (A-015) — exactly one synthetic/seeded centre, no centre-selection UI, no centre-management UI, **one named management account** (never shared credentials), and a **real `centres` entity with real relationships** so multi-centre support stays additive.
+- [x] **The canonical hierarchy is Centre → Class Grade → Class Module → Class Session** (A-016) — Class Grade values are exactly **Beginner, Intermediate, Advanced**; "Class Grade" replaces "Academic Level" as the active term; the "Create Class" action persists a **Class Module** under a selected Class Grade with **no hidden intermediate `classes` entity**.
+- [x] **All assessments require all nine dimensions** (A-017) — Quick mode removed completely; no four-dimension-only completion path; no four-dimension fallback; dimensions, ratings, rubric anchors, grounding validation, trainer accountability and governed AI review all retained unchanged.
+- [x] **Attendance defaults to `Present` and can be toggled to `Absent`** (A-018) — persisted per student + class session, conceptually unique, never producing a fabricated assessment or report for an absent student, and **auditable**.
+- [x] **Management can create profiles, invitations, class modules, class sessions, enrolments and assignments** (A-019) — every such write **server-side, centre-scoped, validated, authorized and auditable**; management **never** edits feedback-report content.
+- [x] **Trainer assignments drive trainer-calendar visibility** (A-019) — the **same stored class-session record** appears in the assigned trainer's calendar; **no separate trainer-calendar copy**; only assigned sessions are reachable through the trainer flow.
+- [x] **One canonical report format is shared across all roles** (A-021) — one shared submitted-report read model and one reusable presentation architecture.
+- [x] **Trainer can edit; management and parent are view only** (A-021) — enforced **server-side**; hiding an Edit button is not authorization; trainer edits use the governed editable version, never mutate a submitted approval snapshot in place, reset the quality checklist, and require review and approval again; AI never publishes directly.
+- [x] **Figma Design 2 is the final visual and interaction authority** (A-022) — and is explicitly **not** authoritative for schema, foreign keys, RLS, server authorization, report lifecycle, audit, Auth, AI governance, persistence, state-machine rules, or transaction boundaries.
+- [x] **Figma porting requires a later implementation-readiness handoff** (A-022.1 … A-022.3) — recorded below as a durable future checkpoint requirement.
+- [x] **Supabase-native / no general-purpose ORM is ratified** (A-023) — this resolves the D-108 data-layer governance tension at spec-amendment precedence.
+- [x] **TA is not a required completed MVP flow** (A-014, A-024) — TA screens, TA login and TA-specific UAT are deferred and are not MVP completion gates. **Amendment 001's evidence-security safeguards are neither deleted nor weakened.**
+- [x] **No schema or application implementation is authorized by this checkpoint.**
+
+**Documents created:**
+
+| Path | Purpose |
+|---|---|
+| `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md` | Ratified Amendment 002 — **A-014 … A-024** with a precise supersession table |
+| `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` | Per-screen implementation matrix + the **"Orchestrator Figma Porting Actions"** checklist |
+
+**Documents modified:** `CLAUDE.md`, `docs/plan/BEST_Coach_Implementation_Plan.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`, `docs/progress/DEMO_TO_MVP_MIGRATION.md`, and this workspace tracker.
+
+**Documents deliberately NOT modified:** `docs/spec/BEST_Coach_Complete_MVP_Specification_v3.md` (byte-for-byte unchanged), `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md` (byte-for-byte unchanged), every file in `governance-source/`, and the entire frozen demo repository.
+
+**Durable future checkpoint requirement — Figma Design 2 implementation handoff.**
+
+A **mandatory Figma Design 2 implementation-readiness gate** exists before the first Figma-based UI implementation checkpoint. For each approved screen the orchestrator must provide or verify: a node-specific `/design/` link where possible; the authoritative screen name; the applicable user flow; the intended route; responsive variants; component and interaction states; **loading, empty, validation, error, success and disabled** states; design variables or an approved token inventory; typography, colours, spacing, radii and shadows; approved logos, SVGs, icons and image assets; prototype transitions and interaction notes not evident from a static frame; and any discrepancy between Figma and a ratified governance or domain rule. **Blind porting** of generated React, Figma mock data, prototype-only navigation, fake authentication, hard-coded identities, duplicated calendar records, client-side authorization assumptions, frame-inferred schema or business logic, Edit-button-inferred permissions, conflicting generated CSS, or Supabase/RLS/validation bypasses is **prohibited**. Missing frames, assets, states or field definitions require implementation to **stop and request orchestrator input — never guess**. **This handoff does not block Step 7E unless an unresolved visible field changes the domain relationship model; it does block the corresponding UI implementation checkpoint.**
+
+**Unresolved items recorded at Step 7E0 — classified by blocking point. None was fabricated or silently resolved.**
+
+**(1) Schema-critical — blocks Step 7E:**
+
+| # | Unresolved item | Required orchestrator input |
+|---|---|---|
+| 1 | `public` profile table's physical relationship to `auth.users` | Ratify 1:1 keyed profile vs alternative |
+| 2 | Audit **target representation** — typed FK vs polymorphic `target_type`/`target_id` | Ratify the representation (also relevant at Step 7H) |
+| 3 | **Report-status storage representation** — display names vs normalized enum spelling | Ratify the stored vocabulary |
+| 4 | Deliberate **`GRANT` strategy** for newly created tables | Ratify the grant policy; a missing grant must not be misdiagnosed as an RLS failure |
+| 5 | **Enum versus reference table** at schema level, including **Class Grade** and report status | Ratify per closed vocabulary |
+| 6 | **Invitation token and expiry** implementation details, and storage of `pending`/`accepted`/`expired`/`revoked` | Ratify the token, expiry and state storage design |
+| 7 | **First-migration table and enum scope** | Ratify exactly which tables and enums the first migration creates |
+
+**(2) Report / UI — blocks only its own later implementation checkpoint:**
+
+| # | Unresolved item | Escalation rule |
+|---|---|---|
+| 8 | Exact individual **Figma Design 2 frame/node links** | Blocks the affected UI checkpoint only |
+| 9 | Exact **field inventory for Create Class** (Class Module details) | Escalates to a **Step 7E blocker only if** a missing field changes the domain relationship model |
+| 10 | Exact fields for **trainer-profile** creation | Same escalation rule |
+| 11 | Exact fields for **student-profile** creation | Same escalation rule |
+| 12 | Exact fields for **parent-profile** creation | Same escalation rule |
+| 13 | Exact **report sections and field schema** from the canonical report frame | Blocks the report UI/projection checkpoint |
+| 14 | **Responsive variants** not yet supplied | Blocks the affected UI checkpoint |
+
+**(3) Figma assets — do not block schema work at all:**
+
+| # | Unresolved item |
+|---|---|
+| 15 | **Figma tokens and approved asset exports** — typography, colours, spacing, radii, shadows, original logos, SVG icons, approved images |
+
+**(4) Evidence — blocks only evidence implementation unless it alters core schema:**
+
+| # | Unresolved item | Note |
+|---|---|---|
+| 16 | Whether **evidence media remains a completion requirement** | Amendment 001 A-001/A-003/A-004 apply in full if it does |
+| 17 | **Who uploads evidence** if evidence remains | **No replacement actor may be invented**; TA upload permissions must not be silently transferred to management or trainer |
+| 18 | Exact **evidence-related Figma screens** if retained | Blocks evidence UI only |
+
+**(5) Audit-design — blocks the audit-chain checkpoint (Step 7H), not the first migration:**
+
+| # | Unresolved item |
+|---|---|
+| 19 | **Audit-chain scope** — one global chain vs one chain per target/tenant |
+| 20 | **SHA-256 ratification** for the audit hash (Specification v3 §23 names no algorithm) |
+| 21 | **Audit-chain genesis rule** — sentinel vs zero-hash for the first entry |
+
+**Verification performed at Step 7E0:**
+
+- Specification v3 **byte-for-byte unchanged** (`64d54aa2f0b3200b540b50cebfb5a614e7d644e895effcf5428bd96ae60852a2`).
+- Amendment 001 **byte-for-byte unchanged** (`25ede394eb4894981d140f6e330450b6e516f056b576b2e14c9afe10434de9b5`).
+- Every `governance-source/` file **unchanged**.
+- Frozen demo **unchanged and clean** at `8d4acf4abc5039c24da01be773ab1a5e4916080f`, annotated tag `demo-freeze-step14-2026-07-21` intact, no remote.
+- **No application, package, dependency, migration, environment, Supabase-configuration or schema file changed.**
+- Workspace tracker and `docs/progress/DEMO_TO_MVP_MIGRATION.md` **byte-identical** after synchronization — this **reconciles the previously permitted one-update administrative lead** recorded at Step 7D5 (D-169).
+- Amendment 002 defines **A-014 through A-024 exactly once each**.
+- The Figma matrix contains the **"Orchestrator Figma Porting Actions"** section; `STATUS.md` contains the pending **"Figma Design 2 implementation handoff"** item; the Implementation Plan contains the **mandatory Figma implementation-readiness gate** (Gate G2) and the **governance and schema-preflight gate** (Gate G1).
+- **Stale-requirement scan** run across the active governance and plan documents for Quick mode, four-dimension-only completion, direct Centre → Class, "Academic Level" as the active term, Stitch as the current final UI source, Prisma/Drizzle/ORM as the selected data layer, TA as a required completed MVP flow or final UAT persona, multi-centre MVP administration, HQ/super-admin MVP functionality, separate role-specific report formats, and management or parent report editing — **every remaining match classified as historical or explicitly superseded; none active**.
+- `git diff --check` clean apart from the intentional two-space Markdown hard line breaks inherited verbatim from this tracker.
+- **`.env.local` was never opened, printed, hashed, copied, parsed or inspected.**
+- **Exactly seven in-repository files staged**; no other staged, unstaged, or untracked repository-visible change; **no commit, tag, remote or push**.
 
 ### Step 7E — First governed SQL migration and database foundation
 
@@ -1449,9 +1610,9 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 **Accepted by orchestrator:** No  
 **Authorized:** No
 
-**Blocking reason.** Step 7E cannot begin until the following previously recorded decisions are formally ratified:
+**Blocking reason.** Step 7E cannot begin until the Step 7E0 documentation checkpoint above is **reviewed, committed and accepted**, and until the following previously recorded decisions are formally ratified:
 
-1. Supabase-native data access versus the conflicting Prisma/Drizzle wording in `CLAUDE.md` and Specification v3.
+1. ~~Supabase-native data access versus the conflicting Prisma/Drizzle wording in `CLAUDE.md` and Specification v3.~~ — **resolved by Amendment 002 A-023** at Step 7E0 (2026-07-30), pending commit and orchestrator acceptance of that checkpoint.
 2. `public` profile relationship to `auth.users`.
 3. Audit target representation.
 4. Report-status storage representation.
@@ -1465,13 +1626,16 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 - The next checkpoint is **planning/governance ratification only**.
 - **No schema implementation is authorized.**
 
-#### Step 7E0 — Data-layer governance and first-migration ratification
+#### Step 7E0-B — Schema-preflight technical ratification
+
+> **Redesignation note (2026-07-30, Step 7E0).** This sub-checkpoint was **previously designated "Step 7E0 — Data-layer governance and first-migration ratification"**. It was **Pending, unauthorized and never started**, so no accepted history is affected. It is redesignated **Step 7E0-B** to remove the name collision with the new top-level checkpoint **"Step 7E0 — Final MVP scope and schema-preflight governance reconciliation"** recorded immediately before Step 7E. Its original title and scope are preserved verbatim below.
 
 **Status:** Pending  
 **Accepted by orchestrator:** No  
-**Authorized:** No
+**Authorized:** No  
+**Prior pause record (preserved):** Paused by orchestrator (2026-07-30) — awaiting explicit orchestrator instruction before planning begins. *That pause was lifted for the Step 7E0 documentation checkpoint only; this technical ratification remains unauthorized.*
 
-**Scope:**
+**Scope (as originally recorded):**
 
 - Reconcile the Supabase-native / no-general-purpose-ORM decision with the governance documents.
 - Define the first migration's exact tables, enums, foreign keys, grants, and audit primitives.
@@ -1479,6 +1643,12 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 - Determine whether Amendment 002 and/or a `CLAUDE.md` correction is required.
 - Produce a bounded implementation plan for Step 7E.
 - Make **no** repository, governance, schema, dependency, runtime, or hosted change during planning.
+
+**Scope adjustment after Step 7E0 (2026-07-30):**
+
+- The **data-layer governance reconciliation** and the **Amendment 002 / `CLAUDE.md` correction** questions are **now answered** — Amendment 002 A-023 ratifies Supabase-native access with no general-purpose ORM, and the active documents have been aligned (staged; acceptance pending).
+- What **remains** for this sub-checkpoint is the **technical schema preflight**: the `public` profile ↔ `auth.users` relationship, audit target representation, report-status storage, the deliberate `GRANT` strategy, enum-versus-reference-table decisions (including Class Grade), invitation token/expiry details, and the first-migration table and enum scope — plus the audit-chain scope, SHA-256 ratification and genesis rule before Step 7H.
+- The schema must now be planned against the **ratified canonical hierarchy** Centre → Class Grade → Class Module → Class Session (A-016), the **mandatory nine-dimension** assessment with **no `mode` column** (A-017), **Present-by-default attendance** unique per student + class session (A-018), the **identity/profile/invitation** model (A-020), and **one shared canonical report read model** (A-021) — with `centres` kept a **real entity with real relationships** (A-015).
 
 ### Objective
 
@@ -1580,8 +1750,8 @@ Port only when the corresponding production module and authoritative data path e
 ### 9.4 B.E.S.T form
 
 - [ ] Rating-chip presentation selectively ported
-- [ ] Quick mode supports four competency dimensions
-- [ ] Full mode supports all nine dimensions
+- [x] ~~Quick mode supports four competency dimensions~~ — **removed by Amendment 002 A-017 (Step 7E0, 2026-07-30).** Quick mode is deleted from scope; there is no four-dimension-only completion path and no four-dimension fallback. Preserved struck through as history; **do not implement.**
+- [ ] **All nine dimensions are mandatory for every assessment** (A-017) — no mode toggle, no `mode` column, server-validated
 - [ ] Rubric anchors surfaced
 - [ ] Server validation implemented
 - [ ] Future-session lock implemented
@@ -1731,24 +1901,24 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - Framework: `Next.js 16.2.10` (App Router, TypeScript, Tailwind, ESLint, Turbopack, root `/app`, alias `@/*`, React Compiler off); React/React DOM `19.2.4`
 - Initial scaffold verification: **Accepted** (tsc/lint/build exit 0; starter HTTP 200)
 - Remote/GitHub: None (everything local; nothing pushed)
-- **Latest HEAD:** `455a0706b5555c0b4f083327dfd5613d3aa23245` (short `455a070`)
-- **Total commits:** `10` — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies) → `5d10bd0` (Supabase dependency records) → `455a070` (Supabase client boundaries)
+- **Latest HEAD:** `e07b2138c9b670ebd3feda41c89782056cb8a6d5` (short `e07b213`)
+- **Total commits:** `11` — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies) → `5d10bd0` (Supabase dependency records) → `455a070` (Supabase client boundaries) → `e07b213` (Supabase client-boundary records)
 - **Working tree:** `Clean`
 - **Governance installation:** `Completed and accepted` (commit `c7c27e5`)
 - **Governance closure synchronization:** `Completed and accepted` (commit `a39ed21`)
 - **Phase 0:** `In progress` — local-runtime execution and Supabase environment/client boundaries complete; **schema/application implementation not started**
-- **Next checkpoint:** `Step 7E0` — Data-layer governance and first-migration ratification
+- **Next checkpoint:** `Step 7E0 — Final MVP scope and schema-preflight governance reconciliation` (**documentation only**; staged, commit pending, orchestrator acceptance pending)
 - **Tag:** `None` · **Remote:** `None` · **Push:** `None`
 
-**Local tooling and runtime state (accepted at Step 7D3, 2026-07-30 — non-secret evidence only; no credential value or project URL recorded):**
+**Local tooling and runtime state (accepted at Step 7D5, 2026-07-30 — non-secret evidence only; no credential value or project URL recorded):**
 
-- **Current repository HEAD:** `455a0706b5555c0b4f083327dfd5613d3aa23245` · **Short HEAD:** `455a070`
-- **Total commits:** `10` · **Working tree:** `Clean`
+- **Current repository HEAD:** `e07b2138c9b670ebd3feda41c89782056cb8a6d5` · **Short HEAD:** `e07b213`
+- **Total commits:** `11` · **Working tree:** `Clean`
 - **Latest substantive tooling commit:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006`
 - **Latest substantive runtime commit:** `25551c5d733fa581844db35ae3647c0ca8d52190`
 - **Latest substantive dependency commit:** `ffd9eef8677f9183175a66f7de00f9fef1223fab`
 - **Latest substantive platform commit:** `455a0706b5555c0b4f083327dfd5613d3aa23245`
-- **Latest administrative progress commit:** `5d10bd050887dc9ceaf0ad9641932257c77c2936`
+- **Latest administrative progress commit:** `e07b2138c9b670ebd3feda41c89782056cb8a6d5`
 - **Supabase environment/client boundaries:** **`Implemented`** — browser-safe, request-scoped, and separate server-only elevated clients; committed as `455a070`
 - **Runtime dependencies (exact-pinned):** `@supabase/ssr` `0.12.3` · `@supabase/supabase-js` `2.110.8` · `server-only` `0.0.1`
 - **Docker Desktop:** `Running with WSL 2` (client and engine `29.6.2`, Compose `v5.3.1`, Linux engine, `x86_64`; Kubernetes not enabled)
@@ -1765,8 +1935,12 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - **`.env.local`:** `Present, ignored, and untracked` (never printed, hashed, copied, or committed)
 - **Database schema / Auth / RLS / audit implementation:** **`Not started`**
 - **Phase 0:** **`In progress`**
-- **Step 7E:** **`Blocked`** — pending data-layer governance and first-migration ratification
-- **Next checkpoint:** `Step 7E0 — Data-layer governance and first-migration ratification`
+- **Step 7D:** **`Complete and accepted`** — Step 7D1 → Step 7D4 and Step 7D overall; environment/client boundaries implemented (`455a070`); records committed (`e07b213`)
+- **Step 7E:** **`Blocked`** — pending acceptance of the Step 7E0 documentation checkpoint and the remaining schema-preflight ratification
+- **Step 7E0 (final MVP scope and schema-preflight governance reconciliation):** **`Staged — documentation only; commit pending; orchestrator acceptance pending`**
+- **Step 7E0-B (schema-preflight technical ratification, formerly designated Step 7E0):** **`Pending and unauthorized`**
+- **Amendment 002:** **`Created (A-014 … A-024); staged; acceptance pending`** — one-centre / three-flow boundary, canonical hierarchy, mandatory nine dimensions, attendance defaults, management administration, identity/invitation model, one canonical report, Figma Design 2 authority, Supabase-native / no ORM, revised phasing
+- **Next checkpoint:** `Orchestrator review, commit and acceptance of Step 7E0`
 
 **Phase 0 prerequisite state (accepted at Step 6A, 2026-07-22 — no credential value recorded):**
 
@@ -1779,29 +1953,30 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - **Data access:** Supabase-native, **no general-purpose ORM**
 - **Supabase CLI:** **installed at Step 6B2A** (`2.109.1`, project-local, exact-pinned) · **Docker-compatible runtime:** **installed and verified at Step 6B1** (Docker Desktop `29.6.2`, WSL 2 backend, Compose `v5.3.1`, Linux engine)
 
-> **Tracker/copy synchronization note (anti-recursion rule, restated at Step 7D3).**
+> **Tracker/copy synchronization note (anti-recursion rule, restated at Step 7D5; reconciled at Step 7E0).**
 >
-> - **The MVP migration copy (`docs/progress/DEMO_TO_MVP_MIGRATION.md`) is re-synchronized byte-for-byte from this tracker during Step 7D3**, absorbing the prior tracker-only Step 7C5 acceptance **and** the new Step 7D1 / Step 7D2 / Step 7D-closure / Step 7E-block / Step 7E0-planning records in a single update.
-> - The **committed MVP migration copy remains at the accepted Step 7C3 synchronization state**, carried by administrative commit `5d10bd0`, **until the Step 7D record-synchronization commit is accepted**; the **staged** copy produced here is byte-identical to this tracker.
-> - Per **D-060 through D-066**, **D-101**, **D-102**, **D-121** and **D-145**, this record does **not** contain the hash of the administrative commit that will carry it; that closure commit hash is recorded in the **next** normal progress-record update rather than through a self-referential administrative commit.
-> - **No commit will be created solely** to make committed progress files acknowledge their own administrative commit.
+> - **The MVP migration copy (`docs/progress/DEMO_TO_MVP_MIGRATION.md`) was synchronized byte-for-byte from this tracker at Step 7D3 and committed as administrative commit `e07b213` at Step 7D4**, absorbing the tracker-only Step 7C5 acceptance and the Step 7D1 / Step 7D2 / Step 7D-closure / Step 7E-block / Step 7E0-planning records.
+> - **The Step 7D5 final acceptance modified only this workspace tracker**, leaving the tracker leading the committed migration copy by exactly one permitted tracker-only administrative update (the Step 7D3/7D4 acceptances, the full Step 7D closure, and the orchestrator pause). Per **D-060 through D-066**, **D-101**, **D-102**, **D-121**, **D-145** and **D-169**, that lead did **not** trigger a self-referential administrative commit.
+> - **Step 7E0 is that substantive progress-record checkpoint, and it reconciles the lead.** This tracker has been synchronized **byte-for-byte** into `docs/progress/DEMO_TO_MVP_MIGRATION.md` as part of the Step 7E0 change set, so the workspace tracker and the in-repository migration copy are **byte-identical** and **no administrative lead remains** (staged; commit pending).
+> - **No commit will be created solely** to make committed progress files acknowledge their own administrative commit — the anti-recursion rule is unchanged for future administrative checkpoints.
 > - This arrangement is **intentional — it is not drift**.
 - **Current phase: Phase 0 — In progress** (local-runtime execution and Supabase environment/client boundaries complete; schema, Auth population, RLS, audit-chain and application implementation **not started**)
-- **Next checkpoint:** Step 7E0 — Data-layer governance and first-migration ratification (planning only; authorization required)
-- **Active migration copy:** re-synchronized byte-for-byte from this tracker at **Step 7D3** and **staged** for the Step 7D record-synchronization commit; the last committed copy remains `5d10bd0` until that commit is accepted
+- **Next checkpoint:** Orchestrator review, commit and acceptance of **Step 7E0 — Final MVP scope and schema-preflight governance reconciliation** (documentation only)
+- **Active migration copy:** synchronized byte-for-byte from this tracker at **Step 7D3** and committed as **`e07b213`** at Step 7D4; the Step 7D5 tracker-only acceptance left a one-update administrative lead, which **Step 7E0 reconciles** — the tracker and the migration copy are now **byte-identical** (staged; commit pending)
 - **AI Features Breakdown:** missing but **non-blocking** for Phase 0 and current MVP scope
-- **Stitch assets:** not installed; disposition deferred
+- **UI reference assets:** not installed; disposition deferred. **The final UI authority is now Figma Design 2** (Amendment 002 A-022), superseding Stitch; the A-013 disposition discipline still applies before any asset is copied
 - **npm advisories:** **3 unresolved findings — 0 moderate and 3 high** (current state as of 2026-07-24) — deferred for reviewed handling (`next` **direct**; transitive `postcss` and `sharp`, both through `next`; **none attributed in any accepted review to `supabase@2.109.1`, `@supabase/ssr`, `@supabase/supabase-js`, `server-only`, or their transitive packages**; the earlier 1-moderate/2-high figure changed because the npm advisory database raised `postcss` to high, **not** because any dependency changed; no `npm audit fix` was run; **advisories remain unresolved**)
 - Supabase project: **Confirmed; Singapore region orchestrator-verified (Step 6A2)**
 - **Governance documents: INSTALLED AND COMMITTED** (staged at Step 5B2, committed at Step 5B3 as `c7c27e5`)
   - Root `CLAUDE.md` installed (reconciled to Amendment 001)
   - Specification v3 installed **unchanged** (`64d54aa2…`)
-  - Amendment 001 installed (A-001 … A-013)
+  - Amendment 001 installed (A-001 … A-013) — **unchanged**; A-001 … A-012 remain fully active, A-013 superseded by Amendment 002 A-022 only for the UI-reference source and install timing
+  - **Amendment 002 created at Step 7E0 (A-014 … A-024) — staged; commit and acceptance pending**
   - Reconciled Implementation Plan installed
   - `STATUS.md` and `BUILD_NOTES.md` installed
   - Active migration copy `docs/progress/DEMO_TO_MVP_MIGRATION.md` installed in this checkpoint
   - `docs/ui-screens/` not created (A-013); AI Features Breakdown v2 absent (A-011), not fabricated
-- Latest committed HEAD is `455a0706b5555c0b4f083327dfd5613d3aa23245` (`455a070`) — the governance baseline was committed at Step 5B3 as `c7c27e5`, and eight further commits have since been accepted
+- Latest committed HEAD is `e07b2138c9b670ebd3feda41c89782056cb8a6d5` (`e07b213`) — the governance baseline was committed at Step 5B3 as `c7c27e5`, and nine further commits have since been accepted
 - Remote/GitHub: None — no remote, nothing pushed
 - Outstanding follow-up: **3 unresolved npm advisories — 0 moderate and 3 high** (current state as of 2026-07-24; `next` **direct**, transitive `postcss` and `sharp` both through `next`; **none attributed in any accepted review to the Supabase CLI or the Supabase runtime packages**; the shift from 1-moderate/2-high was **npm advisory-database movement on `postcss`**, not a dependency change; **no `npm audit fix` was run**; **advisories remain unresolved**; deferred to the later security/dependency review — no auto-fix without review)
 
@@ -1974,6 +2149,48 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 | D-161 | 2026-07-30 | **Step 7E is blocked pending formal ratification** — the data-layer governance decision, `public`↔`auth.users` relationship, audit target/status/chain-scope/SHA-256/genesis representations, deliberate `GRANT` strategy, and first-migration table/enum scope must be ratified before any migration is written. | Accepted |
 | D-162 | 2026-07-30 | **Step 7E0 is the next planning checkpoint** — data-layer governance and first-migration ratification, planning only, unauthorized until the ratification is approved. | Accepted |
 | D-163 | 2026-07-30 | **No SQL or governance-document change is authorized yet** — Step 7E0 makes no repository, governance, schema, dependency, runtime, or hosted change. | Accepted |
+| D-164 | 2026-07-30 | **Step 7D3 record synchronization is accepted** — the tracker was synchronized byte-for-byte into `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `STATUS.md` and `BUILD_NOTES.md` were updated, and exactly three progress files were staged (3 modifications, 0 additions, 0 deletions; 302 insertions, 63 deletions). | Accepted |
+| D-165 | 2026-07-30 | **The `/compact` interruption during Step 7D3 caused no lasting defect** — `/compact` changed conversation context only; it mutated no file, Git staging, commit, or runtime state; execution stopped cleanly after Section 9 and before Section 10; no duplicate, malformed, truncated, or inconsistent record remained. | Accepted |
+| D-166 | 2026-07-30 | **No work or data was lost during the interruption** — the completed synchronization was verified before resuming, and the remaining Step 7D3 sections were completed correctly. | Accepted |
+| D-167 | 2026-07-30 | **Administrative progress commit `e07b213`** (`docs(progress): record Supabase client boundaries`, parent `455a070`, 3 files, 302 insertions, 63 deletions) **is accepted**. | Accepted |
+| D-168 | 2026-07-30 | **The substantive implementation commit remains `455a070`** — `e07b213` is administrative record-keeping only and introduces no source, dependency, runtime, schema, or application change. | Accepted |
+| D-169 | 2026-07-30 | **Tracker-only anti-recursion handling applies after `e07b213`** — this tracker may lead the committed migration copy by exactly one administrative update (extends D-060 … D-066, D-101, D-121, D-145). | Accepted |
+| D-170 | 2026-07-30 | **No self-referential administrative commit is required** — committed progress files need not acknowledge their own administrative commit hash; the absence is intentional, not a defect (reaffirms D-102, D-146). | Accepted |
+| D-171 | 2026-07-30 | **The complete Step 7D sequence is closed and accepted** — Step 7D1, Step 7D2, Step 7D3, Step 7D4, and Step 7D overall. | Accepted |
+| D-172 | 2026-07-30 | **The Supabase environment/client-boundary foundation is accepted** — local-versus-hosted classification, six-variable validation, the browser / request-scoped / server-only elevated boundaries, the negative `server-only` proof, client-bundle private-name isolation, IPv6 loopback handling, and passing typecheck/lint/build; implementation commit `455a070` and progress commit `e07b213` accepted; structural validation does not prove hosted-project ownership; no Auth, query, schema, RLS, audit, or hosted operation exists. | Accepted |
+| D-173 | 2026-07-30 | **Step 7E remains blocked** — pending formal ratification of the data-layer governance, `public`↔`auth.users` identity, report-status, audit-design (target/scope/SHA-256/genesis), deliberate `GRANT`, and first-migration table/enum decisions. | Accepted |
+| D-174 | 2026-07-30 | **Step 7E0 remains pending and unauthorized** — data-layer governance and first-migration ratification, planning only; not yet accepted or authorized. | Accepted |
+| D-175 | 2026-07-30 | **The workflow is paused by the orchestrator before Step 7E0** — pause point: after complete acceptance of Step 7D and before Step 7E0 planning; resume condition: explicit new orchestrator instruction. | Accepted |
+| D-176 | 2026-07-30 | **No automatic next action is authorized** — the clean accepted Step 7D state must be preserved; no Step 7E0 planning, governance-document change, or SQL is permitted while paused. | Accepted |
+| D-177 | 2026-07-30 | **Work may resume only after explicit orchestrator instruction** — no self-triggered continuation of the workflow. | Accepted |
+| D-178 | 2026-07-30 | **The orchestrator has explicitly resumed the workflow** and authorized **Step 7E0 — Final MVP scope and schema-preflight governance reconciliation** as a **documentation-only** checkpoint, positioned after the complete accepted Step 7D sequence and before Step 7E. The pause recorded in D-175 … D-177 is closed by that instruction and preserved as history. | Accepted |
+| D-179 | 2026-07-30 | **Step 7D remains historically unchanged and accepted**, and the product decisions ratified at Step 7E0 **do not invalidate the accepted Step 7D client-boundary work** — Step 7D created client boundaries only and committed the project to no domain shape. **No accepted historical checkpoint is renumbered or rewritten.** | Accepted |
+| D-180 | 2026-07-30 | **Specification v3 Amendment 002 is created with decisions A-014 through A-024** and a precise supersession table. Specification v3 and Amendment 001 are **not edited in place** and remain byte-for-byte unchanged; supersession is by reference only. | Accepted |
+| D-181 | 2026-07-30 | **A-014 — Final MVP boundary:** exactly **three** completed human-user flows (Management, Trainer, Parent) for **one centre**. No centre creation/deletion/switching, multi-centre administration, cross-centre analytics or transfers, HQ role, super-admin role, completed TA flow, or TA-specific UAT gate. | Accepted |
+| D-182 | 2026-07-30 | **A-015 — One-centre persistence and management-account rule:** a **real `centres` entity and centre-scoped relationships are retained** so multi-centre support stays additive; the MVP uses **exactly one** synthetic/seeded centre, with **no centre-selection UI** and **no centre-management UI**; there is **one named management account** — never shared credentials. | Accepted |
+| D-183 | 2026-07-30 | **A-016 — Canonical hierarchy:** **Centre → Class Grade → Class Module → Class Session → downstream records.** Class Grade values are exactly **Beginner, Intermediate, Advanced**; **"Class Grade" replaces "Academic Level"** as the active term; "Create Class" persists a **Class Module** under a selected Class Grade with **no hidden intermediate `classes` entity**; trainer assignment is authoritative at **class-session** level; **calendars are projections, never duplicated event records**. | Accepted |
+| D-184 | 2026-07-30 | **A-017 — Mandatory full nine-dimension assessment:** every assessment requires **all nine** dimensions. **Quick mode is removed completely**; **no four-dimension-only completion path**; **no four-dimension fallback**. Dimensions, ratings, rubric anchors, grounding validation, trainer accountability, and governed AI generation/review are retained unchanged. | Accepted |
+| D-185 | 2026-07-30 | **A-018 — Attendance:** defaults to **`Present`** on roster initialization; the trainer may toggle an individual student to **`Absent`**; state persists per **student + class session** (conceptually unique); absence never creates or exposes a fabricated assessment or report; **changes are auditable**. | Accepted |
+| D-186 | 2026-07-30 | **A-019 — Management administration:** management creates Class Modules under a selected Class Grade, dated Class Sessions, trainer/student/parent profiles and invitations, enrolments, parent–student links, and **one trainer assignment per class session**; it **views** submitted reports and **never edits report content**. Every management write is **server-side, centre-scoped, validated, authorized and auditable**. Trainer assignment surfaces the **same stored session record** in the trainer calendar — **no separate copy**. | Accepted |
+| D-187 | 2026-07-30 | **A-020 — Profile, invitation and account-activation model:** the **Auth identity is distinct from the domain profile**; management initiates email invitations; the recipient **verifies** and sets **their own** credentials; **no plaintext generated password is stored, displayed or emailed**; invitation states include at least `pending`/`accepted`/`expired`/`revoked`; **an unactivated profile is not an active login identity**; authorization remains live-relationship-based and RLS/server-enforced. | Accepted |
+| D-188 | 2026-07-30 | **A-021 — One canonical role-aware feedback report:** one format, **one shared submitted-report read model**, one reusable presentation architecture. Trainer views and edits within the governed workflow; **management and parent are view only** (parent: linked students only). All draft / internal-note / raw-rating / AI-history prohibitions are retained; **hiding an Edit button is not authorization** — the **server rejects** management and parent edit attempts; trainer edits use the governed editable version, never mutate a submitted approval snapshot in place, reset the quality checklist, and require review and approval again; **AI never publishes directly**. | Accepted |
+| D-189 | 2026-07-30 | **A-022 — Figma Design 2 replaces Stitch as the final UI authority.** It is authoritative for visual layout, hierarchy, composition, visible fields, labels, microcopy, page relationships, interaction intent, visual states, and explicitly shown responsive behaviour; it is **not** authoritative for schema, foreign keys, RLS, server authorization, report lifecycle, audit, Auth, AI governance, persistence, state-machine rules, or transaction boundaries. **Amendment 001 A-013 is superseded only for the UI-reference source and install timing**; its disposition discipline survives. | Accepted |
+| D-190 | 2026-07-30 | **A-022.1 … A-022.3 — Figma implementation-readiness gate and porting rules:** a **mandatory gate** precedes the first Figma-based UI implementation checkpoint (node-specific `/design/` links, screen names, flows, routes, responsive variants, component/interaction states, the six required states, token inventory, typography/colours/spacing/radii/shadows, logos/SVGs/icons/images, prototype transitions and interaction notes, and governance discrepancies). **Blind porting is prohibited** for generated React, Figma mock data, prototype-only navigation, fake authentication, hard-coded identities, duplicated calendar records, client-side authorization assumptions, frame-inferred schema or business logic, Edit-button-inferred permissions, conflicting generated CSS, and Supabase/RLS/validation bypasses. **Missing details require implementation to stop and ask — never guess.** The handoff **does not block Step 7E unless a missing visible field changes the domain relationship model**; it **does block** the corresponding UI checkpoint. | Accepted |
+| D-191 | 2026-07-30 | **A-023 — Supabase-native data layer, no general-purpose ORM, is ratified at spec-amendment precedence.** `@supabase/ssr` + `@supabase/supabase-js`; **Supabase SQL migrations are the schema source of truth**; **generated Supabase database TypeScript types are authoritative** for application data types; RLS-scoped normal access; reviewed server actions/route handlers for governance-carrying writes; reviewed PostgreSQL functions/RPCs for atomic transition+audit; a **separate server-only elevated client requiring explicit authorization**; **no Prisma, Drizzle or other general-purpose ORM**, addable only via a later explicit ADR and orchestrator approval. **This resolves D-108.** | Accepted |
+| D-192 | 2026-07-30 | **D-108 is resolved.** The data-layer governance tension between Specification v3 §18 / `CLAUDE.md` §9 ("Prisma or Drizzle") and the tracker-only Supabase-native decision (D-067) is closed by Amendment 002 A-023 at the correct precedence level, and the active documents have been aligned — **pending commit and orchestrator acceptance of this checkpoint**. | Accepted |
+| D-193 | 2026-07-30 | **A-024 — Revised implementation phasing and three-flow UAT:** governance/schema preflight → hierarchy foundations → identity/profile/invitation foundations → management setup and creation → trainer assignment and calendar projection → enrolment and roster projection → trainer attendance → nine-dimension assessment → AI draft/review/edit/approval → shared submitted-report projection → parent invitation/activation/linked-student view → management report view and remaining Design 2 management screens → full three-flow integration and UAT. **Final UAT covers Management, Trainer and Parent only.** | Accepted |
+| D-194 | 2026-07-30 | **TA deferral does not weaken evidence security.** Amendment 001 **A-001, A-003 and A-004 remain active in full** and apply whenever evidence is implemented. Amendment 002 **does not silently weaken privacy, approval, audit or evidence controls**, and the core governance rule — *AI drafts, trainer approves, parents and management see only approved reports* — is unchanged. | Accepted |
+| D-195 | 2026-07-30 | **The evidence-uploader decision is recorded as UNRESOLVED.** No replacement actor was invented, and **TA evidence-upload permissions were not silently transferred to management or trainer**. Whether evidence media remains a completion requirement, and its exact Figma screens if retained, are likewise unresolved. | Open |
+| D-196 | 2026-07-30 | **A formal governance and schema-preflight gate (Plan Gate G1) is inserted before Step 7E**, and a **mandatory Figma Design 2 implementation-readiness gate (Plan Gate G2)** is inserted before the first Figma-based UI implementation checkpoint. Both are new; **neither renumbers any accepted historical checkpoint**. | Accepted |
+| D-197 | 2026-07-30 | **`docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` is created** with the required 22-column per-screen matrix covering the Management, Trainer and Parent screen families (plus the deferred TA and conditional evidence rows) and the **"Orchestrator Figma Porting Actions"** checklist. **Every unverified node cell reads exactly `Pending node-specific Design 2 link — do not guess`; no node ID was fabricated**, and the supplied prototype-section link is **not** treated as proof of any child frame. | Accepted |
+| D-198 | 2026-07-30 | **The previously recorded sub-checkpoint "Step 7E0 — Data-layer governance and first-migration ratification" is redesignated "Step 7E0-B — Schema-preflight technical ratification"** to remove the name collision with this checkpoint. It was **Pending, unauthorized and never started**, so **no accepted history is affected**; its original title and scope are preserved verbatim. | Accepted |
+| D-199 | 2026-07-30 | **Step 7E remains blocked** — it may not begin until the Step 7E0 documentation checkpoint is **reviewed, committed and accepted**, and until the remaining schema-critical decisions are ratified: the `public` profile ↔ `auth.users` relationship; audit target representation; report-status storage; the deliberate `GRANT` strategy; enum-versus-reference-table decisions (including Class Grade); invitation token/expiry details and state storage; and the first-migration table/enum scope. | Accepted |
+| D-200 | 2026-07-30 | **Open decisions are classified by blocking point:** **(1)** schema-critical → blocks Step 7E; **(2)** report/UI → blocks only its own later implementation checkpoint; **(3)** Figma tokens/assets → blocks no schema work; **(4)** evidence → blocks only evidence implementation unless it alters core schema; **(5)** audit-design (chain scope, SHA-256, genesis) → blocks Step 7H, not the first migration. **Missing Figma node links must not block Step 7E unless a missing field changes the domain relationship model.** | Accepted |
+| D-201 | 2026-07-30 | **The Step 7E0 change set is documentation only** — no application code, database schema, SQL migration, dependency, Supabase operation, Auth user, invitation, seed data, UI component, route, server action, test, or Figma asset was created or modified; no typecheck, lint, build, or test was run; the local stack was not started; the hosted project was not linked; and **`.env.local` was never opened, printed, hashed, copied, parsed or inspected**. | Accepted |
+| D-202 | 2026-07-30 | **Specification v3 and Amendment 001 are verified byte-for-byte unchanged**, every `governance-source/` file is unchanged, and the **frozen demo is unchanged and clean** at `8d4acf4` with its annotated tag intact. | Accepted |
+| D-203 | 2026-07-30 | **Step 7E0 reconciles the tracker's permitted one-update administrative lead** — this workspace tracker is synchronized **byte-for-byte** into `docs/progress/DEMO_TO_MVP_MIGRATION.md`, so the two are byte-identical and no lead remains. The anti-recursion rule (D-060 … D-066, D-101, D-121, D-145, D-169) is unchanged for future administrative checkpoints. | Accepted |
+| D-204 | 2026-07-30 | **Exactly seven in-repository documentation files are staged** — `CLAUDE.md`, `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md`, `docs/plan/BEST_Coach_Implementation_Plan.md`, `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`, `docs/progress/DEMO_TO_MVP_MIGRATION.md` — with no other staged, unstaged, or untracked repository-visible change. **No commit, tag, remote or push was created.** | Accepted |
+| D-205 | 2026-07-30 | **This checkpoint does not self-accept.** Its acceptance status is **Pending orchestrator review**; the workflow may not proceed to Step 7E or Step 7E0-B until the orchestrator explicitly accepts it. | Accepted |
 
 ---
 
@@ -2002,6 +2219,58 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 | 8 | **Deliberate `GRANT` strategy for new tables** — new `public` entities are not auto-exposed | Step 7E |
 | 9 | **Local-versus-hosted environment-selection design** — local CLI credentials are distinct from hosted ones | Step 7D (before client implementation) |
 
+> **Status of that Step 7B-R5 table as of Step 7E0 (2026-07-30).** Item **1** is **resolved** by Amendment 002 A-023 / D-191 / D-192. Item **9** is **resolved** — implemented and accepted at Step 7D. Items **2 – 8** remain open and are carried forward, reclassified, into the register below. The table above is preserved unchanged as the accurate record of its moment.
+
+**Still unresolved as of Step 7E0 (2026-07-30) — classified by blocking point. Nothing below was fabricated or silently resolved.**
+
+**(1) Schema-critical — blocks Step 7E:**
+
+| # | Unresolved decision | Required orchestrator input |
+|---|---|---|
+| S-1 | `public` profile table's physical relationship to `auth.users` | Ratify 1:1 keyed profile vs alternative |
+| S-2 | Audit **target representation** — typed FK vs polymorphic `target_type`/`target_id` | Ratify the representation (carried from item 3 above) |
+| S-3 | **Report-status storage representation** — display names vs normalized enum spelling | Ratify the stored vocabulary (carried from item 4) |
+| S-4 | Deliberate **`GRANT` strategy** for newly created tables | Ratify the grant policy (carried from item 8) |
+| S-5 | **Enum versus reference table** at schema level, including **Class Grade** (`Beginner`/`Intermediate`/`Advanced`) and report status | Ratify per closed vocabulary |
+| S-6 | **Invitation token and expiry** implementation details, and storage of `pending`/`accepted`/`expired`/`revoked` | Ratify token, expiry and state storage |
+| S-7 | **First-migration table and enum scope** | Ratify exactly which tables and enums the first migration creates |
+
+**(2) Report / UI — blocks only its own later implementation checkpoint:**
+
+| # | Unresolved decision | Escalation rule |
+|---|---|---|
+| U-1 | Exact individual **Figma Design 2 frame/node links** | Affected UI checkpoint only |
+| U-2 | Exact **field inventory for Create Class** (Class Module details) | Escalates to a **Step 7E blocker only if** a missing field changes the domain relationship model |
+| U-3 | Exact fields for **trainer-profile** creation | Same escalation rule |
+| U-4 | Exact fields for **student-profile** creation | Same escalation rule |
+| U-5 | Exact fields for **parent-profile** creation | Same escalation rule |
+| U-6 | Exact **report sections and field schema** from the canonical report frame | Report UI/projection checkpoint |
+| U-7 | **Responsive variants** not yet supplied | Affected UI checkpoint |
+
+**(3) Figma assets — do not block schema work at all:**
+
+| # | Unresolved decision |
+|---|---|
+| F-1 | **Figma tokens and approved asset exports** — typography, colours, spacing, radii, shadows, original logos, SVG icons, approved images |
+
+**(4) Evidence — blocks only evidence implementation unless it alters core schema:**
+
+| # | Unresolved decision | Note |
+|---|---|---|
+| E-1 | Whether **evidence media remains a completion requirement** | Amendment 001 A-001/A-003/A-004 apply in full if it does |
+| E-2 | **Who uploads evidence** if evidence remains | **No replacement actor may be invented**; TA permissions must not be silently transferred |
+| E-3 | Exact **evidence-related Figma screens** if retained | Evidence UI only |
+
+**(5) Audit-design — blocks the audit-chain checkpoint (Step 7H), not the first migration:**
+
+| # | Unresolved decision | Carried from |
+|---|---|---|
+| A-1 | **Audit-chain scope** — one global chain vs one chain per target/tenant | item 5 above |
+| A-2 | **SHA-256 ratification** for the audit hash (Specification v3 §23 names no algorithm) | item 6 above |
+| A-3 | **Audit-chain genesis rule** — sentinel vs zero-hash for the first entry | item 7 above |
+
+**Also still open (unchanged):** whether and when to create GitHub remotes; the three unresolved npm advisories (3 high, deferred to a reviewed security/dependency checkpoint); hosted Supabase linking; and the missing `BEST_Coach_AI_Features_Breakdown_v2.docx` (non-blocking for Phases 0–4).
+
 ---
 
 ## 9. Next permitted action
@@ -2014,6 +2283,14 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 
 **Step 7D is Completed and Accepted (2026-07-30)** — explicit local-versus-hosted classification, six-variable validation, and the browser-safe / request-scoped-server / separate server-only elevated client boundaries are implemented; the negative server-only proof and client-bundle private-name isolation passed; typecheck, lint and production build passed; the implementation commit **`455a070`** (`feat(platform): add Supabase client boundaries`, parent `5d10bd0`, 5 files, 363 insertions) was accepted. No query, Auth flow, hosted connection, schema, RLS, audit chain, or domain functionality was implemented. Structural credential validation does **not** prove hosted project ownership or identity — that requires a later runtime connection/identity proof.
 
-**Step 7E is Blocked** pending formal ratification of: the data-layer governance decision (Supabase-native vs the Prisma/Drizzle wording in `CLAUDE.md` / Specification v3), the `public`↔`auth.users` profile relationship, the audit target/status/chain-scope/SHA-256/genesis representations, the deliberate `GRANT` strategy for new tables, and the first-migration table/enum scope.
+**Step 7E is Blocked** pending (a) orchestrator review, commit and acceptance of the Step 7E0 documentation checkpoint, and (b) formal ratification of the remaining schema-critical decisions: the `public`↔`auth.users` profile relationship, the audit target and report-status representations, the deliberate `GRANT` strategy for new tables, enum-versus-reference-table decisions (including Class Grade), invitation token/expiry details, and the first-migration table/enum scope. *(The data-layer governance decision is no longer part of this list — Amendment 002 A-023 resolves it, pending acceptance of this checkpoint.)*
 
-**Next permitted action (Step 7E0 — Pending, authorization required):** after the Step 7D record-synchronization commit and final tracker acceptance are complete, perform a **planning-only** Step 7E0 review to ratify those decisions and produce a bounded Step 7E implementation plan. **Do not**, during planning: write SQL; create any migration, schema, seed, Auth user, RLS policy, or audit chain; modify governance documents (`CLAUDE.md`, specification, amendment, or plan); install/modify dependencies; start Supabase or alter Docker; link, authenticate, query, or contact hosted Supabase; use real data (**synthetic only**); or commit, tag, configure a remote, or push. **No schema implementation is authorized.**
+**Step 7D is fully accepted and remains historically unchanged (2026-07-30).** Step 7D3 (record synchronization and staging), Step 7D4 (administrative progress commit `e07b213`), the full Step 7D sequence, and the Supabase environment/client-boundary foundation are complete and accepted. The `/compact` interruption during Step 7D3 caused no lasting defect and no work was lost. **The Amendment 002 product decisions do not invalidate that accepted work.**
+
+**The earlier orchestrator pause (2026-07-30, D-175 … D-177) is closed** by an explicit new orchestrator instruction authorizing **Step 7E0 — Final MVP scope and schema-preflight governance reconciliation** as a documentation-only checkpoint. The pause record is preserved above as accepted history.
+
+**Current permitted action: orchestrator review of the staged Step 7E0 documentation change set.** The seven approved in-repository files are **staged**; the workspace tracker is modified outside the MVP repository and synchronized byte-for-byte into `docs/progress/DEMO_TO_MVP_MIGRATION.md`. **No commit, tag, remote, or push has been created, and this checkpoint does not self-accept.**
+
+Until the orchestrator explicitly accepts this checkpoint, **do not**: commit, tag, configure a remote, or push; begin Step 7E or Step 7E0-B; write SQL; create any migration, schema, seed, Auth user, invitation, RLS policy, or audit chain; write application code, UI components, routes, server actions, or tests; install or modify dependencies; start Supabase or alter Docker; link, authenticate, query, or contact hosted Supabase; import, export, download, or scrape any Figma asset, or fabricate a Figma node ID; open, print, hash, copy, parse, or inspect `.env.local`; or use real data (**synthetic only**).
+
+**After acceptance**, the next checkpoint is **Step 7E0-B — Schema-preflight technical ratification** (planning only): ratify S-1 … S-7 above, then produce a bounded Step 7E implementation plan. **No schema implementation is authorized.**
