@@ -4,9 +4,9 @@
 
 **Scope:** This tracker governs only the demo-to-MVP migration. It ends when every relevant demo asset has been ported, rejected, or superseded and the MVP has no dependency on demo-only architecture.
 
-**Current checkpoint:** Step 7D — Supabase clients, environment selection and server-only boundaries  
-**Checkpoint status:** Pending  
-**Current permitted action:** After the Step 7C record-synchronization commit is accepted, implement **only** the three Supabase client boundaries and **explicit local-versus-hosted environment validation**, **prove `server-only` isolation**, run the **automated baseline**, and **stop before commit or schema work**.
+**Current checkpoint:** Step 7E0 — Data-layer governance and first-migration ratification  
+**Checkpoint status:** Pending — authorization required  
+**Current permitted action:** After the Step 7D record-synchronization commit and final tracker acceptance are complete, perform a planning-only Step 7E0 review to ratify the data-access, identity, status, audit, grant, and first-migration decisions. Do not modify governance documents or write SQL until the resulting ratification is approved.
 
 ---
 
@@ -1285,35 +1285,200 @@ _(Previously titled "Complete MVP Phase 0 foundations" and marked `Blocked by St
 - [x] **No source, schema, runtime or hosted operation occurred.**
 - [x] The only `package.json` deletion was the `react-dom` line re-emitted with a trailing comma; **its version is unchanged**.
 
+#### Step 7C3 — Recover and synchronize Supabase dependency records
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+- [x] **The original Step 7C3 session stopped after partial workspace-tracker edits** because the Claude Code account reached its session limit; the work was resumed and completed in a later session.
+- [x] **Valid partial edits were preserved** — the header, the Step 7C / 7C1 / advisory-movement / 7C2 / 7D section content, the current-state advisory corrections, and the detailed repository sub-block were all retained.
+- [x] **The tracker was audited before continuation** — no duplicate section, truncated Markdown, reused decision identifier, malformed content, or repository corruption was found.
+- [x] **Stale repository fields and incomplete synchronization content were repaired** — the top MVP `Latest HEAD`, commit count, and next-checkpoint fields; the current-state "Next checkpoint" pointers; the "Latest committed HEAD" line; the synchronization note; and Section 9.
+- [x] **Decisions D-130 through D-139 were completed** — the Step 7C execution acceptances that the interrupted session had not yet appended.
+- [x] **The workspace tracker, migration copy, `STATUS.md`, and `BUILD_NOTES.md` were synchronized correctly** — the completed tracker was copied byte-for-byte into `docs/progress/DEMO_TO_MVP_MIGRATION.md`.
+- [x] **Exactly three progress files were staged** via explicit path-scoped `git add --` (`git add -A` not used).
+
+| Metric | Value |
+|---|---|
+| Modifications | **3** |
+| Additions | **0** |
+| Deletions | **0** |
+| Insertions | **310** |
+| Deleted lines | **57** |
+
+- [x] **Final synchronized tracker SHA-256:** `07431fab2a7e5b45785ec94a074cb1059dca6c10224ab0a9776a6ec8063fe9dc`.
+- [x] **No data or work was lost, and the account/session interruption caused no lasting defect.**
+- [x] **No package, source, runtime, schema, or hosted operation occurred during recovery.**
+
+#### Step 7C4 — Commit Supabase dependency records
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+| Field | Value |
+|---|---|
+| **Full commit** | `5d10bd050887dc9ceaf0ad9641932257c77c2936` |
+| **Short commit** | `5d10bd0` |
+| **Date** | `2026-07-30 02:21:39 +0800` |
+| **Message** | `docs(progress): record Supabase runtime dependencies` |
+| **Parent** | `ffd9eef8677f9183175a66f7de00f9fef1223fab` |
+| **Summary** | `3 files changed, 310 insertions, 57 deletions` |
+
+- [x] **Repository clean after commit.**
+- [x] **Exactly nine commits** — `4de3f93` → `c7c27e5` → `a39ed21` → `0cdb782` → `a83ec7a` → `25551c5` → `329f03c` → `ffd9eef` → `5d10bd0`.
+- [x] **No tag, remote or push.**
+- [x] **Tracker and committed migration copy remained byte-identical before this tracker-only update** (`07431fab…3fe9dc` on both sides).
+- [x] **Post-commit recovery-integrity verification passed** — no duplicate Step 7C / 7C1 / 7C2 / 7D sections, no malformed or truncated Markdown, no reused decision identifiers, and no stale current-state repository or advisory summary.
+- [x] **No dependency, source, runtime, schema, or hosted operation occurred.**
+
+**Self-reference note.** The committed progress files correctly identify the **substantive dependency commit `ffd9eef`**. Their **absence of a self-reference to administrative commit `5d10bd0` is intentional and is not a defect** — it is the required outcome of the anti-recursion rule, and no follow-up commit was or will be created to add it.
+
+#### Step 7C sequence closure
+
+**All of the following are Completed and Accepted:**
+
+| Sub-checkpoint | Status |
+|---|---|
+| **Step 7C1** — dependency verification, installation and staging | Completed · Accepted (2026-07-24) |
+| **Step 7C2** — dependency commit (`ffd9eef`) | Completed · Accepted (2026-07-24) |
+| **Step 7C3** — interrupted-session recovery and record synchronization | Completed · Accepted (2026-07-30) |
+| **Step 7C4** — administrative progress commit (`5d10bd0`) | Completed · Accepted (2026-07-30) |
+| **Step 7C** — overall | **Completed · Accepted** |
+
+**Accepted dependency foundation (preserved):**
+
+- **Exact-pinned runtime dependencies:** `@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`; **Supabase CLI** `2.109.1`.
+- **Node `v24.16.0` compatible; the `@supabase/ssr` peer requirement `^2.110.5` is satisfied by `@supabase/supabase-js` `2.110.8`.**
+- **Typecheck, lint and production build passed.**
+- **Current advisories: 3 high, 0 moderate, 0 critical — unresolved;** no advisory is attributable to the installed Supabase runtime packages; `npm audit fix` was not run.
+- **No ORM or test dependency was installed.**
+- **No clients, server modules, schema, Auth, RLS, audit chain, or application functionality has been implemented.**
+- **Installing Supabase-native dependencies did not resolve the data-layer governance tension** — D-108 still gates Step 7E and Step 7J.
+
 ### Step 7D — Supabase clients, environment selection and server-only boundaries
 
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Authorized:** Yes  
+**Authorized date:** 2026-07-30  
+**Accepted:** 2026-07-30
+
+- [x] **Explicit local-versus-hosted target classification implemented** — a single `NEXT_PUBLIC_SUPABASE_URL` selector; the application never holds simultaneous local and hosted credential sets.
+- [x] **All six approved environment-variable names validated.**
+- [x] **Browser-safe client boundary implemented.**
+- [x] **Request-scoped authenticated server-client boundary implemented.**
+- [x] **Separate server-only elevated client boundary implemented.**
+- [x] **`server-only` imports applied at every required boundary; objective negative server-only proof passed.**
+- [x] **Client-bundle private-name isolation passed.**
+- [x] **Typecheck, lint and production build passed.**
+- [x] **Implementation commit `455a070` accepted.**
+- [x] **No query, Auth flow, hosted connection, schema, RLS, audit chain, or domain functionality was implemented** — Phase 0 remains `In progress`.
+
+**Prohibitions honored:** no ORM; no migration or database schema; no Auth users; no RLS policy; no audit-chain code; no hosted link; no Phase 1–4 functionality; no reading or copying of hosted credentials from `.env.local`.
+
+> **The data-layer governance issue (D-108) still gates Steps 7E and 7J — not Step 7D.** Step 7D created client boundaries only and did not commit the project to a data-access abstraction.
+
+#### Step 7D1 — Implement and stage Supabase environment and client boundaries
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+**Five permanent files and their roles:**
+
+1. **`lib/supabase/public-config.ts`** — client-safe public configuration; validates only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; classifies local versus hosted (local hosts `localhost`, `127.0.0.1`, and IPv6 loopback `::1`; local port restricted to `54321`; hosted restricted to HTTPS and `*.supabase.co`); supports current opaque (`sb_publishable_`) and legacy JWT publishable-key families; rejects a secret-key prefix; does not decode JWTs or expose values.
+2. **`lib/supabase/browser.ts`** — browser-safe `createBrowserClient` boundary; publishable key only; module-level browser singleton; no server import, private variable name, Auth call, or query.
+3. **`server/platform/env.ts`** — first executable import is `import "server-only";`; validates exactly the six approved environment names; reuses the public local/hosted classification; validates key families, key non-reuse, the accepted LLM provider (`openai`) and model (`gpt-5.6-terra`), and a nonblank LLM API key; returns an immutable typed configuration; logs and exposes no values.
+4. **`server/platform/supabase/request.ts`** — first executable import is `import "server-only";`; async request-scoped `createServerClient` factory; `await cookies()`; a fresh client per invocation; publishable key only; `getAll`/`setAll` cookie adapter (name, value, and options preserved); no global client, Authorization override, Auth call, or query.
+5. **`server/platform/supabase/elevated.ts`** — first executable import is `import "server-only";`; elevated client uses the secret key only; no request cookie or user JWT; `persistSession: false`, `autoRefreshToken: false`, `detectSessionInUrl: false`; a warning states it bypasses RLS and requires prior server-side authorization; no query or administrative action.
+
+**Design notes:**
+
+- Installed package APIs were checked before implementation.
+- Next.js `cookies()` is **asynchronous** in the installed version.
+- The SSR `getAll`/`setAll` cookie adapter is supported.
+- The browser, request-scoped, and elevated clients have **distinct security boundaries**.
+- Structural validation **cannot** prove that opaque credentials belong to the selected project without a later runtime connection/identity proof.
+- The request-client cookie-write `setAll` uses a narrow `try/catch` limited to the documented Next.js Server-Component write restriction; full session-refresh/proxy behaviour is deferred to the later Auth checkpoint (no `proxy.ts`/`middleware.ts`).
+
+**Validation evidence.**
+
+- **Environment probe.** The originally proposed `app/__step7d_env_probe` path was identified as a **Next.js private folder** (leading underscore ⇒ excluded from routing) and therefore did **not** become a route; the first build correctly demonstrated the validators had not executed through that path. A temporary **routable** path `app/step7d-env-probe/page.tsx` was used instead; the production build included the temporary route, and public and server configuration validation executed successfully using opaque environment inputs. No value was rendered, logged, inspected, or reported. The temporary route was deleted and not staged. **This deviation was necessary to make the proof valid and did not weaken scope or security.**
+- **Negative server-only proof.** A temporary Client Component imported the elevated factory; the production build failed with **exit code 1 specifically because a `server-only` module was imported into a Client Component** — not a syntax, path, dependency, lint, or unrelated TypeScript error. The temporary route was deleted and not staged. The negative build failure counted as a **successful** boundary proof.
+- **Automated baseline.** `npx tsc --noEmit` passed; `npm run lint` passed; `npm run build` passed — zero warnings, zero errors. The ignored `.next` cache was removed only to clear a stale generated reference to the deleted probe; no tracked or repository-visible file was affected.
+- **Client-bundle isolation.** Private variable-name occurrences in `.next/static`: `SUPABASE_SECRET_KEY` 0, `LLM_PROVIDER` 0, `LLM_MODEL` 0, `LLM_API_KEY` 0. No `server/platform` module appeared in the client output or inspected client manifests; the elevated factory was unreachable from browser code; no value was searched or printed.
+- **Staged set.** Exactly **5 additions, 0 modifications, 0 deletions, 363 insertions**; no temporary probe; no package, environment, Supabase configuration, governance, progress, app-route, public, or demo file staged.
+
+#### Step 7D2 — Commit Supabase environment and client boundaries
+
+**Status:** Completed  
+**Accepted by orchestrator:** Yes  
+**Accepted:** 2026-07-30
+
+| Field | Value |
+|---|---|
+| **Full commit** | `455a0706b5555c0b4f083327dfd5613d3aa23245` |
+| **Short commit** | `455a070` |
+| **Date** | `2026-07-30 09:19:03 +0800` |
+| **Message** | `feat(platform): add Supabase client boundaries` |
+| **Parent** | `5d10bd050887dc9ceaf0ad9641932257c77c2936` |
+| **Summary** | `5 files changed, 363 insertions, 0 deletions` |
+
+- [x] **Exactly the five approved files were committed.**
+- [x] **Post-commit typecheck, lint and production build passed.**
+- [x] **Client-bundle isolation passed** (0 private-name occurrences in `.next/static`).
+- [x] **Repository clean; exactly ten commits.**
+- [x] **No tag, remote or push.**
+- [x] **No dependency, schema, Auth, runtime, hosted, or application operation occurred.**
+
+#### Step 7D sequence closure
+
+**All of the following are Completed and Accepted (2026-07-30):**
+
+| Sub-checkpoint | Status |
+|---|---|
+| **Step 7D1** — implement and stage environment/client boundaries | Completed · Accepted |
+| **Step 7D2** — implementation commit (`455a070`) | Completed · Accepted |
+| **Step 7D** — overall | **Completed · Accepted** |
+
+### Step 7E — First governed SQL migration and database foundation
+
+**Status:** Blocked  
+**Accepted by orchestrator:** No  
+**Authorized:** No
+
+**Blocking reason.** Step 7E cannot begin until the following previously recorded decisions are formally ratified:
+
+1. Supabase-native data access versus the conflicting Prisma/Drizzle wording in `CLAUDE.md` and Specification v3.
+2. `public` profile relationship to `auth.users`.
+3. Audit target representation.
+4. Report-status storage representation.
+5. Audit-chain scope.
+6. Audit SHA-256 algorithm.
+7. Audit genesis representation.
+8. Deliberate `GRANT` strategy for newly created tables.
+9. First-migration table and enum scope.
+
+- **No migration may be written** while these items remain unresolved.
+- The next checkpoint is **planning/governance ratification only**.
+- **No schema implementation is authorized.**
+
+#### Step 7E0 — Data-layer governance and first-migration ratification
+
 **Status:** Pending  
-**Accepted by orchestrator:** No
+**Accepted by orchestrator:** No  
+**Authorized:** No
 
 **Scope:**
 
-- [ ] **Define and implement explicit local-versus-hosted environment selection** without ever mixing credentials.
-- [ ] **Create environment validation** for the six approved variables.
-- [ ] **Create the browser-safe Supabase client.**
-- [ ] **Create the request-scoped server Supabase client.**
-- [ ] **Create the separate server-only elevated client.**
-- [ ] **Apply `server-only` imports at required boundaries.**
-- [ ] **Add an objective build-time boundary proof.**
-- [ ] **Run typecheck, lint and production build.**
-- [ ] **Review changes and stop before commit.**
-
-**Step 7D must not:**
-
-- [ ] **Introduce an ORM.**
-- [ ] **Create any migration or database schema.**
-- [ ] **Create Auth users.**
-- [ ] **Create any RLS policy.**
-- [ ] **Implement the audit chain.**
-- [ ] **Link the hosted project.**
-- [ ] **Implement any Phase 1–4 functionality.**
-- [ ] **Read or copy hosted credentials from `.env.local`.**
-
-> **The data-layer governance issue (D-108) still gates Steps 7E and 7J — not Step 7D.** Step 7D creates client boundaries only and does not commit the project to a data-access abstraction.
+- Reconcile the Supabase-native / no-general-purpose-ORM decision with the governance documents.
+- Define the first migration's exact tables, enums, foreign keys, grants, and audit primitives.
+- Ratify the unresolved identity, status, audit, and grant decisions.
+- Determine whether Amendment 002 and/or a `CLAUDE.md` correction is required.
+- Produce a bounded implementation plan for Step 7E.
+- Make **no** repository, governance, schema, dependency, runtime, or hosted change during planning.
 
 ### Objective
 
@@ -1566,23 +1731,25 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - Framework: `Next.js 16.2.10` (App Router, TypeScript, Tailwind, ESLint, Turbopack, root `/app`, alias `@/*`, React Compiler off); React/React DOM `19.2.4`
 - Initial scaffold verification: **Accepted** (tsc/lint/build exit 0; starter HTTP 200)
 - Remote/GitHub: None (everything local; nothing pushed)
-- **Latest HEAD:** `ffd9eef8677f9183175a66f7de00f9fef1223fab` (short `ffd9eef`)
-- **Total commits:** `8` — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies)
+- **Latest HEAD:** `455a0706b5555c0b4f083327dfd5613d3aa23245` (short `455a070`)
+- **Total commits:** `10` — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies) → `5d10bd0` (Supabase dependency records) → `455a070` (Supabase client boundaries)
 - **Working tree:** `Clean`
 - **Governance installation:** `Completed and accepted` (commit `c7c27e5`)
 - **Governance closure synchronization:** `Completed and accepted` (commit `a39ed21`)
-- **Phase 0:** `In progress` — local-runtime execution begun and passed; **schema/application implementation not started**
-- **Next checkpoint:** `Step 7D` — Supabase clients, environment selection and server-only boundaries
+- **Phase 0:** `In progress` — local-runtime execution and Supabase environment/client boundaries complete; **schema/application implementation not started**
+- **Next checkpoint:** `Step 7E0` — Data-layer governance and first-migration ratification
 - **Tag:** `None` · **Remote:** `None` · **Push:** `None`
 
-**Local tooling and runtime state (accepted at Step 7B-R5, 2026-07-24 — non-secret evidence only; no credential value or project URL recorded):**
+**Local tooling and runtime state (accepted at Step 7D3, 2026-07-30 — non-secret evidence only; no credential value or project URL recorded):**
 
-- **Current repository HEAD:** `ffd9eef8677f9183175a66f7de00f9fef1223fab` · **Short HEAD:** `ffd9eef`
-- **Total commits:** `8` · **Working tree:** `Clean`
+- **Current repository HEAD:** `455a0706b5555c0b4f083327dfd5613d3aa23245` · **Short HEAD:** `455a070`
+- **Total commits:** `10` · **Working tree:** `Clean`
 - **Latest substantive tooling commit:** `0cdb7825b0d4bcd9ad9b40323a3e90228065f006`
 - **Latest substantive runtime commit:** `25551c5d733fa581844db35ae3647c0ca8d52190`
-- **Latest dependency commit:** `ffd9eef8677f9183175a66f7de00f9fef1223fab`
-- **Latest administrative progress commit:** `329f03c253cc3afc356be5873c963efc2eb35e12`
+- **Latest substantive dependency commit:** `ffd9eef8677f9183175a66f7de00f9fef1223fab`
+- **Latest substantive platform commit:** `455a0706b5555c0b4f083327dfd5613d3aa23245`
+- **Latest administrative progress commit:** `5d10bd050887dc9ceaf0ad9641932257c77c2936`
+- **Supabase environment/client boundaries:** **`Implemented`** — browser-safe, request-scoped, and separate server-only elevated clients; committed as `455a070`
 - **Runtime dependencies (exact-pinned):** `@supabase/ssr` `0.12.3` · `@supabase/supabase-js` `2.110.8` · `server-only` `0.0.1`
 - **Docker Desktop:** `Running with WSL 2` (client and engine `29.6.2`, Compose `v5.3.1`, Linux engine, `x86_64`; Kubernetes not enabled)
 - **Supabase CLI:** `2.109.1` — **project-local and exact-pinned** (dev dependency; no global install; invoked via `npx --no-install`)
@@ -1596,9 +1763,10 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - **Hosted Supabase project:** `Not linked through CLI` (no login, no link, no access token on this machine)
 - **`.env.example`:** `Committed, placeholder-only` (six approved variable names; only the non-secret selectors carry values)
 - **`.env.local`:** `Present, ignored, and untracked` (never printed, hashed, copied, or committed)
-- **Schema/application implementation:** **`Not started`**
+- **Database schema / Auth / RLS / audit implementation:** **`Not started`**
 - **Phase 0:** **`In progress`**
-- **Next checkpoint:** `Step 7D — Supabase clients, environment selection and server-only boundaries`
+- **Step 7E:** **`Blocked`** — pending data-layer governance and first-migration ratification
+- **Next checkpoint:** `Step 7E0 — Data-layer governance and first-migration ratification`
 
 **Phase 0 prerequisite state (accepted at Step 6A, 2026-07-22 — no credential value recorded):**
 
@@ -1611,16 +1779,16 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 - **Data access:** Supabase-native, **no general-purpose ORM**
 - **Supabase CLI:** **installed at Step 6B2A** (`2.109.1`, project-local, exact-pinned) · **Docker-compatible runtime:** **installed and verified at Step 6B1** (Docker Desktop `29.6.2`, WSL 2 backend, Compose `v5.3.1`, Linux engine)
 
-> **Tracker/copy synchronization note (anti-recursion rule, restated at Step 7C3).**
+> **Tracker/copy synchronization note (anti-recursion rule, restated at Step 7D3).**
 >
-> - **The MVP migration copy (`docs/progress/DEMO_TO_MVP_MIGRATION.md`) is re-synchronized byte-for-byte from this tracker during Step 7C3**, absorbing the prior Step 7B-R5 tracker-only acceptance **and** the new Step 7C1 / Step 7C2 / Step 7C-closure / Step 7D records in a single update.
-> - The **committed MVP migration copy remains at the accepted Step 7B-R3 synchronization state**, committed as `329f03c`, **until the Step 7C record-synchronization commit is accepted**; the **staged** copy produced here is byte-identical to this tracker.
-> - Per **D-060 through D-066**, **D-101**, **D-102** and **D-121**, this record does **not** contain the hash of the administrative commit that will carry it; that closure commit hash is recorded in the **next** normal progress-record update rather than through a self-referential administrative commit.
+> - **The MVP migration copy (`docs/progress/DEMO_TO_MVP_MIGRATION.md`) is re-synchronized byte-for-byte from this tracker during Step 7D3**, absorbing the prior tracker-only Step 7C5 acceptance **and** the new Step 7D1 / Step 7D2 / Step 7D-closure / Step 7E-block / Step 7E0-planning records in a single update.
+> - The **committed MVP migration copy remains at the accepted Step 7C3 synchronization state**, carried by administrative commit `5d10bd0`, **until the Step 7D record-synchronization commit is accepted**; the **staged** copy produced here is byte-identical to this tracker.
+> - Per **D-060 through D-066**, **D-101**, **D-102**, **D-121** and **D-145**, this record does **not** contain the hash of the administrative commit that will carry it; that closure commit hash is recorded in the **next** normal progress-record update rather than through a self-referential administrative commit.
 > - **No commit will be created solely** to make committed progress files acknowledge their own administrative commit.
 > - This arrangement is **intentional — it is not drift**.
-- **Current phase: Phase 0 — In progress** (local-runtime execution begun and passed; schema, Auth population, RLS, audit-chain and application implementation **not started**)
-- **Next checkpoint:** Step 7D — Supabase clients, environment selection and server-only boundaries
-- **Active migration copy:** re-synchronized byte-for-byte from this tracker during **Step 7C3** and **staged** for the Step 7C record-synchronization commit; the last committed copy remains `329f03c` until that commit is accepted
+- **Current phase: Phase 0 — In progress** (local-runtime execution and Supabase environment/client boundaries complete; schema, Auth population, RLS, audit-chain and application implementation **not started**)
+- **Next checkpoint:** Step 7E0 — Data-layer governance and first-migration ratification (planning only; authorization required)
+- **Active migration copy:** re-synchronized byte-for-byte from this tracker at **Step 7D3** and **staged** for the Step 7D record-synchronization commit; the last committed copy remains `5d10bd0` until that commit is accepted
 - **AI Features Breakdown:** missing but **non-blocking** for Phase 0 and current MVP scope
 - **Stitch assets:** not installed; disposition deferred
 - **npm advisories:** **3 unresolved findings — 0 moderate and 3 high** (current state as of 2026-07-24) — deferred for reviewed handling (`next` **direct**; transitive `postcss` and `sharp`, both through `next`; **none attributed in any accepted review to `supabase@2.109.1`, `@supabase/ssr`, `@supabase/supabase-js`, `server-only`, or their transitive packages**; the earlier 1-moderate/2-high figure changed because the npm advisory database raised `postcss` to high, **not** because any dependency changed; no `npm audit fix` was run; **advisories remain unresolved**)
@@ -1633,7 +1801,7 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
   - `STATUS.md` and `BUILD_NOTES.md` installed
   - Active migration copy `docs/progress/DEMO_TO_MVP_MIGRATION.md` installed in this checkpoint
   - `docs/ui-screens/` not created (A-013); AI Features Breakdown v2 absent (A-011), not fabricated
-- Latest committed HEAD is `ffd9eef8677f9183175a66f7de00f9fef1223fab` (`ffd9eef`) — the governance baseline was committed at Step 5B3 as `c7c27e5`, and six further commits have since been accepted
+- Latest committed HEAD is `455a0706b5555c0b4f083327dfd5613d3aa23245` (`455a070`) — the governance baseline was committed at Step 5B3 as `c7c27e5`, and eight further commits have since been accepted
 - Remote/GitHub: None — no remote, nothing pushed
 - Outstanding follow-up: **3 unresolved npm advisories — 0 moderate and 3 high** (current state as of 2026-07-24; `next` **direct**, transitive `postcss` and `sharp` both through `next`; **none attributed in any accepted review to the Supabase CLI or the Supabase runtime packages**; the shift from 1-moderate/2-high was **npm advisory-database movement on `postcss`**, not a dependency change; **no `npm audit fix` was run**; **advisories remain unresolved**; deferred to the later security/dependency review — no auto-fix without review)
 
@@ -1782,6 +1950,30 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 | D-137 | 2026-07-24 | **Installing the Supabase-native dependencies did not resolve the data-layer governance tension** (confirmed post-execution) — D-108 still requires an explicit governance decision and continues to gate Step 7E and Step 7J, not Step 7D (reaffirms D-128). | Accepted |
 | D-138 | 2026-07-24 | **Step 7D is the next checkpoint** — Supabase clients, explicit local-versus-hosted environment selection, and `server-only` boundaries; it stops before commit and before any schema work. | Accepted |
 | D-139 | 2026-07-24 | **Hosted linking and schema/application work remain deferred** — `supabase login` / `supabase link` / remote migrations and all schema, Auth population, RLS, audit-chain, and application implementation require their own explicit later checkpoints (reaffirms D-126, D-129). | Accepted |
+| D-140 | 2026-07-30 | **The recovered Step 7C3 synchronization is accepted** — the interrupted-session partial tracker edits were audited, valid work retained, stale fields repaired, decisions D-130 … D-139 completed, and the tracker / migration copy / `STATUS.md` / `BUILD_NOTES.md` correctly synchronized (final tracker SHA-256 `07431fab…3fe9dc`). | Accepted |
+| D-141 | 2026-07-30 | **The interrupted Claude Code session caused no lasting defect** — no duplicate section, truncated Markdown, reused decision identifier, malformed content, or repository corruption resulted from the account/session-limit interruption. | Accepted |
+| D-142 | 2026-07-30 | **No data or valid work was lost during the interruption** — every valid partial edit from the interrupted session was preserved and completed. | Accepted |
+| D-143 | 2026-07-30 | **Administrative progress commit `5d10bd0`** (`docs(progress): record Supabase runtime dependencies`, parent `ffd9eef`, 3 files, 310 insertions, 57 deletions) **is accepted**. | Accepted |
+| D-144 | 2026-07-30 | **The substantive dependency commit remains `ffd9eef`** — `5d10bd0` is administrative record-keeping only and introduces no dependency, source, runtime, schema, or application change. | Accepted |
+| D-145 | 2026-07-30 | **Tracker-only anti-recursion handling applies after `5d10bd0`** — this tracker may lead the committed migration copy by exactly one administrative update (extends D-060 … D-066, D-101, D-121). | Accepted |
+| D-146 | 2026-07-30 | **No self-referential administrative commit is required** — committed progress files need not acknowledge their own administrative commit hash; the absence is intentional, not a defect (reaffirms D-102, D-122). | Accepted |
+| D-147 | 2026-07-30 | **The full Step 7C sequence is complete and accepted** — Step 7C1, Step 7C2, Step 7C3, Step 7C4, and Step 7C overall. | Accepted |
+| D-148 | 2026-07-30 | **The Supabase runtime-dependency foundation is accepted** — exact-pinned `@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`, and Supabase CLI `2.109.1`; Node 24 / peer-compatible; automated baseline passing; advisories 3 high / 0 moderate unresolved; no ORM or test dependency; no client, schema, or application implementation. | Accepted |
+| D-149 | 2026-07-30 | **Step 7D is authorized** — Supabase clients, environment selection, and server-only boundaries (Status Pending; not yet accepted by the orchestrator). | Accepted |
+| D-150 | 2026-07-30 | **Step 7D is restricted to environment selection and client/server boundaries** — explicit local-versus-hosted environment selection, six-variable validation, the browser-safe / request-scoped-server / separate server-only elevated clients, and objective server-only boundary proof; typecheck, lint, and production build; stage only the approved implementation files; stop before commit or schema work. | Accepted |
+| D-151 | 2026-07-30 | **Schema, Auth, RLS, audit chain, hosted linking, and Phase 1–4 work remain deferred** — none is authorized by Step 7D; the data-layer governance tension (D-108) still gates Step 7E and Step 7J. | Accepted |
+| D-152 | 2026-07-30 | **Step 7D1 is accepted** — the Supabase environment and client boundaries were implemented, validated, and staged as exactly five additions (0 modifications, 0 deletions, 363 insertions). | Accepted |
+| D-153 | 2026-07-30 | **The five-file environment/client-boundary design is accepted** — `lib/supabase/public-config.ts`, `lib/supabase/browser.ts`, `server/platform/env.ts`, `server/platform/supabase/request.ts`, and `server/platform/supabase/elevated.ts`, with distinct browser / request-scoped / server-only elevated security boundaries. | Accepted |
+| D-154 | 2026-07-30 | **The routable environment-probe deviation is accepted as necessary and correct** — the proposed `app/__step7d_env_probe` path is a Next.js private folder and would not execute; a temporary routable `app/step7d-env-probe` proved validation without weakening scope or security, and was deleted and never staged. | Accepted |
+| D-155 | 2026-07-30 | **The negative server-only boundary proof is accepted** — importing the elevated factory into a Client Component failed the build with exit 1 specifically on the `server-only` boundary (not syntax/path/dependency/lint/unrelated TypeScript). | Accepted |
+| D-156 | 2026-07-30 | **The client-bundle isolation result is accepted** — zero occurrences of `SUPABASE_SECRET_KEY`, `LLM_PROVIDER`, `LLM_MODEL`, and `LLM_API_KEY` in `.next/static`; no `server/platform` module in client output; the elevated factory is unreachable from browser code. | Accepted |
+| D-157 | 2026-07-30 | **Implementation commit `455a070`** (`feat(platform): add Supabase client boundaries`, parent `5d10bd0`, 5 files, 363 insertions, 0 deletions) **is accepted**. | Accepted |
+| D-158 | 2026-07-30 | **Step 7D is complete and accepted** — Step 7D1, Step 7D2, and Step 7D overall. | Accepted |
+| D-159 | 2026-07-30 | **Structural credential validation does not prove hosted project ownership or identity** — offline checks cannot bind an opaque key to the selected URL; connection/identity proof belongs to a later runtime/Auth checkpoint. | Accepted |
+| D-160 | 2026-07-30 | **No Auth, query, schema, RLS, audit, or hosted operation has occurred** — Step 7D implemented client boundaries only; Phase 0 remains `In progress`. | Accepted |
+| D-161 | 2026-07-30 | **Step 7E is blocked pending formal ratification** — the data-layer governance decision, `public`↔`auth.users` relationship, audit target/status/chain-scope/SHA-256/genesis representations, deliberate `GRANT` strategy, and first-migration table/enum scope must be ratified before any migration is written. | Accepted |
+| D-162 | 2026-07-30 | **Step 7E0 is the next planning checkpoint** — data-layer governance and first-migration ratification, planning only, unauthorized until the ratification is approved. | Accepted |
+| D-163 | 2026-07-30 | **No SQL or governance-document change is authorized yet** — Step 7E0 makes no repository, governance, schema, dependency, runtime, or hosted change. | Accepted |
 
 ---
 
@@ -1818,8 +2010,10 @@ Phases 2–4, final UAT, quality passes, and deployment are outside this migrati
 
 **The complete Step 7B sequence is Completed and Accepted (2026-07-24)** — Step 7A planning, the Step 7B1 diagnostic run, Step 7B-R1 remediation and verification, Step 7B-R2 remediation commit (`25551c5`), Step 7B-R3 record synchronization, Step 7B-R4 administrative record commit (`329f03c`), and Step 7B overall. The local Supabase runtime is **verified operational on Windows** (PostgreSQL 17, Auth, REST, Studio, Storage, Realtime, Kong, Mail, Postgres Meta and Edge Runtime; Analytics/Vector intentionally disabled; Docker TCP 2375 still disabled; stack currently stopped). **Phase 0 is `In progress`: local-runtime execution has begun and passed; schema, Auth population, RLS, audit-chain and application implementation have not started.**
 
-**Step 7C is Completed and Accepted (2026-07-24)** — the current stable Supabase runtime packages were verified and **exact-pinned** (`@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`), Node 24 and peer compatibility passed, the automated baseline (typecheck, lint, production build) passed, exactly `package.json` and `package-lock.json` were staged, and the dependency commit **`ffd9eef`** (`chore(deps): add Supabase runtime clients`, parent `329f03c`, 2 files, 132 insertions, 2 deletions) was accepted. The current npm advisory state is **3 high, 0 moderate — unresolved**, with **no finding attributed to the newly installed Supabase runtime packages**. Installing the Supabase-native packages **did not** resolve the data-layer governance tension — D-108 still gates Step 7E and Step 7J.
+**Step 7C is Completed and Accepted (2026-07-24)** — the current stable Supabase runtime packages were verified and **exact-pinned** (`@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`), Node 24 and peer compatibility passed, the automated baseline (typecheck, lint, production build) passed, exactly `package.json` and `package-lock.json` were staged, and the dependency commit **`ffd9eef`** (`chore(deps): add Supabase runtime clients`, parent `329f03c`, 2 files, 132 insertions, 2 deletions) was accepted. The current npm advisory state is **3 high, 0 moderate — unresolved**, with **no finding attributed to the newly installed Supabase runtime packages**. Installing the Supabase-native packages **did not** resolve the data-layer governance tension — D-108 still gates Step 7E and Step 7J. **The full Step 7C sequence is now closed and accepted** — Step 7C1 (dependency verification, installation and staging), Step 7C2 (dependency commit `ffd9eef`), Step 7C3 (interrupted-session recovery and record synchronization), Step 7C4 (administrative progress commit `5d10bd0`), and Step 7C overall. The Step 7C3 session-limit interruption caused **no lasting defect** and **no work was lost**.
 
-**Next permitted action (Step 7D — Pending, not yet accepted):** after the **Step 7C record-synchronization commit is accepted**, implement **only** the three Supabase client boundaries (a browser-safe client, a request-scoped server client, and a separate server-only elevated client), define and validate **explicit local-versus-hosted environment selection** across the six approved variables, apply and **prove `server-only` isolation** with an objective build-time boundary proof, run **typecheck, lint and production build**, review the changes, and **stop before commit or schema work**.
+**Step 7D is Completed and Accepted (2026-07-30)** — explicit local-versus-hosted classification, six-variable validation, and the browser-safe / request-scoped-server / separate server-only elevated client boundaries are implemented; the negative server-only proof and client-bundle private-name isolation passed; typecheck, lint and production build passed; the implementation commit **`455a070`** (`feat(platform): add Supabase client boundaries`, parent `5d10bd0`, 5 files, 363 insertions) was accepted. No query, Auth flow, hosted connection, schema, RLS, audit chain, or domain functionality was implemented. Structural credential validation does **not** prove hosted project ownership or identity — that requires a later runtime connection/identity proof.
 
-**Do not, during Step 7D:** introduce an ORM; create any migration, database schema, seed data, Auth user, RLS policy, or audit chain; link the hosted project or run any hosted operation; read or copy hosted credentials from `.env.local`; **resolve the data-layer governance tension by implication** (D-108 requires an explicit decision and gates Step 7E/7J, not Step 7D); use real child, parent, trainer, or academy data (**synthetic only**); build any Phase 1–4 functionality early; expose Docker TCP 2375; expose, print, hash, or commit any credential value; modify the frozen demo, `governance-source`, or any accepted governance document; commit, tag, configure a remote, or push.
+**Step 7E is Blocked** pending formal ratification of: the data-layer governance decision (Supabase-native vs the Prisma/Drizzle wording in `CLAUDE.md` / Specification v3), the `public`↔`auth.users` profile relationship, the audit target/status/chain-scope/SHA-256/genesis representations, the deliberate `GRANT` strategy for new tables, and the first-migration table/enum scope.
+
+**Next permitted action (Step 7E0 — Pending, authorization required):** after the Step 7D record-synchronization commit and final tracker acceptance are complete, perform a **planning-only** Step 7E0 review to ratify those decisions and produce a bounded Step 7E implementation plan. **Do not**, during planning: write SQL; create any migration, schema, seed, Auth user, RLS policy, or audit chain; modify governance documents (`CLAUDE.md`, specification, amendment, or plan); install/modify dependencies; start Supabase or alter Docker; link, authenticate, query, or contact hosted Supabase; use real data (**synthetic only**); or commit, tag, configure a remote, or push. **No schema implementation is authorized.**
