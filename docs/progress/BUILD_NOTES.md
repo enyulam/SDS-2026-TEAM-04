@@ -427,4 +427,52 @@ _The entries below record verified history prior to this log's creation. They ar
 
 ---
 
-_Next permitted action: review and commit the staged Step 7E0D2C acceptance record (the three progress files above). **After that commit is accepted, no implementation checkpoint becomes authorized automatically — Step 7E requires a separate, explicit orchestrator authorization.** Step 7E remains blocked, unauthorized and not started. Do not write SQL, create migrations, `seed.sql`, Supabase functions, seed data, Auth users, fixtures, database types, RLS policies, grants, an audit chain, or any application code; do not import or export Figma assets or fabricate a node ID; and do not link the hosted project._
+## 2026-08-03 — First governed SQL migration: authoring, correction, local verification and commit (Steps 7E1A, 7E1B, 7E2A, 7E2B, 7E2C)
+
+- **Checkpoint:** Step 7E2C — record and stage acceptance of the governed-core migration. **Documentation-only progress-record checkpoint; stops before commit.**
+- **Authorization:** an explicit orchestrator authorization **bounded to Step 7E alone**. It did **not** extend to Step 7F or any later checkpoint.
+
+**Step 7E1A — initial migration authoring.** The first governed-core migration was authored as exactly one file, `supabase/migrations/20260803034500_step_7e_governed_core.sql`, and staged with path-scoped staging. It was **not applied to any database and not committed** at this point. Static review then identified four items requiring correction: **missing active normalized-email uniqueness** on `accounts`; **`full_name` versus `display_name`**; **incomplete role pinning** for the attendance recorder and the report-version author and submitter, which were centre-pinned only; and **the need to adjudicate `content_hash` precisely** rather than assume that deferring the audit hash chain automatically deferred a report-content hash.
+
+**Step 7E1B — corrections.** The file was edited **in place** — not renamed, and no corrective second migration was created:
+
+- `accounts.full_name` → **`accounts.display_name`**; **`accounts.normalized_email`** added (`NOT NULL`, `CHECK`-normalized to lowercase/trimmed with an `@`).
+- **`accounts_one_active_per_normalized_email_idx`** added — partial unique over `WHERE status = 'active'`, so many **deactivated** historical accounts may share an email while two **live** identities for one email are impossible. The email is a **lookup and contact snapshot only, never an authorization source** (A-027).
+- `accounts` retains **no `centre_id` and no role column**.
+- **Attendance recorder, observation recorder, report-version author, report-version approver and report-version submitter are all trainer-role-pinned** via the composite `(membership_id, centre_id, role) → centre_memberships(id, centre_id, role)` pattern plus a role `CHECK`. Optional actors carry a nullable role discriminator with `CHECK ((id IS NULL) = (role IS NULL))`, so an actor is either wholly absent or internally consistent.
+- **`content_hash` remains absent under Amendment 003 A-032.** Specification v3 §20 lists it and A-028 does not supersede it, so it stays a live data-model requirement; but §23 — "Approval provenance. An approval event captures the `content_hash` of the approved version" — is the clause that gives it meaning, making it audit-provenance data, and A-032 states Step 7E creates "no AI, evidence, audit, or hash-chain column … A column arrives with the checkpoint that gives it meaning." Its algorithm and canonical serialization are explicitly unratified (A-029; U-14). It is deferred to **Step 7H**.
+- The **exact 10-enum, 22-table and 13-seed boundary was unchanged** by the corrections.
+
+**Migration file (final, committed):** SHA-256 **`422be2850c6913ca040bc54b90902df8eaaf35d66492230553e65ab1b3f8db54`** · **66,809 bytes** · **1,209 lines**.
+
+**Step 7E2A — local application and catalogue proof.** Docker Desktop was started (it was not running) and the local Supabase stack brought up with the accepted Windows configuration unchanged — 10 services healthy, Analytics/Vector/imgproxy/pooler intentionally stopped. `supabase db reset --local` applied migration version **`20260803034500`** from a clean local database with **exit code 0**, recorded **exactly once**. Catalogue verification via the local container confirmed:
+
+- **10 enums** with exact ordered values; **22 application tables**; **13 deterministic seed rows** with exact fixed UUIDs, codes, labels, groups and orders; **0 rows** in all 19 other application tables; **0** Auth users.
+- **44 foreign keys** — 40 `ON DELETE RESTRICT`, 3 `CASCADE` (owned children only), 1 `SET NULL` (`accounts.auth_user_id`); **0** FK targets unbacked by a primary or non-partial unique candidate key.
+- **43 explicit indexes**, all present (8 partial-unique + 35 supporting), plus 54 constraint-backed; **0** index predicates reference `now()`.
+- **RLS enabled on all 22 tables**, forced on 0; **0 RLS policies**; **0 explicit grants**; and **zero effective table privileges** for `PUBLIC`, `anon`, `authenticated` and `service_role` across all seven privilege types, measured with catalogue privilege functions rather than a textual scan. `PUBLIC` does not retain `CREATE` on schema `public`.
+- **0** views, materialized views, functions, procedures, non-internal triggers, extensions or additional application schemas; **0** AI/evidence/audit/`content_hash`/Quick-4/session-lifecycle/version-kind objects.
+- The Step 7I rules remain **deliberately unenforced** — 0 triggers, 0 rules, 0 functions, 0 rating-cardinality constraints.
+
+**Lint:** `supabase db lint --local` returned **zero errors and zero warnings**, including at `--level warning` with `--fail-on warning` (exit 0). Nothing was suppressed or fixed.
+
+**Credential-output incident (local-only scope).** `supabase start` briefly printed **disposable local-development JWT and S3 default values** because the first redaction filter targeted a `Key: value` form while the CLI emits a JSON `"KEY": "value"` block. **No hosted credential and no `.env.local` value was exposed** — these are Supabase's publicly documented local defaults, regenerated on every `supabase start`. Redaction was tightened immediately and all later output was clean. **Future database-operation prompts must suppress all credential-bearing CLI output.**
+
+**Step 7G carry-forward.** A **pre-existing `supabase_admin` default ACL** in schema `public` may grant client privileges to **future objects created by that role**. It **did not affect the 22 Step 7E tables**, which are **`postgres`-owned and catalogue-verified at zero client privileges**. **Step 7G must inspect effective and default ACLs before adding any policy or grant.** No default privilege was changed in Step 7E.
+
+The local stack was **stopped cleanly** afterwards (0 running containers) and the migration file remained **byte-identical** throughout.
+
+**Step 7E2B — commit.** **`252ef9b13008629cadc238bdf58b7016c50bb7b2`** (short `252ef9b`) · `feat(supabase): add governed core schema migration` — one subject line, no body, no trailer · parent `584691ebe8b12e8b0eb0d56ca38db259d59ec949` · `2026-08-03 04:37:05 +0800` · **1 file changed, 1,209 insertions(+), 0 deletions**, `create mode 100644` · resulting commit count **16**. The committed blob is **byte-identical** to the locally verified migration and the commit **changed no progress file**.
+
+**Step 7E is Completed and Accepted (2026-08-03). Step 7F remains Not accepted · Not authorized · Not started** and requires a **separate explicit orchestrator authorization**. The **7F → 7G → 7H → 7I → 7J** sequence is preserved unchanged and the **Figma Design 2 implementation handoff remains pending**.
+
+- **No hosted operation occurred** — no `supabase link`, no project reference, no `--linked`, no hosted URL; `supabase/.temp/project-ref` does not exist, so the project has never been linked. All database work targeted the **local disposable stack only**.
+- **No Auth user, fixture, RLS policy, client grant, RPC, view, function, trigger, audit object, generated database type, application code, test or Figma asset was created.** `supabase/seed.sql` and `supabase/functions` remain absent; exactly one tracked `.sql` file exists.
+- **Decisions appended:** **D-232 through D-237**, sequential after **D-231**; the log remains contiguous (**D-001 … D-237**) and unique (**237 IDs, 0 duplicates, 0 gaps**).
+- **Files changed in this Step 7E2C checkpoint (3 in-repository + 1 workspace-level):** `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md` (append-only), and — outside the repository — the workspace tracker. **No other file was modified**, and **no database command was run in this checkpoint**.
+- **Tracker synchronization:** synchronized **byte-for-byte** into `docs/progress/DEMO_TO_MVP_MIGRATION.md`; verified by raw byte comparison, SHA-256, byte count and line count.
+- **This acceptance-record change set is staged but NOT committed.** Per the anti-recursion rule (D-060 … D-066, D-101, D-121, D-145, D-169, D-213, D-230), these committed progress files name the **substantive** migration commit `252ef9b` rather than their own administrative hash; that absence is intentional and is not a defect.
+
+---
+
+_Next permitted action: review and commit the staged Step 7E2C acceptance record (the three progress files above). **After that commit is accepted, no implementation checkpoint becomes authorized automatically — Step 7F requires a separate, explicit orchestrator authorization.** Step 7F remains unauthorized and not started. Do not create Auth users, fixtures, RLS policies, grants, RPCs, views, functions, triggers, audit objects, generated database types, application code or tests; do not modify the committed migration or create another migration; do not start Supabase or run any database command; do not import or export Figma assets or fabricate a node ID; and do not link the hosted project._

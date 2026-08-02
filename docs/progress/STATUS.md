@@ -2,16 +2,16 @@
 
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 
-_Last updated: 2026-08-03 (Step 7E0D2C — **Step 7E0D is completed and accepted**; the schema-critical architecture ratification was committed as `b367475` and Amendment 003 is active. This acceptance-record change set is **staged, commit pending**. Step 7D, Step 7E0 and Step 7E0D1 remain completed and accepted; **Step 7E remains blocked, unauthorized and not started and requires a separate explicit orchestrator authorization**)._
+_Last updated: 2026-08-03 (Step 7E2C — **Step 7E is completed and accepted**; the governed-core migration was applied to a local disposable database only, verified, and committed as `252ef9b`. This acceptance-record change set is **staged, commit pending**. Step 7D, Step 7E0 and Step 7E0D remain completed and accepted; **Step 7F is unauthorized and unstarted and requires a separate explicit orchestrator authorization**)._
 
 ---
 
 ## Current project state
 
 - **Project:** B.E.S.T Coach MVP
-- **Lifecycle stage:** Phase 0 in progress — client boundaries implemented and accepted; **schema architecture ratified but the database foundation is not authorized and does not exist**
+- **Lifecycle stage:** Phase 0 in progress — client boundaries accepted and the **first governed SQL migration delivered**; Auth population, fixtures, RLS policies, client grants, RPCs, audit chain and generated types **not started**
 - **Migration/tooling status:** Step 6 local tooling **completed and accepted**
-- **Current checkpoint:** **Step 7E0D2C — Record and stage acceptance of the schema-critical architecture ratification (documentation only)**
+- **Current checkpoint:** **Step 7E2C — Record and stage acceptance of the governed-core migration (documentation only)**
 - **Checkpoint status:** **Staged — acceptance-record commit pending.** Nothing in this checkpoint is self-accepted.
 - **Step 7D:** **Completed and fully accepted** (7D1 → 7D4 and overall)
 - **Step 7E0:** **Completed and accepted (2026-07-30)** — substantive governance commit **`722dcb8`**; sub-checkpoints **7E0A** (change set) and **7E0B** (commit) both Completed · Accepted; its acceptance record committed at **`6551d37`** (Step 7E0C / 7E0C2)
@@ -19,20 +19,25 @@ _Last updated: 2026-08-03 (Step 7E0D2C — **Step 7E0D is completed and accepted
 - **Step 7E0D — Schema-critical decision ratification:** **Completed and accepted (2026-08-03)** — substantive ratification commit **`b367475`**; sub-checkpoints **7E0D1**, **7E0D2A** (change set) and **7E0D2B** (commit) all Completed · Accepted
 - **Amendment 002:** **Active** (A-014 … A-024), committed at `722dcb8`
 - **Amendment 003:** **Active** (**A-025 … A-032**), committed at `b367475` — schema architecture and migration boundaries; **clarifies rather than reverses Amendment 002**, names no Amendment 001 clause, and is **not an implementation authorization**
-- **Step 7E:** **Blocked · Not accepted · Not authorized · Not started** — all seven schema-critical blockers are resolved, which makes Step 7E **eligible, not authorized**. **It requires a separate explicit orchestrator authorization that has not been given.**
-- **Accepted Step 7E boundary (recorded, not created):** **exactly 10 enums, 22 tables and 13 deterministic seed rows**, RLS enabled with **zero policies and zero client grants**; no view, RPC or helper function; no extension; no placeholder columns
-- **Accepted centre seed identity (recorded, not seeded):** code **`ispeak`** · display name **`iSpeak Academy`**
-- **Current implementation state:** local Supabase runtime **verified**; Supabase **environment and client boundaries implemented and accepted** (browser-safe, request-scoped server, and elevated server-only factories; `server-only` isolation proven by a negative build); all six approved environment variables validated; **no query, Auth flow, migration, schema, RLS, or audit implementation**
+- **Step 7E — first governed SQL migration:** **Completed and accepted (2026-08-03)** — substantive migration commit **`252ef9b`**; sub-checkpoints **7E1A** (author/stage), **7E1B** (correct/restage), **7E2A** (local apply + catalogue verification) and **7E2B** (commit) all Completed · Accepted. Authorization was **bounded to Step 7E alone**.
+- **Committed migration:** `supabase/migrations/20260803034500_step_7e_governed_core.sql` · version **`20260803034500`** · SHA-256 `422be2850c6913ca040bc54b90902df8eaaf35d66492230553e65ab1b3f8db54` · 66,809 bytes · 1,209 lines
+- **Delivered and locally verified boundary:** **exactly 10 enums, 22 tables, 13 deterministic seed rows, 44 foreign keys and 43 explicit indexes** (8 partial-unique + 35 supporting); no view, RPC, helper function, trigger, extension, additional schema or placeholder column
+- **Delivered centre seed identity:** code **`ispeak`** · display name **`iSpeak Academy`** — seeded in the **local disposable database only**
+- **Local database application and lint: PASSED** — `supabase db reset --local` exit **0**, migration recorded **exactly once**; lint returned **zero errors and zero warnings** (including `--fail-on warning`)
+- **Access posture verified in the catalogue:** **RLS enabled on all 22 tables**, **zero policies**, and **zero effective client table privileges** for `PUBLIC`, `anon`, `authenticated` and `service_role` across all seven privilege types
+- **No hosted database was accessed** at any point — no link, no project reference, no hosted URL; the project has never been linked
+- **Step 7G privilege-review note (carry-forward):** a **pre-existing `supabase_admin` default ACL** in schema `public` may grant client privileges to **future objects created by that role**. It did **not** affect the 22 Step 7E tables, which are **`postgres`-owned and verified at zero client privileges**. **Step 7G must inspect effective and default ACLs before adding any policy or grant.**
+- **Step 7F:** **Not accepted · Not authorized · Not started** — requires a **separate explicit orchestrator authorization** that has not been given
+- **Auth users, fixtures, RLS policies, client grants, RPCs, audit chain, generated types:** **none exist** — `auth.users` contains **0** rows; `supabase/seed.sql` and `supabase/functions` are absent
 - **Environment/client boundaries:** implemented and accepted (Step 7D)
-- **Migrations, seed data, Auth users, application tables:** **none exist** — `supabase/migrations`, `supabase/seed.sql` and `supabase/functions` are absent, zero `.sql` files are tracked, and the local `public` schema still contains **0 application tables**. **The ratified inventory above describes what a future authorized migration would create; no migration has been written.**
-- **Actual current MVP HEAD:** `b367475c180a2e4f4cf70ff1385f34b253356c33` (short `b367475`)
-- **Actual MVP commit count:** **14** — before the later administrative progress commit that will carry this acceptance record
-- **Latest accepted substantive MVP commit:** `b367475c180a2e4f4cf70ff1385f34b253356c33` (`docs(governance): ratify schema-critical MVP architecture`)
-- **Latest accepted administrative progress commit:** `6551d37253e562a40d51e521b93c261daf7efdc9` (`docs(progress): record final MVP governance acceptance`)
+- **Actual current MVP HEAD:** `252ef9b13008629cadc238bdf58b7016c50bb7b2` (short `252ef9b`)
+- **Actual MVP commit count:** **16** — before the later administrative progress commit that will carry this acceptance record
+- **Latest accepted substantive MVP commit:** `252ef9b13008629cadc238bdf58b7016c50bb7b2` (`feat(supabase): add governed core schema migration`)
+- **Latest accepted administrative progress commit:** `584691ebe8b12e8b0eb0d56ca38db259d59ec949` (`docs(progress): record schema architecture ratification`)
 - **Latest accepted platform/implementation commit:** `455a0706b5555c0b4f083327dfd5613d3aa23245` (`feat(platform): add Supabase client boundaries`)
 - **Runtime dependencies (exact-pinned):** `@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`; **Supabase CLI** `2.109.1` (project-local, exact-pinned)
 - **Latest accepted governance baseline:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce`
-- **Repository:** local-only and **clean at `b367475`**; **no tag, no remote, no upstream, nothing pushed**. The working tree carries **only** this checkpoint's three staged progress files.
+- **Repository:** local-only and **clean at `252ef9b`**; **no tag, no remote, no upstream, nothing pushed**. The working tree carries **only** this checkpoint's three staged progress files.
 
 ## Step 7E0 acceptance record (accepted 2026-07-30)
 
@@ -66,7 +71,7 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 | **Date** | `2026-08-03 02:44:20 +0800` |
 | **Summary** | 3 files changed, 479 insertions, 37 deletions (**1 created, 2 modified**) |
 | **Resulting commit count** | **14** |
-| **Acceptance-record commit** | **Pending** — the Step 7E0D2C checkpoint stops before commit |
+| **Acceptance-record commit** | **`584691ebe8b12e8b0eb0d56ca38db259d59ec949`** (`584691e`, Step 7E0D2C / 7E0D2D) |
 
 **Committed files:** `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_003.md` (created, 374 lines) · `CLAUDE.md` · `docs/plan/BEST_Coach_Implementation_Plan.md`. **No progress file was touched by that commit**, so the workspace tracker and the committed migration copy stayed byte-identical across it.
 
@@ -116,8 +121,9 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 - **Step 7C is completed and accepted (2026-07-24)** — Supabase runtime dependencies (`@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`) exact-pinned, installed and verified; typecheck/lint/build passed; only `package.json` and `package-lock.json` committed as `ffd9eef`; **no clients, migrations, or source code** were created.
 - **Step 7D is completed and accepted (2026-07-30)** — explicit local-versus-hosted environment selection and the three Supabase client boundaries (browser-safe `createBrowserClient`, request-scoped server `createServerClient`, and a separate elevated server-only client) implemented; `server-only` isolation proven by a **negative production build** (a Client Component importing the elevated factory failed the build with exit code 1); all six approved environment variables validated (opaque inputs only — no value rendered, logged, or reported); typecheck/lint/build passed with zero warnings; client-bundle private-name isolation passed (0 occurrences of `SUPABASE_SECRET_KEY`/`LLM_PROVIDER`/`LLM_MODEL`/`LLM_API_KEY` in `.next/static`); only the five implementation files committed as `455a070` (5 files, 363 insertions, 0 deletions); **no query, Auth flow, migration, schema, RLS, audit chain, or hosted operation** occurred.
 - **Step 7E0 (final MVP scope and schema-preflight governance reconciliation) is completed and accepted** — **documentation only**. It created **Amendment 002** (A-014 … A-024) and the **Figma Design 2 screen implementation matrix**, and aligned `CLAUDE.md`, the Implementation Plan, and the progress records to the ratified final MVP scope. Committed as **`722dcb8`**; **no schema, code, dependency, runtime, Auth, seed, or Figma import was authorized or performed by it.**
-- **Step 7E (first governed SQL migration and database foundation) remains Blocked, Not accepted, Not authorized and Not started** — the data-layer tension is **resolved** by Amendment 002 A-023, but Step 7E may be authorized only after **Step 7E0D** is completed, committed, recorded and accepted.
-- **Step 7E0D (schema-critical decision ratification) is the next authorized checkpoint** — **Pending · Authorized 2026-07-30**; documentation and architecture-decision work only. It must resolve the **seven schema-critical blockers** listed under "Current follow-ups". **No SQL migration or application implementation is authorized.**
+- **Step 7E (first governed SQL migration and database foundation) is Completed and Accepted (2026-08-03)** — the data-layer tension was resolved by Amendment 002 A-023, the seven schema-critical blockers by Amendment 003, and the migration itself was authored, corrected, locally verified and committed as `252ef9b` under a **bounded authorization covering Step 7E alone**.
+- **Step 7E0D (schema-critical decision ratification) is Completed and Accepted (2026-08-03)** — committed as `b367475`; it resolved the seven schema-critical blockers at spec-amendment precedence as Amendment 003 A-025 … A-032.
+- **Step 7F is the next checkpoint and is NOT authorized** — it requires a **separate explicit orchestrator authorization** that has not been given. **No Auth user, fixture, RLS policy, client grant, RPC, audit object, generated type or application code is authorized.**
 
 ## Completed tooling state (Step 6, accepted 2026-07-23)
 
@@ -155,10 +161,10 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 
 - **Path:** `C:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\SDS Project Final (BEST Coach)`
 - **Branch:** `main`
-- **Latest accepted substantive commit:** `b367475c180a2e4f4cf70ff1385f34b253356c33` (`docs(governance): ratify schema-critical MVP architecture`)
-- **Current HEAD:** `b367475c180a2e4f4cf70ff1385f34b253356c33` (`b367475`)
-- **History:** **fourteen** accepted commits — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (local Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies) → `5d10bd0` (runtime dependency records) → `455a070` (Supabase client boundaries) → `e07b213` (Supabase client-boundary records) → `722dcb8` (final single-centre three-flow MVP governance ratification) → `6551d37` (final MVP governance acceptance records) → `b367475` (schema-critical MVP architecture ratification)
-- **Working tree:** clean at `b367475` apart from this checkpoint's three staged progress files
+- **Latest accepted substantive commit:** `252ef9b13008629cadc238bdf58b7016c50bb7b2` (`feat(supabase): add governed core schema migration`)
+- **Current HEAD:** `252ef9b13008629cadc238bdf58b7016c50bb7b2` (`252ef9b`)
+- **History:** **sixteen** accepted commits — `4de3f93` (scaffold) → `c7c27e5` (governance baseline) → `a39ed21` (closure synchronization) → `0cdb782` (local Supabase tooling scaffold) → `a83ec7a` (tooling closure records) → `25551c5` (Windows local-stack remediation) → `329f03c` (Phase 0 runtime foundation records) → `ffd9eef` (Supabase runtime dependencies) → `5d10bd0` (runtime dependency records) → `455a070` (Supabase client boundaries) → `e07b213` (Supabase client-boundary records) → `722dcb8` (final single-centre three-flow MVP governance ratification) → `6551d37` (final MVP governance acceptance records) → `b367475` (schema-critical MVP architecture ratification) → `584691e` (schema architecture ratification records) → `252ef9b` (governed core schema migration)
+- **Working tree:** clean at `252ef9b` apart from this checkpoint's three staged progress files
 - **Remote:** none (no tag, no upstream, nothing pushed)
 
 ---
@@ -182,7 +188,9 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 ## Current follow-ups
 
 - **Current npm advisories remain unresolved — 3 high and 0 moderate** (`next` high/direct; `postcss` and `sharp` high/transitive, both through `next`). None is attributable to `supabase@2.109.1`, `@supabase/ssr`, `@supabase/supabase-js`, `server-only`, or their transitive packages; the shift from 1-moderate/2-high reflects npm advisory-database movement raising `postcss` to high, not a dependency change. No `npm audit fix` has been run; remediation is deferred to a reviewed security/dependency checkpoint.
-- **This Step 7E0D2C acceptance record is staged only; its commit is pending.** Nothing here is self-accepted. (The Step 7E0D architecture ratification itself is **accepted** and committed at `b367475`.)
+- **This Step 7E2C acceptance record is staged only; its commit is pending.** Nothing here is self-accepted. (The Step 7E governed-core migration itself is **accepted** and committed at `252ef9b`.)
+- **Step 7E is completed and accepted (2026-08-03).** The governed-core migration was applied to a **local disposable database only**, verified against the catalogue, and committed. **Step 7F remains unauthorized and unstarted** and requires a **separate explicit orchestrator authorization**.
+- **Step 7G must begin with a privilege review.** A pre-existing **`supabase_admin` default ACL** in schema `public` may grant client privileges to future objects created by that role; it did not affect the 22 `postgres`-owned Step 7E tables, which are verified at zero client privileges. **Inspect effective and default ACLs before adding any policy or grant.**
 - **Step 7E0D is completed and accepted (2026-08-03).** All seven schema-critical blockers are resolved by Amendment 003. **This did not authorize Step 7E.** **Step 7E requires a separate explicit orchestrator authorization that has not been given** — resolving the blockers made it **eligible**, not **authorized**.
 - **Audit-chain design remains unratified and blocks Step 7H** — chain scope, canonical serialization, hash application, previous-hash rules, genesis, and verification/repair. **These must not be inferred, defaulted, or decided inside a migration.**
 - **Figma Design 2 implementation handoff** — **pending**. The orchestrator must supply or verify, per approved screen: **node-specific `/design/` frames**, screen names, flows, intended routes, responsive variants, component/interaction states, and the **loading, empty, validation, error, success and disabled** states; the **design-variable or approved token inventory** (typography, colours, spacing, radii, shadows); and the **approved logos, SVG icons and image assets**; plus prototype transitions, interaction notes, and any discrepancy against a ratified governance rule. **It is NOT a blocker for Step 7E unless an unresolved Figma field changes the domain relationship model.** **It IS a blocker for the corresponding UI implementation checkpoint.** **Missing visual or interaction details must not be guessed** — implementation stops and asks. Tracking artefact: `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` § "Orchestrator Figma Porting Actions". **No Figma asset has been scraped, exported, downloaded, or ported, and no node ID has been fabricated.**
@@ -265,8 +273,8 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 
 ## Next permitted action
 
-**Review and commit the staged Step 7E0D2C acceptance record.** Exactly three progress files are **staged** — `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`. The acceptance-record commit has **not** been created, and this record does **not** self-accept.
+**Review and commit the staged Step 7E2C acceptance record.** Exactly three progress files are **staged** — `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`. The acceptance-record commit has **not** been created, and this record does **not** self-accept.
 
-**After that commit is accepted, no implementation checkpoint becomes authorized automatically.** **Step 7E — the first governed SQL migration — requires a separate, explicit orchestrator authorization.** Amendment 003 records **what** the first migration would contain; it does **not** authorize writing it. The accepted sequence **7E → 7F → 7G → 7H → 7I → 7J** is preserved unchanged, and the **Figma Design 2 implementation handoff remains pending**.
+**After that commit is accepted, no implementation checkpoint becomes authorized automatically.** **Step 7F — synthetic Auth users and domain fixtures — requires a separate, explicit orchestrator authorization.** Step 7E's authorization was **bounded to Step 7E alone**. The accepted sequence **7F → 7G → 7H → 7I → 7J** is preserved unchanged, **Step 7G must begin with the `supabase_admin` default-ACL privilege review**, and the **Figma Design 2 implementation handoff remains pending**.
 
-**No schema work is currently authorized.** Step 7E remains **Blocked · Not accepted · Not authorized · Not started**. This checkpoint made **no** code, dependency, schema, migration, seed, Auth, fixture, database-type, runtime, Supabase, test, or Figma change; `supabase login` / `supabase link` remain deferred; no commit, tag, remote or push occurred; `.env.local` was not accessed. No secret value may be printed, reported, or committed. Synthetic data only.
+**No further implementation is currently authorized.** Step 7F remains **Not accepted · Not authorized · Not started**. This checkpoint made **no** code, dependency, schema, migration, seed, Auth, fixture, database-type, runtime, Supabase, test, or Figma change, and **ran no database command**; `supabase login` / `supabase link` remain deferred; no commit, tag, remote or push occurred; `.env.local` was not accessed. No secret value may be printed, reported, or committed. Synthetic data only.
