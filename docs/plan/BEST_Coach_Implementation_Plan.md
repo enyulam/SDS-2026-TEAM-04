@@ -1,12 +1,16 @@
 # B.E.S.T Coach — Implementation Plan (Orchestrator's Script)
 
-**Companion to:** `CLAUDE.md` (the agent's standing contract), the Complete MVP Specification (v3), its ratified **Amendment 001** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md`), and its ratified **Amendment 002** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md`)
+**Companion to:** `CLAUDE.md` (the agent's standing contract), the Complete MVP Specification (v3), its ratified **Amendment 001** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md`), its ratified **Amendment 002** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md`), and its ratified **Amendment 003** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_003.md`)
 **Audience:** you, as orchestrator and reviewer, working with Claude Code in VS Code
 **Purpose:** a start-to-end script for driving the build, with concrete tasks, verification steps, and review checklists at every stage — not just a restatement of the phases in `CLAUDE.md`.
 
 > **Authority (Amendment 001 A-012).** This plan is **procedural** — it may add Phase 5 (final integration/UAT/quality) and review detail, but it **cannot override** the specification or a ratified amendment. Where this plan and v3-as-amended disagree, **v3-as-amended governs**. Several passages below were reconciled to Amendment 001 and then to Amendment 002; each is marked inline.
 
 > **Amendment 002 reconciliation (2026-07-30).** This plan is reconciled to Amendment 002 **A-014 … A-024**: the one-centre / three-flow MVP boundary; the **Centre → Class Grade → Class Module → Class Session** hierarchy; **mandatory nine-dimension assessment with Quick mode removed**; Present-by-default attendance with a trainer Absent toggle; management administration scope; the profile/invitation model; **one canonical role-aware feedback report**; **Figma Design 2 as the final UI authority**; **Supabase-native data access with no general-purpose ORM**; and the revised three-flow phasing and UAT.
+>
+> **Amendment 003 reconciliation (2026-08-03).** This plan is reconciled to Amendment 003 **A-025 … A-032**: centre-independent `accounts` with **membership-scoped roles**; enum-vs-reference-table rules; the **absolute authentication-secret prohibition** for application tables; the report **aggregate/version** model with **approval as the freeze point**; audit-compatibility guarantees; the **deny-by-default** privilege posture; and the **exact Step 7E boundary of 10 enums, 22 tables and 13 deterministic seed rows**, with its explicit exclusions. Amendment 003 **clarifies rather than reverses** Amendment 002 and **names no Amendment 001 clause**.
+>
+> **Amendment 003 is not an implementation authorization.** It governs **schema architecture and migration boundaries**. **Step 7E remains blocked, unauthorized and unstarted** after Amendment 003 is staged **and** after it is committed. Ratifying an architecture is not the same as authorizing its construction — **Step 7E requires a separate, explicit orchestrator authorization**.
 >
 > **Accepted history is not renumbered and not rewritten.** The completed migration and Phase 0 checkpoints — through the **complete, accepted Step 7D sequence** (Supabase environment and client boundaries) — **remain historically unchanged**. The product decisions in Amendment 002 **do not invalidate the accepted Step 7D client-boundary work**: Step 7D created browser / request-scoped / elevated client boundaries only, committed the project to no domain shape, and is unaffected by a scope or hierarchy decision. No accepted checkpoint identifier below is renumbered.
 
@@ -70,24 +74,53 @@ Nothing here is Claude Code's job — it cannot complete OAuth flows or hold API
 - [ ] **Management administration scope** (**A-019**) and the **profile/invitation model** (**A-020**) are reflected in the intended identity and class-hierarchy tables.
 - [ ] **One canonical role-aware report** (**A-021**) is reflected in the intended report read model — one shared projection, not three.
 - [ ] **One centre, three flows** (**A-014**, **A-015**) is reflected in scope, seed design, and RLS scoping — with the `centres` entity and its relationships kept real.
+- [ ] **Schema architecture and the first-migration boundary** are ratified at spec-amendment level (**Amendment 003, A-025 … A-032**) and reflected in `CLAUDE.md` (§1 precedence and table, ADR-3, ADR-7, §6, **§6.1**, §9, §10 Phase 0, §12) and this plan. Any older `management_centre_assignments` / `trainer_class_assignments` / `parent_child_links` naming, `reports.checklist_*` column location, or `report_versions.kind` / `audience` visibility mechanism is **historical**.
 
-**G1b — Schema-critical decisions that must be ratified before Step 7E (still open at the time this gate was written):**
+**G1b — Schema-critical decisions (RESOLVED by Amendment 003; verify each is reflected, do not re-decide):**
 
-- [ ] **`public` profile table's physical relationship to `auth.users`** (1:1 keyed profile vs alternative).
-- [ ] **Audit target representation** — typed FK vs polymorphic `target_type` / `target_id`.
-- [ ] **Report-status storage representation** — display names vs a normalized enum spelling.
-- [ ] **Deliberate `GRANT` strategy for newly created tables** — new `public` entities are not automatically reachable by `anon` / `authenticated` / `service_role`; a missing grant must never be misdiagnosed as an RLS failure.
-- [ ] **Enum versus reference table** at schema level — including **Class Grade** (`Beginner` / `Intermediate` / `Advanced`) and report status.
-- [ ] **Invitation token and expiry implementation details**, and the storage of the `pending` / `accepted` / `expired` / `revoked` states.
-- [ ] **First-migration table and enum scope** — exactly which tables and enums the first migration creates.
+Each item below records the decision that closed it. **These are no longer open questions — a differing schema shape is a defect, not a choice.**
 
-**G1c — Audit-design decisions (ratify before the audit-chain checkpoint; they do not all block the first migration):**
+- [x] **`public` profile relationship to `auth.users`** → **A-025**: centre-independent `accounts` with an **application-owned UUID** and a **nullable, unique `auth_user_id`**. Profiles never key to `auth.users`. `students` have **no** Auth linkage at all. *(Closes Amendment 002 U-17.)*
+- [x] **Role authority** → **A-025**: role lives **only** on `centre_memberships` (`management` / `trainer` / `parent`; **no TA**). **No `role` or `centre_id` on `accounts`.** Account lifecycle (`active`/`deactivated`) and membership lifecycle (`pending`/`active`/`deactivated`) are **separate**. Role changes **deactivate and re-create** a membership. Role/profile agreement uses **composite keys and composite FKs**, never a cross-table `CHECK`. Cardinality (one active membership per account+centre; one active `management` membership per centre) uses **partial unique indexes restricted to active rows**.
+- [x] **Audit target representation** → **A-029**: **polymorphic target IDs with immutable minimal snapshots and no FK**, plus a **related-target child table** (not a JSONB blob). **Durable actor FKs (`RESTRICT`) for centre/account/membership attribution** — this is **not** a blanket no-FK rule. *(Closes Amendment 002 U-12.)*
+- [x] **Report-status storage representation** → **A-028**: a normalized `report_status` enum with **exactly seven** values — `incomplete`, `observation_saved`, `drafting`, `draft_ready`, `needs_edit`, `approved`, `submitted`. **`Evidence Pending` is not a stored status** (evidence scope/uploader unresolved — A-014); this deletes **no** evidence safeguard.
+- [x] **`GRANT` strategy for new tables** → **A-030**: **deny-by-default**. Step 7E enables RLS on every table with **zero policies** and **zero client privileges** (no `SELECT`, no DML, no `EXECUTE` for `PUBLIC` / `anon` / `authenticated` / `service_role`); `CREATE` on `public` revoked from `PUBLIC`. **Privilege and policy are separate layers.** In **Step 7G**, **a policy and its minimum matching grant ship together**. *(Closes Amendment 002 U-16.)*
+- [x] **Enum versus reference table** → **A-026**: enum for **closed, security/workflow-bearing, non-runtime-editable** vocabularies; table where **FK identity, ordering or labels** are needed; **hybrid** for **Class Grade** (`class_grade_code` enum + **centre-owned** rows) and the **nine dimensions** (`dimension_code` enum + **global** rows). Session-lifecycle and audit vocabularies are **deferred — do not invent a placeholder enum.** *(Closes Amendment 002 U-19.)*
+- [x] **Invitation token and expiry** → **A-027**: **no application table may hold a raw token, OTP, password, access token, refresh token or secret hash** — enforced by the **absence of any such column**. An invitation targets a **`pending` centre membership**, carries an **immutable normalized email** (acceptance-time proof only) plus **stored status and `expires_at`**, and its **effective expiry is evaluated transactionally** (a partial unique index cannot reference `now()`). **Revoke or supersede before reissue**; **reuse the existing account** for a later-centre invitation. *(Closes Amendment 002 U-18. Invitation **duration** remains an operational default — U-20 — and does **not** block schema design.)*
+- [x] **Report aggregate and freeze point** → **A-028**: one aggregate per Class Session + student (valid enrolment required) owning the status, `lock_version`, `current_cycle_version_id` and `latest_submitted_version_id`; **self-contained versions** with **exactly nine immutable rating snapshots**; **approval — not submission — freezes**; **version-scoped immutable checklist and approval evidence**; edits **clone into a new version**; a submitted version **never reopens**; the **previous submitted version stays canonical** during correction. **No version-kind enum and no audience column.**
+- [x] **First-migration table and enum scope** → **A-031**: **exactly 10 enums, 22 tables and 13 deterministic seed rows** — the canonical inventory in Amendment 003 A-031 and `CLAUDE.md` §6.1. **Seed UUIDs are fixed literals across environments**, and a seed insert **asserts on the natural key and fails on divergence** — never a silent upsert, never a quiet do-nothing. Centre seed values: code **`ispeak`**, display name **`iSpeak Academy`**.
 
-- [ ] **Audit-chain scope** — one global chain vs one chain per target/tenant.
-- [ ] **SHA-256 ratification** for the audit hash (spec §23 names no algorithm).
-- [ ] **Audit-chain genesis rule** — sentinel vs zero-hash for the first entry.
+**G1c — Audit-design decisions (ratify before the audit-chain checkpoint; they do not block the first migration):**
 
-**Gate rule.** Every G1a and G1b item must be **explicitly ratified and recorded** before Step 7E begins. G1c items must be ratified before the audit-chain checkpoint. **If an item is unresolved, stop and request an orchestrator decision — do not guess a schema shape and do not "decide it in the migration."**
+- [x] **Audit target representation** — **RESOLVED by A-029** (moved to G1b above; retained here for traceability).
+- [ ] **Audit-chain scope** — one global chain vs one chain per target/tenant. **(Amendment 002 U-13 — still open.)**
+- [ ] **SHA-256 ratification** for the audit hash (spec §23 names no algorithm). **(Amendment 002 U-14 — still open.)**
+- [ ] **Audit-chain genesis rule** — sentinel vs zero-hash for the first entry. **(Amendment 002 U-15 — still open.)**
+- [ ] **Canonical serialization**, **previous-hash rules**, and **verification/repair procedures**. **(Explicitly NOT ratified by Amendment 003 — Step 7H.)**
+
+**G1d — Checkpoint decomposition and the Step 7E boundary (Amendment 003 A-031, A-032).**
+
+**Phase 0's build list is the *phase* scope, not the first migration's scope.** It is delivered as separate, separately-authorized checkpoints, in this order:
+
+| Checkpoint | Scope |
+|---|---|
+| **7E** | The **first governed migration** — exactly the A-031 inventory: 10 enums, 22 tables, 13 seed rows, all constraints and indexes, **RLS enabled with zero policies and zero client grants** |
+| **7F** | Synthetic Auth users and domain fixtures |
+| **7G** | **RLS policies with their minimum matching grants**, and the access proofs |
+| **7H** | Audit tables and the hash chain |
+| **7I** | Reviewed **read/mutation RPCs** and server-action proof |
+| **7J** | Committed **generated database types** |
+
+**Excluded from Step 7E** — do not fold a later checkpoint's artefacts into the first migration: RLS policies and client grants (7G) · Auth users and fixtures (7F) · audit objects and hash chain (7H) · RPCs and server-action proof (7I) · generated database types (7J) · AI schema · evidence schema · session-lifecycle enum · private helper schema · **views, RPCs and helper functions (absent from Step 7E entirely)** · UI and Figma implementation. **No placeholder or dangling AI/evidence/audit/hash-chain columns, and no extension** — PostgreSQL 17 built-ins suffice.
+
+**Gate rule.** Every G1a and G1b item must be **explicitly ratified and recorded** before Step 7E begins — **G1b is now satisfied by Amendment 003, and its items are to be verified as reflected, not re-decided.** G1c items must be ratified before the audit-chain checkpoint. **If an item is unresolved, stop and request an orchestrator decision — do not guess a schema shape and do not "decide it in the migration."**
+
+**Authorization rule — separate from the gate.** Passing Gate G1 makes Step 7E **eligible**; it does **not** make it **authorized**. **Step 7E is blocked, unauthorized and unstarted**, and stays that way until the **Step 7E0D ratification checkpoint is accepted and committed** *and* the orchestrator issues an **explicit Step 7E authorization**. **Amendment 003 does not authorize migration implementation.**
+
+**Step 7E0D — schema-critical decision ratification (the checkpoint that closes G1b).**
+
+- **Step 7E0D1 — read-only architecture analysis: COMPLETE.** Decisions A–G were analysed and corrected across the review; the analysis produced **no file, SQL, schema, Auth, runtime or repository change of any kind**. It was analysis only and ratified nothing by itself.
+- **Step 7E0D2 — ratification and documentation only.** Records the ratified architecture at the correct precedence levels (**Amendment 003**), reconciles `CLAUDE.md` and this plan, and updates the progress and tracker records. **It creates no SQL, migration, seed, Supabase function, Auth user, fixture, database type, application code, test, dependency or Figma asset.** Step 7E0D2 is a **documentation checkpoint**; completing it authorizes **nothing** beyond itself.
 
 ---
 
@@ -127,15 +160,15 @@ Nothing here is Claude Code's job — it cannot complete OAuth flows or hold API
 **Sessions (rough):** 2–4.
 
 **What you ask Claude Code to do:**
-1. Read `CLAUDE.md` fully, then the spec fully, then **Amendment 001**, then **Amendment 002**, then this Implementation Plan. (The AI Features Breakdown is **currently unavailable and non-blocking** — A-011; UI reference material is **installed later, after an approved disposition** — A-013/A-022, so for Phase 0 use the **spec §8 Screen & Page Inventory as amended by Amendment 002 A-014/A-019** plus the Figma screen matrix as the screen list.) Confirm back to you in its own words what the core governance rule is, before writing any code — this is a cheap way to catch a misread early.
+1. Read `CLAUDE.md` fully, then the spec fully, then **Amendment 001**, then **Amendment 002**, then **Amendment 003**, then this Implementation Plan. (The AI Features Breakdown is **currently unavailable and non-blocking** — A-011; UI reference material is **installed later, after an approved disposition** — A-013/A-022, so for Phase 0 use the **spec §8 Screen & Page Inventory as amended by Amendment 002 A-014/A-019** plus the Figma screen matrix as the screen list.) Confirm back to you in its own words what the core governance rule is, before writing any code — this is a cheap way to catch a misread early.
 2. Scaffold the Next.js (App Router) project with the `/server/modules/*` structure from `CLAUDE.md` §9.
 3. Install and configure the **Supabase-native** client libraries (`@supabase/ssr`, `@supabase/supabase-js`) and the browser / request-scoped / elevated `server-only` boundaries; connect to your Singapore project using the `.env.local` values. **(Amendment 002 A-023): no Prisma, no Drizzle, no general-purpose ORM.** Supabase SQL migrations are the schema source of truth; generated Supabase database TypeScript types are authoritative for application data types.
-4. Write the initial schema migration **only after the governance and schema-preflight gate below has passed**. Core tables from spec §20 **as amended by Amendment 002 A-016** — identity/profile tables, `parent_child_links`, `centres`, `management_centre_assignments`, the **Class Grade / Class Module / Class Session** hierarchy (replacing the flat `classes` → `class_sessions` assumption), enrolment, trainer **class-session** assignment, invitations, `students`, `attendance`, `observations`, `observation_ratings` (with the B.E.S.T enums — **all nine dimensions, no `mode` column**), `reports`, `report_versions`, `audit_events`, plus the PDPA-relevant tables (`consent_records`, `retention_policies`, `erasure_requests`) even though their logic isn't built yet.
+4. Write the initial schema migration **only after Gate G1 has passed *and* the orchestrator has explicitly authorized Step 7E**. **(Amendment 003 A-031, A-032 — this step is now bounded):** Step 7E creates **exactly** the canonical inventory — **10 enums, 22 tables and 13 deterministic seed rows** (Amendment 003 A-031; `CLAUDE.md` §6.1) — with all constraints and indexes, **RLS enabled on every table**, **zero policies** and **zero client grants**. It creates **no** `audit_events`, **no** PDPA tables (`consent_records`, `retention_policies`, `erasure_requests`), **no** view, RPC or helper function, and **no** placeholder AI/evidence/audit column; those belong to their own checkpoints per **G1d**. Physical names come from the ratified inventory — **`centre_memberships`, `class_session_assignments`, `parent_student_links`**; the older `management_centre_assignments`, `trainer_class_assignments` and `parent_child_links` names are **historical**. The hierarchy is **Class Grade / Class Module / Class Session** (replacing the flat `classes` → `class_sessions` assumption), and `observation_ratings` carries the B.E.S.T enums — **all nine dimensions, no `mode` column**.
    - **Keep `centres` a real entity with real relationships.** The MVP runs on **exactly one seeded centre**, but the one-centre operation must come from **seed data and the absence of centre-management UI**, never from hardcoding the centre away, dropping the foreign keys, or collapsing centre scoping out of RLS. Future multi-centre support must stay **additive**.
    - **Calendars are projections**, not stored event tables. Do not create a management-calendar table and a trainer-calendar table; both views read the same class-session records, filtered by the live trainer assignment.
-5. Implement the audit module: append-only grant (`INSERT`-only, `UPDATE`/`DELETE` revoked at the DB level), hash-chaining logic (`entry_hash = hash(prev_hash + payload)`).
+5. Implement the audit module: append-only grant (`INSERT`-only, `UPDATE`/`DELETE` revoked at the DB level), hash-chaining logic (`entry_hash = hash(prev_hash + payload)`). **(Amendment 003 A-029, A-032): this is Step 7H, not Step 7E** — the first migration creates no audit object. Step 7E must only avoid making this design impossible later (stable account/membership attribution; durable actor FKs; polymorphic targets with label snapshots). **Chain scope, canonical serialization, hash application, previous-hash rules, genesis, and verification/repair are NOT ratified — G1c. Do not infer or default them.**
 6. Wire Supabase Auth; scaffold a minimal login flow for at least the trainer role.
-7. Write an initial RLS policy for one table (e.g. `reports`, scoped to trainer-class assignment) as a proof of the pattern — full RLS coverage comes in Phase 1, but Phase 0 proves the mechanism works at all.
+7. Write an initial RLS policy for one table (e.g. `reports`, scoped to trainer-class assignment) as a proof of the pattern — full RLS coverage comes in Phase 1, but Phase 0 proves the mechanism works at all. **(Amendment 003 A-030, A-032): this is Step 7G, not Step 7E.** Step 7E **enables** RLS with **zero policies and zero client grants**; the first policy arrives **together with its minimum matching grant** — neither is added alone. Remember that **privilege and policy are separate layers**: a missing grant must never be misdiagnosed as an RLS failure.
 8. Set up the testing stack: Vitest + React Testing Library, Playwright (**pre-approved by Amendment 001 A-009 — install without a separate flag**), and write the seed script producing the synthetic dataset from `CLAUDE.md` §11.
 9. Maintain the permanent continuity documents `docs/progress/STATUS.md` **and** `docs/progress/BUILD_NOTES.md` (both already created at Step 5B) — update `STATUS.md` to reflect Phase 0 state and add a dated `BUILD_NOTES.md` entry for the Phase 0 work (Amendment 001 A-008).
 
@@ -147,7 +180,7 @@ Nothing here is Claude Code's job — it cannot complete OAuth flows or hold API
 - [ ] Confirm `.env.local` is git-ignored and no key appears in any committed file (`git log -p` or a secret-scan tool).
 - [ ] Read `STATUS.md` — does it accurately describe what you just watched happen?
 
-**Exit condition (from `CLAUDE.md` §10):** a logged-in trainer can hit one authorized server action and it produces a verifiable, hash-chained audit row.
+**Exit condition (from `CLAUDE.md` §10):** a logged-in trainer can hit one authorized server action and it produces a verifiable, hash-chained audit row. **(Amendment 003 A-032): this is the exit condition for Phase 0 as a whole — through Step 7J — not for Step 7E.** Step 7E's own completion is the ratified inventory created, constrained, RLS-enabled and **unreachable by any client**; the review checklist above cannot be run until the later checkpoints that create Auth users (7F), policies and grants (7G), and the audit chain (7H) have been separately authorized and completed.
 
 ---
 
@@ -277,8 +310,8 @@ This phase also implements the **gated parent evidence access** ratified in Amen
 - [ ] **Management report-edit denial** — an automated negative test proves a management edit call is **rejected server-side**, including when the UI is bypassed entirely.
 - [ ] **Parent report-edit denial** — an automated negative test proves the same for a parent account.
 - [ ] **Trainer-authorized report editing** — an automated test proves the assigned trainer **can** edit the governed editable version, and that an unassigned trainer cannot.
-- [ ] **Checklist reset after trainer edit** — an automated test proves all quality-checklist columns reset to `false` after any save from the edit path, and that Approve & Submit is consequently blocked; manual: check all three, edit, confirm all three are cleared.
-- [ ] **Immutable submitted approval snapshots** — an automated test proves a trainer edit creates or updates the **editable** version and **never mutates the submitted approval snapshot in place**; the snapshot's content still verifies against its stored hash afterwards.
+- [ ] **Checklist reset after trainer edit** — an automated test proves the **working version's** quality-checklist progress is cleared after any save from the edit path, and that Approve & Submit is consequently blocked; manual: check all three, edit, confirm all three are cleared. **(Amendment 003 A-028): checklist progress is version-scoped (`report_version_checklist_progress`), not `reports.checklist_*` columns** — and a **frozen** version's checklist and approval evidence are **immutable and must never be cleared**. Add a negative test for that.
+- [ ] **Immutable frozen approved versions** — an automated test proves a trainer edit **clones into a new mutable version** and **never mutates a frozen approved or submitted version in place**; the frozen version's content still verifies against its stored hash afterwards. **(Amendment 003 A-028): approval — not submission — is the freeze point**, and the **previous submitted version stays canonical** while correction work is in progress. Add a test that a reader sees the previous submitted version, never a gap and never draft content.
 - [ ] **One shared canonical report projection** — a repository/architecture check proves trainer, management and parent read the **same** submitted-report read model and the **same** presentation components — no second or third report format exists.
 
 ### Final integration (A-024)
