@@ -2,16 +2,16 @@
 
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 
-_Last updated: 2026-08-03 (Step 7F0E — **Step 7E is completed and accepted** and the **Step 7F synthetic-fixture design is completed and ratified**, committed as `936cf4e`. This acceptance-record change set is **staged, commit pending**. Step 7D, Step 7E0 and Step 7E0D remain completed and accepted; **Step 7F implementation is unauthorized and unstarted and requires a separate explicit orchestrator authorization**)._
+_Last updated: 2026-08-03 (Step 7F1F — **Step 7F is completed and runtime-accepted**. The deterministic local synthetic fixture was implemented, corrected across five recorded incidents, proven by operator and independent runtime verification, and committed as `e197f91`. This acceptance-record change set is **staged, commit pending**. Step 7D, Step 7E0, Step 7E0D and Step 7E remain completed and accepted; **Step 7G is not started, is not authorized by this record, and must begin with the P-1 `supabase_admin` default-ACL review**)._
 
 ---
 
 ## Current project state
 
 - **Project:** B.E.S.T Coach MVP
-- **Lifecycle stage:** Phase 0 in progress — client boundaries accepted and the **first governed SQL migration delivered**; Auth population, fixtures, RLS policies, client grants, RPCs, audit chain and generated types **not started**
+- **Lifecycle stage:** Phase 0 in progress — client boundaries accepted, the **first governed SQL migration delivered**, and the **deterministic local synthetic fixture delivered and runtime-accepted**; RLS policies, client grants, RPCs, audit chain and generated types **not started**
 - **Migration/tooling status:** Step 6 local tooling **completed and accepted**
-- **Current checkpoint:** **Step 7E2C — Record and stage acceptance of the governed-core migration (documentation only)**
+- **Current checkpoint:** **Step 7F1F — Record and stage acceptance of the Step 7F fixture implementation (documentation only)**
 - **Checkpoint status:** **Staged — acceptance-record commit pending.** Nothing in this checkpoint is self-accepted.
 - **Step 7D:** **Completed and fully accepted** (7D1 → 7D4 and overall)
 - **Step 7E0:** **Completed and accepted (2026-07-30)** — substantive governance commit **`722dcb8`**; sub-checkpoints **7E0A** (change set) and **7E0B** (commit) both Completed · Accepted; its acceptance record committed at **`6551d37`** (Step 7E0C / 7E0C2)
@@ -28,23 +28,27 @@ _Last updated: 2026-08-03 (Step 7F0E — **Step 7E is completed and accepted** a
 - **No hosted database was accessed** at any point — no link, no project reference, no hosted URL; the project has never been linked
 - **Step 7G privilege-review note (carry-forward):** a **pre-existing `supabase_admin` default ACL** in schema `public` may grant client privileges to **future objects created by that role**. It did **not** affect the 22 Step 7E tables, which are **`postgres`-owned and verified at zero client privileges**. **Step 7G must inspect effective and default ACLs before adding any policy or grant.**
 - **Step 7F design (7F0A … 7F0D): Completed and ratified (2026-08-03)** — committed as `936cf4e`; the ratified record is `docs/plan/STEP_7F_SYNTHETIC_FIXTURE_BASELINE.md`
-- **Step 7F implementation: Not accepted · Not authorized · Not started** — ratifying the design made Step 7F **ready**, not **authorized**; it requires a **separate explicit orchestrator authorization** that has not been given
-- **Ratified Step 7F fixture footprint (designed, NOT created):** **3 synthetic Auth users** · **25 application-domain rows** (15 core + 10 assessment) · **1 observation** · **9 mixed ratings** · **0 reports** · **0 report versions** · **0 report-version ratings** · **0 checklist-progress rows** · **0 approval rows** · **0 invitation rows**
-- **Ratified delivery mechanism:** a **local-only Node ESM loader plus static transactional SQL** under `scripts/fixtures/`, with verification/negative-test SQL, one future package script and **no new dependency** — **no `supabase/seed.sql`, no second migration, no direct `auth.users` insertion, no password hash, no invitation row**. **None of these files exist yet.**
+- **Step 7F implementation — deterministic local synthetic fixture:** **Completed and runtime-accepted (2026-08-03)** — substantive implementation commit **`e197f91`**; sub-checkpoints **7F1A** (author/stage), **7F1B** (timestamp reconciliation + static audit), **7F1C** (blocked: no interactive TTY), **7F1C1** (Windows password handler), **7F1C2** (domain SQL operation guard), **7F1C3** (negative tests N2/N3/N4 + loader exit path), **7F1D** (independent runtime verification) and **7F1E** (commit) all Completed · Accepted. Authorization was **bounded to Step 7F alone**.
+- **Delivered and verified Step 7F fixture footprint:** **3 synthetic Auth users** · **25 application-domain rows** (15 core + 10 assessment) · **28 canonical checksum rows** · **1 observation** · **9 mixed ratings** · **0 reports** · **0 report versions** · **0 report-version ratings** · **0 checklist-progress rows** · **0 approval rows** · **0 invitation rows** · **no Student Auth identity**. Anchored on **1 centre**, Class Grade **`beginner`**, **1 student**, **1 parent-student link**, **1 Class Module**, **1 Class Session**, **1 enrolment**, **1 trainer assignment** and **1 `present` attendance row**. Created in the **local disposable database only**.
+- **Canonical fixture checksum (accepted):** SHA-256 **`d6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517`** — operator Checksums **A**, **B** and **C** were **identical**, and independent verification reproduced the same value
+- **Delivered delivery mechanism:** a **local-only Node ESM loader plus static transactional SQL** under `scripts/fixtures/`, with verification/negative-test SQL, exactly one `package.json` script (`fixtures:local`) and **no new dependency** — **no `supabase/seed.sql`, no second migration, no direct `auth.users` insertion, no password hash, no invitation row**. The loader supports a **clean load** and an **explicit bounded `--reload`** only; a duplicate clean load is **rejected before any password prompt and makes no mutation**.
 - **Deterministic Auth UUIDs (ratified):** management `d0000000-0000-4000-8000-000000000001`, trainer `...002`, parent `...003`, caller-supplied through the supported Auth Admin API and linked through `accounts.auth_user_id`; every Auth and domain UUID and every fixture timestamp is a **fixed literal**, so the acceptance checksum covers **all** fixture columns including `accounts.auth_user_id`. The runtime-generated fallback is **withdrawn**, and a mismatch must **abort rather than adapt**.
 - **Credential rule (binding):** fixture passwords are entered **only through no-echo interactive stdin in an operator-controlled local terminal** — **no environment-variable path**, and **no password or credential may enter chat, any tracked or untracked file, a log, an error or a report**. **No pattern-based redaction**; credential-bearing stdout and stderr stay **captured and unrendered**; connection values stay **process-memory only**.
 - **The broader `CLAUDE.md` §11 fixture shape is deferred and additive, not deleted** — 2 trainers, 2 class modules, 3–4 students per module, 2 parents and a **second Class Session** remain required before the Phase 1 grounding-validation and continuity proofs.
 - **N-4 / U-23 (production Management bootstrap) remains OPEN** — fixture provisioning does not define or resolve it
-- **Auth users, fixtures, RLS policies, client grants, RPCs, audit chain, generated types:** **none exist** — `auth.users` contains **0** rows; `supabase/seed.sql`, `supabase/functions` and `scripts/` are absent; **no fixture implementation artefact of any kind exists**
+- **Auth users and fixtures:** **delivered** — `auth.users` contains exactly **3** deterministic fixture users and the 22 application tables contain exactly **25** fixture rows in the **local disposable database**; `scripts/fixtures/` holds exactly **3** files; `supabase/seed.sql` and `supabase/functions` remain **absent**
+- **RLS policies, client grants, RPCs, audit chain, generated types:** **not started** — **RLS enabled on all 22 tables**, **zero policies**, **zero privileges** for `anon`, `authenticated`, `service_role` and `PUBLIC`, and exactly **one** applied migration (`20260803034500`)
 - **Environment/client boundaries:** implemented and accepted (Step 7D)
-- **Actual current MVP HEAD:** `936cf4e9b131b99943db6724bfb6eb9b23c07050` (short `936cf4e`)
-- **Actual MVP commit count:** **18** — before the later administrative progress commit that will carry this acceptance record
-- **Latest accepted substantive MVP commit:** `936cf4e9b131b99943db6724bfb6eb9b23c07050` (`docs(fixtures): ratify synthetic fixture baseline`) · **latest schema commit:** `252ef9b13008629cadc238bdf58b7016c50bb7b2`
-- **Latest accepted administrative progress commit:** `20e3650be26c0f40fda32078da32398c924e2672` (`docs(progress): record governed core migration acceptance`)
+- **Actual current MVP HEAD:** `e197f91bbdf3196ef8e0eeee8216d6e7d8e495a7` (short `e197f91`)
+- **Actual MVP commit count:** **20** — before the later administrative progress commit that will carry this acceptance record
+- **Latest accepted substantive MVP commit:** `e197f91bbdf3196ef8e0eeee8216d6e7d8e495a7` (`feat(fixtures): add deterministic local fixture baseline`) · **latest fixture-design commit:** `936cf4e9b131b99943db6724bfb6eb9b23c07050` · **latest schema commit:** `252ef9b13008629cadc238bdf58b7016c50bb7b2`
+- **Latest accepted administrative progress commit:** `098d0eaf2bcba912c366aee6789813410df86b48` (`docs(progress): record fixture design ratification`) · **preceding:** `20e3650be26c0f40fda32078da32398c924e2672`
 - **Latest accepted platform/implementation commit:** `455a0706b5555c0b4f083327dfd5613d3aa23245` (`feat(platform): add Supabase client boundaries`)
 - **Runtime dependencies (exact-pinned):** `@supabase/ssr` `0.12.3`, `@supabase/supabase-js` `2.110.8`, `server-only` `0.0.1`; **Supabase CLI** `2.109.1` (project-local, exact-pinned)
 - **Latest accepted governance baseline:** `c7c27e5e2f772725d88fbed1b5e1459d509960ce`
-- **Repository:** local-only and **clean at `252ef9b`**; **no tag, no remote, no upstream, nothing pushed**. The working tree carries **only** this checkpoint's three staged progress files.
+- **Repository:** local-only and **clean at `e197f91`**; **no tag, no remote, no upstream, nothing pushed**. The working tree carries **only** this checkpoint's three staged progress files.
+- **Local Supabase stack:** **stopped after independent verification** — 10 running containers → **0**, and **no Supabase container remains**. Docker Desktop may remain running.
+- **Fixture credential posture:** passwords remain **operator-controlled, hidden and non-persistent** — entered only through no-echo interactive stdin in an operator-controlled local terminal, never stored, printed, logged, reported or placed in an environment variable, argument or file.
 
 ## Step 7E0 acceptance record (accepted 2026-07-30)
 
@@ -101,6 +105,26 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 **Accepted Step 7E inventory — 13 deterministic seed rows:** **1 centre** (`ispeak` / `iSpeak Academy`) · **3 Class Grades** (`beginner`/Beginner/1, `intermediate`/Intermediate/2, `advanced`/Advanced/3) · **9 assessment dimensions** (Body, Emotion, Speech, Tonality = `competency` 1–4; Eye Contact, Vocal Projection, Emotional Expression, Sentence Flow, Audience Awareness = `speech_linguistics` 5–9).
 
 **None of this has been built.** The inventory above is a **ratified specification of a future authorized migration**. Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`), Amendment 002 (`70e787ff…`) and every `governance-source/` file remain **byte-for-byte unchanged**; the frozen demo remains **unchanged and clean** at `8d4acf4…` with its annotated tag intact. **No previously accepted history was rewritten.**
+
+## Step 7F acceptance record — deterministic local synthetic fixture (accepted 2026-08-03)
+
+**Delivered scope.** Exactly **3 deterministic Auth users** — management, trainer and parent — and exactly **25 application-domain rows**, producing exactly **28 canonical checksum rows**. The dataset is **1 centre**, Class Grade **`beginner`**, **1 student**, **1 parent-student link**, **1 Class Module**, **1 Class Session**, **1 enrolment**, **1 trainer assignment**, **1 `present` attendance row**, **1 observation** and **nine mixed observation ratings**, with **zero** reports, report versions, report-version ratings, checklist-progress rows, approvals and invitations, and **no Student Auth identity**. Created in the **local disposable database only**.
+
+**Runtime proof (accepted).** The bounded `--reload` passed; a duplicate clean load was **rejected before any password prompt and made no mutation**; **two independent reset-and-clean-load cycles** passed; operator **Checksums A, B and C were identical**; and independent verification reproduced the same value. **Canonical SHA-256 `d6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517`.** **37 positive assertions passed**, **all 7 negative tests passed**, and the negative tests **left no residue**. Step 7E seeds remained **1 centre, 3 grades and 9 dimensions**; exactly **one** migration is applied; **RLS is enabled on all 22 tables**, with **zero policies** and **zero unintended privileges**.
+
+**Corrective incidents resolved.** Five defects were found and corrected before acceptance, each proven rather than assumed:
+
+1. The **first operator attempt was blocked** because the execution channel lacked a **genuine interactive TTY**; the loader was not invoked and no alternative password path was substituted.
+2. The initial **Windows password handler set a stream encoding**, so stdin chunks arrived as strings while the handler compared **numeric byte codes** — Enter and Ctrl+C were therefore never recognized.
+3. The **domain SQL operation guard placed psql variables inside a dollar-quoted block**, where psql performs no substitution; the block reached the server verbatim and failed with **SQLSTATE 42601**.
+4. **Verification tests N2, N3 and N4 reached unrelated constraints before their intended ones** and were corrected to isolate the intended invariants.
+5. **stdin remained referenced after completion**, preventing Node from exiting automatically; the loader lifecycle was corrected so both the success and failure paths exit without Ctrl+C.
+
+**All corrected paths were subsequently proven** by operator runtime verification and by independent verification through the approved local `docker exec … psql` contract.
+
+**Committed implementation.** **`e197f91bbdf3196ef8e0eeee8216d6e7d8e495a7`** (short `e197f91`) · `feat(fixtures): add deterministic local fixture baseline` · parent `098d0eaf2bcba912c366aee6789813410df86b48` · **5 files changed, 2,208 insertions(+), 1 deletion(-)**. **Committed locally only — no remote exists and nothing was pushed.**
+
+**Operational state.** The local Supabase stack was **stopped after independent verification** and **no Supabase container remains**; Docker Desktop may remain running. The repository was **clean after the implementation commit**. Fixture passwords remain **operator-controlled, hidden and non-persistent**. The loader supports a **clean load** and an **explicit bounded `--reload`** only. **Production Management bootstrap (N-4 / U-23) remains unresolved and is not replaced, defined or discharged by synthetic fixtures.**
 
 ## Ratified final MVP scope (Amendment 002 — ACTIVE, ratified and committed 2026-07-30)
 
@@ -275,14 +299,15 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 - ~~Step 7E0 governance reconciliation awaiting commit and acceptance~~ — resolved: **committed as `722dcb8` and accepted by the orchestrator on 2026-07-30**; Amendment 002 is **active**. Its acceptance record was committed as **`6551d37`**.
 - ~~The seven schema-critical decisions blocking Step 7E~~ — resolved by **Amendment 003 A-025 … A-032**, **committed at `b367475` and accepted 2026-08-03**. **Resolution is not authorization** — Step 7E remains blocked and unauthorized.
 - ~~Centre seed identity undetermined~~ — resolved: code **`ispeak`**, display name **`iSpeak Academy`**, orchestrator-confirmed and recorded. **Not seeded** — no seed file or row exists.
-- ~~Exact first-migration boundary undetermined~~ — resolved: **10 enums, 22 tables, 13 deterministic seed rows**, with RLS enabled, zero policies and zero client grants, and explicit exclusions assigned to 7F–7J. **Recorded, not created.**
+- ~~Exact first-migration boundary undetermined~~ — resolved: **10 enums, 22 tables, 13 deterministic seed rows**, with RLS enabled, zero policies and zero client grants, and explicit exclusions assigned to 7F–7J. **Delivered and locally verified** by the Step 7E migration `252ef9b`.
+- ~~Step 7F synthetic fixture designed but unimplemented~~ — resolved: **implemented, corrected across five recorded incidents, runtime-proven and committed as `e197f91`**. **3 Auth users, 25 domain rows, 28 canonical rows**, canonical SHA-256 `d6a314b4…`, identical across the bounded reload and two reset-and-clean-load cycles. **Local disposable database only.**
 
 ---
 
 ## Next permitted action
 
-**Review and commit the staged Step 7F0E acceptance record.** Exactly three progress files are **staged** — `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`. The acceptance-record commit has **not** been created, and this record does **not** self-accept.
+**Review and commit the staged Step 7F1F acceptance record.** Exactly three progress files are **staged** — `docs/progress/DEMO_TO_MVP_MIGRATION.md`, `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md`. The acceptance-record commit has **not** been created at the time of writing, and this record does **not** self-accept.
 
-**After that commit is accepted, no implementation checkpoint becomes authorized automatically.** **Step 7F implementation — synthetic Auth users and domain fixtures — requires a separate, explicit orchestrator authorization.** Ratifying the fixture design at `936cf4e` made Step 7F **ready**, not **authorized**.
+**Step 7F is complete.** The next implementation checkpoint is **Step 7G — RLS policies and the minimum matching grants**, which **must begin with the P-1 `supabase_admin` default-ACL review**: effective **and** default ACLs in schema `public` must be inspected **before** any policy or grant is added, so a policy-and-grant pair is not silently widened by an inherited platform default. **Step 7G was not started in this checkpoint and is not authorized by this record** — it requires a separate, explicit orchestrator authorization. The accepted sequence **7F → 7G → 7H → 7I → 7J** is unchanged.
 
-**No further implementation is currently authorized.** **Step 7F implementation remains Not accepted · Not authorized · Not started.** This checkpoint made **no** code, dependency, schema, migration, seed, Auth, fixture, database-type, runtime, Supabase, test, or Figma change, **created no Auth user and no fixture row**, and **ran no database or hosted command**; `supabase login` / `supabase link` remain deferred; no commit, tag, remote or push occurred; `.env.local` was not accessed. **No password or credential was requested, printed or persisted.** Synthetic data only.
+**No further implementation is currently authorized.** This checkpoint made **no** code, dependency, schema, migration, seed, Auth, fixture, database-type, runtime, Supabase, test, or Figma change, **created no Auth user and no fixture row**, and **ran no database, Docker, psql or hosted command**; the local stack remains **stopped** with **no Supabase container**; `supabase login` / `supabase link` remain deferred; no tag, remote or push occurred; `.env.local` was not accessed. **No password or credential was requested, printed or persisted.** Synthetic data only.
