@@ -22,6 +22,13 @@
 --   B  canonical representation for the checksum (read-only)
 --   C  negative tests inside BEGIN ... ROLLBACK
 --   D  post-rollback residue proof (read-only)
+--
+-- Reconciled at Step 7G1F: this file originally asserted the Step 7F-era
+-- access posture (zero policies, zero client grants, one applied
+-- migration). The committed Step 7G relationship-authorization migration
+-- superseded that posture, so A32-A35 and D5 now pin the ACCEPTED Step 7G
+-- posture instead. Every fixture-data assertion, negative test and the
+-- canonical checksum region are unchanged.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -31,8 +38,8 @@
 -- =====================================================================
 DO $verify_positive$
 DECLARE
-  v_n        integer;
-  v_expected text;
+  v_n integer;
+  v_m integer;
 BEGIN
   -- --- Auth identity projection (read-only) -------------------------
   -- Exactly three local Auth users, matched by the three reserved emails.
@@ -188,42 +195,156 @@ BEGIN
   IF (SELECT count(*) FROM public.report_version_approvals) <> 0           THEN RAISE EXCEPTION 'FAIL A30: report_version_approvals must be empty'; END IF;
   IF (SELECT count(*) FROM public.invitations) <> 0                        THEN RAISE EXCEPTION 'FAIL A31: invitations must be empty'; END IF;
 
-  -- --- Access posture is unchanged from Step 7E ----------------------
+  -- --- Access posture matches the COMMITTED Step 7G migration ---------
+  -- (Reconciled at Step 7G1F. Checks are scoped to the 22 project tables
+  -- and the 6 project helpers so unrelated platform objects can never
+  -- cause a false failure.)
+
+  -- A32: RLS and policy posture. Exactly 22 project tables; RLS enabled
+  -- on all and forced on none; exactly the 29 accepted SELECT policies,
+  -- all permissive and scoped to authenticated, distributed exactly as
+  -- committed; zero policies on the nine out-of-scope tables.
+  SELECT count(*), count(*) FILTER (WHERE NOT c.relrowsecurity) INTO v_n, v_m
+    FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND c.relkind = 'r';
+  IF v_n <> 22 OR v_m <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: expected 22 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
+  END IF;
   SELECT count(*) INTO v_n
-    FROM pg_policies
-   WHERE schemaname = 'public'
-     AND tablename IN (
-       'centres','assessment_dimensions','accounts','centre_memberships','trainer_profiles',
-       'parent_profiles','students','parent_student_links','class_grades','class_modules',
-       'class_sessions','enrolments','class_session_assignments','attendance','invitations',
-       'observations','observation_ratings','reports','report_versions','report_version_ratings',
-       'report_version_checklist_progress','report_version_approvals');
-  IF v_n <> 0 THEN RAISE EXCEPTION 'FAIL A32: expected 0 RLS policies on the 22 Step 7E tables, found %', v_n; END IF;
+    FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relforcerowsecurity;
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: FORCE ROW LEVEL SECURITY is enabled on % table(s); expected 0', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n FROM pg_catalog.pg_policies WHERE schemaname = 'public';
+  IF v_n <> 29 THEN
+    RAISE EXCEPTION 'FAIL A32: expected exactly the 29 Step 7G policies, found %', v_n;
+  END IF;
 
   SELECT count(*) INTO v_n
-    FROM (
-      SELECT t.tablename, r.rolname, p.priv
-        FROM (VALUES
-          ('centres'),('assessment_dimensions'),('accounts'),('centre_memberships'),('trainer_profiles'),
-          ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
-          ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
-          ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
-          ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
-        CROSS JOIN (VALUES ('anon'),('authenticated'),('service_role'),('public')) AS r(rolname)
-        CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
-       WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv)
-    ) AS granted;
+    FROM pg_catalog.pg_policies
+   WHERE schemaname = 'public'
+     AND (permissive <> 'PERMISSIVE' OR cmd <> 'SELECT' OR roles <> ARRAY['authenticated']::name[]);
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A33: expected 0 effective client table privileges, found % grant(s)', v_n;
+    RAISE EXCEPTION 'FAIL A32: % policy(ies) are not permissive SELECT policies for authenticated', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres', 1), ('accounts', 2), ('centre_memberships', 2), ('trainer_profiles', 2),
+      ('parent_profiles', 2), ('students', 3), ('parent_student_links', 2), ('class_grades', 1),
+      ('class_modules', 3), ('class_sessions', 3), ('enrolments', 3),
+      ('class_session_assignments', 2), ('attendance', 3)) AS expected(tbl, cnt)
+   WHERE (SELECT count(*) FROM pg_catalog.pg_policies p
+           WHERE p.schemaname = 'public' AND p.tablename = expected.tbl) <> expected.cnt;
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: % table(s) deviate from the accepted Step 7G policy distribution', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_policies
+   WHERE schemaname = 'public'
+     AND tablename IN ('invitations','assessment_dimensions','observations','observation_ratings',
+                       'reports','report_versions','report_version_ratings',
+                       'report_version_checklist_progress','report_version_approvals');
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: % policy(ies) exist on out-of-scope tables; expected 0', v_n;
+  END IF;
+
+  -- A33: table privileges. authenticated holds SELECT on exactly the 13
+  -- relationship tables and no write-side privilege anywhere; anon,
+  -- service_role, authenticator and PUBLIC hold nothing at all on any of
+  -- the 22 project tables. (service_role carries BYPASSRLS, so this zero
+  -- is the only boundary that constrains it.)
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres'),('accounts'),('centre_memberships'),('trainer_profiles'),('parent_profiles'),
+      ('students'),('parent_student_links'),('class_grades'),('class_modules'),('class_sessions'),
+      ('enrolments'),('class_session_assignments'),('attendance')) AS t(tablename)
+   WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, 'SELECT');
+  IF v_n <> 13 THEN
+    RAISE EXCEPTION 'FAIL A33: authenticated must hold SELECT on exactly the 13 relationship tables, matched %', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('invitations'),('assessment_dimensions'),('observations'),('observation_ratings'),
+      ('reports'),('report_versions'),('report_version_ratings'),
+      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+   WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, 'SELECT');
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A33: authenticated holds SELECT on % out-of-scope table(s); expected 0', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres'),('assessment_dimensions'),('accounts'),('centre_memberships'),('trainer_profiles'),
+      ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
+      ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
+      ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
+      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+    CROSS JOIN (VALUES ('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
+   WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, p.priv);
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A33: authenticated holds % write-side table privilege(s); expected 0', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres'),('assessment_dimensions'),('accounts'),('centre_memberships'),('trainer_profiles'),
+      ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
+      ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
+      ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
+      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+    CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
+    CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
+   WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A33: anon/service_role/authenticator/PUBLIC hold % table privilege(s); expected 0', v_n;
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
+  -- A34: exactly the two accepted project migrations are applied.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 1 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 1 applied migration, found %', v_n; END IF;
+  IF v_n <> 2 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 2 applied migrations, found %', v_n; END IF;
 
-  SELECT version INTO v_expected FROM supabase_migrations.schema_migrations LIMIT 1;
-  IF v_expected <> '20260803034500' THEN
-    RAISE EXCEPTION 'FAIL A35: expected migration version 20260803034500, found %', v_expected;
+  SELECT count(*) INTO v_n
+    FROM supabase_migrations.schema_migrations
+   WHERE version IN ('20260803034500', '20260803154500');
+  IF v_n <> 2 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500 and 20260803154500';
+  END IF;
+
+  -- A35: exactly the six Step 7G authorization helpers exist in public --
+  -- each STABLE, SECURITY DEFINER and search-path pinned, executable by
+  -- authenticated and by no other client role.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public';
+  IF v_n <> 6 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 6 functions in schema public, found %', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('app_current_account_id','app_has_active_membership','app_is_own_membership',
+                       'app_is_own_active_membership','app_trainer_reaches_session','app_trainer_reaches_module')
+     AND p.provolatile = 's'
+     AND p.prosecdef
+     AND p.proconfig IS NOT NULL
+     AND p.proconfig::text LIKE '%search_path=%'
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE');
+  IF v_n <> 6 THEN
+    RAISE EXCEPTION 'FAIL A35: the 6 Step 7G helpers must all be STABLE SECURITY DEFINER, search-path pinned and authenticated-only (matched %)', v_n;
   END IF;
 
   IF (SELECT count(*) FROM public.centres) <> 1
@@ -237,6 +358,21 @@ BEGIN
      WHERE id = 'b0000000-0000-4000-8000-000000000001'
        AND code = 'ispeak' AND display_name = 'iSpeak Academy') THEN
     RAISE EXCEPTION 'FAIL A37: the ratified seed centre is missing or altered';
+  END IF;
+
+  -- A38: no project view, materialized view or user trigger exists.
+  SELECT (SELECT count(*)
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+           WHERE n.nspname = 'public' AND c.relkind IN ('v', 'm'))
+       + (SELECT count(*)
+            FROM pg_catalog.pg_trigger t
+            JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+           WHERE n.nspname = 'public' AND NOT t.tgisinternal)
+    INTO v_n;
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A38: % view(s)/user trigger(s) exist in public; expected 0', v_n;
   END IF;
 
   RAISE NOTICE 'SECTION A: all positive assertions passed.';
@@ -665,9 +801,45 @@ BEGIN
     RAISE EXCEPTION 'FAIL D4: the Step 7E seed boundary diverged during the negative suite';
   END IF;
 
-  -- Access posture unchanged.
-  SELECT count(*) INTO v_n FROM pg_policies WHERE schemaname = 'public';
-  IF v_n <> 0 THEN RAISE EXCEPTION 'FAIL D5: % RLS policy/policies exist after the negative suite', v_n; END IF;
+  -- Access posture identical after the rollback: the negative suite must
+  -- neither widen nor shrink the committed Step 7G posture. (Reconciled
+  -- at Step 7G1F from the superseded zero-policy expectation.)
+  SELECT count(*) INTO v_n FROM pg_catalog.pg_policies WHERE schemaname = 'public';
+  IF v_n <> 29 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 29 Step 7G policies after the negative suite, found %', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public';
+  IF v_n <> 6 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 6 Step 7G helpers after the negative suite, found %', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres'),('accounts'),('centre_memberships'),('trainer_profiles'),('parent_profiles'),
+      ('students'),('parent_student_links'),('class_grades'),('class_modules'),('class_sessions'),
+      ('enrolments'),('class_session_assignments'),('attendance')) AS t(tablename)
+   WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, 'SELECT');
+  IF v_n <> 13 THEN
+    RAISE EXCEPTION 'FAIL D5: the authenticated SELECT posture changed during the negative suite (matched %)', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('centres'),('assessment_dimensions'),('accounts'),('centre_memberships'),('trainer_profiles'),
+      ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
+      ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
+      ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
+      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+    CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
+    CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
+   WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL D5: a zero-privilege role gained % table privilege(s) during the negative suite', v_n;
+  END IF;
 
   RAISE NOTICE 'SECTION D: rollback left no residue; fixture, Option B and seed boundaries all intact.';
 END;
