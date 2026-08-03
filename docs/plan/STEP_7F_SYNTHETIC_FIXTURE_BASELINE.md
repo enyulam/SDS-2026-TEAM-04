@@ -242,6 +242,69 @@ Both recorder columns are NULL **because this row represents default roster init
 
 Steps 3–5 are order-independent among themselves; the sequence above is one valid linearisation.
 
+### Ratified fixed timestamp literals (added 2026-08-03, Step 7F1B)
+
+§8 already ratifies the **rule** that every fixture timestamp is a fixed literal. This subsection records the **exact literals**, so the value — not only the rule — is ratified and auditable.
+
+**Four ratified groups:**
+
+| Group | Instant | Applies to |
+|---|---|---|
+| **T1** | `2026-01-05T09:00:00+08:00` | identity, membership, role-profile and Student lifecycle timestamps |
+| **T2** | `2026-01-12T09:00:00+08:00` | Parent–Student link, Class Module, Class Session record, enrolment and trainer-assignment lifecycle timestamps |
+| **T3** | `2026-02-03T10:00:00+08:00` | attendance lifecycle timestamps |
+| **T4** | `2026-02-03T11:05:00+08:00` | observation and observation-rating lifecycle timestamps |
+
+**Complete table-and-column matrix — all 37 timestamp/date/time columns across the 13 fixture tables:**
+
+| # | Table | Column | Type | Literal |
+|---|---|---|---|---|
+| 1 | `accounts` | `created_at` | `timestamptz` | **T1** |
+| 2 | `accounts` | `updated_at` | `timestamptz` | **T1** |
+| 3 | `accounts` | `deactivated_at` | `timestamptz` | `NULL` |
+| 4 | `centre_memberships` | `created_at` | `timestamptz` | **T1** |
+| 5 | `centre_memberships` | `updated_at` | `timestamptz` | **T1** |
+| 6 | `centre_memberships` | `activated_at` | `timestamptz` | **T1** |
+| 7 | `centre_memberships` | `deactivated_at` | `timestamptz` | `NULL` |
+| 8 | `trainer_profiles` | `created_at` | `timestamptz` | **T1** |
+| 9 | `trainer_profiles` | `updated_at` | `timestamptz` | **T1** |
+| 10 | `parent_profiles` | `created_at` | `timestamptz` | **T1** |
+| 11 | `parent_profiles` | `updated_at` | `timestamptz` | **T1** |
+| 12 | `students` | `created_at` | `timestamptz` | **T1** |
+| 13 | `students` | `updated_at` | `timestamptz` | **T1** |
+| 14 | `students` | `deactivated_at` | `timestamptz` | `NULL` |
+| 15 | `parent_student_links` | `linked_at` | `timestamptz` | **T2** |
+| 16 | `parent_student_links` | `unlinked_at` | `timestamptz` | `NULL` |
+| 17 | `parent_student_links` | `created_at` | `timestamptz` | **T2** |
+| 18 | `class_modules` | `created_at` | `timestamptz` | **T2** |
+| 19 | `class_modules` | `updated_at` | `timestamptz` | **T2** |
+| 20 | `class_modules` | `deactivated_at` | `timestamptz` | `NULL` |
+| 21 | `class_sessions` | `session_date` | `date` | `2026-02-03` |
+| 22 | `class_sessions` | `starts_at` | `time` | `10:00` |
+| 23 | `class_sessions` | `ends_at` | `time` | `11:00` |
+| 24 | `class_sessions` | `created_at` | `timestamptz` | **T2** |
+| 25 | `class_sessions` | `updated_at` | `timestamptz` | **T2** |
+| 26 | `enrolments` | `enrolled_at` | `timestamptz` | **T2** |
+| 27 | `enrolments` | `withdrawn_at` | `timestamptz` | `NULL` |
+| 28 | `enrolments` | `created_at` | `timestamptz` | **T2** |
+| 29 | `class_session_assignments` | `assigned_at` | `timestamptz` | **T2** |
+| 30 | `class_session_assignments` | `unassigned_at` | `timestamptz` | `NULL` |
+| 31 | `class_session_assignments` | `created_at` | `timestamptz` | **T2** |
+| 32 | `attendance` | `created_at` | `timestamptz` | **T3** |
+| 33 | `attendance` | `updated_at` | `timestamptz` | **T3** |
+| 34 | `observations` | `created_at` | `timestamptz` | **T4** |
+| 35 | `observations` | `updated_at` | `timestamptz` | **T4** |
+| 36 | `observation_ratings` | `created_at` | `timestamptz` | **T4** (all nine rows) |
+| 37 | `observation_ratings` | `updated_at` | `timestamptz` | **T4** (all nine rows) |
+
+**Every timestamp-bearing fixture column is accounted for**: 30 columns carry a ratified group literal, 7 nullable lifecycle-terminator columns are explicitly `NULL`, and the 3 non-`timestamptz` Class Session columns carry their own ratified date and time literals. **No fixture timestamp falls outside these four groups.**
+
+**Offset notation.** The SQL writes these as `2026-01-05 09:00:00+08` and so on. `+08` and `+08:00` denote the **same instant** in PostgreSQL; the ISO-8601 form above and the SQL form are equivalent, not divergent.
+
+**Chronological and constraint consistency.** T1 (identities exist) → T2 (hierarchy and relationships created) → T3 (roster initialised on the session date) → T4 (observation captured five minutes after the session ends at `11:00`). This satisfies every lifecycle CHECK without any reference to `now()`: `centre_memberships_activated_after_created_chk` holds because `activated_at = created_at = T1`; the `*_deactivated_after_*`, `*_unlinked_after_linked`, `*_withdrawn_after_enrolled` and `*_unassigned_after_assigned` checks hold vacuously because each terminator is `NULL`; and `class_sessions_time_order_chk` holds because `11:00 > 10:00`.
+
+**Why this matters.** Because no value is derived from `now()`, two loads separated by a clean `supabase db reset --local` produce byte-identical rows, which is what makes the canonical SHA-256 checksum an equality test rather than a similarity judgement.
+
 ---
 
 ## 4. Exact nine mixed ratings
