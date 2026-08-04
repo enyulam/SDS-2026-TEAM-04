@@ -40,6 +40,7 @@ DO $verify_positive$
 DECLARE
   v_n integer;
   v_m integer;
+  v_oid oid;
 BEGIN
   -- --- Auth identity projection (read-only) -------------------------
   -- Exactly three local Auth users, matched by the three reserved emails.
@@ -200,16 +201,17 @@ BEGIN
   -- and the 6 project helpers so unrelated platform objects can never
   -- cause a false failure.)
 
-  -- A32: RLS and policy posture. Exactly 22 project tables; RLS enabled
-  -- on all and forced on none; exactly the 29 accepted SELECT policies,
-  -- all permissive and scoped to authenticated, distributed exactly as
-  -- committed; zero policies on the nine out-of-scope tables.
+  -- A32: RLS and policy posture. Exactly 25 project tables (22 Step 7E +
+  -- 3 Step 7H audit); RLS enabled on all and forced on none; exactly the
+  -- 29 accepted SELECT policies, all permissive and scoped to
+  -- authenticated, distributed exactly as committed; zero policies on the
+  -- nine out-of-scope tables and the three audit tables (twelve total).
   SELECT count(*), count(*) FILTER (WHERE NOT c.relrowsecurity) INTO v_n, v_m
     FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
    WHERE n.nspname = 'public' AND c.relkind = 'r';
-  IF v_n <> 22 OR v_m <> 0 THEN
-    RAISE EXCEPTION 'FAIL A32: expected 22 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
+  IF v_n <> 25 OR v_m <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: expected 25 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
   END IF;
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_class c
@@ -249,16 +251,18 @@ BEGIN
    WHERE schemaname = 'public'
      AND tablename IN ('invitations','assessment_dimensions','observations','observation_ratings',
                        'reports','report_versions','report_version_ratings',
-                       'report_version_checklist_progress','report_version_approvals');
+                       'report_version_checklist_progress','report_version_approvals',
+                       'audit_events','audit_event_targets','audit_chain_heads');
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A32: % policy(ies) exist on out-of-scope tables; expected 0', v_n;
+    RAISE EXCEPTION 'FAIL A32: % policy(ies) exist on out-of-scope or audit tables; expected 0', v_n;
   END IF;
 
   -- A33: table privileges. authenticated holds SELECT on exactly the 13
   -- relationship tables and no write-side privilege anywhere; anon,
   -- service_role, authenticator and PUBLIC hold nothing at all on any of
-  -- the 22 project tables. (service_role carries BYPASSRLS, so this zero
-  -- is the only boundary that constrains it.)
+  -- the 25 project tables (22 Step 7E + 3 Step 7H audit). (service_role
+  -- carries BYPASSRLS, so this zero is the only boundary that constrains
+  -- it.)
   SELECT count(*) INTO v_n
     FROM (VALUES
       ('centres'),('accounts'),('centre_memberships'),('trainer_profiles'),('parent_profiles'),
@@ -273,10 +277,11 @@ BEGIN
     FROM (VALUES
       ('invitations'),('assessment_dimensions'),('observations'),('observation_ratings'),
       ('reports'),('report_versions'),('report_version_ratings'),
-      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+      ('report_version_checklist_progress'),('report_version_approvals'),
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
    WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, 'SELECT');
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A33: authenticated holds SELECT on % out-of-scope table(s); expected 0', v_n;
+    RAISE EXCEPTION 'FAIL A33: authenticated holds SELECT on % out-of-scope or audit table(s); expected 0', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
@@ -285,7 +290,8 @@ BEGIN
       ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
-      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+      ('report_version_checklist_progress'),('report_version_approvals'),
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
     CROSS JOIN (VALUES ('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, p.priv);
   IF v_n <> 0 THEN
@@ -298,7 +304,8 @@ BEGIN
       ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
-      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+      ('report_version_checklist_progress'),('report_version_approvals'),
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
     CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
     CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
@@ -307,26 +314,29 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the two accepted project migrations are applied.
+  -- A34: exactly the three accepted project migrations are applied.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 2 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 2 applied migrations, found %', v_n; END IF;
+  IF v_n <> 3 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 3 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500', '20260803154500');
-  IF v_n <> 2 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500 and 20260803154500';
+   WHERE version IN ('20260803034500', '20260803154500', '20260804213000');
+  IF v_n <> 3 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500 and 20260804213000';
   END IF;
 
-  -- A35: exactly the six Step 7G authorization helpers exist in public --
-  -- each STABLE, SECURITY DEFINER and search-path pinned, executable by
-  -- authenticated and by no other client role.
+  -- A35: exactly the ten public project functions exist -- the six
+  -- Step 7G authorization helpers plus the four Step 7H audit functions.
+  -- The six helpers stay STABLE, SECURITY DEFINER, search-path pinned and
+  -- authenticated-only executable; each Step 7H function is checked
+  -- against the exact contract derived from the committed migration,
+  -- including zero EXECUTE for every client role and for PUBLIC.
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 6 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 6 functions in schema public, found %', v_n;
+  IF v_n <> 10 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 10 functions in schema public, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
@@ -347,6 +357,105 @@ BEGIN
     RAISE EXCEPTION 'FAIL A35: the 6 Step 7G helpers must all be STABLE SECURITY DEFINER, search-path pinned and authenticated-only (matched %)', v_n;
   END IF;
 
+  -- audit_canonical_json(jsonb): IMMUTABLE, STRICT, PARALLEL SAFE,
+  -- SECURITY INVOKER, search-path pinned, zero client EXECUTE (incl.
+  -- PUBLIC). The regprocedure signature is the same form the committed
+  -- migration itself uses to REVOKE, so its successful resolution here is
+  -- also proof the applied function matches the ratified identity.
+  BEGIN
+    v_oid := 'public.audit_canonical_json(jsonb)'::regprocedure::oid;
+  EXCEPTION WHEN undefined_function THEN
+    RAISE EXCEPTION 'FAIL A35: public.audit_canonical_json(jsonb) does not exist with the expected signature';
+  END;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+   WHERE p.oid = v_oid
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND p.provolatile = 'i' AND p.proisstrict AND p.proparallel = 's' AND NOT p.prosecdef
+     AND p.proconfig IS NOT NULL AND p.proconfig::text LIKE '%search_path=%'
+     AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT (p.proacl IS NOT NULL AND (p.proacl::text LIKE '{=%' OR p.proacl::text LIKE '%,=%'));
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: audit_canonical_json must be owner postgres, IMMUTABLE, STRICT, PARALLEL SAFE, SECURITY INVOKER, search-path pinned, with zero client EXECUTE (including PUBLIC)';
+  END IF;
+
+  -- audit_append_event(...): VOLATILE, SECURITY DEFINER, not STRICT
+  -- (several parameters are legitimately nullable), search-path pinned,
+  -- zero client EXECUTE. The 13-type identity list matches only the IN
+  -- parameters; the two OUT parameters are excluded from the identity
+  -- signature by PostgreSQL itself.
+  BEGIN
+    v_oid := 'public.audit_append_event(uuid, uuid, uuid, public.centre_membership_role, text, text, text, text, text, uuid, text, jsonb, jsonb)'::regprocedure::oid;
+  EXCEPTION WHEN undefined_function THEN
+    RAISE EXCEPTION 'FAIL A35: public.audit_append_event(...) does not exist with the expected 13-argument signature';
+  END;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+   WHERE p.oid = v_oid
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND p.provolatile = 'v' AND NOT p.proisstrict AND p.prosecdef
+     AND p.proconfig IS NOT NULL AND p.proconfig::text LIKE '%search_path=%'
+     AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT (p.proacl IS NOT NULL AND (p.proacl::text LIKE '{=%' OR p.proacl::text LIKE '%,=%'));
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: audit_append_event must be owner postgres, VOLATILE, SECURITY DEFINER, not STRICT, search-path pinned, with zero client EXECUTE (including PUBLIC)';
+  END IF;
+
+  -- audit_verify_chain(uuid, bigint, bigint): STABLE, SECURITY DEFINER,
+  -- not STRICT (all three parameters default to NULL), search-path
+  -- pinned, zero client EXECUTE. RETURNS TABLE columns are OUT parameters
+  -- and are likewise excluded from the identity signature.
+  BEGIN
+    v_oid := 'public.audit_verify_chain(uuid, bigint, bigint)'::regprocedure::oid;
+  EXCEPTION WHEN undefined_function THEN
+    RAISE EXCEPTION 'FAIL A35: public.audit_verify_chain(uuid, bigint, bigint) does not exist with the expected signature';
+  END;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+   WHERE p.oid = v_oid
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND p.provolatile = 's' AND NOT p.proisstrict AND p.prosecdef
+     AND p.proconfig IS NOT NULL AND p.proconfig::text LIKE '%search_path=%'
+     AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT (p.proacl IS NOT NULL AND (p.proacl::text LIKE '{=%' OR p.proacl::text LIKE '%,=%'));
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: audit_verify_chain must be owner postgres, STABLE, SECURITY DEFINER, not STRICT, search-path pinned, with zero client EXECUTE (including PUBLIC)';
+  END IF;
+
+  -- audit_block_mutation(): the shared trigger-guard helper. VOLATILE
+  -- (the plpgsql default; never declared otherwise), SECURITY INVOKER
+  -- (never declared SECURITY DEFINER), not STRICT, search-path pinned,
+  -- zero client EXECUTE -- it is implementation support for the three
+  -- guard triggers, not a fourth audit API.
+  BEGIN
+    v_oid := 'public.audit_block_mutation()'::regprocedure::oid;
+  EXCEPTION WHEN undefined_function THEN
+    RAISE EXCEPTION 'FAIL A35: public.audit_block_mutation() does not exist with the expected signature';
+  END;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+   WHERE p.oid = v_oid
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND p.provolatile = 'v' AND NOT p.proisstrict AND NOT p.prosecdef
+     AND p.proconfig IS NOT NULL AND p.proconfig::text LIKE '%search_path=%'
+     AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT (p.proacl IS NOT NULL AND (p.proacl::text LIKE '{=%' OR p.proacl::text LIKE '%,=%'));
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: audit_block_mutation must be owner postgres, VOLATILE, SECURITY INVOKER, not STRICT, search-path pinned, with zero client EXECUTE (including PUBLIC)';
+  END IF;
+
   IF (SELECT count(*) FROM public.centres) <> 1
   OR (SELECT count(*) FROM public.class_grades) <> 3
   OR (SELECT count(*) FROM public.assessment_dimensions) <> 9 THEN
@@ -360,19 +469,62 @@ BEGIN
     RAISE EXCEPTION 'FAIL A37: the ratified seed centre is missing or altered';
   END IF;
 
-  -- A38: no project view, materialized view or user trigger exists.
-  SELECT (SELECT count(*)
-            FROM pg_catalog.pg_class c
-            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-           WHERE n.nspname = 'public' AND c.relkind IN ('v', 'm'))
-       + (SELECT count(*)
-            FROM pg_catalog.pg_trigger t
-            JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
-            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-           WHERE n.nspname = 'public' AND NOT t.tgisinternal)
-    INTO v_n;
+  -- A38: zero project views and materialized views; exactly the three
+  -- enabled Step 7H append-only audit guards. This file no longer asserts
+  -- zero user triggers -- three are now ratified -- so the check is split
+  -- into an independent view/matview census and an exact guard-trigger
+  -- inventory (name, owning table, trigger function, enabled state,
+  -- statement-level posture and event scope, all checked together).
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND c.relkind = 'v';
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A38: % view(s)/user trigger(s) exist in public; expected 0', v_n;
+    RAISE EXCEPTION 'FAIL A38: % view(s) exist in public; expected 0', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND c.relkind = 'm';
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A38: % materialized view(s) exist in public; expected 0', v_n;
+  END IF;
+
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_trigger t
+    JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND NOT t.tgisinternal;
+  IF v_n <> 3 THEN
+    RAISE EXCEPTION 'FAIL A38: expected exactly 3 non-internal triggers in public (the Step 7H audit guards), found %', v_n;
+  END IF;
+
+  -- tgtype 26 = BEFORE(2) + UPDATE(16) + DELETE(8), statement-level (ROW
+  -- bit 1 absent); tgtype 10 = BEFORE(2) + DELETE(8) only. Both values are
+  -- the same encoding the committed migration's own end-of-migration
+  -- assertions (B15) proved against these exact triggers.
+  SELECT count(*) INTO v_n
+    FROM (VALUES
+      ('audit_events_block_update_delete_trg',        'audit_events',        26),
+      ('audit_event_targets_block_update_delete_trg', 'audit_event_targets', 26),
+      ('audit_chain_heads_block_delete_trg',          'audit_chain_heads',   10)
+    ) AS expected(trgname, tblname, tgtype)
+   WHERE NOT EXISTS (
+     SELECT 1
+       FROM pg_catalog.pg_trigger t
+       JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
+       JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+       JOIN pg_catalog.pg_proc p ON p.oid = t.tgfoid
+      WHERE n.nspname = 'public'
+        AND NOT t.tgisinternal
+        AND t.tgname = expected.trgname
+        AND c.relname = expected.tblname
+        AND t.tgtype = expected.tgtype
+        AND t.tgenabled = 'O'
+        AND p.proname = 'audit_block_mutation');
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A38: % Step 7H audit guard trigger(s) are missing, misscoped, disabled or misbound', v_n;
   END IF;
 
   RAISE NOTICE 'SECTION A: all positive assertions passed.';
@@ -802,8 +954,10 @@ BEGIN
   END IF;
 
   -- Access posture identical after the rollback: the negative suite must
-  -- neither widen nor shrink the committed Step 7G posture. (Reconciled
-  -- at Step 7G1F from the superseded zero-policy expectation.)
+  -- neither widen nor shrink the committed Step 7G/7H posture, and the
+  -- three Step 7H append-only guards must remain enabled. (Reconciled at
+  -- Step 7G1F from the superseded zero-policy expectation; extended for
+  -- the Step 7H audit chain.)
   SELECT count(*) INTO v_n FROM pg_catalog.pg_policies WHERE schemaname = 'public';
   IF v_n <> 29 THEN
     RAISE EXCEPTION 'FAIL D5: expected the 29 Step 7G policies after the negative suite, found %', v_n;
@@ -813,8 +967,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 6 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 6 Step 7G helpers after the negative suite, found %', v_n;
+  IF v_n <> 10 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 10 Step 7G/7H functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
@@ -833,7 +987,8 @@ BEGIN
       ('parent_profiles'),('students'),('parent_student_links'),('class_grades'),('class_modules'),
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
-      ('report_version_checklist_progress'),('report_version_approvals')) AS t(tablename)
+      ('report_version_checklist_progress'),('report_version_approvals'),
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
     CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
     CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
@@ -841,6 +996,15 @@ BEGIN
     RAISE EXCEPTION 'FAIL D5: a zero-privilege role gained % table privilege(s) during the negative suite', v_n;
   END IF;
 
-  RAISE NOTICE 'SECTION D: rollback left no residue; fixture, Option B and seed boundaries all intact.';
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_trigger t
+    JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND NOT t.tgisinternal AND t.tgenabled = 'O';
+  IF v_n <> 3 THEN
+    RAISE EXCEPTION 'FAIL D5: expected all 3 Step 7H audit guard triggers enabled after the negative suite, found %', v_n;
+  END IF;
+
+  RAISE NOTICE 'SECTION D: rollback left no residue; fixture, Option B, seed and audit-guard boundaries all intact.';
 END;
 $verify_residue$;
