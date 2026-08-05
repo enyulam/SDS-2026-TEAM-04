@@ -1,0 +1,154 @@
+"use server";
+
+/**
+ * The contract §5.1 server actions — SERVER-ONLY wrappers binding each core
+ * to the request-scoped authenticated Supabase client. Every action:
+ *   - carries the CALLER'S OWN credential (the `authenticated` role) into
+ *     the governed RPC, which re-derives all authority from auth.uid();
+ *   - performs NO direct table mutation — the only writes are the RPCs;
+ *   - adds no authority: no role query parameter, header or route value is
+ *     read anywhere in this file.
+ *
+ * `reopenSubmitted` (RPC-12) is DELIBERATELY ABSENT: post-submission
+ * correction initiation is deferred (contract §3/§5.1) and must not be
+ * wired to a participant-reachable control.
+ */
+
+import { createRequestSupabaseClient } from "@/server/platform/supabase/request";
+import { getServerConfig } from "@/server/platform/env";
+import type { ActionResult } from "@/server/contracts/action-result";
+import {
+  saveObservationCore,
+  getTrainerObservationCore,
+  type SaveObservationInput,
+  type SaveObservationSuccess,
+  type TrainerObservationDto,
+} from "@/server/modules/observation/core";
+import {
+  managementApproveAndSubmitCore,
+  managementEditWordingCore,
+  managementReturnToTrainerCore,
+  saveTrainerEditCore,
+  trainerApproveCore,
+  updateTrainerChecklistCore,
+  type ManagementApproveAndSubmitInput,
+  type ManagementApproveAndSubmitSuccess,
+  type ManagementEditWordingInput,
+  type ManagementEditWordingSuccess,
+  type ManagementReturnInput,
+  type ManagementReturnSuccess,
+  type SaveTrainerEditInput,
+  type SaveTrainerEditSuccess,
+  type TrainerApproveInput,
+  type TrainerApproveSuccess,
+  type UpdateTrainerChecklistInput,
+} from "@/server/modules/report-workflow/core";
+import {
+  requestDraftCore,
+  type RequestDraftInput,
+  type RequestDraftSuccess,
+} from "@/server/modules/ai-drafting/request-draft-core";
+import { OpenAiDraftProvider } from "@/server/modules/ai-drafting/provider";
+import { LocalTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
+
+export async function saveObservation(
+  input: SaveObservationInput,
+): Promise<ActionResult<SaveObservationSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return saveObservationCore(client, input);
+}
+
+export async function getTrainerObservation(
+  sessionId: string,
+  studentId: string,
+): Promise<ActionResult<TrainerObservationDto>> {
+  const client = await createRequestSupabaseClient();
+  return getTrainerObservationCore(client, sessionId, studentId);
+}
+
+export async function requestDraft(
+  input: RequestDraftInput,
+): Promise<ActionResult<RequestDraftSuccess>> {
+  const client = await createRequestSupabaseClient();
+
+  // The trusted channel's claims come from the VERIFIED session, never from
+  // the request body; a caller with no session fails here, before anything.
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError || !userData?.user) return { outcome: "unauthenticated" };
+
+  // Participant path: the REAL provider, unconditionally (gate G-19). The
+  // deterministic fixture provider is constructed only by automated tests,
+  // never here — there is no switch to flip.
+  let provider: OpenAiDraftProvider;
+  try {
+    const config = getServerConfig();
+    provider = new OpenAiDraftProvider({
+      apiKey: config.llm.apiKey,
+      model: config.llm.model,
+    });
+  } catch {
+    // Misconfigured environment. The diagnostic (which names the variable,
+    // never a value) stays server-side; the caller gets a neutral outcome.
+    return {
+      outcome: "generation_failure",
+      retryable: false,
+      message: "Draft generation is not configured on this environment.",
+    };
+  }
+
+  return requestDraftCore(
+    {
+      db: client,
+      provider,
+      trustedStore: new LocalTrustedDraftStore(),
+      authUserSub: userData.user.id,
+      readStudentDisplayName: async (studentId: string) => {
+        const { data } = await client.from("students").select("id, full_name").eq("id", studentId);
+        return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? null;
+      },
+    },
+    input,
+  );
+}
+
+export async function saveTrainerEdit(
+  input: SaveTrainerEditInput,
+): Promise<ActionResult<SaveTrainerEditSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return saveTrainerEditCore(client, input);
+}
+
+export async function updateTrainerChecklist(
+  input: UpdateTrainerChecklistInput,
+): Promise<ActionResult<{ reportId: string }>> {
+  const client = await createRequestSupabaseClient();
+  return updateTrainerChecklistCore(client, input);
+}
+
+export async function trainerApprove(
+  input: TrainerApproveInput,
+): Promise<ActionResult<TrainerApproveSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return trainerApproveCore(client, input);
+}
+
+export async function managementEditWording(
+  input: ManagementEditWordingInput,
+): Promise<ActionResult<ManagementEditWordingSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return managementEditWordingCore(client, input);
+}
+
+export async function managementReturnToTrainer(
+  input: ManagementReturnInput,
+): Promise<ActionResult<ManagementReturnSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return managementReturnToTrainerCore(client, input);
+}
+
+export async function managementApproveAndSubmit(
+  input: ManagementApproveAndSubmitInput,
+): Promise<ActionResult<ManagementApproveAndSubmitSuccess>> {
+  const client = await createRequestSupabaseClient();
+  return managementApproveAndSubmitCore(client, input);
+}
