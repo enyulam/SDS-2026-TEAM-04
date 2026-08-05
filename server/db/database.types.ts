@@ -1617,6 +1617,24 @@ export type Database = {
           todays_strength: string
         }[]
       }
+      report_list_management_corrections: {
+        Args: never
+        Returns: {
+          class_session_id: string
+          correction_reason: string
+          correction_request_id: string
+          correction_status: Database["public"]["Enums"]["correction_request_status"]
+          issue_scope: Database["public"]["Enums"]["correction_issue_scope"]
+          report_id: string
+          report_status: Database["public"]["Enums"]["report_status"]
+          returned_at: string
+          session_date: string
+          student_display_name: string
+          student_id: string
+          tracking_updated_at: string
+          trainer_correction_submitted: boolean
+        }[]
+      }
       report_management_approve_and_submit: {
         Args: {
           p_expected_lock_version: number

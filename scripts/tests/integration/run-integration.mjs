@@ -25,7 +25,13 @@
 //     managementReturnToTrainerCore, managementApproveAndSubmitCore) over a
 //     psql-backed RpcCaller bound to fixture identities, plus the trusted
 //     draft-store channel pointed at the disposable database. Committing
-//     work runs here and only here (U-7I-21).
+//     work runs here and only here (U-7I-21). Round B2.1 extends it with
+//     the five-step correction-tracking proof (INT-C1 .. INT-C5): after a
+//     management return, management DISCOVERS the report through the real
+//     governed projection, the trainer corrects and reapproves, management
+//     sees the tracking state change at each step, submission removes it
+//     from unresolved correction work, and parent visibility stays off
+//     until submission.
 //
 //   An optional bounded REAL-PROVIDER leg runs once inside Part 3 when
 //   LLM_API_KEY is configured; its absence or failure is RECORDED, never
@@ -55,6 +61,7 @@ import {
   managementEditWordingCore, managementReturnToTrainerCore, managementApproveAndSubmitCore,
 } from "@/server/modules/report-workflow/core.ts";
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core.ts";
+import { listManagementCorrectionsFromRpc } from "@/server/modules/management-view/projections.ts";
 
 const ROOT = process.cwd();
 const CONTAINER = "supabase_db_best-coach-mvp";
@@ -625,6 +632,44 @@ SELECT count(*) FROM public.report_version_ratings a
   else if (mgmtPeek !== null) fail("INT-L5", "management can still read the candidate after its own return (needs_edit must be zero rows)");
   else pass("INT-L5", "wording edit preserved all nine snapshots; substance writes denied; the returned report is invisible to parent AND management");
 
+  // --- The correction-tracking lifecycle proof (U-B2-1) ----------------
+  // Step 1: management DISCOVERS the report it just returned, through the
+  // real governed projection. Before Round B2.1 this step was impossible --
+  // a returned report left every management-reachable surface entirely.
+  const trackAfterReturn = await listManagementCorrectionsFromRpc(managementDb);
+  if (trackAfterReturn.outcome !== "success" || trackAfterReturn.data.length !== 1) {
+    fail("INT-C1", `the correction-tracking projection gave ${trackAfterReturn.outcome} with ${trackAfterReturn.data?.length ?? "no"} row(s), expected exactly 1`);
+  } else {
+    const t1 = trackAfterReturn.data[0];
+    const expectedName = await readStudentDisplayName();
+    const keys = Object.keys(t1).sort().join(",");
+    if (keys !== "openCorrectionReason,openCorrectionScope,openCorrectionStatus,reportId,sessionDate,sessionId,status,studentDisplayName,studentId") {
+      fail("INT-C1", `the tracking DTO carries unexpected fields: ${keys}`);
+    } else if (t1.reportId !== reportId || t1.sessionId !== SESSION || t1.studentId !== STUDENT) {
+      fail("INT-C1", "the tracking row does not identify the returned report");
+    } else if (t1.status !== "needs_edit" || t1.openCorrectionStatus !== "open" || t1.openCorrectionScope !== "rating") {
+      fail("INT-C1", `the tracking row reads ${t1.status}/${t1.openCorrectionStatus}/${t1.openCorrectionScope}`);
+    } else if (t1.studentDisplayName !== expectedName) {
+      fail("INT-C1", "the tracking row does not carry the authorized student display label");
+    } else if (t1.openCorrectionReason !== "Please re-verify the eye contact rating against the observed behaviour.") {
+      fail("INT-C1", "the tracking row does not carry the management-authored reason");
+    } else pass("INT-C1", "after the return, management DISCOVERS the report through the real governed projection -- needs_edit, open, rating scope, its own bounded reason, and exactly the nine contract DTO fields");
+  }
+
+  // Step 1b: the same projection denies every other caller, and the report
+  // under correction is still not parent-visible.
+  {
+    const asTrainer = await listManagementCorrectionsFromRpc(trainerDb);
+    const asParent = await listManagementCorrectionsFromRpc(parentDb);
+    const asNobody = await listManagementCorrectionsFromRpc(new PsqlRpc(null));
+    const parentPeek3 = await parentDb.rpc("report_get_canonical", { p_class_session_id: SESSION, p_student_id: STUDENT });
+    if (asTrainer.data?.length !== 0 || asParent.data?.length !== 0 || asNobody.data?.length !== 0) {
+      fail("INT-C2", "the governed projection returned rows to a trainer, a parent or an unauthenticated caller");
+    } else if (parentPeek3.error || parentPeek3.data.length !== 0) {
+      fail("INT-C2", "the report under correction became parent-visible");
+    } else pass("INT-C2", "the same projection is empty for trainer, parent and unauthenticated callers, and parent visibility stays off during the correction cycle");
+  }
+
   // L6 -- trainer correction -> fresh checklist -> reapproval.
   state = await working();
   if (!state.open_correction_request_id) fail("INT-L6", "the trainer working read does not carry the open correction");
@@ -641,6 +686,20 @@ SELECT count(*) FROM public.report_version_ratings a
   if (corrected.outcome !== "success" || corrected.data.status !== "draft_ready") {
     fail("INT-L6", `the correction save gave ${corrected.outcome}`); await destroyDisposable(); return;
   }
+  // Step 2: the trainer has corrected but NOT reapproved. Management must
+  // still see the item, and must see that the correction has arrived.
+  {
+    const midCycle = await listManagementCorrectionsFromRpc(managementDb);
+    const t2 = midCycle.outcome === "success" && midCycle.data.length === 1 ? midCycle.data[0] : null;
+    if (!t2) {
+      fail("INT-C3", `mid-cycle tracking gave ${midCycle.outcome} with ${midCycle.data?.length ?? "no"} row(s), expected exactly 1 -- the item must not vanish before reapproval`);
+    } else if (t2.status !== "draft_ready" || t2.openCorrectionStatus !== "open") {
+      fail("INT-C3", `mid-cycle tracking reads ${t2.status}/${t2.openCorrectionStatus}, expected draft_ready/open`);
+    } else if ((await review()) !== null) {
+      fail("INT-C3", "management could read the corrected candidate CONTENT before reapproval");
+    } else pass("INT-C3", "correction saved but not reapproved: still tracked, now draft_ready with the request still open, and the content still unreadable by management");
+  }
+
   state = await working();
   await updateTrainerChecklistCore(trainerDb, {
     reportId, expectedLockVersion: state.lock_version, expectedVersionId: state.current_version_id,
@@ -655,6 +714,17 @@ SELECT count(*) FROM public.report_version_ratings a
   const resolvedCorrection = await q(WORK_DB, `SELECT status FROM public.report_correction_requests WHERE report_id='${reportId}';`);
   if (resolvedCorrection !== "resolved") fail("INT-L6", `the correction request is '${resolvedCorrection}', expected resolved`);
   else pass("INT-L6", "trainer corrected through a NEW immutable version, re-attested the checklist, reapproved; the request resolved");
+
+  // Step 3: reapproval removes the item from unresolved correction work and
+  // moves it to the pending-review queue. Nothing is lost.
+  {
+    const afterReapproval = await listManagementCorrectionsFromRpc(managementDb);
+    if (afterReapproval.outcome !== "success" || afterReapproval.data.length !== 0) {
+      fail("INT-C4", `${afterReapproval.data?.length ?? "?"} tracking row(s) after reapproval, expected 0`);
+    } else if ((await review()) === null) {
+      fail("INT-C4", "the reapproved report is not visible as pending review either -- it vanished");
+    } else pass("INT-C4", "reapproval resolves the request and clears the item from correction tracking; it reappears as pending-review work");
+  }
 
   // L7 -- management Approve & Submit: the only publication.
   candidate = await review();
@@ -680,6 +750,18 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
   } else if (residue !== "0") {
     fail("INT-L7", "a committed approved-status report exists");
   } else pass("INT-L7", "Approve & Submit appended exactly two ordered state-change events with no approved residue");
+
+  // Step 4/5: final submission leaves unresolved correction tracking empty,
+  // while the resolved request survives as history.
+  {
+    const afterSubmission = await listManagementCorrectionsFromRpc(managementDb);
+    const resolvedRows = await q(WORK_DB, `SELECT count(*) FROM public.report_correction_requests WHERE report_id='${reportId}' AND status='resolved';`);
+    if (afterSubmission.outcome !== "success" || afterSubmission.data.length !== 0) {
+      fail("INT-C5", `${afterSubmission.data?.length ?? "?"} tracking row(s) after submission, expected 0`);
+    } else if (resolvedRows !== "1") {
+      fail("INT-C5", `${resolvedRows} resolved correction request(s) survive, expected 1`);
+    } else pass("INT-C5", "final submission removes the report from unresolved correction tracking; the resolved request survives as history");
+  }
 
   // L8 -- the audit chain verifies end-to-end after the complete lifecycle.
   const broken = await q(WORK_DB, "SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL) x WHERE NOT x.ok;");

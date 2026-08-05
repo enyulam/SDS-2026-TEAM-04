@@ -79,6 +79,14 @@ export type ManagementReviewRow =
 export type CanonicalReportRow =
   Database["public"]["Functions"]["report_get_canonical"]["Returns"][number];
 
+/**
+ * R-7 report_list_management_corrections (governed correction-tracking read).
+ * Bounded tracking metadata only — the generated type is authoritative, and it
+ * carries no panel, rating, hash, revision number or version id to consume.
+ */
+export type ManagementCorrectionRow =
+  Database["public"]["Functions"]["report_list_management_corrections"]["Returns"][number];
+
 /** ASM-1 assessment_save_observation */
 export interface AssessmentSaveRow {
   observation_id: string;

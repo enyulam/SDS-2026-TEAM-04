@@ -60,6 +60,22 @@
 -- every fixture-data assertion, every negative test and the canonical
 -- checksum region are UNCHANGED -- the assessment migration adds no table,
 -- enum, column, constraint, index, policy, table grant or fixture row.
+--
+-- Reconciled again at Backend Round B2.1 (management correction tracking,
+-- U-B2-1). That migration adds exactly ONE read-only function and ONE
+-- authenticated EXECUTE grant, and moves three censuses this file hard-pins,
+-- so -- for the same reason as above -- the reconciliation is committed
+-- TOGETHER WITH that migration:
+--   A34  6 -> 7 applied migrations, adding 20260806103000
+--   A35  30 -> 31 public functions (6 Step 7G + 4 Step 7H + 18 Step 7I
+--        + 2 assessment + 1 correction tracking), with a per-function
+--        contract check for the new one
+--   D5   the same 31-function figure, post-negative-suite
+-- A32 (26 tables), A33, the 29 policies, the 13-table authenticated SELECT
+-- set, the Step 7H audit guards, every fixture-data assertion, every
+-- negative test and the canonical checksum region are UNCHANGED -- the
+-- correction-tracking migration adds NO table, enum, column, constraint,
+-- index, policy, table grant or fixture row.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -353,25 +369,28 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the six accepted project migrations are applied. Step 7I
+  -- A34: exactly the seven accepted project migrations are applied. Step 7I
   -- ships TWO files by mandate (U-7I-18), not one: the `trainer_approved`
   -- enum label must be added and COMMITTED before any object may reference
   -- it. Backend Round B2 adds the assessment-persistence migration
-  -- (CP-2/CP-4), moving the count 5 -> 6.
+  -- (CP-2/CP-4), moving the count 5 -> 6, and Round B2.1 adds the
+  -- correction-tracking migration (U-B2-1), moving it 6 -> 7.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 6 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 6 applied migrations, found %', v_n; END IF;
+  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 7 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
-                     '20260805090000', '20260805090500', '20260806090000');
-  IF v_n <> 6 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500 and 20260806090000';
+                     '20260805090000', '20260805090500', '20260806090000',
+                     '20260806103000');
+  IF v_n <> 7 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000 and 20260806103000';
   END IF;
 
-  -- A35: exactly the thirty public project functions exist -- the six
+  -- A35: exactly the thirty-one public project functions exist -- the six
   -- Step 7G authorization helpers, the four Step 7H audit functions, the
-  -- eighteen Step 7I lifecycle functions and the two assessment functions.
+  -- eighteen Step 7I lifecycle functions, the two assessment functions and
+  -- the one correction-tracking read.
   -- The six helpers stay STABLE, SECURITY DEFINER, search-path pinned and
   -- authenticated-only executable; each Step 7H function is checked
   -- against the exact contract derived from the committed migration,
@@ -380,8 +399,54 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 30 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 30 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment), found %', v_n;
+  IF v_n <> 31 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 31 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking), found %', v_n;
+  END IF;
+
+  -- A35 (correction tracking, U-B2-1): the one governed R-7 read. It is
+  -- postgres-owned SECURITY DEFINER plpgsql with a pinned search_path,
+  -- non-STRICT, ZERO-ARGUMENT (which is what makes a caller-supplied centre
+  -- unrepresentable) and STABLE (so the engine itself forbids it writing or
+  -- appending to the audit chain). authenticated EXECUTE and nothing else.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+    JOIN pg_catalog.pg_language l ON l.oid = p.prolang
+   WHERE n.nspname = 'public'
+     AND p.proname = 'report_list_management_corrections'
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND l.lanname = 'plpgsql'
+     AND p.prosecdef
+     AND NOT p.proisstrict
+     AND p.pronargs = 0
+     AND p.provolatile = 's'
+     AND p.proconfig IS NOT NULL
+     AND p.proconfig::text LIKE '%search_path=%'
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: report_list_management_corrections does not satisfy its full ratified contract';
+  END IF;
+
+  -- A35 (correction tracking): the EXACT bounded projection. Asserted from
+  -- the catalogue so it holds against the APPLIED signature, and stated
+  -- here as well as in the migration so a later widening fails the
+  -- canonical verifier and not only the migration that introduced it.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname = 'report_list_management_corrections'
+     AND p.proargnames = ARRAY[
+       'report_id', 'student_id', 'student_display_name', 'class_session_id',
+       'session_date', 'report_status', 'correction_request_id', 'issue_scope',
+       'correction_reason', 'correction_status', 'returned_at',
+       'trainer_correction_submitted', 'tracking_updated_at'];
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: report_list_management_corrections does not return exactly the thirteen bounded tracking columns';
   END IF;
 
   -- A35 (assessment, CP-2/CP-4): the two governed assessment functions.
@@ -1180,8 +1245,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 30 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 30 Step 7G/7H/7I/assessment functions after the negative suite, found %', v_n;
+  IF v_n <> 31 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 31 Step 7G/7H/7I/assessment/correction-tracking functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n

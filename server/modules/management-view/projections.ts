@@ -10,23 +10,27 @@
  * added, so RPC-15's ratified zero-row posture (T7I-63) is untouched and
  * authority is re-proved by the database for every pair.
  *
- * R-7, STATED HONESTLY. Full correction tracking — listing reports still at
- * `needs_edit` with their open request's scope and status — is NOT
- * reachable through the ratified read inventory: RPC-15 deliberately
- * returns ZERO ROWS at `needs_edit` (A-038; pinned by T7I-63), the
- * correction table carries zero client privileges, and widening either is
- * ratified out (`CLAUDE.md` §12) / a §9 blocker (contract §5.2). This
- * projection therefore tracks what management may lawfully see: pairs whose
- * gated read returns a row that still carries open-correction metadata.
- * The physical-test discovery minimum (contract §3) is unaffected — it
- * requires management to discover reports AWAITING REVIEW (R-6), which is
- * fully delivered. Extending R-7 to `needs_edit` visibility is recorded as
- * an operator decision (U-B2-1 in the backend log), not improvised.
+ * U-B2-1 IS RESOLVED HERE (Round B2.1). R-7 now reads the governed
+ * boundary `report_list_management_corrections`, added by
+ * `20260806103000_management_correction_tracking.sql`. The previous
+ * implementation could only track pairs whose STATUS-GATED read still
+ * returned a row, which meant a returned report vanished from every
+ * management surface the moment management returned it — RPC-15 returns
+ * ZERO ROWS at `needs_edit` and at `draft_ready` (A-038; pinned by
+ * T7I-63), and `report_correction_requests` carries zero client
+ * privileges. Neither of those decisions was reopened: the new function
+ * returns tracking METADATA ONLY and no version content whatsoever, so
+ * A-038's "no report content to management before trainer approval" is
+ * intact, and the correction table still has no policy and no grant.
  *
  * DTO exclusions (contract §5.5, absolute): no ratings, observations,
  * attendance, evidence, trainer notes, checklist values, content hashes,
- * revision counts, correction reasons or AI history appear in any shape
- * this module returns. `wordingHash` appears only on the review candidate.
+ * revision counts or AI history appear in any shape this module returns.
+ * `wordingHash` appears only on the review candidate. `openCorrectionReason`
+ * appears ONLY on the correction-tracking row, under the §5.5 carve-out —
+ * every correction request is management-authored by CHECK and composite
+ * FK, and the reader is live active management of the same centre. It is
+ * never carried on `ManagementReviewDto` and never on a parent surface.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -37,8 +41,10 @@ import {
   firstRow,
   type CorrectionIssueScope,
   type CorrectionRequestStatus,
+  type ManagementCorrectionRow,
   type ManagementReviewRow,
   type ReportStatus,
+  type RpcCaller,
 } from "@/server/modules/report-workflow/rpc-types";
 
 export interface ManagementQueueRowDto {
@@ -50,6 +56,11 @@ export interface ManagementQueueRowDto {
   readonly status: ReportStatus;
   readonly openCorrectionScope?: CorrectionIssueScope;
   readonly openCorrectionStatus?: CorrectionRequestStatus;
+  /**
+   * Contract §5.5 carve-out — present ONLY on the R-7 correction-tracking
+   * projection, never on R-6 and never on `ManagementReviewDto`.
+   */
+  readonly openCorrectionReason?: string;
 }
 
 export interface ManagementReviewDto {
@@ -152,30 +163,54 @@ export async function listManagementPendingReviewCore(
 }
 
 // ---------------------------------------------------------------------
-// R-7 — correction tracking (bounded to the lawful surface; see header)
+// R-7 — correction tracking, through the governed read boundary (U-B2-1)
 // ---------------------------------------------------------------------
+/**
+ * The RPC-only half, so the disposable-database lifecycle proof can exercise
+ * the real projection through a psql-backed caller. It adds NO authority of
+ * its own: `report_list_management_corrections` re-derives the caller's live
+ * active management membership and its centre on every call, which is why a
+ * trainer, a parent or an unauthenticated caller reaching this function
+ * directly still receives an empty list.
+ *
+ * Rows arrive already ordered (returned-at, then report id), so the queue is
+ * deterministic without the server re-sorting and possibly disagreeing with
+ * the boundary about what "latest" means.
+ */
+export async function listManagementCorrectionsFromRpc(
+  caller: RpcCaller,
+): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
+  const { data, error } = await caller.rpc("report_list_management_corrections", {});
+  if (error) return mapSqlErrorToResult(error.code, error.message);
+
+  const rows = (Array.isArray(data) ? data : []) as readonly ManagementCorrectionRow[];
+  return {
+    outcome: "success",
+    data: rows.map((row) => ({
+      reportId: row.report_id,
+      sessionId: row.class_session_id,
+      studentId: row.student_id,
+      studentDisplayName: row.student_display_name,
+      sessionDate: row.session_date,
+      status: row.report_status,
+      openCorrectionScope: row.issue_scope,
+      openCorrectionStatus: row.correction_status,
+      openCorrectionReason: row.correction_reason,
+    })),
+  };
+}
+
 export async function listManagementCorrectionTrackingCore(
   client: SupabaseClient,
 ): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
+  // The role gate is what turns a wrong-role caller's empty list into the
+  // contract's `unauthorized` outcome at the action boundary. It is a
+  // presentation improvement, NOT the security boundary — the database
+  // re-proves authority independently inside the RPC.
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
 
-  const out: ManagementQueueRowDto[] = [];
-  for (const pair of await listCentrePairs(client)) {
-    const row = await gatedReview(client, pair.sessionId, pair.studentId);
-    if (!row || row.open_correction_status !== "open") continue;
-    out.push({
-      reportId: row.report_id,
-      sessionId: pair.sessionId,
-      studentId: pair.studentId,
-      studentDisplayName: pair.studentDisplayName,
-      sessionDate: pair.sessionDate,
-      status: row.status,
-      openCorrectionScope: row.open_correction_issue_scope,
-      openCorrectionStatus: row.open_correction_status,
-    });
-  }
-  return { outcome: "success", data: out };
+  return listManagementCorrectionsFromRpc(client);
 }
 
 // ---------------------------------------------------------------------

@@ -149,12 +149,14 @@ END $$;
 DO $census$
 DECLARE v_n bigint; v_m bigint; v_txt text;
 BEGIN
-  -- T-ASM-40: 6 migrations, 30 functions, 26 tables, 12 enums.
+  -- T-ASM-40: 7 migrations, 31 functions, 26 tables, 12 enums.
+  -- (Reconciled at Round B2.1: the correction-tracking migration adds one
+  -- read-only function and one migration file; no table and no enum.)
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 6 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 6', v_n; END IF;
+  IF v_n <> 7 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 7', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
-  IF v_n <> 30 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 30', v_n; END IF;
+  IF v_n <> 31 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 31', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace
    WHERE ns.nspname = 'public' AND c.relkind = 'r';
@@ -163,7 +165,7 @@ BEGIN
     JOIN pg_catalog.pg_namespace ns ON ns.oid = t.typnamespace
    WHERE ns.nspname = 'public' AND t.typtype = 'e';
   IF v_n <> 12 THEN RAISE EXCEPTION 'T-ASM-40: % enums, expected 12', v_n; END IF;
-  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: 6 migrations, 30 functions, 26 tables, 12 enums)';
+  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: 7 migrations, 31 functions, 26 tables, 12 enums)';
 
   -- T-ASM-41: full function contracts from the catalogue.
   SELECT count(*) INTO v_n
@@ -180,13 +182,13 @@ BEGIN
   IF v_n <> 2 THEN RAISE EXCEPTION 'T-ASM-41: catalogue contract matched % of 2', v_n; END IF;
   RAISE NOTICE 'PASS T-ASM-41 (catalogue leg)';
 
-  -- T-ASM-42: EXECUTE census -- 22 authenticated; zero for the other roles
+  -- T-ASM-42: EXECUTE census -- 23 authenticated; zero for the other roles
   -- on the two new functions; the 7I four and the 7H four unchanged.
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 22 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 22', v_n; END IF;
+  IF v_n <> 23 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 23', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'
@@ -205,7 +207,7 @@ BEGIN
                        'audit_canonical_json', 'audit_block_mutation')
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
   IF v_n <> 0 THEN RAISE EXCEPTION 'T-ASM-42: an owner-only function acquired authenticated EXECUTE'; END IF;
-  RAISE NOTICE 'PASS T-ASM-42 (22 authenticated EXECUTE; both exclusion lists unchanged)';
+  RAISE NOTICE 'PASS T-ASM-42 (23 authenticated EXECUTE; both exclusion lists unchanged)';
 
   -- T-ASM-43: zero table privileges and zero policies on the three
   -- assessment tables; RLS enabled; FORCE off.
@@ -237,12 +239,28 @@ BEGIN
                  ('class_session_assignments'),('attendance')) t(n)
    WHERE pg_catalog.has_table_privilege('authenticated', ('public.' || t.n)::regclass, 'SELECT');
   IF v_n <> 13 THEN RAISE EXCEPTION 'T-ASM-45: authenticated SELECT on % tables, expected 13', v_n; END IF;
+  -- The FOURTEEN Step 7I RPCs, named rather than pattern-matched.
+  -- (Reconciled at Round B2.1: the correction-tracking read also begins
+  -- `report_`, so a `LIKE 'report\_%'` sweep would silently redefine what
+  -- this assertion measures. Naming the fourteen keeps the label true, and
+  -- the new read is asserted separately below.)
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
-   WHERE ns.nspname = 'public' AND p.proname LIKE 'report\_%'
+   WHERE ns.nspname = 'public'
+     AND p.proname IN ('report_create','report_mark_observation_saved','report_request_draft',
+                       'report_cancel_draft','report_save_edit','report_update_checklist',
+                       'report_trainer_approve','report_management_edit_wording',
+                       'report_management_return_to_trainer','report_management_approve_and_submit',
+                       'report_reopen_submitted','report_get_canonical','report_get_working',
+                       'report_get_management_review')
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
   IF v_n <> 14 THEN RAISE EXCEPTION 'T-ASM-45: % authenticated Step 7I RPCs, expected 14', v_n; END IF;
-  RAISE NOTICE 'PASS T-ASM-45 (Step 7G and Step 7I posture unchanged)';
+  SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
+   WHERE ns.nspname = 'public' AND p.proname = 'report_list_management_corrections'
+     AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
+  IF v_n <> 1 THEN RAISE EXCEPTION 'T-ASM-45: the correction-tracking read does not hold authenticated EXECUTE'; END IF;
+  RAISE NOTICE 'PASS T-ASM-45 (Step 7G and Step 7I posture unchanged; the one B2.1 read added alongside)';
 
   -- T-ASM-33 (runtime legs): the registry is byte-identical in both audit
   -- functions; the three guard triggers stay enabled.

@@ -226,13 +226,14 @@ DO $t$
 DECLARE v_n bigint; v_labels text[];
 BEGIN
   -- (Reconciled at Backend Round B2: the assessment migration is the sixth
-  -- ledger row. T7I-73's own property -- the two Step 7I files applied in
-  -- order with the label file first -- is unchanged.)
+  -- ledger row. Reconciled again at Round B2.1: the correction-tracking
+  -- migration is the seventh. T7I-73's own property -- the two Step 7I files
+  -- applied in order with the label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 6 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 6', v_n; END IF;
+  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 7', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000');
-  IF v_n <> 6 THEN RAISE EXCEPTION 'FAIL T7I-73: the six applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000');
+  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL T7I-73: the seven applied versions are not the expected ones'; END IF;
 
   SELECT pg_catalog.array_agg(e.enumlabel::text ORDER BY e.enumsortorder) INTO v_labels
     FROM pg_catalog.pg_enum e JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
@@ -255,7 +256,7 @@ BEGIN
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname='public';
-  IF v_n <> 30 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 30 (28 + the 2 B2 assessment functions)', v_n; END IF;
+  IF v_n <> 31 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 31 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read)', v_n; END IF;
 
   -- All new objects owned by postgres.
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_class c
@@ -359,7 +360,7 @@ BEGIN
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 22 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 22 (6 + 14 + the 2 B2 assessment RPCs)', v_n; END IF;
+  IF v_n <> 23 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 23 (6 + 14 + the 2 B2 assessment RPCs + the B2.1 correction-tracking read)', v_n; END IF;
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
