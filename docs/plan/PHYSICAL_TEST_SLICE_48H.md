@@ -11,7 +11,7 @@
 
 **Precedence (highest first), unchanged from `CLAUDE.md` §1:**
 
-> Specification v3 → ratified amendments (Amendment 001 → 002 → 003 → **004**, for the clauses each names) → `CLAUDE.md` → `docs/plan/BEST_Coach_Implementation_Plan.md` → Figma Design 2 (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker → **this contract**.
+> Specification v3 → ratified amendments (Amendment 001 → 002 → 003 → 004 → **005**, for the clauses each names) → `CLAUDE.md` → `docs/plan/BEST_Coach_Implementation_Plan.md` → Figma Design 2 (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker → **this contract**.
 
 The governing documents this contract is derived from, and is bound by:
 
@@ -20,7 +20,9 @@ The governing documents this contract is derived from, and is bound by:
 | `CLAUDE.md` | The standing build contract, the four §4 non-negotiables, the §12 stop-and-ask list, module boundaries, testing stack, git discipline, session continuity |
 | `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_004.md` (**A-033 … A-040**) | The two-stage governed workflow, the eight-value status set, the management editing boundary, return-to-trainer, dual approval provenance, role-specific read models, notification triggers, the exhaustive Step-7I-only additive schema set |
 | `docs/plan/STEP_7I_REPORT_LIFECYCLE_BASELINE.md` (**R-1 … R-33**) | The exact lifecycle RPC inventory, transition set, CAS/idempotency discipline, authorization predicates, return shapes, audit mapping and the 75 acceptance tests |
-| `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` | The per-screen inventory, the readiness gate, and the **eight blocked design families** |
+| `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_005.md` (**A-041 … A-048**) | The ratified **36-screen** visual-reference inventory, the **canonical routes**, the **exact twelve-screen physical-test subset**, the **24 deferred portal screens**, the **visual-authority precedence**, and the rule that **Figma never bypasses governance** |
+| `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` | The per-screen record for all 36 screens and the **route-compatibility register** — subordinate to Amendment 005 |
+| `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` | The per-screen-family planning rows, the readiness gate, the **§0.2 ratified 36-screen node mapping**, and the **eight blocked design families** |
 | `docs/plan/BEST_Coach_Implementation_Plan.md` | The procedural execution and review script |
 | `docs/spec/` Amendments 001, 002, 003 and Specification v3 | Everything else |
 
@@ -130,7 +132,7 @@ A deterministic fixture adapter **may** be used to accelerate frontend developme
 - Production deployment
 - Broad calendar work
 - Full mobile refinement
-- Nonessential Figma screens
+- Nonessential Figma screens — **made exact by Amendment 005 A-044: the 24 portal screens listed in §4.4, none of which may be required to be visually complete before the physical test**
 - Post-submission correction initiation
 - Full operational PDPA tooling
 
@@ -170,6 +172,68 @@ These route families are pinned. Neither agent may rename, add or restructure a 
 **Authority always comes from the authenticated server session and live domain membership** — `auth.uid()` → `accounts.auth_user_id` → an **active** `centre_memberships` row → the live relationship (class-session assignment for trainers, centre for management, `parent_student_links` for parents). A route that renders a role's surface must independently prove that role server-side; rendering is never a permission.
 
 **Route-vs-RPC note.** The canonical read RPC is keyed on `(class_session_id, student_id)`, not on `report_id`. The parent detail route matches that key directly. The trainer and management `[reportId]` routes must resolve the report's session/student pair server-side and call the RPC with that pair — the report id is a routing convenience, never a substitute for the authorization predicate.
+
+### 4.1 Relationship to the ratified canonical routes (Amendment 005 A-042)
+
+**Amendment 005 ratifies a canonical route for each of the 36 final-MVP screens. Several differ from the routes pinned above. Both are correct, for different purposes, and neither is withdrawn here.**
+
+- **The routes pinned in §4 are the routes the physical test runs on.** They were built to this contract and remain correct against it. **This checkpoint renames, adds and restructures nothing**, and no route code was changed.
+- **The canonical routes are the final-MVP target.** The per-screen reconciliation — every mismatch, with one treatment each (move to canonical · preserve as redirect · preserve as alias · replace after integration · operator decision required) — is `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §7. **Executing any treatment requires its own authorization** and is **not** part of the 48-hour slice.
+- **The `role` query parameter still selects presentation only** and carries no authority whatsoever (A-046). Unchanged.
+
+### 4.2 The exact twelve-screen visual subset (Amendment 005 A-043)
+
+**Exactly twelve visual-reference screens block this physical test.** This is a **visual-reference subset, not an expansion of this contract's scope** — §2's included scope and §3's deferrals are unchanged.
+
+| Flow | Screen ID | Screen | Canonical route | Route this test runs on |
+|---:|---|---|---|---|
+| 1 | AUTH-01 | Trainer Login | `/login?role=trainer` | `/login?role=trainer` |
+| 2 | 05 | Trainer Schedule | `/trainer/schedule` | — (session selection folded into `/trainer`) |
+| 3 | 06 | Trainer Student Roster | `/trainer/schedule/[sessionId]/student-roster` | `/trainer/sessions/[sessionId]/roster` |
+| 4 | 07 | Trainer Grade Student | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student` | `/trainer/sessions/[sessionId]/students/[studentId]/assess` |
+| 5 | 08 | Trainer AI Report Generation | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student/ai-report-generation` | `/trainer/reports/[reportId]/generate` |
+| 6 | 10 | Trainer Student Report | `/trainer/reports/[reportId]` | `/trainer/reports/[reportId]/review` |
+| 7 | AUTH-02 | Management Login | `/login?role=management` | `/login?role=management` |
+| 8 | 29 | Management Reports | `/management/reports` | `/management/reports` |
+| 9 | 19 | Management Student Report | `/management/students/[studentId]/reports/[reportId]` | `/management/reports/[reportId]/review` |
+| 10 | AUTH-03 | Parent Login | `/login?role=parent` | `/login?role=parent` |
+| 11 | 32 | Parent Reports | `/parent/reports` | `/parent/reports` |
+| 12 | 33 | Parent Class Report | `/parent/reports/[reportId]` | `/parent/students/[studentId]/sessions/[sessionId]/report` |
+
+**The complete governed workflow this subset walks — trainer approval is never abbreviated away:**
+
+```
+Trainer sign-in
+  → session selection
+    → roster
+      → student assessment
+        → grounded AI report generation
+          → Trainer review / edit / checklist / approval   (publishes NOTHING)
+            → Management sign-in
+              → Management queue
+                → Management wording edit, return to trainer, or final Approve & Submit
+                  → Parent sign-in
+                    → Parent submitted-report list
+                      → Parent canonical report detail
+```
+
+This is the §1 lifecycle stated at screen granularity, not a second workflow. **Trainer approval commits `draft_ready | needs_edit → trainer_approved`, freezes the version and publishes nothing; management's Approve & Submit is the only publication** (A-033/A-036). Where management returns a report, **the trainer owns the correction and reapproves through a new immutable version** — a silent byte-identical save is rejected (T-12, A-035).
+
+**One open decision, recorded and not made here.** **ID 05 Trainer Schedule has no implemented route** — session selection currently happens on the trainer landing surface. Either accept that fold for this test, or build `/trainer/schedule` before it. Recorded as Amendment 005 **U-A5-1** and inventory §7.3. **Adding the route is a §9 blocker under this contract, not an agent decision.**
+
+### 4.3 The external frozen UI-reference pack
+
+**The frozen visual references live in an external UI-reference pack, not in this repository.** The pack will scaffold **all 36 folders** — `AUTH-01-trainer-login` … `AUTH-03-parent-login` and `01-trainer-dashboard` … `33-parent-class-report` — one folder per screen, each holding that screen's frozen `reference.png`.
+
+- **Only the twelve core screenshots above are required immediately.** The other 24 folders may be scaffolded empty.
+- **Visual authority is frozen `reference.png` → node-specific Figma context → existing frontend implementation** (A-045).
+- **No visual asset enters this repository without a recorded `PORT` / `REFERENCE ONLY` / `REBUILD` / `REJECT` / `NOT APPLICABLE` disposition** (A-013 discipline, carried by A-022.2). **No screenshot has been captured yet.**
+
+### 4.4 The other 24 portal screens are post-physical-test scope
+
+**The remaining 24 portal screens — 01 · 02 · 03 · 04 · 09 · 11 · 12 · 13 · 14 · 15 · 16 · 17 · 18 · 20 · 21 · 22 · 23 · 24 · 25 · 26 · 27 · 28 · 30 · 31 — are `Post-48-hour final-MVP scope` (A-044).** They are **required for the final MVP** and **must not be required to be visually complete before this physical test**, must not appear in any acceptance gate of §13, and must not be reported as physical-test blockers. **Deferral deletes no safeguard.**
+
+**This contract is not expanded to all 36 screens.** Its included scope stays §2; its deferrals stay §3.
 
 ---
 
