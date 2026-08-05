@@ -187,6 +187,57 @@ Anchored on the existing Step 7E seed centre (`ispeak` / `iSpeak Academy`) and C
 
 **Working artefact.** `docs/plan/FIGMA_DESIGN_2_SCREEN_IMPLEMENTATION_MATRIX.md` holds the per-screen inventory and the **"Orchestrator Figma Porting Actions"** checklist that operationalises this gate.
 
+### G2.1 — The ratified 36-screen inventory and the four screen classes (Amendment 005, A-041 … A-048)
+
+**A large part of Gate G2 is now discharged.** The orchestrator has supplied a **node-specific `/design/` link and node ID for all 36 screens** — **3 authentication screens (`AUTH-01` … `AUTH-03`)** and **33 portal screens (Trainer 01–10 · Management 11–29 · Parent 30–33)** — in Figma file `sSY1TYw3jyVlZDy8V2Mu7g` (`SDS-dashboard`). **Portal numbering 01–33 is preserved; authentication IDs sit outside it.**
+
+**The per-screen record is `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md`.** Do not duplicate it here and do not re-derive it.
+
+**Still outstanding at G2, for every screen:** the six required state frames (loading, empty, validation, error, success, disabled), the token inventory, typography/colour/spacing/radii/shadow scales, logo and icon exports, responsive variants, prototype transitions and interaction notes. **A node ID is not a discharged gate** — it discharges only the "node-specific link, screen name, flow and intended route" line.
+
+**Sequence the work in these four classes, in this order.**
+
+**Class 1 — the twelve physical-test-critical screens.** These, and only these, block the physical-test walkthrough, in this contiguous flow order:
+
+| Flow | ID | Screen | Canonical route |
+|---:|---|---|---|
+| 1 | AUTH-01 | Trainer Login | `/login?role=trainer` |
+| 2 | 05 | Trainer Schedule | `/trainer/schedule` |
+| 3 | 06 | Trainer Student Roster | `/trainer/schedule/[sessionId]/student-roster` |
+| 4 | 07 | Trainer Grade Student | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student` |
+| 5 | 08 | Trainer AI Report Generation | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student/ai-report-generation` |
+| 6 | 10 | Trainer Student Report | `/trainer/reports/[reportId]` |
+| 7 | AUTH-02 | Management Login | `/login?role=management` |
+| 8 | 29 | Management Reports | `/management/reports` |
+| 9 | 19 | Management Student Report | `/management/students/[studentId]/reports/[reportId]` |
+| 10 | AUTH-03 | Parent Login | `/login?role=parent` |
+| 11 | 32 | Parent Reports | `/parent/reports` |
+| 12 | 33 | Parent Class Report | `/parent/reports/[reportId]` |
+
+**Only the twelve core screenshots are required immediately.** **One open decision blocks Class 1 completeness: ID 05 has no implemented route** (inventory §7.3 / Amendment 005 U-A5-1) — accept the fold into the trainer landing surface for the test, or build `/trainer/schedule` before it. **Decide it; do not improvise it.**
+
+**Class 2 — the twenty-four deferred portal screens.** `Post-48-hour final-MVP scope` — **required for the final MVP, not required before the physical test**: 01 · 02 · 03 · 04 · 09 · 11 · 12 · 13 · 14 · 15 · 16 · 17 · 18 · 20 · 21 · 22 · 23 · 24 · 25 · 26 · 27 · 28 · 30 · 31. **Do not require these to be visually complete before the physical test**, and do not let their absence be reported as a physical-test blocker. Deferral **deletes no safeguard**.
+
+**Class 3 — backend-dependent screens.** These cannot be built truthfully until a governed read/write path exists; a screen in this class is **blocked on backend work, not on a frame**:
+
+| Missing backend path | Screens |
+|---|---|
+| Lesson-plan schema, RPC and governance (none exists in the census) | 03, 14 |
+| Session- and class-level statistics projections | 15, 16 |
+| Class-module list, overview and calendar projections | 12, 13, 25 |
+| Management student/trainer list, profile and edit projections and write paths | 17, 18, 22, 23 |
+| Creation and invitation write paths | 20, 21, 24, 26, 27 |
+| Trainer-scoped class and student projections | 02, 04 |
+| Parent calendar projection | 31 |
+| Trainer schedule/date projection | **05 (core slice)** |
+| Centre-scoped management dashboard summary | 11 |
+
+**Class 4 — separately governed screens.** **ID 28 Management Term Report** remains **separately governed before implementation**. Term-report **generation is out of MVP scope** (spec §28; `CLAUDE.md` §5, §8) — evidence is captured, the generator is not built. **Its presence in the visual inventory authorizes nothing.** Screens **20, 21, 24 and 26** additionally carry `Governance decision missing` because their exact field inventories are **UNRESOLVED** — **do not invent a field.**
+
+**Route compatibility is planned, not executed.** The inventory §7 records every mismatch between an implemented route and its canonical route, with one treatment each (move / redirect / alias / replace after integration / operator decision required). **Executing any treatment requires its own authorization**, and no route code was changed to produce the plan.
+
+**Screen presence is not authorization.** A frame authorizes no lifecycle transition, role, permission, database mutation, AI operation, protected-content access, direct table access, Management power or Parent access to unpublished content. Record missing governance as a dependency (A-045).
+
 ---
 
 ## Phase 0 — Foundations

@@ -3,7 +3,7 @@
 **Status:** Planning artefact — created at the Step 7E0 governance reconciliation checkpoint (2026-07-30)
 **Authority:** Governed by **Amendment 002 A-022** (Figma Design 2 is the final UI authority), **A-014** (three-flow, one-centre boundary), **A-016** (canonical hierarchy), **A-017** (mandatory nine dimensions), **A-018** (attendance), **A-019** (management administration), **A-020** (identity/invitation), **A-021** (one canonical report), **A-024** (revised phasing), and **Amendment 004 A-033 … A-040** (the two-stage governed report workflow).
 **Precedence:** This document is **procedural planning material**. It cannot override Specification v3, Amendment 001, Amendment 002, Amendment 003, Amendment 004, or `CLAUDE.md`.
-**Last reconciled:** 2026-08-05 (Step 7I1F-R3 — corrected the §0.1 arithmetic against the Step 7I1E focused re-review finding CD-6: §0.1 and §1 carry **eight design families**, §5.2 carries **nine porting rows** because trainer reapproval after correction is a separate row sharing the correction-tracking family; the earlier "all three lists are eight" claim was a miscount and is withdrawn. No family, row, node ID or asset changed. Step 7I1D-R2 — completed the Step 7I1B-R1 reconciliation against the Step 7I1C adversarial-review findings: §0.1's blocked-family table corrected from five to **eight**, adding the omitted **Management final review** screen and both **notification surfaces**; matching rows added to the screen inventory and the Orchestrator porting actions; the over-broad "no draft" management UAT wording qualified; component inventories on blocked rows marked as placeholders. Step 7I1B-R1 — reconciled to Amendment 004; resolves U-26).
+**Last reconciled:** 2026-08-05 (**Final MVP visual-screen inventory and 48-hour core-slice reconciliation** — **§0.2 added: the ratified 36-screen node mapping**, supplied by the orchestrator and ratified by **Amendment 005 A-041/A-042**. **The "Pending node-specific Design 2 link — do not guess" placeholder is now withdrawn for the 36 screens named in §0.2** and survives only for rows in §1–§3 that §0.2 does not name. **§1–§3 are family-based planning rows and are NOT the complete screen inventory** — see §0.2's boundary note. No family, node ID, screen name, field or asset was invented; the eight blocked design families of §0.1 are unchanged and still have no frame. Previously: Step 7I1F-R3 — corrected the §0.1 arithmetic against the Step 7I1E focused re-review finding CD-6: §0.1 and §1 carry **eight design families**, §5.2 carries **nine porting rows** because trainer reapproval after correction is a separate row sharing the correction-tracking family; the earlier "all three lists are eight" claim was a miscount and is withdrawn. No family, row, node ID or asset changed. Step 7I1D-R2 — completed the Step 7I1B-R1 reconciliation against the Step 7I1C adversarial-review findings: §0.1's blocked-family table corrected from five to **eight**, adding the omitted **Management final review** screen and both **notification surfaces**; matching rows added to the screen inventory and the Orchestrator porting actions; the over-broad "no draft" management UAT wording qualified; component inventories on blocked rows marked as placeholders. Step 7I1B-R1 — reconciled to Amendment 004; resolves U-26).
 
 ---
 
@@ -65,7 +65,87 @@
 
 **Component inventories on blocked rows are placeholders.** Where a `Blocked — new design required` row below names reusable components, tokens or responsive behaviour, those entries record what the **governed behaviour** will need — they are **not** assertions about an absent frame, and the produced design supersedes them. No node ID, screen name, field or asset has been inferred from them.
 
-**No Figma file was modified, and no frame, node ID, screen name or asset was invented in recording it.** Every entry below still carries `Pending node-specific Design 2 link — do not guess`.
+**No Figma file was modified, and no frame, node ID, screen name or asset was invented in recording it.** Every entry below carries `Pending node-specific Design 2 link — do not guess` **except the screens now mapped in §0.2**.
+
+---
+
+## 0.2 The ratified 36-screen node mapping (Amendment 005 A-041 / A-042)
+
+> **Boundary note — read this before treating §1–§3 as the screen inventory.** **§1, §2 and §3 are family-based planning rows written before any node-specific frame existed. They are not, and never were, the complete final-MVP screen inventory**, and they must not be presented as one. Several of their rows describe screen *families* (shared states, calendars, activation flows) that do not correspond one-to-one with a Figma frame, and several ratified screens below have **no** row there at all. **The complete inventory is the 36 screens in this section**, recorded per screen in `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md`. The §1–§3 rows remain useful for their data, authorization, state and porting detail, and are retained for that.
+
+**All 36 screens belong to Figma file key `sSY1TYw3jyVlZDy8V2Mu7g`, file name `SDS-dashboard`.** Every node ID below was **supplied by the orchestrator**; **none was inferred, guessed or fabricated**. Every URL is node-specific.
+
+**`Core` marks the twelve physical-test-critical screens (A-043) with their flow order. `Deferred` marks the twenty-four `Post-48-hour final-MVP scope` portal screens (A-044).**
+
+### Authentication (3)
+
+| ID | Screen | Folder | Canonical route | Node | Node-specific URL | Slice |
+|---|---|---|---|---|---|---|
+| AUTH-01 | Trainer Login | `AUTH-01-trainer-login` | `/login?role=trainer` | `546:370` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=546-370&m=dev | **Core 1** |
+| AUTH-02 | Management Login | `AUTH-02-management-login` | `/login?role=management` | `459:13` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=459-13&m=dev | **Core 7** |
+| AUTH-03 | Parent Login | `AUTH-03-parent-login` | `/login?role=parent` | `546:413` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=546-413&m=dev | **Core 10** |
+
+**This resolves the open question carried on all three login rows in §1–§3 and in §5.2** — *"Shared login shell vs three role-specific login screens is **undetermined** in Design 2."* **Three distinct node-specific frames were supplied, so the visual answer is three role-specific frames**, each separately frozen. The implementation may still share one shell and one route file; **the visual references do not merge**. The orchestrator's sharing note is recorded verbatim: *"all similar to each other"* — similar is not identical, and the A-041 shared-frame exception is **not** invoked.
+
+### Trainer portal (10)
+
+| ID | Screen | Folder | Canonical route | Node | Node-specific URL | Slice |
+|---|---|---|---|---|---|---|
+| 01 | Trainer Dashboard | `01-trainer-dashboard` | `/trainer/dashboard` | `415:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=415-9&m=dev | Deferred |
+| 02 | Trainer My Classes | `02-trainer-my-classes` | `/trainer/my-classes` | `777:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=777-2&m=dev | Deferred |
+| 03 | Trainer Lesson Plan | `03-trainer-lesson-plan` | `/trainer/my-classes/lesson-plan` | `773:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=773-2&m=dev | Deferred |
+| 04 | Trainer Students | `04-trainer-students` | `/trainer/students` | `529:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=529-9&m=dev | Deferred |
+| 05 | Trainer Schedule | `05-trainer-schedule` | `/trainer/schedule` | `591:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=591-9&m=dev | **Core 2** |
+| 06 | Trainer Student Roster | `06-trainer-student-roster` | `/trainer/schedule/[sessionId]/student-roster` | `487:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=487-9&m=dev | **Core 3** |
+| 07 | Trainer Grade Student | `07-trainer-grade-student` | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student` | `784:679` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=784-679&m=dev | **Core 4** |
+| 08 | Trainer AI Report Generation | `08-trainer-ai-report-generation` | `/trainer/schedule/[sessionId]/student-roster/[studentId]/grade-student/ai-report-generation` | `784:340` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=784-340&m=dev | **Core 5** |
+| 09 | Trainer Reports | `09-trainer-reports` | `/trainer/reports` | `783:59` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=783-59&m=dev | Deferred |
+| 10 | Trainer Student Report | `10-trainer-student-report` | `/trainer/reports/[reportId]` | `664:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=664-9&m=dev | **Core 6** |
+
+### Management portal (19)
+
+| ID | Screen | Folder | Canonical route | Node | Node-specific URL | Slice |
+|---|---|---|---|---|---|---|
+| 11 | Management Dashboard | `11-management-dashboard` | `/management/dashboard` | `397:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=397-2&m=dev | Deferred |
+| 12 | Management Classes | `12-management-classes` | `/management/classes` | `442:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=442-9&m=dev | Deferred |
+| 13 | Management Class Overview | `13-management-class-overview` | `/management/classes/[classModuleId]` | `689:66` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=689-66&m=dev | Deferred |
+| 14 | Management Lesson Plan Management | `14-management-lesson-plan-management` | `/management/classes/[classModuleId]/lesson-plans` | `760:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=760-2&m=dev | Deferred |
+| 15 | Management Lesson Statistics | `15-management-lesson-statistics` | `/management/classes/[classModuleId]/sessions/[sessionId]/lesson-statistics` | `690:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=690-2&m=dev | Deferred |
+| 16 | Management Class Statistics | `16-management-class-statistics` | `/management/classes/[classModuleId]/class-statistics` | `445:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=445-9&m=dev | Deferred |
+| 17 | Management Students | `17-management-students` | `/management/students` | `510:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=510-9&m=dev | Deferred |
+| 18 | Management Student Profile | `18-management-student-profile` | `/management/students/[studentId]` | `649:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=649-9&m=dev | Deferred |
+| 19 | Management Student Report | `19-management-student-report` | `/management/students/[studentId]/reports/[reportId]` | `648:330` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=648-330&m=dev | **Core 9** |
+| 20 | Management Register New Student | `20-management-register-student` | `/management/students/register` | `425:10` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=425-10&m=dev | Deferred |
+| 21 | Management Create Parent Account | `21-management-create-parents-account` | `/management/students/create-parent-account` | `709:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=709-2&m=dev | Deferred |
+| 22 | Management Edit Student | `22-management-edit-student` | `/management/students/[studentId]/edit` | `545:175` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=545-175&m=dev | Deferred |
+| 23 | Management Trainers | `23-management-trainers` | `/management/trainers` | `544:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=544-9&m=dev | Deferred |
+| 24 | Management Add Trainer | `24-management-add-trainer` | `/management/trainers/add` | `544:292` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=544-292&m=dev | Deferred |
+| 25 | Management Schedule | `25-management-schedule` | `/management/schedule` | `506:59` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=506-59&m=dev | Deferred |
+| 26 | Management Add Class | `26-management-add-class` | `/management/classes/add-class` | `646:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=646-9&m=dev | Deferred |
+| 27 | Management Edit Class | `27-management-edit-class` | `/management/classes/[classModuleId]/edit` | `545:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=545-9&m=dev | Deferred |
+| 28 | Management Term Report | `28-management-term-report` | `/management/students/[studentId]/term-report` | `836:2` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=836-2&m=dev | Deferred — **separately governed** |
+| 29 | Management Reports | `29-management-reports` | `/management/reports` | `527:170` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=527-170&m=dev | **Core 8** |
+
+### Parent portal (4)
+
+| ID | Screen | Folder | Canonical route | Node | Node-specific URL | Slice |
+|---|---|---|---|---|---|---|
+| 30 | Parent Dashboard | `30-parent-dashboard` | `/parent/dashboard` | `420:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=420-9&m=dev | Deferred |
+| 31 | Parent Calendar | `31-parent-calendar` | `/parent/calendar` | `622:91` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=622-91&m=dev | Deferred |
+| 32 | Parent Reports | `32-parent-reports` | `/parent/reports` | `533:180` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=533-180&m=dev | **Core 11** |
+| 33 | Parent Class Report | `33-parent-class-report` | `/parent/reports/[reportId]` | `627:9` | https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=627-9&m=dev | **Core 12** |
+
+### 0.2.1 What §0.2 does and does not discharge
+
+**Discharged for these 36 screens:** the §5.1 cross-cutting action *"obtain a node-specific Figma `/design/` link for each approved screen … confirm the authoritative screen name and its user flow"*, and the **intended route**, now ratified as the **canonical route** by A-042.
+
+**Still outstanding for every one of the 36:** the **state variants** (loading, empty, validation, error, success, disabled), the **token inventory**, **typography / colour / spacing / radii / shadow** scales, **logo and icon exports**, **responsive variants**, **prototype transitions** and **interaction notes**. **A node ID is not a discharged gate.** Every other §5.1 and §5.2 action stands.
+
+**Unchanged and still blocked:** the **eight design families of §0.1** — management review queue · management final review · wording-only editor · return-to-trainer dialog · correction tracking · final Approve & Submit · staff notification surface · parent notification surface. **No frame exists for any of them, none appears in §0.2, and none may be invented.** Six of the eight are exercised by the twelve-screen physical-test walkthrough; they are built to the ratified governance rules and the contract's field lists, not to a frame. **Eight families, nine porting rows** (§0.1, §5.2) is unchanged.
+
+**Screen presence is not authorization (A-045).** A frame in §0.2 authorizes no lifecycle transition, role, permission, database mutation, AI operation, protected-content access, direct table access, Management power or Parent access to unpublished content. **Figma never bypasses governance**; where a frame and a ratified rule disagree, the ratified rule wins and the discrepancy is recorded.
+
+**Note on "class type".** The compiled screen list described IDs 13–16 and 27 in terms of a "class type". Under A-016 the persisted entity is the **Class Module** under a selected **Class Grade**, so the canonical routes use **`[classModuleId]`** and **no hidden `classes` entity is introduced** (A-047).
 
 ---
 
@@ -73,13 +153,15 @@
 
 - **Figma Design 2 is authoritative for** visual layout, visual hierarchy, component composition, visible fields, screen labels, microcopy, page relationships, screen-to-screen interaction intent, visual states, and responsive behaviour **where explicitly shown**.
 - **Figma Design 2 is NOT authoritative for** database schema, foreign-key design, RLS, server authorization, report lifecycle, audit behaviour, Auth implementation, AI governance, persistence architecture, state-machine rules, or transaction boundaries.
-- **Routes are proposed, not ratified.** Every value in "Intended Next.js route" is a planning proposal and must be confirmed at its implementation checkpoint. No route has been created.
+- **Routes: superseded for the 36 screens of §0.2, still proposals elsewhere.** **Amendment 005 A-042 ratifies the canonical route of every screen in §0.2**, and those canonical routes — not the "Intended Next.js route" values in §1–§3 — are authoritative for those screens. For any row §0.2 does not name, "Intended Next.js route" remains **a planning proposal** to be confirmed at its implementation checkpoint. **No route was created by this reconciliation**, and the routes currently implemented on `feat/48h-frontend` remain those pinned by `docs/plan/PHYSICAL_TEST_SLICE_48H.md` §4 — the reconciliation between the two is `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §7.
 - **"Required data" describes conceptual data needs only.** It is **not** a schema, and it must not be read as one. Schema is decided by ratified governance plus the Step 7E preflight, never inferred from a visual frame.
 - **No Figma asset has been scraped, exported, downloaded, or ported.** No Figma-generated React or CSS exists anywhere in this repository.
 
 ### Verified Figma reference
 
-The only verified reference at this checkpoint is the **prototype entry link supplied by the orchestrator**:
+> **Superseded in part on 2026-08-05 — read §0.2 first.** This subsection recorded the state when the **only** verified reference was a prototype entry link. **The orchestrator has since supplied node-specific `/design/` links and node IDs for all 36 ratified screens (§0.2), and Amendment 005 A-041/A-042 ratifies them.** The `Pending node-specific Design 2 link — do not guess` placeholder is **withdrawn for those 36 screens** and **survives for every §1–§3 row §0.2 does not name**. The prohibition below is otherwise unchanged: **fabricating a node ID is prohibited (A-022)**, and the **eight blocked families of §0.1 still have no frame**.
+
+The original prototype-entry reference, retained as the record of that earlier state:
 
 `https://www.figma.com/proto/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=391-2&t=lRaOIpHfwA4ZaNMZ-1`
 
