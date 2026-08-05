@@ -447,7 +447,7 @@ Real authentication and server-derived role resolution; the Step 7I governed rep
 ### 8.4 What this inventory does not change
 
 - It does **not** amend Specification v3 or Amendments 001–004.
-- It does **not** alter the competency-rating vocabulary — `Emerging` → `Developing` → `Secure` → `Advanced` is governed by a separate vocabulary-reconciliation checkpoint and is untouched here.
+- It does **not** alter the competency-rating vocabulary. **That vocabulary is now ratified by Amendment 006 (A-049, 2026-08-05) as `Beginning` → `Developing` → `Mastering` → `Mastered`**; the reconciliation checkpoint this document formerly pointed to has **completed its governance stage**. Nothing in this inventory — screen counts, IDs, nodes, routes, the twelve-screen physical-test subset or any Amendment 005 decision — is affected by it.
 - It does **not** alter the canonical hierarchy: **Centre → Class Grade → Class Module → Class Session**.
 - It does **not** create, move, delete or restyle any application code, route or component.
 - It does **not** authorize any checkpoint.
