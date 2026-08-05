@@ -29,6 +29,23 @@
 -- superseded that posture, so A32-A35 and D5 now pin the ACCEPTED Step 7G
 -- posture instead. Every fixture-data assertion, negative test and the
 -- canonical checksum region are unchanged.
+--
+-- Reconciled again at Backend Round B1 (Step 7I): the two committed Step 7I
+-- migrations move four censuses this file hard-pins, and it is knowingly RED
+-- from the moment migration file 1 applies until this reconciliation lands --
+-- which is why the reconciliation is committed TOGETHER WITH the migration,
+-- not after it. The four labels and their movements:
+--   A32  25 -> 26 project tables, all with RLS enabled;
+--        report_correction_requests joins the zero-policy list
+--   A33  the 25-table zero-privilege sweeps become 26-table sweeps
+--   A34  3 -> 5 applied migrations, adding 20260805090000 and 20260805090500
+--   A35  10 -> 28 public functions (6 Step 7G + 4 Step 7H + 18 Step 7I), with
+--        per-function contract checks for the new eighteen
+--   D5   the same 28-function and 26-table figures, post-negative-suite
+-- The 29 Step 7G policies, the 13-table authenticated SELECT set, the Step 7H
+-- audit guards, every fixture-data assertion, every negative test and the
+-- canonical checksum region are UNCHANGED -- Step 7I adds no policy, no table
+-- grant and no fixture row.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -201,17 +218,21 @@ BEGIN
   -- and the 6 project helpers so unrelated platform objects can never
   -- cause a false failure.)
 
-  -- A32: RLS and policy posture. Exactly 25 project tables (22 Step 7E +
-  -- 3 Step 7H audit); RLS enabled on all and forced on none; exactly the
-  -- 29 accepted SELECT policies, all permissive and scoped to
-  -- authenticated, distributed exactly as committed; zero policies on the
-  -- nine out-of-scope tables and the three audit tables (twelve total).
+  -- A32: RLS and policy posture. Exactly 26 project tables (22 Step 7E +
+  -- 3 Step 7H audit + 1 Step 7I correction-request table); RLS enabled on
+  -- all and forced on none; exactly the 29 accepted SELECT policies, all
+  -- permissive and scoped to authenticated, distributed exactly as
+  -- committed; zero policies on the nine out-of-scope tables, the three
+  -- audit tables and the correction-request table (thirteen total).
+  -- ZERO GRANTS IS NOT THE SAME AS RLS ENABLED: this count is exactly why
+  -- report_correction_requests had to ship with RLS enabled -- a table
+  -- without it would fail here indistinguishably from a real regression.
   SELECT count(*), count(*) FILTER (WHERE NOT c.relrowsecurity) INTO v_n, v_m
     FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
    WHERE n.nspname = 'public' AND c.relkind = 'r';
-  IF v_n <> 25 OR v_m <> 0 THEN
-    RAISE EXCEPTION 'FAIL A32: expected 25 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
+  IF v_n <> 26 OR v_m <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: expected 26 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
   END IF;
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_class c
@@ -252,9 +273,10 @@ BEGIN
      AND tablename IN ('invitations','assessment_dimensions','observations','observation_ratings',
                        'reports','report_versions','report_version_ratings',
                        'report_version_checklist_progress','report_version_approvals',
-                       'audit_events','audit_event_targets','audit_chain_heads');
+                       'audit_events','audit_event_targets','audit_chain_heads',
+                       'report_correction_requests');
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A32: % policy(ies) exist on out-of-scope or audit tables; expected 0', v_n;
+    RAISE EXCEPTION 'FAIL A32: % policy(ies) exist on out-of-scope, audit or correction tables; expected 0', v_n;
   END IF;
 
   -- A33: table privileges. authenticated holds SELECT on exactly the 13
@@ -278,10 +300,11 @@ BEGIN
       ('invitations'),('assessment_dimensions'),('observations'),('observation_ratings'),
       ('reports'),('report_versions'),('report_version_ratings'),
       ('report_version_checklist_progress'),('report_version_approvals'),
-      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads'),
+      ('report_correction_requests')) AS t(tablename)
    WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, 'SELECT');
   IF v_n <> 0 THEN
-    RAISE EXCEPTION 'FAIL A33: authenticated holds SELECT on % out-of-scope or audit table(s); expected 0', v_n;
+    RAISE EXCEPTION 'FAIL A33: authenticated holds SELECT on % out-of-scope, audit or correction table(s); expected 0', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
@@ -291,7 +314,8 @@ BEGIN
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
       ('report_version_checklist_progress'),('report_version_approvals'),
-      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads'),
+      ('report_correction_requests')) AS t(tablename)
     CROSS JOIN (VALUES ('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege('authenticated', ('public.' || t.tablename)::regclass, p.priv);
   IF v_n <> 0 THEN
@@ -305,7 +329,8 @@ BEGIN
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
       ('report_version_checklist_progress'),('report_version_approvals'),
-      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads'),
+      ('report_correction_requests')) AS t(tablename)
     CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
     CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
@@ -314,19 +339,24 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the three accepted project migrations are applied.
+  -- A34: exactly the five accepted project migrations are applied. Step 7I
+  -- ships TWO files by mandate (U-7I-18), not one: the `trainer_approved`
+  -- enum label must be added and COMMITTED before any object may reference
+  -- it, so the count moved 3 -> 5 rather than 3 -> 4.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 3 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 3 applied migrations, found %', v_n; END IF;
+  IF v_n <> 5 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 5 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500', '20260803154500', '20260804213000');
-  IF v_n <> 3 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500 and 20260804213000';
+   WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
+                     '20260805090000', '20260805090500');
+  IF v_n <> 5 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000 and 20260805090500';
   END IF;
 
-  -- A35: exactly the ten public project functions exist -- the six
-  -- Step 7G authorization helpers plus the four Step 7H audit functions.
+  -- A35: exactly the twenty-eight public project functions exist -- the six
+  -- Step 7G authorization helpers, the four Step 7H audit functions and the
+  -- eighteen Step 7I lifecycle functions.
   -- The six helpers stay STABLE, SECURITY DEFINER, search-path pinned and
   -- authenticated-only executable; each Step 7H function is checked
   -- against the exact contract derived from the committed migration,
@@ -335,8 +365,148 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 10 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 10 functions in schema public, found %', v_n;
+  IF v_n <> 28 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 28 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I), found %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): all eighteen new functions exist, exactly once each, are
+  -- owned by postgres, are LANGUAGE plpgsql (section 5.1 pins the language
+  -- so no `LANGUAGE sql` body can reintroduce the enum parse-analysis
+  -- hazard) and pin an empty search_path.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+    JOIN pg_catalog.pg_language l ON l.oid = p.prolang
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_create','report_mark_observation_saved','report_request_draft',
+                       'report_store_draft','report_cancel_draft','report_save_edit',
+                       'report_update_checklist','report_trainer_approve',
+                       'report_management_edit_wording','report_management_return_to_trainer',
+                       'report_management_approve_and_submit','report_reopen_submitted',
+                       'report_get_canonical','report_get_working','report_get_management_review',
+                       'app_parent_reaches_student','report_content_hash_v1','report_wording_hash_v1')
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND l.lanname = 'plpgsql'
+     AND p.proconfig IS NOT NULL
+     AND p.proconfig::text LIKE '%search_path=%';
+  IF v_n <> 18 THEN
+    RAISE EXCEPTION 'FAIL A35: expected the 18 Step 7I functions to be postgres-owned plpgsql with a pinned search_path, matched %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): the EXECUTE census. EXACTLY fourteen Step 7I functions
+  -- hold `authenticated` EXECUTE -- the fourteen client-callable RPCs and
+  -- nothing else.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_create','report_mark_observation_saved','report_request_draft',
+                       'report_cancel_draft','report_save_edit','report_update_checklist',
+                       'report_trainer_approve','report_management_edit_wording',
+                       'report_management_return_to_trainer','report_management_approve_and_submit',
+                       'report_reopen_submitted','report_get_canonical','report_get_working',
+                       'report_get_management_review')
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE');
+  IF v_n <> 14 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 14 authenticated-callable Step 7I RPCs, matched %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): the FOUR zero-EXECUTE functions. report_store_draft and
+  -- both serializers are zero-EXECUTE by GOVERNANCE PROHIBITION (R-27,
+  -- R-26); app_parent_reaches_student is zero-EXECUTE by MINIMUM PRIVILEGE
+  -- (R-31) and may be granted later, but only together with the policy or
+  -- client consumer that needs it.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_store_draft','report_content_hash_v1',
+                       'report_wording_hash_v1','app_parent_reaches_student')
+     AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND p.proacl IS NOT NULL
+     AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
+  IF v_n <> 4 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 4 Step 7I functions with zero client EXECUTE including PUBLIC, matched %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): both serializers are IMMUTABLE, NOT STRICT (a NULL panel
+  -- is a legal, meaningful value serialized as the `N` tag), PARALLEL SAFE
+  -- and SECURITY INVOKER -- invoker rights are safe precisely because their
+  -- only legitimate callers already run as postgres.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_content_hash_v1','report_wording_hash_v1')
+     AND p.provolatile = 'i'
+     AND NOT p.proisstrict
+     AND p.proparallel = 's'
+     AND NOT p.prosecdef;
+  IF v_n <> 2 THEN
+    RAISE EXCEPTION 'FAIL A35: the two Step 7I serializers must be IMMUTABLE, not STRICT, PARALLEL SAFE and SECURITY INVOKER, matched %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): the fifteen RPCs and the parent helper are all
+  -- SECURITY DEFINER; the three reads and the helper are STABLE and the
+  -- twelve mutations are VOLATILE.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_create','report_mark_observation_saved','report_request_draft',
+                       'report_store_draft','report_cancel_draft','report_save_edit',
+                       'report_update_checklist','report_trainer_approve',
+                       'report_management_edit_wording','report_management_return_to_trainer',
+                       'report_management_approve_and_submit','report_reopen_submitted')
+     AND p.prosecdef AND p.provolatile = 'v';
+  IF v_n <> 12 THEN
+    RAISE EXCEPTION 'FAIL A35: expected 12 VOLATILE SECURITY DEFINER Step 7I mutation RPCs, matched %', v_n;
+  END IF;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('report_get_canonical','report_get_working',
+                       'report_get_management_review','app_parent_reaches_student')
+     AND p.prosecdef AND p.provolatile = 's';
+  IF v_n <> 4 THEN
+    RAISE EXCEPTION 'FAIL A35: expected 4 STABLE SECURITY DEFINER Step 7I read/helper functions, matched %', v_n;
+  END IF;
+
+  -- A35 (Step 7I): the eight ordered report_status labels. The physical
+  -- pg_enum sort order must equal A-036, CLAUDE.md section 6 and the Step 7I
+  -- baseline -- a bare ADD VALUE would have appended `trainer_approved`
+  -- eighth and silently disagreed with all three.
+  IF (SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder)
+        FROM pg_catalog.pg_enum e
+        JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
+        JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+       WHERE n.nspname = 'public' AND t.typname = 'report_status')
+     IS DISTINCT FROM ARRAY['incomplete','observation_saved','drafting','draft_ready',
+                            'needs_edit','trainer_approved','approved','submitted'] THEN
+    RAISE EXCEPTION 'FAIL A35: report_status labels or their physical order do not match the ratified eight';
+  END IF;
+
+  -- A35 (Step 7I): exactly 12 enums, and the approvals default drop.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_type t
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+   WHERE n.nspname = 'public' AND t.typtype = 'e';
+  IF v_n <> 12 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 12 enum types in public, found %', v_n;
+  END IF;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_attrdef d
+    JOIN pg_catalog.pg_attribute a ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+   WHERE d.adrelid = 'public.report_version_approvals'::regclass AND a.attname = 'approver_role';
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL A35: report_version_approvals.approver_role still carries a DEFAULT (A-040 item 5)';
   END IF;
 
   SELECT count(*) INTO v_n
@@ -943,6 +1113,7 @@ BEGIN
   OR (SELECT count(*) FROM public.report_version_ratings) <> 0
   OR (SELECT count(*) FROM public.report_version_checklist_progress) <> 0
   OR (SELECT count(*) FROM public.report_version_approvals) <> 0
+  OR (SELECT count(*) FROM public.report_correction_requests) <> 0
   OR (SELECT count(*) FROM public.invitations) <> 0 THEN
     RAISE EXCEPTION 'FAIL D3: the Option B zero-row boundary was violated by the negative suite';
   END IF;
@@ -967,8 +1138,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 10 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 10 Step 7G/7H functions after the negative suite, found %', v_n;
+  IF v_n <> 28 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 28 Step 7G/7H/7I functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
@@ -988,7 +1159,8 @@ BEGIN
       ('class_sessions'),('enrolments'),('class_session_assignments'),('attendance'),('invitations'),
       ('observations'),('observation_ratings'),('reports'),('report_versions'),('report_version_ratings'),
       ('report_version_checklist_progress'),('report_version_approvals'),
-      ('audit_events'),('audit_event_targets'),('audit_chain_heads')) AS t(tablename)
+      ('audit_events'),('audit_event_targets'),('audit_chain_heads'),
+      ('report_correction_requests')) AS t(tablename)
     CROSS JOIN (VALUES ('anon'),('service_role'),('authenticator'),('public')) AS r(rolname)
     CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS p(priv)
    WHERE has_table_privilege(r.rolname, ('public.' || t.tablename)::regclass, p.priv);
