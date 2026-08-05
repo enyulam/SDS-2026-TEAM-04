@@ -149,11 +149,14 @@ END $$;
 DO $census$
 DECLARE v_n bigint; v_m bigint; v_txt text;
 BEGIN
-  -- T-ASM-40: 7 migrations, 31 functions, 26 tables, 12 enums.
+  -- T-ASM-40: 8 migrations, 31 functions, 26 tables, 12 enums.
   -- (Reconciled at Round B2.1: the correction-tracking migration adds one
-  -- read-only function and one migration file; no table and no enum.)
+  -- read-only function and one migration file; no table and no enum.
+  -- Reconciled again at B-V2-2: the Amendment 006 A-053 competency-vocabulary
+  -- rename adds one migration file and, being three ALTER TYPE ... RENAME
+  -- VALUE statements, changes no function, table or enum count.)
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 7 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 7', v_n; END IF;
+  IF v_n <> 8 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 8', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
   IF v_n <> 31 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 31', v_n; END IF;
@@ -165,7 +168,7 @@ BEGIN
     JOIN pg_catalog.pg_namespace ns ON ns.oid = t.typnamespace
    WHERE ns.nspname = 'public' AND t.typtype = 'e';
   IF v_n <> 12 THEN RAISE EXCEPTION 'T-ASM-40: % enums, expected 12', v_n; END IF;
-  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: 7 migrations, 31 functions, 26 tables, 12 enums)';
+  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: 8 migrations, 31 functions, 26 tables, 12 enums)';
 
   -- T-ASM-41: full function contracts from the catalogue.
   SELECT count(*) INTO v_n
@@ -980,7 +983,14 @@ BEGIN
   SELECT count(*) INTO v_bad
     FROM public.audit_events e
    WHERE (e.payload::text || e.payload_canonical) ~*
-         '(Scaffold observation notes|Scaffold follow-up|Scaffold term|confident-opening|pacing|"emerging"|"developing"|"secure"|"advanced"|Fixture (Student|Trainer|Manager|Parent)|example\.test)';
+         -- Amendment 006 A-052 (audit-payload privacy), reconciled at B-V2-2:
+         -- the RATIFIED labels are listed FIRST because they are the values
+         -- that now exist; the superseded labels are retained so an archived
+         -- or stale payload still trips the assertion. An assertion left
+         -- pinned to the old labels alone keeps PASSING while checking for
+         -- values that no longer exist -- the silent false negative A-052
+         -- names as this amendment's highest-risk failure mode.
+         '(Scaffold observation notes|Scaffold follow-up|Scaffold term|confident-opening|pacing|"beginning"|"developing"|"mastering"|"mastered"|"emerging"|"secure"|"advanced"|Fixture (Student|Trainer|Manager|Parent)|example\.test)';
   IF v_bad <> 0 THEN RAISE EXCEPTION 'T-ASM-34: % event payload(s) leak assessment substance or PII', v_bad; END IF;
   SELECT count(*) INTO v_bad
     FROM public.audit_event_targets t
