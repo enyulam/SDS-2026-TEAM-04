@@ -154,7 +154,7 @@ export type ManagementQueueRowDto = {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionDate: string;
-  readonly status: "trainer_approved" | "needs_edit";
+  readonly status: "trainer_approved" | "needs_edit" | "draft_ready";
   readonly openCorrectionScope?: CorrectionRequestDto["issueScope"];
   readonly openCorrectionStatus?: CorrectionRequestDto["status"];
   /** Present only on the correction-tracking projection for a request this fixture raised. */
