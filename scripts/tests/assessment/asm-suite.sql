@@ -93,18 +93,24 @@ END $$;
 
 -- A well-formed nine-element ratings payload with a deliberately mixed set,
 -- in a SHUFFLED order (T-ASM-36 asserts the read re-orders it).
+--
+-- Reconciled at Backend V2 to the Amendment 006 A-049 ratified vocabulary:
+-- `advanced`->`mastered`, `secure`->`mastering`, `emerging`->`beginning`;
+-- `developing` is unchanged. The MIX is positionally identical to the
+-- accepted CP-2/CP-4 payload -- only the three renamed labels moved. These
+-- are competency ratings, not Class Grades (A-054).
 CREATE FUNCTION pg_temp.nine() RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN
   RETURN '[
     {"dimension_code":"sentence_flow","rating":"developing"},
-    {"dimension_code":"body","rating":"advanced"},
-    {"dimension_code":"audience_awareness","rating":"secure"},
-    {"dimension_code":"emotion","rating":"emerging"},
-    {"dimension_code":"vocal_projection","rating":"advanced"},
-    {"dimension_code":"speech","rating":"secure"},
-    {"dimension_code":"emotional_expression","rating":"emerging"},
+    {"dimension_code":"body","rating":"mastered"},
+    {"dimension_code":"audience_awareness","rating":"mastering"},
+    {"dimension_code":"emotion","rating":"beginning"},
+    {"dimension_code":"vocal_projection","rating":"mastered"},
+    {"dimension_code":"speech","rating":"mastering"},
+    {"dimension_code":"emotional_expression","rating":"beginning"},
     {"dimension_code":"tonality","rating":"developing"},
-    {"dimension_code":"eye_contact","rating":"secure"}
+    {"dimension_code":"eye_contact","rating":"mastering"}
   ]'::jsonb;
 END $$;
 
@@ -487,7 +493,7 @@ BEGIN
 
   -- T-ASM-6: nine elements, one code twice -- caught by the DISTINCTNESS
   -- gate, not a unique violation, and distinct from T-ASM-5's code.
-  bad := (pg_temp.nine() - 0) || '[{"dimension_code":"emotion","rating":"secure"}]'::jsonb;
+  bad := (pg_temp.nine() - 0) || '[{"dimension_code":"emotion","rating":"mastering"}]'::jsonb;
   v_code := pg_temp.errcode(pg_catalog.format(
     'SELECT pg_temp.save(%L,%L,%L,11,%L::jsonb)', S1, STU, v_obs, bad::text));
   IF v_code <> 'BC108' THEN RAISE EXCEPTION 'T-ASM-6: got %, expected BC108', v_code; END IF;
@@ -495,7 +501,7 @@ BEGIN
   RAISE NOTICE 'PASS T-ASM-6';
 
   -- T-ASM-7: unknown dimension code, distinct again.
-  bad := (pg_temp.nine() - 0) || '[{"dimension_code":"charisma","rating":"secure"}]'::jsonb;
+  bad := (pg_temp.nine() - 0) || '[{"dimension_code":"charisma","rating":"mastering"}]'::jsonb;
   v_code := pg_temp.errcode(pg_catalog.format(
     'SELECT pg_temp.save(%L,%L,%L,11,%L::jsonb)', S1, STU, v_obs, bad::text));
   IF v_code <> 'BC109' THEN RAISE EXCEPTION 'T-ASM-7: got %, expected BC109', v_code; END IF;
@@ -520,12 +526,12 @@ BEGIN
        '[1,2,3,4,5,6,7,8,9]')) <> 'BC107' THEN
     RAISE EXCEPTION 'T-ASM-9: non-object element was not BC107';
   END IF;
-  bad := (pg_temp.nine() - 1) || '[{"dimension_code":"body","rating":"secure","extra":true}]'::jsonb;
+  bad := (pg_temp.nine() - 1) || '[{"dimension_code":"body","rating":"mastering","extra":true}]'::jsonb;
   IF pg_temp.errcode(pg_catalog.format(
        'SELECT pg_temp.save(%L,%L,%L,11,%L::jsonb)', S1, STU, v_obs, bad::text)) <> 'BC107' THEN
     RAISE EXCEPTION 'T-ASM-9: extra key was not BC107';
   END IF;
-  bad := (pg_temp.nine() - 1) || '[{"dimension_code":"body","grade":"secure"}]'::jsonb;
+  bad := (pg_temp.nine() - 1) || '[{"dimension_code":"body","grade":"mastering"}]'::jsonb;
   IF pg_temp.errcode(pg_catalog.format(
        'SELECT pg_temp.save(%L,%L,%L,11,%L::jsonb)', S1, STU, v_obs, bad::text)) <> 'BC107' THEN
     RAISE EXCEPTION 'T-ASM-9: misspelled key was not BC107';

@@ -165,16 +165,21 @@ async function destroyDisposable() {
     { tuplesOnly: false, stopOnError: false, user: 'supabase_admin' })
 }
 
+// The nine-dimension race payload, in the Amendment 006 A-049 ratified
+// vocabulary (`beginning` / `developing` / `mastering` / `mastered`). The
+// MIX is positionally unchanged from the accepted CP-2/CP-4 payload -- only
+// the three renamed labels moved, and `developing` did not. These are
+// competency ratings, not Class Grades (A-054).
 const NINE = JSON.stringify([
-  { dimension_code: 'body', rating: 'advanced' },
-  { dimension_code: 'emotion', rating: 'emerging' },
-  { dimension_code: 'speech', rating: 'secure' },
+  { dimension_code: 'body', rating: 'mastered' },
+  { dimension_code: 'emotion', rating: 'beginning' },
+  { dimension_code: 'speech', rating: 'mastering' },
   { dimension_code: 'tonality', rating: 'developing' },
-  { dimension_code: 'eye_contact', rating: 'secure' },
-  { dimension_code: 'vocal_projection', rating: 'advanced' },
-  { dimension_code: 'emotional_expression', rating: 'emerging' },
+  { dimension_code: 'eye_contact', rating: 'mastering' },
+  { dimension_code: 'vocal_projection', rating: 'mastered' },
+  { dimension_code: 'emotional_expression', rating: 'beginning' },
   { dimension_code: 'sentence_flow', rating: 'developing' },
-  { dimension_code: 'audience_awareness', rating: 'secure' },
+  { dimension_code: 'audience_awareness', rating: 'mastering' },
 ])
 
 const saveCall = (session, obs, lock) => `PERFORM public.assessment_save_observation(

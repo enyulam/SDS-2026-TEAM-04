@@ -5,9 +5,9 @@
 // LOCAL STACK ONLY. Three parts:
 //
 //   Part 1 -- GROUNDING (pure, no database): deterministic schema and
-//     grounding validation, including the mandated contradiction case (an
-//     `emerging` rating described in achievement language MUST be rejected)
-//     and the raw-rating-label leak case.
+//     grounding validation, including the mandated contradiction case (a
+//     `beginning` rating described in achievement language MUST be rejected)
+//     and the rating-attribution leak case.
 //
 //   Part 2 -- REAL AUTHENTICATION (canonical database, STRICTLY READ-ONLY):
 //     three real local Auth sessions are established WITHOUT any password
@@ -52,6 +52,7 @@ import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
 import { validateGrounding } from "@/server/modules/ai-drafting/grounding.ts";
+import { POLARITY_BANDS } from "@/server/modules/framework/dimensions.ts";
 import { validatePanelShape, DeterministicFixtureDraftProvider, OpenAiDraftProvider } from "@/server/modules/ai-drafting/provider.ts";
 import { requestDraftCore } from "@/server/modules/ai-drafting/request-draft-core.ts";
 import { LocalTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store.ts";
@@ -239,17 +240,32 @@ SELECT COALESCE(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(x)), '[]'::jsonb) FROM 
 // =====================================================================
 function partGrounding() {
   console.log("--- Part 1: deterministic schema + grounding validation ---");
+  // Amendment 006 A-049 ratified vocabulary. These MUST be members of
+  // RatingLevel: POLARITY_BANDS is keyed by it, and a stale label would make
+  // POLARITY_BANDS[r.rating] `undefined`, which grounding rule 3 SKIPS —
+  // the gate would stop rejecting instead of erroring, a fail-open
+  // degradation of CLAUDE.md §4 non-negotiable 1. The mix is positionally
+  // unchanged; eye_contact stays the needs_support dimension INT-G3 targets.
   const ratings = [
-    { dimensionCode: "body", displayName: "Body", rating: "advanced" },
-    { dimensionCode: "emotion", displayName: "Emotion", rating: "emerging" },
-    { dimensionCode: "speech", displayName: "Speech", rating: "secure" },
+    { dimensionCode: "body", displayName: "Body", rating: "mastered" },
+    { dimensionCode: "emotion", displayName: "Emotion", rating: "beginning" },
+    { dimensionCode: "speech", displayName: "Speech", rating: "mastering" },
     { dimensionCode: "tonality", displayName: "Tonality", rating: "developing" },
-    { dimensionCode: "eye_contact", displayName: "Eye Contact", rating: "emerging" },
-    { dimensionCode: "vocal_projection", displayName: "Vocal Projection", rating: "advanced" },
+    { dimensionCode: "eye_contact", displayName: "Eye Contact", rating: "beginning" },
+    { dimensionCode: "vocal_projection", displayName: "Vocal Projection", rating: "mastered" },
     { dimensionCode: "emotional_expression", displayName: "Emotional Expression", rating: "developing" },
-    { dimensionCode: "sentence_flow", displayName: "Sentence Flow", rating: "secure" },
-    { dimensionCode: "audience_awareness", displayName: "Audience Awareness", rating: "secure" },
+    { dimensionCode: "sentence_flow", displayName: "Sentence Flow", rating: "mastering" },
+    { dimensionCode: "audience_awareness", displayName: "Audience Awareness", rating: "mastering" },
   ];
+  // Fail-closed precondition: prove every fixture rating is a live
+  // RatingLevel BEFORE the grounding proofs run. Without this, INT-G3 and
+  // INT-G5 could report green while rule 3 was silently inert.
+  {
+    const unknown = ratings.filter((r) => POLARITY_BANDS[r.rating] === undefined);
+    if (unknown.length > 0) {
+      fail("INT-G0", `${unknown.length} fixture rating label(s) are not members of RatingLevel: ${unknown.map((r) => r.rating).join(", ")} — grounding would fail OPEN`);
+    } else pass("INT-G0", "every fixture rating resolves to a ratified polarity band (the grounding gate cannot fail open)");
+  }
   const input = { studentDisplayName: "Fixture Student One", ratings };
   const goodPanels = {
     todaysStrength: "The student used posture and gesture confidently and independently across today's activities.",
@@ -269,21 +285,43 @@ function partGrounding() {
   if (!ok.ok) fail("INT-G2", `a compliant draft was rejected: ${ok.reasons.join("; ")}`);
   else pass("INT-G2", "a polarity-compliant draft passes grounding");
 
-  // 1c -- THE mandated contradiction: `eye_contact` is EMERGING, and the
-  // draft calls it excellent. Grounding must reject — not a human.
+  // 1c -- THE mandated contradiction: `eye_contact` is BEGINNING
+  // (needs_support under A-051), and the draft calls it excellent. Grounding
+  // must reject — not a human. The rejection is required to come from the
+  // POLARITY rule, so a green here can never be an attribution-rule accident.
   const contradictory = {
     ...goodPanels,
     todaysStrength: "Excellent eye contact throughout — the student has clearly mastered holding the audience's gaze.",
   };
   const verdict = validateGrounding(contradictory, input);
-  if (verdict.ok) fail("INT-G3", "achievement language about an emerging dimension was NOT rejected");
-  else pass("INT-G3", "an emerging rating described as achievement is rejected by the system");
+  if (verdict.ok) fail("INT-G3", "achievement language about a `beginning` dimension was NOT rejected");
+  else if (!verdict.reasons.some((r) => r.includes("needs_support") && r.includes("eye_contact"))) {
+    fail("INT-G3", `the draft was rejected, but not by the polarity rule: ${verdict.reasons.join("; ")}`);
+  } else pass("INT-G3", "a `beginning` rating described as achievement is rejected by the system, by the polarity rule");
 
-  // 1d -- raw rating labels never reach parent prose.
-  const leaking = { ...goodPanels, sessionTakeaway: "The student is currently rated Emerging in eye contact." };
+  // 1d -- rating ATTRIBUTION never reaches parent prose (A-052). Re-keyed at
+  // Backend V2 to the RATIFIED vocabulary: the superseded wording ("rated
+  // Emerging") certified a guarantee that no longer holds, because
+  // `emerging` is no longer a value this system can assign.
+  const leaking = { ...goodPanels, sessionTakeaway: "The student is currently rated Mastering in sentence flow." };
   const leakVerdict = validateGrounding(leaking, input);
-  if (leakVerdict.ok) fail("INT-G4", "a raw rating label leaked into parent-facing prose");
-  else pass("INT-G4", "raw rating vocabulary in parent prose is rejected");
+  if (leakVerdict.ok) fail("INT-G4", "a ratified rating label was attributed to the student in parent-facing prose and was NOT rejected");
+  else if (!leakVerdict.reasons.some((r) => r.includes("attributed to the student"))) {
+    fail("INT-G4", `rejected, but not by the attribution rule: ${leakVerdict.reasons.join("; ")}`);
+  } else pass("INT-G4", "attributing a ratified rating label to the student is rejected by the attribution rule");
+
+  // 1d(ii) -- A-052's other half: ORDINARY PROSE using the same words stays
+  // LEGAL. A bare-word regex is expressly prohibited, and this is the proof
+  // that none was reintroduced. `body` is `mastered` and `sentence_flow` is
+  // `mastering`, so neither sentence contradicts a rating either.
+  const ordinary = {
+    ...goodPanels,
+    todaysStrength: "Right from the beginning of the session, the student has mastered a confident, upright posture and used gesture naturally.",
+    practiceSuggestion: "The student is mastering sentence flow, so short daily practice will keep that progress steady.",
+  };
+  const ordinaryVerdict = validateGrounding(ordinary, input);
+  if (!ordinaryVerdict.ok) fail("INT-G6", `ordinary prose using the label words was rejected — a bare-word guard has regressed: ${ordinaryVerdict.reasons.join("; ")}`);
+  else pass("INT-G6", "ordinary prose (\"at the beginning of the session\", \"has mastered … posture\", \"is mastering sentence flow\") remains legal");
 
   // 1e -- a needs_support dimension presented as the strength is rejected.
   const wrongStrength = { ...goodPanels, todaysStrength: "Eye contact was the highlight of the session." };
@@ -443,7 +481,9 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
   const readStudentDisplayName = async () =>
     q(WORK_DB, `SELECT full_name FROM public.students WHERE id='${STUDENT}';`);
 
-  // L1 -- saveObservation core (trainer): all nine, mixed, eye_contact emerging.
+  // L1 -- saveObservation core (trainer): all nine, mixed, eye_contact
+  // `beginning` (A-049) -- the needs_support dimension L2's contradictory
+  // provider is then caught against.
   const saved = await saveObservationCore(trainerDb, {
     sessionId: SESSION, studentId: STUDENT,
     strengthChips: ["confident-opening"], focusChips: ["pacing"],
@@ -451,22 +491,22 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
     followUpNotes: "Reinforce eye contact drills next session.",
     termEvidenceNotes: "",
     ratings: [
-      { dimensionCode: "body", rating: "advanced" },
+      { dimensionCode: "body", rating: "mastered" },
       { dimensionCode: "emotion", rating: "developing" },
-      { dimensionCode: "speech", rating: "secure" },
+      { dimensionCode: "speech", rating: "mastering" },
       { dimensionCode: "tonality", rating: "developing" },
-      { dimensionCode: "eye_contact", rating: "emerging" },
-      { dimensionCode: "vocal_projection", rating: "advanced" },
+      { dimensionCode: "eye_contact", rating: "beginning" },
+      { dimensionCode: "vocal_projection", rating: "mastered" },
       { dimensionCode: "emotional_expression", rating: "developing" },
-      { dimensionCode: "sentence_flow", rating: "secure" },
-      { dimensionCode: "audience_awareness", rating: "secure" },
+      { dimensionCode: "sentence_flow", rating: "mastering" },
+      { dimensionCode: "audience_awareness", rating: "mastering" },
     ],
   });
   if (saved.outcome !== "success") { fail("INT-L1", `saveObservationCore gave ${saved.outcome}`); await destroyDisposable(); return; }
   pass("INT-L1", "saveObservationCore persisted the nine-rating observation (no audit event, no report)");
 
-  // L2 -- requestDraft with a provider whose output CONTRADICTS the emerging
-  // rating: grounding must reject twice (one bounded retry) and cancel, so
+  // L2 -- requestDraft with a provider whose output CONTRADICTS the
+  // `beginning` rating: grounding must reject twice (one bounded retry) and cancel, so
   // no false draft_ready exists and the assessment is preserved.
   const rejected = await requestDraftCore({
     db: trainerDb, provider: new ContradictoryProvider(), trustedStore,
@@ -493,7 +533,9 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
         studentDisplayName: "Fixture Student One",
         ratings: observation.data.ratings.map((r) => ({
           dimensionCode: r.dimensionCode, displayName: r.displayName, rating: r.rating,
-          anchorText: "", polarityBand: r.rating === "emerging" ? "needs_support" : r.rating === "developing" ? "developing" : "positive",
+          // A-051: derived from the ratified constant, not re-hardcoded here,
+          // so this harness can never drift from the backend mapping.
+          anchorText: "", polarityBand: POLARITY_BANDS[r.rating],
         })),
         strengthChips: observation.data.strengthChips,
         focusChips: observation.data.focusChips,
@@ -607,7 +649,7 @@ SELECT count(*) FROM public.report_version_ratings a
     p_class_session_id: SESSION, p_student_id: STUDENT, p_expected_observation_id: null,
     p_expected_lock_version: null, p_strength_chips: [], p_focus_chips: [],
     p_observation_notes: null, p_follow_up_notes: null, p_term_evidence_notes: null,
-    p_ratings: [{ dimension_code: "body", rating: "secure" }],
+    p_ratings: [{ dimension_code: "body", rating: "mastering" }],
   });
   const mgmtEdit = await managementDb.rpc("report_save_edit", {
     p_report_id: reportId, p_expected_status: "draft_ready", p_expected_lock_version: 1,

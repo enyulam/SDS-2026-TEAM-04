@@ -227,13 +227,35 @@ DECLARE v_n bigint; v_labels text[];
 BEGIN
   -- (Reconciled at Backend Round B2: the assessment migration is the sixth
   -- ledger row. Reconciled again at Round B2.1: the correction-tracking
-  -- migration is the seventh. T7I-73's own property -- the two Step 7I files
-  -- applied in order with the label file first -- is unchanged.)
+  -- migration is the seventh. Reconciled again at Backend V2: the
+  -- competency-vocabulary rename (Amendment 006 A-053) is the eighth.
+  -- T7I-73's own property -- the two Step 7I files applied in order with the
+  -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 7', v_n; END IF;
+  IF v_n <> 8 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 8', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000');
-  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL T7I-73: the seven applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000');
+  IF v_n <> 8 THEN RAISE EXCEPTION 'FAIL T7I-73: the eight applied versions are not the expected ones'; END IF;
+
+  -- Backend V2: the four ratified competency_rating labels and their physical
+  -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
+  -- the ordinal semantics survived. Class Grade is a DIFFERENT enum and is
+  -- unchanged (A-054) -- it is asserted separately below.
+  SELECT pg_catalog.array_agg(e.enumlabel::text ORDER BY e.enumsortorder) INTO v_labels
+    FROM pg_catalog.pg_enum e JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+   WHERE n.nspname = 'public' AND t.typname = 'competency_rating';
+  IF v_labels IS DISTINCT FROM ARRAY['beginning','developing','mastering','mastered'] THEN
+    RAISE EXCEPTION 'FAIL T7I-73: competency_rating physical order is %, expected the ratified four (A-049)', v_labels;
+  END IF;
+
+  SELECT pg_catalog.array_agg(e.enumlabel::text ORDER BY e.enumsortorder) INTO v_labels
+    FROM pg_catalog.pg_enum e JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+   WHERE n.nspname = 'public' AND t.typname = 'class_grade_code';
+  IF v_labels IS DISTINCT FROM ARRAY['beginner','intermediate','advanced'] THEN
+    RAISE EXCEPTION 'FAIL T7I-73: class_grade_code is %, expected beginner/intermediate/advanced unchanged (A-054)', v_labels;
+  END IF;
 
   SELECT pg_catalog.array_agg(e.enumlabel::text ORDER BY e.enumsortorder) INTO v_labels
     FROM pg_catalog.pg_enum e JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
@@ -404,7 +426,7 @@ BEGIN
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-4: report_store_draft as authenticated gave %, expected 42501 permission denied', v; END IF;
 
   v := pg_temp.errcode($q$ SELECT public.report_content_hash_v1('a','b','c','d',
-        ARRAY['secure','secure','secure','secure','secure','secure','secure','secure','secure']::public.competency_rating[]) $q$);
+        ARRAY['mastering','mastering','mastering','mastering','mastering','mastering','mastering','mastering','mastering']::public.competency_rating[]) $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-4: report_content_hash_v1 as authenticated gave %, expected 42501', v; END IF;
 
   v := pg_temp.errcode($q$ SELECT public.report_wording_hash_v1('a','b','c','d') $q$);
@@ -423,7 +445,7 @@ BEGIN
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-18: DELETE on report_version_approvals as authenticated gave %, expected 42501', v; END IF;
   v := pg_temp.errcode($q$ INSERT INTO public.report_correction_requests(id) VALUES (gen_random_uuid()) $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-3: INSERT on report_correction_requests as authenticated gave %, expected 42501', v; END IF;
-  v := pg_temp.errcode($q$ UPDATE public.observation_ratings SET rating='secure' $q$);
+  v := pg_temp.errcode($q$ UPDATE public.observation_ratings SET rating='mastering' $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-52: UPDATE on observation_ratings as authenticated gave %, expected 42501', v; END IF;
   v := pg_temp.errcode($q$ UPDATE public.attendance SET status='absent' $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-52: UPDATE on attendance as authenticated gave %, expected 42501', v; END IF;
@@ -558,8 +580,9 @@ DECLARE
   v_src   text;
   v_a     text;
   v_b     text;
-  v_nine  public.competency_rating[] := ARRAY['secure','developing','emerging','secure','advanced',
-                                              'developing','emerging','secure','advanced']::public.competency_rating[];
+  -- Amendment 006 A-049 ratified labels; the mix is positionally unchanged.
+  v_nine  public.competency_rating[] := ARRAY['mastering','developing','beginning','mastering','mastered',
+                                              'developing','beginning','mastering','mastered']::public.competency_rating[];
   v_err   text;
 BEGIN
   SELECT pg_catalog.count(*) INTO v_n
@@ -603,12 +626,12 @@ BEGIN
 
   -- Fixed arity: any length other than nine, or a NULL element, RAISES.
   v_err := pg_temp.errcode($q$ SELECT public.report_content_hash_v1('a','b','c','d',
-             ARRAY['secure']::public.competency_rating[]) $q$);
+             ARRAY['mastering']::public.competency_rating[]) $q$);
   IF v_err = 'OK' THEN RAISE EXCEPTION 'FAIL T7I-45: a one-element rating array was accepted'; END IF;
   v_err := pg_temp.errcode($q$ SELECT public.report_content_hash_v1('a','b','c','d', NULL) $q$);
   IF v_err = 'OK' THEN RAISE EXCEPTION 'FAIL T7I-45: a NULL rating array was accepted'; END IF;
   v_err := pg_temp.errcode($q$ SELECT public.report_content_hash_v1('a','b','c','d',
-             ARRAY['secure','secure','secure','secure','secure','secure','secure','secure',NULL]::public.competency_rating[]) $q$);
+             ARRAY['mastering','mastering','mastering','mastering','mastering','mastering','mastering','mastering',NULL]::public.competency_rating[]) $q$);
   IF v_err = 'OK' THEN RAISE EXCEPTION 'FAIL T7I-45: a NULL rating element was accepted'; END IF;
 
   -- Determinism, and NULL panels serialized as the `N` tag rather than ''.
@@ -1748,10 +1771,12 @@ ROLLBACK;
 -- T7I-35  Content-hash field coverage.
 DO $t$
 DECLARE
-  v_nine public.competency_rating[] := ARRAY['secure','developing','emerging','secure','advanced',
-    'developing','emerging','secure','advanced']::public.competency_rating[];
-  v_alt  public.competency_rating[] := ARRAY['advanced','developing','emerging','secure','advanced',
-    'developing','emerging','secure','advanced']::public.competency_rating[];
+  -- Amendment 006 A-049 ratified labels; v_alt still differs from v_nine in
+  -- exactly its first element, which is what T7I-35 measures.
+  v_nine public.competency_rating[] := ARRAY['mastering','developing','beginning','mastering','mastered',
+    'developing','beginning','mastering','mastered']::public.competency_rating[];
+  v_alt  public.competency_rating[] := ARRAY['mastered','developing','beginning','mastering','mastered',
+    'developing','beginning','mastering','mastered']::public.competency_rating[];
   v_base text;
 BEGIN
   v_base := public.report_content_hash_v1('S','F','P','T', v_nine);
@@ -2333,8 +2358,8 @@ BEGIN
 
   -- A decoy snapshot mutation on the FINAL version only.
   UPDATE public.report_version_ratings
-     SET rating = CASE WHEN rating = 'secure' THEN 'advanced'::public.competency_rating
-                       ELSE 'secure'::public.competency_rating END
+     SET rating = CASE WHEN rating = 'mastering' THEN 'mastered'::public.competency_rating
+                       ELSE 'mastering'::public.competency_rating END
    WHERE report_version_id = v_ver AND dimension_code = 'body';
 
   PERFORM pg_temp.as_management();

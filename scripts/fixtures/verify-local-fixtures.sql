@@ -76,6 +76,29 @@
 -- negative test and the canonical checksum region are UNCHANGED -- the
 -- correction-tracking migration adds NO table, enum, column, constraint,
 -- index, policy, table grant or fixture row.
+--
+-- Reconciled again at Backend V2 (competency vocabulary, Amendment 006
+-- A-049/A-053). The enum-rename migration renames exactly three
+-- `public.competency_rating` labels behind a fail-closed zero-row guard. It
+-- moves ONE census this file hard-pins and changes the fixture rating
+-- literals this file asserts, so -- for the same reason as above -- the
+-- reconciliation is committed TOGETHER WITH that migration:
+--   A34  7 -> 8 applied migrations, adding 20260806160000
+--   A24  the mixed-set assertion re-keys `emerging`/`advanced` to the
+--        ratified `beginning`/`mastered`
+--   A25  the nine ratified rating triples re-key `secure`->`mastering`,
+--        `emerging`->`beginning`, `advanced`->`mastered`; `developing` is
+--        unchanged (A-049 renames exactly three labels)
+-- A32 (26 tables), A33, the 29 policies, A35's 31 functions and 12 enums,
+-- the Step 7H audit guards, the Option B report-table ZERO-ROW guards
+-- (A26-A31, D3) and every negative test are UNCHANGED -- a label rename
+-- adds no table, enum, column, constraint, index, policy, grant, function
+-- or fixture row, and the report tables must still be empty (A-053's
+-- zero-row precondition is exactly why the rename is safe).
+--
+-- CLASS GRADE IS NOT TOUCHED (A-054). `class_grade_code`, the three seeded
+-- Class Grades and the `beginner` grade assertions below are competency-
+-- unrelated and stay byte-identical.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -213,24 +236,24 @@ BEGIN
   IF v_n <> 4 THEN RAISE EXCEPTION 'FAIL A23: expected all four rating levels represented, found %', v_n; END IF;
 
   IF (SELECT count(*) FROM public.observation_ratings
-       WHERE observation_id = 'c9000000-0000-4000-8000-000000000001' AND rating = 'emerging') < 1
+       WHERE observation_id = 'c9000000-0000-4000-8000-000000000001' AND rating = 'beginning') < 1
   OR (SELECT count(*) FROM public.observation_ratings
-       WHERE observation_id = 'c9000000-0000-4000-8000-000000000001' AND rating = 'advanced') < 1 THEN
-    RAISE EXCEPTION 'FAIL A24: the mixed rating set must include at least one emerging and one advanced rating';
+       WHERE observation_id = 'c9000000-0000-4000-8000-000000000001' AND rating = 'mastered') < 1 THEN
+    RAISE EXCEPTION 'FAIL A24: the mixed rating set must include at least one beginning and one mastered rating';
   END IF;
 
   -- Exact ratified UUID / dimension / rating triples.
   SELECT count(*) INTO v_n FROM public.observation_ratings r
    WHERE (r.id, r.dimension_code, r.rating) IN (
-     ('ca000000-0000-4000-8000-000000000001'::uuid, 'body'::public.dimension_code,                 'secure'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000001'::uuid, 'body'::public.dimension_code,                 'mastering'::public.competency_rating),
      ('ca000000-0000-4000-8000-000000000002'::uuid, 'emotion'::public.dimension_code,              'developing'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000003'::uuid, 'speech'::public.dimension_code,               'emerging'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000004'::uuid, 'tonality'::public.dimension_code,             'secure'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000005'::uuid, 'eye_contact'::public.dimension_code,          'advanced'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000003'::uuid, 'speech'::public.dimension_code,               'beginning'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000004'::uuid, 'tonality'::public.dimension_code,             'mastering'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000005'::uuid, 'eye_contact'::public.dimension_code,          'mastered'::public.competency_rating),
      ('ca000000-0000-4000-8000-000000000006'::uuid, 'vocal_projection'::public.dimension_code,     'developing'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000007'::uuid, 'emotional_expression'::public.dimension_code, 'emerging'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000008'::uuid, 'sentence_flow'::public.dimension_code,        'secure'::public.competency_rating),
-     ('ca000000-0000-4000-8000-000000000009'::uuid, 'audience_awareness'::public.dimension_code,   'advanced'::public.competency_rating));
+     ('ca000000-0000-4000-8000-000000000007'::uuid, 'emotional_expression'::public.dimension_code, 'beginning'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000008'::uuid, 'sentence_flow'::public.dimension_code,        'mastering'::public.competency_rating),
+     ('ca000000-0000-4000-8000-000000000009'::uuid, 'audience_awareness'::public.dimension_code,   'mastered'::public.competency_rating));
   IF v_n <> 9 THEN
     RAISE EXCEPTION 'FAIL A25: the nine rating UUID/dimension/rating triples do not match the ratified values exactly (matched %)', v_n;
   END IF;
@@ -369,22 +392,23 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the seven accepted project migrations are applied. Step 7I
+  -- A34: exactly the eight accepted project migrations are applied. Step 7I
   -- ships TWO files by mandate (U-7I-18), not one: the `trainer_approved`
   -- enum label must be added and COMMITTED before any object may reference
   -- it. Backend Round B2 adds the assessment-persistence migration
-  -- (CP-2/CP-4), moving the count 5 -> 6, and Round B2.1 adds the
-  -- correction-tracking migration (U-B2-1), moving it 6 -> 7.
+  -- (CP-2/CP-4), moving the count 5 -> 6; Round B2.1 adds the
+  -- correction-tracking migration (U-B2-1), moving it 6 -> 7; and Backend V2
+  -- adds the competency-vocabulary rename (A-053), moving it 7 -> 8.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 7 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 7 applied migrations, found %', v_n; END IF;
+  IF v_n <> 8 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 8 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
                      '20260805090000', '20260805090500', '20260806090000',
-                     '20260806103000');
-  IF v_n <> 7 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000 and 20260806103000';
+                     '20260806103000', '20260806160000');
+  IF v_n <> 8 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000 and 20260806160000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -598,6 +622,34 @@ BEGIN
      IS DISTINCT FROM ARRAY['incomplete','observation_saved','drafting','draft_ready',
                             'needs_edit','trainer_approved','approved','submitted'] THEN
     RAISE EXCEPTION 'FAIL A35: report_status labels or their physical order do not match the ratified eight';
+  END IF;
+
+  -- A35 (Backend V2): the four ratified competency_rating labels and their
+  -- physical sort order (A-049). RENAME VALUE leaves pg_enum.enumsortorder
+  -- untouched, so this also proves the ordinal semantics survived the rename
+  -- -- an assertion pinned to the superseded labels would instead pass while
+  -- checking for values that no longer exist (A-052's named failure mode).
+  -- This is the competency scale, NOT Class Grade: class_grade_code is
+  -- asserted separately and is unchanged (A-054).
+  IF (SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder)
+        FROM pg_catalog.pg_enum e
+        JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
+        JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+       WHERE n.nspname = 'public' AND t.typname = 'competency_rating')
+     IS DISTINCT FROM ARRAY['beginning','developing','mastering','mastered'] THEN
+    RAISE EXCEPTION 'FAIL A35: competency_rating labels or their physical order do not match the ratified four (A-049)';
+  END IF;
+
+  -- A35 (A-054): the Class Grade vocabulary is a DIFFERENT closed set and is
+  -- expressly unchanged by Amendment 006. Pinned here so a future vocabulary
+  -- edit that strays into class_grade_code fails loudly.
+  IF (SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder)
+        FROM pg_catalog.pg_enum e
+        JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid
+        JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+       WHERE n.nspname = 'public' AND t.typname = 'class_grade_code')
+     IS DISTINCT FROM ARRAY['beginner','intermediate','advanced'] THEN
+    RAISE EXCEPTION 'FAIL A35: class_grade_code must remain beginner/intermediate/advanced, unchanged (A-054)';
   END IF;
 
   -- A35 (Step 7I): exactly 12 enums, and the approvals default drop.

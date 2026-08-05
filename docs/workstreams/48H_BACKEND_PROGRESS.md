@@ -50,6 +50,9 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 | B2.3 | **Round B2** — AI provider and grounding | Ready for review |
 | B2.4 | **Round B2** — integration tests | Ready for review |
 | RB2.1 | **Round B2.1** — governed management correction tracking (U-B2-1). Labelled `RB2.1` to distinguish the **round** from checklist item `B2.1` above, which is Round B2's authentication sub-item | Ready for review |
+| BV2.1 | **Backend V2** (B-V2-1) — competency-vocabulary enum rename behind the fail-closed zero-row guard (Amendment 006 A-053) | Ready for review |
+| BV2.2 | **Backend V2** (B-V2-2) — contextual attribution / taxonomy-disclosure leak detection replacing the bare-word regex (A-052) | Ready for review |
+| BV2.3 | **Backend V2** (B-V2-3) — fixture, assessment, lifecycle and integration suites reconciled to the ratified vocabulary | **Blocked** — code complete and every runnable gate green; **database-dependent verification cannot run** because the local database is UNFIXTURED and reloading it is an **operator-only** action (see the Backend V2 entry below) |
 | B3.1 | Integration support | Not started |
 | B3.2 | Physical-test blocker fixes | Not started |
 
@@ -209,3 +212,91 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 - **Unresolved blockers:** **None blocking Round B2.1 or its acceptance. U-B2-1 is CLOSED** — R-7 is now fully delivered against the contract, and CP-3 is fully resolved. One **integration note for the frontend round, not a backend blocker:** the frontend's committed `ManagementQueueRowDto.status` union is `"trainer_approved" | "needs_edit"`, and the correction-tracking projection legitimately returns `"draft_ready"` for the "corrected, awaiting reapproval" state. That union needs a one-value widening in the frontend contract when the real adapter is wired; the backend DTO already types `status` as the full `ReportStatus` and its field set is otherwise byte-identical to the committed frontend shape. Carried forward unchanged: **CP-5 / N-4** (deterministic management bootstrap), **U-25** (eight blocked Figma families — none invented), **U-29** (post-submission correction deferred; `reopenSubmitted` still not wired), **U-7I-25** (enum label irreversible), **U-ASM-1 / U-ASM-2**.
 - **Contract deviations requested:** **None.** Three execution notes, recorded rather than requested: **(1)** the local Supabase stack's containers had been removed between rounds; the **data volume survived**, so `supabase start` restored the canonical database intact (the same 3 Auth identities, 25 domain rows, 0 audit events) — **`supabase db reset` was again not run**, because a reset destroys the three synthetic Auth identities and recreating them requires an interactive no-echo password prompt this agent must never supply or handle; the fresh-reset property itself is proven on a stripped scratch database by `verify-fresh-apply.mjs`, which additionally proves the canonical database is catalogue-identical to that fresh application. **(2)** The correction-tracking suite runs only on a disposable clone because it commits real audit events. **(3)** The one external call was the single bounded LLM provider request inside the integration suite (contract §6.3-approved provider/model), whose output passed deterministic grounding before being stored on the disposable database only. **No `.env.local` value, hosted credential, database password or connection string was requested, read, printed, logged or persisted at any point; no hosted Supabase endpoint was contacted; the project has never been linked.**
 - **Next action:** independent review of Round B2.1. The pinned integration order (contract §12) is unchanged: backend merges to `main` first; frontend Round 2 rebases and wires the real adapter to these actions and projections — including the one-value `status` widening noted above — then reset+seed, verifier, disposable suites, typecheck/lint/build, and the scripted three-role dry run. `report_store_draft`, both serializers and `app_parent_reaches_student` must stay at zero client EXECUTE.
+
+### 2026-08-06 — Backend V2 (competency-vocabulary reconciliation, Amendment 006 A-049 … A-055)
+
+- **Timestamp (Asia/Singapore):** 2026-08-06
+- **Round / checkpoint ID:** **Backend V2** — the backend half of `docs/plan/COMPETENCY_VOCABULARY_RECONCILIATION_PLAN.md`, delivered as **three commits** (B-V2-1, B-V2-2, B-V2-3). This single entry covers all three.
+- **Starting commit:** `4b58c6b` (the Amendment 006 ratification merged into `feat/48h-backend`).
+- **Ending commit:** the commit created by this entry — `test(backend): reconcile fixtures, assessment, lifecycle and integration suites to the ratified vocabulary`. The two preceding Backend V2 commits are `e5a66d7` and `103f433`.
+- **Status:** **Blocked** — implementation is complete and every runnable gate passes, but the **database-dependent verification could not be run**. See "Unresolved blockers" below. **No readiness claim is made for Backend V2.**
+
+#### The three commits
+
+| Commit | Title | Scope |
+|---|---|---|
+| **`e5a66d7`** | `feat(backend): rename competency rating vocabulary behind a fail-closed zero-row guard (Amendment 006 A-053)` | `supabase/migrations/20260806160000_competency_vocabulary_rename.sql` — **exactly three** `ALTER TYPE public.competency_rating RENAME VALUE` statements (`emerging`→`beginning`, `secure`→`mastering`, `advanced`→`mastered`; `developing` untouched) behind a fail-closed in-transaction **zero-row guard** over `report_versions`, `report_version_ratings` and `observation_ratings`. Plus `server/modules/framework/dimensions.ts` (rating union, anchors carried forward **positionally and verbatim** per A-050, polarity bands per A-051), the regenerated `server/db/database.types.ts` (**regenerated, never hand-edited** — ADR-8), and the census pins in `scripts/tests/step-7i/static-scan.mjs`, `scripts/tests/step-7i/verify-fresh-apply.mjs` and `scripts/tests/correction-tracking/ct-static.mjs` moved 7 → 8 migrations. **No table, enum, column, constraint, index, policy, grant or function count changed** (A-053). |
+| **`103f433`** | `feat(backend): replace bare-word rating leak guard with contextual attribution detection (A-052)` | `server/modules/ai-drafting/grounding.ts` and `provider.ts` — the prohibited bare-word regex is replaced with **contextual attribution and taxonomy-disclosure detection**; ordinary prose ("at the beginning of the session", "has mastered eye contact") stays legal, while `rating: Mastered` / `rated as Beginning` / `Mastering level` are rejected. `mastered` / `mastery` are **retained** as achievement language for contradiction detection. `scripts/tests/assessment/asm-suite.sql` extended accordingly. |
+| **this commit** | `test(backend): reconcile fixtures, assessment, lifecycle and integration suites to the ratified vocabulary` | The six suite/fixture files described below. |
+
+#### Scope completed in this commit (B-V2-3)
+
+- **`scripts/fixtures/local_fixtures.sql`** — the nine `observation_ratings` literals move to the ratified storage values, **positionally unchanged**: `secure`→`mastering` (body, tonality, sentence_flow), `emerging`→`beginning` (speech, emotional_expression), `advanced`→`mastered` (eye_contact, audience_awareness); `developing` (emotion, vocal_projection) is untouched. The set stays **deliberately mixed, with two `beginning` and two `mastered`**, so the persona §3.4 grounding contradiction proof stays exercisable. The pre-commit assertion that the mix contains at least one low and one high rating is re-keyed to `beginning` / `mastered`. **The Step 7F shape is preserved exactly** — 3 Auth identities, 25 domain rows, Option B — and **no `reports`, `report_versions`, `report_version_ratings`, checklist, approval or `invitations` row is created**.
+- **`scripts/fixtures/verify-local-fixtures.sql`** — A24 and A25 re-keyed to the ratified triples; A34 moved **7 → 8** applied migrations with `20260806160000` added to the exact version list, and the stale 5→6→7 narrative comments corrected. **The Option B zero-row guards over the five report tables (A26–A31, D3) are KEPT verbatim and not weakened** — A-053's zero-row precondition is precisely why the rename is safe. Two assertions were added to A35: the four `competency_rating` labels **in physical `enumsortorder`** (proving `RENAME VALUE` preserved the ordinal semantics, where an assertion pinned to the superseded labels would instead have passed while checking for values that no longer exist), and a companion assertion that **`class_grade_code` remains `beginner` / `intermediate` / `advanced`, unchanged** (A-054).
+- **`scripts/tests/assessment/asm-suite.sql`** — `pg_temp.nine()` and the T-ASM-6 / T-ASM-7 / T-ASM-9 malformed-payload fragments no longer cast `advanced` / `secure` / `emerging` to `public.competency_rating`; post-rename those are **not members of the enum**, so the casts would have failed at cast time rather than exercising the intended validator branch. T-ASM-40's migration pin was already reconciled to 8 at B-V2-2 and was **verified, not re-edited**.
+- **`scripts/tests/step-7i/lifecycle-canonical.sql`** — T7I-73 moved **7 → 8** with `20260806160000` added, and the comment calling the correction-tracking migration "the seventh" corrected; the `competency_rating` casts in T7I-4, T7I-45, T7I-35, T7I-52 and the decoy snapshot-mutation case re-keyed. Two new T7I-73 assertions pin the ratified `competency_rating` physical order **and** the unchanged `class_grade_code` order.
+- **`scripts/tests/assessment/run-assessment.mjs`** — the nine-dimension race payload re-keyed; the mix is positionally unchanged.
+- **`scripts/tests/integration/run-integration.mjs` — the substantive fix of this commit.** The Part 1 fixture rating arrays still carried `advanced` / `emerging` / `secure`. Those are no longer members of `RatingLevel`, so `POLARITY_BANDS[rating]` returned `undefined` and grounding rule 3 **silently skipped every polarity check** — INT-G3 and INT-G5 would have reported green while proving nothing. That is a **fail-open degradation of `CLAUDE.md` §4 non-negotiable 1**, not cosmetic label drift. Fixed by: re-keying the Part 1, L1 and `report_save_edit` arrays to the ratified labels; adding **INT-G0**, a fail-closed precondition proving every fixture rating resolves to a live `POLARITY_BANDS` member **before** any grounding proof runs; tightening **INT-G3** to require the rejection to come from the **polarity** rule (so a green can never be an attribution-rule accident) and **INT-G5** likewise; deriving the Part 3 `polarityBand` from the **`POLARITY_BANDS` constant** instead of a re-hardcoded ternary, so the harness cannot drift from the backend mapping; re-keying **INT-G4** — which asserted that "currently rated **Emerging**" is rejected, a sentence certifying a guarantee that no longer holds because `emerging` is not a value this system can assign — to the ratified `"currently rated Mastering"`, and requiring the rejection to come from the **attribution** rule; and adding **INT-G6**, the other half of A-052, proving ordinary prose using the same words stays **legal**, so a bare-word guard cannot regress in unnoticed.
+- **Context discipline (A-054).** Every occurrence of `advanced` / `secure` / `emerging` was classified by **actual context**. **No global keyword replacement was performed.** `class_grade_code`, the three seeded Class Grades, the `beginner` grade assertions and every Class Grade literal are **byte-identical**; `advanced` survives unchanged wherever it is a Class Grade. The superseded labels deliberately **remain** inside `asm-suite.sql`'s audit-payload leak-scan regex, which asserts that neither the old nor the new vocabulary reaches an audit payload.
+- **No dependency and no test runner was added (R-B7). `package.json` / `package-lock.json` are unchanged. `npm audit fix` was never run.**
+
+#### Files changed (this commit)
+
+- `scripts/fixtures/local_fixtures.sql`
+- `scripts/fixtures/verify-local-fixtures.sql`
+- `scripts/tests/assessment/asm-suite.sql`
+- `scripts/tests/assessment/run-assessment.mjs`
+- `scripts/tests/integration/run-integration.mjs`
+- `scripts/tests/step-7i/lifecycle-canonical.sql`
+- `docs/workstreams/48H_BACKEND_PROGRESS.md` (this entry and the two checklist rows)
+- `docs/progress/STATUS.md`, `docs/progress/BUILD_NOTES.md` (see "Contract deviations")
+- **No `supabase/**`, `server/**`, generated-type, frontend-owned, `package.json` or `package-lock.json` change. The frozen demo at `SDS Project Sprint 2` was not touched.**
+
+#### Tests and validation — real exit codes
+
+| Gate | Exit | Result |
+|---|---|---|
+| `npx tsc --noEmit` | **0** | Clean. |
+| `npx eslint .` | **0** | Clean, no warnings. |
+| `node scripts/tests/step-7i/static-scan.mjs` | **0** | All ten static proofs pass, including T7I-73's eight-file check. |
+| `node scripts/tests/correction-tracking/ct-static.mjs` | **0** | All six static proofs pass; T-CT-S4 confirms **eight** migration files and that the seven already-applied files are byte-identical to HEAD. |
+| `node scripts/tests/step-7i/verify-fresh-apply.mjs` | **0** | **All eight migrations apply cleanly, in order, from a database stripped of every project object**; fresh census 26 tables / 31 functions / 12 enums / 29 policies / 8 migrations / 23 authenticated EXECUTE / RLS everywhere / 8 ordered labels / 1-3-9 seeds; the local database is catalogue-identical to that fresh application. Scratch database destroyed. |
+| `node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/run-integration.mjs` | **1** | **Part 1 (no database) passes in full — INT-G0, INT-G1, INT-G2, INT-G3, INT-G4, INT-G6, INT-G5: 7 of 7.** The process then exits 1 at **INT-A0**, `the trainer session resolved to an unexpected auth user`, because the database is **unfixtured**. **Parts 2 and 3 are BLOCKED-ON-FIXTURE, not failing** — no assertion about backend behaviour was contradicted; the suite could not establish the real Auth sessions it needs to begin. |
+| Static SQL parse/lint of the four changed `.sql` files | **n/a** | **The toolchain offers none.** `package.json` exposes `dev`, `build`, `start`, `lint` (ESLint) and `fixtures:local` only, and `supabase db lint` runs against an applied schema, which is the blocked path. **No SQL linter was added — R-B7 forbids it.** The SQL edits are literal-for-literal substitutions plus additive assertions, and the enum values they now use are proven live by the `verify-fresh-apply.mjs` census. |
+
+**Read-only census of the local database, taken directly** (`docker exec … psql`, no mutation): `auth.users` = **1**, `public.accounts` = **0**, applied migrations = **8**, `competency_rating` = `beginning, developing, mastering, mastered`, `class_grade_code` = `beginner, intermediate, advanced`. **The rename is applied correctly and Class Grade is untouched.**
+
+#### Gates that are BLOCKED — recorded as neither passing nor failing
+
+- `npm run fixtures:local`, and the `-- --reload` form
+- fixture verification (`scripts/fixtures/verify-local-fixtures.sql`)
+- the post-reset fixture census and the canonical fixture checksum
+- `node scripts/tests/assessment/run-assessment.mjs`
+- the Step 7I lifecycle canonical **dual run** and its `d6a314b4…b87517` checksum reproduction
+- `run-integration.mjs` **Parts 2 and 3** (real-auth isolation and the governed lifecycle, including the correction-tracking proofs INT-C1 … INT-C5)
+
+#### Unresolved blockers
+
+- **B-V2-BLOCK-1 — fixture-credential blocker. OPERATOR-ONLY. Open.**
+  - **What is true.** The local database is **migrated** (8 migrations; `competency_rating` correctly renamed to `beginning` / `developing` / `mastering` / `mastered`; `class_grade_code` unchanged) but **UNFIXTURED**.
+  - **Observed residue.** `auth.users` holds **one orphan row**, `trainer.fixture@example.test`, under a **non-ratified UUID**; `public.accounts` is **0**. The 25 ratified domain rows are absent.
+  - **Why an agent cannot close it.** Reloading requires `npm run fixtures:local -- --reload`, whose password prompt requires an **interactive no-echo TTY** that does not exist in an agent session. `CLAUDE.md` §11 "Fixture credentials — absolute" is **absolute**: fixture passwords come **only** from no-echo interactive stdin on an operator-controlled local terminal. There is **no environment-variable path, no default, no generated-and-discarded value and no file source**, and no password may ever be requested, accepted, transmitted, printed or persisted.
+  - **What was deliberately NOT done.** No password path was added. No password was generated. Nothing was inserted directly into `auth.users`. No `password_hash` was supplied. **The loader's preflight was not weakened.** Each of those would violate an absolute rule.
+  - **Precise operator action required.** From an **interactive local terminal**, in `c:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\worktrees\backend-48h`, run:
+
+    ```
+    npm run fixtures:local -- --reload
+    ```
+
+    entering the fixture passwords at the **no-echo prompt**. Then re-run the six blocked gates listed above.
+  - **Consequence, stated without softening.** **Backend V2's database-dependent verification is INCOMPLETE.** **No readiness claim may be made for Backend V2.** It must not be treated as accepted, integration-ready or physical-test-ready until the operator has reloaded the fixture and the six blocked gates have been run and reported.
+- Carried forward unchanged: **CP-5 / N-4** (management bootstrap), **U-25** (eight blocked Figma families — none invented), **U-29**, **U-7I-25** (enum label rename irreversible in the forward-only migration set), **U-ASM-1 / U-ASM-2**, and the frontend `ManagementQueueRowDto.status` one-value widening noted at Round B2.1. **Frontend V3 remains pending and separately authorized** — the frontend still carries the superseded labels.
+
+#### Contract deviations
+
+- **One, recorded rather than requested.** This commit also updates `docs/progress/STATUS.md` and `docs/progress/BUILD_NOTES.md`, which this log's Ownership note says are "never updated from this worktree". They were **explicitly assigned as owned paths for this checkpoint**, and `CLAUDE.md` §11 (permanent continuity documents) sits above this log in precedence — this log states of itself that it is "an operational log, not a governance authority". The blocker above is exactly the kind of state the two permanent continuity documents exist to carry across sessions, so recording it only here would defeat their purpose.
+- **No credential-bearing output was rendered at any point.** No password, token, key or connection string was requested, accepted, printed, logged or persisted. No hosted Supabase endpoint was contacted.
+
+#### Next action
+
+**Operator:** reload the fixture as described in B-V2-BLOCK-1, then re-run the six blocked gates. Only after they report clean may Backend V2 be reviewed for acceptance. **Frontend V3 stays separately authorized.**
