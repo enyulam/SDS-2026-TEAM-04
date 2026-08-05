@@ -24,30 +24,49 @@ export const DIMENSION_CODES = [
 
 export type DimensionCode = (typeof DIMENSION_CODES)[number];
 
-export const RATING_LEVELS = ["emerging", "developing", "secure", "advanced"] as const;
+export const RATING_LEVELS = ["beginning", "developing", "mastering", "mastered"] as const;
 export type RatingLevel = (typeof RATING_LEVELS)[number];
 
 export type DimensionGroup = "competency" | "speech_linguistics";
 export type PolarityBand = "needs_support" | "developing" | "positive";
 
-/** Spec §3.3 — the four behavioural anchors, verbatim. */
+/**
+ * Spec §3.3 — the four behavioural anchors, verbatim.
+ *
+ * Amendment 006 A-050: the anchors carry forward POSITIONALLY and VERBATIM.
+ * The anchor TEXT did not change; only the label each is keyed to did —
+ * Emerging→Beginning · Developing→Developing · Secure→Mastering ·
+ * Advanced→Mastered. `Mastered` remains the exceeds-expectations level; no
+ * threshold moved and there is no fifth level. The authoritative wording is
+ * spec §3.3's, preserved character-for-character — do not reword it.
+ */
 export const RUBRIC_ANCHORS: Readonly<Record<RatingLevel, string>> = Object.freeze({
-  emerging:
+  beginning:
     "Requires frequent prompting, modelling, and support to demonstrate the skill consistently.",
   developing:
     "Demonstrates the skill with some guidance and increasing confidence, but consistency may still vary.",
-  secure:
+  mastering:
     "Demonstrates the skill independently and consistently across most classroom activities and presentations.",
-  advanced:
+  mastered:
     "Exceeds the expected level: strong confidence, natural expression, independent application, consistent across different contexts.",
 });
 
-/** Spec §3.3 / CLAUDE.md §5 — Emerging → needs_support; Developing → developing; Secure/Advanced → positive. */
+/**
+ * Amendment 006 A-051 / CLAUDE.md §5 — beginning → needs_support;
+ * developing → developing; mastering → positive; mastered → positive.
+ *
+ * `mastering` is `positive`, and that is a ratified ruling rather than a
+ * judgement call: polarity derives from the ratified behavioural anchor
+ * (independent, consistent demonstration across most activities), not from
+ * the progressive grammatical form of the label. Demoting it would silently
+ * narrow what the AI may describe as a strength in every report. Only
+ * `beginning` carries `needs_support`.
+ */
 export const POLARITY_BANDS: Readonly<Record<RatingLevel, PolarityBand>> = Object.freeze({
-  emerging: "needs_support",
+  beginning: "needs_support",
   developing: "developing",
-  secure: "positive",
-  advanced: "positive",
+  mastering: "positive",
+  mastered: "positive",
 });
 
 export interface FrameworkDimension {

@@ -1743,7 +1743,7 @@ export type Database = {
       centre_membership_role: "management" | "trainer" | "parent"
       centre_membership_status: "pending" | "active" | "deactivated"
       class_grade_code: "beginner" | "intermediate" | "advanced"
-      competency_rating: "emerging" | "developing" | "secure" | "advanced"
+      competency_rating: "beginning" | "developing" | "mastering" | "mastered"
       correction_issue_scope: "rating" | "observation" | "assessment_fact"
       correction_request_status: "open" | "resolved"
       dimension_code:
@@ -1902,7 +1902,7 @@ export const Constants = {
       centre_membership_role: ["management", "trainer", "parent"],
       centre_membership_status: ["pending", "active", "deactivated"],
       class_grade_code: ["beginner", "intermediate", "advanced"],
-      competency_rating: ["emerging", "developing", "secure", "advanced"],
+      competency_rating: ["beginning", "developing", "mastering", "mastered"],
       correction_issue_scope: ["rating", "observation", "assessment_fact"],
       correction_request_status: ["open", "resolved"],
       dimension_code: [
