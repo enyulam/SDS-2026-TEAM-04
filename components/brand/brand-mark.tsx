@@ -20,19 +20,27 @@ export function BrandMark({
   compact = false,
   portalLabel,
   size = "default",
+  interactive = true,
 }: {
   readonly compact?: boolean;
   /** Quiet subtitle beneath the product name, e.g. "Trainer Portal". Presentation only. */
   readonly portalLabel?: string;
   readonly size?: "default" | "large";
+  /**
+   * When false the mark renders as plain content rather than a link.
+   *
+   * Pre-authentication screens use this. The mark's destination is `/trainer`, so on the
+   * Management and Parent logins a linked mark would make another role's workspace
+   * reachable from a screen whose only intended exit is the selected role's own labelled
+   * entry point. It granted no authority either way, but offering the route at all is
+   * needless surface. Set at F3; the portal shell keeps the linked mark unchanged.
+   */
+  readonly interactive?: boolean;
 }) {
   const large = size === "large";
-  return (
-    <Link
-      href="/trainer"
-      className={`inline-flex items-center no-underline ${large ? "gap-4" : "gap-3"} rounded-lg`}
-      aria-label="B.E.S.T. Coach Trainer home"
-    >
+
+  const content = (
+    <>
       <span
         aria-hidden="true"
         className={`grid place-items-center rounded-xl bg-brand-600 text-white shadow-raised ${
@@ -59,6 +67,24 @@ export function BrandMark({
           </span>
         </span>
       )}
+    </>
+  );
+
+  const className = `inline-flex items-center no-underline ${
+    large ? "gap-4" : "gap-3"
+  } rounded-lg`;
+
+  if (!interactive) {
+    return (
+      <span className={className} role="img" aria-label="B.E.S.T. Coach">
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <Link href="/trainer" className={className} aria-label="B.E.S.T. Coach Trainer home">
+      {content}
     </Link>
   );
 }

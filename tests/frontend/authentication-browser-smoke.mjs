@@ -395,9 +395,78 @@ for (const testCase of roleCases) {
     `${testCase.label}: role segments and the primary action must be keyboard reachable`,
   );
 
+  // The region carries a role-specific accessible name, so the three variants are
+  // distinguishable to assistive technology despite sharing one visible heading.
+  assert(
+    await evaluate(
+      `document.querySelector('[data-role-presentation="${testCase.role}"]')?.getAttribute('aria-label') === ${JSON.stringify(
+        `Sign in — ${testCase.label} portal presentation`,
+      )}`,
+    ),
+    `${testCase.label}: the login region must carry its role-specific accessible name`,
+  );
+
+  // No other role's workspace is reachable from this presentation.
+  const otherHomes = roleCases
+    .filter((other) => other.role !== testCase.role)
+    .map((other) => other.home);
+  assert(
+    await evaluate(`
+      (() => {
+        const targets = [...document.querySelectorAll('a[href]')]
+          .map((a) => new URL(a.href).pathname);
+        return ${JSON.stringify(otherHomes)}.every((home) => !targets.includes(home));
+      })()
+    `),
+    `${testCase.label}: another role's workspace must not be reachable from this presentation`,
+  );
+
   screenshots.push(await screenshot(testCase.shot));
   record(`${testCase.label}: selection state, non-disclosure, disabled credentials, entry target`);
 }
+
+/* ---------------------------------------------------------------------------
+ * Keyboard operability of the shared shell — F3
+ * ------------------------------------------------------------------------- */
+
+await navigate("/login?role=trainer");
+await waitUntil("document.body.innerText.includes('Sign in as')", "Trainer login for keyboard checks");
+
+// Tabbing reaches every interactive affordance; nothing is mouse-only.
+assert(
+  await evaluate(`
+    (() => {
+      const focusable = [...document.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )];
+      return focusable.length > 0 && focusable.every((el) => el.tabIndex >= 0);
+    })()
+  `),
+  "Every enabled affordance must be keyboard reachable",
+);
+
+// The reveal control is a real button, so Enter and Space operate it natively.
+assert(
+  await evaluate(`
+    document.querySelector('button[aria-controls]')?.tagName === 'BUTTON' &&
+    document.querySelector('button[aria-controls]')?.getAttribute('type') === 'button'
+  `),
+  "The password reveal must be a real non-submitting button",
+);
+
+// Focus-visible is never suppressed.
+assert(
+  await evaluate(`
+    (() => {
+      const el = document.querySelector('[data-fixture-entry]');
+      el.focus();
+      const style = getComputedStyle(el, ':focus-visible');
+      return document.activeElement === el && style.outlineStyle !== 'none';
+    })()
+  `),
+  "The primary action must show a visible focus indicator",
+);
+record("keyboard operability, real reveal button, visible focus indicator");
 
 /* ---------------------------------------------------------------------------
  * An unknown or absent role must fall back and must grant nothing.

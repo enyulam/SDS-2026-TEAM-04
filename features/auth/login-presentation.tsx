@@ -74,10 +74,22 @@ export function LoginPresentation() {
           a logo ad hoc. The approved in-repo mark is therefore used in the frame's brand
           slot, and the missing asset is recorded as a dependency.
         */}
-        <BrandMark portalLabel="iSpeak Academy" size="large" />
+        <BrandMark portalLabel="iSpeak Academy" size="large" interactive={false} />
       </div>
 
-      <section aria-labelledby="login-heading" className="mt-10">
+      {/*
+        The three role variants share one heading ("Sign in"), so assistive technology would
+        otherwise announce all three identically. The region carries a role-specific
+        accessible name instead, which distinguishes them without altering visible copy and
+        without implying the role has been granted — it names a presentation, not an
+        authority. Added at F3 and reused verbatim by F10 and F13.
+      */}
+      <section
+        aria-labelledby="login-heading"
+        aria-label={`Sign in — ${active.label} portal presentation`}
+        data-role-presentation={activeRole}
+        className="mt-10"
+      >
         <p id="signin-as-label" className="text-small font-bold text-ink-strong">
           Sign in as
         </p>
