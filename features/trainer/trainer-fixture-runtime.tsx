@@ -13,6 +13,7 @@ import {
   type DeterministicFixturePhysicalTestPort,
 } from "@/lib/frontend/fixtures/physical-test-fixture";
 import type { PhysicalTestPort } from "@/lib/frontend/physical-test-port";
+import type { SessionRole } from "@/lib/frontend/contracts/physical-test";
 
 type RuntimeValue = {
   readonly port: PhysicalTestPort;
@@ -22,9 +23,15 @@ type RuntimeValue = {
 
 const RuntimeContext = createContext<RuntimeValue | null>(null);
 
-export function TrainerFixtureRuntime({ children }: { readonly children: ReactNode }) {
+export function FixturePhysicalTestRuntime({
+  children,
+  role,
+}: {
+  readonly children: ReactNode;
+  readonly role: SessionRole;
+}) {
   const [fixturePort] = useState<DeterministicFixturePhysicalTestPort>(() =>
-    createDeterministicFixturePhysicalTestPort(),
+    createDeterministicFixturePhysicalTestPort(role),
   );
   const [fixtureRevision, setFixtureRevision] = useState(0);
   const resetFixture = useCallback(() => {
@@ -37,6 +44,12 @@ export function TrainerFixtureRuntime({ children }: { readonly children: ReactNo
   );
 
   return <RuntimeContext.Provider value={value}>{children}</RuntimeContext.Provider>;
+}
+
+export function TrainerFixtureRuntime({ children }: { readonly children: ReactNode }) {
+  return (
+    <FixturePhysicalTestRuntime role="trainer">{children}</FixturePhysicalTestRuntime>
+  );
 }
 
 export function usePhysicalTestPort(): PhysicalTestPort {

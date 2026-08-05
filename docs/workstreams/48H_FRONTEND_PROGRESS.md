@@ -47,11 +47,11 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 | F1.4 | **Round F1** — assessment | Ready for review |
 | F1.5 | **Round F1** — AI loading/failure/retry states | Ready for review |
 | F1.6 | **Round F1** — trainer review/edit/checklist/approval | Ready for review |
-| F2.1 | **Round F2** — Management queue and review | Not started |
-| F2.2 | **Round F2** — wording editor and return dialog | Not started |
-| F2.3 | **Round F2** — correction and reapproval UI | Not started |
-| F2.4 | **Round F2** — Parent list and report detail | Not started |
-| F2.5 | **Round F2** — privacy and absence tests | Not started |
+| F2.1 | **Round F2** — Management queue and review | Ready for review |
+| F2.2 | **Round F2** — wording editor and return dialog | Ready for review |
+| F2.3 | **Round F2** — correction and reapproval UI | Ready for review |
+| F2.4 | **Round F2** — Parent list and report detail | Ready for review |
+| F2.5 | **Round F2** — privacy and absence tests | Ready for review |
 | F3.1 | Real-adapter wiring support | Not started |
 | F3.2 | Physical-test blocker fixes | Not started |
 
@@ -119,3 +119,17 @@ Any genuinely required cross-owned edit is a **blocker**, reported **before** mo
 - **Unresolved blockers:** No blocker to independent Round F1 review. A real participant-test adapter remains dependent on backend authentication, server-derived session authority, contract action endpoints, persistence/projections, lifecycle enforcement and the grounded AI service. Returned-report correction authoring/reaffirmation and all Management/Parent surfaces remain deliberately deferred beyond F1.
 - **Contract deviations requested:** none
 - **Next action:** Independent F1 review and acceptance; keep the fixture adapter out of participant surfaces, then reconcile the backend contract before Round F2/F3 adapter work.
+
+### 2026-08-05 19:06 Asia/Singapore — Round F2
+
+- **Timestamp (Asia/Singapore):** 2026-08-05 19:06
+- **Round / checkpoint ID:** Round F2
+- **Starting commit:** `76540834858bd4cc0b40dc054a408a3e942b6251`
+- **Ending commit:** The commit created by `feat(frontend): complete fixture-backed F2 lifecycle`
+- **Status:** Ready for review
+- **Scope completed:** Independent F1 verification passed without repair. Extended the typed `PhysicalTestPort`, deterministic fixture adapter and browser-session state through Management pending review, wording-only edit, bounded return, Trainer correction or explicit reaffirmation, fresh checklist and reapproval, Management final submission, and Parent canonical visibility. Added `/management`, Management queues/review/editor, `/parent`, Parent availability/list/canonical detail, durable queue/badge/banner feedback, privacy-safe loading/empty/linked-unavailable/unavailable/denied states, runtime fixture lifecycle assertions, DOM privacy checks and a complete three-role browser walkthrough. Fixture mode remains visibly ineligible for participant testing; no real adapter, Supabase access, authentication or server lifecycle implementation was added.
+- **Files changed:** `app/(portals)/management/**`; `app/(portals)/parent/**`; `components/layout/portal-shell.tsx`; `components/ui/state-panel.tsx`; `features/auth/login-presentation.tsx`; `features/management/**`; `features/parent/**`; bounded Trainer correction/reapproval changes under `features/trainer/**`; `lib/frontend/contracts/physical-test.ts`; `lib/frontend/fixtures/physical-test-fixture.ts`; `lib/frontend/physical-test-port.ts`; `tests/frontend/**`; this frontend workstream log.
+- **Tests and validation:** baseline/ownership checks — pass; independent F1 `tsc --noEmit`, ESLint, production build and complete Trainer browser smoke — exit 0; F2 `tsc --noEmit` — exit 0; `eslint .` — exit 0; `npm.cmd run build` — exit 0 for all Trainer, Management and Parent routes; compiled runtime `fixture-lifecycle.assertions.ts` — exit 0, including stale duplicate actions and canonical visibility; `node tests/frontend/trainer-browser-smoke.mjs` — exit 0; `node tests/frontend/three-role-browser-smoke.mjs` — exit 0 with Management/Parent DOM absence checks and zero uncaught browser-console/runtime errors; `git diff --check` — exit 0.
+- **Unresolved blockers:** No blocker to fixture-backed F2 review. Participant testing still depends on backend Round B2 and integration: real authentication and server-derived role/relationship authority; governed observation read/write implementation; server actions for the exact port methods; queue/list projections (contract CP-3 remains open); AI provider wiring; durable server-backed in-app projections; and final real-adapter wiring after backend-first integration. External notification delivery and post-submission correction initiation remain intentionally deferred.
+- **Contract deviations requested:** none
+- **Next action:** Independent F2/integration review, backend-first integration per the pinned order, then wire the real participant adapter without changing page components.

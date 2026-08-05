@@ -1,11 +1,23 @@
 import {
+  type AvailabilityStateDto,
   DIMENSION_CODES,
+  RATING_LEVELS,
   type AssessmentDraftDto,
   type AssessmentRatingDto,
+  type CanonicalReportDto,
   type ChecklistDto,
   type CorrectionRequestDto,
   type DimensionCode,
   type DraftGenerationContextDto,
+  type ManagementApproveAndSubmitInput,
+  type ManagementApproveAndSubmitSuccess,
+  type ManagementEditWordingInput,
+  type ManagementEditWordingSuccess,
+  type ManagementQueueRowDto,
+  type ManagementReturnToTrainerInput,
+  type ManagementReturnToTrainerSuccess,
+  type ManagementReviewDto,
+  type ParentReportListItemDto,
   type RatingLevel,
   type ReportPanelsDto,
   type ReportStatus,
@@ -18,6 +30,7 @@ import {
   type SaveTrainerEditInput,
   type SaveTrainerEditSuccess,
   type SessionUserDto,
+  type SessionRole,
   type TrainerApproveInput,
   type TrainerApproveSuccess,
   type TrainerSessionSummaryDto,
@@ -28,7 +41,7 @@ import type { UiActionResult } from "../contracts/result";
 import type { PhysicalTestPort } from "../physical-test-port";
 import { GOVERNED_DIMENSIONS } from "./dimensions";
 
-const STORAGE_KEY = "best-coach.frontend-f1.deterministic-fixture.v1";
+const STORAGE_KEY = "best-coach.frontend-f2.deterministic-fixture.v2";
 
 type FixtureStudent = {
   readonly studentId: string;
@@ -66,14 +79,22 @@ type FixtureReport = {
   revisionNumber: number;
   panels: ReportPanelsDto;
   contentHash: string;
+  wordingHash: string;
   checklist: ChecklistDto;
   observation: FixtureObservation;
+  versionRatings: Record<DimensionCode, RatingLevel | null>;
+  observationChangedSinceVersion: boolean;
   generationAttempts: number;
   openCorrection?: CorrectionRequestDto;
+  latestSubmitted?: {
+    readonly versionId: string;
+    readonly panels: ReportPanelsDto;
+    readonly submittedAt: string;
+  };
 };
 
 type FixtureState = {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   reports: Record<string, FixtureReport>;
 };
 
@@ -169,10 +190,34 @@ const SESSIONS: readonly FixtureSession[] = [
     endTime: "17:30",
     students: [],
   },
+  {
+    sessionId: "session-speech-showcase",
+    moduleName: "Speech Showcase",
+    classGrade: "Advanced",
+    date: "2026-08-04",
+    startTime: "17:00",
+    endTime: "18:30",
+    students: [
+      {
+        studentId: "student-ember",
+        displayName: "Learner Ember",
+        attendanceState: "present",
+        reportId: "report-ember",
+        previousSessionFocus: "Add vocal variety between key ideas.",
+      },
+      {
+        studentId: "student-fern",
+        displayName: "Learner Fern",
+        attendanceState: "present",
+        reportId: "report-fern",
+        previousSessionFocus: "Pause before the final idea.",
+      },
+    ],
+  },
 ];
 
 const INITIAL_STATE: FixtureState = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   reports: {
     "report-aster": {
       reportId: "report-aster",
@@ -184,6 +229,7 @@ const INITIAL_STATE: FixtureState = {
       revisionNumber: 0,
       panels: EMPTY_PANELS,
       contentHash: "fixture-internal-content-aster-working",
+      wordingHash: "fixture-wording-aster-working",
       checklist: EMPTY_CHECKLIST,
       observation: {
         ratings: EMPTY_RATINGS,
@@ -192,6 +238,8 @@ const INITIAL_STATE: FixtureState = {
         lockVersion: 0,
         validSaveAttempts: 0,
       },
+      versionRatings: EMPTY_RATINGS,
+      observationChangedSinceVersion: false,
       generationAttempts: 0,
     },
     "report-birch": {
@@ -213,6 +261,7 @@ const INITIAL_STATE: FixtureState = {
           "A clear structure gave the presentation a confident foundation today.",
       },
       contentHash: "fixture-internal-content-birch-draft-1",
+      wordingHash: "fixture-wording-birch-draft-1",
       checklist: EMPTY_CHECKLIST,
       observation: {
         ratings: ADVANCED_MIXED_RATINGS,
@@ -223,6 +272,8 @@ const INITIAL_STATE: FixtureState = {
         lockVersion: 2,
         validSaveAttempts: 2,
       },
+      versionRatings: ADVANCED_MIXED_RATINGS,
+      observationChangedSinceVersion: false,
       generationAttempts: 2,
     },
     "report-cedar": {
@@ -244,7 +295,12 @@ const INITIAL_STATE: FixtureState = {
           "Clear sequencing supported the story, with expression ready for more focused practice.",
       },
       contentHash: "fixture-internal-content-cedar-returned",
-      checklist: EMPTY_CHECKLIST,
+      wordingHash: "fixture-wording-cedar-returned",
+      checklist: {
+        evidenceConfirmed: true,
+        aiDraftReviewed: true,
+        privacyChecked: true,
+      },
       observation: {
         ratings: MIXED_RATINGS,
         notes:
@@ -253,6 +309,8 @@ const INITIAL_STATE: FixtureState = {
         lockVersion: 3,
         validSaveAttempts: 2,
       },
+      versionRatings: MIXED_RATINGS,
+      observationChangedSinceVersion: false,
       generationAttempts: 2,
       openCorrection: {
         id: "correction-cedar-expression",
@@ -261,6 +319,92 @@ const INITIAL_STATE: FixtureState = {
         status: "open",
         reason:
           "Please re-check the Emotional Expression rating against the saved observation before creating a fresh correction version.",
+      },
+    },
+    "report-ember": {
+      reportId: "report-ember",
+      sessionId: "session-speech-showcase",
+      studentId: "student-ember",
+      status: "trainer_approved",
+      lockVersion: 5,
+      versionId: "fixture-version-ember-approved",
+      revisionNumber: 2,
+      panels: {
+        todaysStrength:
+          "Learner Ember opened with a clear purpose and kept each supporting idea easy to follow.",
+        nextFocus:
+          "The next focus is adding a little more vocal variety when moving between key ideas.",
+        practiceSuggestion:
+          "Practise the opening twice, marking one word in each sentence to emphasise with a change in tone.",
+        sessionTakeaway:
+          "A clear structure made the presentation easy to follow and ready for more vocal colour.",
+      },
+      contentHash: "fixture-internal-content-ember-approved",
+      wordingHash: "fixture-wording-ember-approved",
+      checklist: {
+        evidenceConfirmed: true,
+        aiDraftReviewed: true,
+        privacyChecked: true,
+      },
+      observation: {
+        ratings: ADVANCED_MIXED_RATINGS,
+        notes: "Clear purpose and sequence. Tonal variety can develop further.",
+        followUp: "Add vocal variety between key ideas.",
+        lockVersion: 2,
+        validSaveAttempts: 2,
+      },
+      versionRatings: ADVANCED_MIXED_RATINGS,
+      observationChangedSinceVersion: false,
+      generationAttempts: 2,
+    },
+    "report-fern": {
+      reportId: "report-fern",
+      sessionId: "session-speech-showcase",
+      studentId: "student-fern",
+      status: "submitted",
+      lockVersion: 7,
+      versionId: "fixture-version-fern-submitted",
+      revisionNumber: 3,
+      panels: {
+        todaysStrength:
+          "Learner Fern shared the main message confidently and used a warm, welcoming opening.",
+        nextFocus:
+          "The next focus is pausing briefly before the closing idea so it lands clearly.",
+        practiceSuggestion:
+          "Read the closing paragraph aloud and add one quiet breath before the final sentence.",
+        sessionTakeaway:
+          "A confident opening and clear message gave the presentation a strong foundation.",
+      },
+      contentHash: "fixture-internal-content-fern-submitted",
+      wordingHash: "fixture-wording-fern-submitted",
+      checklist: {
+        evidenceConfirmed: true,
+        aiDraftReviewed: true,
+        privacyChecked: true,
+      },
+      observation: {
+        ratings: MIXED_RATINGS,
+        notes: "Warm opening and clear message. Closing pace accelerated.",
+        followUp: "Pause before the final idea.",
+        lockVersion: 2,
+        validSaveAttempts: 2,
+      },
+      versionRatings: MIXED_RATINGS,
+      observationChangedSinceVersion: false,
+      generationAttempts: 2,
+      latestSubmitted: {
+        versionId: "fixture-version-fern-submitted",
+        panels: {
+          todaysStrength:
+            "Learner Fern shared the main message confidently and used a warm, welcoming opening.",
+          nextFocus:
+            "The next focus is pausing briefly before the closing idea so it lands clearly.",
+          practiceSuggestion:
+            "Read the closing paragraph aloud and add one quiet breath before the final sentence.",
+          sessionTakeaway:
+            "A confident opening and clear message gave the presentation a strong foundation.",
+        },
+        submittedAt: "2026-08-05T09:30:00.000Z",
       },
     },
   },
@@ -288,6 +432,13 @@ function isCompleteRatings(
   return DIMENSION_CODES.every((code) => ratings[code] !== null);
 }
 
+function ratingsMatch(
+  left: Record<DimensionCode, RatingLevel | null>,
+  right: Record<DimensionCode, RatingLevel | null>,
+): boolean {
+  return DIMENSION_CODES.every((code) => left[code] === right[code]);
+}
+
 function assertFixtureState(state: FixtureState): void {
   for (const report of Object.values(state.reports)) {
     const dimensions = Object.keys(report.observation.ratings);
@@ -313,9 +464,15 @@ function assertFixtureState(state: FixtureState): void {
       );
     }
 
-    if (report.status === "submitted" || report.status === "approved") {
+    if (report.status === "approved") {
       throw new Error(
-        "Fixture invariant failed: Round F1 contains no publication transition.",
+        "Fixture invariant failed: approved is never a committed state.",
+      );
+    }
+
+    if (report.status === "submitted" && !report.latestSubmitted) {
+      throw new Error(
+        "Fixture invariant failed: a submitted report has a canonical snapshot.",
       );
     }
   }
@@ -343,6 +500,8 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
 
   private memoryState = clone(INITIAL_STATE);
 
+  constructor(private readonly sessionRole: SessionRole = "trainer") {}
+
   reset(): void {
     this.memoryState = clone(INITIAL_STATE);
     if (typeof window !== "undefined") {
@@ -363,7 +522,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
 
     try {
       const parsed = JSON.parse(stored) as FixtureState;
-      if (parsed.schemaVersion !== 1) {
+      if (parsed.schemaVersion !== 2) {
         this.reset();
         return this.memoryState;
       }
@@ -386,11 +545,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
 
   async getSessionUser(): Promise<UiActionResult<SessionUserDto>> {
     await delay(100);
+    const displayNames: Readonly<Record<SessionRole, string>> = {
+      trainer: "Trainer Fixture",
+      management: "Management Fixture",
+      parent: "Parent Fixture",
+    };
     return {
       outcome: "success",
       data: {
-        displayName: "Trainer Fixture",
-        role: "trainer",
+        displayName: displayNames[this.sessionRole],
+        role: this.sessionRole,
         centreDisplayName: "iSpeak Academy",
       },
     };
@@ -489,7 +653,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       return { outcome: "unavailable" };
     }
     const match = findStudent(report.sessionId, report.studentId);
-    const completeRatings = report.observation.ratings;
+    const completeRatings = report.versionRatings;
     if (!match || !isCompleteRatings(completeRatings)) {
       return { outcome: "unavailable" };
     }
@@ -515,8 +679,8 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
           rating: completeRatings[dimension.dimensionCode],
         })),
         canonicalPointer: {
-          latestSubmittedVersionId: null,
-          submittedAt: null,
+          latestSubmittedVersionId: report.latestSubmitted?.versionId ?? null,
+          submittedAt: report.latestSubmitted?.submittedAt ?? null,
         },
         coachNotes: report.observation.followUp,
         ...(report.openCorrection ? { openCorrection: report.openCorrection } : {}),
@@ -572,6 +736,139 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     return { outcome: "success", data: returned };
   }
 
+  async listManagementPendingReviews(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  > {
+    await delay(240);
+    const rows: ManagementQueueRowDto[] = [];
+    for (const report of Object.values(this.readState().reports)) {
+      if (report.status !== "trainer_approved") continue;
+      const match = findStudent(report.sessionId, report.studentId);
+      if (!match) continue;
+      rows.push({
+        reportId: report.reportId,
+        sessionId: report.sessionId,
+        studentId: report.studentId,
+        studentDisplayName: match.student.displayName,
+        sessionDate: match.session.date,
+        status: "trainer_approved",
+        ...(report.openCorrection
+          ? {
+              openCorrectionScope: report.openCorrection.issueScope,
+              openCorrectionStatus: report.openCorrection.status,
+            }
+          : {}),
+      });
+    }
+    return { outcome: "success", data: rows };
+  }
+
+  async listManagementCorrectionTracking(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  > {
+    await delay(240);
+    const rows: ManagementQueueRowDto[] = [];
+    for (const report of Object.values(this.readState().reports)) {
+      if (report.status !== "needs_edit" || !report.openCorrection) continue;
+      const match = findStudent(report.sessionId, report.studentId);
+      if (!match) continue;
+      rows.push({
+        reportId: report.reportId,
+        sessionId: report.sessionId,
+        studentId: report.studentId,
+        studentDisplayName: match.student.displayName,
+        sessionDate: match.session.date,
+        status: "needs_edit",
+        openCorrectionScope: report.openCorrection.issueScope,
+        openCorrectionStatus: report.openCorrection.status,
+        ...(report.openCorrection.reason
+          ? { openCorrectionReason: report.openCorrection.reason }
+          : {}),
+      });
+    }
+    return { outcome: "success", data: rows };
+  }
+
+  async getManagementReview(
+    reportId: string,
+  ): Promise<UiActionResult<ManagementReviewDto>> {
+    await delay(240);
+    if (reportId === "denied") return { outcome: "unauthorized" };
+    const report = this.readState().reports[reportId];
+    if (!report || report.status !== "trainer_approved") {
+      return { outcome: "unavailable" };
+    }
+    return {
+      outcome: "success",
+      data: {
+        status: "trainer_approved",
+        lockVersion: report.lockVersion,
+        versionId: report.versionId,
+        panels: clone(report.panels),
+        wordingHash: report.wordingHash,
+        ...(report.latestSubmitted?.submittedAt
+          ? { submittedAt: report.latestSubmitted.submittedAt }
+          : {}),
+        ...(report.openCorrection
+          ? {
+              openCorrectionScope: report.openCorrection.issueScope,
+              openCorrectionStatus: report.openCorrection.status,
+            }
+          : {}),
+      },
+    };
+  }
+
+  async getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>> {
+    await delay(180);
+    const available = Object.values(this.readState().reports).some(
+      (report) => report.latestSubmitted !== undefined,
+    );
+    return { outcome: "success", data: available ? "available" : "none_yet" };
+  }
+
+  async listParentSubmittedReports(): Promise<
+    UiActionResult<readonly ParentReportListItemDto[]>
+  > {
+    await delay(240);
+    const reports: ParentReportListItemDto[] = [];
+    for (const report of Object.values(this.readState().reports)) {
+      if (!report.latestSubmitted) continue;
+      const match = findStudent(report.sessionId, report.studentId);
+      if (!match) continue;
+      reports.push({
+        studentId: report.studentId,
+        studentDisplayName: match.student.displayName,
+        sessionId: report.sessionId,
+        sessionDate: match.session.date,
+        submittedAt: report.latestSubmitted.submittedAt,
+      });
+    }
+    return { outcome: "success", data: reports };
+  }
+
+  async getCanonicalReport(
+    sessionId: string,
+    studentId: string,
+  ): Promise<UiActionResult<CanonicalReportDto>> {
+    await delay(240);
+    if (sessionId === "denied" || studentId === "denied") {
+      return { outcome: "unauthorized" };
+    }
+    const report = Object.values(this.readState().reports).find(
+      (candidate) =>
+        candidate.sessionId === sessionId && candidate.studentId === studentId,
+    );
+    if (!report?.latestSubmitted) return { outcome: "unavailable" };
+    return {
+      outcome: "success",
+      data: {
+        panels: clone(report.latestSubmitted.panels),
+        submittedAt: report.latestSubmitted.submittedAt,
+      },
+    };
+  }
+
   async saveObservation(
     input: SaveObservationInput,
   ): Promise<UiActionResult<SaveObservationSuccess>> {
@@ -583,7 +880,15 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       message: "Choose one of the four governed ratings.",
     }));
     const uniqueCodes = new Set(input.ratings.map((item) => item.dimensionCode));
-    if (input.ratings.length !== 9 || uniqueCodes.size !== 9 || fields.length > 0) {
+    const ratingsAreGoverned = input.ratings.every(
+      (item) => item.rating !== null && RATING_LEVELS.includes(item.rating),
+    );
+    if (
+      input.ratings.length !== 9 ||
+      uniqueCodes.size !== 9 ||
+      fields.length > 0 ||
+      !ratingsAreGoverned
+    ) {
       return {
         outcome: "validation",
         message: "Rate all nine dimensions before saving the observation.",
@@ -604,6 +909,15 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     ) {
       return { outcome: "unavailable" };
     }
+    const returnedCorrection =
+      report.status === "needs_edit" && report.openCorrection?.status === "open";
+    if (
+      !returnedCorrection &&
+      report.status !== "incomplete" &&
+      report.status !== "observation_saved"
+    ) {
+      return { outcome: "unavailable" };
+    }
     if (report.observation.lockVersion !== input.observationLockVersion) {
       return {
         outcome: "stale_state",
@@ -621,15 +935,26 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       };
     }
 
-    report.observation.ratings = Object.fromEntries(
+    const nextRatings = Object.fromEntries(
       input.ratings.map((item) => [item.dimensionCode, item.rating]),
     ) as Record<DimensionCode, RatingLevel>;
+    const observationChanged =
+      !ratingsMatch(report.observation.ratings, nextRatings) ||
+      report.observation.notes !== input.notes ||
+      report.observation.followUp !== input.followUp;
+    report.observation.ratings = nextRatings;
     report.observation.notes = input.notes;
     report.observation.followUp = input.followUp;
     report.observation.lockVersion += 1;
-    report.status = "observation_saved";
-    report.lockVersion += 1;
-    report.checklist = clone(EMPTY_CHECKLIST);
+    report.observationChangedSinceVersion =
+      report.observationChangedSinceVersion || observationChanged;
+    if (!returnedCorrection) {
+      report.status = "observation_saved";
+      report.lockVersion += 1;
+    }
+    if (!returnedCorrection) {
+      report.checklist = clone(EMPTY_CHECKLIST);
+    }
     this.writeState(state);
     return {
       outcome: "success",
@@ -697,7 +1022,10 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     report.revisionNumber += 1;
     report.versionId = `fixture-version-${report.studentId}-draft-${report.revisionNumber}`;
     report.contentHash = `fixture-internal-content-${report.studentId}-draft-${report.revisionNumber}`;
+    report.wordingHash = `fixture-wording-${report.studentId}-draft-${report.revisionNumber}`;
     report.checklist = clone(EMPTY_CHECKLIST);
+    report.versionRatings = clone(report.observation.ratings);
+    report.observationChangedSinceVersion = false;
     this.writeState(state);
     return {
       outcome: "success",
@@ -725,7 +1053,9 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         message: "This report changed while you were working. Reload it before saving.",
       };
     }
-    if (report.status !== "draft_ready" || report.openCorrection?.status === "open") {
+    const returnedCorrection =
+      report.status === "needs_edit" && report.openCorrection?.status === "open";
+    if (report.status !== "draft_ready" && !returnedCorrection) {
       return { outcome: "unavailable" };
     }
 
@@ -739,7 +1069,29 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         fields,
       };
     }
-    if (JSON.stringify(report.panels) === JSON.stringify(input.panels)) {
+    const panelsChanged = JSON.stringify(report.panels) !== JSON.stringify(input.panels);
+    const assessmentChanged =
+      report.observationChangedSinceVersion ||
+      !ratingsMatch(report.versionRatings, report.observation.ratings);
+    if (
+      returnedCorrection &&
+      !panelsChanged &&
+      !assessmentChanged &&
+      input.reaffirmCorrectionRequestId !== report.openCorrection?.id
+    ) {
+      return {
+        outcome: "validation",
+        message:
+          "Confirm the open correction request explicitly before creating an unchanged reaffirmation version.",
+        fields: [
+          {
+            path: "reaffirmCorrectionRequestId",
+            message: "Explicit reaffirmation is required for unchanged content.",
+          },
+        ],
+      };
+    }
+    if (!returnedCorrection && !panelsChanged) {
       return {
         outcome: "validation",
         message: "Make a wording change before saving a new version.",
@@ -751,8 +1103,15 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     report.revisionNumber += 1;
     report.versionId = `fixture-version-${report.studentId}-edit-${report.revisionNumber}`;
     report.contentHash = `fixture-internal-content-${report.studentId}-edit-${report.revisionNumber}`;
+    report.wordingHash = `fixture-wording-${report.studentId}-edit-${report.revisionNumber}`;
     report.lockVersion += 1;
     report.checklist = clone(EMPTY_CHECKLIST);
+    report.versionRatings = clone(report.observation.ratings);
+    report.observationChangedSinceVersion = false;
+    report.status = "draft_ready";
+    if (returnedCorrection && report.openCorrection) {
+      report.openCorrection = { ...report.openCorrection, status: "resolved" };
+    }
     this.writeState(state);
     return {
       outcome: "success",
@@ -761,6 +1120,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         status: "draft_ready",
         versionId: report.versionId,
         checklistReset: true,
+        correctionResolved: returnedCorrection,
       },
     };
   }
@@ -838,10 +1198,174 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       },
     };
   }
+
+  async managementEditWording(
+    input: ManagementEditWordingInput,
+  ): Promise<UiActionResult<ManagementEditWordingSuccess>> {
+    await delay(480);
+    const state = this.readState();
+    const report = state.reports[input.reportId];
+    if (!report) return { outcome: "unavailable" };
+    if (
+      report.lockVersion !== input.expectedLockVersion ||
+      report.versionId !== input.expectedVersionId ||
+      report.wordingHash !== input.expectedWordingHash
+    ) {
+      return {
+        outcome: "stale_state",
+        message: "This report changed while you were working. Reload it before saving.",
+      };
+    }
+    if (report.status !== "trainer_approved") return { outcome: "unavailable" };
+    const fields = Object.entries(input.panels)
+      .filter(([, value]) => !value.trim())
+      .map(([path]) => ({ path, message: "This parent-facing panel is required." }));
+    if (fields.length > 0) {
+      return {
+        outcome: "validation",
+        message: "Complete all four parent-facing panels before saving.",
+        fields,
+      };
+    }
+    if (JSON.stringify(report.panels) === JSON.stringify(input.panels)) {
+      return {
+        outcome: "validation",
+        message: "Make a wording change before saving a new version.",
+        fields: [],
+      };
+    }
+
+    report.panels = clone(input.panels);
+    report.revisionNumber += 1;
+    report.versionId = `fixture-version-${report.studentId}-management-${report.revisionNumber}`;
+    report.contentHash = `fixture-internal-content-${report.studentId}-management-${report.revisionNumber}`;
+    report.wordingHash = `fixture-wording-${report.studentId}-management-${report.revisionNumber}`;
+    report.lockVersion += 1;
+    this.writeState(state);
+    return {
+      outcome: "success",
+      data: {
+        reportId: report.reportId,
+        status: "trainer_approved",
+        versionId: report.versionId,
+        wordingHash: report.wordingHash,
+      },
+    };
+  }
+
+  async managementReturnToTrainer(
+    input: ManagementReturnToTrainerInput,
+  ): Promise<UiActionResult<ManagementReturnToTrainerSuccess>> {
+    await delay(480);
+    const state = this.readState();
+    const report = state.reports[input.reportId];
+    if (!report) return { outcome: "unavailable" };
+    if (
+      report.lockVersion !== input.expectedLockVersion ||
+      report.versionId !== input.expectedVersionId
+    ) {
+      return {
+        outcome: "stale_state",
+        message: "This report changed while you were working. Reload it before returning.",
+      };
+    }
+    if (report.status !== "trainer_approved") return { outcome: "unavailable" };
+
+    const fields: { path: string; message: string }[] = [];
+    const reason = input.reason.trim();
+    if (!reason || reason.length > 2000) {
+      fields.push({
+        path: "reason",
+        message: "Provide a correction reason between 1 and 2,000 characters.",
+      });
+    }
+    if (input.issueScope === "rating" && !input.dimensionCode) {
+      fields.push({
+        path: "dimensionCode",
+        message: "Choose the affected dimension for a rating concern.",
+      });
+    }
+    if (input.issueScope !== "rating" && input.dimensionCode) {
+      fields.push({
+        path: "dimensionCode",
+        message: "An affected dimension is used only for a rating concern.",
+      });
+    }
+    if (fields.length > 0) {
+      return {
+        outcome: "validation",
+        message: "Complete the bounded assessment-fact concern before returning.",
+        fields,
+      };
+    }
+
+    const correctionRequestId = `correction-${report.studentId}-${report.lockVersion + 1}`;
+    report.status = "needs_edit";
+    report.lockVersion += 1;
+    report.openCorrection = {
+      id: correctionRequestId,
+      issueScope: input.issueScope,
+      ...(input.dimensionCode ? { dimensionCode: input.dimensionCode } : {}),
+      status: "open",
+      reason,
+    };
+    report.observationChangedSinceVersion = false;
+    this.writeState(state);
+    return {
+      outcome: "success",
+      data: {
+        reportId: report.reportId,
+        status: "needs_edit",
+        correctionRequestId,
+        parentVisible: false,
+      },
+    };
+  }
+
+  async managementApproveAndSubmit(
+    input: ManagementApproveAndSubmitInput,
+  ): Promise<UiActionResult<ManagementApproveAndSubmitSuccess>> {
+    await delay(520);
+    const state = this.readState();
+    const report = state.reports[input.reportId];
+    if (!report) return { outcome: "unavailable" };
+    if (
+      report.lockVersion !== input.expectedLockVersion ||
+      report.versionId !== input.expectedVersionId ||
+      report.wordingHash !== input.expectedWordingHash
+    ) {
+      return {
+        outcome: "stale_state",
+        message: "This report changed while you were working. Reload it before submitting.",
+      };
+    }
+    if (report.status !== "trainer_approved") return { outcome: "unavailable" };
+
+    const submittedAt = "2026-08-05T12:00:00.000Z";
+    report.status = "submitted";
+    report.lockVersion += 1;
+    report.latestSubmitted = {
+      versionId: report.versionId,
+      panels: clone(report.panels),
+      submittedAt,
+    };
+    this.writeState(state);
+    return {
+      outcome: "success",
+      data: {
+        reportId: report.reportId,
+        status: "submitted",
+        submittedAt,
+        parentVisible: true,
+      },
+    };
+  }
 }
 
-export function createDeterministicFixturePhysicalTestPort(): DeterministicFixturePhysicalTestPort {
-  return new DeterministicFixturePhysicalTestPort();
+export function createDeterministicFixturePhysicalTestPort(
+  sessionRole: SessionRole = "trainer",
+): DeterministicFixturePhysicalTestPort {
+  return new DeterministicFixturePhysicalTestPort(sessionRole);
 }
 
 export function makeAssessmentRatings(

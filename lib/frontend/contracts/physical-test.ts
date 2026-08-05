@@ -148,6 +148,48 @@ export type ReturnedReportQueueItemDto = {
   readonly correction: CorrectionRequestDto;
 };
 
+export type ManagementQueueRowDto = {
+  readonly reportId: string;
+  readonly sessionId: string;
+  readonly studentId: string;
+  readonly studentDisplayName: string;
+  readonly sessionDate: string;
+  readonly status: "trainer_approved" | "needs_edit";
+  readonly openCorrectionScope?: CorrectionRequestDto["issueScope"];
+  readonly openCorrectionStatus?: CorrectionRequestDto["status"];
+  /** Present only on the correction-tracking projection for a request this fixture raised. */
+  readonly openCorrectionReason?: string;
+};
+
+export type ManagementReviewDto = {
+  readonly status: "trainer_approved";
+  readonly lockVersion: number;
+  readonly versionId: string;
+  readonly panels: ReportPanelsDto;
+  readonly wordingHash: string;
+  readonly submittedAt?: string;
+  readonly openCorrectionScope?: CorrectionRequestDto["issueScope"];
+  readonly openCorrectionStatus?: CorrectionRequestDto["status"];
+};
+
+export type ParentReportListItemDto = {
+  readonly studentId: string;
+  readonly studentDisplayName: string;
+  readonly sessionId: string;
+  readonly sessionDate: string;
+  readonly submittedAt: string;
+};
+
+export type CanonicalReportDto = {
+  readonly panels: ReportPanelsDto;
+  readonly submittedAt: string;
+};
+
+export type AvailabilityStateDto =
+  | "available"
+  | "none_yet"
+  | "linked_unavailable";
+
 export type SaveObservationInput = {
   readonly reportId: string;
   readonly sessionId: string;
@@ -195,6 +237,7 @@ export type SaveTrainerEditSuccess = {
   readonly status: "draft_ready";
   readonly versionId: string;
   readonly checklistReset: true;
+  readonly correctionResolved: boolean;
 };
 
 export type UpdateTrainerChecklistInput = {
@@ -215,4 +258,49 @@ export type TrainerApproveSuccess = {
   readonly status: "trainer_approved";
   readonly published: false;
   readonly managementReviewRequired: true;
+};
+
+export type ManagementEditWordingInput = {
+  readonly reportId: string;
+  readonly expectedLockVersion: number;
+  readonly expectedVersionId: string;
+  readonly expectedWordingHash: string;
+  readonly panels: ReportPanelsDto;
+};
+
+export type ManagementEditWordingSuccess = {
+  readonly reportId: string;
+  readonly status: "trainer_approved";
+  readonly versionId: string;
+  readonly wordingHash: string;
+};
+
+export type ManagementReturnToTrainerInput = {
+  readonly reportId: string;
+  readonly expectedLockVersion: number;
+  readonly expectedVersionId: string;
+  readonly issueScope: CorrectionRequestDto["issueScope"];
+  readonly dimensionCode?: DimensionCode;
+  readonly reason: string;
+};
+
+export type ManagementReturnToTrainerSuccess = {
+  readonly reportId: string;
+  readonly status: "needs_edit";
+  readonly correctionRequestId: string;
+  readonly parentVisible: false;
+};
+
+export type ManagementApproveAndSubmitInput = {
+  readonly reportId: string;
+  readonly expectedLockVersion: number;
+  readonly expectedVersionId: string;
+  readonly expectedWordingHash: string;
+};
+
+export type ManagementApproveAndSubmitSuccess = {
+  readonly reportId: string;
+  readonly status: "submitted";
+  readonly submittedAt: string;
+  readonly parentVisible: true;
 };

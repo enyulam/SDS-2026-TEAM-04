@@ -15,6 +15,12 @@ const roles = [
   supporting: string;
 }[];
 
+const fixtureHomes: Readonly<Record<SessionRole, string>> = {
+  trainer: "/trainer",
+  management: "/management",
+  parent: "/parent",
+};
+
 function presentationRole(value: string | null): SessionRole {
   return roles.some((role) => role.value === value)
     ? (value as SessionRole)
@@ -43,7 +49,7 @@ export function LoginPresentation() {
           </p>
         </div>
         <div className="mt-12 rounded-2xl border border-blue-300/20 bg-white/5 p-4 text-sm leading-6 text-blue-100">
-          <strong className="block text-white">Frontend Round F1 fixture</strong>
+          <strong className="block text-white">Frontend Round F2 fixture</strong>
           This presentation performs no sign-in and grants no authority. The role query
           parameter changes this card only.
         </div>
@@ -92,25 +98,16 @@ export function LoginPresentation() {
           </label>
           <p id="auth-disabled-note" className="rounded-xl bg-slate-100 px-3 py-2.5 text-xs leading-5 text-ink-muted">
             Credential entry is disabled because real authentication is deliberately not
-            implemented in Frontend Round F1.
+            implemented in this frontend fixture.
           </p>
         </div>
 
-        {activeRole === "trainer" ? (
-          <Link
-            href="/trainer"
-            className="mt-7 flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-base font-extrabold text-white transition hover:bg-brand-500"
-          >
-            Open Trainer fixture workspace
-          </Link>
-        ) : (
-          <button
-            className="mt-7 min-h-12 w-full cursor-not-allowed rounded-xl bg-slate-200 px-5 py-3 text-base font-extrabold text-slate-500"
-            disabled
-          >
-            {active.label} flow arrives after Round F1
-          </button>
-        )}
+        <Link
+          href={fixtureHomes[activeRole]}
+          className="mt-7 flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-base font-extrabold text-white transition hover:bg-brand-500"
+        >
+          Open {active.label} fixture workspace
+        </Link>
         <p className="mt-4 text-center text-xs leading-5 text-ink-muted">
           Selecting a role changes presentation only. It never authenticates or authorizes.
         </p>

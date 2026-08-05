@@ -141,6 +141,7 @@ export function TrainerReportReview() {
 
   const report = resource.data;
   const returned = report.status === "needs_edit" && report.openCorrection?.status === "open";
+  const corrected = report.status === "draft_ready" && report.openCorrection?.status === "resolved";
   const trainerApproved = report.status === "trainer_approved";
   const canEdit = report.status === "draft_ready" && !returned;
   const canApprove = canEdit && checklistComplete;
@@ -167,6 +168,13 @@ export function TrainerReportReview() {
         </FeedbackBanner>
       )}
 
+      {searchParams.get("saved") === "correction" && corrected && (
+        <FeedbackBanner tone="success" title="Fresh correction version created">
+          The Management concern is resolved on a new immutable version. All three checklist
+          items are fresh and Trainer reapproval is required before it returns to final review.
+        </FeedbackBanner>
+      )}
+
       {returned && report.openCorrection && (
         <FeedbackBanner tone="warning" title="Returned for Trainer correction">
           <strong>{formatIssueScope(report.openCorrection.issueScope)}</strong>
@@ -176,14 +184,29 @@ export function TrainerReportReview() {
           <span className="mt-1 block">{report.openCorrection.reason}</span>
           <span className="mt-1 block font-bold">
             The frozen approved version cannot be reapproved. A fresh correction or explicit
-            reaffirmation version is required; that workflow continues in Frontend Round F2.
+            reaffirmation version is required.
+          </span>
+          <span className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href={`/trainer/sessions/${report.sessionId}/students/${report.studentId}/assess`}
+              className="inline-flex min-h-10 items-center rounded-xl bg-warning-800 px-3.5 py-2 text-sm font-bold text-white hover:bg-amber-900"
+            >
+              Review assessment
+            </Link>
+            <Link
+              href={`/trainer/reports/${report.reportId}/edit`}
+              className="inline-flex min-h-10 items-center rounded-xl border border-warning-800 px-3.5 py-2 text-sm font-bold text-warning-800 hover:bg-white/60"
+            >
+              Correct or reaffirm
+            </Link>
           </span>
         </FeedbackBanner>
       )}
 
       {trainerApproved && (
         <FeedbackBanner tone="success" title="Trainer approval saved — nothing published">
-          This exact Trainer-reviewed version is now awaiting management&apos;s final quality review.
+          This exact Trainer-reviewed version is now awaiting management&apos;s final quality review
+          {report.openCorrection?.status === "resolved" ? " again" : ""}.
           Parent visibility is unchanged and no parent notification was promised or sent.
         </FeedbackBanner>
       )}
@@ -212,7 +235,7 @@ export function TrainerReportReview() {
               href={`/trainer/reports/${report.reportId}/edit`}
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-extrabold text-navy-800 hover:border-brand-500 hover:bg-brand-100"
             >
-              Edit wording
+              {corrected ? "Review correction wording" : "Edit wording"}
             </Link>
           )}
         </div>

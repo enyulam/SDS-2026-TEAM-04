@@ -1,7 +1,18 @@
 import type {
+  AvailabilityStateDto,
   AssessmentDraftDto,
+  CanonicalReportDto,
   DimensionDto,
   DraftGenerationContextDto,
+  ManagementApproveAndSubmitInput,
+  ManagementApproveAndSubmitSuccess,
+  ManagementEditWordingInput,
+  ManagementEditWordingSuccess,
+  ManagementQueueRowDto,
+  ManagementReturnToTrainerInput,
+  ManagementReturnToTrainerSuccess,
+  ManagementReviewDto,
+  ParentReportListItemDto,
   RequestDraftInput,
   RequestDraftSuccess,
   ReturnedReportQueueItemDto,
@@ -57,6 +68,23 @@ export interface PhysicalTestPort {
   listReturnedReports(): Promise<
     UiActionResult<readonly ReturnedReportQueueItemDto[]>
   >;
+  listManagementPendingReviews(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  >;
+  listManagementCorrectionTracking(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  >;
+  getManagementReview(
+    reportId: string,
+  ): Promise<UiActionResult<ManagementReviewDto>>;
+  getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>>;
+  listParentSubmittedReports(): Promise<
+    UiActionResult<readonly ParentReportListItemDto[]>
+  >;
+  getCanonicalReport(
+    sessionId: string,
+    studentId: string,
+  ): Promise<UiActionResult<CanonicalReportDto>>;
 
   saveObservation(
     input: SaveObservationInput,
@@ -73,4 +101,27 @@ export interface PhysicalTestPort {
   trainerApprove(
     input: TrainerApproveInput,
   ): Promise<UiActionResult<TrainerApproveSuccess>>;
+  managementEditWording(
+    input: ManagementEditWordingInput,
+  ): Promise<UiActionResult<ManagementEditWordingSuccess>>;
+  managementReturnToTrainer(
+    input: ManagementReturnToTrainerInput,
+  ): Promise<UiActionResult<ManagementReturnToTrainerSuccess>>;
+  managementApproveAndSubmit(
+    input: ManagementApproveAndSubmitInput,
+  ): Promise<UiActionResult<ManagementApproveAndSubmitSuccess>>;
 }
+
+export type FixturePhysicalTestPort = PhysicalTestPort & {
+  readonly identity: Extract<
+    PhysicalTestAdapterIdentity,
+    { readonly kind: "deterministic_fixture" }
+  >;
+};
+
+export type RealParticipantPhysicalTestPort = PhysicalTestPort & {
+  readonly identity: Extract<
+    PhysicalTestAdapterIdentity,
+    { readonly kind: "real_participant_adapter" }
+  >;
+};

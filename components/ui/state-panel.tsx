@@ -6,9 +6,13 @@ type FailureResult = Exclude<UiActionResult<never>, { outcome: "success" }>;
 export function StatePanel({
   result,
   title,
+  homeHref = "/trainer",
+  homeLabel = "Return to Trainer workspace",
 }: {
   readonly result: FailureResult;
   readonly title?: string;
+  readonly homeHref?: string;
+  readonly homeLabel?: string;
 }) {
   const copy = getCopy(result, title);
   return (
@@ -26,10 +30,10 @@ export function StatePanel({
         {copy.message}
       </p>
       <Link
-        href="/trainer"
+        href={homeHref}
         className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500"
       >
-        Return to Trainer workspace
+        {homeLabel}
       </Link>
     </section>
   );

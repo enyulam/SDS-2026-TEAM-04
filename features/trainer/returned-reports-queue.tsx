@@ -91,7 +91,7 @@ export function ReturnedReportsQueue() {
                   href={`/trainer/reports/${report.reportId}/review`}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-navy-800"
                 >
-                  Open correction banner
+                  Open correction detail
                 </Link>
               </div>
             </article>

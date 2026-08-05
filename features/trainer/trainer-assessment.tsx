@@ -18,6 +18,7 @@ import {
   DIMENSION_CODES,
   RATING_LEVELS,
   type AssessmentDraftDto,
+  type CorrectionRequestDto,
   type DimensionCode,
   type DimensionDto,
   type RatingLevel,
@@ -74,6 +75,7 @@ export function TrainerAssessment() {
   const [showValidation, setShowValidation] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState<UiActionResult<SaveObservationSuccess> | null>(null);
+  const [correction, setCorrection] = useState<CorrectionRequestDto | null>(null);
   const fieldsets = useRef<Partial<Record<DimensionCode, HTMLFieldSetElement | null>>>({});
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export function TrainerAssessment() {
     void Promise.all([
       port.getAssessmentDraft(params.sessionId, params.studentId),
       port.getDimensions(),
-    ]).then(([draftResult, dimensionsResult]) => {
+    ]).then(async ([draftResult, dimensionsResult]) => {
       if (!active) return;
       if (draftResult.outcome !== "success") {
         setResource({ kind: "failed", result: asFailure(draftResult) });
@@ -98,6 +100,15 @@ export function TrainerAssessment() {
       setNotes(draftResult.data.notes);
       setFollowUp(draftResult.data.followUp);
       setLockVersion(draftResult.data.observationLockVersion);
+      const workingResult = await port.getTrainerWorkingReport(draftResult.data.reportId);
+      if (!active) return;
+      if (
+        workingResult.outcome === "success" &&
+        workingResult.data.status === "needs_edit" &&
+        workingResult.data.openCorrection?.status === "open"
+      ) {
+        setCorrection(workingResult.data.openCorrection);
+      }
       setResource({
         kind: "ready",
         data: { draft: draftResult.data, dimensions: dimensionsResult.data },
@@ -180,6 +191,17 @@ export function TrainerAssessment() {
         description="Rate every competency and speech-linguistics dimension. The rubric anchor for each selected level stays visible below the choices."
       />
 
+      {correction && (
+        <FeedbackBanner tone="warning" title="Returned assessment concern">
+          <strong>{formatIssueScope(correction.issueScope)}</strong>
+          {correction.dimensionCode ? ` · ${formatDimension(correction.dimensionCode)}` : ""}
+          <span className="mt-1 block">{correction.reason}</span>
+          <span className="mt-1 block font-bold">
+            Save any required assessment change here, then create a fresh correction version.
+          </span>
+        </FeedbackBanner>
+      )}
+
       <section className="card sticky top-3 z-10 flex flex-col gap-3 px-4 py-3 shadow-lg sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-extrabold text-navy-950">
@@ -218,17 +240,23 @@ export function TrainerAssessment() {
       {saveResult?.outcome === "success" && (
         <FeedbackBanner
           tone="success"
-          title="Observation saved"
+          title={correction ? "Assessment correction saved" : "Observation saved"}
           actions={
             <Link
-              href={`/trainer/reports/${saveResult.data.reportId}/generate`}
+              href={
+                correction
+                  ? `/trainer/reports/${saveResult.data.reportId}/edit`
+                  : `/trainer/reports/${saveResult.data.reportId}/generate`
+              }
               className="inline-flex min-h-10 items-center rounded-xl bg-success-700 px-3.5 py-2 text-sm font-bold text-white hover:bg-green-800"
             >
-              Continue to AI draft
+              {correction ? "Create correction version" : "Continue to AI draft"}
             </Link>
           }
         >
-          All nine ratings and the Trainer&apos;s notes are preserved in this browser-session fixture.
+          {correction
+            ? "The governed assessment changes are saved. The frozen returned version remains unchanged until a fresh correction version is created."
+            : "All nine ratings and the Trainer's notes are preserved in this browser-session fixture."}
         </FeedbackBanner>
       )}
 
@@ -293,13 +321,18 @@ export function TrainerAssessment() {
         <div>
           <p className="text-sm font-extrabold text-navy-950">Save gate</p>
           <p className="mt-1 text-xs leading-5 text-ink-muted">
-            The fixture deliberately returns one retryable save error on the first complete
-            submission so recovery can be reviewed without losing this form.
+            {correction
+              ? "Saving here updates the Trainer-owned assessment; the correction version and fresh checklist are created in the next step."
+              : "The fixture deliberately returns one retryable save error on the first complete submission so recovery can be reviewed without losing this form."}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <Button type="submit" size="large" disabled={!complete || saving || saveComplete}>
-            {saving ? "Saving observation…" : "Save observation & generate draft"}
+            {saving
+              ? "Saving observation…"
+              : correction
+                ? "Save assessment correction"
+                : "Save observation & generate draft"}
           </Button>
           {!complete && (
             <span className="text-xs font-bold text-danger-700" aria-live="polite">
@@ -383,4 +416,19 @@ export function TrainerAssessment() {
       </fieldset>
     );
   }
+}
+
+function formatIssueScope(scope: CorrectionRequestDto["issueScope"]) {
+  return {
+    rating: "Rating review",
+    observation: "Observation review",
+    derived_assessment_fact: "Assessment-fact review",
+  }[scope];
+}
+
+function formatDimension(dimension: DimensionCode) {
+  return dimension
+    .split("_")
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
 }

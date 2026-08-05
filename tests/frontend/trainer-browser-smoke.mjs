@@ -180,7 +180,7 @@ try {
 
   await navigate("/login?role=trainer");
   await waitUntil(
-    "document.body.innerText.includes('Frontend Round F1 fixture')",
+    "document.body.innerText.includes('Frontend Round F2 fixture')",
     "fixture login presentation",
   );
   assert(await bodyIncludes("Selecting a role changes presentation only"), "Role presentation warning is missing");
@@ -335,7 +335,7 @@ try {
 
   await navigate("/trainer/reports?status=needs_edit");
   await waitUntil("document.body.innerText.includes('Trainer correction queue')", "returned-report queue");
-  await clickExact("a", "Open correction banner");
+  await clickExact("a", "Open correction detail");
   await waitUntil(
     "document.body.innerText.includes('Returned for Trainer correction')",
     "returned-report correction banner",
