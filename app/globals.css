@@ -150,12 +150,35 @@ h4 {
   text-wrap: balance;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
+/*
+ * Form-control normalization — MUST stay inside `@layer base`.
+ *
+ * Browsers do not inherit font or colour into form controls, so this reset is deliberate
+ * and is kept. What was wrong was its cascade position, not its content: an UNLAYERED
+ * rule outranks every rule in every `@layer`, and `@import "tailwindcss"` emits its
+ * utilities into `@layer utilities` (layer order `theme, base, components, utilities`).
+ * Unlayered `font: inherit; color: inherit` therefore beat `text-white`, `font-bold` and
+ * every other typography/colour utility on every button, input, textarea and select in the
+ * application — the utility was generated, matched, and silently lost the cascade, so the
+ * control rendered its ancestor's colour and weight instead. On the primary action that
+ * produced white-declared label text rendering as `#1b2b4b` on `bg-brand-700` `#d6357a`
+ * = 3.113:1, a live WCAG 2.2 AA failure (F-01b).
+ *
+ * Declaring it in `@layer base` puts it below `utilities`, so the normalization still
+ * applies to any control that sets no utility, and any control that does set one wins.
+ * This is also exactly where Tailwind's own preflight declares the same normalization
+ * (`node_modules/tailwindcss/preflight.css`, `@layer base`), so the two now agree rather
+ * than fight. `@layer base { … }` appends to the existing layer; it does not redefine the
+ * layer order, and no token VALUE is changed here.
+ */
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
 }
 
 button,
