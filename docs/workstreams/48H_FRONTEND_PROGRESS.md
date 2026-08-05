@@ -41,12 +41,12 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 
 | # | Round / item | Status |
 |---|---|---|
-| F1.1 | **Round F1** — design foundations and shell | Not started |
-| F1.2 | **Round F1** — login and role presentation | Not started |
-| F1.3 | **Round F1** — Trainer dashboard and roster | Not started |
-| F1.4 | **Round F1** — assessment | Not started |
-| F1.5 | **Round F1** — AI loading/failure/retry states | Not started |
-| F1.6 | **Round F1** — trainer review/edit/checklist/approval | Not started |
+| F1.1 | **Round F1** — design foundations and shell | Ready for review |
+| F1.2 | **Round F1** — login and role presentation | Ready for review |
+| F1.3 | **Round F1** — Trainer dashboard and roster | Ready for review |
+| F1.4 | **Round F1** — assessment | Ready for review |
+| F1.5 | **Round F1** — AI loading/failure/retry states | Ready for review |
+| F1.6 | **Round F1** — trainer review/edit/checklist/approval | Ready for review |
 | F2.1 | **Round F2** — Management queue and review | Not started |
 | F2.2 | **Round F2** — wording editor and return dialog | Not started |
 | F2.3 | **Round F2** — correction and reapproval UI | Not started |
@@ -106,4 +106,16 @@ Any genuinely required cross-owned edit is a **blocker**, reported **before** mo
 
 ## Checkpoint entries
 
-_None yet. No frontend implementation has begun._
+### 2026-08-05 18:10 Asia/Singapore — Round F1
+
+- **Timestamp (Asia/Singapore):** 2026-08-05 18:10
+- **Round / checkpoint ID:** Round F1
+- **Starting commit:** `68169e97cbf614bf8b9b55deaee4039065fa45a0`
+- **Ending commit:** The commit created by `feat(trainer): deliver fixture-backed F1 slice`
+- **Status:** Ready for review
+- **Scope completed:** Shared dark-navy foundations and responsive Trainer portal shell; role-tab login presentation; Trainer dashboard, session roster and synthetic empty roster; complete nine-dimension assessment with the governed four-level scale and all-nine save gate; deterministic observation save failure/recovery; deterministic AI generation loading, safe first failure, bounded retry and success; four-panel report review, Trainer wording editor, exact three-item checklist, non-publishing Trainer approval, returned-report queue/correction banner, and loading, empty, unavailable, validation and disabled states. The `PhysicalTestPort` and its deterministic browser-session fixture adapter use the contract DTO/action names and visibly identify fixture mode as ineligible for participant use.
+- **Files changed:** `app/layout.tsx`; `app/globals.css`; `app/(auth)/**`; `app/(portals)/trainer/**`; `components/**`; `features/**`; `lib/frontend/**`; `tests/frontend/**`; this frontend workstream log.
+- **Tests and validation:** `npm ci` — exit 0, exact locked dependencies installed with no manifest changes; `node_modules/.bin/tsc.cmd --noEmit` — exit 0, including typed fixture/action assertions; `node_modules/.bin/eslint.cmd .` — exit 0; `npm.cmd run build` — exit 0, production build completed for all F1 routes; `node tests/frontend/trainer-browser-smoke.mjs` against the production build — exit 0, full Trainer walkthrough passed with zero uncaught browser-console/runtime errors. No frontend test script or test-runner dependency exists, so no package test command was available and none was added.
+- **Unresolved blockers:** No blocker to independent Round F1 review. A real participant-test adapter remains dependent on backend authentication, server-derived session authority, contract action endpoints, persistence/projections, lifecycle enforcement and the grounded AI service. Returned-report correction authoring/reaffirmation and all Management/Parent surfaces remain deliberately deferred beyond F1.
+- **Contract deviations requested:** none
+- **Next action:** Independent F1 review and acceptance; keep the fixture adapter out of participant surfaces, then reconcile the backend contract before Round F2/F3 adapter work.

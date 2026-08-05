@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f2f5f8;
+  --foreground: #142033;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: #f2f5f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f9fb;
+  --color-ink: #142033;
+  --color-ink-muted: #607086;
+  --color-navy-950: #071426;
+  --color-navy-900: #0b1b31;
+  --color-navy-800: #132a48;
+  --color-navy-700: #1d3a5f;
+  --color-brand-600: #3468e8;
+  --color-brand-500: #4d7cf0;
+  --color-brand-100: #e9efff;
+  --color-line: #dce3eb;
+  --color-success-700: #23643d;
+  --color-success-100: #e6f6eb;
+  --color-warning-800: #7a4f00;
+  --color-warning-100: #fff4d6;
+  --color-danger-700: #a1392b;
+  --color-danger-100: #feebe7;
+  --font-sans: "Segoe UI", Aptos, system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
+  --shadow-card: 0 16px 40px rgba(7, 20, 38, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid #79a0ff;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #d9e4ff;
+  color: #071426;
+}
+
+.page-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.card {
+  border: 1px solid #dce3eb;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.form-field {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.875rem;
+  background: #ffffff;
+  color: #142033;
+  padding: 0.75rem 0.875rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.form-field:focus {
+  border-color: #4d7cf0;
+  box-shadow: 0 0 0 3px rgba(77, 124, 240, 0.16);
+  outline: none;
+}
+
+.form-field:disabled {
+  cursor: not-allowed;
+  background: #edf1f5;
+  color: #758398;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #e9eef3 25%, #f7f9fb 50%, #e9eef3 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
