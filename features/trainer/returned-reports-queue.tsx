@@ -58,7 +58,7 @@ export function ReturnedReportsQueue() {
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-muted">
             There are no open correction requests in this fixture view.
           </p>
-          <Link href="/trainer" className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500">
+          <Link href="/trainer" className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800">
             Return to dashboard
           </Link>
         </section>

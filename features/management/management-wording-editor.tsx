@@ -91,7 +91,7 @@ export function ManagementWordingEditor() {
         <div>
           <Link
             href={`/management/reports/${params.reportId}/review`}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
           >
             Return to safe review
           </Link>

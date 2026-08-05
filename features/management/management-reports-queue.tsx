@@ -112,7 +112,7 @@ export function ManagementReportsQueue() {
               {pending ? (
                 <Link
                   href={`/management/reports/${row.reportId}/review`}
-                  className="mt-4 inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500 sm:mt-0"
+                  className="mt-4 inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800 sm:mt-0"
                 >
                   Open safe review
                 </Link>

@@ -102,7 +102,7 @@ function QueueCard({
       <p className="mt-2 text-4xl font-black text-navy-950">{count}</p>
       <Link
         href={href}
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
       >
         {action}
       </Link>

@@ -150,7 +150,7 @@ function renderAction(sessionId: string, entry: RosterEntryDto) {
     return (
       <Link
         href={`/trainer/reports/${entry.reportId}/generate`}
-        className="flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-500"
+        className="flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-800"
       >
         Generate report draft
       </Link>
@@ -159,7 +159,7 @@ function renderAction(sessionId: string, entry: RosterEntryDto) {
   return (
     <Link
       href={`/trainer/sessions/${sessionId}/students/${entry.studentId}/assess`}
-      className="flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-500"
+      className="flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-800"
     >
       Start nine-dimension assessment
     </Link>

@@ -139,7 +139,7 @@ export function TrainerDraftGeneration() {
         </p>
         <Link
           href={`/trainer/reports/${state.result.reportId}/review`}
-          className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-base font-extrabold text-white hover:bg-brand-500"
+          className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-700 px-5 py-3 text-base font-extrabold text-white hover:bg-brand-800"
         >
           Review four-panel report
         </Link>
