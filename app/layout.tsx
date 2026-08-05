@@ -15,7 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full bg-navy-950">
+    // The final MVP is a light design. The root element carries the light canvas so no
+    // dark surface shows through during hydration or over-scroll (F1).
+    <html lang="en" className="h-full bg-canvas">
       <body className="min-h-full bg-canvas text-ink antialiased">{children}</body>
     </html>
   );

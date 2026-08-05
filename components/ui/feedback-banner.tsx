@@ -1,11 +1,16 @@
 import type { ReactNode } from "react";
 
+/**
+ * Tones reconciled to the shared foundation at F1. `fixture` keeps a deliberate dark
+ * accent surface so the non-participant fixture notice stays unmistakable against the
+ * light canvas.
+ */
 const styles = {
-  info: "border-blue-200 bg-blue-50 text-blue-950",
-  success: "border-green-200 bg-success-100 text-success-700",
-  warning: "border-amber-200 bg-warning-100 text-warning-800",
-  error: "border-red-200 bg-danger-100 text-danger-700",
-  fixture: "border-sky-700/70 bg-navy-800 text-blue-50",
+  info: "border-transparent bg-info-soft text-info-on",
+  success: "border-transparent bg-success-soft text-success-on",
+  warning: "border-transparent bg-warning-soft text-warning-on",
+  error: "border-transparent bg-danger-soft text-danger-on",
+  fixture: "border-transparent bg-accent-ink text-white",
 } as const;
 
 export function FeedbackBanner({
@@ -21,7 +26,7 @@ export function FeedbackBanner({
 }) {
   return (
     <section
-      className={`rounded-2xl border px-4 py-3.5 ${styles[tone]}`}
+      className={`rounded-card border px-4 py-3.5 ${styles[tone]}`}
       role={tone === "error" ? "alert" : "status"}
       aria-live={tone === "error" ? "assertive" : "polite"}
     >

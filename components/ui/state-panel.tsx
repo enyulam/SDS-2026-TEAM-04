@@ -18,20 +18,20 @@ export function StatePanel({
   return (
     <section className="card mx-auto max-w-2xl px-6 py-12 text-center" role="status">
       <span
-        className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-100 text-lg font-black text-navy-800"
+        className="mx-auto grid size-12 place-items-center rounded-xl bg-neutral-soft text-lg font-bold text-ink-muted"
         aria-hidden="true"
       >
         {copy.marker}
       </span>
-      <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-navy-950">
+      <h1 className="mt-5 text-section-title font-extrabold tracking-tight text-ink-strong">
         {copy.title}
       </h1>
-      <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-ink-muted">
+      <p className="mx-auto mt-2 max-w-lg text-body leading-6 text-ink-muted">
         {copy.message}
       </p>
       <Link
         href={homeHref}
-        className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-500"
+        className="mt-6 inline-flex min-h-11 items-center justify-center rounded-field bg-brand-700 px-4 py-2.5 text-body font-bold text-white shadow-raised no-underline hover:bg-brand-800"
       >
         {homeLabel}
       </Link>

@@ -14,22 +14,26 @@ const labels: Readonly<Record<DisplayStatus, string>> = {
   submitted: "Submitted",
 };
 
+/**
+ * Status tints reconciled to the shared foundation at F1. The label map above is
+ * unchanged — F1 restyles lifecycle presentation and renames no governed status.
+ */
 const styles: Readonly<Record<DisplayStatus, string>> = {
-  no_report: "bg-slate-100 text-slate-600",
-  incomplete: "bg-amber-100 text-amber-800",
-  observation_saved: "bg-blue-100 text-blue-800",
-  drafting: "bg-violet-100 text-violet-800",
-  draft_ready: "bg-cyan-100 text-cyan-800",
-  needs_edit: "bg-orange-100 text-orange-900",
-  trainer_approved: "bg-indigo-100 text-indigo-800",
-  approved: "bg-emerald-100 text-emerald-800",
-  submitted: "bg-green-100 text-green-800",
+  no_report: "bg-neutral-soft text-neutral-on",
+  incomplete: "bg-warning-soft text-warning-on",
+  observation_saved: "bg-info-soft text-info-on",
+  drafting: "bg-brand-100 text-brand-800",
+  draft_ready: "bg-info-soft text-info-on",
+  needs_edit: "bg-warning-soft text-warning-on",
+  trainer_approved: "bg-brand-100 text-brand-800",
+  approved: "bg-success-soft text-success-on",
+  submitted: "bg-success-soft text-success-on",
 };
 
 export function StatusPill({ status }: { readonly status: DisplayStatus }) {
   return (
     <span
-      className={`inline-flex min-h-7 items-center rounded-full px-2.5 py-1 text-xs font-extrabold ${styles[status]}`}
+      className={`inline-flex min-h-7 items-center rounded-full px-2.5 py-1 text-small font-bold ${styles[status]}`}
     >
       {labels[status]}
     </span>
