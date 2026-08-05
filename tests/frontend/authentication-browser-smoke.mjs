@@ -272,15 +272,63 @@ record("password reveal toggles type only and stores no value");
  * Per-role selection state — F3, F10, F13
  * ------------------------------------------------------------------------- */
 
+/**
+ * Terms that must not appear on any pre-authentication screen.
+ *
+ * `shared` covers roster, report and lifecycle vocabulary for every role. The per-role
+ * lists add that role's own governed powers and data, so a Management login cannot hint at
+ * the review queue or its approval powers, and a Parent login cannot hint at a linked child.
+ */
+const SHARED_FORBIDDEN = [
+  "learner",
+  "student",
+  "report",
+  "roster",
+  "approve",
+  "submitted",
+  "trainer_approved",
+  "needs_edit",
+  "draft_ready",
+  "beginning",
+  "developing",
+  "mastering",
+  "mastered",
+];
+
 const roleCases = [
-  { role: "trainer", label: "Trainer", home: "/trainer", shot: "auth-01-trainer.png" },
+  {
+    role: "trainer",
+    label: "Trainer",
+    home: "/trainer",
+    shot: "auth-01-trainer.png",
+    // A Trainer login must not hint at assessment work or its nine dimensions.
+    forbidden: ["assessment", "observation", "session", "dimension", "checklist"],
+  },
   {
     role: "management",
     label: "Management",
     home: "/management",
     shot: "auth-02-management.png",
+    // A Management login must not hint at the review queue or any governed Management power.
+    forbidden: [
+      "queue",
+      "pending review",
+      "final review",
+      "wording",
+      "correction",
+      "return to trainer",
+      "publish",
+      "submit",
+    ],
   },
-  { role: "parent", label: "Parent", home: "/parent", shot: "auth-03-parent.png" },
+  {
+    role: "parent",
+    label: "Parent",
+    home: "/parent",
+    shot: "auth-03-parent.png",
+    // A Parent login must not hint at a linked child or any published content.
+    forbidden: ["child", "linked", "your children", "progress", "attendance", "evidence"],
+  },
 ];
 
 for (const testCase of roleCases) {
@@ -350,22 +398,9 @@ for (const testCase of roleCases) {
     `${testCase.label}: the fixture entry must target ${testCase.home}`,
   );
 
-  // Non-disclosure: no roster, report, child or lifecycle datum before authentication.
-  const forbidden = [
-    "learner",
-    "student",
-    "report",
-    "roster",
-    "approve",
-    "submitted",
-    "trainer_approved",
-    "needs_edit",
-    "draft_ready",
-    "beginning",
-    "developing",
-    "mastering",
-    "mastered",
-  ];
+  // Non-disclosure: no roster, report, child, lifecycle or role-power datum before
+  // authentication — shared vocabulary plus this role's own governed powers and data.
+  const forbidden = [...SHARED_FORBIDDEN, ...testCase.forbidden];
   const leaked = await evaluate(`
     (() => {
       const text = document.body.innerText.toLowerCase();
@@ -375,6 +410,61 @@ for (const testCase of roleCases) {
   assert(
     Array.isArray(leaked) && leaked.length === 0,
     `${testCase.label}: pre-authentication disclosure of ${JSON.stringify(leaked)}`,
+  );
+
+  // No shared, demo or pre-supplied credential is offered (A-015, A-046).
+  const credentialHints = await evaluate(`
+    (() => {
+      const text = document.body.innerText.toLowerCase();
+      return ["demo", "shared login", "shared credential", "test account", "sample password", "default password"]
+        .filter((term) => text.includes(term));
+    })()
+  `);
+  assert(
+    Array.isArray(credentialHints) && credentialHints.length === 0,
+    `${testCase.label}: a shared or demo credential was suggested — ${JSON.stringify(credentialHints)}`,
+  );
+
+  // Measured geometry against the frozen frames: the content column is 400 px wide and
+  // horizontally centred at the 1440 px reference viewport. Vertical offsets are NOT
+  // asserted because this reconstruction carries an additional governance notice the frames
+  // do not, which shifts everything below it; vertical ORDER is asserted instead.
+  const geometry = await evaluate(`
+    (() => {
+      const selector = document.querySelector('[data-role-segment]').closest('ul').getBoundingClientRect();
+      return { left: Math.round(selector.left), width: Math.round(selector.width) };
+    })()
+  `);
+  assert(
+    Math.abs(geometry.width - 400) <= 2,
+    `${testCase.label}: content column must be 400px wide, measured ${geometry.width}`,
+  );
+  assert(
+    Math.abs(geometry.left - 520) <= 2,
+    `${testCase.label}: content column must start at x=520, measured ${geometry.left}`,
+  );
+
+  const ordered = await evaluate(`
+    (() => {
+      const top = (selector) => {
+        const el = document.querySelector(selector);
+        return el ? el.getBoundingClientRect().top : Number.NaN;
+      };
+      const marks = [
+        top('[role="img"]'),
+        top('[data-role-segment]'),
+        top('h1'),
+        top('input[type="email"]'),
+        top('input[type="password"]'),
+        top('input[type="checkbox"]'),
+        top('[data-fixture-entry]'),
+      ];
+      return marks.every((value, index) => index === 0 || value > marks[index - 1]);
+    })()
+  `);
+  assert(
+    ordered,
+    `${testCase.label}: brand, role selector, heading, email, password, options and action must appear in the reference order`,
   );
 
   // No credential is ever pre-filled or suggested. Scoped to credential-bearing inputs —
