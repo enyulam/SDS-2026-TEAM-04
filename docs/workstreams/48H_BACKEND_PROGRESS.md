@@ -41,10 +41,10 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 
 | # | Round / item | Status |
 |---|---|---|
-| B1.1 | **Round B1** — Step 7I migrations and schema | Not started |
-| B1.2 | **Round B1** — lifecycle RPCs and grants | Not started |
-| B1.3 | **Round B1** — fixtures, verifier and concurrency proofs | Not started |
-| B1.4 | **Round B1** — generated types | Not started |
+| B1.1 | **Round B1** — Step 7I migrations and schema | Ready for review |
+| B1.2 | **Round B1** — lifecycle RPCs and grants | Ready for review |
+| B1.3 | **Round B1** — fixtures, verifier and concurrency proofs | Ready for review |
+| B1.4 | **Round B1** — generated types | Ready for review |
 | B2.1 | **Round B2** — authentication and server boundaries | Not started |
 | B2.2 | **Round B2** — read projections | Not started |
 | B2.3 | **Round B2** — AI provider and grounding | Not started |
@@ -67,9 +67,9 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 | # | Checkpoint | Status |
 |---|---|---|
 | CP-1 | AI provider approval and configuration | **Satisfied** — `openai` / `gpt-5.6-terra`; no secret value inspected |
-| CP-2 | **Assessment-write authorization** — `observations` / `observation_ratings` have zero policies and zero `authenticated` privileges, and no assessment-write RPC exists in the Step 7I inventory | **OPEN — operator decision required before any assessment-write SQL is authored.** Does not block Round B1 |
-| CP-3 | Queue and list projections (R-1, R-2, R-4, R-6, R-7, R-9, R-10) | **OPEN — resolve at Round B2 design** |
-| CP-4 | Trainer observation read path (U-7I-11 / U-30) | **OPEN — resolve with CP-2** |
+| CP-2 | **Assessment-write authorization** — `observations` / `observation_ratings` have zero policies and zero `authenticated` privileges, and no assessment-write RPC exists in the Step 7I inventory | **RESOLVED BY DESIGN (2026-08-05)** — `docs/plan/PHYSICAL_TEST_ASSESSMENT_WRITE_BASELINE.md` ratifies `assessment_save_observation`. **No implementation exists**; it belongs to **Round B2**, in its own separately-authorized migration. Did not block Round B1. *(Row corrected here on 2026-08-05: the contract §10 table already recorded this resolution and this branch-local log was stale. The log is subordinate to the contract — see the header.)* |
+| CP-3 | Queue and list projections (R-1, R-2, R-4, R-6, R-7, R-9, R-10) | **OPEN — resolve at Round B2 design.** Step 7I owns no list read: RPC-15 is keyed `(class_session_id, student_id)`, so management still has no in-product way to discover a report awaiting review (U-7I-24). Non-blocking for Round B1 |
+| CP-4 | Trainer observation read path (U-7I-11 / U-30) | **RESOLVED BY DESIGN (2026-08-05)** — the same baseline ratifies `assessment_get_trainer_observation`. **No implementation exists**; Round B2. *(Row corrected on 2026-08-05 for the same reason as CP-2.)* |
 | CP-5 | Deterministic management bootstrap (N-4 / U-23) | **OPEN — non-blocking for the physical test** |
 
 ---
@@ -98,4 +98,34 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 
 ## Checkpoint entries
 
-_None yet. No backend implementation has begun._
+### 2026-08-05 18:05 Asia/Singapore — Round B1 (Step 7I governed report lifecycle)
+
+- **Timestamp (Asia/Singapore):** 2026-08-05 18:05
+- **Round / checkpoint ID:** **B1** — B1.1 migrations and schema · B1.2 lifecycle RPCs and grants · B1.3 fixtures, verifier and concurrency proofs · B1.4 generated types
+- **Starting commit:** `68169e97cbf614bf8b9b55deaee4039065fa45a0` (`docs(plan): define governed assessment persistence`) — verified before any edit as the tip of `feat/48h-backend`, of `feat/48h-frontend` and of `main`, with all three worktrees clean and no branch commit beyond the baseline.
+- **Ending commit:** the commit created by this entry — the third of three (see **Commits** below).
+- **Status:** **Ready for review**
+- **Scope completed:**
+  - **Two migration files, exactly as U-7I-18 mandates.** File 1 (`20260805090000`) contains only the P-1 guard and `ALTER TYPE public.report_status ADD VALUE 'trainer_approved' AFTER 'needs_edit'`, and commits before anything may reference the label. File 2 (`20260805090500`) contains the exhaustive A-040 set and nothing else: 2 correction enums, `report_correction_requests` (with `centre_id`, three composite FKs, RLS enabled, zero policies, explicit revokes and one partial unique index on `status='open'`), 3 `report_versions` columns, 4 constraint replacements, the `approver_role` DEFAULT drop, and 18 functions.
+  - **All 15 RPC entry points**, the parent-reach helper and both serializers, every one `plpgsql`, `postgres`-owned, `SET search_path = ''`, no dynamic SQL. Explicit authorization, CAS and concurrency gates throughout: the aggregate row lock is the mutex for every mutation, every committed aggregate mutation bumps `lock_version` by exactly 1 (twice for Approve & Submit), and `report_update_checklist` validates without bumping, under the lock.
+  - **EXECUTE posture:** 14 `authenticated` grants and exactly 4 functions at zero client EXECUTE including `PUBLIC`. `report_store_draft` and both serializers are zero-EXECUTE by **governance prohibition** (R-27, R-26); `app_parent_reaches_student` by **minimum privilege** (R-31) and may be granted later, but only *with* the policy or consumer that needs it. Nothing is granted to `service_role`, and no RLS policy or table grant is added anywhere.
+  - **Audit:** exact mapping onto the three already-registered actions. **No audit-registry extension** — neither `audit_append_event` nor `audit_verify_chain` is replaced, and both still carry the byte-identical 16-action registry. Correction **reason text never enters an audit event**; labels are the six ratified generic constants.
+  - **Fixture verifier reconciled** in the same commit as the migration it invalidates: A32 25→26, A33's zero-privilege sweeps 25→26, A34 3→5, A35 10→28 with per-function contract checks for the new eighteen, D5 to match.
+  - **Canonical/disposable split implemented.** The four `R(C)` proofs run on a separate disposable database created and destroyed by their own runner; the canonical fixture database runs everything else and stays pristine.
+  - **Generated database types** produced *after* the applied schema passed, and proven to describe it.
+- **Files changed:**
+  - `supabase/migrations/20260805090000_step_7i_report_status_trainer_approved.sql` (new, 62 lines, SHA-256 `c046d6aa70c74a8afbe039483f72245a4397722950122a204a523c164f7af6bf`)
+  - `supabase/migrations/20260805090500_step_7i_report_lifecycle.sql` (new, 3,332 lines, SHA-256 `1a579eeba80865a439cbce68c5de4d9ec6d1da3c8b68a1992e4a409704d19f99`)
+  - `scripts/fixtures/verify-local-fixtures.sql` (reconciled, SHA-256 `38f28941a2265b935a44762ab22848268d8ff0fb52b099a886357651f638a839`)
+  - `scripts/tests/step-7i/lifecycle-canonical.sql`, `run-canonical.mjs`, `run-concurrency.mjs`, `static-scan.mjs`, `verify-fresh-apply.mjs` (all new)
+  - `server/db/database.types.ts` (new, 1,885 lines, SHA-256 `4ff6fd400ce6504eef30239b20e821302ee1f2b0d97d97305f728cf59fb1a177`)
+  - `docs/workstreams/48H_BACKEND_PROGRESS.md` (this entry, and the round checklist)
+- **Tests and validation:** *(no credential-bearing output was rendered at any point; `supabase start` and `gen types` were run with their output suppressed or redirected)*
+  - `node scripts/tests/step-7i/verify-fresh-apply.mjs` → exit **0**. All five migrations apply cleanly, in order, to a stripped database; fresh census **26 tables / 28 functions / 12 enums / 29 policies / 5 migrations / 20 authenticated EXECUTE / RLS on every table / 8 ordered `report_status` labels / 1-3-9 seeds**; and the canonical database is **catalogue-identical** to that fresh application.
+  - `node scripts/tests/step-7i/run-canonical.mjs` → exit **0**. Static scan passed; the lifecycle suite emitted **51 PASS notices** and ran **twice byte-identically** (T7I-31); the reconciled verifier passed **twice** with `SECTION A`/`C`/`D` all clean; the canonical fixture checksum reproduced as **28 rows / `d6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517`**, byte-identical to the accepted Step 7F value.
+  - `node scripts/tests/step-7i/run-concurrency.mjs` → exit **0**. T7I-15, T7I-16, T7I-46 and all six T7I-61 pairings passed on the disposable database; in every pairing `lock_version` advanced by exactly the winner's own bump, and `audit_verify_chain` passed afterwards. The database ended with **62 committed audit events — the expected outcome**, and was destroyed.
+  - `npx tsc --noEmit` → exit **0**; `npm run lint` → exit **0**, no warnings; `node --check` on all four `.mjs` runners → exit **0**.
+  - **Final canonical database state:** 5 migrations · 3 Auth users · 25 domain rows · **0 audit events / 0 targets / 0 heads** · 0 reports / versions / correction requests · 26 tables / 28 functions / 12 enums / 29 policies · no scratch database left behind.
+- **Unresolved blockers:** **None blocking Round B1 or its acceptance.** Carried forward, all pre-existing and all non-blocking here: **CP-3** (queue/list projections — Step 7I owns no list read, so management still cannot discover a report awaiting review in-product, U-7I-24); **CP-5 / N-4** (deterministic management bootstrap, now more important because management is the publisher); **U-25** (no Figma frame exists for any of the eight management-review and notification screen families — none was invented); **U-29** (management-initiated post-submission correction, deliberately deferred); **U-7I-25** (the enum label is permanently irreversible, accepted for a local disposable database).
+- **Contract deviations requested:** **None.** One execution deviation is recorded rather than requested, because it changed no contract term: **`supabase db reset` was not run.** A reset destroys the three synthetic Auth identities, and recreating them requires an interactive no-echo password prompt that this agent must never supply or handle. The two migrations were therefore applied to the canonical database with `supabase migration up --local`, and the *fresh-reset property itself* — all five migrations applying in order from a database with no project objects — was proven on a stripped scratch database by `verify-fresh-apply.mjs`, which additionally proves the canonical database is catalogue-identical to that fresh application. **No `.env.local` value, hosted credential, database password or connection string was requested, read, printed, logged or persisted at any point, and the project has never been linked.**
+- **Next action:** independent review of Round B1. **Round B2 is not started** and remains separately authorized: server actions, real authentication and server boundaries, the read projections, the AI provider and grounding, and the CP-2/CP-4 assessment RPCs all belong there. `report_store_draft` must stay at zero client EXECUTE.
