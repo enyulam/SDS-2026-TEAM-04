@@ -1479,6 +1479,37 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: boolean
       }
+      assessment_get_trainer_observation: {
+        Args: { p_class_session_id: string; p_student_id: string }
+        Returns: {
+          dimension_count: number
+          focus_chips: string[]
+          follow_up_notes: string
+          is_complete: boolean
+          lock_version: number
+          observation_exists: boolean
+          observation_id: string
+          observation_notes: string
+          ratings: Json
+          strength_chips: string[]
+          term_evidence_notes: string
+        }[]
+      }
+      assessment_save_observation: {
+        Args: {
+          p_class_session_id: string
+          p_expected_lock_version: number
+          p_expected_observation_id: string
+          p_focus_chips: string[]
+          p_follow_up_notes: string
+          p_observation_notes: string
+          p_ratings: Json
+          p_strength_chips: string[]
+          p_student_id: string
+          p_term_evidence_notes: string
+        }
+        Returns: Record<string, unknown>
+      }
       audit_append_event: {
         Args: {
           p_action: string
