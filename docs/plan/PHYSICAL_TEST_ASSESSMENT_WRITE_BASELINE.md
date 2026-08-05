@@ -4,6 +4,16 @@
 **Resolves:** `docs/plan/PHYSICAL_TEST_SLICE_48H.md` §10 checkpoints **CP-2** (assessment-write authorization) and **CP-4** (trainer observation read path), and the carried-forward open items **U-7I-11 / U-30** (no governed trainer read path to `observations`) and **U-7I-4** (governed path for observation edits).
 **Owner of implementation:** the Phase 1 assessment checkpoint (A-024 step 8), executed as **Backend Round B2**, **after Step 7I acceptance**.
 
+> **Amendment 006 supersession note — appended 2026-08-05 23:20 (Asia/Singapore). Nothing below this note was rewritten.**
+>
+> **The competency-rating vocabulary is now `Beginning` → `Developing` → `Mastering` → `Mastered`** (storage `beginning`, `developing`, `mastering`, `mastered`), ratified by `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_006.md` **A-049**.
+>
+> **Every occurrence of `emerging` / `secure` / `advanced` as a competency-rating label below is superseded and historical**, including the §2 enum declaration and the **T-ASM-8** invalid-rating row. Those rows remain **accurate records of the baseline as ratified** and are preserved verbatim; read the ratified labels in their place. `developing` is unchanged. **Behavioural anchors and polarity bands carry forward positionally and verbatim** (A-050, A-051), so **no threshold, adjudication or test intent below changes** — only the label spelling does.
+>
+> **Class Grade (`beginner` / `intermediate` / `advanced`) is a different vocabulary and is unchanged** (A-054).
+>
+> The vocabulary is **ratified but not yet implemented.** The bounded sequence is `docs/plan/COMPETENCY_VOCABULARY_RECONCILIATION_PLAN.md`; the enum rename and the T-ASM updates land together in checkpoint **V2**, which requires its own authorization.
+
 ---
 
 ## 0. Precedence — this document is subordinate and authorizes nothing

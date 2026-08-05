@@ -3,6 +3,14 @@
 **Status:** Shared implementation contract — created 2026-08-05 (Asia/Singapore).
 **Purpose:** Pin the exact shared boundary between the backend workstream (Claude Code) and the frontend workstream (Codex) so a locally runnable, desktop-first, synthetic-data vertical slice can be delivered in two focused days and used for a supervised physical test.
 
+> **Amendment 006 supersession note — appended 2026-08-05 23:20 (Asia/Singapore). No accepted contract row was rewritten.**
+>
+> **The competency-rating vocabulary is now `Beginning` → `Developing` → `Mastering` → `Mastered`** (storage `beginning`, `developing`, `mastering`, `mastered`), ratified by `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_006.md` **A-049**. The §7 `rating` union has been updated in place because it is an **active shared contract** that both workstreams build against; **behavioural anchors and polarity bands are unchanged** (A-050, A-051), so the DTO shape, the anchor requirement and the polarity union are all unaffected.
+>
+> **Any remaining `emerging` / `secure` / `advanced` competency-rating label elsewhere in this contract is superseded and historical.** **Class Grade (`beginner` / `intermediate` / `advanced`) is a different vocabulary and is unchanged** (A-054).
+>
+> The vocabulary is **ratified but not yet implemented** — no backend, frontend, fixture, generated type or test has changed. See `docs/plan/COMPETENCY_VOCABULARY_RECONCILIATION_PLAN.md`; checkpoints **V2** and **V3** each require their own authorization.
+
 ---
 
 ## 0. Precedence — this document is subordinate and can override nothing
@@ -374,7 +382,7 @@ export interface AiDraftRequest {
   readonly ratings: ReadonlyArray<{
     readonly dimensionCode: string;
     readonly displayName: string;
-    readonly rating: 'emerging' | 'developing' | 'secure' | 'advanced';
+    readonly rating: 'beginning' | 'developing' | 'mastering' | 'mastered';   // Amendment 006 A-049
     readonly anchorText: string;                       // the rubric anchor, never a bare enum
     readonly polarityBand: 'needs_support' | 'developing' | 'positive';
   }>;
