@@ -1,20 +1,18 @@
 import type { ReactNode } from "react";
+import { AuthBackdrop } from "@/components/auth/auth-shell";
 
+/**
+ * Authentication route-group layout (FRONTEND RECONSTRUCTION F2).
+ *
+ * The provisional dark authentication presentation identified at F1 is retired here. The
+ * three frozen login references all render on a plain white page carrying four pale
+ * decorative discs — not on the portal canvas grey and not on a dark surface.
+ */
 export default function AuthLayout({ children }: { readonly children: ReactNode }) {
   return (
-    // The authentication frames are reconstructed at FRONTEND RECONSTRUCTION F2/F3. Until
-    // then this layout keeps the provisional login presentation legible by supplying the
-    // dark accent surface it was authored against, retinted to the brand hue (F1).
-    <main className="relative min-h-screen overflow-hidden bg-accent-ink px-4 py-8 text-white sm:px-6 sm:py-12">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-70"
-        aria-hidden="true"
-        style={{
-          background:
-            "radial-gradient(circle at 15% 15%, rgba(236,72,153,.24), transparent 32%), radial-gradient(circle at 88% 80%, rgba(47,189,189,.14), transparent 28%)",
-        }}
-      />
-      <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-6xl items-center justify-center">
+    <main className="relative min-h-screen overflow-hidden bg-surface px-4 py-8 text-ink sm:px-6">
+      <AuthBackdrop />
+      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl items-center justify-center">
         {children}
       </div>
     </main>
