@@ -46,6 +46,20 @@
 -- audit guards, every fixture-data assertion, every negative test and the
 -- canonical checksum region are UNCHANGED -- Step 7I adds no policy, no table
 -- grant and no fixture row.
+--
+-- Reconciled again at Backend Round B2 (governed assessment persistence,
+-- CP-2/CP-4). The assessment migration adds exactly two functions and moves
+-- three censuses this file hard-pins, so -- for the same reason as above --
+-- the reconciliation is committed TOGETHER WITH that migration:
+--   A34  5 -> 6 applied migrations, adding 20260806090000
+--   A35  28 -> 30 public functions (6 Step 7G + 4 Step 7H + 18 Step 7I
+--        + 2 assessment), with per-function contract checks for the new two
+--   D5   the same 30-function figure, post-negative-suite
+-- A32 (26 tables), A33 (the 26-table zero-privilege sweeps), the 29
+-- policies, the 13-table authenticated SELECT set, the Step 7H audit guards,
+-- every fixture-data assertion, every negative test and the canonical
+-- checksum region are UNCHANGED -- the assessment migration adds no table,
+-- enum, column, constraint, index, policy, table grant or fixture row.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -339,24 +353,25 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the five accepted project migrations are applied. Step 7I
+  -- A34: exactly the six accepted project migrations are applied. Step 7I
   -- ships TWO files by mandate (U-7I-18), not one: the `trainer_approved`
   -- enum label must be added and COMMITTED before any object may reference
-  -- it, so the count moved 3 -> 5 rather than 3 -> 4.
+  -- it. Backend Round B2 adds the assessment-persistence migration
+  -- (CP-2/CP-4), moving the count 5 -> 6.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 5 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 5 applied migrations, found %', v_n; END IF;
+  IF v_n <> 6 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 6 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
-                     '20260805090000', '20260805090500');
-  IF v_n <> 5 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000 and 20260805090500';
+                     '20260805090000', '20260805090500', '20260806090000');
+  IF v_n <> 6 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500 and 20260806090000';
   END IF;
 
-  -- A35: exactly the twenty-eight public project functions exist -- the six
-  -- Step 7G authorization helpers, the four Step 7H audit functions and the
-  -- eighteen Step 7I lifecycle functions.
+  -- A35: exactly the thirty public project functions exist -- the six
+  -- Step 7G authorization helpers, the four Step 7H audit functions, the
+  -- eighteen Step 7I lifecycle functions and the two assessment functions.
   -- The six helpers stay STABLE, SECURITY DEFINER, search-path pinned and
   -- authenticated-only executable; each Step 7H function is checked
   -- against the exact contract derived from the committed migration,
@@ -365,8 +380,35 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 28 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 28 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I), found %', v_n;
+  IF v_n <> 30 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 30 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment), found %', v_n;
+  END IF;
+
+  -- A35 (assessment, CP-2/CP-4): the two governed assessment functions.
+  -- Both postgres-owned SECURITY DEFINER plpgsql with a pinned search_path
+  -- and non-STRICT; the save VOLATILE, the read STABLE (so the engine itself
+  -- forbids it writing); authenticated EXECUTE on both and nothing else.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+    JOIN pg_catalog.pg_language l ON l.oid = p.prolang
+   WHERE n.nspname = 'public'
+     AND p.proname IN ('assessment_save_observation', 'assessment_get_trainer_observation')
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND l.lanname = 'plpgsql'
+     AND p.prosecdef
+     AND NOT p.proisstrict
+     AND p.proconfig IS NOT NULL
+     AND p.proconfig::text LIKE '%search_path=%'
+     AND ((p.proname = 'assessment_save_observation'         AND p.provolatile = 'v')
+       OR (p.proname = 'assessment_get_trainer_observation'  AND p.provolatile = 's'))
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
+  IF v_n <> 2 THEN
+    RAISE EXCEPTION 'FAIL A35: expected the 2 assessment functions to satisfy their full ratified contract, matched %', v_n;
   END IF;
 
   -- A35 (Step 7I): all eighteen new functions exist, exactly once each, are
@@ -1138,8 +1180,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 28 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 28 Step 7G/7H/7I functions after the negative suite, found %', v_n;
+  IF v_n <> 30 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 30 Step 7G/7H/7I/assessment functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n

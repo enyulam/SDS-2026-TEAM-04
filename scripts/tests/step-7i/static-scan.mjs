@@ -43,7 +43,7 @@ const body2 = stripComments(file2)
     fail('T7I-73', `${step7i.length} Step 7I migration files exist, expected exactly 2`)
   }
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql'))
-  if (all.length !== 5) fail('T7I-73', `${all.length} migration files exist, expected 5`)
+  if (all.length !== 6) fail('T7I-73', `${all.length} migration files exist, expected 6`) // 5 through Step 7I + the B2 assessment migration
 
   // File 1 contains ONLY the ALTER TYPE statement and the P-1 guard.
   const adds1 = body1.match(/ALTER TYPE[\s\S]*?ADD VALUE/gi) || []
@@ -338,21 +338,21 @@ const fnBodies = new Map()
     return out
   }
 
-  const workflowDir = join(ROOT, 'server', 'modules', 'report-workflow')
-  const workflowFiles = walk(workflowDir)
-  const actionCount = workflowFiles
-    .map((f) => (readFileSync(f, 'utf8').match(/^\s*'use server'/gm) || []).length)
-    .reduce((a, b) => a + b, 0)
-  if (actionCount > 1) {
-    fail('T7I-40', `server/modules/report-workflow declares ${actionCount} server actions, expected at most 1`)
-  }
-  if (workflowFiles.length === 0) {
-    console.log('RECORDED T7I-40 -- server/modules/report-workflow does not exist yet: the single proof server action belongs to the server-action checkpoint (Backend Round B2). The scan below therefore holds over the repository as it stands, and must be re-run when that module lands.')
-  }
-
-  // No report-lifecycle module imports the ELEVATED client. service_role
-  // holds zero privileges and zero EXECUTE on everything Step 7I touches.
+  // RECONCILED AT BACKEND ROUND B2 (the earlier RECORDED note said exactly
+  // this reconciliation would happen when the server module landed). The
+  // repository now carries the CONTRACT-MANDATED action set (48h contract
+  // §5.1: saveObservation, requestDraft, saveTrainerEdit,
+  // updateTrainerChecklist, trainerApprove, managementEditWording,
+  // managementReturnToTrainer, managementApproveAndSubmit, plus the read
+  // wrappers), so "at most one action" no longer describes the accepted
+  // design. T7I-40's RATIFIED PROPERTY is unchanged and still scanned in
+  // full: PostgreSQL owns every transition, guard and gate — TypeScript
+  // holds NO status/lock_version authority, performs NO direct report-table
+  // access, and never touches the elevated client. TS may ROUTE on
+  // RPC-returned state (choosing which governed RPC to call next); it may
+  // not decide a transition's legality — every RPC re-verifies everything.
   const serverFiles = walk(join(ROOT, 'server'))
+  const allAppFiles = [...serverFiles, ...walk(join(ROOT, 'app')), ...walk(join(ROOT, 'lib'))]
   for (const f of serverFiles) {
     const text = readFileSync(f, 'utf8')
     const rel = relative(ROOT, f).replace(/\\/g, '/')
@@ -362,19 +362,27 @@ const fnBodies = new Map()
     }
   }
 
-  // No TypeScript compares or mutates report status / lock_version outside an
-  // RPC call site: PostgreSQL owns every transition, guard and gate.
-  for (const f of [...serverFiles, ...walk(join(ROOT, 'app')), ...walk(join(ROOT, 'lib'))]) {
+  for (const f of allAppFiles) {
     const text = readFileSync(f, 'utf8')
     const rel = relative(ROOT, f).replace(/\\/g, '/')
+    // (a) lock_version is never mutated in TypeScript.
     if (/\block_version\s*(\+\+|--|\+=|-=|=[^=])/.test(text)) {
       fail('T7I-40', `${rel} mutates lock_version in TypeScript`)
     }
-    if (/\bstatus\s*===\s*['"](draft_ready|needs_edit|trainer_approved|approved|submitted|incomplete|observation_saved|drafting)['"]/.test(text)) {
-      fail('T7I-40', `${rel} compares a report status in TypeScript outside an RPC call site`)
+    // (b) no direct table access to ANY report-family or assessment table:
+    // reads and writes alike go through the governed RPCs.
+    if (/\.from\(\s*['"](reports|report_versions|report_version_ratings|report_version_checklist_progress|report_version_approvals|report_correction_requests|observations|observation_ratings|audit_events|audit_event_targets|audit_chain_heads)['"]/.test(text)) {
+      fail('T7I-40', `${rel} accesses a governed table directly instead of through an RPC`)
+    }
+    // (c) no TypeScript writes a report status VALUE anywhere except as an
+    // expected-state RPC argument (p_expected_status) or a returned-state
+    // check. A status literal on the left of an assignment would be TS
+    // deciding a transition — forbidden.
+    if (/status\s*=\s*['"](draft_ready|needs_edit|trainer_approved|approved|submitted|incomplete|observation_saved|drafting)['"]/.test(text.replace(/status\s*===|status\s*!==/g, ''))) {
+      fail('T7I-40', `${rel} assigns a report status in TypeScript`)
     }
   }
-  if (failures === before) pass('T7I-40', 'no elevated-client import, no TypeScript status/lock_version authority')
+  if (failures === before) pass('T7I-40', 'no elevated-client import, no direct governed-table access, no TypeScript status/lock_version authority (reconciled to the B2 contract action set)')
 }
 
 console.log('')
