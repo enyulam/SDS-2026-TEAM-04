@@ -193,3 +193,19 @@ Any genuinely required cross-owned edit is a **blocker**, reported **before** mo
 - **Unresolved blockers:** None blocking review. The five F2 frame-versus-governance deviations carry forward unchanged; the undispositioned academy wordmark still needs an operator asset decision.
 - **Contract deviations requested:** none
 - **Next action:** F13 (AUTH-03 Parent Login) within the same authorized batch.
+
+### 2026-08-06 — FRONTEND RECONSTRUCTION F13 (AUTH-03 Parent Login)
+
+- **Timestamp (Asia/Singapore):** 2026-08-06
+- **Round / checkpoint ID:** `FRONTEND RECONSTRUCTION F13` — AUTH-03 Parent Login, node `546:413`, route `/login?role=parent`. Final checkpoint of the authorized authentication batch.
+- **Starting commit:** `52d26d08f6ae3439b9bf46c4561c17ed1f4acfb2` (F10)
+- **Ending commit:** The commit created by `feat(frontend): reconstruct parent login`
+- **Status:** Ready for review — **AUTH-03 proposed visually accepted**
+- **Scope completed:** The shared shell already produced this frame's visual result, so F13 added the two assertion groups its acceptance criteria name directly. **Role-query escalation:** walking `parent → trainer → management → parent` is asserted to keep exactly one segment selected, move the entry point with the presentation, and — the sharpest form of A-046 — persist **nothing**: `localStorage`, `sessionStorage` and `document.cookie` are all asserted empty after every hop, so no session, role, credential or grant accumulates from switching the query. **Responsive usability:** at 1440, 1024, 900 and 480 px the page is asserted not to scroll horizontally, the primary action is asserted to stay on-screen with a ≥ 44 px touch target, and every role segment is asserted to remain visible and within the viewport. The Parent forbidden-term list (`child`, `linked`, `your children`, `progress`, `attendance`, `evidence`) was introduced at F10 and is enforced here: **no linked-child, report or attendance datum is exposed before authentication**, which is the Parent boundary (A-021, A-048) applied at its earliest surface.
+- **Functional behaviour preserved:** Parent authentication and authorization behaviour is unchanged. Parent access remains submitted-canonical, view-only and limited to linked children — none of which this screen can grant, reach or hint at. Authority remains server-derived.
+- **Files changed:** `tests/frontend/authentication-browser-smoke.mjs`; this frontend workstream log.
+- **Tests and validation:** compiled `auth-reference-fidelity.assertions.ts` — exit 0, AUTH-03 SHA-256 `fcd4d4ed…3b85c` confirmed identical to the validated pack at 1440 × 1024 and 95,425 bytes; `tsc --noEmit` — exit 0; `eslint .` — exit 0; `npm run build` — exit 0, **route census unchanged at 16**; `node tests/frontend/authentication-browser-smoke.mjs` — exit 0, 12 check groups; compiled `design-foundation.assertions.ts` — exit 0; `node tests/frontend/trainer-browser-smoke.mjs` — exit 0; `node tests/frontend/three-role-browser-smoke.mjs` — exit 0; `git diff --check` — exit 0. Zero uncaught browser-console/runtime errors. Evidence at `UI_REFERENCE_FINAL_MVP\_checkpoint-evidence\F13\`.
+- **Destination dependency, recorded not resolved:** the expected physical-test destination for AUTH-03 is `/parent/reports`, which **does exist** and is already canonical with no route mismatch. No route was created and no redirect policy was changed; wiring the real post-authentication destination is F16.
+- **Unresolved blockers:** None blocking review. The five F2 frame-versus-governance deviations carry forward unchanged; the undispositioned academy wordmark still needs an operator asset decision.
+- **Contract deviations requested:** none
+- **Next action:** Operator review of the authentication batch. F4 (05 Trainer Schedule) remains **blocked on the operator route decision** recorded at F0 (inventory §7.3, U-A5-1) and was not started.

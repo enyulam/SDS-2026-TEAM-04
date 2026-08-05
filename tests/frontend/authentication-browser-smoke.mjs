@@ -586,6 +586,102 @@ for (const path of ["/login", "/login?role=admin", "/login?role=management%20tra
 }
 record("unknown, absent and malformed role queries fall back and grant nothing");
 
+/* ---------------------------------------------------------------------------
+ * Role-query switching never escalates or carries state — F13
+ *
+ * The sharpest form of A-046: walking the role query must not accumulate authority, leak
+ * one role's state into another, or leave any persisted trace behind.
+ * ------------------------------------------------------------------------- */
+
+await evaluate("localStorage.clear(); sessionStorage.clear()");
+
+for (const role of ["parent", "trainer", "management", "parent"]) {
+  await navigate(`/login?role=${role}`);
+  await waitUntil(
+    "document.body.innerText.includes('Sign in as')",
+    `role switch to ${role}`,
+  );
+
+  assert(
+    await evaluate(
+      `document.querySelector('[data-role-segment="${role}"]').dataset.selected === 'true'`,
+    ),
+    `role switch: ${role} must be the selected presentation`,
+  );
+  assert(
+    await evaluate(
+      `document.querySelectorAll('[data-role-segment][data-selected="true"]').length === 1`,
+    ),
+    `role switch: switching to ${role} must not leave a second role selected`,
+  );
+  assert(
+    await evaluate(
+      `new URL(document.querySelector('[data-fixture-entry]').href).pathname === '/${role}'`,
+    ),
+    `role switch: the entry point must follow the presentation to /${role}`,
+  );
+  // Nothing is persisted by walking the query — no session, role, credential or grant.
+  assert(
+    await evaluate(
+      `localStorage.length === 0 && sessionStorage.length === 0 && document.cookie === ''`,
+    ),
+    `role switch: visiting /login?role=${role} must persist nothing`,
+  );
+}
+record("walking the role query escalates nothing, carries no state and persists nothing");
+
+/* ---------------------------------------------------------------------------
+ * Responsive usability — F13
+ * ------------------------------------------------------------------------- */
+
+for (const width of [1440, 1024, 900, 480]) {
+  await send("Emulation.setDeviceMetricsOverride", {
+    width,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await navigate("/login?role=parent");
+  await waitUntil(
+    "document.body.innerText.includes('Sign in as')",
+    `Parent login at ${width}px`,
+  );
+
+  assert(
+    await evaluate(
+      `document.documentElement.scrollWidth <= window.innerWidth + 1`,
+    ),
+    `${width}px: the authentication page must not scroll horizontally`,
+  );
+  assert(
+    await evaluate(`
+      (() => {
+        const el = document.querySelector('[data-fixture-entry]');
+        const box = el.getBoundingClientRect();
+        return box.height >= 44 && box.left >= 0 && box.right <= window.innerWidth + 1;
+      })()
+    `),
+    `${width}px: the primary action must stay on-screen with an adequate touch target`,
+  );
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('[data-role-segment]')].every((el) => {
+        const box = el.getBoundingClientRect();
+        return box.width > 0 && box.left >= 0 && box.right <= window.innerWidth + 1;
+      })
+    `),
+    `${width}px: every role segment must remain visible and on-screen`,
+  );
+}
+record("responsive usability at 1440, 1024, 900 and 480 px");
+
+await send("Emulation.setDeviceMetricsOverride", {
+  width: VIEWPORT.width,
+  height: VIEWPORT.height,
+  deviceScaleFactor: 1,
+  mobile: false,
+});
+
 assert(
   consoleErrors.length === 0,
   `Browser console/runtime errors: ${consoleErrors.join(" | ")}`,
