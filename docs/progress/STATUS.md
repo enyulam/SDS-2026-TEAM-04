@@ -2,7 +2,9 @@
 
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 
-_Last updated: 2026-08-05 (Step 7I1G — **Amendment 004 and the Step 7I report-lifecycle design are ratified, and Step 7I1 is complete**. The five staged design documents were independently re-verified against the Step 7I1E defect register and committed as `docs(governance): ratify Step 7I report lifecycle design`. **This is a design ratification only: no Step 7I SQL, migration, RPC, server action, fixture, generated type, application code or UI has been authored, and no Supabase, Docker, psql, fixture, verifier or application runtime was run.** Steps 7D, 7E0, 7E0D, 7E, 7F, 7G and 7H remain completed and accepted; **the audit infrastructure remains empty until a future governed RPC appends an event; Step 7I2A remains unstarted and separately authorized**)._
+_Last updated: 2026-08-05 (**48-hour physical-test slice contract accepted; parallel worktrees created**. The shared implementation contract `docs/plan/PHYSICAL_TEST_SLICE_48H.md` and the two branch-local workstream logs were created and committed, and the isolated `feat/48h-backend` / `feat/48h-frontend` branches and worktrees were created from that same commit. **No implementation has begun — no SQL, migration, RPC, server action, fixture, generated type, application code or UI was authored, and no Supabase, Docker, psql, fixture, verifier or application runtime was run.** The previous entry follows.)_
+
+_Previously: 2026-08-05 (Step 7I1G — **Amendment 004 and the Step 7I report-lifecycle design are ratified, and Step 7I1 is complete**. The five staged design documents were independently re-verified against the Step 7I1E defect register and committed as `docs(governance): ratify Step 7I report lifecycle design`. **This is a design ratification only: no Step 7I SQL, migration, RPC, server action, fixture, generated type, application code or UI has been authored, and no Supabase, Docker, psql, fixture, verifier or application runtime was run.** Steps 7D, 7E0, 7E0D, 7E, 7F, 7G and 7H remain completed and accepted; **the audit infrastructure remains empty until a future governed RPC appends an event; Step 7I2A remains unstarted and separately authorized**)._
 
 ---
 
@@ -11,8 +13,10 @@ _Last updated: 2026-08-05 (Step 7I1G — **Amendment 004 and the Step 7I report-
 - **Project:** B.E.S.T Coach MVP
 - **Lifecycle stage:** Phase 0 in progress — client boundaries, governed core schema, deterministic synthetic fixture, relationship authorization and the reusable tamper-evident audit-chain infrastructure are delivered, applied, dual-proven and **fully accepted**; assessment writes, report lifecycle, governed business RPCs and generated types are **not started**
 - **Migration/tooling status:** Step 6 local tooling **completed and accepted**
-- **Current checkpoint:** **Step 7I1G — final verification, ratification and commit of the Step 7I report-lifecycle design; Step 7I1 is now complete**
-- **Checkpoint status:** **Complete.** The five staged design documents were independently re-verified against the Step 7I1E defect register (CD-1 … CD-7), Markdown-validated, whitespace-checked and committed together with the three progress records. **Amendment 004 and the Step 7I lifecycle design are ratified.** The next bounded checkpoint is **Step 7I2A** (author and stage the two Step 7I migration files for static review), which **requires its own explicit orchestrator authorization**.
+- **Current checkpoint:** **48-hour physical-test slice — contract acceptance and parallel-worktree setup**
+- **Checkpoint status:** **Complete.** The shared 48-hour implementation contract and the two branch-local workstream logs are committed on `main`, and the two isolated branches/worktrees are created from that same commit. **No implementation has begun.** The next action is the first parallel round, subject to the open checkpoints recorded below.
+- **Preceding checkpoint:** **Step 7I1G — final verification, ratification and commit of the Step 7I report-lifecycle design; Step 7I1 is complete**
+- **Preceding checkpoint status:** **Complete.** The five staged design documents were independently re-verified against the Step 7I1E defect register (CD-1 … CD-7), Markdown-validated, whitespace-checked and committed together with the three progress records. **Amendment 004 and the Step 7I lifecycle design are ratified.** The next bounded checkpoint is **Step 7I2A** (author and stage the two Step 7I migration files for static review), which **requires its own explicit orchestrator authorization**.
 - **Step 7D:** **Completed and fully accepted** (7D1 → 7D4 and overall)
 - **Step 7E0:** **Completed and accepted (2026-07-30)** — substantive governance commit **`722dcb8`**; sub-checkpoints **7E0A** (change set) and **7E0B** (commit) both Completed · Accepted; its acceptance record committed at **`6551d37`** (Step 7E0C / 7E0C2)
 - **Step 7E0D1 — read-only schema-critical analysis:** **Completed and accepted (2026-08-03)** — Decisions A – G analysed with binding orchestrator corrections; **no file, SQL, schema, Auth, runtime or repository change occurred**
@@ -76,6 +80,32 @@ Resumed from the committed Codex handoff at `643d973ac9162be2f7aebb8ba9b825e7a96
 - **Post-commit repeatability proof:** Supabase restarted from the preserved volume (no reset, no reapplied migration); committed verifier confirmed byte-identical to the tested bytes; run **twice** more through the identical contract — both exit `0`, both byte-identical to each other and to **both pre-commit runs** (same stdout/stderr SHA-256 values above) — four independent runs, zero divergence. A final independent state re-check reproduced every required value unchanged.
 - **Decisions:** D-279 … D-284 record the reconciliation, the repeatability proof, the commit, final fixture/authorization preservation, full Step 7H acceptance, and the Step 7I-unstarted boundary.
 - **Final state:** Supabase stopped after each runtime phase with all three volumes preserved and zero lingering process confirmed at every stop. **Step 7H is complete and fully accepted.** The audit infrastructure remains empty (0 events/0 targets/0 heads) until a future governed RPC calls `audit_append_event`; nothing in this checkpoint appended an audit event. Production management bootstrap (N-4) remains unresolved but does not reopen Step 7H. Phase 4 items (external mirror, alerting, retention, cadence) remain deferred. **Step 7I remains unstarted; a read-only design reconciliation is the next checkpoint.**
+
+## 48-hour physical-test slice — contract acceptance and parallel-worktree setup (2026-08-05)
+
+**The 48-hour implementation contract is accepted, and no implementation has begun.**
+
+- **Contract:** `docs/plan/PHYSICAL_TEST_SLICE_48H.md` — the shared coordination boundary for a locally runnable, desktop-first, synthetic-data vertical slice covering trainer assessment → AI draft → trainer review/edit → **trainer approval (no publication)** → management review → wording edit or return → trainer correction/reaffirmation and reapproval → **management Approve & Submit** → parent canonical submitted-report view.
+- **Subordination is explicit and stated in the contract's §0.** It sits **below** Specification v3, Amendments 001–004, `CLAUDE.md`, the Implementation Plan, Figma Design 2, `STATUS.md`, `BUILD_NOTES.md` and the migration tracker. **It authorizes no checkpoint, amends no governing document, and narrows no part of `CLAUDE.md` §12.** The named schema/migration checkpoints (**7I2A … 7I2G**, then **7J**) keep their identities and their separate-authorization requirement.
+- **Backend and frontend work will use isolated branches and worktrees.** `feat/48h-backend` (Claude Code) at `C:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\worktrees\backend-48h`; `feat/48h-frontend` (Codex) at `C:\Users\enyul\Vibe Studio\B.E.S.T-Coach-Workspace\worktrees\frontend-48h`. **Both start from the same contract commit** — the commit created by `docs(plan): define 48-hour physical-test slice`, resolvable as `git merge-base feat/48h-backend feat/48h-frontend`.
+- **Shared references are read-only during parallel implementation** — `CLAUDE.md`, `docs/spec/**`, `docs/plan/**`, `docs/progress/**` and `docs/progress/DEMO_TO_MVP_MIGRATION.md`. Neither worktree may update `STATUS.md`, `BUILD_NOTES.md`, either migration tracker, Amendment 004, the Step 7I baseline, the Figma matrix or the 48-hour contract.
+- **Each workstream has its own branch-local operational log** — `docs/workstreams/48H_BACKEND_PROGRESS.md` and `docs/workstreams/48H_FRONTEND_PROGRESS.md`. Each carries a fixed six-value status vocabulary (Not started · In progress · Blocked · Ready for review · Accepted · Integrated), a round checklist and an append-only eleven-field checkpoint template. **They are operational logs, not governance authorities**, and the other agent's log is read-only. Each agent commits its own log in the same commit as its implementation checkpoint.
+- **Canonical progress will be reconciled only from `main`**, once both workstream reports have been received — never from a worktree.
+- **Integration order is pinned:** contract commit → Round 1 parallel → reconcile → Round 2 parallel → **backend merges first** → frontend rebases/merges against the backend-integrated `main` → frontend merges second → adapter wiring → reset and seed → canonical verifier → **disposable** concurrency suite → typecheck/lint/build → scripted three-role dry run → blocker repair → participant testing. **No merge was performed at this setup checkpoint.**
+
+**Named implementation checkpoints recorded by the contract (§10) — decisions deliberately recorded rather than made:**
+
+| # | Checkpoint | Status |
+|---|---|---|
+| **CP-1** | **AI provider approval and configuration** | **Satisfied.** The ratified non-secret selectors `LLM_PROVIDER=openai` and `LLM_MODEL=gpt-5.6-terra` are already committed in `.env.example`, and the provider and key are recorded as orchestrator-verified and present locally. **No secret value was inspected, printed, logged or reported.** The AI provider therefore does **not** require a fresh operator decision — but it remains an explicit implementation checkpoint: if the approved provider is found unconfigured at implementation time, or a different provider would be needed, the backend agent **stops and requests an operator decision** rather than silently selecting Ollama or a hosted provider |
+| **CP-2** | **Assessment-write authorization.** `observations` and `observation_ratings` hold **zero policies and zero `authenticated` privileges**, and the Step 7I inventory contains **no assessment-write RPC** — the baseline assigns "assessment RPCs" to a later Phase 1 slice. Real observation persistence therefore needs governed write objects that are **not yet designed or authorized** | **OPEN — operator decision required.** Blocks `saveObservation` and the real-data assessment path. **Does not block backend Round 1**, which is entirely within the ratified Step 7I design |
+| **CP-3** | **Queue and list projections** — no checkpoint owns a management review-queue read path (U-7I-24), so management currently has no in-product way to discover a report awaiting review | **OPEN — resolve at backend Round 2 design** |
+| **CP-4** | **Trainer observation read path** (U-7I-11 / U-30) — no governed read path to `observations`, so Review & Approve cannot yet load `follow_up_notes` | **OPEN — resolve with CP-2** |
+| **CP-5** | **Deterministic management bootstrap** (N-4 / U-23) | **OPEN — non-blocking for the physical test.** Synthetic fixtures do not discharge it |
+
+**Deferred from the physical-test slice, with no safeguard deleted:** TA workflow · evidence upload and signed URLs · analytics and broad statistics · **external** email/SMS/push delivery · multi-centre UI · production deployment · broad calendar work · full mobile refinement · nonessential Figma screens · post-submission correction initiation · full operational PDPA tooling. **Durable in-app queue, badge and banner states are sufficient for the physical test.**
+
+**No implementation began at this checkpoint.** No SQL, migration, RPC, server action, fixture, generated type, application code or UI component was authored, staged or applied; `supabase/migrations/` still holds exactly the three accepted versions; no dependency was installed; no Supabase, Docker, psql, fixture-loader, verifier or application runtime was started; and no server was started. The frozen demo remains unchanged and clean at `8d4acf4abc5039c24da01be773ab1a5e4916080f`.
 
 ## Step 7I1 — report-lifecycle design ratification (2026-08-05, Step 7I1G)
 
@@ -401,6 +431,18 @@ Specification v3 (`64d54aa2…`), Amendment 001 (`25ede394…`) and every `gover
 ---
 
 ## Next permitted action
+
+**The 48-hour physical-test slice contract is accepted and the parallel worktrees are ready (2026-08-05).** `docs/plan/PHYSICAL_TEST_SLICE_48H.md` and the two branch-local workstream logs are committed on `main`; `feat/48h-backend` and `feat/48h-frontend` exist as isolated worktrees, both starting from that same commit. **No implementation has begun and no merge was performed.**
+
+**Next: begin backend Round B1 and frontend Round F1 in parallel, each in its own worktree, each starting from the contract commit.** Backend Round B1 is the ratified Step 7I work — **Step 7I2A** (author and stage the exactly two migration files for static review) is its first sub-checkpoint and **still requires its own explicit orchestrator authorization**, as do 7I2B … 7I2G and 7J. Frontend Round F1 is fixture-backed presentation work and depends on no open checkpoint.
+
+**Before the assessment-write path is built, resolve CP-2** — `observations` and `observation_ratings` have zero policies and zero `authenticated` privileges, and no assessment-write RPC exists in the ratified Step 7I inventory. **An operator decision is required before any assessment-write SQL is authored.** CP-3 and CP-4 resolve at backend Round 2 design; CP-5 (N-4 management bootstrap) remains open and non-blocking.
+
+**Canonical progress records are reconciled only from `main`, after both workstream reports are received.** Neither worktree may update `STATUS.md`, `BUILD_NOTES.md`, either migration tracker, Amendment 004, the Step 7I baseline, the Figma matrix or the 48-hour contract. No tag, remote or push exists, and none is authorized.
+
+---
+
+**Historical — the preceding entry, retained unchanged.**
 
 **Step 7H is complete and fully accepted.** The fixture verifier was reconciled (A32/A33/A34/A35/A38/D5 only), proven twice pre-commit and twice post-commit against the preserved database with all four runs byte-identical and passing, and committed as `617ca4b`.
 
