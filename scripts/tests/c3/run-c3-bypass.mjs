@@ -352,17 +352,70 @@ SELECT count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oi
     const after = await q(WORK_DB, rowsFor(s4))
     const shell = await q(WORK_DB,
       `SELECT status::text || '|' || lock_version::text FROM public.reports WHERE class_session_id='${s4}';`)
-    const chain = await q(WORK_DB, `SELECT bool_and(ok) FROM public.audit_verify_chain(NULL, NULL, NULL);`)
+    /*
+     * POSITIVE audit-chain evidence, to the SAME standard already applied by
+     * run-f17.mjs G-17 and prove-g17-chain-controls.mjs.
+     *
+     * The predicate here previously read `chain !== 't' && chain !== ''` over
+     * `bool_and(ok)`. `bool_and` over ZERO rows is SQL NULL, which psql
+     * renders as the EMPTY STRING -- so "no chain was verified at all" was
+     * accepted as "the chain verifies". An unreadable result was accepted the
+     * same way. That is the exact defect class this harness was rejected for
+     * once already: an ABSENCE of evidence counted as evidence.
+     *
+     * The replacement demands, all of them, from the verifier itself:
+     *   - at least ONE chain row returned;
+     *   - ZERO chains reporting anything other than ok = true (an
+     *     unreadable/NULL `ok` counts as NOT ok, never as ok);
+     *   - ZERO chains whose HEAD was not covered by the verification;
+     *   - at least ONE event actually checked; and
+     *   - the checked-event total RECONCILED against the real
+     *     `public.audit_events` row count, so a verifier that silently
+     *     covered a subset of the committed events cannot pass.
+     * Every field is cast to text and read as an exact literal, so a NULL
+     * arrives as the empty string and fails rather than defaulting to ok.
+     */
+    const CHAIN_PROBE = `
+SELECT (SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL))::text
+  || '|' || (SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL) v
+              WHERE v.ok IS DISTINCT FROM true)::text
+  || '|' || (SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL) v
+              WHERE v.head_checked IS DISTINCT FROM true)::text
+  || '|' || (SELECT COALESCE(sum(v.events_checked), 0) FROM public.audit_verify_chain(NULL, NULL, NULL) v)::text
+  || '|' || (SELECT count(*) FROM public.audit_events)::text;`
+    let chainProbe = ''
+    try {
+      chainProbe = await q(WORK_DB, CHAIN_PROBE)
+    } catch (e) {
+      chainProbe = ''
+    }
+    const chainFields = chainProbe.split('|')
+    const chainNumbers = chainFields.length === 5 && chainFields.every((f) => /^\d+$/.test(f))
+      ? chainFields.map(Number)
+      : null
+    const [chains, notOk, headsUnchecked, checked, events] = chainNumbers ?? [0, 0, 0, 0, 0]
     if (!r.ok) {
       fail('T-C3-4', `the composer call failed with ${r.state}: ${r.message}`)
     } else if (after !== '1|9|1') {
       fail('T-C3-4', `the composer left observations|ratings|reports = ${after}; expected 1|9|1`)
     } else if (shell !== 'observation_saved|2') {
       fail('T-C3-4', `the report shell is ${shell}; expected observation_saved|2`)
-    } else if (chain !== 't' && chain !== '') {
-      fail('T-C3-4', 'the audit chain does not verify after the governed save')
+    } else if (chainNumbers === null) {
+      fail('T-C3-4', `public.audit_verify_chain() produced an UNREADABLE verification result (${JSON.stringify(chainProbe)}); an unreadable result is never evidence that the chain verifies`)
+    } else if (chains === 0) {
+      fail('T-C3-4', 'public.audit_verify_chain() returned NO chain to verify after the governed save; an empty verification result is not a verified chain')
+    } else if (notOk > 0) {
+      fail('T-C3-4', `${notOk} of ${chains} chain(s) did not report ok = true after the governed save`)
+    } else if (headsUnchecked > 0) {
+      fail('T-C3-4', `${headsUnchecked} of ${chains} chain(s) verified without covering their head event`)
+    } else if (checked === 0) {
+      fail('T-C3-4', 'public.audit_verify_chain() checked ZERO events after the governed save; nothing was actually verified')
+    } else if (events === 0) {
+      fail('T-C3-4', 'the governed save committed NO audit event, so there was nothing for the chain verifier to prove')
+    } else if (checked !== events) {
+      fail('T-C3-4', `the chain verifier checked ${checked} event(s) but public.audit_events holds ${events}; the verification did not cover every committed event`)
     } else {
-      pass('T-C3-4', 'the SAME authenticated caller, through the composer, committed one observation, nine ratings and EXACTLY ONE report shell at observation_saved (lock_version 2) in one transaction, and the audit chain verifies')
+      pass('T-C3-4', `the SAME authenticated caller, through the composer, committed one observation, nine ratings and EXACTLY ONE report shell at observation_saved (lock_version 2) in one transaction, and public.audit_verify_chain() returned ${chains} chain(s), ALL ok with their head included, checking ${checked} event(s) -- reconciled exactly against the ${events} row(s) in public.audit_events`)
     }
   }
 
@@ -558,10 +611,23 @@ async function postgrestLeg() {
   const succeeded = results.filter((r) => r.code === 'SUCCESS')
   const codes = new Set(results.map((r) => r.code))
   const messages = new Set(results.map((r) => r.message))
+  /*
+   * The denial CODE is asserted, not merely its identity across the three
+   * roles. This leg's PASS string claims a specific refusal, so the specific
+   * refusal has to be measured: PostgREST surfaces the SQLSTATE verbatim as
+   * `error.code`, and the ratified refusal for a caller holding no EXECUTE is
+   * 42501 insufficient_privilege -- the SAME code T-C3-2 and T-C3-6 pin on the
+   * in-database channel. Accepting "any one shared code" would have passed on
+   * a schema-cache miss (PGRST202) or on any other uniform failure, which is
+   * not the closure this leg reports.
+   */
+  const EXPECTED_DENIAL = '42501'
   if (succeeded.length > 0) {
     fail('T-C3-8', `the old RPC is STILL reachable over HTTP for: ${succeeded.map((r) => r.who).join(', ')}`)
   } else if (codes.size !== 1 || messages.size !== 1) {
     fail('T-C3-8', `the three roles received different HTTP answers (${results.map((r) => `${r.who}=${r.code}`).join(', ')}), so the denial discloses the caller`)
+  } else if (!codes.has(EXPECTED_DENIAL)) {
+    fail('T-C3-8', `the three roles were each refused with ${[...codes][0]}, not the expected ${EXPECTED_DENIAL} insufficient_privilege; a uniform answer that is not the privilege refusal does not demonstrate the closure`)
   } else if (before !== after) {
     fail('T-C3-8', `the canonical census moved across the HTTP leg (${before} -> ${after})`)
   } else {
