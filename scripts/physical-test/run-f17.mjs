@@ -379,12 +379,21 @@ NON-CREDENTIAL ENVIRONMENT (all optional; none may carry a secret)
   CHROME_PATH                  headless Chrome binary
 
 ABORTING
-  Press Ctrl+C at any point, including at a password prompt. The run stops,
-  the server and the browser are killed, both ports are then verified released
-  by re-binding them, H-1 is recorded from that verification, the gate ledger
-  is written with whatever was decided, and nothing captured is printed. The
-  exit code is 130. The abort path does not wait for the run to settle: it is
-  the same teardown the normal path uses, and it runs exactly once.
+  Press Ctrl+C at any point, including at a password prompt. The run stops and
+  nothing captured is printed. The exit code is 130. The abort path does not
+  wait for the run to settle: it is the same teardown the normal path uses,
+  and it runs exactly once.
+
+  If this run had already claimed its ports or started anything, the server
+  and the browser are killed, both ports are then verified released by
+  re-binding them, H-1 is recorded from that verification, and the gate ledger
+  is written with whatever was decided. The ledger is not closed until that
+  verification has finished, so the recorded H-1 is the verified one.
+
+  If the signal arrives BEFORE anything was acquired — during the guards, the
+  identity preflight or G-20 — there is nothing to stop and nothing to verify.
+  H-1 is then not recorded and no ledger is written, so an early abort cannot
+  overwrite the evidence pack's existing ledger with an empty one.
 `
 
 function parseArgs(argv) {
@@ -2160,13 +2169,48 @@ async function main() {
  */
 const teardownState = { appPort: null, debugPort: null, socket: null, context: null }
 
-let toreDown = false
+/**
+ * Did this run ever acquire anything H-1 could be about? A port is "acquired"
+ * the moment it is CHOSEN, because from then on this run is the one that would
+ * be holding it. `stopEverything()` clears `owned.server`/`owned.chrome`, so
+ * this must be read BEFORE teardown runs, never after.
+ *
+ * When the answer is no — a signal during the guards, the identity preflight
+ * or G-20 — there is no server, no browser and no port, so there is nothing to
+ * stop and nothing to verify. H-1 is then not recorded at all: "there was
+ * never anything to hold" is a different statement from "what was held is
+ * released", and only the second one is a hygiene verdict.
+ */
+function acquiredSomething() {
+  return (
+    teardownState.appPort !== null ||
+    teardownState.debugPort !== null ||
+    teardownState.socket !== null ||
+    owned.server !== null ||
+    owned.chrome !== null ||
+    owned.serverPid !== null ||
+    owned.chromePid !== null
+  )
+}
 
-async function teardownAndVerify() {
-  if (toreDown) return
-  toreDown = true
+/**
+ * Teardown runs exactly once, and every later caller gets THE SAME promise
+ * rather than an instant `undefined`. That is what lets `finishRun()` wait for
+ * a verification that is still in flight instead of closing the ledger over
+ * the top of it — the abort path's H-1 is computed and then actually used.
+ */
+let teardownPromise = null
 
+function teardownAndVerify() {
+  if (teardownPromise === null) teardownPromise = runTeardownAndVerify()
+  return teardownPromise
+}
+
+async function runTeardownAndVerify() {
+  const acquired = acquiredSomething()
   const { appPort, debugPort, socket } = teardownState
+  if (!acquired) return
+
   try {
     socket?.close()
   } catch {
@@ -2194,15 +2238,43 @@ async function teardownAndVerify() {
 }
 
 /**
- * The single end-of-run routine: close every undecided gate, print the ledger
- * and write it. It runs exactly once, on the normal path AND on the signal
- * path, which is what makes the abort documentation true.
+ * The single end-of-run routine: wait for any teardown still in flight, close
+ * every undecided gate, print the ledger and write it. It runs exactly once,
+ * on the normal path AND on the signal path, which is what makes the abort
+ * documentation true — and, like teardown, every later caller gets the SAME
+ * promise, so whichever path exits cannot exit before the ledger is on disk.
  */
-let ledgerFinished = false
+let finishPromise = null
 function finishRun() {
-  if (ledgerFinished) return
-  ledgerFinished = true
-  if (ledger.size === 0) return
+  if (finishPromise === null) finishPromise = runFinish()
+  return finishPromise
+}
+
+async function runFinish() {
+  /*
+   * A teardown started by the abort path is still computing H-1 while `main`'s
+   * tail arrives here. Closing the ledger now would stamp H-1 NOT-RUN and
+   * write the file, and the real verdict — already computed — would be
+   * discarded. So wait for it. A teardown that threw must not stop the ledger
+   * from being written; closeLedger() then records H-1 as NOT-RUN, never PASS.
+   */
+  if (teardownPromise !== null) {
+    try {
+      await teardownPromise
+    } catch {
+      // Teardown failure is not a reason to lose the rest of the ledger.
+    }
+  }
+
+  /*
+   * "Nothing to write" is decided from the gates this run actually DECIDED,
+   * read here BEFORE closeLedger() fills the map with NOT-RUN defaults. A run
+   * that decided nothing — an abort before anything was acquired — writes no
+   * file at all, and so cannot overwrite the evidence pack's existing ledger
+   * with an empty one.
+   */
+  const decidedGates = ledger.size
+  if (decidedGates === 0) return
 
   closeLedger('not reached: the run ended before this gate could be decided')
   printLedger()
@@ -2226,7 +2298,11 @@ let interrupted = false
  * ports are released, record H-1 from that verification, close and write the
  * ledger, then exit 130. It does not merely kill and hope — and it does not
  * depend on `main` ever settling, which it may not if the browser has stopped
- * answering.
+ * answering. `finishRun()` waits for the verification above, so the H-1 this
+ * path computes is the H-1 the ledger reports, whichever path gets here first.
+ *
+ * If nothing was ever acquired, teardown records no H-1 and `finishRun()`
+ * writes no ledger — an early Ctrl+C leaves the evidence pack untouched.
  */
 async function abortAndExit() {
   try {
@@ -2235,7 +2311,7 @@ async function abortAndExit() {
     // Teardown must never mask the abort, and never surfaces captured output.
   }
   try {
-    finishRun()
+    await finishRun()
   } catch {
     // Neither must the ledger.
   }
@@ -2270,11 +2346,9 @@ main()
   })
   .then(async () => {
     // Teardown runs whether main resolved, threw, or was never reached.
-    if (owned.server !== null || owned.chrome !== null || teardownState.appPort !== null) {
-      await teardownAndVerify()
-    }
+    if (acquiredSomething()) await teardownAndVerify()
 
-    finishRun()
+    await finishRun()
     const failed = [...ledger.values()].filter((entry) => entry.verdict === 'FAIL').length
     if (failed > 0 && process.exitCode !== 130) process.exitCode = 1
   })
