@@ -16,6 +16,7 @@
     "physical-test:f17-disposable": "node scripts/physical-test/run-f17-disposable.mjs",
     "physical-test:f17-isolation": "node scripts/physical-test/prove-disposable-isolation.mjs",
     "physical-test:f17-app": "node scripts/physical-test/prove-disposable-app.mjs",
+    "physical-test:f17-linkage": "node scripts/physical-test/prove-disposable-identity-linkage.mjs",
     "test:runtime-profile": "node scripts/tests/config/run-runtime-profile.mjs"
   },
   "dependencies": {

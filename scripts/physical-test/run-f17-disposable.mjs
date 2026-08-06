@@ -121,6 +121,7 @@ import {
   SafeError,
   assertCanonicalConfigUntouched,
   assertCanonicalPristine,
+  assertDisposableIdentityLinkage,
   assertNoCollision,
   assertPortFree,
   captureDisposableStatus,
@@ -136,6 +137,7 @@ import {
   portAnswers,
   psqlFileStdout,
   psqlRows,
+  readBoolean,
   readCanonical,
   readDisposableCensus,
   resolveLocalCli,
@@ -727,15 +729,26 @@ async function createDisposableIdentities(admin, secrets) {
  * or reordered — it is executed verbatim, and only the disposable database
  * is touched.
  *
- * THE RE-POINT IS READ BACK, NOT ASSERTED. The previous verification counted
- * accounts joined to `auth.users` and required 3 — a number that is 3 whether
- * or not the UPDATE matched a single row, because the fixture creates those
- * three links itself. So it proved the fixture had loaded and proved NOTHING
- * about the re-point. It now reads the ACTUAL `normalized_email` of each of
- * the three account rows and requires it to equal that identity's disposable
- * address exactly; a re-point that silently matched no row now stops the run.
- * The failure messages name the ROLE only and never echo a value read back
- * from the database.
+ * THE RE-POINT IS READ BACK, NOT ASSERTED. Counting accounts joined to
+ * `auth.users` and requiring 3 proves only that the fixture loaded: the
+ * fixture creates those three links itself, so the count is 3 whether or not
+ * the UPDATE matched a single row. The read-back below therefore reads the
+ * ACTUAL stored values, one row per identity.
+ *
+ * THE READ-BACK ITSELF WAS DEFECTIVE AND IS NOW FIXED. It asked psql for
+ * `(u.id IS NOT NULL)::text` and tested the field against `'t'`. Under
+ * `--tuples-only --no-align` a BARE boolean renders `t`, but an EXPLICIT
+ * `::text` cast renders `true` — so that test was false for EVERY row on
+ * EVERY run, and the FIRST identity in `DISPOSABLE_IDENTITIES` (the Trainer)
+ * was reported unlinked even when all three links were perfect. The remedy
+ * is not to relax the assertion. The whole check now lives in
+ * `assertDisposableIdentityLinkage()`, shared with its autonomous regression
+ * proof, and it no longer asks the weak question "is anything joined?": it
+ * requires each row to carry the EXACT expected Auth id, to resolve to the
+ * auth.users row bearing that role's disposable address, to hold the right
+ * active role and centre, and it requires the three ids to be distinct with
+ * no dangling row anywhere. Failure messages name the ROLE and a structural
+ * fact only, and never echo a value read back from the database.
  */
 function seedDisposableDomain() {
   psqlFileStdout(DISPOSABLE_DB_CONTAINER, join(REPO_ROOT, 'scripts', 'fixtures', 'local_fixtures.sql'), {
@@ -748,51 +761,12 @@ function seedDisposableDomain() {
   ).join('\n')
   psqlRows(DISPOSABLE_DB_CONTAINER, `BEGIN;\n${updates}\nCOMMIT;\nSELECT 1;`)
 
-  const linked = psqlRows(
-    DISPOSABLE_DB_CONTAINER,
-    'SELECT count(*) FROM public.accounts a JOIN auth.users u ON u.id = a.auth_user_id;',
-  )[0]?.[0]
-  if (linked !== String(DISPOSABLE_IDENTITIES.length)) {
-    throw new SafeError(
-      `Only ${linked ?? 'an unreadable number of'} disposable account rows are linked to an Auth user; ` +
-        `${DISPOSABLE_IDENTITIES.length} are required.`,
-    )
-  }
-
-  // READ BACK the actual stored addresses, one row per identity, and require
-  // each to be the disposable one. An account id is a committed, non-secret
-  // fixture literal and an address is a synthetic .example.test literal
-  // authored in this repository, so nothing read here is a credential.
-  const readBack = new Map(
-    psqlRows(
-      DISPOSABLE_DB_CONTAINER,
-      'SELECT a.id::text, a.normalized_email, (u.id IS NOT NULL)::text ' +
-        'FROM public.accounts a LEFT JOIN auth.users u ON u.id = a.auth_user_id;',
-    )
-      .filter((row) => row.length === 3)
-      .map((row) => [row[0], { email: row[1], linkedToAuth: row[2] === 't' }]),
-  )
-  const repointed = []
-  for (const identity of DISPOSABLE_IDENTITIES) {
-    const row = readBack.get(identity.accountId)
-    if (row === undefined) {
-      throw new SafeError(`The ${identity.label} disposable account row was not found after the fixture load.`)
-    }
-    if (row.email !== identity.email) {
-      throw new SafeError(
-        `The ${identity.label} disposable account row does not carry its disposable address after the re-point. ` +
-          'The stored value is deliberately not reported. The UPDATE matched no row, or matched the wrong one.',
-      )
-    }
-    if (!row.linkedToAuth) {
-      throw new SafeError(`The ${identity.label} disposable account row is not linked to a disposable Auth user.`)
-    }
-    repointed.push(identity.key)
-  }
-  if (repointed.length !== DISPOSABLE_IDENTITIES.length) {
-    throw new SafeError('Not every disposable account row was verified by read-back.')
-  }
-  return { repointed: repointed.length }
+  // READ BACK the actual stored values, one row per identity, and require
+  // each to be the expected one. FAILS CLOSED. An account id is a committed,
+  // non-secret fixture literal and an address is a synthetic .example.test
+  // literal authored in this repository, so nothing read here is a credential.
+  const linkage = assertDisposableIdentityLinkage()
+  return { repointed: linkage.measured.rows, measured: linkage.measured }
 }
 
 /**
@@ -1369,9 +1343,15 @@ async function main() {
   const auditEventRows = Number(auditEventRowsRaw)
   const auditEventRowsKnown = Number.isInteger(auditEventRows)
   const eventsChecked = chainRows.reduce((total, row) => total + (Number(row[2]) || 0), 0)
-  const corrupt = chainRows.filter((row) => row[1] !== 't')
+  // `ok::text` and `head_checked::text` are EXPLICIT casts, so psql renders
+  // them `true`/`false`, never `t`/`f`. Comparing them against `'t'` — the
+  // same defect that broke the identity read-back — would have classed every
+  // healthy chain as corrupt the moment this gate stopped being NOT-RUN.
+  // `readBoolean` returns null for an unreadable field, and a field that was
+  // not measured is treated as NOT ok rather than quietly as ok.
+  const corrupt = chainRows.filter((row) => readBoolean(row[1]) !== true)
   const partial = chainRows.filter((row) => row[3] !== 'complete')
-  const headsUnchecked = chainRows.filter((row) => row[6] !== 't')
+  const headsUnchecked = chainRows.filter((row) => readBoolean(row[6]) !== true)
 
   if (chainRows.length === 0 || eventsChecked === 0 || !auditEventRowsKnown || auditEventRows === 0) {
     gate(

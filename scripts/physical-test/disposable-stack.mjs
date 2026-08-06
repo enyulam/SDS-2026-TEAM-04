@@ -380,6 +380,26 @@ export function psqlRows(container, sql) {
     .map((line) => line.split('|'))
 }
 
+/**
+ * Read a PostgreSQL boolean out of a `psql` field.
+ *
+ * `--tuples-only --no-align` renders a BARE boolean as `t`/`f`, but an
+ * EXPLICIT `::text` cast renders it as `true`/`false`. Both spellings occur
+ * in the queries this repository issues, and a reader that accepted only one
+ * of them would silently treat every measured `true` as `false` — an absence
+ * of evidence dressed up as evidence of absence. That is not hypothetical:
+ * it is the defect this helper exists to make unrepeatable.
+ *
+ * Anything that is neither spelling returns `null`, so an UNREADABLE field
+ * can never be mistaken for a measured `false`. Callers must therefore test
+ * `=== true` / `=== false` and treat `null` as "not measured".
+ */
+export function readBoolean(field) {
+  if (field === 't' || field === 'true') return true
+  if (field === 'f' || field === 'false') return false
+  return null
+}
+
 export function psqlFileStdout(container, absolutePath, psqlVars = {}) {
   if (!existsSync(absolutePath)) throw new SafeError('A required SQL file is missing.')
   const args = ['exec', '-i', container, ...PSQL_PREFIX]
@@ -1070,4 +1090,177 @@ export function readDisposableCensus() {
     auditEvents: Number(fields[6]),
     authUsers: Number(fields[8]),
   }
+}
+
+// ---------------------------------------------------------------------
+// Disposable identity linkage. ONE implementation, shared by the
+// interactive runner and by its autonomous regression proof, so what is
+// proven is the code that actually ships.
+// ---------------------------------------------------------------------
+
+/**
+ * The committed fixture's single centre. `public.centre_memberships` is the
+ * SOLE authority for role, so the linkage check reads role and centre from
+ * there and not from the account row.
+ */
+export const FIXTURE_CENTRE_ID = 'b0000000-0000-4000-8000-000000000001'
+
+/**
+ * MEASURE the disposable identity linkage. Nothing here is asserted from the
+ * absence of a throw: every clause below is a value read back out of the
+ * DISPOSABLE database and compared to an expectation authored in this file.
+ *
+ * WHY THIS EXISTS. The previous per-row read-back asked psql for
+ * `(u.id IS NOT NULL)::text` and then tested the field against `'t'`. An
+ * explicit `::text` cast of a boolean renders `true`, never `t`, so that
+ * test was false for EVERY row on EVERY run — including runs whose linkage
+ * was perfect. It reported the FIRST identity in `DISPOSABLE_IDENTITIES` as
+ * unlinked and stopped the run before authentication. The remedy is not to
+ * relax the assertion: it is to read the data correctly and then ask MORE of
+ * it. This function no longer asks the weak question "is anything joined?"
+ * at all. It requires each account row to carry the EXACT expected Auth id.
+ *
+ * Returns { ok, failures, measured }. `failures` holds authored strings that
+ * name a ROLE and a STRUCTURAL fact only; no address, id, token or Auth
+ * error object is ever placed in one.
+ */
+export function verifyDisposableIdentityLinkage() {
+  const expectedCount = DISPOSABLE_IDENTITIES.length
+  const failures = []
+
+  const counts = psqlRows(
+    DISPOSABLE_DB_CONTAINER,
+    'SELECT (SELECT count(*) FROM public.accounts)::text, ' +
+      '(SELECT count(*) FROM auth.users)::text, ' +
+      '(SELECT count(DISTINCT auth_user_id) FROM public.accounts)::text, ' +
+      '(SELECT count(*) FROM public.accounts WHERE auth_user_id IS NULL)::text, ' +
+      '(SELECT count(*) FROM public.accounts a LEFT JOIN auth.users u ON u.id = a.auth_user_id ' +
+      'WHERE u.id IS NULL)::text;',
+  )[0]
+  if (!Array.isArray(counts) || counts.length !== 5) {
+    throw new SafeError('The disposable identity-linkage census did not return the expected 5 fields.')
+  }
+  const measured = {
+    accounts: Number(counts[0]),
+    authUsers: Number(counts[1]),
+    distinctAuthIds: Number(counts[2]),
+    accountsWithoutAuthId: Number(counts[3]),
+    danglingAccounts: Number(counts[4]),
+    rows: 0,
+  }
+
+  if (measured.accounts !== expectedCount) {
+    failures.push(`public.accounts holds ${measured.accounts} row(s); exactly ${expectedCount} are required`)
+  }
+  if (measured.authUsers !== expectedCount) {
+    failures.push(`auth.users holds ${measured.authUsers} row(s); exactly ${expectedCount} are required`)
+  }
+  if (measured.distinctAuthIds !== expectedCount) {
+    failures.push(
+      `the account rows reference ${measured.distinctAuthIds} DISTINCT Auth id(s); ${expectedCount} are required, ` +
+        'so two roles would otherwise share one identity',
+    )
+  }
+  if (measured.accountsWithoutAuthId !== 0) {
+    failures.push(`${measured.accountsWithoutAuthId} account row(s) carry no auth_user_id at all`)
+  }
+  if (measured.danglingAccounts !== 0) {
+    failures.push(
+      `${measured.danglingAccounts} account row(s) point at an auth.users id that does not exist on this stack`,
+    )
+  }
+
+  const rows = new Map(
+    psqlRows(
+      DISPOSABLE_DB_CONTAINER,
+      'SELECT a.id::text, a.normalized_email, COALESCE(a.auth_user_id::text, \'none\'), ' +
+        "COALESCE(u.id::text, 'none'), COALESCE(u.email, 'none'), COALESCE(m.role::text, 'none'), " +
+        "COALESCE(m.centre_id::text, 'none') " +
+        'FROM public.accounts a ' +
+        'LEFT JOIN auth.users u ON u.id = a.auth_user_id ' +
+        "LEFT JOIN public.centre_memberships m ON m.account_id = a.id AND m.status = 'active' " +
+        'ORDER BY a.id;',
+    )
+      .filter((row) => row.length === 7)
+      .map((row) => [
+        row[0],
+        { email: row[1], accountAuthId: row[2], authUserId: row[3], authEmail: row[4], role: row[5], centre: row[6] },
+      ]),
+  )
+  measured.rows = rows.size
+  if (rows.size !== expectedCount) {
+    failures.push(`the per-row linkage read returned ${rows.size} readable row(s); ${expectedCount} are required`)
+  }
+
+  const seenAuthIds = new Set()
+  for (const identity of DISPOSABLE_IDENTITIES) {
+    const row = rows.get(identity.accountId)
+    if (row === undefined) {
+      failures.push(`the ${identity.label} account row was not found after the fixture load`)
+      continue
+    }
+    if (row.email !== identity.email) {
+      failures.push(
+        `the ${identity.label} account row does not carry its disposable address after the re-point ` +
+          '(the stored value is deliberately not reported)',
+      )
+    }
+    if (row.accountAuthId !== identity.authId) {
+      failures.push(
+        `the ${identity.label} account row's auth_user_id is not the id created for the ${identity.label} ` +
+          'disposable Auth user',
+      )
+    }
+    if (row.authUserId !== identity.authId) {
+      failures.push(
+        `the ${identity.label} account row does not resolve to the ${identity.label} disposable auth.users row`,
+      )
+    }
+    if (row.authEmail !== identity.email) {
+      failures.push(
+        `the auth.users row the ${identity.label} account resolves to does not carry the ${identity.label} ` +
+          'disposable address, so it is not the identity this run created',
+      )
+    }
+    if (row.role !== identity.role) {
+      failures.push(`the ${identity.label} account has no ACTIVE centre_memberships row with the ${identity.role} role`)
+    }
+    if (row.centre !== FIXTURE_CENTRE_ID) {
+      failures.push(`the ${identity.label} account's active membership is not in the committed fixture centre`)
+    }
+    seenAuthIds.add(row.authUserId)
+  }
+  if (seenAuthIds.size !== expectedCount) {
+    failures.push(
+      `the ${expectedCount} roles resolved to ${seenAuthIds.size} distinct auth.users id(s); they must not be shared`,
+    )
+  }
+
+  // No account row may point anywhere OUTSIDE the intended disposable set.
+  const expectedIds = new Set(DISPOSABLE_IDENTITIES.map((identity) => identity.authId))
+  for (const [accountId, row] of rows) {
+    if (!expectedIds.has(row.accountAuthId)) {
+      const known = DISPOSABLE_IDENTITIES.some((identity) => identity.accountId === accountId)
+      failures.push(
+        `${known ? 'a known' : 'an unexpected'} account row points at an Auth id outside the intended ` +
+          'disposable set',
+      )
+    }
+  }
+
+  return { ok: failures.length === 0, failures, measured }
+}
+
+/**
+ * The same measurement, failing CLOSED. One authored message, roles only.
+ */
+export function assertDisposableIdentityLinkage() {
+  const report = verifyDisposableIdentityLinkage()
+  if (!report.ok) {
+    throw new SafeError(
+      `The disposable account rows are not correctly linked to this run's disposable Auth users: ` +
+        `${report.failures.join('; ')}.`,
+    )
+  }
+  return report
 }
