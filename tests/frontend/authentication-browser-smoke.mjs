@@ -5,10 +5,17 @@
  * F3 AUTH-01 Trainer, F10 AUTH-02 Management, F13 AUTH-03 Parent.
  *
  * These assertions are about presentation, accessibility, non-disclosure and the absolute
- * rule that the `role` query grants nothing. They assert no authentication behaviour,
- * because real Supabase Auth is not wired on this branch.
+ * rule that the `role` query grants nothing.
  *
- * No credential is ever typed, read, stored or captured by this suite.
+ * Updated at F16-A, where the credential fields became enabled and the primary action became
+ * a real submit control inside a real form bound to `signInFormAction`. The suite therefore
+ * now asserts the SHAPE of that form — a real `<form>`, a real submit button, no hidden role
+ * input, no destination anywhere in the markup — and asserts that nothing on the page can
+ * pick a post-sign-in destination from the `role` query.
+ *
+ * NO CREDENTIAL IS EVER TYPED, READ, STORED OR CAPTURED BY THIS SUITE, and none is needed:
+ * every assertion here holds WITHOUT a valid password. The suite never attempts a sign-in,
+ * because a successful sign-in is not what is under test — non-disclosure is.
  */
 
 import { spawn } from "node:child_process";
@@ -380,22 +387,61 @@ for (const testCase of roleCases) {
     `${testCase.label}: the no-authority notice is missing`,
   );
 
-  // Credential entry stays disabled while real authentication is not wired.
+  // Credential entry is enabled and posts to the real server action (F16-A).
   assert(
-    await evaluate(`document.querySelector('input[type="email"]').disabled === true`),
-    `${testCase.label}: the email field must remain disabled`,
+    await evaluate(`document.querySelector('input[type="email"]').disabled === false`),
+    `${testCase.label}: the email field must be enabled`,
   );
   assert(
-    await evaluate(`document.querySelector('input[type="password"]').disabled === true`),
-    `${testCase.label}: the password field must remain disabled`,
+    await evaluate(`document.querySelector('input[type="password"]').disabled === false`),
+    `${testCase.label}: the password field must be enabled`,
   );
-
-  // The fixture entry point targets this role's workspace and no other.
+  assert(
+    await evaluate(`
+      (() => {
+        const form = document.querySelector('form[data-auth-form="sign-in"]');
+        if (!form) return false;
+        const submit = form.querySelector('[data-auth-submit]');
+        return !!submit && submit.tagName === 'BUTTON' && submit.type === 'submit';
+      })()
+    `),
+    `${testCase.label}: the primary action must be a real submit control inside a real form`,
+  );
   assert(
     await evaluate(
-      `new URL(document.querySelector('[data-fixture-entry]').href).pathname === '${testCase.home}'`,
+      `document.querySelector('[data-auth-submit]').innerText.trim() === 'Sign in'`,
     ),
-    `${testCase.label}: the fixture entry must target ${testCase.home}`,
+    `${testCase.label}: the primary action must read "Sign in", matching the frozen frame`,
+  );
+
+  // The form carries no destination and no role: the server chooses where a successful
+  // sign-in lands, from the membership row it derived (A-046).
+  assert(
+    await evaluate(`
+      (() => {
+        const form = document.querySelector('form[data-auth-form="sign-in"]');
+        const names = [...form.elements].map((el) => el.name).filter(Boolean).sort();
+        return JSON.stringify(names) === JSON.stringify(['email', 'password']);
+      })()
+    `),
+    `${testCase.label}: the sign-in form must submit exactly email and password`,
+  );
+  assert(
+    await evaluate(`!document.querySelector('form[data-auth-form="sign-in"] input[type="hidden"]')`),
+    `${testCase.label}: the sign-in form must carry no hidden field`,
+  );
+  assert(
+    await evaluate(`!document.querySelector('[data-fixture-entry]')`),
+    `${testCase.label}: the fixture entry point must be gone — sign-in is real`,
+  );
+  assert(
+    await evaluate(`
+      (() => {
+        const targets = [...document.querySelectorAll('a[href]')].map((a) => new URL(a.href).pathname);
+        return ['/trainer', '/management', '/parent'].every((home) => !targets.includes(home));
+      })()
+    `),
+    `${testCase.label}: no portal destination may be reachable before authentication`,
   );
 
   // Non-disclosure: no roster, report, child, lifecycle or role-power datum before
@@ -457,7 +503,7 @@ for (const testCase of roleCases) {
         top('input[type="email"]'),
         top('input[type="password"]'),
         top('input[type="checkbox"]'),
-        top('[data-fixture-entry]'),
+        top('[data-auth-submit]'),
       ];
       return marks.every((value, index) => index === 0 || value > marks[index - 1]);
     })()
@@ -479,10 +525,36 @@ for (const testCase of roleCases) {
   // Keyboard reachability: the role segments and the primary action are focusable.
   assert(
     await evaluate(`
-      [...document.querySelectorAll('[data-role-segment], [data-fixture-entry]')]
+      [...document.querySelectorAll('[data-role-segment], [data-auth-submit]')]
         .every((el) => el.tabIndex >= 0 || el.tagName === 'A')
     `),
     `${testCase.label}: role segments and the primary action must be keyboard reachable`,
+  );
+
+  // "Remember me" claims no behaviour: it is disabled and contributes nothing to the form.
+  // Session lifetime belongs to the approved @supabase/ssr session (A-045).
+  assert(
+    await evaluate(`
+      (() => {
+        const box = document.querySelector('input[type="checkbox"]');
+        return !!box && box.disabled === true && box.name === '';
+      })()
+    `),
+    `${testCase.label}: Remember me must stay non-interactive and unsubmitted`,
+  );
+  // "Forgot password?" is inert text — no recovery workflow exists to link to.
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('a[href]')]
+        .every((a) => !a.innerText.toLowerCase().includes('forgot password'))
+    `),
+    `${testCase.label}: Forgot password? must not be a link — no recovery workflow exists`,
+  );
+
+  // No error state is rendered before any attempt is made.
+  assert(
+    await evaluate(`!document.querySelector('[data-auth-error]')`),
+    `${testCase.label}: no failure message may render before an attempt`,
   );
 
   // The region carries a role-specific accessible name, so the three variants are
@@ -512,7 +584,9 @@ for (const testCase of roleCases) {
   );
 
   screenshots.push(await screenshot(testCase.shot));
-  record(`${testCase.label}: selection state, non-disclosure, disabled credentials, entry target`);
+  record(
+    `${testCase.label}: selection state, non-disclosure, enabled credentials, real sign-in form, no destination in the DOM`,
+  );
 }
 
 /* ---------------------------------------------------------------------------
@@ -548,7 +622,7 @@ assert(
 assert(
   await evaluate(`
     (() => {
-      const el = document.querySelector('[data-fixture-entry]');
+      const el = document.querySelector('[data-auth-submit]');
       el.focus();
       const style = getComputedStyle(el, ':focus-visible');
       return document.activeElement === el && style.outlineStyle !== 'none';
@@ -578,10 +652,13 @@ for (const path of ["/login", "/login?role=admin", "/login?role=management%20tra
     `${path}: an unrecognised role must fall back to the Trainer presentation`,
   );
   assert(
-    await evaluate(
-      `new URL(document.querySelector('[data-fixture-entry]').href).pathname === '/trainer'`,
-    ),
-    `${path}: the fallback must not target another role's workspace`,
+    await evaluate(`
+      (() => {
+        const targets = [...document.querySelectorAll('a[href]')].map((a) => new URL(a.href).pathname);
+        return ['/trainer', '/management', '/parent'].every((home) => !targets.includes(home));
+      })()
+    `),
+    `${path}: a malformed role query must not expose any portal destination`,
   );
 }
 record("unknown, absent and malformed role queries fall back and grant nothing");
@@ -614,11 +691,19 @@ for (const role of ["parent", "trainer", "management", "parent"]) {
     ),
     `role switch: switching to ${role} must not leave a second role selected`,
   );
+  // The sharpest F16-A form of A-046: the role query changes the presentation but can no
+  // longer change any destination, because the page holds no destination at all.
   assert(
-    await evaluate(
-      `new URL(document.querySelector('[data-fixture-entry]').href).pathname === '/${role}'`,
-    ),
-    `role switch: the entry point must follow the presentation to /${role}`,
+    await evaluate(`
+      (() => {
+        const form = document.querySelector('form[data-auth-form="sign-in"]');
+        const names = [...form.elements].map((el) => el.name).filter(Boolean).sort();
+        const links = [...document.querySelectorAll('a[href]')].map((a) => new URL(a.href).pathname);
+        return JSON.stringify(names) === JSON.stringify(['email', 'password']) &&
+          ['/trainer', '/management', '/parent'].every((home) => !links.includes(home));
+      })()
+    `),
+    `role switch: /login?role=${role} must expose no destination and submit no role`,
   );
   // Nothing is persisted by walking the query — no session, role, credential or grant.
   assert(
@@ -656,7 +741,7 @@ for (const width of [1440, 1024, 900, 480]) {
   assert(
     await evaluate(`
       (() => {
-        const el = document.querySelector('[data-fixture-entry]');
+        const el = document.querySelector('[data-auth-submit]');
         const box = el.getBoundingClientRect();
         return box.height >= 44 && box.left >= 0 && box.right <= window.innerWidth + 1;
       })()

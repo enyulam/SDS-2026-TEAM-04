@@ -646,7 +646,7 @@ try {
 
   await navigate("/login?role=management");
   await waitUntil(
-    "document.body.innerText.includes('Frontend Round F2 fixture')",
+    "document.body.innerText.includes('Role selection is presentation only')",
     "F2 role presentation",
   );
   assert(await bodyIncludes("Selecting a role changes presentation only"), "Role query warning is missing");

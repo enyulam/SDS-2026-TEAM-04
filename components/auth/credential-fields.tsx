@@ -14,20 +14,25 @@ import { useId, useState } from "react";
  * prop and no change handler by design, so there is no code path on which a password could
  * leave the input element.
  *
- * ## Why the inputs are disabled
+ * ## The credential fields are enabled (F16-A)
  *
- * Real Supabase Auth sign-in is delivered on `feat/48h-backend` and is **not** wired into
- * this frontend branch. Presenting an enabled credential form that authenticates nothing
- * would invite a real password into a field that goes nowhere. The delivered behaviour —
- * disabled inputs plus an explicit note — is therefore preserved, and the disabled state is
- * one the frozen frames' own state inventory calls for. Enabling these fields is
- * FRONTEND RECONSTRUCTION F16 (real adapter and route integration), not an authentication
- * checkpoint.
+ * Until F16 these two inputs defaulted to `disabled`, because real Supabase Auth sign-in
+ * lived only on `feat/48h-backend` and an enabled form would have invited a real password
+ * into a field that went nowhere. That is no longer true: `signInAction` performs the real
+ * local Supabase Auth password sign-in, so the fields default to ENABLED and the form posts
+ * to it. The `disabled` prop is retained — a caller that has no wired action can still pass
+ * `disabled` explicitly — it simply no longer defaults to `true`.
+ *
+ * `required` follows the enabled state, so the browser's own constraint validation prompts
+ * for an empty field without the server having to say which field was empty.
+ *
+ * The password remains uncontrolled: it goes input → FormData → `signInAction` and reaches
+ * no other code path.
  */
 
 export function EmailField({
   placeholder,
-  disabled = true,
+  disabled = false,
   describedBy,
 }: {
   readonly placeholder: string;
@@ -47,6 +52,7 @@ export function EmailField({
         autoComplete="username"
         placeholder={placeholder}
         disabled={disabled}
+        required={!disabled}
         aria-describedby={describedBy}
         className="form-field mt-2 min-h-12"
       />
@@ -55,7 +61,7 @@ export function EmailField({
 }
 
 export function PasswordField({
-  disabled = true,
+  disabled = false,
   describedBy,
 }: {
   readonly disabled?: boolean;
@@ -79,6 +85,7 @@ export function PasswordField({
           autoComplete="current-password"
           placeholder="••••••••••"
           disabled={disabled}
+          required={!disabled}
           aria-describedby={describedBy}
           className="form-field min-h-12 pr-12"
         />
@@ -124,10 +131,21 @@ function EyeGlyph({ revealed }: { readonly revealed: boolean }) {
 /**
  * The "Remember me" / "Forgot password?" row from the frozen frames.
  *
- * Both affordances are presentation at this checkpoint: neither persists a session, and the
- * recovery link is not wired, because a recovery flow is governed by Supabase Auth and is
- * not delivered on this branch. Rendering either one authorizes nothing — screen presence is
- * not authorization (A-045).
+ * BOTH affordances stay NON-INTERACTIVE at F16-A, deliberately, and both remain visible so
+ * the reconstruction still matches the frozen frames:
+ *
+ * - **Remember me** is a `disabled` checkbox with no name, so it is never submitted and can
+ *   never influence anything. Session lifetime is owned entirely by the approved
+ *   `@supabase/ssr` cookie session; building a second, custom persistence mechanism beside it
+ *   is not authorized and is not done. An enabled checkbox here would claim a behaviour that
+ *   does not exist, which is exactly what A-045 forbids.
+ * - **Forgot password?** is inert text, not a link, unless a caller passes an explicit
+ *   `recoveryHref`. No password-recovery workflow is created by this checkpoint; recovery is
+ *   a Supabase Auth flow that has not been authorized or delivered.
+ *
+ * Each carries a visible-on-hover `title` and a screen-reader-only note stating that it is
+ * not available, so neither silently pretends to work. Rendering either one authorizes
+ * nothing — screen presence is not authorization (A-045).
  */
 export function CredentialOptionsRow({
   disabled = true,
@@ -144,10 +162,20 @@ export function CredentialOptionsRow({
           id={id}
           type="checkbox"
           disabled={disabled}
+          // No `name`: this control contributes nothing to the submitted form.
           className="size-4 shrink-0 accent-[#d6357a]"
         />
-        <label htmlFor={id} className="text-small text-ink">
+        <label
+          htmlFor={id}
+          className="text-small text-ink"
+          title={
+            disabled
+              ? "Session length is managed by the approved Supabase session. This option is not available."
+              : undefined
+          }
+        >
           Remember me
+          {disabled && <span className="sr-only"> — not available</span>}
         </label>
       </span>
       {recoveryHref ? (
@@ -160,9 +188,10 @@ export function CredentialOptionsRow({
       ) : (
         <span
           className="text-small font-bold text-ink-subtle"
-          title="Password recovery is delivered by Supabase Auth and is not wired on this branch."
+          title="Password recovery is not available here. Contact your school administrator."
         >
           Forgot password?
+          <span className="sr-only"> — not available</span>
         </span>
       )}
     </div>

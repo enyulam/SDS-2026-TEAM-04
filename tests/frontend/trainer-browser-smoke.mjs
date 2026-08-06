@@ -261,7 +261,7 @@ try {
 
   await navigate("/login?role=trainer");
   await waitUntil(
-    "document.body.innerText.includes('Frontend Round F2 fixture')",
+    "document.body.innerText.includes('Role selection is presentation only')",
     "fixture login presentation",
   );
   assert(await bodyIncludes("Selecting a role changes presentation only"), "Role presentation warning is missing");
