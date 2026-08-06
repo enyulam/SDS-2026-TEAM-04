@@ -542,7 +542,18 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
     ],
   });
   if (saved.outcome !== "success") { fail("INT-L1", `saveObservationCore gave ${saved.outcome}`); await destroyDisposable(); return; }
-  pass("INT-L1", "saveObservationCore persisted the nine-rating observation (no audit event, no report)");
+  // R-C2-1 (Round C2 Phase C2-A): the complete save is now ATOMIC and opens
+  // the report shell in the SAME transaction, so this leg's old claim of
+  // "no audit event, no report" is no longer true and has been corrected
+  // rather than left standing. The shell it opens is asserted here, and the
+  // boundary itself is proven in scripts/tests/c2.
+  if (typeof saved.data.reportId !== "string" || saved.data.reportId.length !== 36) {
+    fail("INT-L1", "the complete save did not return a real report identifier");
+  } else if (saved.data.reportStatus !== "observation_saved") {
+    fail("INT-L1", `the shell landed at ${saved.data.reportStatus}, expected observation_saved`);
+  } else {
+    pass("INT-L1", "saveObservationCore persisted the nine-rating observation AND atomically opened exactly one report shell at observation_saved, returning its real id (R-C2-1)");
+  }
 
   // L2 -- requestDraft with a provider whose output CONTRADICTS the
   // `beginning` rating: grounding must reject twice (one bounded retry) and cancel, so

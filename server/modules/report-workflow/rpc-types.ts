@@ -96,6 +96,23 @@ export interface AssessmentSaveRow {
   was_created: boolean;
 }
 
+/**
+ * R-C2-1 assessment_save_complete_and_open_report — the ATOMIC composite.
+ * One transaction: the observation write, then exactly-one-report-shell.
+ *
+ * `report_status` is typed `string` deliberately. TypeScript must never
+ * assert a transition PostgreSQL performed; the database is the authority
+ * on what state the aggregate reached.
+ */
+export interface AssessmentSaveAndOpenRow {
+  observation_id: string;
+  observation_lock_version: number;
+  report_id: string;
+  report_status: string;
+  report_lock_version: number;
+  report_created: boolean;
+}
+
 /** ASM-2 assessment_get_trainer_observation */
 export interface TrainerObservationRow {
   observation_exists: boolean;

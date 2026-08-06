@@ -100,6 +100,7 @@ import type {
   AdapterManagementReviewDto,
   AdapterParentReportListItemDto,
   AdapterRatingLevel,
+  AdapterReportStatus,
   AdapterRequestDraftInput,
   AdapterRequestDraftSuccess,
   AdapterReturnedReportQueueItemDto,
@@ -605,16 +606,17 @@ export async function adapterSaveObservation(
   });
   if (saved.outcome !== "success") return saved;
 
-  // The report position is READ BACK from the database. Saving an assessment
-  // does not advance the report lifecycle (ratified operator ruling), so a
-  // first save legitimately leaves no report at all.
-  const working = await readWorking(client, input.sessionId, input.studentId);
+  // R-C2-1: the report identifier comes back from the SAME governed call
+  // that performed the write, inside the same transaction. There is no
+  // read-back, no second round trip, and no identifier constructed here.
+  // `input.reportId` remains deliberately unread — a client-supplied report
+  // key is an unverified assertion and is never trusted on this path.
   return {
     outcome: "success",
     data: {
-      reportId: working ? working.report_id : null,
+      reportId: saved.data.reportId,
       observationLockVersion: saved.data.observationLockVersion,
-      status: working ? working.status : "no_report",
+      status: saved.data.reportStatus as AdapterReportStatus,
     },
   };
 }

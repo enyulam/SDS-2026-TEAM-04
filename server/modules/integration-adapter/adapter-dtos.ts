@@ -229,11 +229,16 @@ export interface AdapterSaveObservationInput {
 }
 
 export interface AdapterSaveObservationSuccess {
-  /** See `AdapterAssessmentDraftDto.reportId` — null until `requestDraft` creates one. */
-  readonly reportId: string | null;
+  /**
+   * R-C2-1: the REAL report identifier the governed save returned. Always
+   * present — the complete save now opens the shell atomically, in the same
+   * transaction as the observation write. Never constructed, cast or
+   * defaulted on this side of the boundary.
+   */
+  readonly reportId: string;
   readonly observationLockVersion: number;
-  /** The report status the DATABASE reports afterwards, or `no_report`. Never asserted by TypeScript. */
-  readonly status: AdapterReportStatus | "no_report";
+  /** The report status the DATABASE reports afterwards. Never asserted by TypeScript. */
+  readonly status: AdapterReportStatus;
 }
 
 export interface AdapterRequestDraftInput {

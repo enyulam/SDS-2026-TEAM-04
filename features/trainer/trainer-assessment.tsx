@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   useEffect,
   useMemo,
@@ -197,6 +197,7 @@ type AssessmentView = {
 
 export function TrainerAssessment() {
   const params = useParams<{ sessionId: string; studentId: string }>();
+  const router = useRouter();
   const port = usePhysicalTestPort();
   const { dataRevision } = usePortalRuntime();
   const [resource, setResource] = useState<ResourceState<AssessmentView>>({ kind: "loading" });
@@ -337,6 +338,23 @@ export function TrainerAssessment() {
     setSaveResult(result);
     if (result.outcome === "success") {
       setLockVersion(result.data.observationLockVersion);
+      /*
+       * R-C2-1 — the governed save now opens the report shell ATOMICALLY and
+       * returns its REAL identifier. We navigate through THAT value and only
+       * that value: it is never constructed, concatenated from the session and
+       * student, cast, defaulted or guessed here. The null branch is retained
+       * because the port contract still types the field nullable (the
+       * deterministic fixture shares this surface); a null id renders the
+       * existing success banner rather than a link to a fabricated route.
+       *
+       * A correction save deliberately does NOT auto-navigate: the correction
+       * flow's next step is the trainer edit surface, which the banner offers
+       * explicitly.
+       */
+      if (!correction && result.data.reportId !== null) {
+        router.push(`/trainer/reports/${result.data.reportId}/generate`);
+        return;
+      }
     }
   }
 

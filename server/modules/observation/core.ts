@@ -3,11 +3,13 @@
  * observation read, over the two governed assessment RPCs.
  *
  * `saveObservation` persists the observation and its NINE governed ratings
- * and NOTHING ELSE: per the ratified assessment baseline §1.3/§5.4 (and the
- * B2 task's own `requestDraft` definition), report orchestration — ensure/
- * create (RPC-1), mark observation saved (RPC-2), request drafting (RPC-3)
- * — belongs to `requestDraft`, so assessment saving never silently advances
- * the report lifecycle and emits no audit event (operator ruling, option c).
+ * AND, in the SAME database transaction, ensures that exactly ONE report
+ * shell exists for the (class_session_id, student_id) pair, returning its
+ * REAL identifier (operator ruling R-C2-1). Both durable effects belong to
+ * one RPC — `assessment_save_complete_and_open_report` — so atomicity is
+ * genuine and is never claimed across separate PostgREST calls. The shell
+ * lands at `observation_saved` with no version, no draft, no approval and
+ * no parent visibility; drafting (RPC-3) remains `requestDraft`'s.
  */
 
 import type { ActionResult } from "@/server/contracts/action-result";
@@ -21,7 +23,7 @@ import {
 } from "@/server/modules/framework/dimensions";
 import {
   firstRow,
-  type AssessmentSaveRow,
+  type AssessmentSaveAndOpenRow,
   type RpcCaller,
   type TrainerObservationRow,
 } from "@/server/modules/report-workflow/rpc-types";
@@ -49,6 +51,16 @@ export interface SaveObservationSuccess {
   readonly observationId: string;
   readonly observationLockVersion: number;
   readonly isComplete: true;
+  /**
+   * The REAL report identifier the database returned. Never null, never
+   * constructed here, never derived from the session/student pair.
+   */
+  readonly reportId: string;
+  /** The status the DATABASE reports. Never asserted by TypeScript. */
+  readonly reportStatus: string;
+  readonly reportLockVersion: number;
+  /** True when this call opened the shell; false when one already existed. */
+  readonly reportCreated: boolean;
 }
 
 function invalid(message: string, path: string): ActionResult<never> {
@@ -102,7 +114,9 @@ export async function saveObservationCore(
     }
   }
 
-  const { data, error } = await db.rpc("assessment_save_observation", {
+  // ONE rpc call, ONE transaction. The observation write and the report-shell
+  // ensure succeed together or not at all (R-C2-1).
+  const { data, error } = await db.rpc("assessment_save_complete_and_open_report", {
     p_class_session_id: input.sessionId,
     p_student_id: input.studentId,
     p_expected_observation_id: hasId ? input.expectedObservationId : null,
@@ -115,16 +129,21 @@ export async function saveObservationCore(
     p_ratings: input.ratings.map((r) => ({ dimension_code: r.dimensionCode, rating: r.rating })),
   });
   if (error) return mapSqlErrorToResult(error.code, error.message);
-  const row = firstRow<AssessmentSaveRow>(data);
-  if (!row || !row.is_complete) {
+  const row = firstRow<AssessmentSaveAndOpenRow>(data);
+  // A missing report id is a failure, NEVER a fabricated or empty identifier.
+  if (!row || !row.observation_id || !row.report_id) {
     return { outcome: "unexpected_failure", message: "The operation could not be completed." };
   }
   return {
     outcome: "success",
     data: {
       observationId: row.observation_id,
-      observationLockVersion: row.lock_version,
+      observationLockVersion: row.observation_lock_version,
       isComplete: true,
+      reportId: row.report_id,
+      reportStatus: row.report_status,
+      reportLockVersion: row.report_lock_version,
+      reportCreated: row.report_created,
     },
   };
 }
