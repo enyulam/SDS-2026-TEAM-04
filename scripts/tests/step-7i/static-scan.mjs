@@ -43,7 +43,7 @@ const body2 = stripComments(file2)
     fail('T7I-73', `${step7i.length} Step 7I migration files exist, expected exactly 2`)
   }
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql'))
-  if (all.length !== 8) fail('T7I-73', `${all.length} migration files exist, expected 8`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename
+  if (all.length !== 9) fail('T7I-73', `${all.length} migration files exist, expected 9`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver
 
   // File 1 contains ONLY the ALTER TYPE statement and the P-1 guard.
   const adds1 = body1.match(/ALTER TYPE[\s\S]*?ADD VALUE/gi) || []
@@ -319,6 +319,89 @@ const fnBodies = new Map()
     fail('T7I-74', 'file 2 restores a DEFAULT on approver_role')
   }
   if (failures === before) pass('T7I-74', 'both approval RPCs supply approver_role literally; no default is restored')
+}
+
+// ---------------------------------------------------------------------
+// T7I-R22 -- the report-context resolver migration's static posture
+// ---------------------------------------------------------------------
+// The file-level legs of the R-22 boundary: exactly ONE function and no
+// other object, SECURITY DEFINER with a pinned EMPTY search_path, EXECUTE
+// granted to `authenticated` ONLY through a signature-qualified
+// REVOKE-then-GRANT pair, and a projection of exactly two identifiers.
+// These are properties of the migration TEXT; the catalogue legs live in
+// the migration's own assertions and in the canonical fixture verifier.
+{
+  const before = failures
+  const FILE_R = '20260806190000_report_context_resolver.sql'
+  const SIG = 'public.report_resolve_context(uuid)'
+  if (!existsSync(join(MIG_DIR, FILE_R))) {
+    fail('T7I-R22', `${FILE_R} does not exist`)
+  } else {
+    const raw = readFileSync(join(MIG_DIR, FILE_R), 'utf8')
+    const src = stripComments(raw)
+
+    // (a) EXACTLY ONE function, and no other object of any kind.
+    const fns = (src.match(/^CREATE FUNCTION public\./gm) || []).length
+    if (fns !== 1) fail('T7I-R22', `the resolver migration creates ${fns} functions, expected exactly 1`)
+    if (/CREATE OR REPLACE/i.test(src)) fail('T7I-R22', 'the resolver migration replaces an existing function')
+    for (const forbidden of ['CREATE TABLE', 'CREATE TYPE', 'ALTER TYPE', 'ADD COLUMN',
+                             'DROP COLUMN', 'ADD CONSTRAINT', 'DROP CONSTRAINT',
+                             'CREATE INDEX', 'CREATE UNIQUE INDEX', 'CREATE POLICY',
+                             'CREATE TRIGGER', 'CREATE VIEW', 'CREATE EXTENSION',
+                             'CREATE SCHEMA', 'ALTER DEFAULT PRIVILEGES', 'OWNER TO']) {
+      if (src.toUpperCase().includes(forbidden)) {
+        fail('T7I-R22', `the resolver migration contains a forbidden statement: ${forbidden}`)
+      }
+    }
+    if (/GRANT[^;]*ON TABLE/i.test(src)) fail('T7I-R22', 'the resolver migration grants a table privilege')
+
+    // (b) SECURITY DEFINER, STABLE, plpgsql, pinned EMPTY search_path.
+    if (!/LANGUAGE\s+plpgsql/i.test(src)) fail('T7I-R22', 'the resolver is not plpgsql')
+    if (/LANGUAGE\s+sql\b/i.test(src)) fail('T7I-R22', 'the resolver migration contains a LANGUAGE sql body')
+    if (!/\bSECURITY DEFINER\b/.test(src)) fail('T7I-R22', 'the resolver is not SECURITY DEFINER')
+    if (!/^STABLE$/m.test(src)) fail('T7I-R22', 'the resolver is not declared STABLE')
+    if (!/SET search_path = ''/.test(src)) fail('T7I-R22', "the resolver does not pin SET search_path = ''")
+
+    // (c) the signature-qualified REVOKE-then-GRANT pair, in that order,
+    //     revoking from all four non-client grantees and granting to
+    //     `authenticated` and NOBODY else.
+    const revoke = src.indexOf(`REVOKE ALL ON FUNCTION ${SIG} FROM PUBLIC, anon, service_role, authenticator;`)
+    const grant = src.indexOf(`GRANT EXECUTE ON FUNCTION ${SIG} TO authenticated;`)
+    if (revoke < 0) fail('T7I-R22', 'the signature-qualified REVOKE from PUBLIC, anon, service_role, authenticator is missing')
+    if (grant < 0) fail('T7I-R22', 'the signature-qualified GRANT EXECUTE TO authenticated is missing')
+    if (revoke >= 0 && grant >= 0 && revoke > grant) fail('T7I-R22', 'the GRANT precedes the REVOKE')
+    const grants = (src.match(/^GRANT\b[\s\S]*?;$/gm) || [])
+    if (grants.length !== 1) fail('T7I-R22', `the resolver migration issues ${grants.length} GRANT statements, expected exactly 1`)
+    for (const g of grants) {
+      if (/\b(anon|service_role|authenticator|PUBLIC)\b/.test(g)) {
+        fail('T7I-R22', 'a GRANT names anon, service_role, authenticator or PUBLIC')
+      }
+    }
+
+    // (d) the projection is exactly two uuid identifiers, and the ONLY
+    //     parameter is the governed report identifier.
+    const sig = /CREATE FUNCTION public\.report_resolve_context\(\s*p_report_id uuid\s*\)\s*RETURNS TABLE \(\s*class_session_id uuid,\s*student_id\s+uuid\s*\)/m.test(src)
+    if (!sig) fail('T7I-R22', 'the resolver signature is not (p_report_id uuid) -> TABLE(class_session_id uuid, student_id uuid)')
+    for (const forbiddenCol of ['todays_strength', 'next_focus', 'practice_suggestion',
+                                'session_takeaway', 'content_hash', 'wording_hash',
+                                'revision_number', 'lock_version', 'centre_id']) {
+      const body = src.slice(src.indexOf('CREATE FUNCTION public.report_resolve_context'))
+      const header = body.slice(0, body.indexOf('AS $fn$'))
+      if (header.includes(forbiddenCol)) {
+        fail('T7I-R22', `the resolver projection declares a forbidden column: ${forbiddenCol}`)
+      }
+    }
+
+    // (e) every denial is a bare RETURN: the body never RAISEs, so an
+    //     unknown id and a forbidden id are byte-identical.
+    const fnBody = src.slice(src.indexOf('AS $fn$'), src.indexOf('$fn$;') + 5)
+    if (/\bRAISE\b/i.test(fnBody)) fail('T7I-R22', 'the resolver body raises instead of returning zero rows')
+    if (/\b(INSERT INTO|UPDATE\s+public\.|DELETE FROM|TRUNCATE)\b/i.test(fnBody)) {
+      fail('T7I-R22', 'the resolver body contains a mutating statement')
+    }
+
+    if (failures === before) pass('T7I-R22', 'the resolver migration creates exactly one SECURITY DEFINER, STABLE, empty-search_path function, grants EXECUTE to authenticated only via a signature-qualified REVOKE-then-GRANT pair, projects exactly two identifiers, and never raises')
+  }
 }
 
 // ---------------------------------------------------------------------

@@ -96,6 +96,24 @@
 -- or fixture row, and the report tables must still be empty (A-053's
 -- zero-row precondition is exactly why the rename is safe).
 --
+-- Reconciled again at Backend Round C2 (the R-22 governed report-context
+-- resolver). That migration adds exactly ONE read-only function and ONE
+-- authenticated EXECUTE grant, and moves three censuses this file hard-pins,
+-- so -- for the same reason as above -- the reconciliation is committed
+-- TOGETHER WITH that migration:
+--   A34  8 -> 9 applied migrations, adding 20260806190000
+--   A35  31 -> 32 public functions (6 Step 7G + 4 Step 7H + 18 Step 7I
+--        + 2 assessment + 1 correction tracking + 1 context resolver), with
+--        a per-function contract check for the new one and an exact
+--        projection check pinning it to two uuid identifiers
+--   D5   the same 32-function figure, post-negative-suite
+-- A32 (26 tables), A33, the 29 policies, the 12 enums, the 13-table
+-- authenticated SELECT set, the Step 7H audit guards, every fixture-data
+-- assertion, every negative test and the canonical checksum region are
+-- UNCHANGED -- the resolver migration adds NO table, enum, column,
+-- constraint, index, policy, table grant or fixture row, and writes no data
+-- at all.
+--
 -- CLASS GRADE IS NOT TOUCHED (A-054). `class_grade_code`, the three seeded
 -- Class Grades and the `beginner` grade assertions below are competency-
 -- unrelated and stay byte-identical.
@@ -392,23 +410,24 @@ BEGIN
   END IF;
 
   -- --- Migration history and Step 7E seed boundary --------------------
-  -- A34: exactly the eight accepted project migrations are applied. Step 7I
+  -- A34: exactly the nine accepted project migrations are applied. Step 7I
   -- ships TWO files by mandate (U-7I-18), not one: the `trainer_approved`
   -- enum label must be added and COMMITTED before any object may reference
   -- it. Backend Round B2 adds the assessment-persistence migration
   -- (CP-2/CP-4), moving the count 5 -> 6; Round B2.1 adds the
-  -- correction-tracking migration (U-B2-1), moving it 6 -> 7; and Backend V2
-  -- adds the competency-vocabulary rename (A-053), moving it 7 -> 8.
+  -- correction-tracking migration (U-B2-1), moving it 6 -> 7; Backend V2
+  -- adds the competency-vocabulary rename (A-053), moving it 7 -> 8; and
+  -- Round C2 adds the report-context resolver (R-22), moving it 8 -> 9.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 8 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 8 applied migrations, found %', v_n; END IF;
+  IF v_n <> 9 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 9 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
                      '20260805090000', '20260805090500', '20260806090000',
-                     '20260806103000', '20260806160000');
-  IF v_n <> 8 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000 and 20260806160000';
+                     '20260806103000', '20260806160000', '20260806190000');
+  IF v_n <> 9 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000 and 20260806190000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -423,8 +442,52 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 31 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 31 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking), found %', v_n;
+  IF v_n <> 32 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 32 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver), found %', v_n;
+  END IF;
+
+  -- A35 (report-context resolver, R-22): the one governed key translation.
+  -- postgres-owned SECURITY DEFINER plpgsql with a pinned EMPTY search_path,
+  -- non-STRICT, STABLE (so the engine itself forbids it writing or appending
+  -- to the audit chain), taking EXACTLY ONE argument -- the governed report
+  -- identifier, and no caller-supplied centre, session or student.
+  -- authenticated EXECUTE and nothing else.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+    JOIN pg_catalog.pg_language l ON l.oid = p.prolang
+   WHERE n.nspname = 'public'
+     AND p.proname = 'report_resolve_context'
+     AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
+     AND l.lanname = 'plpgsql'
+     AND p.prosecdef
+     AND NOT p.proisstrict
+     AND p.pronargs = 1
+     AND p.provolatile = 's'
+     AND p.proconfig IS NOT NULL
+     AND 'search_path=""' = ANY (p.proconfig)
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
+     AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
+     AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: report_resolve_context does not satisfy its full ratified contract';
+  END IF;
+
+  -- A35 (report-context resolver): the EXACT projection -- one uuid in, two
+  -- uuid identifiers out, and NOTHING else. Asserted from the catalogue so a
+  -- later widening fails the canonical verifier and not only the migration
+  -- that introduced it.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname = 'report_resolve_context'
+     AND p.proargnames = ARRAY['p_report_id', 'class_session_id', 'student_id']
+     AND pg_catalog.pg_get_function_result(p.oid) = 'TABLE(class_session_id uuid, student_id uuid)';
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: report_resolve_context does not return exactly the two governed identifiers';
   END IF;
 
   -- A35 (correction tracking, U-B2-1): the one governed R-7 read. It is
@@ -1297,8 +1360,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 31 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 31 Step 7G/7H/7I/assessment/correction-tracking functions after the negative suite, found %', v_n;
+  IF v_n <> 32 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 32 Step 7G/7H/7I/assessment/correction-tracking/context-resolver functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n

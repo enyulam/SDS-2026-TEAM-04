@@ -1680,6 +1680,13 @@ export type Database = {
         Args: { p_expected_lock_version: number; p_report_id: string }
         Returns: Record<string, unknown>
       }
+      report_resolve_context: {
+        Args: { p_report_id: string }
+        Returns: {
+          class_session_id: string
+          student_id: string
+        }[]
+      }
       report_save_edit: {
         Args: {
           p_expected_lock_version: number

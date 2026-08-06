@@ -18,10 +18,10 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 const MIG_NAME = '20260806103000_management_correction_tracking.sql'
-// The newest migration file in the tree (checkpoint B-V2-1, Amendment 006
-// A-053). It is not this suite's subject; it is only what "sorts last" now
-// means.
-const NEWEST_MIG_NAME = '20260806160000_competency_vocabulary_rename.sql'
+// The newest migration file in the tree (Round C2, the R-22 report-context
+// resolver). It is not this suite's subject; it is only what "sorts last"
+// now means.
+const NEWEST_MIG_NAME = '20260806190000_report_context_resolver.sql'
 const MIG = join(MIG_DIR, MIG_NAME)
 const PROJECTIONS = join(ROOT, 'server', 'modules', 'management-view', 'projections.ts')
 
@@ -142,17 +142,17 @@ const bodyCode = code(body)
 }
 
 // ---------------------------------------------------------------------
-// T-CT-S4 -- the seven earlier migration files are byte-unchanged
+// T-CT-S4 -- the eight earlier migration files are byte-unchanged
 // ---------------------------------------------------------------------
-// Checkpoint B-V2-1 added the competency-vocabulary rename, which sorts
-// after the correction-tracking migration. The correction-tracking file is
-// therefore now an ALREADY-APPLIED file rather than the newest one, so it
-// moves from the "sorts last" leg into the byte-identical-to-HEAD leg —
-// which is a strictly stronger assertion for it, not a weaker one.
+// Checkpoint B-V2-1 added the competency-vocabulary rename and Round C2 the
+// report-context resolver, both of which sort after the correction-tracking
+// migration. The correction-tracking file is therefore an ALREADY-APPLIED
+// file rather than the newest one, so it sits in the byte-identical-to-HEAD
+// leg — a strictly stronger assertion for it, not a weaker one.
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 8) fail('T-CT-S4', `${all.length} migration files exist, expected 8`)
+  if (all.length !== 9) fail('T-CT-S4', `${all.length} migration files exist, expected 9`)
   if (all[all.length - 1] !== NEWEST_MIG_NAME) fail('T-CT-S4', `the newest migration is not the last file (last is ${all[all.length - 1]})`)
   if (!all.includes(MIG_NAME)) fail('T-CT-S4', `${MIG_NAME} is missing`)
 
@@ -164,7 +164,7 @@ const bodyCode = code(body)
     const h2 = createHash('sha256').update(read(join(MIG_DIR, f))).digest('hex')
     if (h1 !== h2) fail('T-CT-S4', `${rel} differs from HEAD -- an applied migration must never be edited`)
   }
-  if (failures === before) pass('T-CT-S4', 'eight migration files; the seven already-applied files are byte-identical to HEAD; the new one sorts last')
+  if (failures === before) pass('T-CT-S4', 'nine migration files; the eight already-applied files are byte-identical to HEAD; the newest one sorts last')
 }
 
 // ---------------------------------------------------------------------
