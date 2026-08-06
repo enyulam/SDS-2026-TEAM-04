@@ -29,7 +29,8 @@
  *        `portalHomeForRole` and must contain NO destination literal of their
  *        own — that is what makes "update every consumer consistently" a
  *        structural property rather than a promise.
- *   D-5  Every destination is a route this application actually ships.
+ *   D-5  Every destination is a route this application actually ships, against
+ *        the census ENUMERATED from `app/**\/page.tsx` on this run.
  *
  * It touches NO database, NO network, NO browser and NO credential.
  *
@@ -43,6 +44,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 
 import { portalHomeForRole } from "@/server/modules/identity-access/portal-destinations";
+import { shippedRoutes } from "./app-route-census.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -67,26 +69,18 @@ const RATIFIED = [
 /** The deferred dashboards no sign-in may land on (C2C-012). */
 const DEFERRED_DASHBOARDS = new Set(["/management", "/parent"]);
 
-/** The application's shipped route census, as `next build` prints it. */
-const SHIPPED_ROUTES = new Set([
-  "/",
-  "/login",
-  "/management",
-  "/management/reports",
-  "/management/reports/[reportId]/edit",
-  "/management/reports/[reportId]/review",
-  "/parent",
-  "/parent/reports",
-  "/parent/students/[studentId]/sessions/[sessionId]/report",
-  "/trainer",
-  "/trainer/reports",
-  "/trainer/reports/[reportId]/edit",
-  "/trainer/reports/[reportId]/generate",
-  "/trainer/reports/[reportId]/review",
-  "/trainer/schedule",
-  "/trainer/sessions/[sessionId]/roster",
-  "/trainer/sessions/[sessionId]/students/[studentId]/assess",
-]);
+/**
+ * THE ROUTE CENSUS IS READ, NOT RESTATED.
+ *
+ * Run C3-A Phase 2b, item D finding 2: D-5 used to carry a hand-authored set
+ * of route literals and then report the verdict as "the shipped 17-route
+ * census". It was a restatement of the census, not a reading of it — a route
+ * added, removed or renamed under `app/` would not move it, so D-5 could not
+ * fail for the very reason it exists. `shippedRoutes()` enumerates
+ * `app/**\/page.tsx` and derives each route the App Router way; the number
+ * below is therefore measured on every run rather than asserted in prose.
+ */
+const SHIPPED_ROUTES = new Set(await shippedRoutes());
 
 // ---------------------------------------------------------------------
 // D-1  Each role lands on its ratified core destination.
@@ -224,7 +218,10 @@ const SHIPPED_ROUTES = new Set([
       `destination(s) that are not in the shipped route census: ${unshipped.map(([r, d]) => `${r} -> ${d}`).join(", ")}`,
     );
   } else {
-    pass("D-5", "every post-login destination is a route in the shipped 17-route census");
+    pass(
+      "D-5",
+      `every post-login destination is a route in the shipped ${SHIPPED_ROUTES.size}-route census, and that census was ENUMERATED from app/**/page.tsx on this run rather than restated inside this test`,
+    );
   }
 }
 

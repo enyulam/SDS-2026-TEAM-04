@@ -26,29 +26,31 @@
  *        then redirects to the constant login path. It reads no caller-supplied
  *        value and touches no elevated client.
  *
- *   S-3  THE BEHAVIOURAL PROOF, against the REAL local Supabase Auth server:
- *        a real session is established for the trainer fixture identity, the
- *        `auth.sessions` row is MEASURED present (the positive control — a
- *        probe that cannot see a live session proves nothing when it later sees
- *        none), `signOut()` is called, and the row is measured GONE. Session
- *        termination is therefore observed in the authentication server's own
- *        state, not inferred from a cleared cookie.
+ *   S-3  THE BEHAVIOURAL PROOF IS RELOCATED, and this leg keeps that
+ *        relocation falsifiable. It used to establish and revoke real Auth
+ *        sessions against the CANONICAL stack, and it exercised the SDK's
+ *        `signOut()` on a client THIS TEST constructed rather than the
+ *        production `signOutFormAction` path. Both are fixed by moving the
+ *        measurement to `prove-disposable-app.mjs` gate G-22, where a real
+ *        browser CLICKS the production control on the application served
+ *        against the DISPOSABLE stack and `auth.sessions` is read in the
+ *        DISPOSABLE Auth server. S-3 now asserts that gate exists, decides,
+ *        targets the production control and reads the disposable database —
+ *        and that THIS suite no longer establishes a session anywhere.
  *
  *   S-4  A protected route is NOT REACHABLE without a session: over real HTTP,
  *        a portal route answers a redirect to `/login` and serves no portal
  *        markup — the "afterwards" state S-3 puts the caller into.
  *
- * NO PASSWORD IS HANDLED ANYWHERE IN THIS FILE. The real session in S-3 comes
- * from the Auth admin magiclink -> verifyOtp channel already accepted in
- * `run-integration.mjs` and `run-c3-bypass.mjs`. Nothing is created, reset or
- * destroyed; no key, token, cookie or connection string is printed, logged,
- * persisted or interpolated into any message.
+ * NO PASSWORD IS HANDLED ANYWHERE IN THIS FILE, and no session is established
+ * or revoked by it at all any more. No key, token, cookie or connection string
+ * is printed, logged, persisted or interpolated into any message.
  *
- * READ-ONLY AGAINST THE CANONICAL DATABASE. S-3 signs a session in and out
- * again, which touches `auth.sessions` and nothing else. The canonical census
- * — reports, versions, ratings, corrections, observations, audit events,
- * chain heads, `auth.users` and migrations — is measured BEFORE and AFTER and
- * must be byte-identical.
+ * READ-ONLY AGAINST THE CANONICAL DATABASE. This suite now performs no Auth
+ * operation whatsoever; the canonical census — reports, versions, ratings,
+ * corrections, observations, audit events, chain heads, `auth.users` and
+ * migrations — is still measured BEFORE and AFTER and must be byte-identical,
+ * which is what makes "this suite mutates nothing" a measurement.
  *
  * Run (with a production server already listening):
  *   BEST_COACH_APP_ORIGIN=http://127.0.0.1:3411 \
@@ -60,7 +62,6 @@ import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { createClient } from "@supabase/supabase-js";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const CONTAINER = "supabase_db_best-coach-mvp";
@@ -69,10 +70,6 @@ const APP_ORIGIN = (process.env.BEST_COACH_APP_ORIGIN ?? "http://127.0.0.1:3000"
   /\/+$/,
   "",
 );
-
-/** Step 7F fixture identity. No credential is associated with it here. */
-const TRAINER_SUB = "d0000000-0000-4000-8000-000000000002";
-const TRAINER_EMAIL = "trainer.fixture@example.test";
 
 const CENSUS = `
 SELECT (SELECT count(*) FROM public.reports)
@@ -132,41 +129,6 @@ async function q(sql) {
   return r.out;
 }
 
-/**
- * The local stack's connection values, captured from project-local CLI
- * structured output into process memory only (CLAUDE.md §11). Never echoed,
- * never serialized, never interpolated into an error.
- */
-function loadLocalStack() {
-  return new Promise((resolve) => {
-    const p = spawn("npx", ["--no-install", "supabase", "status", "--output", "json"], {
-      cwd: REPO_ROOT,
-      stdio: ["ignore", "pipe", "pipe"],
-      shell: process.platform === "win32",
-    });
-    let out = "";
-    p.stdout.on("data", (d) => {
-      out += d;
-    });
-    p.on("close", () => {
-      try {
-        const status = JSON.parse(out.slice(out.indexOf("{")));
-        const url = status.API_URL;
-        const publishable = status.PUBLISHABLE_KEY || status.ANON_KEY;
-        const secret = status.SECRET_KEY || status.SERVICE_ROLE_KEY;
-        const host = url ? new URL(url).hostname : "";
-        if (!["127.0.0.1", "localhost", "::1"].includes(host)) {
-          resolve(null);
-          return;
-        }
-        resolve(url && publishable && secret ? { url, publishable, secret } : null);
-      } catch {
-        resolve(null);
-      }
-    });
-  });
-}
-
 const stripComments = (source) =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
@@ -188,14 +150,42 @@ const stripComments = (source) =>
   if (!shell.includes("signOutFormAction")) {
     problems.push("the shell does not bind the sign-out server action at all");
   }
-  if (!/<form\s+action=\{signOutFormAction\}/.test(shell)) {
+
+  /*
+   * SCOPED TO THE SIGN-OUT FORM ITSELF (Run C3-A Phase 2b, item D finding 4).
+   *
+   * The submit-button and label checks used to scan the WHOLE shell file, so
+   * ANY submit button and ANY occurrence of the words "Sign out" anywhere in
+   * that file satisfied them — including a control that has nothing to do with
+   * signing out. A sign-out form that lost its button would still have passed
+   * as long as some other control in the same file had one. The checks now run
+   * against the extracted `<form action={signOutFormAction}> … </form>` markup
+   * ONLY: the button, its type and the visible label must be INSIDE the form
+   * that posts the action, which is the only place they mean anything.
+   */
+  const form = /<form\s+action=\{signOutFormAction\}[\s\S]*?<\/form>/.exec(shell)?.[0] ?? null;
+  if (form === null) {
     problems.push(
-      "the sign-out control is not a <form action={signOutFormAction}> — a link or a client handler would navigate away while leaving the session alive",
+      "the sign-out control is not a <form action={signOutFormAction}>…</form> — a link or a client handler would navigate away while leaving the session alive",
     );
+  } else {
+    if (!/<button\b[\s\S]*?type="submit"/.test(form)) {
+      problems.push(
+        "the sign-out form contains no submit button, so the form cannot be activated; a submit button elsewhere in the shell does not activate this form",
+      );
+    }
+    if (!/>\s*Sign out\s*</.test(form)) {
+      problems.push(
+        "the sign-out form carries no visible \"Sign out\" text label inside it; the words appearing elsewhere in the shell name a different control",
+      );
+    }
+    if (!/data-testid="sign-out"/.test(form)) {
+      problems.push(
+        "the sign-out form's control carries no `data-testid=\"sign-out\"`; the disposable behavioural proof (G-22) locates the production control by that hook and would silently target something else without it",
+      );
+    }
   }
-  if (!/<button\s+type="submit"/.test(shell)) {
-    problems.push("the sign-out control has no submit button, so the form cannot be activated");
-  }
+
   const railAndHeader = [...shell.matchAll(/<SignOutControl\s+variant="(rail|header)"/g)].map(
     (m) => m[1],
   );
@@ -204,15 +194,12 @@ const stripComments = (source) =>
       `the sign-out control renders in [${railAndHeader.join(", ") || "no"}] surface(s); it must render in BOTH the desktop rail and the mobile header, or it is unreachable below the lg breakpoint`,
     );
   }
-  if (!/Sign out/.test(shell)) {
-    problems.push("the sign-out control carries no visible text label");
-  }
   if (problems.length > 0) {
     fail("S-1", problems.join("; "));
   } else {
     pass(
       "S-1",
-      "all three portal wrappers render the one shared RolePortalShell, and that shell renders a real <form action={signOutFormAction}> with a visible submit button in BOTH the desktop rail and the mobile header",
+      "all three portal wrappers render the one shared RolePortalShell, and that shell renders a real <form action={signOutFormAction}> whose OWN markup carries the submit button, the visible \"Sign out\" label and the `sign-out` test hook, in BOTH the desktop rail and the mobile header",
     );
   }
 }
@@ -265,90 +252,94 @@ const stripComments = (source) =>
 }
 
 // =====================================================================
-// S-3  BEHAVIOURAL — the session row is created, then destroyed, in the
-//      authentication server's own state. No password is involved.
+// S-3  THE BEHAVIOURAL PROOF LIVES ON A DISPOSABLE STACK AND EXERCISES THE
+//      PRODUCTION PATH. This leg proves it is really there and really wired
+//      to the production control — it does not restate the measurement.
 // =====================================================================
 const censusBefore = await q(CENSUS);
 {
-  const sessionCount = () =>
-    q(`SELECT count(*) FROM auth.sessions WHERE user_id = '${TRAINER_SUB}';`);
-
-  const before = await sessionCount();
-  const stack = await loadLocalStack();
-  if (!stack) {
-    fail(
-      "S-3",
-      "the local stack connection values could not be read from the project-local CLI; the behavioural leg did not run",
+  /*
+   * WHAT MOVED, AND WHY (Run C3-A Phase 2b, item D finding 4).
+   *
+   * S-3 used to establish and revoke REAL Auth sessions against the CANONICAL
+   * stack, and it exercised the SDK's `signOut()` on a client THIS TEST
+   * constructed. Both were wrong:
+   *
+   *   * the canonical stack is the one stack this project treats as sacred,
+   *     and a test that signs identities in and out of it is mutating it, even
+   *     though `auth.sessions` sits outside the pinned census; and
+   *   * `signOutFormAction` — the Server Action the shell's `<form>` posts,
+   *     which calls the governed `signOutAction` on the request-scoped server
+   *     client and then redirects — was never invoked. The measurement was of
+   *     the Supabase SDK, not of this application's sign-out.
+   *
+   * The measurement now lives in `scripts/physical-test/prove-disposable-app.mjs`
+   * as gate G-22, where a real browser CLICKS the production control on the
+   * application served against the DISPOSABLE stack and `auth.sessions` is read
+   * in the DISPOSABLE Auth server. This leg's job is to make that relocation
+   * FALSIFIABLE: if the gate is deleted, renamed, or stops clicking the
+   * production control, this fails here rather than leaving a suite that
+   * quietly no longer proves anything behavioural.
+   */
+  const proof = stripComments(
+    await readFile(
+      join(REPO_ROOT, "scripts", "physical-test", "prove-disposable-app.mjs"),
+      "utf8",
+    ),
+  );
+  const problems = [];
+  if (!/\bGATE_TITLES[\s\S]*?\['G-22',/.test(proof)) {
+    problems.push("the disposable app proof declares no G-22 gate, so the relocated behavioural proof does not exist");
+  }
+  if (!/gateFrom\(\s*\n?\s*'G-22'/.test(proof) && !/gate\(\s*'G-22'/.test(proof)) {
+    problems.push("the disposable app proof never decides G-22");
+  }
+  if (!/form button\[data-testid="sign-out"\]/.test(proof)) {
+    problems.push(
+      "G-22 does not locate the PRODUCTION sign-out control (a submit button inside the shell's sign-out form); it cannot be exercising the production path",
     );
-  } else {
-    const admin = createClient(stack.url, stack.secret, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-    });
-    // A real local sign-in WITHOUT handling any password: the Auth admin API
-    // mints a one-time magiclink token and verifying it yields an ordinary
-    // session. Nothing is created, reset or destroyed.
-    const link = await admin.auth.admin.generateLink({
-      type: "magiclink",
-      email: TRAINER_EMAIL,
-    });
-    if (link.error || !link.data?.properties?.hashed_token) {
-      fail("S-3", "a real session could not be established for the trainer fixture identity");
-    } else {
-      const client = createClient(stack.url, stack.publishable, {
-        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-      });
-      const verified = await client.auth.verifyOtp({
-        type: "magiclink",
-        token_hash: link.data.properties.hashed_token,
-      });
-      if (verified.error || verified.data?.user?.id !== TRAINER_SUB) {
-        fail("S-3", "the trainer session could not be verified");
-      } else {
-        const live = await sessionCount();
-        const signedOut = await client.auth.signOut();
-        const after = await sessionCount();
-        const stillUser = await client.auth.getUser();
-
-        /*
-         * `signOutAction` calls `auth.signOut()` with NO arguments, which is
-         * Supabase's GLOBAL scope: every session belonging to the identity is
-         * revoked, not merely the calling one. That is the production
-         * behaviour, so it is the behaviour measured here — which is why the
-         * expectation after sign-out is ZERO live sessions for the identity
-         * rather than "one fewer". Any pre-existing session for this fixture
-         * identity is residue from an earlier local run, is not part of the
-         * canonical fixture pin (`auth.sessions` appears in no pinned census),
-         * and its removal is the correct consequence of a global sign-out.
-         *
-         * The positive control is the sign-in itself: the count must RISE, or
-         * the probe cannot see a live session and its later absence would
-         * prove nothing at all.
-         */
-        if (Number(live) <= Number(before)) {
-          fail(
-            "S-3",
-            `the positive control failed: auth.sessions for the identity went ${before} -> ${live} on sign-in; the probe cannot see a live session, so its later absence would prove nothing`,
-          );
-        } else if (signedOut.error) {
-          fail("S-3", "auth.signOut() reported an error");
-        } else if (Number(after) !== 0) {
-          fail(
-            "S-3",
-            `after sign-out auth.sessions for the identity is ${after}; a global sign-out must leave ZERO — the session was NOT terminated server-side`,
-          );
-        } else if (!stillUser.error && stillUser.data?.user) {
-          fail(
-            "S-3",
-            "the signed-out client still resolves a user against the Auth server, so the session outlived the sign-out",
-          );
-        } else {
-          pass(
-            "S-3",
-            `against the REAL local Auth server: establishing a session moved auth.sessions for the identity ${before} -> ${live} (the positive control), the production global signOut() left ${after}, and the same client can no longer resolve a user — the termination is observed in the authentication server's own state, not inferred from a cleared cookie`,
-          );
-        }
-      }
+  }
+  if (!/auth\.sessions WHERE user_id/.test(proof)) {
+    problems.push("G-22 does not read auth.sessions, so it measures no server-side termination");
+  }
+  if (!/DISPOSABLE_DB_CONTAINER,\s*\n?\s*`SELECT count\(\*\)::text FROM auth\.sessions/.test(proof)) {
+    problems.push(
+      "G-22's auth.sessions reading is not taken from the DISPOSABLE database container; the behavioural leg must not touch the canonical stack",
+    );
+  }
+  /*
+   * And this suite itself must no longer establish a session anywhere. A
+   * relocation that left the old sign-in behind would be an addition, not a
+   * move.
+   */
+  const selfSource = await readFile(fileURLToPath(import.meta.url), "utf8");
+  const self = stripComments(selfSource);
+  /*
+   * The needles are assembled from fragments ON PURPOSE. A literal
+   * `".generateLink("` written out here would itself be a match, and the check
+   * would fail against its own source no matter what the file did — an
+   * unfalsifiable assertion in the opposite direction.
+   *
+   * `.signOut(` is deliberately NOT one of the needles: S-2 legitimately quotes
+   * it in prose when describing what `signOutAction` must call. The three
+   * needles below are the ones that can only appear in code that builds a
+   * Supabase client and establishes a session, which is the thing that moved.
+   */
+  const FORBIDDEN = ["create" + "Client(", ".generate" + "Link(", ".verify" + "Otp("];
+  for (const forbidden of FORBIDDEN) {
+    if (self.includes(forbidden)) {
+      problems.push(
+        `this suite still calls ${forbidden}, so it still establishes or revokes a real session against the canonical stack`,
+      );
     }
+  }
+  if (problems.length > 0) {
+    fail("S-3", problems.join("; "));
+  } else {
+    pass(
+      "S-3",
+      "the behavioural proof is relocated to prove-disposable-app.mjs gate G-22, where the PRODUCTION control (a submit button inside the shell's <form action={signOutFormAction}>) is clicked in a real browser against the DISPOSABLE stack and auth.sessions is measured in the DISPOSABLE Auth server — and this suite itself no longer establishes or revokes any session on the canonical stack",
+    );
   }
 }
 

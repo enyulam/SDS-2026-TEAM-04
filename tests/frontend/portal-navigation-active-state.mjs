@@ -46,10 +46,17 @@
  * =====================================================================
  */
 
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+
 import {
   isNavigationItemActive,
   roleConfig,
 } from "@/components/layout/portal-navigation";
+import { concreteRoute, shippedPortalRoutes } from "./app-route-census.mjs";
+
+const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
 let failures = 0;
 const fail = (id, message) => {
@@ -59,49 +66,172 @@ const fail = (id, message) => {
 const pass = (id, message) => console.log(`PASS ${id} -- ${message}`);
 
 /**
- * The 14 CANONICAL portal routes (the census `integrated-route-security.mjs`
- * pins, minus the three `/trainer` `/management` `/parent` bare-prefix entries
- * that are themselves rail destinations and are listed here in their own right),
- * plus the two ratified Management `?status=` compatibility aliases and the
- * Trainer one. Each row names the rail item that MUST be the current page.
+ * THE ROUTE LIST IS DERIVED FROM THE APP TREE, NOT HAND-AUTHORED.
  *
- * Query strings are carried on the row and stripped before matching, because
- * `usePathname()` never sees them — which is precisely why the aliases have to
- * resolve to the same single active item as the bare route.
+ * Run C3-A Phase 2b, item D finding 3: this suite used to assert over a
+ * literal `ROUTES` array whose own header claimed it covered `/trainer`,
+ * `/management` and `/parent` "in their own right". `/trainer` was SILENTLY
+ * ABSENT and nothing failed, because a hand-authored list cannot notice its
+ * own gap. A route added to `app/` tomorrow would be equally invisible.
+ *
+ * `shippedPortalRoutes()` enumerates `app/**\/page.tsx` and derives the routes
+ * the App Router way. Every derived portal route MUST appear in the expectation
+ * table below; an unexpected route is a FAILURE (N-0), never a silent skip, and
+ * a stale expectation naming a route that no longer ships is a FAILURE too.
+ *
+ * Each expectation is one of exactly two kinds:
+ *
+ *   { role, label }  the route renders the portal shell, and `label` is the
+ *                    rail item that MUST be the single current page.
+ *   { redirectsTo }  the route renders NO shell: its page redirects before any
+ *                    navigation is emitted. The exemption is PROVEN by reading
+ *                    the page source and requiring the redirect to be there —
+ *                    it is not a way of excusing a route from the assertion.
  */
-const ROUTES = [
-  // Trainer — 7 routes.
-  ["trainer", "/trainer/schedule", "Schedule"],
-  ["trainer", "/trainer/sessions/session-storytelling-lab/roster", "Schedule"],
+const EXPECTED_BY_ROUTE = new Map([
+  // Trainer.
+  ["/trainer", { redirectsTo: "/trainer/schedule" }],
+  ["/trainer/schedule", { role: "trainer", label: "Schedule" }],
+  ["/trainer/sessions/[sessionId]/roster", { role: "trainer", label: "Schedule" }],
   [
-    "trainer",
-    "/trainer/sessions/session-storytelling-lab/students/student-birch/assess",
-    "Schedule",
+    "/trainer/sessions/[sessionId]/students/[studentId]/assess",
+    { role: "trainer", label: "Schedule" },
   ],
-  ["trainer", "/trainer/reports", "Returned reports"],
-  ["trainer", "/trainer/reports?status=needs_edit", "Returned reports"],
-  ["trainer", "/trainer/reports/report-birch/generate", "Returned reports"],
-  ["trainer", "/trainer/reports/report-birch/review", "Returned reports"],
-  ["trainer", "/trainer/reports/report-birch/edit", "Returned reports"],
-  // Management — 4 routes plus both ratified aliases.
-  ["management", "/management", "Dashboard"],
-  ["management", "/management/reports", "Reports"],
-  ["management", "/management/reports?status=trainer_approved", "Reports"],
-  ["management", "/management/reports?status=needs_edit", "Reports"],
-  ["management", "/management/reports?status=submitted", "Reports"],
-  ["management", "/management/reports/report-birch/review", "Reports"],
-  ["management", "/management/reports/report-birch/edit", "Reports"],
-  // Parent — 3 routes.
-  ["parent", "/parent", "Home"],
-  ["parent", "/parent/reports", "Reports"],
+  ["/trainer/reports", { role: "trainer", label: "Returned reports" }],
+  ["/trainer/reports/[reportId]/generate", { role: "trainer", label: "Returned reports" }],
+  ["/trainer/reports/[reportId]/review", { role: "trainer", label: "Returned reports" }],
+  ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Returned reports" }],
+  // Management.
+  ["/management", { role: "management", label: "Dashboard" }],
+  ["/management/reports", { role: "management", label: "Reports" }],
+  ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
+  ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],
+  // Parent.
+  ["/parent", { role: "parent", label: "Home" }],
+  ["/parent/reports", { role: "parent", label: "Reports" }],
   [
-    "parent",
-    "/parent/students/student-birch/sessions/session-storytelling-lab/report",
-    "Reports",
+    "/parent/students/[studentId]/sessions/[sessionId]/report",
+    { role: "parent", label: "Reports" },
   ],
+]);
+
+/**
+ * The ratified `?status=` compatibility aliases. These are NOT routes — they
+ * are query spellings of a route the census already carries — so they are
+ * listed separately and each names the shipped route it must resolve onto.
+ * `usePathname()` never sees a query string, which is precisely why an alias
+ * has to resolve to the same single active item as its bare route.
+ */
+const ALIASES = [
+  ["trainer", "/trainer/reports?status=needs_edit", "/trainer/reports", "Returned reports"],
+  ["management", "/management/reports?status=trainer_approved", "/management/reports", "Reports"],
+  ["management", "/management/reports?status=needs_edit", "/management/reports", "Reports"],
+  ["management", "/management/reports?status=submitted", "/management/reports", "Reports"],
 ];
 
+const shipped = await shippedPortalRoutes();
+
 const pathnameOf = (route) => route.split("?")[0];
+
+/** The page file backing a derived route pattern, for the redirect proof. */
+async function readPageSource(routePattern) {
+  const segments = routePattern.split("/").filter((segment) => segment.length > 0);
+  // Route groups are invisible in the URL, so the file may sit under either
+  // portal group. Both candidates are tried and a miss is reported, never
+  // swallowed.
+  const candidates = [
+    join(REPO_ROOT, "app", "(portals)", ...segments, "page.tsx"),
+    join(REPO_ROOT, "app", ...segments, "page.tsx"),
+  ];
+  for (const candidate of candidates) {
+    try {
+      return await readFile(candidate, "utf8");
+    } catch {
+      // Try the next candidate.
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------
+// N-0  Every route the app tree ships is covered, and nothing stale is
+//      asserted. A missing expectation FAILS; it is never a silent skip.
+// ---------------------------------------------------------------------
+{
+  const uncovered = shipped.filter((route) => !EXPECTED_BY_ROUTE.has(route));
+  const stale = [...EXPECTED_BY_ROUTE.keys()].filter((route) => !shipped.includes(route));
+  // An alias is a query spelling of a REAL route. An alias whose base route
+  // does not ship is an alias onto nothing.
+  const orphanAliases = ALIASES.filter(([, , base]) => !shipped.includes(base)).map(
+    ([, alias, base]) => `${alias} (base ${base})`,
+  );
+  if (uncovered.length > 0 || stale.length > 0 || orphanAliases.length > 0) {
+    fail(
+      "N-0",
+      [
+        uncovered.length > 0
+          ? `${uncovered.length} shipped portal route(s) have NO expectation in this suite and were therefore never asserted: ${uncovered.join(", ")}`
+          : null,
+        stale.length > 0
+          ? `${stale.length} expectation(s) name a route this application no longer ships: ${stale.join(", ")}`
+          : null,
+        orphanAliases.length > 0
+          ? `${orphanAliases.length} ?status= alias(es) have no shipped base route: ${orphanAliases.join(", ")}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join("; "),
+    );
+  } else {
+    pass(
+      "N-0",
+      `all ${shipped.length} portal routes derived from app/**/page.tsx carry an expectation, every one of the ${ALIASES.length} ratified ?status= aliases resolves onto a shipped base route, and no expectation names a route that no longer ships — the route list is READ from the app tree, not restated inside this test`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------
+// N-0b A redirect-only exemption is PROVEN, not asserted. A route excused
+//      from the active-item rule must really redirect.
+// ---------------------------------------------------------------------
+{
+  const problems = [];
+  for (const [route, expectation] of EXPECTED_BY_ROUTE) {
+    if (!("redirectsTo" in expectation)) continue;
+    const source = await readPageSource(route);
+    if (source === null) {
+      problems.push(`${route}: its page source could not be read, so the exemption is unproven`);
+      continue;
+    }
+    const target = expectation.redirectsTo.replace(/[/\-]/g, "\\$&");
+    if (!new RegExp(`redirect\\(\\s*["'\`]${target}["'\`]\\s*\\)`).test(source)) {
+      problems.push(
+        `${route}: claimed redirect-only, but its page does not redirect to ${expectation.redirectsTo}. A route that renders the shell must name the rail item it makes current, not be excused from the rule.`,
+      );
+    }
+  }
+  const exempt = [...EXPECTED_BY_ROUTE].filter(([, e]) => "redirectsTo" in e);
+  if (problems.length > 0) {
+    fail("N-0b", problems.join("; "));
+  } else {
+    pass(
+      "N-0b",
+      `all ${exempt.length} redirect-only route(s) (${exempt.map(([r, e]) => `${r} -> ${e.redirectsTo}`).join(", ")}) really do redirect before any navigation is rendered, so their exemption from the single-active-item rule is measured rather than claimed`,
+    );
+  }
+}
+
+/**
+ * The rows the active-item assertions run over: every shipped shell-rendering
+ * route with its dynamic segments made concrete, plus the ratified aliases.
+ */
+const ROUTES = [
+  ...shipped
+    .map((route) => [route, EXPECTED_BY_ROUTE.get(route)])
+    .filter(([, expectation]) => expectation && "label" in expectation)
+    .map(([route, expectation]) => [expectation.role, concreteRoute(route), expectation.label]),
+  ...ALIASES.map(([role, alias, , label]) => [role, concreteRoute(alias), label]),
+];
 
 // ---------------------------------------------------------------------
 // N-1  R-C2-3 structural half: ONE primary Reports destination.

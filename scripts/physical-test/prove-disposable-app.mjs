@@ -334,6 +334,7 @@ const GATE_TITLES = new Map([
   ['G-19', 'Concurrency proofs on the disposable database AND fixture mode unused for the primary walkthrough'],
   ['G-20', 'Typecheck, lint and build pass'],
   ['G-21', 'Browser console has no uncaught errors'],
+  ['G-22', 'Production sign-out terminates the session in the disposable Auth server, and the guard holds afterwards'],
   ['H-1', 'Process hygiene — this run leaves no server, no browser and no held port behind'],
 ])
 
@@ -2721,6 +2722,137 @@ async function main() {
         .join('; ') || 'the isolation comparison did not decide',
     )
   }
+  /* -----------------------------------------------------------------
+   * G-22 — SIGN-OUT TERMINATES THE SESSION SERVER-SIDE, THROUGH THE
+   * PRODUCTION CONTROL, ON THE DISPOSABLE STACK.
+   *
+   * RELOCATED HERE FROM `tests/frontend/sign-out-terminates-session.mjs`
+   * (Run C3-A Phase 2b, item D finding 4). That suite's behavioural leg had
+   * two defects the reviewers named:
+   *
+   *   * it established and revoked REAL Auth sessions against the CANONICAL
+   *     stack — the one stack this project treats as sacred; and
+   *   * it exercised the SDK's `signOut()` on a client the TEST constructed,
+   *     which is not the production path. `signOutFormAction` — the Server
+   *     Action the portal shell's `<form>` posts, which calls the governed
+   *     `signOutAction` on the REQUEST-SCOPED server client and then redirects
+   *     — was never invoked. A green suite therefore said nothing about the
+   *     code that actually runs when a user clicks Sign out.
+   *
+   * Here the production control is CLICKED, in a real browser, on the real
+   * application, served against the DISPOSABLE stack, and the outcome is
+   * measured in the DISPOSABLE Auth server's own `auth.sessions`.
+   *
+   * The parent identity is used because its live session is already installed
+   * by G-14 immediately above, so no additional mint is required — and because
+   * a session that has just been used to read a real report is a stronger
+   * subject than a freshly minted, never-exercised one.
+   * ---------------------------------------------------------------- */
+  phase('G-22 — production sign-out, measured in the disposable Auth server')
+
+  let signOutOutcome = null
+  let signOutFailure = null
+  try {
+    const parent = DISPOSABLE_IDENTITIES.find((identity) => identity.key === 'parent')
+    const sessionCount = () => {
+      const rows = psqlRows(
+        DISPOSABLE_DB_CONTAINER,
+        `SELECT count(*)::text FROM auth.sessions WHERE user_id = '${parent.authId}';`,
+      )
+      const value = Number((rows[0] ?? [])[0])
+      if (!Number.isFinite(value)) {
+        throw new SafeError('The disposable auth.sessions count could not be read, so nothing was measured.')
+      }
+      return value
+    }
+
+    await visit('/parent/reports')
+    const live = sessionCount()
+
+    /*
+     * THE CONTROL IS IDENTIFIED BEFORE IT IS CLICKED, and it must be UNIQUE.
+     * The shell renders the sign-out form twice — desktop rail and mobile
+     * header — so both are located, the first VISIBLE one is used, and a
+     * count of zero fails loudly rather than resolving to "nothing happened".
+     * The click is a real click on a real submit button inside a real
+     * `<form action={signOutFormAction}>`: Next.js posts the Server Action.
+     */
+    const clicked = await evaluateRaw(
+      `(function () {
+         var buttons = Array.prototype.slice.call(document.querySelectorAll('form button[data-testid="sign-out"]'));
+         if (buttons.length === 0) return 'none';
+         var visible = buttons.filter(function (b) { return b.offsetParent !== null });
+         var target = visible[0] || buttons[0];
+         var form = target.closest('form');
+         if (!form) return 'not-in-form';
+         var label = (target.textContent || '').trim();
+         target.click();
+         return 'clicked:' + buttons.length + ':' + label;
+       })()`,
+      'the production sign-out control',
+    )
+    if (clicked === 'none') {
+      throw new SafeError('The served application rendered no sign-out control, so no sign-out was performed.')
+    }
+    if (clicked === 'not-in-form') {
+      throw new SafeError('The sign-out control is not inside a form, so clicking it posts no Server Action.')
+    }
+    if (!clicked.startsWith('clicked:') || !clicked.includes('Sign out')) {
+      throw new SafeError('The control clicked was not the labelled Sign out control.')
+    }
+
+    // Wait, to a deadline that REJECTS, for the redirect the action performs.
+    const deadline = Date.now() + NAVIGATION_TIMEOUT_MS
+    let landing = null
+    while (Date.now() < deadline) {
+      landing = await evaluateString('location.pathname', 'the path after sign-out')
+      if (landing === '/login') break
+      await new Promise((r) => setTimeout(r, 200))
+    }
+
+    const after = sessionCount()
+
+    // The state sign-out returns the caller to: a protected route must now
+    // answer the login surface and no portal navigation landmark.
+    await visit('/parent/reports')
+    const guardedLanding = await evaluateString('location.pathname', 'the guarded path after sign-out')
+    const guardedHtml = await evaluateDocument('/parent/reports after sign-out')
+    const leaksPortal = /aria-label="(Trainer|Management|Parent) navigation"/.test(guardedHtml)
+
+    signOutOutcome = { live, after, landing, guardedLanding, leaksPortal, controls: clicked }
+  } catch (error) {
+    signOutFailure =
+      error instanceof SafeError ? error.message : 'the production sign-out could not be exercised in the browser'
+  }
+
+  if (signOutFailure !== null) {
+    gate('G-22', 'FAIL', `the production sign-out path was not exercised end to end: ${signOutFailure}`)
+  } else if (signOutOutcome.live <= 0) {
+    gate(
+      'G-22',
+      'FAIL',
+      'the POSITIVE CONTROL failed: the disposable Auth server reported 0 live sessions for the parent identity ' +
+        'BEFORE sign-out, so their later absence would prove nothing at all',
+    )
+  } else {
+    gateFrom(
+      'G-22',
+      signOutOutcome.after === 0 &&
+        signOutOutcome.landing === '/login' &&
+        signOutOutcome.guardedLanding === '/login' &&
+        !signOutOutcome.leaksPortal,
+      'the PRODUCTION control was clicked — a real submit button inside the shell\'s ' +
+        '`<form action={signOutFormAction}>`, in a real browser, on the application served against the DISPOSABLE ' +
+        `stack. auth.sessions for the identity went ${signOutOutcome.live} -> ${signOutOutcome.after} in the ` +
+        'DISPOSABLE Auth server\'s own state (the positive control is the non-zero reading BEFORE), the action ' +
+        'redirected to /login, and a protected portal route then answered /login with no portal navigation ' +
+        'landmark. Nothing was signed in or out on the canonical stack',
+      `after sign-out auth.sessions=${signOutOutcome.after} (expected 0), landing=${signOutOutcome.landing} ` +
+        `(expected /login), guarded route landed on ${signOutOutcome.guardedLanding} (expected /login), portal ` +
+        `landmark leaked=${signOutOutcome.leaksPortal}`,
+    )
+  }
+
   /* -----------------------------------------------------------------
    * A-16 / G-21 — origins and the browser console.
    * ---------------------------------------------------------------- */
