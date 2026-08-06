@@ -196,6 +196,100 @@ try {
     "Fixture separation copy is missing",
   );
 
+  /* -------------------------------------------------------------------------
+   * Screen 05 Trainer Schedule — F-04.
+   *
+   * R-B1: `/trainer/schedule` is the canonical Trainer entry route and `/trainer` is
+   * PRESERVED as a compatibility redirect onto it. Both facts are asserted here, because
+   * "the old route still works" is the half of the ruling a passing new route would hide.
+   * ----------------------------------------------------------------------- */
+
+  assert(
+    await evaluate("window.location.pathname === '/trainer/schedule'"),
+    "/trainer must redirect to the canonical /trainer/schedule, not 404 or dead-end",
+  );
+  await waitUntil(
+    "document.body.innerText.includes('Your classes, sessions and meetings')",
+    "trainer schedule surface reached through the /trainer compatibility redirect",
+  );
+
+  await navigate("/trainer/schedule");
+  await waitUntil(
+    "document.body.innerText.includes('Your classes, sessions and meetings')",
+    "canonical trainer schedule route",
+  );
+
+  // The projection is over the SAME governed class-session rows the roster surface uses.
+  assert(
+    await bodyIncludes("Storytelling Foundations"),
+    "The schedule must project the assigned class sessions",
+  );
+  assert(
+    await bodyIncludes("August 2026"),
+    "The schedule must focus the month carrying the assigned sessions",
+  );
+  assert(
+    (await evaluate(
+      "document.querySelectorAll('[data-schedule-day]').length >= 28",
+    )),
+    "The month grid must render its day cells",
+  );
+
+  // "Add Agenda" carries the frame's label and is inactive — no create-session path exists.
+  assert(
+    await evaluate(`
+      (() => {
+        const button = [...document.querySelectorAll('button')]
+          .find((candidate) => candidate.textContent.trim().endsWith('Add Agenda'));
+        return Boolean(button && button.disabled && button.getAttribute('aria-describedby'));
+      })()
+    `),
+    "Add Agenda must be disabled with a programmatically associated reason",
+  );
+
+  // Selecting a day opens Schedule Details for that day and nothing else.
+  assert(
+    !(await bodyIncludes("Open Class Roster")),
+    "Schedule Details must start with no day selected",
+  );
+  await evaluate(
+    "document.querySelector('[data-schedule-day=\"2026-08-05\"]').click()",
+  );
+  await waitUntil(
+    "document.body.innerText.includes('Open Class Roster')",
+    "schedule details for the selected day",
+  );
+  const detailsText = await evaluate(
+    `document.querySelector('aside[aria-labelledby="schedule-details-heading"]').innerText`,
+  );
+  assert(
+    detailsText.includes("Storytelling Foundations"),
+    "Schedule Details must name the session on the selected day",
+  );
+  assert(
+    !detailsText.includes("Speech Showcase"),
+    "Schedule Details must show only the selected day's sessions",
+  );
+
+  // The Day / Week / Month switch is a real projection of the same rows.
+  await clickExact("button", "Day");
+  await waitUntil(
+    `document.querySelector('[data-schedule-view="day"]').dataset.selected === 'true'`,
+    "day view selected",
+  );
+  await clickExact("button", "Month");
+  await waitUntil(
+    `document.querySelector('[data-schedule-view="month"]').dataset.selected === 'true'`,
+    "month view restored",
+  );
+
+  // Empty projection state.
+  await navigate("/trainer/schedule?preview=empty");
+  await waitUntil(
+    "document.body.innerText.includes('No Class Sessions are assigned to this Trainer.')",
+    "empty schedule state",
+  );
+
   await navigate("/trainer/sessions/session-storytelling-lab/roster");
   await waitUntil("document.body.innerText.includes('Learner Aster')", "session roster");
   assert(await bodyIncludes("Learner Delta"), "Full synthetic roster was not rendered");
@@ -354,6 +448,7 @@ try {
         result: "passed",
         checks: [
           "fixture role presentation and permanent fixture banner",
+          "canonical /trainer/schedule route, /trainer compatibility redirect, month projection, inactive Add Agenda, day selection, view switch and empty state",
           "roster and all-nine validation",
           "retryable observation save failure and recovery",
           "deterministic generation failure, bounded retry, and success",

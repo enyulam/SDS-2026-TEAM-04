@@ -64,7 +64,7 @@ export function TrainerRoster() {
   return (
     <div className="page-grid">
       <nav aria-label="Breadcrumb" className="text-sm font-bold text-ink-muted">
-        <Link href="/trainer" className="hover:text-brand-600">Dashboard</Link>
+        <Link href="/trainer/schedule" className="hover:text-brand-600">Schedule</Link>
         <span aria-hidden="true" className="px-2">/</span>
         <span>Session roster</span>
       </nav>

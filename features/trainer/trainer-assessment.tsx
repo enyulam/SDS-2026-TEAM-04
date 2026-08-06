@@ -173,7 +173,7 @@ export function TrainerAssessment() {
   return (
     <form className="page-grid" onSubmit={handleSubmit} noValidate>
       <nav aria-label="Breadcrumb" className="text-sm font-bold text-ink-muted">
-        <Link href="/trainer" className="hover:text-brand-600">Dashboard</Link>
+        <Link href="/trainer/schedule" className="hover:text-brand-600">Schedule</Link>
         <span aria-hidden="true" className="px-2">/</span>
         <Link
           href={`/trainer/sessions/${draft.sessionId}/roster`}

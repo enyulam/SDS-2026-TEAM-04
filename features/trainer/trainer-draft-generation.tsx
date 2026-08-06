@@ -110,10 +110,10 @@ export function TrainerDraftGeneration() {
               Retry once
             </Button>
             <Link
-              href="/trainer"
+              href="/trainer/schedule"
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white px-5 py-3 text-base font-bold text-navy-800 hover:border-brand-500 hover:bg-brand-100"
             >
-              Return to dashboard
+              Return to schedule
             </Link>
           </div>
         </section>

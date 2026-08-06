@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Trainer landing surface, delivered by Round F2.
+ *
+ * RETAINED, NOT DELETED. At checkpoint F-04 (operator ruling R-B1) `/trainer` became a
+ * compatibility redirect onto the canonical `/trainer/schedule`, so this component is
+ * currently unmounted. Its session-selection function is preserved on the Schedule surface
+ * (`screen.md` §6). It is kept for screen `01` Trainer Dashboard — a DEFERRED post-48-hour
+ * screen (A-044) whose canonical route is `/trainer/dashboard` (inventory §7.2) and which
+ * gets its own reconstruction checkpoint. Deleting it here would discard delivered work
+ * that checkpoint will need.
+ */
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

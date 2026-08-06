@@ -38,14 +38,22 @@ const roleConfig: Readonly<
 > = {
   trainer: {
     label: "Trainer",
-    home: "/trainer",
+    /**
+     * F-04 / operator ruling R-B1: `/trainer/schedule` is the canonical Trainer entry
+     * route and `/trainer` is preserved as a compatibility redirect onto it. The rail
+     * therefore names Schedule — the destination it actually reaches — rather than a
+     * "Dashboard" item that would redirect away from the dashboard. Screen `01` Trainer
+     * Dashboard is a DEFERRED post-48-hour screen whose canonical route is
+     * `/trainer/dashboard` (inventory §7.2); it gets its own checkpoint and its own item.
+     */
+    home: "/trainer/schedule",
     navigation: [
       {
-        href: "/trainer",
-        label: "Dashboard",
-        path: "/trainer",
+        href: "/trainer/schedule",
+        label: "Schedule",
+        path: "/trainer/schedule",
         exact: true,
-        icon: "dashboard",
+        icon: "calendar",
       },
       {
         href: "/trainer/reports?status=needs_edit",

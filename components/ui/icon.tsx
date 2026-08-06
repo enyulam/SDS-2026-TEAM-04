@@ -21,6 +21,7 @@ const strokeProps = {
 
 export type IconName =
   | "dashboard"
+  | "calendar"
   | "reports"
   | "document"
   | "bell"
@@ -63,6 +64,14 @@ const paths: Readonly<Record<IconName, ReactNode>> = {
       <rect x="14" y="3" width="7" height="7" rx="1.6" />
       <rect x="3" y="14" width="7" height="7" rx="1.6" />
       <rect x="14" y="14" width="7" height="7" rx="1.6" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2.4" />
+      <path d="M3 10h18" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
     </>
   ),
   reports: (
