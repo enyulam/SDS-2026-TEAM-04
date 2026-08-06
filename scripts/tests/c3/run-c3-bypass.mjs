@@ -386,7 +386,9 @@ SELECT (SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL))::text
     let chainProbe = ''
     try {
       chainProbe = await q(WORK_DB, CHAIN_PROBE)
-    } catch (e) {
+    } catch {
+      // An unreadable verification result is NOT evidence: the empty string
+      // falls through to the explicit "UNREADABLE" failure branch below.
       chainProbe = ''
     }
     const chainFields = chainProbe.split('|')
