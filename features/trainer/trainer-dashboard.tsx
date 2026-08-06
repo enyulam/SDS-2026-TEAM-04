@@ -21,12 +21,12 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import { reportStatusLabel } from "@/components/ui/status-pill";
 import type { TrainerSessionSummaryDto } from "@/lib/frontend/contracts/physical-test";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import { asFailure, type ResourceState } from "./resource-state";
 
 export function TrainerDashboard() {
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const searchParams = useSearchParams();
   const [state, setState] = useState<
     ResourceState<readonly TrainerSessionSummaryDto[]>
@@ -45,7 +45,7 @@ export function TrainerDashboard() {
     return () => {
       active = false;
     };
-  }, [port, fixtureRevision]);
+  }, [port, dataRevision]);
 
   if (state.kind === "loading") {
     return <LoadingSkeleton label="Loading assigned Trainer sessions" rows={3} />;

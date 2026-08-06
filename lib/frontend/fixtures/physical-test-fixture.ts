@@ -908,7 +908,11 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       return { outcome: "unavailable" };
     }
     const state = this.readState();
-    const report = state.reports[input.reportId];
+    // `reportId` is nullable on the port since F16-C (the governed backend
+    // creates the report at draft request, not at assessment save). This
+    // fixture always pre-creates one, so a null id here is simply unreachable
+    // in fixture data and resolves to the non-disclosing outcome.
+    const report = input.reportId === null ? undefined : state.reports[input.reportId];
     if (
       !report ||
       report.sessionId !== input.sessionId ||

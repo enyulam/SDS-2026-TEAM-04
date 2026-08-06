@@ -1,0 +1,802 @@
+"use server";
+
+/**
+ * F16-C — the PARTICIPANT ADAPTER action surface.
+ *
+ * This is the only thing `lib/frontend/adapters/real-participant-port.ts`
+ * talks to. Every function here:
+ *
+ *  - is a Server Action bound to `createRequestSupabaseClient()`, so the call
+ *    carries the CALLER'S OWN credential (`authenticated` role, resolving
+ *    `auth.uid()`) and every predicate is re-derived inside the database on
+ *    every request;
+ *  - NEVER imports `server/platform/supabase/elevated.ts`. The service-role
+ *    client is not reachable from any participant path, and T7I-40's scan
+ *    proves it for the whole `server/` tree;
+ *  - adds NO authority of its own. No role query parameter, header, cookie
+ *    claim or route value is read anywhere in this file;
+ *  - resolves the three REPORT-KEYED reads through the governed resolver
+ *    `report_resolve_context` (R-22). The client supplies a report id and
+ *    nothing else — never a session id, never a student id — so a caller
+ *    cannot pair a report it may read with a session or student it may not.
+ *
+ * LIFECYCLE. No transition is decided here. TypeScript only ROUTES on
+ * RPC-returned state (choosing which governed RPC to call next) and then
+ * VERIFIES that the state the database reported is the one the frontend
+ * contract's literal type promises; when it is not, the caller gets a
+ * non-disclosing non-success outcome rather than an asserted status.
+ * Trainer approval publishes nothing; AI approves, submits and publishes
+ * nothing; management edits wording only; the parent surface reads the
+ * submitted canonical version only.
+ *
+ * NON-DISCLOSURE. Every denial collapses to `unauthorized` or `unavailable`
+ * exactly as the underlying cores and RPCs already define them. Nothing here
+ * distinguishes "no such report" from "not permitted", and no message
+ * interpolates row content.
+ */
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { ActionResult } from "@/server/contracts/action-result";
+import { createRequestSupabaseClient } from "@/server/platform/supabase/request";
+import { resolveSessionIdentity, toSessionUserDto } from "@/server/modules/identity-access/session-core";
+import {
+  FRAMEWORK_DIMENSIONS,
+  RUBRIC_ANCHORS,
+  isDimensionCode,
+  isRatingLevel,
+} from "@/server/modules/framework/dimensions";
+import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver";
+import {
+  firstRow,
+  type CorrectionIssueScope,
+  type WorkingReportRow,
+} from "@/server/modules/report-workflow/rpc-types";
+import {
+  getSessionRosterCore,
+  getTrainerWorkingReportCore,
+  listReturnedReportsCore,
+  listTrainerSessionsCore,
+} from "@/server/modules/report-workflow/trainer-projections";
+import {
+  getManagementReviewCandidateCore,
+  listManagementCorrectionTrackingCore,
+  listManagementPendingReviewCore,
+} from "@/server/modules/management-view/projections";
+import {
+  getCanonicalReportCore,
+  getParentAvailabilityCore,
+  listParentReportsCore,
+} from "@/server/modules/parent-view/projections";
+import {
+  getTrainerObservationCore,
+  saveObservationCore,
+  type TrainerObservationDto,
+} from "@/server/modules/observation/core";
+import {
+  managementApproveAndSubmitCore,
+  managementEditWordingCore,
+  managementReturnToTrainerCore,
+  saveTrainerEditCore,
+  trainerApproveCore,
+  updateTrainerChecklistCore,
+} from "@/server/modules/report-workflow/core";
+import { requestDraft as requestDraftAction } from "@/server/modules/report-workflow/actions";
+import type {
+  AdapterAssessmentDraftDto,
+  AdapterAvailabilityStateDto,
+  AdapterCanonicalReportDto,
+  AdapterCorrectionRequestDto,
+  AdapterDimensionCode,
+  AdapterDimensionDto,
+  AdapterDraftGenerationContextDto,
+  AdapterIssueScope,
+  AdapterManagementApproveAndSubmitInput,
+  AdapterManagementApproveAndSubmitSuccess,
+  AdapterManagementEditWordingInput,
+  AdapterManagementEditWordingSuccess,
+  AdapterManagementQueueRowDto,
+  AdapterManagementReturnToTrainerInput,
+  AdapterManagementReturnToTrainerSuccess,
+  AdapterManagementReviewDto,
+  AdapterParentReportListItemDto,
+  AdapterRatingLevel,
+  AdapterRequestDraftInput,
+  AdapterRequestDraftSuccess,
+  AdapterReturnedReportQueueItemDto,
+  AdapterRosterEntryDto,
+  AdapterSaveObservationInput,
+  AdapterSaveObservationSuccess,
+  AdapterSaveTrainerEditInput,
+  AdapterSaveTrainerEditSuccess,
+  AdapterSessionUserDto,
+  AdapterTrainerApproveInput,
+  AdapterTrainerApproveSuccess,
+  AdapterTrainerSessionSummaryDto,
+  AdapterTrainerWorkingReportDto,
+  AdapterUpdateTrainerChecklistInput,
+} from "@/server/modules/integration-adapter/adapter-dtos";
+
+// ---------------------------------------------------------------------
+// internal helpers (not exported — a "use server" module may export only
+// async functions, and these must never become a client-callable endpoint)
+// ---------------------------------------------------------------------
+
+/**
+ * DB `assessment_fact` -> frontend `derived_assessment_fact`. The two
+ * vocabularies are both ratified and deliberately spelled differently; the
+ * translation lives here and nowhere else.
+ */
+function scopeToUi(scope: CorrectionIssueScope): AdapterIssueScope {
+  return scope === "assessment_fact" ? "derived_assessment_fact" : scope;
+}
+
+function scopeToDb(scope: AdapterIssueScope): CorrectionIssueScope {
+  return scope === "derived_assessment_fact" ? "assessment_fact" : scope;
+}
+
+function correctionToUi(correction: {
+  readonly id: string;
+  readonly issueScope: CorrectionIssueScope;
+  readonly dimensionCode?: string;
+  readonly status: "open" | "resolved";
+  readonly reason?: string;
+}): AdapterCorrectionRequestDto {
+  return {
+    id: correction.id,
+    issueScope: scopeToUi(correction.issueScope),
+    // The dimension is carried only when the database's value is one of the
+    // ratified nine. An unrecognised code is DROPPED, never forwarded.
+    ...(correction.dimensionCode && isDimensionCode(correction.dimensionCode)
+      ? { dimensionCode: correction.dimensionCode as AdapterDimensionCode }
+      : {}),
+    status: correction.status,
+    ...(correction.reason !== undefined ? { reason: correction.reason } : {}),
+  };
+}
+
+async function readWorking(
+  client: SupabaseClient,
+  sessionId: string,
+  studentId: string,
+): Promise<WorkingReportRow | null> {
+  const { data, error } = await client.rpc("report_get_working", {
+    p_class_session_id: sessionId,
+    p_student_id: studentId,
+  });
+  if (error) return null;
+  return firstRow<WorkingReportRow>(data);
+}
+
+async function readSessionDate(client: SupabaseClient, sessionId: string): Promise<string> {
+  const { data } = await client.from("class_sessions").select("id, session_date").eq("id", sessionId);
+  return ((data?.[0] as { session_date?: string } | undefined)?.session_date) ?? "";
+}
+
+async function readStudentName(client: SupabaseClient, studentId: string): Promise<string> {
+  const { data } = await client.from("students").select("id, full_name").eq("id", studentId);
+  return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? "Student";
+}
+
+/**
+ * The governed report-id -> (session, student) translation. The ONLY input is
+ * the report identifier plus the caller's live session; a zero-row answer is
+ * the single non-disclosing denial for every reason at once.
+ */
+async function resolveContext(
+  client: SupabaseClient,
+  reportId: string,
+): Promise<ActionResult<{ readonly sessionId: string; readonly studentId: string }>> {
+  return resolveReportContextCore(client, reportId);
+}
+
+// ---------------------------------------------------------------------
+// identity
+// ---------------------------------------------------------------------
+
+export async function adapterGetSessionUser(): Promise<ActionResult<AdapterSessionUserDto>> {
+  const client = await createRequestSupabaseClient();
+  const identity = await resolveSessionIdentity(client);
+  if (identity.outcome !== "success") return identity;
+  return { outcome: "success", data: toSessionUserDto(identity.data) };
+}
+
+// ---------------------------------------------------------------------
+// framework constants
+// ---------------------------------------------------------------------
+
+/**
+ * The nine governed dimensions and their four ratified rubric anchors. These
+ * are FRAMEWORK CONSTANTS (spec §3.1/§3.3), read from the backend's own
+ * `server/modules/framework/dimensions.ts` so the participant surface and the
+ * AI skeleton are grounded in one declaration. Deliberately NOT read from
+ * `lib/frontend/fixtures/**` — no participant path may reach the fixture.
+ */
+export async function adapterGetDimensions(): Promise<ActionResult<readonly AdapterDimensionDto[]>> {
+  return {
+    outcome: "success",
+    data: FRAMEWORK_DIMENSIONS.map((dimension) => ({
+      dimensionCode: dimension.code,
+      group: dimension.group,
+      displayName: dimension.displayName,
+      focus: dimension.focus,
+      ordinal: dimension.ordinal,
+      rubricAnchors: RUBRIC_ANCHORS,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------
+// trainer reads
+// ---------------------------------------------------------------------
+
+export async function adapterListTrainerSessions(): Promise<
+  ActionResult<readonly AdapterTrainerSessionSummaryDto[]>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listTrainerSessionsCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: result.data.map((session) => ({
+      sessionId: session.sessionId,
+      moduleName: session.moduleName,
+      classGrade: session.classGrade,
+      date: session.date,
+      // `starts_at`/`ends_at` are nullable in the schema. A missing clock time
+      // is reported as the empty string, never as an invented time.
+      startTime: session.startTime ?? "",
+      endTime: session.endTime ?? "",
+      studentCount: session.studentCount,
+      countsByReportState: session.countsByReportState as Readonly<Record<string, number>>,
+    })),
+  };
+}
+
+export async function adapterGetSessionRoster(
+  sessionId: string,
+): Promise<ActionResult<readonly AdapterRosterEntryDto[]>> {
+  const client = await createRequestSupabaseClient();
+  return getSessionRosterCore(client, sessionId);
+}
+
+export async function adapterGetAssessmentDraft(
+  sessionId: string,
+  studentId: string,
+): Promise<ActionResult<AdapterAssessmentDraftDto>> {
+  const client = await createRequestSupabaseClient();
+  const observation = await getTrainerObservationCore(client, sessionId, studentId);
+  if (observation.outcome !== "success") return observation;
+
+  const saved: TrainerObservationDto = observation.data;
+  const ratingOf = new Map(saved.ratings.map((entry) => [entry.dimensionCode as string, entry.rating]));
+  const working = await readWorking(client, sessionId, studentId);
+
+  return {
+    outcome: "success",
+    data: {
+      // Null, not "", when no report exists yet — see AdapterAssessmentDraftDto.
+      reportId: working ? working.report_id : null,
+      sessionId,
+      studentId,
+      studentDisplayName: await readStudentName(client, studentId),
+      ratings: FRAMEWORK_DIMENSIONS.map((dimension) => ({
+        dimensionCode: dimension.code,
+        rating: (ratingOf.get(dimension.code) ?? null) as AdapterRatingLevel | null,
+      })),
+      notes: saved.observationNotes,
+      followUp: saved.followUpNotes,
+      observationLockVersion: saved.observationLockVersion ?? 0,
+    },
+  };
+}
+
+export async function adapterGetTrainerWorkingReport(
+  reportId: string,
+): Promise<ActionResult<AdapterTrainerWorkingReportDto>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, reportId);
+  if (context.outcome !== "success") return context;
+
+  const report = await getTrainerWorkingReportCore(client, context.data.sessionId, context.data.studentId);
+  if (report.outcome !== "success") return report;
+
+  // Both halves of every snapshot must be governed vocabulary or the snapshot
+  // is dropped; nothing is coerced into the ratified unions.
+  const snapshots = report.data.ratingSnapshots.filter(
+    (snapshot) => isDimensionCode(snapshot.dimensionCode) && isRatingLevel(snapshot.rating),
+  );
+  return {
+    outcome: "success",
+    data: {
+      reportId: report.data.reportId,
+      sessionId: report.data.sessionId,
+      studentId: report.data.studentId,
+      studentDisplayName: report.data.studentDisplayName,
+      sessionDate: await readSessionDate(client, report.data.sessionId),
+      status: report.data.status,
+      lockVersion: report.data.lockVersion,
+      versionId: report.data.versionId,
+      revisionNumber: report.data.revisionNumber,
+      panels: report.data.panels,
+      contentHash: report.data.contentHash,
+      checklist: report.data.checklist,
+      ratingSnapshots: snapshots.map((snapshot) => ({
+        dimensionCode: snapshot.dimensionCode as AdapterDimensionCode,
+        displayName: snapshot.displayName,
+        rating: snapshot.rating as AdapterRatingLevel,
+      })),
+      canonicalPointer: report.data.canonicalPointer,
+      coachNotes: report.data.coachNotes,
+      ...(report.data.openCorrection
+        ? { openCorrection: correctionToUi(report.data.openCorrection) }
+        : {}),
+    },
+  };
+}
+
+export async function adapterGetDraftGenerationContext(
+  reportId: string,
+): Promise<ActionResult<AdapterDraftGenerationContextDto>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, reportId);
+  if (context.outcome !== "success") return context;
+
+  const working = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!working) return { outcome: "unavailable" };
+  // The generation surface exists for exactly two lifecycle positions. Any
+  // other position is reported as `unavailable` rather than coerced into one
+  // of the two — TypeScript never restates a status the database did not give.
+  if (working.status !== "observation_saved" && working.status !== "draft_ready") {
+    return { outcome: "unavailable" };
+  }
+
+  const observation = await getTrainerObservationCore(client, context.data.sessionId, context.data.studentId);
+  if (observation.outcome !== "success") return observation;
+  if (!observation.data.observationExists || observation.data.observationLockVersion === null) {
+    return { outcome: "unavailable" };
+  }
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: working.report_id,
+      studentDisplayName: await readStudentName(client, context.data.studentId),
+      observationLockVersion: observation.data.observationLockVersion,
+      status: working.status,
+    },
+  };
+}
+
+export async function adapterListReturnedReports(): Promise<
+  ActionResult<readonly AdapterReturnedReportQueueItemDto[]>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listReturnedReportsCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: result.data.map((item) => ({
+      reportId: item.reportId,
+      sessionId: item.sessionId,
+      studentId: item.studentId,
+      studentDisplayName: item.studentDisplayName,
+      sessionDate: item.sessionDate,
+      correction: correctionToUi(item.correction),
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------
+// management reads
+// ---------------------------------------------------------------------
+
+/**
+ * `ManagementQueueRowDto.status` on the frontend is the three-value union
+ * `trainer_approved | needs_edit | draft_ready`. The governed projections
+ * return the full `report_status` enum, so a row outside the three is DROPPED
+ * rather than coerced. No management surface has ever shown a fourth status,
+ * and inventing one here would be TypeScript asserting a lifecycle position.
+ */
+function narrowQueueRows(
+  rows: ReadonlyArray<{
+    readonly reportId: string;
+    readonly sessionId: string;
+    readonly studentId: string;
+    readonly studentDisplayName: string;
+    readonly sessionDate: string;
+    readonly status: string;
+    readonly openCorrectionScope?: CorrectionIssueScope;
+    readonly openCorrectionStatus?: "open" | "resolved";
+    readonly openCorrectionReason?: string;
+  }>,
+): readonly AdapterManagementQueueRowDto[] {
+  const allowed = new Set(["trainer_approved", "needs_edit", "draft_ready"]);
+  return rows
+    .filter((row) => allowed.has(row.status))
+    .map((row) => ({
+      reportId: row.reportId,
+      sessionId: row.sessionId,
+      studentId: row.studentId,
+      studentDisplayName: row.studentDisplayName,
+      sessionDate: row.sessionDate,
+      status: row.status as AdapterManagementQueueRowDto["status"],
+      ...(row.openCorrectionScope ? { openCorrectionScope: scopeToUi(row.openCorrectionScope) } : {}),
+      ...(row.openCorrectionStatus ? { openCorrectionStatus: row.openCorrectionStatus } : {}),
+      ...(row.openCorrectionReason !== undefined
+        ? { openCorrectionReason: row.openCorrectionReason }
+        : {}),
+    }));
+}
+
+export async function adapterListManagementPendingReviews(): Promise<
+  ActionResult<readonly AdapterManagementQueueRowDto[]>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listManagementPendingReviewCore(client);
+  if (result.outcome !== "success") return result;
+  return { outcome: "success", data: narrowQueueRows(result.data) };
+}
+
+export async function adapterListManagementCorrectionTracking(): Promise<
+  ActionResult<readonly AdapterManagementQueueRowDto[]>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listManagementCorrectionTrackingCore(client);
+  if (result.outcome !== "success") return result;
+  // `report_list_management_corrections` legitimately reports rows at
+  // `needs_edit` (returned, awaiting the trainer), `draft_ready` (the trainer
+  // has produced a correction version) and `trainer_approved` (re-approved and
+  // back in the queue). All three survive `narrowQueueRows`.
+  return { outcome: "success", data: narrowQueueRows(result.data) };
+}
+
+export async function adapterGetManagementReview(
+  reportId: string,
+): Promise<ActionResult<AdapterManagementReviewDto>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, reportId);
+  if (context.outcome !== "success") return context;
+
+  const review = await getManagementReviewCandidateCore(
+    client,
+    context.data.sessionId,
+    context.data.studentId,
+  );
+  if (review.outcome !== "success") return review;
+
+  // RPC-15 is STATUS-GATED and only ever yields a trainer-approved candidate
+  // (A-038). Anything else — and any missing render proof — is the same
+  // non-disclosing `unavailable` the zero-row case already produces.
+  if (review.data.status !== "trainer_approved") return { outcome: "unavailable" };
+  if (review.data.lockVersion === null || review.data.versionId === null || review.data.wordingHash === null) {
+    return { outcome: "unavailable" };
+  }
+
+  return {
+    outcome: "success",
+    data: {
+      status: review.data.status,
+      lockVersion: review.data.lockVersion,
+      versionId: review.data.versionId,
+      panels: review.data.panels,
+      wordingHash: review.data.wordingHash,
+      ...(review.data.submittedAt ? { submittedAt: review.data.submittedAt } : {}),
+      ...(review.data.openCorrectionScope
+        ? { openCorrectionScope: scopeToUi(review.data.openCorrectionScope) }
+        : {}),
+      ...(review.data.openCorrectionStatus
+        ? { openCorrectionStatus: review.data.openCorrectionStatus }
+        : {}),
+    },
+  };
+}
+
+// ---------------------------------------------------------------------
+// parent reads — the submitted canonical narrative and nothing else
+// ---------------------------------------------------------------------
+
+export async function adapterGetParentAvailability(): Promise<
+  ActionResult<AdapterAvailabilityStateDto>
+> {
+  return getParentAvailabilityCore(await createRequestSupabaseClient());
+}
+
+export async function adapterListParentSubmittedReports(): Promise<
+  ActionResult<readonly AdapterParentReportListItemDto[]>
+> {
+  return listParentReportsCore(await createRequestSupabaseClient());
+}
+
+export async function adapterGetCanonicalReport(
+  sessionId: string,
+  studentId: string,
+): Promise<ActionResult<AdapterCanonicalReportDto>> {
+  // `report_get_canonical` is itself keyed by the pair and resolves EXCLUSIVELY
+  // through `latest_submitted_version_id`, re-deriving the caller's reach on
+  // every call. A caller naming a pair it may not read gets zero rows.
+  return getCanonicalReportCore(await createRequestSupabaseClient(), sessionId, studentId);
+}
+
+// ---------------------------------------------------------------------
+// writes
+// ---------------------------------------------------------------------
+
+export async function adapterSaveObservation(
+  input: AdapterSaveObservationInput,
+): Promise<ActionResult<AdapterSaveObservationSuccess>> {
+  const client = await createRequestSupabaseClient();
+
+  // All nine dimensions, each with a governed rating. An unrated dimension is
+  // a validation outcome here and again inside the database.
+  const ratings: Array<{ dimensionCode: string; rating: string }> = [];
+  for (const entry of input.ratings) {
+    if (entry.rating === null) {
+      return {
+        outcome: "validation",
+        message: "All nine dimensions must be rated before saving.",
+        fields: [{ path: "ratings", message: "All nine dimensions must be rated." }],
+      };
+    }
+    ratings.push({ dimensionCode: entry.dimensionCode, rating: entry.rating });
+  }
+
+  // The port carries notes and follow-up only. Chips and the term-evidence
+  // note are read back and passed through UNCHANGED so a save through this
+  // surface can never silently discard governed data the trainer entered
+  // through another one.
+  const existing = await getTrainerObservationCore(client, input.sessionId, input.studentId);
+  if (existing.outcome !== "success") return existing;
+  const prior = existing.data;
+
+  const saved = await saveObservationCore(client, {
+    sessionId: input.sessionId,
+    studentId: input.studentId,
+    ...(prior.observationExists && prior.observationId !== null
+      ? {
+          expectedObservationId: prior.observationId,
+          // The CAS value is the one the CALLER rendered, not the one just
+          // read back — that is what makes a concurrent edit lose.
+          expectedLockVersion: input.observationLockVersion,
+        }
+      : {}),
+    strengthChips: prior.strengthChips,
+    focusChips: prior.focusChips,
+    observationNotes: input.notes,
+    followUpNotes: input.followUp,
+    termEvidenceNotes: prior.termEvidenceNotes,
+    ratings,
+  });
+  if (saved.outcome !== "success") return saved;
+
+  // The report position is READ BACK from the database. Saving an assessment
+  // does not advance the report lifecycle (ratified operator ruling), so a
+  // first save legitimately leaves no report at all.
+  const working = await readWorking(client, input.sessionId, input.studentId);
+  return {
+    outcome: "success",
+    data: {
+      reportId: working ? working.report_id : null,
+      observationLockVersion: saved.data.observationLockVersion,
+      status: working ? working.status : "no_report",
+    },
+  };
+}
+
+export async function adapterRequestDraft(
+  input: AdapterRequestDraftInput,
+): Promise<ActionResult<AdapterRequestDraftSuccess>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, input.reportId);
+  if (context.outcome !== "success") return context;
+
+  // The governed orchestration owns ensure/create -> mark -> request ->
+  // grounded generation -> trusted store. It re-reads the saved observation
+  // itself; the caller's `observationLockVersion` is a render proof only and
+  // establishes nothing.
+  const result = await requestDraftAction({
+    sessionId: context.data.sessionId,
+    studentId: context.data.studentId,
+  });
+  if (result.outcome !== "success") return result;
+  if (result.data.status !== "draft_ready") return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: result.data.reportId,
+      status: result.data.status,
+      versionId: result.data.versionId,
+    },
+  };
+}
+
+export async function adapterSaveTrainerEdit(
+  input: AdapterSaveTrainerEditInput,
+): Promise<ActionResult<AdapterSaveTrainerEditSuccess>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, input.reportId);
+  if (context.outcome !== "success") return context;
+
+  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!before) return { outcome: "unavailable" };
+  // The expected-state argument is the position the DATABASE just reported,
+  // routed straight back into the CAS. RPC-6 re-verifies it under the
+  // aggregate row lock, so this is routing, not a legality decision.
+  if (before.status !== "draft_ready" && before.status !== "needs_edit") {
+    return {
+      outcome: "stale_state",
+      message: "This report is no longer in a state that allows that action. Reload to continue.",
+    };
+  }
+  const hadOpenCorrection = before.open_correction_request_id !== null;
+
+  const saved = await saveTrainerEditCore(client, {
+    reportId: input.reportId,
+    expectedStatus: before.status,
+    expectedLockVersion: input.expectedLockVersion,
+    expectedVersionId: input.expectedVersionId,
+    panels: input.panels,
+    ...(input.reaffirmCorrectionRequestId !== undefined
+      ? { reaffirmCorrectionRequestId: input.reaffirmCorrectionRequestId }
+      : {}),
+  });
+  if (saved.outcome !== "success") return saved;
+  if (saved.data.status !== "draft_ready") return { outcome: "unavailable" };
+
+  const after = await readWorking(client, context.data.sessionId, context.data.studentId);
+  return {
+    outcome: "success",
+    data: {
+      reportId: saved.data.reportId,
+      status: saved.data.status,
+      versionId: saved.data.versionId,
+      checklistReset: true,
+      // Observed, not asserted: the correction is resolved when the database
+      // stops reporting an open one.
+      correctionResolved: hadOpenCorrection && (after === null || after.open_correction_request_id === null),
+    },
+  };
+}
+
+export async function adapterUpdateTrainerChecklist(
+  input: AdapterUpdateTrainerChecklistInput,
+): Promise<ActionResult<AdapterTrainerWorkingReportDto>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, input.reportId);
+  if (context.outcome !== "success") return context;
+
+  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!before) return { outcome: "unavailable" };
+
+  const updated = await updateTrainerChecklistCore(client, {
+    reportId: input.reportId,
+    expectedLockVersion: before.lock_version,
+    expectedVersionId: input.expectedVersionId,
+    evidenceConfirmed: input.checklist.evidenceConfirmed,
+    aiDraftReviewed: input.checklist.aiDraftReviewed,
+    privacyChecked: input.checklist.privacyChecked,
+  });
+  if (updated.outcome !== "success") return updated;
+
+  // The port returns the re-read working report, never a locally patched copy.
+  return adapterGetTrainerWorkingReport(input.reportId);
+}
+
+export async function adapterTrainerApprove(
+  input: AdapterTrainerApproveInput,
+): Promise<ActionResult<AdapterTrainerApproveSuccess>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, input.reportId);
+  if (context.outcome !== "success") return context;
+
+  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!before) return { outcome: "unavailable" };
+  if (before.status !== "draft_ready" && before.status !== "needs_edit") {
+    return {
+      outcome: "stale_state",
+      message: "This report is no longer in a state that allows that action. Reload to continue.",
+    };
+  }
+
+  const approved = await trainerApproveCore(client, {
+    reportId: input.reportId,
+    expectedStatus: before.status,
+    expectedLockVersion: input.expectedLockVersion,
+    expectedVersionId: input.expectedVersionId,
+    expectedContentHash: input.expectedContentHash,
+  });
+  if (approved.outcome !== "success") return approved;
+  if (approved.data.status !== "trainer_approved") return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: approved.data.reportId,
+      status: approved.data.status,
+      // A-020: trainer approval freezes a version and PUBLISHES NOTHING. The
+      // database performs no submission here and none is claimed.
+      published: false,
+      managementReviewRequired: true,
+    },
+  };
+}
+
+export async function adapterManagementEditWording(
+  input: AdapterManagementEditWordingInput,
+): Promise<ActionResult<AdapterManagementEditWordingSuccess>> {
+  const client = await createRequestSupabaseClient();
+  // WORDING ONLY: the four panels are the entire mutable surface RPC-9
+  // accepts. No rating, checklist item, observation or hash can be expressed.
+  const edited = await managementEditWordingCore(client, {
+    reportId: input.reportId,
+    expectedLockVersion: input.expectedLockVersion,
+    expectedVersionId: input.expectedVersionId,
+    expectedWordingHash: input.expectedWordingHash,
+    panels: input.panels,
+  });
+  if (edited.outcome !== "success") return edited;
+  if (edited.data.status !== "trainer_approved") return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: edited.data.reportId,
+      status: edited.data.status,
+      versionId: edited.data.versionId,
+      wordingHash: edited.data.wordingHash,
+    },
+  };
+}
+
+export async function adapterManagementReturnToTrainer(
+  input: AdapterManagementReturnToTrainerInput,
+): Promise<ActionResult<AdapterManagementReturnToTrainerSuccess>> {
+  const client = await createRequestSupabaseClient();
+  const returned = await managementReturnToTrainerCore(client, {
+    reportId: input.reportId,
+    expectedLockVersion: input.expectedLockVersion,
+    expectedVersionId: input.expectedVersionId,
+    issueScope: scopeToDb(input.issueScope),
+    ...(input.dimensionCode !== undefined ? { dimensionCode: input.dimensionCode } : {}),
+    reason: input.reason,
+  });
+  if (returned.outcome !== "success") return returned;
+  if (returned.data.status !== "needs_edit") return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: returned.data.reportId,
+      status: returned.data.status,
+      correctionRequestId: returned.data.correctionRequestId,
+      // Returning creates no version and moves no canonical pointer.
+      parentVisible: false,
+    },
+  };
+}
+
+export async function adapterManagementApproveAndSubmit(
+  input: AdapterManagementApproveAndSubmitInput,
+): Promise<ActionResult<AdapterManagementApproveAndSubmitSuccess>> {
+  const client = await createRequestSupabaseClient();
+  // RPC-11 is the ONLY publication in the system, and it is a management
+  // action. No AI path and no trainer path reaches it.
+  const submitted = await managementApproveAndSubmitCore(client, {
+    reportId: input.reportId,
+    expectedLockVersion: input.expectedLockVersion,
+    expectedVersionId: input.expectedVersionId,
+    expectedWordingHash: input.expectedWordingHash,
+  });
+  if (submitted.outcome !== "success") return submitted;
+  if (submitted.data.status !== "submitted") return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      reportId: submitted.data.reportId,
+      status: submitted.data.status,
+      submittedAt: submitted.data.submittedAt,
+      parentVisible: true,
+    },
+  };
+}

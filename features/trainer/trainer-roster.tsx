@@ -12,7 +12,7 @@ import type {
   RosterEntryDto,
   TrainerSessionSummaryDto,
 } from "@/lib/frontend/contracts/physical-test";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import { asFailure, type ResourceState } from "./resource-state";
 
 /**
@@ -140,7 +140,7 @@ export function TrainerRoster() {
   const params = useParams<{ sessionId: string }>();
   const sessionId = params.sessionId;
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const [state, setState] = useState<ResourceState<RosterView>>({ kind: "loading" });
   const [attendanceFilter, setAttendanceFilter] = useState<AttendanceFilter>("all");
   const [sortMode, setSortMode] = useState<SortMode>("name");
@@ -172,7 +172,7 @@ export function TrainerRoster() {
     return () => {
       active = false;
     };
-  }, [fixtureRevision, port, sessionId]);
+  }, [dataRevision, port, sessionId]);
 
   const roster = useMemo(
     () => (state.kind === "ready" ? state.data.roster : []),

@@ -14,7 +14,7 @@ import type {
 } from "@/lib/frontend/contracts/physical-test";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type ResourceState } from "./resource-state";
-import { usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 
 /**
  * Trainer wording editor — the `/trainer/reports/[reportId]/edit` sub-surface of screen 10

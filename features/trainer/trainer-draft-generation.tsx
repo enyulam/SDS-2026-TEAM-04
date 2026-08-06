@@ -21,7 +21,7 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type FailureResult } from "./resource-state";
-import { usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 
 /**
  * Screen 08 — Trainer AI Report Generation (operator checkpoint F-08).

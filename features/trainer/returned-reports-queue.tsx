@@ -8,12 +8,12 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import type { ReturnedReportQueueItemDto } from "@/lib/frontend/contracts/physical-test";
 import { asFailure, type ResourceState } from "./resource-state";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 
 export function ReturnedReportsQueue() {
   const searchParams = useSearchParams();
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const [resource, setResource] = useState<
     ResourceState<readonly ReturnedReportQueueItemDto[]>
   >({ kind: "loading" });
@@ -31,7 +31,7 @@ export function ReturnedReportsQueue() {
     return () => {
       active = false;
     };
-  }, [fixtureRevision, port]);
+  }, [dataRevision, port]);
 
   if (searchParams.get("status") !== "needs_edit") {
     return <StatePanel result={{ outcome: "unavailable" }} />;

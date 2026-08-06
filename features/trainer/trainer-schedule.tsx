@@ -9,7 +9,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import type { TrainerSessionSummaryDto } from "@/lib/frontend/contracts/physical-test";
 import { asFailure, type ResourceState } from "./resource-state";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import {
   SCHEDULE_VIEW_MODES,
   WEEKDAY_HEADINGS,
@@ -69,14 +69,21 @@ import {
  *     roster, the behaviour that already existed on `/trainer` and is preserved here.
  */
 
-/** Presentation tone per Class Grade. Class Grade is unchanged by Amendment 006 (A-054). */
-const CLASS_GRADE_TONE = {
+/**
+ * Presentation tone per Class Grade. Class Grade is unchanged by Amendment 006
+ * (A-054). F16-C: `classGrade` is now the DISPLAY NAME the database holds, so
+ * the map is keyed by string with an explicit neutral default — an unrecognised
+ * grade renders in the brand tone rather than crashing or being renamed.
+ */
+const CLASS_GRADE_TONE: Readonly<Record<string, "brand" | "info" | "success">> = {
   Beginner: "brand",
   Intermediate: "info",
   Advanced: "success",
-} as const satisfies Readonly<
-  Record<TrainerSessionSummaryDto["classGrade"], "brand" | "info" | "success">
->;
+};
+
+function classGradeTone(classGrade: string): "brand" | "info" | "success" {
+  return CLASS_GRADE_TONE[classGrade] ?? "brand";
+}
 
 const CHIP_TONE = {
   brand: "bg-brand-100 text-brand-800",
@@ -92,7 +99,7 @@ const VIEW_LABEL: Readonly<Record<ScheduleViewMode, string>> = {
 
 export function TrainerSchedule() {
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const searchParams = useSearchParams();
   const searchId = useId();
   const monthId = useId();
@@ -119,7 +126,7 @@ export function TrainerSchedule() {
     return () => {
       active = false;
     };
-  }, [port, fixtureRevision]);
+  }, [port, dataRevision]);
 
   const allSessions = useMemo(
     () => (state.kind === "ready" ? state.data : []),
@@ -451,7 +458,7 @@ function DayCell({
           <span
             key={session.sessionId}
             className={`block truncate rounded-md px-2 py-1.5 text-micro font-bold ${
-              CHIP_TONE[CLASS_GRADE_TONE[session.classGrade]]
+              CHIP_TONE[classGradeTone(session.classGrade)]
             }`}
           >
             <span className="block truncate">

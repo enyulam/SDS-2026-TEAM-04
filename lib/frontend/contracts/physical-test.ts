@@ -62,7 +62,15 @@ export type SessionUserDto = {
 export type TrainerSessionSummaryDto = {
   readonly sessionId: string;
   readonly moduleName: string;
-  readonly classGrade: "Beginner" | "Intermediate" | "Advanced";
+  /**
+   * The centre's Class Grade DISPLAY NAME, read from `class_grades.display_name`
+   * (A-054 vocabulary, unchanged by Amendment 006). F16-C widened this from the
+   * three-value literal union to `string`: the union was a fixture artefact, and
+   * the real adapter must report the row the database actually holds rather than
+   * coerce an unrecognised grade into one of three. Presentation keys off it with
+   * an explicit default (see `CLASS_GRADE_TONE` in `features/trainer/trainer-schedule.tsx`).
+   */
+  readonly classGrade: string;
   readonly date: string;
   readonly startTime: string;
   readonly endTime: string;
@@ -94,7 +102,14 @@ export type AssessmentRatingDto = {
 };
 
 export type AssessmentDraftDto = {
-  readonly reportId: string;
+  /**
+   * NULL when the governed backend has not created a report for this pair yet.
+   * Report creation is owned by `requestDraft` (RPC-1) — saving an assessment
+   * never advances the report lifecycle — so a first assessment legitimately
+   * has no report identifier. F16-C widened this rather than let the real
+   * adapter emit a fabricated or empty id.
+   */
+  readonly reportId: string | null;
   readonly sessionId: string;
   readonly studentId: string;
   readonly studentDisplayName: string;
@@ -209,7 +224,8 @@ export type AvailabilityStateDto =
   | "linked_unavailable";
 
 export type SaveObservationInput = {
-  readonly reportId: string;
+  /** Null before `requestDraft` creates the report — see `AssessmentDraftDto.reportId`. */
+  readonly reportId: string | null;
   readonly sessionId: string;
   readonly studentId: string;
   readonly ratings: readonly AssessmentRatingDto[];
@@ -219,9 +235,17 @@ export type SaveObservationInput = {
 };
 
 export type SaveObservationSuccess = {
-  readonly reportId: string;
+  /** Null when no report exists yet — see `AssessmentDraftDto.reportId`. */
+  readonly reportId: string | null;
   readonly observationLockVersion: number;
-  readonly status: "observation_saved";
+  /**
+   * The report position the DATABASE reports after the save, or `no_report`
+   * when the governed backend has not created one. F16-C widened this from the
+   * single literal `"observation_saved"`: saving an assessment does not advance
+   * the report lifecycle, so restating that one status would have been
+   * TypeScript asserting a transition PostgreSQL never performed.
+   */
+  readonly status: ReportStatus | "no_report";
 };
 
 export type RequestDraftInput = {

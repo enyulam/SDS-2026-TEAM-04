@@ -30,7 +30,7 @@ import {
 } from "@/lib/frontend/contracts/physical-test";
 import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import { asFailure, type ResourceState } from "./resource-state";
 
 /**
@@ -198,7 +198,7 @@ type AssessmentView = {
 export function TrainerAssessment() {
   const params = useParams<{ sessionId: string; studentId: string }>();
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const [resource, setResource] = useState<ResourceState<AssessmentView>>({ kind: "loading" });
   const [roster, setRoster] = useState<readonly RosterEntryDto[] | null>(null);
   const [session, setSession] = useState<TrainerSessionSummaryDto | null>(null);
@@ -244,9 +244,19 @@ export function TrainerAssessment() {
        */
       setFollowUp(draftResult.data.followUp);
       setLockVersion(draftResult.data.observationLockVersion);
-      const workingResult = await port.getTrainerWorkingReport(draftResult.data.reportId);
+      /*
+       * F16-C — `reportId` is null until the governed backend creates the report
+       * (report creation is owned by `requestDraft`/RPC-1). No report id means
+       * there is no working report to read and therefore no open correction; we
+       * do not invent an identifier to ask about.
+       */
+      const workingResult =
+        draftResult.data.reportId === null
+          ? null
+          : await port.getTrainerWorkingReport(draftResult.data.reportId);
       if (!active) return;
       if (
+        workingResult !== null &&
         workingResult.outcome === "success" &&
         workingResult.data.status === "needs_edit" &&
         workingResult.data.openCorrection?.status === "open"
@@ -261,7 +271,7 @@ export function TrainerAssessment() {
     return () => {
       active = false;
     };
-  }, [params.sessionId, params.studentId, port, fixtureRevision]);
+  }, [params.sessionId, params.studentId, port, dataRevision]);
 
   /*
    * Session context for the identity card and the REVIEW & APPROVE rail. Both are secondary
@@ -285,7 +295,7 @@ export function TrainerAssessment() {
     return () => {
       active = false;
     };
-  }, [params.sessionId, port, fixtureRevision]);
+  }, [params.sessionId, port, dataRevision]);
 
   const ratedCount = useMemo(
     () => DIMENSION_CODES.filter((code) => ratings[code] !== null).length,
@@ -428,22 +438,33 @@ export function TrainerAssessment() {
             <FeedbackBanner
               tone="success"
               title={correction ? "Assessment correction saved" : "Observation saved"}
+              /*
+               * F16-C — the follow-on link is rendered ONLY when the governed
+               * backend actually holds a report identifier. Saving an assessment
+               * does not create a report (RPC-1 belongs to `requestDraft`), so a
+               * first save legitimately has none. A link to a fabricated or empty
+               * id would be a broken promise dressed as a working control.
+               */
               actions={
-                <Link
-                  href={
-                    correction
-                      ? `/trainer/reports/${saveResult.data.reportId}/edit`
-                      : `/trainer/reports/${saveResult.data.reportId}/generate`
-                  }
-                  className="inline-flex min-h-10 items-center rounded-field bg-success-on px-3.5 py-2 text-small font-bold text-white no-underline hover:bg-[#215a39]"
-                >
-                  {correction ? "Create correction version" : "Continue to AI draft"}
-                </Link>
+                saveResult.data.reportId !== null ? (
+                  <Link
+                    href={
+                      correction
+                        ? `/trainer/reports/${saveResult.data.reportId}/edit`
+                        : `/trainer/reports/${saveResult.data.reportId}/generate`
+                    }
+                    className="inline-flex min-h-10 items-center rounded-field bg-success-on px-3.5 py-2 text-small font-bold text-white no-underline hover:bg-[#215a39]"
+                  >
+                    {correction ? "Create correction version" : "Continue to AI draft"}
+                  </Link>
+                ) : undefined
               }
             >
               {correction
                 ? "The governed assessment changes are saved. The frozen returned version remains unchanged until a fresh correction version is created."
-                : "All nine ratings and the Trainer's notes are preserved in this browser-session fixture."}
+                : saveResult.data.reportId !== null
+                  ? "All nine ratings and the Trainer's notes are saved."
+                  : "All nine ratings and the Trainer's notes are saved. This learner has no report yet — the report is created when AI drafting is requested."}
             </FeedbackBanner>
           )}
 

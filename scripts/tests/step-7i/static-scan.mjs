@@ -435,7 +435,47 @@ const fnBodies = new Map()
   // RPC-returned state (choosing which governed RPC to call next); it may
   // not decide a transition's legality — every RPC re-verifies everything.
   const serverFiles = walk(join(ROOT, 'server'))
+  const relOf = (f) => relative(ROOT, f).replace(/\\/g, '/')
+
+  // ------------------------------------------------------------------
+  // SCOPE OF (a)/(b)/(c): THE GOVERNED PATH ONLY -- RECONCILED AT F16-C
+  // ------------------------------------------------------------------
+  // T7I-40's ratified property is that PostgreSQL owns every transition and
+  // TypeScript holds NO status authority ON THE GOVERNED PATH. Exactly one
+  // directory is excluded, `lib/frontend/fixtures/`, and nothing broader:
+  // not `lib/`, not any `server/` or `app/` path.
+  //
+  // WHY THE EXCLUSION IS SOUND. `lib/frontend/fixtures/physical-test-fixture.ts`
+  // is a browser-only SIMULATION of the backend for UI development. It touches
+  // no database, no RPC and no session. Since F16-C it is also, provably, not
+  // on the governed path:
+  //   * the portals compose the REAL participant adapter by default --
+  //     `features/portal/physical-test-runtime.tsx` is the single composition
+  //     root and it constructs `createRealParticipantPhysicalTestPort()`;
+  //   * the fixture is selectable ONLY by the build-time development flag
+  //     NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE=1, which is OFF BY DEFAULT and
+  //     cannot be set from a query parameter, cookie, header or UI control;
+  //   * when it IS composed it is VISIBLY IDENTIFIED -- `PortalShell` renders a
+  //     persistent "Deterministic fixture mode" banner on every portal surface,
+  //     keyed off the port's own `identity.kind`, which the real adapter can
+  //     never report;
+  //   * real-auth navigation cannot reach it: `proxy.ts` and each layout's
+  //     `requirePortalAccess` gate the portals, and neither the layouts nor any
+  //     surface imports the fixture.
+  //
+  // THE PRICE OF THE EXCLUSION IS LEG (d) BELOW, which makes the scan STRONGER:
+  // the exclusion cannot silently become a hole, because a single participant
+  // -path import of the fixture module now FAILS this scan.
+  //
+  // The isolation itself is proved end-to-end by the F16-D test
+  // `tests/frontend/fixture-isolation-browser-smoke.mjs` (participant-mode
+  // navigation reaches no fixture surface, and the fixture banner is present
+  // on every portal surface in a fixture-mode build).
+  const FIXTURE_DIR = 'lib/frontend/fixtures/'
+  const isFixtureModule = (rel) => rel.startsWith(FIXTURE_DIR)
+
   const allAppFiles = [...serverFiles, ...walk(join(ROOT, 'app')), ...walk(join(ROOT, 'lib'))]
+    .filter((f) => !isFixtureModule(relOf(f)))
   for (const f of serverFiles) {
     const text = readFileSync(f, 'utf8')
     const rel = relative(ROOT, f).replace(/\\/g, '/')
@@ -465,7 +505,52 @@ const fnBodies = new Map()
       fail('T7I-40', `${rel} assigns a report status in TypeScript`)
     }
   }
-  if (failures === before) pass('T7I-40', 'no elevated-client import, no direct governed-table access, no TypeScript status/lock_version authority (reconciled to the B2 contract action set)')
+  // ------------------------------------------------------------------
+  // (d) FIXTURE CONTAINMENT -- the price of the (a)/(b)/(c) exclusion.
+  // ------------------------------------------------------------------
+  // No participant-path file may import the deterministic fixture. Only three
+  // places may: the fixture directory itself, the ONE flag-gated dev
+  // composition module, and the test harnesses. Anything else -- a layout, a
+  // portal shell, a feature surface, the composition root, a server module --
+  // is a governance failure, because it would put simulated data (and the
+  // TypeScript status assignments the exclusion above tolerates) back on the
+  // path a real participant can reach.
+  const FIXTURE_IMPORT = /from\s+['"][^'"]*lib\/frontend\/fixtures\/physical-test-fixture['"]|import\(\s*['"][^'"]*lib\/frontend\/fixtures\/physical-test-fixture['"]/
+  const FIXTURE_IMPORT_ALLOWED = [
+    'lib/frontend/fixtures/',                    // the fixture's own modules
+    'features/dev-fixture/',                     // the flag-gated dev composition, off by default
+    'tests/',                                    // the harnesses that exist to exercise it
+  ]
+  const containmentRoots = ['app', 'features', 'components', 'lib', 'server', 'tests']
+  for (const root of containmentRoots) {
+    for (const f of walk(join(ROOT, root))) {
+      const rel = relOf(f)
+      if (FIXTURE_IMPORT_ALLOWED.some((prefix) => rel.startsWith(prefix))) continue
+      if (FIXTURE_IMPORT.test(readFileSync(f, 'utf8'))) {
+        fail('T7I-40', `${rel} imports the deterministic fixture on a participant path`)
+      }
+    }
+  }
+
+  // The exclusion is worthless if the flag-gated composition module is gone,
+  // or if the composition root ever stops defaulting to the real adapter.
+  const RUNTIME = join(ROOT, 'features', 'portal', 'physical-test-runtime.tsx')
+  if (!existsSync(RUNTIME)) {
+    fail('T7I-40', 'features/portal/physical-test-runtime.tsx is missing -- the fixture exclusion is unproven')
+  } else {
+    const runtime = readFileSync(RUNTIME, 'utf8')
+    if (!/createRealParticipantPhysicalTestPort\s*\(/.test(runtime)) {
+      fail('T7I-40', 'the portal composition root does not construct the real participant adapter')
+    }
+    if (!/NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE|FIXTURE_MODE_ENABLED/.test(runtime)) {
+      fail('T7I-40', 'the portal composition root does not gate the fixture on the build-time flag')
+    }
+    if (FIXTURE_IMPORT.test(runtime.replace(/import\([\s\S]*?\)/g, ''))) {
+      fail('T7I-40', 'the portal composition root imports the fixture statically')
+    }
+  }
+
+  if (failures === before) pass('T7I-40', 'no elevated-client import, no direct governed-table access, no TypeScript status/lock_version authority on the governed path; the deterministic fixture is excluded from (c) AND contained -- no participant-path file imports it')
 }
 
 console.log('')

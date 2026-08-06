@@ -10,7 +10,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { REPORT_PANEL_CONFIG } from "@/features/trainer/report-panel-config";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
-import { usePhysicalTestPort } from "@/features/trainer/trainer-fixture-runtime";
+import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 import type {
   ManagementReviewDto,
   ReportPanelsDto,

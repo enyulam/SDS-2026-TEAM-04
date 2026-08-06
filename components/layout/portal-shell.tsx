@@ -13,9 +13,9 @@ import type {
   SessionUserDto,
 } from "@/lib/frontend/contracts/physical-test";
 import {
-  useFixtureRuntime,
   usePhysicalTestPort,
-} from "@/features/trainer/trainer-fixture-runtime";
+  usePortalRuntime,
+} from "@/features/portal/portal-runtime-context";
 
 type NavigationItem = {
   readonly href: string;
@@ -125,7 +125,16 @@ function RolePortalShell({
   const pathname = usePathname();
   const router = useRouter();
   const port = usePhysicalTestPort();
-  const { resetFixture, fixtureRevision } = useFixtureRuntime();
+  const { resetFixture, dataRevision } = usePortalRuntime();
+  /*
+   * G-19 — the fixture banner is keyed off the COMPOSED PORT'S OWN identity, not
+   * off the environment flag and not off a prop. The participant adapter reports
+   * `real_participant_adapter` and can never report `deterministic_fixture`, so
+   * there is no build in which a simulated surface renders without the banner and
+   * none in which a real surface renders with it.
+   */
+  const fixtureIdentity =
+    port.identity.kind === "deterministic_fixture" ? port.identity : null;
   const [user, setUser] = useState<SessionUserDto | null>(null);
   const config = roleConfig[role];
 
@@ -137,9 +146,12 @@ function RolePortalShell({
     return () => {
       active = false;
     };
-  }, [port, fixtureRevision]);
+  }, [port, dataRevision]);
 
   function handleReset() {
+    // Unreachable in participant mode: `resetFixture` is null unless the
+    // deterministic fixture is the composed port.
+    if (!resetFixture) return;
     resetFixture();
     router.push(config.home);
     router.refresh();
@@ -246,22 +258,32 @@ function RolePortalShell({
             </span>
           </div>
 
-          <FeedbackBanner
-            tone="fixture"
-            title="Deterministic fixture mode — not the participant adapter"
-            actions={
-              <Button variant="onDark" size="small" onClick={handleReset}>
-                Reset fixture
-              </Button>
-            }
-          >
-            Simulated {config.label} data and browser-session actions only. No real sign-in,
-            server write, external notification, or publication occurs in this mode.
-          </FeedbackBanner>
+          {fixtureIdentity && (
+            <FeedbackBanner
+              tone="fixture"
+              title="Deterministic fixture mode — not the participant adapter"
+              actions={
+                <Button variant="onDark" size="small" onClick={handleReset}>
+                  Reset fixture
+                </Button>
+              }
+            >
+              Simulated {config.label} data and browser-session actions only. No real sign-in,
+              server write, external notification, or publication occurs in this mode.
+            </FeedbackBanner>
+          )}
           <div className="mt-6">{children}</div>
-          <footer className="mt-10 border-t border-line py-5 text-small text-neutral-on">
-            Adapter: <strong>deterministic_fixture</strong> · Participant eligible:{" "}
-            <strong>no</strong> · Persistence: <strong>browser session only</strong>
+          <footer
+            className="mt-10 border-t border-line py-5 text-small text-neutral-on"
+            data-adapter-kind={port.identity.kind}
+          >
+            Adapter: <strong>{port.identity.kind}</strong> · Participant eligible:{" "}
+            <strong>{port.identity.participantEligible ? "yes" : "no"}</strong> · Persistence:{" "}
+            <strong>
+              {port.identity.persistence === "local_supabase"
+                ? "local Supabase"
+                : "browser session only"}
+            </strong>
           </footer>
         </main>
       </div>

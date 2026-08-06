@@ -22,7 +22,7 @@ import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type ResourceState } from "./resource-state";
-import { useFixtureRuntime, usePhysicalTestPort } from "./trainer-fixture-runtime";
+import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 
 /**
  * Screen 10 — Trainer Student Report (FRONTEND RECONSTRUCTION F9 / operator checkpoint F-09).
@@ -181,7 +181,7 @@ export function TrainerReportReview() {
   const params = useParams<{ reportId: string }>();
   const searchParams = useSearchParams();
   const port = usePhysicalTestPort();
-  const { fixtureRevision } = useFixtureRuntime();
+  const { dataRevision } = usePortalRuntime();
   const [resource, setResource] = useState<ResourceState<ReportView>>({ kind: "loading" });
   const [checklistSaving, setChecklistSaving] = useState<keyof ChecklistDto | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -219,7 +219,7 @@ export function TrainerReportReview() {
     return () => {
       active = false;
     };
-  }, [fixtureRevision, params.reportId, port]);
+  }, [dataRevision, params.reportId, port]);
 
   const checklistComplete = useMemo(() => {
     if (resource.kind !== "ready") return false;
