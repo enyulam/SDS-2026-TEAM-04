@@ -252,6 +252,19 @@ const G6_NOT_RUN_REASON =
   'case not be a called one'
 
 const ASSESS_ROUTE = `/trainer/sessions/${FIXTURE_SESSION}/students/${FIXTURE_STUDENT}/assess`
+/*
+ * G-23's two arms (C2C-011). Both are sessions this proof seeds itself, on the
+ * DISPOSABLE database, so neither disturbs the pair the live screen 07 -> 08
+ * transition drives.
+ *
+ *   FUTURE   dated TOMORROW in the pinned Asia/Singapore zone, with the
+ *            fixture learner PRESENT — so the refusal is the SCHEDULED START,
+ *            on its own terms, not masked by absence.
+ *   ABSENT   dated YESTERDAY, so the start condition is satisfied and the
+ *            refusal can only be the ATTENDANCE one.
+ */
+const G23_FUTURE_SESSION = 'c5000000-0000-4000-8000-0000000000f1'
+const G23_ABSENT_SESSION = 'c5000000-0000-4000-8000-0000000000f2'
 const PORTAL_PREFIXES = ['/trainer', '/management', '/parent']
 
 /**
@@ -335,6 +348,7 @@ const GATE_TITLES = new Map([
   ['G-20', 'Typecheck, lint and build pass'],
   ['G-21', 'Browser console has no uncaught errors'],
   ['G-22', 'Production sign-out terminates the session in the disposable Auth server, and the guard holds afterwards'],
+  ['G-23', 'The assessment surface is refused on entry for an absent learner and for a session that has not started'],
   ['H-1', 'Process hygiene — this run leaves no server, no browser and no held port behind'],
 ])
 
@@ -2532,6 +2546,112 @@ async function main() {
       corrupt.length > 0
         ? `chain(s) failing verification: ${corrupt.map((row) => `${row[0]} at seq ${row[3]} (${row[4]})`).join(', ')}`
         : `${checkedEvents} event(s) checked against ${totalEvents} stored; heads included = ${headsIncluded}`,
+    )
+  }
+
+  /* -----------------------------------------------------------------
+   * G-23 — THE ASSESSMENT SURFACE IS REFUSED ON ENTRY (C2C-011).
+   *
+   * THE DEFECT. The assess route was fully reachable and fillable BY DIRECT
+   * URL for an ABSENT learner and for a session whose scheduled start had not
+   * been reached. The load path applied no attendance and no start condition
+   * before rendering the rubric, so the trainer entered all nine ratings and
+   * only then met BC102 / BC104 at save time.
+   *
+   * This gate is EXECUTED, in a real browser, on the application served
+   * against the DISPOSABLE stack, through the PARTICIPANT ADAPTER — not the
+   * deterministic fixture. Both arms are DEEP LINKS: the surface is entered by
+   * URL with no navigation through the schedule or the roster, which is exactly
+   * the path the finding describes.
+   *
+   * The seed uses two NEW sessions and touches nothing belonging to the pair
+   * A-14 and A-15 observe.
+   * ---------------------------------------------------------------- */
+  phase('G-23 — the assess deep link is refused on entry')
+
+  let assessGate = null
+  let assessGateFailure = null
+  try {
+    psqlRows(
+      DISPOSABLE_DB_CONTAINER,
+      `BEGIN;
+       INSERT INTO public.class_sessions (id, centre_id, class_module_id, session_date, starts_at, ends_at)
+       SELECT '${G23_FUTURE_SESSION}', s.centre_id, s.class_module_id,
+              (pg_catalog.now() AT TIME ZONE 'Asia/Singapore')::date + 1, '10:00', '11:00'
+         FROM public.class_sessions s WHERE s.id = '${FIXTURE_SESSION}';
+       INSERT INTO public.class_sessions (id, centre_id, class_module_id, session_date, starts_at, ends_at)
+       SELECT '${G23_ABSENT_SESSION}', s.centre_id, s.class_module_id,
+              (pg_catalog.now() AT TIME ZONE 'Asia/Singapore')::date - 1, '10:00', '11:00'
+         FROM public.class_sessions s WHERE s.id = '${FIXTURE_SESSION}';
+       INSERT INTO public.class_session_assignments (centre_id, class_session_id, trainer_membership_id)
+       SELECT a.centre_id, v.id, a.trainer_membership_id
+         FROM public.class_session_assignments a
+         CROSS JOIN (VALUES ('${G23_FUTURE_SESSION}'::uuid), ('${G23_ABSENT_SESSION}'::uuid)) AS v(id)
+        WHERE a.class_session_id = '${FIXTURE_SESSION}';
+       INSERT INTO public.attendance (centre_id, class_session_id, class_module_id, student_id, enrolment_id, status)
+       SELECT t.centre_id, v.id, t.class_module_id, t.student_id, t.enrolment_id, v.st::public.attendance_status
+         FROM public.attendance t
+         CROSS JOIN (VALUES ('${G23_FUTURE_SESSION}'::uuid, 'present'), ('${G23_ABSENT_SESSION}'::uuid, 'absent')) AS v(id, st)
+        WHERE t.class_session_id = '${FIXTURE_SESSION}' AND t.student_id = '${FIXTURE_STUDENT}';
+       COMMIT;
+       SELECT 1;`,
+    )
+    const seeded = psqlRows(
+      DISPOSABLE_DB_CONTAINER,
+      `SELECT count(*)::text FROM public.attendance
+        WHERE class_session_id IN ('${G23_FUTURE_SESSION}', '${G23_ABSENT_SESSION}');`,
+    )
+    if (Number((seeded[0] ?? [])[0]) !== 2) {
+      throw new SafeError('The G-23 arms were not seeded, so neither refusal could be exercised.')
+    }
+
+    // The trainer session is still installed from the screen 07 -> 08 walkthrough.
+    const probe = async (path) => {
+      await visit(path)
+      const deadline = Date.now() + NAVIGATION_TIMEOUT_MS
+      let text = ''
+      while (Date.now() < deadline) {
+        text = await evaluateString('document.body.innerText', `the assess surface at ${path}`)
+        if (text.includes('is not open') || text.includes('Grade Student')) break
+        await new Promise((r) => setTimeout(r, 200))
+      }
+      const controls = await evaluateRaw(
+        "(function () { return String(document.querySelectorAll('button[aria-pressed]').length) + '|' + " +
+          "String(document.querySelectorAll('fieldset').length) })()",
+        `the rating controls at ${path}`,
+      )
+      return { text, controls }
+    }
+
+    const future = await probe(`/trainer/sessions/${G23_FUTURE_SESSION}/students/${FIXTURE_STUDENT}/assess`)
+    const absent = await probe(`/trainer/sessions/${G23_ABSENT_SESSION}/students/${FIXTURE_STUDENT}/assess`)
+    assessGate = {
+      futureRefused: future.text.includes('The scheduled session start has not been reached.'),
+      absentRefused: absent.text.includes('The student is not recorded present for this session.'),
+      designed: future.text.includes('is not open') && absent.text.includes('is not open'),
+      noControls: future.controls === '0|0' && absent.controls === '0|0',
+      futureControls: future.controls,
+      absentControls: absent.controls,
+    }
+  } catch (error) {
+    assessGateFailure =
+      error instanceof SafeError ? error.message : 'the assess entry gate could not be exercised in the browser'
+  }
+
+  if (assessGateFailure !== null) {
+    gate('G-23', 'FAIL', `the assess entry gate was not exercised: ${assessGateFailure}`)
+  } else {
+    gateFrom(
+      'G-23',
+      assessGate.futureRefused && assessGate.absentRefused && assessGate.designed && assessGate.noControls,
+      'both DEEP LINKS were refused BEFORE the rubric was assembled, by the PARTICIPANT ADAPTER on the served ' +
+        'application: a session dated TOMORROW with the learner PRESENT answered the governed BC104 reason, and a ' +
+        'PAST session with the learner ABSENT answered the governed BC102 reason. Each rendered the designed ' +
+        'ineligible state rather than a generic banner, and NEITHER document contained a single rating control or ' +
+        'fieldset — there is nothing to focus, tab to or fill',
+      `future arm refused=${assessGate.futureRefused}, absent arm refused=${assessGate.absentRefused}, ` +
+        `designed state=${assessGate.designed}, rating controls|fieldsets future=${assessGate.futureControls} ` +
+        `absent=${assessGate.absentControls} (both must be 0|0)`,
     )
   }
 

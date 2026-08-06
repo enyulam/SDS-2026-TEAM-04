@@ -216,6 +216,8 @@ export function TrainerAssessment() {
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState<UiActionResult<SaveObservationSuccess> | null>(null);
   const [correction, setCorrection] = useState<CorrectionRequestDto | null>(null);
+  /** C2C-011 — the governed reason the assessment surface is not open, or null. */
+  const [ineligible, setIneligible] = useState<string | null>(null);
   const fieldsets = useRef<Partial<Record<DimensionCode, HTMLFieldSetElement | null>>>({});
 
   useEffect(() => {
@@ -226,6 +228,27 @@ export function TrainerAssessment() {
     ]).then(async ([draftResult, dimensionsResult]) => {
       if (!active) return;
       if (draftResult.outcome !== "success") {
+        /*
+         * C2C-011 — THE GOVERNED INELIGIBLE STATE.
+         *
+         * The entry gate lives on the SERVER (the participant adapter refuses
+         * before it reads anything, and the deterministic fixture mirrors it),
+         * so a direct URL for an ABSENT learner or a session whose scheduled
+         * start has not been reached never returns a draft. What arrives here
+         * is the governed `validation` refusal carrying the same reason string
+         * BC102 / BC104 produce.
+         *
+         * It is rendered as a DESIGNED state rather than a generic banner
+         * (spec §15), and — this is the point of the finding — the rubric is
+         * NOT rendered at all behind it, so there is no rating control to
+         * focus, tab to or fill. The reason names the CONDITION only; it
+         * discloses no learner, date, time or report state.
+         */
+        if (draftResult.outcome === "validation") {
+          setIneligible(draftResult.message);
+          setResource({ kind: "failed", result: draftResult });
+          return;
+        }
         setResource({ kind: "failed", result: asFailure(draftResult) });
         return;
       }
@@ -361,7 +384,26 @@ export function TrainerAssessment() {
   if (resource.kind === "loading") {
     return <LoadingSkeleton label="Loading the nine-dimension Assessment Rubric" rows={5} />;
   }
-  if (resource.kind === "failed") return <StatePanel result={resource.result} />;
+  if (resource.kind === "failed") {
+    /*
+     * C2C-011 — the ineligible state is rendered INSTEAD OF the instrument, not
+     * beside it. Nothing below this return is reached, so the nine fieldsets,
+     * their 36 rating chips, the two note fields and the save control are all
+     * absent from the document: there is no focusable rating control to reach
+     * by keyboard, by script or by deep link.
+     */
+    if (ineligible !== null) {
+      return (
+        <StatePanel
+          result={{ outcome: "validation", message: ineligible, fields: [] }}
+          title="This assessment is not open"
+          homeHref={`/trainer/sessions/${params.sessionId}/roster`}
+          homeLabel="Back to Student Roster"
+        />
+      );
+    }
+    return <StatePanel result={resource.result} />;
+  }
 
   const { draft, dimensions } = resource.data;
   const saveComplete = saveResult?.outcome === "success";

@@ -125,6 +125,36 @@ async function screenshot(name) {
   return path;
 }
 
+/**
+ * THE FIXTURE'S THREE ELIGIBILITY ARMS, DERIVED HERE INDEPENDENTLY.
+ *
+ * The deterministic fixture no longer carries absolute session dates: it
+ * expresses each session as an offset from the current Asia/Singapore date, so
+ * "today", "tomorrow" and "yesterday" keep their meaning at every wall-clock
+ * time (C2C-010). This test therefore derives the same three dates rather than
+ * pinning literals — and it derives them from `Intl` directly rather than by
+ * importing the production module, so the two derivations are INDEPENDENT and a
+ * fault in either one shows up as a disagreement instead of cancelling out.
+ */
+const SGT_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Singapore",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const SGT_MONTH = new Intl.DateTimeFormat("en-SG", {
+  timeZone: "Asia/Singapore",
+  month: "long",
+  year: "numeric",
+});
+function singaporeDayOffset(days) {
+  const [year, month, day] = SGT_DATE.format(new Date()).split("-").map(Number);
+  return SGT_DATE.format(new Date(Date.UTC(year, month - 1, day + days, 12)));
+}
+const TODAY_ISO = singaporeDayOffset(0);
+const TOMORROW_ISO = singaporeDayOffset(1);
+const CURRENT_MONTH_LABEL = SGT_MONTH.format(new Date());
+
 async function bodyIncludes(text) {
   return evaluate(`document.body.innerText.includes(${JSON.stringify(text)})`);
 }
@@ -306,7 +336,7 @@ try {
     "The schedule must project the assigned class sessions",
   );
   assert(
-    await bodyIncludes("August 2026"),
+    await bodyIncludes(CURRENT_MONTH_LABEL),
     "The schedule must focus the month carrying the assigned sessions",
   );
   assert(
@@ -334,7 +364,7 @@ try {
     "Schedule Details must start with no day selected",
   );
   await evaluate(
-    "document.querySelector('[data-schedule-day=\"2026-08-05\"]').click()",
+    `document.querySelector('[data-schedule-day="${TODAY_ISO}"]').click()`,
   );
   await waitUntil(
     "document.body.innerText.includes('Open Class Roster')",
@@ -352,6 +382,72 @@ try {
     "Schedule Details must show only the selected day's sessions",
   );
 
+  /* -------------------------------------------------------------------------
+   * C2C-010 — SESSION-START ELIGIBILITY, IN THE DOM.
+   *
+   * Before this checkpoint every SessionCard rendered an identically enabled
+   * roster link, so a trainer could open a session that had not started,
+   * complete all nine ratings, and only then be refused by BC104 at save time.
+   *
+   * The selected day is TODAY, whose fixture session has already begun.
+   * ----------------------------------------------------------------------- */
+  assert(
+    await evaluate(`
+      (() => {
+        const card = document.querySelector('aside[aria-labelledby="schedule-details-heading"] article[data-session-eligibility]');
+        if (!card) return false;
+        const link = card.querySelector('[data-roster-entry="enabled"]');
+        return card.dataset.sessionEligibility === 'eligible' &&
+          Boolean(link) && link.tagName === 'A' &&
+          new URL(link.href).pathname === '/trainer/sessions/session-storytelling-lab/roster';
+      })()
+    `),
+    "A session that has already started today must render as eligible with an ENABLED roster link",
+  );
+  assert(
+    await evaluate(`
+      (() => {
+        const card = document.querySelector('aside[aria-labelledby="schedule-details-heading"] article[data-session-eligibility]');
+        const chip = card && card.querySelector('[data-session-state-label]');
+        return Boolean(chip) && chip.textContent.includes('In session today');
+      })()
+    `),
+    "The derived state must be carried in TEXT, not by colour alone",
+  );
+
+  // TOMORROW's session: inert, with a governed reason and NO enabled path.
+  await evaluate(
+    `document.querySelector('[data-schedule-day="${TOMORROW_ISO}"]').click()`,
+  );
+  await waitUntil(
+    `(() => {
+       const card = document.querySelector('aside[aria-labelledby="schedule-details-heading"] article[data-session-eligibility]');
+       return Boolean(card) && card.dataset.sessionEligibility === 'future';
+     })()`,
+    "the future session's card",
+  );
+  assert(
+    await evaluate(`
+      (() => {
+        const panel = document.querySelector('aside[aria-labelledby="schedule-details-heading"]');
+        const card = panel.querySelector('article[data-session-eligibility="future"]');
+        if (!card) return false;
+        const inert = card.querySelector('[data-roster-entry="inert"]');
+        const described = inert && document.getElementById(inert.getAttribute('aria-describedby'));
+        // NO enabled path of ANY kind: not an enabled control, and not an
+        // anchor either — a link would still be followable by keyboard, by
+        // middle-click and through the address bar.
+        const anchors = [...card.querySelectorAll('a')];
+        const enabled = card.querySelector('[data-roster-entry="enabled"]');
+        return Boolean(inert) && inert.tagName === 'BUTTON' && inert.disabled === true &&
+          Boolean(described) && described.textContent.includes('has not started yet') &&
+          anchors.length === 0 && !enabled &&
+          card.querySelector('[data-session-state-label]').textContent.includes('Not started yet');
+      })()
+    `),
+    "A session whose scheduled start has not been reached must render INERT with a governed reason and no enabled roster or assess path",
+  );
+
   // The Day / Week / Month switch is a real projection of the same rows.
   await clickExact("button", "Day");
   await waitUntil(
@@ -363,6 +459,46 @@ try {
     `document.querySelector('[data-schedule-view="month"]').dataset.selected === 'true'`,
     "month view restored",
   );
+
+  /* -------------------------------------------------------------------------
+   * C2C-011 — THE DIRECT ASSESS URL IS REFUSED, and the rubric is not rendered.
+   *
+   * Both arms are DEEP LINKS: the surface is entered by URL, exactly as the
+   * finding describes, with no navigation through the schedule or the roster.
+   * ----------------------------------------------------------------------- */
+  const assertNoRubric = async (label) => {
+    assert(
+      await evaluate(`
+        (() => {
+          const chips = document.querySelectorAll('button[aria-pressed]');
+          const fieldsets = document.querySelectorAll('fieldset');
+          const notes = document.getElementById('observation-notes');
+          return chips.length === 0 && fieldsets.length === 0 && !notes;
+        })()
+      `),
+      `${label}: the rubric must not be rendered at all — no rating control may exist to focus`,
+    );
+  };
+
+  // (a) an ABSENT learner in a session that HAS started.
+  await navigate("/trainer/sessions/session-storytelling-lab/students/student-delta/assess");
+  await waitUntil(
+    "document.body.innerText.includes('The student is not recorded present for this session.')",
+    "the governed ineligible state for an absent learner",
+  );
+  assert(
+    await bodyIncludes("This assessment is not open"),
+    "The absent-learner refusal must be a designed state, not a generic error",
+  );
+  await assertNoRubric("absent learner");
+
+  // (b) a PRESENT learner in a session whose scheduled start has NOT been reached.
+  await navigate("/trainer/sessions/session-presentation-practice/students/student-gale/assess");
+  await waitUntil(
+    "document.body.innerText.includes('The scheduled session start has not been reached.')",
+    "the governed ineligible state for a session that has not started",
+  );
+  await assertNoRubric("future session");
 
   // Empty projection state.
   await navigate("/trainer/schedule?preview=empty");

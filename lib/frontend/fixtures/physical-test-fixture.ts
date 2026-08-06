@@ -40,6 +40,22 @@ import {
 import type { UiActionResult } from "../contracts/result";
 import type { PhysicalTestPort } from "../physical-test-port";
 import { GOVERNED_DIMENSIONS } from "./dimensions";
+import { deriveSessionEligibility } from "@/lib/schedule/session-eligibility";
+import { fixtureSessionDates } from "@/lib/schedule/fixture-session-dates";
+
+/*
+ * Derived ONCE, from the real pinned Asia/Singapore clock, at fixture load.
+ * The derivation itself is a pure function of the instant so a test can sweep
+ * simulated ones through the same code.
+ */
+const FIXTURE_DATES = fixtureSessionDates();
+
+/*
+ * THE SESSION DATES ARE DERIVED FROM A PINNED REFERENCE, NOT ABSOLUTE LITERALS.
+ * The derivation and the reasoning behind it live in
+ * `lib/schedule/fixture-session-dates.ts`, outside this file, so a test can read
+ * the three eligibility arms without importing this browser-facing port class.
+ */
 
 const STORAGE_KEY = "best-coach.frontend-f2.deterministic-fixture.v2";
 
@@ -151,9 +167,9 @@ const SESSIONS: readonly FixtureSession[] = [
     sessionId: "session-storytelling-lab",
     moduleName: "Storytelling Foundations",
     classGrade: "Beginner",
-    date: "2026-08-05",
-    startTime: "14:00",
-    endTime: "15:30",
+    date: FIXTURE_DATES.eligible.date,
+    startTime: FIXTURE_DATES.eligible.startTime,
+    endTime: FIXTURE_DATES.eligible.endTime,
     students: [
       {
         studentId: "student-aster",
@@ -192,16 +208,36 @@ const SESSIONS: readonly FixtureSession[] = [
     sessionId: "session-presentation-practice",
     moduleName: "Presentation Practice",
     classGrade: "Intermediate",
-    date: "2026-08-07",
+    date: FIXTURE_DATES.future.date,
     startTime: "16:00",
     endTime: "17:30",
-    students: [],
+    /*
+     * C2C-011 — one PRESENT learner on the FUTURE session, and no report.
+     *
+     * The session previously carried no roster at all, which made the
+     * "ineligible session" arm untestable: with nobody enrolled, an assess
+     * deep link was refused for ABSENCE and the scheduled-start condition was
+     * never reached. A present learner separates the two refusals, so the
+     * start gate is exercised on its own terms.
+     *
+     * `reportId` is null and stays null: a future session must never carry a
+     * report, and absence of one is what the governed lifecycle produces.
+     */
+    students: [
+      {
+        studentId: "student-gale",
+        displayName: "Learner Gale",
+        attendanceState: "present",
+        reportId: null,
+        previousSessionFocus: null,
+      },
+    ],
   },
   {
     sessionId: "session-speech-showcase",
     moduleName: "Speech Showcase",
     classGrade: "Advanced",
-    date: "2026-08-04",
+    date: FIXTURE_DATES.past.date,
     startTime: "17:00",
     endTime: "18:30",
     students: [
@@ -628,7 +664,35 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
   ): Promise<UiActionResult<AssessmentDraftDto>> {
     await delay(220);
     const match = findStudent(sessionId, studentId);
-    if (!match || match.student.attendanceState === "absent" || !match.student.reportId) {
+    /*
+     * C2C-011 — THE ENTRY GATE, mirroring the participant adapter's exactly.
+     *
+     * The two refusals are the GOVERNED ones, verbatim: the same strings the
+     * backend's SQLSTATE map produces for BC102 (attendance) and BC104
+     * (scheduled start). Each names the CONDITION and nothing else — no
+     * learner name, no date, no time, no report state and no existence claim —
+     * so the state is non-disclosing, and a caller cannot tell "absent" from
+     * "not enrolled here" or "future session" from "no such session".
+     *
+     * Order matters: attendance is resolved first, so an absent learner in a
+     * future session is refused for attendance rather than leaking that the
+     * session exists but has not begun.
+     */
+    if (!match || match.student.attendanceState === "absent") {
+      return {
+        outcome: "validation",
+        message: "The student is not recorded present for this session.",
+        fields: [],
+      };
+    }
+    if (deriveSessionEligibility(match.session) === "future") {
+      return {
+        outcome: "validation",
+        message: "The scheduled session start has not been reached.",
+        fields: [],
+      };
+    }
+    if (!match.student.reportId) {
       return { outcome: "unavailable" };
     }
     const report = this.readState().reports[match.student.reportId];

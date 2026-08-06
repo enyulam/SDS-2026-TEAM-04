@@ -45,6 +45,7 @@ import {
   isDimensionCode,
   isRatingLevel,
 } from "@/server/modules/framework/dimensions";
+import { deriveSessionEligibility } from "@/lib/schedule/session-eligibility";
 import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver";
 import {
   firstRow,
@@ -296,11 +297,84 @@ export async function adapterGetSessionRoster(
   return getSessionRosterCore(client, sessionId);
 }
 
+/**
+ * C2C-011 — THE ENTRY GATE, RESOLVED SERVER-SIDE, BEFORE ANY DRAFT IS RETURNED.
+ *
+ * THE DEFECT. The assessment route was fully reachable and fillable by DIRECT
+ * URL for an ABSENT learner and for a session whose scheduled start had not
+ * been reached. This read applied no attendance and no start condition, so the
+ * trainer entered all nine ratings and only then met BC102 / BC104 at save
+ * time, rendered as a generic banner. The refusal existed; the designed state
+ * did not (spec §15).
+ *
+ * WHY THE GATE IS HERE AND NOT ONLY IN THE COMPONENT. A component that declines
+ * to render is not a boundary: the route is a Server Action away from any
+ * caller, and "hiding a control is not authorization" is the same rule that
+ * governs every other surface in this project. This action refuses, so a direct
+ * URL, a stale tab and a scripted call all get the same answer.
+ *
+ * THE REASONS ARE THE GOVERNED ONES, VERBATIM. They are the exact strings
+ * `mapSqlErrorToResult` already produces for BC102 (attendance) and BC104
+ * (scheduled start), so the pre-entry refusal and the post-save refusal read
+ * identically and neither invents a new vocabulary. They name the CONDITION and
+ * nothing else — no student name, no date, no time, no report state, no
+ * existence claim — so the state is non-disclosing.
+ *
+ * THE SERVER GATES ARE UNTOUCHED. BC017/BC104 and BC102 remain authoritative in
+ * the database (ADR-3); this changes when the trainer is offered the
+ * instrument, never what the database permits.
+ */
+async function assessmentEntryRefusal(
+  client: SupabaseClient,
+  sessionId: string,
+  studentId: string,
+): Promise<ActionResult<never> | null> {
+  // 1. ATTENDANCE. The roster read is itself trainer-scoped and assignment
+  //    checked, so an unassigned caller never reaches the attendance value.
+  const roster = await getSessionRosterCore(client, sessionId);
+  if (roster.outcome !== "success") return roster;
+  const entry = roster.data.find((row) => row.studentId === studentId) ?? null;
+  if (entry === null || entry.attendanceState === "absent") {
+    // A learner who is not on this roster and a learner marked absent get the
+    // SAME answer. Distinguishing them would disclose enrolment.
+    return {
+      outcome: "validation",
+      message: "The student is not recorded present for this session.",
+      fields: [],
+    };
+  }
+
+  // 2. SCHEDULED START, against the pinned Asia/Singapore clock the governed
+  //    RPCs compare on. A session the caller is not assigned to is not in this
+  //    projection at all, so a miss is refused rather than treated as eligible.
+  const sessions = await listTrainerSessionsCore(client);
+  if (sessions.outcome !== "success") return sessions;
+  const session = sessions.data.find((row) => row.sessionId === sessionId) ?? null;
+  if (session === null) {
+    return { outcome: "unavailable" };
+  }
+  if (
+    deriveSessionEligibility({
+      date: session.date,
+      startTime: session.startTime ?? "",
+    }) === "future"
+  ) {
+    return {
+      outcome: "validation",
+      message: "The scheduled session start has not been reached.",
+      fields: [],
+    };
+  }
+  return null;
+}
+
 export async function adapterGetAssessmentDraft(
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<AdapterAssessmentDraftDto>> {
   const client = await createRequestSupabaseClient();
+  const refusal = await assessmentEntryRefusal(client, sessionId, studentId);
+  if (refusal !== null) return refusal;
   const observation = await getTrainerObservationCore(client, sessionId, studentId);
   if (observation.outcome !== "success") return observation;
 

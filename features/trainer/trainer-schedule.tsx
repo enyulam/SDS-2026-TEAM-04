@@ -8,6 +8,12 @@ import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import type { TrainerSessionSummaryDto } from "@/lib/frontend/contracts/physical-test";
+import {
+  SESSION_ELIGIBILITY_PRESENTATION,
+  deriveSessionEligibility,
+  singaporeInstant,
+  type SessionEligibility,
+} from "@/lib/schedule/session-eligibility";
 import { asFailure, type ResourceState } from "./resource-state";
 import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import {
@@ -67,6 +73,16 @@ import {
  *     A-026: "do not invent a placeholder enum"). The control is therefore relabelled to
  *     name the governed action it actually performs — trainer session selection into the
  *     roster, the behaviour that already existed on `/trainer` and is preserved here.
+ *
+ * C2C-010 — SESSION-START ELIGIBILITY IS NOW SURFACED, and it is a DERIVED time
+ * comparison, not a status. Before this checkpoint no Trainer surface distinguished a
+ * session that had started from one that had not: every SessionCard rendered an identically
+ * enabled roster link, so a trainer could enter a FUTURE session, complete all nine ratings,
+ * and only then be refused by BC104 at save time. `session-eligibility.ts` derives past /
+ * eligible / future from `date` + `startTime` against the SAME pinned Asia/Singapore clock
+ * the governed RPCs use; a `future` session renders its entry point INERT with the governed
+ * reason attached programmatically, exactly as D1's "Add Agenda" already does. The server
+ * gates are untouched and remain authoritative (ADR-3).
  */
 
 /**
@@ -554,11 +570,36 @@ function ScheduleDetails({
 }
 
 function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }) {
+  /*
+   * Derived on render from the live pinned clock. It is deliberately NOT held in
+   * state and not memoised across the session list: a value cached at mount would
+   * keep claiming "not started yet" after the start time passed.
+   */
+  const eligibility: SessionEligibility = deriveSessionEligibility(session, singaporeInstant());
+  const presentation = SESSION_ELIGIBILITY_PRESENTATION[eligibility];
+  const reasonId = `session-state-${session.sessionId}`;
   return (
-    <article className="rounded-panel bg-brand-50 p-4">
-      <Badge tone="brand" size="small">
-        Class
-      </Badge>
+    <article className="rounded-panel bg-brand-50 p-4" data-session-eligibility={eligibility}>
+      <span className="flex flex-wrap items-center gap-2">
+        <Badge tone="brand" size="small">
+          Class
+        </Badge>
+        {/*
+          COLOUR IS NOT THE ONLY CARRIER (GLOBAL_UI_RULES §7, WCAG 2.2 SC 1.4.1). The
+          state is stated in WORDS ("Completed" / "In session today" / "Not started
+          yet"), given a distinct SHAPE glyph, and — when inert — accompanied by the
+          governed reason in prose below. The tint is the fourth, redundant carrier.
+        */}
+        <span
+          data-session-state-label={eligibility}
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-micro font-bold ${
+            ELIGIBILITY_CHIP[presentation.tone]
+          }`}
+        >
+          <span aria-hidden="true">{presentation.glyph}</span>
+          {presentation.label}
+        </span>
+      </span>
       <h3 className="mt-2.5 text-card-title font-extrabold text-brand-800">
         {session.moduleName}
       </h3>
@@ -583,27 +624,67 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
           </dd>
         </div>
       </dl>
-      {/* D2 — the frame's "Start Class" is relabelled to the governed action it performs. */}
-      <Link
-        href={`/trainer/sessions/${session.sessionId}/roster`}
-        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-field bg-surface px-4 py-2.5 text-body font-bold text-brand-800 no-underline shadow-raised transition hover:bg-brand-100"
-      >
-        Open Class Roster
-        <span className="sr-only"> for {session.moduleName}</span>
-      </Link>
+      {/*
+        D2 — the frame's "Start Class" is relabelled to the governed action it performs.
+        C2C-010 — and for a session whose scheduled start has not been reached there is
+        NO ENABLED ROSTER OR ASSESS PATH AT ALL. The control is a disabled button, not a
+        styled link: a link would still be followable by keyboard, by middle-click and by
+        the browser's own address bar. Hiding it would be worse — the trainer would not
+        know why the class they can see cannot be opened — so it renders visibly inert
+        with the governed reason associated by `aria-describedby`.
+      */}
+      {presentation.inert ? (
+        <>
+          <button
+            type="button"
+            disabled
+            aria-describedby={reasonId}
+            data-roster-entry="inert"
+            className="mt-4 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-field border border-line bg-surface-muted px-4 py-2.5 text-body font-bold text-ink-subtle"
+          >
+            Open Class Roster
+            <span className="sr-only"> for {session.moduleName}</span>
+          </button>
+          <p id={reasonId} className="mt-2 text-small leading-6 text-ink">
+            {presentation.reason}
+          </p>
+        </>
+      ) : (
+        <Link
+          href={`/trainer/sessions/${session.sessionId}/roster`}
+          data-roster-entry="enabled"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-field bg-surface px-4 py-2.5 text-body font-bold text-brand-800 no-underline shadow-raised transition hover:bg-brand-100"
+        >
+          Open Class Roster
+          <span className="sr-only"> for {session.moduleName}</span>
+        </Link>
+      )}
     </article>
   );
 }
 
+/** Chip tints per derived state. Redundant with the label and the glyph, never alone. */
+const ELIGIBILITY_CHIP: Readonly<Record<"brand" | "success" | "neutral", string>> = {
+  brand: "bg-brand-100 text-brand-800",
+  success: "bg-success-soft text-success-on",
+  neutral: "bg-neutral-soft text-neutral-on",
+};
+
 function describeDay(day: ScheduleDay): string {
   if (day.sessions.length === 0) return "No assigned Class Session.";
+  const now = singaporeInstant();
   return day.sessions
     .map(
       (session) =>
+        /*
+         * The derived state is carried into the calendar cell's ACCESSIBLE NAME as
+         * well, so a screen-reader user learns which sessions are open before
+         * choosing a day rather than after opening one.
+         */
         `${session.classGrade} ${session.moduleName}, ${formatTimeRange(
           session.startTime,
           session.endTime,
-        )}`,
+        )}, ${SESSION_ELIGIBILITY_PRESENTATION[deriveSessionEligibility(session, now)].label}`,
     )
     .join(". ");
 }
