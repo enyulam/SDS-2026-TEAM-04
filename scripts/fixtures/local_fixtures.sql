@@ -362,30 +362,32 @@ VALUES
 -- ---------------------------------------------------------------------
 -- 13/13 -- observation_ratings (9) -- all nine dimensions, deliberately mixed
 -- ---------------------------------------------------------------------
--- Spans all four levels and includes exactly two `emerging` and two
--- `advanced`, so the Phase 1 grounding-validation contradiction test
+-- Spans all four levels and includes exactly two `beginning` and two
+-- `mastered`, so the Phase 1 grounding-validation contradiction test
 -- (CLAUDE.md 11, persona 3.4) has a genuine contradiction available.
+-- Labels are the Amendment 006 A-049 ratified vocabulary; the mix is
+-- positionally unchanged from the ratified Step 7F baseline.
 INSERT INTO public.observation_ratings
   (id, observation_id, dimension_code, rating, created_at, updated_at)
 VALUES
   ('ca000000-0000-4000-8000-000000000001', 'c9000000-0000-4000-8000-000000000001',
-   'body',                 'secure',     '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'body',                 'mastering',  '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000002', 'c9000000-0000-4000-8000-000000000001',
    'emotion',              'developing', '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000003', 'c9000000-0000-4000-8000-000000000001',
-   'speech',               'emerging',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'speech',               'beginning',  '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000004', 'c9000000-0000-4000-8000-000000000001',
-   'tonality',             'secure',     '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'tonality',             'mastering',  '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000005', 'c9000000-0000-4000-8000-000000000001',
-   'eye_contact',          'advanced',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'eye_contact',          'mastered',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000006', 'c9000000-0000-4000-8000-000000000001',
    'vocal_projection',     'developing', '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000007', 'c9000000-0000-4000-8000-000000000001',
-   'emotional_expression', 'emerging',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'emotional_expression', 'beginning',  '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000008', 'c9000000-0000-4000-8000-000000000001',
-   'sentence_flow',        'secure',     '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
+   'sentence_flow',        'mastering',  '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08'),
   ('ca000000-0000-4000-8000-000000000009', 'c9000000-0000-4000-8000-000000000001',
-   'audience_awareness',   'advanced',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08');
+   'audience_awareness',   'mastered',   '2026-02-03 11:05:00+08', '2026-02-03 11:05:00+08');
 
 -- ---------------------------------------------------------------------
 -- Pre-commit assertions -- exact counts, exact relationships, exact
@@ -434,11 +436,11 @@ BEGIN
 
   IF (SELECT count(*) FROM public.observation_ratings
        WHERE observation_id = 'c9000000-0000-4000-8000-000000000001'
-         AND rating = 'emerging') < 1
+         AND rating = 'beginning') < 1
      OR (SELECT count(*) FROM public.observation_ratings
           WHERE observation_id = 'c9000000-0000-4000-8000-000000000001'
-            AND rating = 'advanced') < 1 THEN
-    RAISE EXCEPTION 'Step 7F load aborted: the mixed rating set must include at least one emerging and one advanced rating';
+            AND rating = 'mastered') < 1 THEN
+    RAISE EXCEPTION 'Step 7F load aborted: the mixed rating set must include at least one beginning and one mastered rating';
   END IF;
 
   IF (SELECT count(DISTINCT dimension_code) FROM public.observation_ratings
