@@ -63,6 +63,7 @@ import {
 } from "@/server/modules/report-workflow/core.ts";
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core.ts";
 import { listManagementCorrectionsFromRpc } from "@/server/modules/management-view/projections.ts";
+import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver.ts";
 
 const ROOT = process.cwd();
 const CONTAINER = "supabase_db_best-coach-mvp";
@@ -440,6 +441,44 @@ async function partRealAuth() {
     else pass("INT-A7", "wrong-role governed writes are denied by the authored role predicates before anything is written");
   }
 
+  // A8 -- R-22: the governed report-context resolver is NON-DISCLOSING about
+  // an unknown report id, under every real JWT. The canonical database holds
+  // ZERO reports, so every identifier tried here is genuinely unknown — which
+  // is exactly the case that must be indistinguishable from "exists but you
+  // may not have it". The INT-A4 idiom is applied to a ZERO-ROW boundary
+  // rather than a raising one: the answer must be no error AND no rows, and
+  // it must be byte-identical across the three roles and across two distinct
+  // ghost identifiers. Any divergence — an error code, a message, a row count
+  // — would make this an existence oracle over report ids.
+  {
+    const GHOST_A = "eeeeeeee-0000-4000-8000-000000000001";
+    const GHOST_B = "eeeeeeee-0000-4000-8000-000000000002";
+    const answers = [];
+    for (const role of ["trainer", "management", "parent"]) {
+      for (const id of [GHOST_A, GHOST_B]) {
+        const r = await clients[role].rpc("report_resolve_context", { p_report_id: id });
+        answers.push(JSON.stringify({ error: r.error, data: r.data }));
+      }
+    }
+    const distinct = new Set(answers);
+    if (distinct.size !== 1) {
+      fail("INT-R0", `the resolver's unknown-id answer differs across roles or identifiers (${distinct.size} distinct answers)`);
+    } else if (answers[0] !== JSON.stringify({ error: null, data: [] })) {
+      fail("INT-R0", `an unknown report id did not resolve to zero rows with no error (${answers[0]})`);
+    } else {
+      // The server core must collapse that one zero-row answer into the one
+      // non-disclosing result, identically for all three roles.
+      const outcomes = [];
+      for (const role of ["trainer", "management", "parent"]) {
+        const resolved = await resolveReportContextCore(clients[role], GHOST_A);
+        outcomes.push(resolved.outcome);
+      }
+      if (outcomes.some((o) => o !== "unauthorized")) {
+        fail("INT-R0", `the resolver core gave ${outcomes.join("/")} for an unknown id, expected unauthorized for all three roles`);
+      } else pass("INT-R0", "an UNKNOWN report id resolves to zero rows and NO error, byte-identically for trainer, management and parent and across two ghost identifiers; the core reports the one non-disclosing outcome");
+    }
+  }
+
   for (const role of ["trainer", "management", "parent"]) await clients[role].auth.signOut();
   return true;
 }
@@ -612,6 +651,98 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
   const parentPeek1 = await parentDb.rpc("report_get_canonical", { p_class_session_id: SESSION, p_student_id: STUDENT });
   if (parentPeek1.error || parentPeek1.data.length !== 0) fail("INT-L4", "a trainer-approved (unsubmitted) report became parent-visible");
   else pass("INT-L4", "edit resets checklist; approve freezes and publishes NOTHING; the parent still sees zero rows");
+
+  // --- R-22: the governed report-context resolver ----------------------
+  // A REAL report now exists and is UNSUBMITTED, which is the state that
+  // makes every one of these legs meaningful. The resolver translates the
+  // report id the frontend port is keyed by into the
+  // (class_session_id, student_id) pair the governed reads are keyed by,
+  // under the CALLER'S OWN authority — so the adapter never has to fabricate
+  // or accept a key from the client.
+  {
+    // R1 -- the assigned trainer resolves the CORRECT pair, and the shape
+    //       carries EXACTLY two columns and nothing else.
+    const raw = await trainerDb.rpc("report_resolve_context", { p_report_id: reportId });
+    const rawRow = Array.isArray(raw.data) && raw.data.length === 1 ? raw.data[0] : null;
+    const resolved = await resolveReportContextCore(trainerDb, reportId);
+    if (!rawRow) {
+      fail("INT-R1", "the assigned trainer could not resolve the report context");
+    } else {
+      const keys = Object.keys(rawRow).sort().join(",");
+      if (keys !== "class_session_id,student_id") {
+        fail("INT-R1", `the resolver shape carries unexpected fields: ${keys}`);
+      } else if (rawRow.class_session_id !== SESSION || rawRow.student_id !== STUDENT) {
+        fail("INT-R1", "the resolver returned the wrong (class_session_id, student_id) pair");
+      } else if (resolved.outcome !== "success" || resolved.data.sessionId !== SESSION || resolved.data.studentId !== STUDENT) {
+        fail("INT-R1", `the resolver core gave ${resolved.outcome} for the assigned trainer`);
+      } else pass("INT-R1", "the assigned trainer resolves the correct pair through the real core; the shape is EXACTLY class_session_id + student_id — no status, lock_version, version id, hash, rating, correction field or centre id exists to leak");
+    }
+
+    // R2 -- management of the SAME centre resolves it, with NO status gate:
+    //       correction tracking legitimately surfaces reports at draft_ready
+    //       and needs_edit, and their ids must stay resolvable. This does not
+    //       widen RPC-15 — the CONTENT gate is proven still shut right here.
+    const mgmtResolved = await resolveReportContextCore(managementDb, reportId);
+    const gatedContent = await managementDb.rpc("report_get_management_review", {
+      p_class_session_id: SESSION, p_student_id: STUDENT,
+    });
+    if (mgmtResolved.outcome !== "success" || mgmtResolved.data.sessionId !== SESSION || mgmtResolved.data.studentId !== STUDENT) {
+      fail("INT-R2", `management of the report's own centre gave ${mgmtResolved.outcome}`);
+    } else if (gatedContent.error) {
+      fail("INT-R2", "the status-gated management content read errored instead of answering");
+    } else pass("INT-R2", "management of the report's centre resolves the pair with no status gate, while report_get_management_review's own gate is untouched");
+
+    // R3 -- the LINKED parent gets ZERO rows BEFORE submission. The parent
+    //       relationship passes; the missing latest_submitted_version_id is
+    //       what denies. Nothing about an unsubmitted report is parent-facing,
+    //       not even its session and student.
+    const parentBefore = await parentDb.rpc("report_resolve_context", { p_report_id: reportId });
+    const parentCore = await resolveReportContextCore(parentDb, reportId);
+    if (parentBefore.error || parentBefore.data.length !== 0) {
+      fail("INT-R3", "the LINKED parent resolved an unsubmitted report's context");
+    } else if (parentCore.outcome !== "unauthorized") {
+      fail("INT-R3", `the resolver core gave ${parentCore.outcome} for the pre-submission parent, expected unauthorized`);
+    } else pass("INT-R3", "the linked parent — the wrong role for an unsubmitted report — gets ZERO rows and the one non-disclosing outcome before submission");
+
+    // R4 -- an unauthenticated caller, and a trainer whose assignment has
+    //       been withdrawn (the wrong-role/no-reach case inside the trainer
+    //       branch), both get zero rows.
+    const nobody = await new PsqlRpc(null).rpc("report_resolve_context", { p_report_id: reportId });
+    await q(WORK_DB, `UPDATE public.class_session_assignments SET is_active=false, unassigned_at=now() WHERE class_session_id='${SESSION}';`);
+    const unassigned = await trainerDb.rpc("report_resolve_context", { p_report_id: reportId });
+    await q(WORK_DB, `UPDATE public.class_session_assignments SET is_active=true, unassigned_at=NULL WHERE class_session_id='${SESSION}';`);
+    const restored = await trainerDb.rpc("report_resolve_context", { p_report_id: reportId });
+    if (nobody.error || nobody.data.length !== 0) fail("INT-R4", "an UNAUTHENTICATED caller resolved the report context");
+    else if (unassigned.error || unassigned.data.length !== 0) fail("INT-R4", "an UNASSIGNED trainer resolved the report context");
+    else if (restored.data.length !== 1) fail("INT-R4", "the trainer's reach was not restored after the assignment was reinstated");
+    else pass("INT-R4", "an unauthenticated caller and a trainer without live session reach both get zero rows; reach is re-derived per call, not cached");
+
+    // R5 -- WRONG-CENTRE management gets zero rows. The T7I-26 idiom, adapted
+    //       to the disposable database: move the management account's ONLY
+    //       active membership to a decoy centre, so the report's centre has
+    //       no management membership for this caller at all.
+    const DECOY = "b0000000-0000-4000-8000-0000000000ff";
+    const MGMT_MEMBERSHIP = "c1000000-0000-4000-8000-000000000001";
+    await q(WORK_DB, `
+INSERT INTO public.centres (id, code, display_name) VALUES ('${DECOY}','decoy','Decoy Centre');
+UPDATE public.centre_memberships SET status='deactivated', deactivated_at=now() WHERE id='${MGMT_MEMBERSHIP}';
+INSERT INTO public.centre_memberships (centre_id, account_id, role, status, activated_at)
+VALUES ('${DECOY}','c0000000-0000-4000-8000-000000000001','management','active', now());`);
+    const wrongCentre = await managementDb.rpc("report_resolve_context", { p_report_id: reportId });
+    const wrongCentreCore = await resolveReportContextCore(managementDb, reportId);
+    await q(WORK_DB, `
+DELETE FROM public.centre_memberships WHERE centre_id='${DECOY}';
+DELETE FROM public.centres WHERE id='${DECOY}';
+UPDATE public.centre_memberships SET status='active', deactivated_at=NULL WHERE id='${MGMT_MEMBERSHIP}';`);
+    const centreRestored = await managementDb.rpc("report_resolve_context", { p_report_id: reportId });
+    if (wrongCentre.error || wrongCentre.data.length !== 0) {
+      fail("INT-R5", "WRONG-CENTRE management resolved the report context");
+    } else if (wrongCentreCore.outcome !== "unauthorized") {
+      fail("INT-R5", `the resolver core gave ${wrongCentreCore.outcome} for wrong-centre management`);
+    } else if (centreRestored.data.length !== 1) {
+      fail("INT-R5", "management's own-centre reach was not restored");
+    } else pass("INT-R5", "wrong-centre management gets zero rows: the centre comes from the REPORT row, never from the caller's request");
+  }
 
   // L5 -- management wording edit, then return-to-trainer; management
   // cannot touch substance; returned report stays parent-invisible.
@@ -821,6 +952,21 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
     } else if (row.next_focus !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
       fail("INT-L9", "the canonical panels are not the submitted version's");
     } else pass("INT-L9", "the parent reads exactly the four submitted panels + submitted_at — nothing else exists in the shape");
+  }
+
+  // R6 -- the SAME parent, the SAME report id, AFTER management submitted:
+  // now the pair resolves. This is the exact half that proves R3 was a live
+  // predicate on latest_submitted_version_id rather than a blanket
+  // parent denial — the only thing that changed is submission.
+  {
+    const parentAfter = await resolveReportContextCore(parentDb, reportId);
+    const rawAfter = await parentDb.rpc("report_resolve_context", { p_report_id: reportId });
+    const rowAfter = Array.isArray(rawAfter.data) && rawAfter.data.length === 1 ? rawAfter.data[0] : null;
+    if (parentAfter.outcome !== "success" || parentAfter.data.sessionId !== SESSION || parentAfter.data.studentId !== STUDENT) {
+      fail("INT-R6", `the linked parent gave ${parentAfter.outcome} AFTER submission, expected the resolved pair`);
+    } else if (!rowAfter || Object.keys(rowAfter).sort().join(",") !== "class_session_id,student_id") {
+      fail("INT-R6", "the post-submission parent shape is not exactly the two identifiers");
+    } else pass("INT-R6", "after management submits, the linked parent resolves the SAME report id to the correct pair — R3's denial was the live latest_submitted_version_id predicate, not a blanket role rule");
   }
 
   const events = await q(WORK_DB, "SELECT count(*) FROM public.audit_events;");

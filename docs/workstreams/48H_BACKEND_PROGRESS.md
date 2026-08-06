@@ -351,3 +351,207 @@ With B-V2-BLOCK-1 closed and all eleven gates above green, **Backend V2's databa
 #### Contract deviations
 
 **None.** Two files were changed: `scripts/tests/step-7i/run-canonical.mjs` and this log. No credential-bearing output was rendered. No hosted Supabase endpoint was contacted. No migration was created or edited, and `server/db/database.types.ts` was not touched.
+
+---
+
+## 2026-08-06 â€” Round C2: the governed report-context resolver (R-22)
+
+### The defect
+
+Run B finding **R-22 (High, blocks F16)**. The frontend port
+`lib/frontend/physical-test-port.ts` (main repo, **not edited here**) declares
+three **reportId-keyed** reads â€” `getTrainerWorkingReport(reportId)`,
+`getDraftGenerationContext(reportId)`, `getManagementReview(reportId)` â€” while
+the governed RPCs behind them, `public.report_get_working` (RPC-14) and
+`public.report_get_management_review` (RPC-15), are keyed by the pair
+`(p_class_session_id, p_student_id)`. No server-side resolver from a report id
+to that pair existed, so the real adapter could only be composed by having the
+**client** supply a session id and a student id next to the report id. A
+client-supplied key is an unverified assertion about which report is meant, and
+it would let a caller pair a report it may read with a session or student it may
+not, or probe the pair space for existence. That is prohibited.
+
+### The design, as implemented
+
+New migration `supabase/migrations/20260806190000_report_context_resolver.sql`
+creates **exactly one function and nothing else** â€” no table, enum, column,
+constraint, index, policy, trigger, view, extension, table grant or fixture row,
+and no `CREATE OR REPLACE` of anything existing.
+
+```
+public.report_resolve_context(p_report_id uuid)
+  RETURNS TABLE (class_session_id uuid, student_id uuid)
+  LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = ''
+```
+
+Body contract, in order, every denial a **bare `RETURN` producing zero rows** â€”
+the function **never RAISEs**, so an unknown id and a forbidden id are
+byte-identical and it cannot be used as an existence oracle:
+
+1. **Caller** â€” `public.app_current_account_id()` (`auth.uid()` to
+   `public.accounts.auth_user_id` with `status = 'active'`, exactly one row).
+   NULL means return.
+2. **Report row** by primary key into `public.reports%ROWTYPE`. Not found means
+   return.
+3. **Membership** â€” the caller's *single* `active` `centre_memberships` row in
+   **that report's** `centre_id`, resolved with the same
+   `array_agg + HAVING count(*) = 1` fail-closed idiom
+   `public.report_get_canonical` uses. Zero or more than one means return. The
+   centre comes from the **report**, never from the request.
+4. **Role dispatch**, mirroring `report_get_canonical`:
+   - `trainer` requires `public.app_trainer_reaches_session(...)`, else return;
+   - `management` is permitted; the single active management membership of that
+     centre **is** the predicate. **No status gate**, deliberately: management
+     correction tracking (R-7) legitimately surfaces reports at `draft_ready`
+     and `needs_edit` and their ids must stay resolvable. This does **not**
+     widen RPC-15 â€” its zero-row posture at those statuses (A-038, T7I-63) is
+     untouched, and the suite proves the content gate is still shut while the
+     id resolves;
+   - `parent` requires `public.app_parent_reaches_student(...)` **and**
+     `latest_submitted_version_id IS NOT NULL`, else return. A parent must not
+     resolve a report that has never been submitted;
+   - any other role returns.
+5. **Answer** â€” exactly the two uuid columns. Nothing else exists in the shape:
+   no status, lock_version, version id, content/wording hash, revision number,
+   timestamp, rating, observation, correction metadata, panel or centre id.
+
+It **grants no reach**: every predicate it applies is one the downstream
+governed read re-proves independently on the next call.
+
+Grants use the established signature-qualified pair:
+
+```
+REVOKE ALL ON FUNCTION public.report_resolve_context(uuid) FROM PUBLIC, anon, service_role, authenticator;
+GRANT EXECUTE ON FUNCTION public.report_resolve_context(uuid) TO authenticated;
+```
+
+Nothing is granted to `service_role`, `anon`, `authenticator` or `PUBLIC`. The
+migration carries ten end-of-apply posture assertions (X1 through X10)
+re-derived from the catalogue, plus a P-1 `current_user = postgres` guard and a
+precondition block that aborts before any change if the 31-function census, the
+three authorization helpers, the pair-keyed signatures or the free function name
+have drifted.
+
+### TypeScript side
+
+`server/modules/report-workflow/context-resolver.ts` â€”
+`resolveReportContextCore(caller, reportId)`. It takes the **request-scoped
+authenticated client** (structurally an `RpcCaller`, exactly as the existing
+cores do) and **never** the elevated/service-role client;
+`server/platform/supabase/elevated.ts` is not imported and T7I-40's static scan
+enforces that. Its **only** input is the governed report identifier plus the
+caller's live session â€” no centre, session or student identifier is accepted
+from the client. A malformed uuid is rejected before it reaches the database
+with the **same** `unauthorized` outcome as a well-formed id the caller may not
+resolve, so the driver's syntax error is never a disclosure channel. Zero rows
+maps to the single non-disclosing `unauthorized` result.
+
+`server/db/database.types.ts` was **regenerated** with
+`npx --no-install supabase gen types typescript --local` after the migration was
+applied locally (output redirected to the file, never rendered). It is
+generated, never hand-edited; the diff is the seven added lines for the new
+function.
+
+### Census move
+
+| Object | Before | After |
+| --- | --- | --- |
+| Tables | 26 | **26** |
+| Functions | 31 | **32** |
+| Enums | 12 | **12** |
+| Policies | 29 | **29** |
+| Migrations | 8 | **9** |
+| `authenticated` EXECUTE | 23 | **24** |
+
+Pins moved (every one verified individually, and grep-swept for others):
+
+- `scripts/tests/step-7i/verify-fresh-apply.mjs` â€” migration count 8 to 9, the
+  packed expected census string `26|31|12|29|8|23|0|...` to
+  `26|32|12|29|9|24|0|...`, the pass message, the "eight migrations" /
+  "eight committed migration files" prose, and the **already-stale header
+  comment** (it claimed 28 functions and 20 EXECUTE grants against a live pin of
+  31/23) corrected to 32/24 with the staleness recorded in place.
+- `scripts/tests/step-7i/static-scan.mjs` â€” migration count 8 to 9.
+- `scripts/tests/correction-tracking/ct-static.mjs` â€” migration count 8 to 9,
+  `NEWEST_MIG_NAME` retargeted to the new file (it now sorts last), and the
+  T-CT-S4 prose.
+- `scripts/tests/step-7i/lifecycle-canonical.sql` â€” applied-migration count 8 to
+  9 plus the explicit version list (adds `20260806190000`), T7I-2 function
+  census 31 to 32, T7I-4 `authenticated` EXECUTE 23 to 24.
+- `scripts/tests/assessment/asm-suite.sql` â€” T-ASM-40 migrations 8 to 9 and
+  functions 31 to 32, T-ASM-42 EXECUTE 23 to 24.
+- `scripts/tests/correction-tracking/ct-suite.sql` â€” T-CT-19 EXECUTE 23 to 24.
+- `scripts/fixtures/verify-local-fixtures.sql` â€” A34 migrations 8 to 9 plus the
+  version list, A35 functions 31 to 32, D5 post-negative-suite functions 31 to
+  32, and the dated reconciliation note in the header.
+
+No pin unrelated to the counts actually moved was touched.
+
+### Proofs
+
+- **Static** (`scripts/tests/step-7i/static-scan.mjs`, new leg **T7I-R22**): the
+  migration creates exactly one function and no other object; it is plpgsql,
+  `SECURITY DEFINER`, `STABLE`, with `SET search_path = ''`; EXECUTE reaches
+  `authenticated` **only**, through the signature-qualified REVOKE-then-GRANT
+  pair in that order, with exactly one `GRANT` in the file and no grantee named
+  `anon`, `service_role`, `authenticator` or `PUBLIC`; the signature is
+  `(p_report_id uuid)` returning `TABLE(class_session_id uuid, student_id uuid)`
+  and declares no forbidden column; the body contains no `RAISE` and no mutating
+  statement.
+- **Catalogue** (`scripts/fixtures/verify-local-fixtures.sql`, A35): the applied
+  function is postgres-owned, definer, STABLE, non-STRICT, single-argument, with
+  a pinned **empty** search_path and `authenticated`-only EXECUTE, and its
+  projection is pinned to exactly the two identifiers.
+- **Part 2, canonical database, strictly read-only** (`INT-R0`): an unknown
+  report id resolves to **zero rows and no error**, byte-identically across all
+  three real-JWT roles and across two distinct ghost identifiers, and the server
+  core reports the single non-disclosing `unauthorized` outcome for all three.
+- **Part 3, disposable database** (`INT-R1` through `INT-R6`): the assigned
+  trainer resolves the correct pair and the returned shape carries **exactly**
+  `class_session_id` and `student_id`; management of the same centre resolves it
+  while RPC-15's own gate is proven still shut; the linked parent gets **zero
+  rows before submission** and the **correct pair after** management submits
+  (proving the denial was the live `latest_submitted_version_id` predicate, not
+  a blanket role rule); an unauthenticated caller (`new PsqlRpc(null)`) and a
+  trainer whose assignment has been withdrawn both get zero rows, with reach
+  restored on reinstatement; and **wrong-centre** management gets zero rows via
+  the T7I-26 decoy-centre idiom adapted to the disposable database.
+
+### Gates
+
+| Gate | Exit code |
+| --- | --- |
+| `npx --no-install supabase migration up --local` | **0** |
+| `node scripts/tests/step-7i/static-scan.mjs` | **0** |
+| `node scripts/tests/step-7i/verify-fresh-apply.mjs` | **0** |
+| `node scripts/tests/step-7i/run-canonical.mjs` | **0** |
+| `node scripts/tests/step-7i/run-concurrency.mjs` | **0** |
+| `node scripts/tests/assessment/asm-static.mjs` | **0** |
+| `node scripts/tests/assessment/run-assessment.mjs` | **0** |
+| `node scripts/tests/correction-tracking/ct-static.mjs` | **0** |
+| `node scripts/tests/correction-tracking/run-correction-tracking.mjs` | **0** |
+| `node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/run-integration.mjs` | **0** â€” Parts 1 + 2 + 3 |
+| `npx tsc --noEmit` | **0** |
+| `npm run lint` | **0** |
+
+`run-canonical.mjs` failed once (exit **1**) mid-round on the D5 function-census
+pin in `verify-local-fixtures.sql`, which the grep sweep had not yet reached; it
+was moved 31 to 32 and the gate then passed. Every figure above is the value
+after that fix.
+
+### Canonical database end state
+
+The canonical fixture checksum is **unmoved** at
+`6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576` (28 rows,
+reproduced identically on two runs) â€” this migration writes no data at all.
+`public.report_versions` = **0** and `public.report_version_ratings` = **0**,
+confirmed by a read-only `SELECT`.
+
+### Contract deviations
+
+**None.** No existing report lifecycle transition, status, policy, table, enum
+or column was changed. No already-applied migration file was edited. Nothing was
+granted to `service_role`, `anon`, `authenticator` or `PUBLIC`.
+`server/db/database.types.ts` was regenerated, never hand-edited. No
+credential-bearing output was rendered, no `.env.local` was read for Supabase
+values, and no hosted Supabase endpoint was contacted.
