@@ -1230,9 +1230,35 @@ ROLLBACK;
 --     do not re-check the guard.
 --   The owner-side session UPDATE below is authorized FOR THIS TEST ONLY and
 --   is named here so it is not mistaken for a bypass of T7I-18.
+--
+-- CLOCK-HOUR DETERMINISM (fixed at Run C3-A Phase 1; a PRE-EXISTING defect,
+-- not a regression).
+--
+-- The window END used to be derived as `(v_local + interval '1 hour')::time`.
+-- Casting an instant one hour later back to a TIME OF DAY wraps modulo 24
+-- hours, so whenever the derived Asia/Singapore wall-clock time fell in the
+-- final hour of the day -- 23:00:00 .. 23:59:59.999999 -- `ends_at` landed
+-- BEFORE `starts_at` and `class_sessions_time_order_chk`
+-- (`ends_at > starts_at`) fired. T7I-9 / T7I-41 therefore failed for one
+-- hour in every twenty-four, purely because of what time the operator
+-- happened to run it.
+--
+-- `starts_at` is UNCHANGED and still exactly `v_local::time`: it is the only
+-- field the R-9 / B-7I-1 predicate reads
+-- (`session_date + COALESCE(starts_at, '00:00') AT TIME ZONE
+-- 'Asia/Singapore'`), so the boundary this test measures is bit-for-bit what
+-- it always was. Only the window END -- which no gate reads -- is computed
+-- differently, and it is CLAMPED rather than derived by an addition that can
+-- wrap. `ends_at` is left NULL only in the single-microsecond case where
+-- `v_local::time` IS the maximum representable time of day and no strictly
+-- greater same-day value exists; the column is nullable, the CHECK is
+-- satisfied unconditionally by a NULL, and the gate still reads only
+-- `starts_at`. There is therefore NO hour at which this helper can fail and
+-- no hour at which it changes what the test measures.
+--
 CREATE FUNCTION pg_temp.set_session_at(p_offset interval, p_null_time boolean) RETURNS void
 LANGUAGE plpgsql AS $$
-DECLARE v_local timestamp;
+DECLARE v_local timestamp; v_start time; v_end time;
 BEGIN
   v_local := (pg_catalog.now() AT TIME ZONE 'Asia/Singapore') + p_offset;
   IF p_null_time THEN
@@ -1240,8 +1266,15 @@ BEGIN
        SET session_date = v_local::date, starts_at = NULL, ends_at = NULL
      WHERE id = 'c5000000-0000-4000-8000-000000000001';
   ELSE
+    v_start := v_local::time;
+    IF v_start < TIME '23:00:00' THEN
+      v_end := v_start + INTERVAL '1 hour';
+    ELSE
+      v_end := TIME '23:59:59.999999';
+      IF v_end <= v_start THEN v_end := NULL; END IF;
+    END IF;
     UPDATE public.class_sessions
-       SET session_date = v_local::date, starts_at = v_local::time, ends_at = (v_local + interval '1 hour')::time
+       SET session_date = v_local::date, starts_at = v_start, ends_at = v_end
      WHERE id = 'c5000000-0000-4000-8000-000000000001';
   END IF;
 END $$;
