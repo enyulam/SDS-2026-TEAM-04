@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // =====================================================================
-// B.E.S.T Coach -- Round C2 Phase C2-A static scan (T-C2-S1 .. T-C2-S5)
+// B.E.S.T Coach -- Round C2 Phase C2-A static scan (T-C2-S1 .. T-C2-S6)
 // =====================================================================
 // Text-only. Touches no database and starts no server.
 //
@@ -288,10 +288,69 @@ function bodyOf(src, startNeedle, endNeedle) {
   }
 }
 
+// ---------------------------------------------------------------------
+// T-C2-S6  The PARENT canonical read has exactly ONE non-success answer.
+// ---------------------------------------------------------------------
+// Operator ruling R-C2-6. `report_get_canonical` holds `authenticated`
+// EXECUTE only, so an UNAUTHENTICATED caller of the same endpoint is
+// refused by PRIVILEGE (SQLSTATE 42501) while an authenticated-but-denied
+// caller receives the RPC's zero-row outcome. Routing that error object
+// through `mapSqlErrorToResult` turned those two into DIFFERENT
+// application outcomes with different authored messages, which
+// `components/ui/state-panel.tsx` renders as two visibly different panels
+// -- an observable difference between two denials of the same read.
+//
+// The fix is a single frozen module constant returned from EVERY
+// non-success path, and this case pins it structurally: T-C2-9 can prove
+// the database half is uniform, but it cannot see the TypeScript boundary
+// at all. Comments are stripped first, because the file DOCUMENTS the
+// mapping it must not perform.
+{
+  const before = failures
+  const PARENT = join(ROOT, 'server', 'modules', 'parent-view', 'projections.ts')
+  const raw = read(PARENT)
+  const src = stripTs(raw)
+  const body = bodyOf(src, 'export async function getCanonicalReportCore', '\n}\n')
+
+  if (!/const CANONICAL_READ_DENIED[^\n]*=\s*\{\s*outcome:\s*"unavailable"\s*\}/.test(src)) {
+    fail('T-C2-S6', 'the single frozen denial constant CANONICAL_READ_DENIED is missing or is no longer a bare `unavailable`')
+  }
+  if (/\bmapSqlErrorToResult\b/.test(src)) {
+    fail('T-C2-S6', 'the parent projections module routes an error through mapSqlErrorToResult again, which re-introduces a per-cause outcome')
+  }
+  if (!body) {
+    fail('T-C2-S6', 'getCanonicalReportCore could not be located in parent-view/projections.ts')
+  } else {
+    // Every non-success return in the function must be the ONE constant.
+    const returns = body.match(/return\s+[^;]+;/g) || []
+    const nonSuccess = returns.filter((r) => !/outcome:\s*"success"/.test(r))
+    if (nonSuccess.length === 0) {
+      fail('T-C2-S6', 'getCanonicalReportCore has no non-success return at all, so its denial cannot be pinned')
+    }
+    for (const r of nonSuccess) {
+      if (!/return\s+CANONICAL_READ_DENIED;/.test(r)) {
+        fail('T-C2-S6', `a non-success return is not the shared constant: ${r.replace(/\s+/g, ' ').slice(0, 90)}`)
+      }
+    }
+    // The thrown-fault path must exist, or a driver throw would escape as a
+    // transport failure and become a seventh distinguishable answer.
+    if (!/catch\s*\{[\s\S]*?return\s+CANONICAL_READ_DENIED;/.test(body)) {
+      fail('T-C2-S6', 'a thrown transport fault is not collapsed into the shared denial')
+    }
+    // The error object must never be inspected or forwarded.
+    if (/error\.(code|message|details|hint)/.test(body)) {
+      fail('T-C2-S6', 'getCanonicalReportCore reads a field off the Supabase error object')
+    }
+  }
+  if (failures === before) {
+    pass('T-C2-S6', 'every non-success path of getCanonicalReportCore returns the one frozen CANONICAL_READ_DENIED constant, no error code/message is read or mapped, and a thrown fault collapses to the same answer')
+  }
+}
+
 console.log('')
 if (failures > 0) {
   console.error(`C2-A static scan: ${failures} failure(s).`)
   process.exitCode = 1
 } else {
-  console.log('C2-A static scan: all five cases passed.')
+  console.log('C2-A static scan: all six cases passed.')
 }

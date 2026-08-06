@@ -28,6 +28,13 @@
 --           non-existent all fail with the IDENTICAL code AND the
 --           IDENTICAL message, and none creates a shell
 --   T-C2-8  stale and malformed CAS pairs are refused, changing nothing
+--   T-C2-9  (operator ruling R-C2-6) the PARENT-facing canonical read is
+--           not an existence oracle: with a REAL submitted report for
+--           another child, a REAL submitted report in another centre and
+--           a REAL not-submitted report for the parent's own child all
+--           present, all six denial cases return the IDENTICAL FULL
+--           result -- while the linked parent still reads their own
+--           child's submitted report and trainer/management are unchanged
 --
 -- T-C2-4 (two-actor concurrency) is NOT here: it needs two coordinated
 -- sessions and lives in the runner.
@@ -107,6 +114,88 @@ BEGIN
     GET STACKED DIAGNOSTICS v_state = RETURNED_SQLSTATE, v_msg = MESSAGE_TEXT;
     RETURN v_state || '|' || v_msg;
   END;
+END $$;
+
+-- ---------------------------------------------------------------------
+-- R-C2-6 helpers -- the PARENT-FACING canonical read, captured WHOLE.
+-- ---------------------------------------------------------------------
+-- `pg_temp.c2_canon` returns the ENTIRE observable result of RPC-13 for
+-- one (class session, student) pair, as ONE string, so a comparison is a
+-- comparison of everything the boundary emitted and not of selected
+-- fields:
+--
+--   * on a normal return  -> 'ROWS|<n>|<every row, serialized and ordered>'
+--   * on a raised error   -> 'RAISED|<SQLSTATE>|<MESSAGE_TEXT>'
+--
+-- Both shapes live in ONE text domain deliberately. A denial that returns
+-- zero rows and a denial that raises are then directly comparable, and any
+-- implementation that started raising for one denial case and returning
+-- for another would be caught by the same `IS DISTINCT FROM` that catches
+-- a differing row count -- rather than slipping past a test that only ever
+-- counted rows.
+CREATE FUNCTION pg_temp.c2_canon(p_sess uuid, p_student uuid)
+RETURNS text LANGUAGE plpgsql AS $$
+DECLARE v_state text; v_msg text; v_n bigint; v_rows text;
+BEGIN
+  BEGIN
+    SELECT pg_catalog.count(*),
+           COALESCE(pg_catalog.string_agg(x::text, E'\n' ORDER BY x::text), '')
+      INTO v_n, v_rows
+      FROM public.report_get_canonical(p_sess, p_student) x;
+    RETURN 'ROWS|' || v_n::text || '|' || v_rows;
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_state = RETURNED_SQLSTATE, v_msg = MESSAGE_TEXT;
+    RETURN 'RAISED|' || v_state || '|' || v_msg;
+  END;
+END $$;
+
+-- The wording hash of a stored version, so management can submit without a
+-- wording edit. Mirrors `pg_temp.whash` in the Step 7I canonical suite.
+CREATE FUNCTION pg_temp.c2_whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
+DECLARE v public.report_versions; BEGIN
+  SELECT * INTO v FROM public.report_versions WHERE id = p_version;
+  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
+                                       v.practice_suggestion, v.session_takeaway);
+END $$;
+
+-- Drive one (class session, student) pair to a named lifecycle stop THROUGH
+-- THE GOVERNED RPCs ONLY -- never by inserting a report, a version or a
+-- pointer directly. `p_stop` is 'trainer_approved' or 'submitted'.
+-- The caller sets the trainer identity; this switches to management and
+-- back only where the workflow itself hands over.
+CREATE FUNCTION pg_temp.c2_drive(p_sess uuid, p_student uuid, p_stop text)
+RETURNS uuid LANGUAGE plpgsql AS $$
+DECLARE
+  v_rep uuid; v_lv integer; v_obs_lv integer; v_st public.report_status;
+  v_ver uuid; v_hash text; v_wh text;
+BEGIN
+  SELECT x.report_id, x.report_lock_version, x.observation_lock_version
+    INTO v_rep, v_lv, v_obs_lv
+    FROM public.assessment_save_complete_and_open_report(
+           p_sess, p_student, NULL, NULL,
+           ARRAY['confident-opening']::text[], ARRAY['pacing']::text[],
+           'Worked on a short prepared speech.', 'Reinforce eye contact drills.', '',
+           pg_temp.c2_nine()) AS x;
+
+  SELECT x.status, x.lock_version, x.observation_lock_version INTO v_st, v_lv, v_obs_lv
+    FROM public.report_request_draft(v_rep, v_lv) x;
+  SELECT x.status, x.lock_version, x.report_version_id, x.content_hash
+    INTO v_st, v_lv, v_ver, v_hash
+    FROM public.report_store_draft(v_rep, v_lv, v_obs_lv,
+      'Spoke clearly and held eye contact', 'Vary pace when excited',
+      'Practice reading aloud for five minutes', 'A confident session') x;
+  PERFORM public.report_update_checklist(v_rep, v_lv, v_ver, true, true, true);
+  SELECT x.status, x.lock_version INTO v_st, v_lv
+    FROM public.report_trainer_approve(v_rep, v_st, v_lv, v_ver, v_hash) x;
+  IF p_stop = 'trainer_approved' THEN RETURN v_rep; END IF;
+
+  PERFORM pg_temp.c2_be('management');
+  v_wh := pg_temp.c2_whash(v_ver);
+  PERFORM public.report_management_approve_and_submit(v_rep, v_lv, v_ver, v_wh);
+  PERFORM pg_temp.c2_be('trainer');
+  IF p_stop = 'submitted' THEN RETURN v_rep; END IF;
+
+  RAISE EXCEPTION 'pg_temp.c2_drive: unknown stop "%"', p_stop;
 END $$;
 
 -- =====================================================================
@@ -561,6 +650,282 @@ BEGIN
 
   RAISE NOTICE 'PASS T-C2-8: stale (BC112), mixed-nullability (BC111) and duplicate-create (BC113) CAS pairs were each refused, leaving the aggregate and the audit chain unchanged';
 END $t8$;
+
+-- =====================================================================
+-- T-C2-9  PARENT NON-DISCLOSING DENIAL (operator ruling R-C2-6).
+-- =====================================================================
+-- The Parent-facing canonical read must not be an EXISTENCE ORACLE. All
+-- SIX denial cases R-C2-6 item 2 enumerates must be INDISTINGUISHABLE in
+-- the FULL result -- not merely in a row count, and not merely in the
+-- rendered message:
+--
+--   (a) a (class session, student) pair that does not exist;
+--   (b) an EXISTING SUBMITTED report belonging to ANOTHER CHILD in the
+--       parent's OWN centre;
+--   (c) an EXISTING SUBMITTED report in ANOTHER CENTRE;
+--   (d) an EXISTING report for the parent's OWN child that is NOT
+--       SUBMITTED (it stands at `trainer_approved`);
+--   (e) an INACTIVE parent link, and separately an INACTIVE parent
+--       membership, over the pair the parent could otherwise read;
+--   (f) an UNAUTHENTICATED caller of the same RPC.
+--
+-- This follows T-C2-7's shape exactly -- one REFERENCE result, then every
+-- other case compared to it with `IS DISTINCT FROM` over the WHOLE
+-- captured string (`pg_temp.c2_canon`), which carries the row count, every
+-- returned row serialized, and any raised SQLSTATE and message.
+--
+-- LIVENESS IS PROVEN, NOT ASSUMED. Cases (b), (c) and (d) are reports that
+-- REALLY EXIST on this database, driven to their states through the
+-- governed RPCs -- so the "existing but unauthorized" arm exercises a
+-- genuinely different code path from the "nothing exists" arm. And the
+-- POSITIVE CONTROL -- the parent's own child's SUBMITTED report -- is
+-- asserted to be READABLE and DIFFERENT from the denial, so a boundary
+-- that simply denied everything could not pass this test.
+DO $t9$
+DECLARE
+  v_own_sess uuid; v_unsub_sess uuid;
+  v_other_sess  CONSTANT uuid := 'c5000000-0000-4000-8000-0000000000d1';
+  v_other_stud  CONSTANT uuid := 'c2000000-0000-4000-8000-0000000000d1';
+  v_other_enrol CONSTANT uuid := 'c6000000-0000-4000-8000-0000000000d1';
+  v_d2_centre  CONSTANT uuid := 'b0000000-0000-4000-8000-0000000000d2';
+  v_d2_grade   CONSTANT uuid := 'b1000000-0000-4000-8000-0000000000d2';
+  v_d2_module  CONSTANT uuid := 'c4000000-0000-4000-8000-0000000000d2';
+  v_d2_stud    CONSTANT uuid := 'c2000000-0000-4000-8000-0000000000d2';
+  v_d2_sess    CONSTANT uuid := 'c5000000-0000-4000-8000-0000000000d2';
+  v_d2_enrol   CONSTANT uuid := 'c6000000-0000-4000-8000-0000000000d2';
+  v_d2_train_m CONSTANT uuid := 'c1000000-0000-4000-8000-0000000000d2';
+  v_d2_mgmt_m  CONSTANT uuid := 'c1000000-0000-4000-8000-0000000000d3';
+  v_nil_sess   CONSTANT uuid := 'c5000000-0000-4000-8000-0000000000de';
+  v_nil_stud   CONSTANT uuid := 'c2000000-0000-4000-8000-0000000000de';
+  v_ref text; v_r text; v_pos text;
+  v_reports0 bigint; v_reports1 bigint;
+BEGIN
+  -- -----------------------------------------------------------------
+  -- Scaffolding. Domain rows only -- NO report, version or pointer is
+  -- ever written here; every report below is created by a governed RPC.
+  -- No Auth identity is manufactured: the second centre reuses the
+  -- EXISTING trainer and management accounts through NEW memberships,
+  -- which is a membership fact, not an authentication secret.
+  -- -----------------------------------------------------------------
+  PERFORM pg_temp.c2_be('trainer');
+
+  -- (b)'s subject: a SECOND child of the parent's OWN centre, deliberately
+  -- NOT linked to the fixture parent.
+  INSERT INTO public.students (id, centre_id, full_name, is_active)
+  VALUES (v_other_stud, pg_temp.c2_centre(), 'C2 Unlinked Child', true);
+  INSERT INTO public.enrolments (id, centre_id, class_module_id, student_id, is_active)
+  VALUES (v_other_enrol, pg_temp.c2_centre(), pg_temp.c2_module(), v_other_stud, true);
+  INSERT INTO public.class_sessions (id, centre_id, class_module_id, session_date, starts_at, ends_at)
+  VALUES (v_other_sess, pg_temp.c2_centre(), pg_temp.c2_module(),
+          (pg_catalog.now() AT TIME ZONE 'Asia/Singapore')::date - 1, '10:00', '11:00');
+  INSERT INTO public.class_session_assignments (centre_id, class_session_id, trainer_membership_id)
+  VALUES (pg_temp.c2_centre(), v_other_sess, pg_temp.c2_trainer_m());
+  INSERT INTO public.attendance (centre_id, class_session_id, class_module_id, student_id, enrolment_id, status)
+  VALUES (pg_temp.c2_centre(), v_other_sess, pg_temp.c2_module(), v_other_stud, v_other_enrol, 'present');
+
+  -- (c)'s subject: a SECOND CENTRE the fixture parent holds no membership in.
+  INSERT INTO public.centres (id, code, display_name)
+  VALUES (v_d2_centre, 'c2other2', 'C2 Other Centre Two');
+  INSERT INTO public.centre_memberships (id, account_id, centre_id, role, status, activated_at)
+  VALUES (v_d2_train_m, 'c0000000-0000-4000-8000-000000000002', v_d2_centre, 'trainer', 'active', pg_catalog.now()),
+         (v_d2_mgmt_m,  'c0000000-0000-4000-8000-000000000001', v_d2_centre, 'management', 'active', pg_catalog.now());
+  INSERT INTO public.trainer_profiles (membership_id, centre_id) VALUES (v_d2_train_m, v_d2_centre);
+  INSERT INTO public.class_grades (id, centre_id, code, display_name, sort_order)
+  VALUES (v_d2_grade, v_d2_centre, 'beginner', 'Beginner', 1);
+  INSERT INTO public.class_modules (id, centre_id, class_grade_id, title)
+  VALUES (v_d2_module, v_d2_centre, v_d2_grade, 'C2 Other Module Two');
+  INSERT INTO public.students (id, centre_id, full_name, is_active)
+  VALUES (v_d2_stud, v_d2_centre, 'C2 Other Centre Child', true);
+  INSERT INTO public.enrolments (id, centre_id, class_module_id, student_id, is_active)
+  VALUES (v_d2_enrol, v_d2_centre, v_d2_module, v_d2_stud, true);
+  INSERT INTO public.class_sessions (id, centre_id, class_module_id, session_date, starts_at, ends_at)
+  VALUES (v_d2_sess, v_d2_centre, v_d2_module,
+          (pg_catalog.now() AT TIME ZONE 'Asia/Singapore')::date - 1, '10:00', '11:00');
+  INSERT INTO public.class_session_assignments (centre_id, class_session_id, trainer_membership_id)
+  VALUES (v_d2_centre, v_d2_sess, v_d2_train_m);
+  INSERT INTO public.attendance (centre_id, class_session_id, class_module_id, student_id, enrolment_id, status)
+  VALUES (v_d2_centre, v_d2_sess, v_d2_module, v_d2_stud, v_d2_enrol, 'present');
+
+  -- -----------------------------------------------------------------
+  -- The four REAL reports, all through governed RPCs.
+  -- -----------------------------------------------------------------
+  v_own_sess   := pg_temp.c2_scenario(91);
+  v_unsub_sess := pg_temp.c2_scenario(92);
+  PERFORM pg_temp.c2_drive(v_own_sess,   pg_temp.c2_student(), 'submitted');
+  PERFORM pg_temp.c2_drive(v_unsub_sess, pg_temp.c2_student(), 'trainer_approved');
+  PERFORM pg_temp.c2_drive(v_other_sess, v_other_stud,         'submitted');
+  PERFORM pg_temp.c2_drive(v_d2_sess,    v_d2_stud,            'submitted');
+
+  -- The three "existing but unauthorized/unsubmitted" subjects must really
+  -- exist, or every comparison below degenerates into the same
+  -- "nothing exists" case and proves nothing. This is asserted, not assumed.
+  SELECT pg_catalog.count(*) INTO v_reports0 FROM public.reports r
+   WHERE (r.class_session_id, r.student_id) IN
+         ((v_other_sess, v_other_stud), (v_d2_sess, v_d2_stud), (v_unsub_sess, pg_temp.c2_student()));
+  IF v_reports0 <> 3 THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: only % of the 3 unauthorized/unsubmitted subject reports exist, so the isolation half would never be exercised', v_reports0;
+  END IF;
+  SELECT pg_catalog.count(*) INTO v_reports0 FROM public.reports r
+   WHERE r.class_session_id IN (v_other_sess, v_d2_sess) AND r.latest_submitted_version_id IS NOT NULL;
+  IF v_reports0 <> 2 THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: only % of the 2 foreign subject reports actually reached submitted', v_reports0;
+  END IF;
+  SELECT pg_catalog.count(*) INTO v_reports0 FROM public.reports r
+   WHERE r.class_session_id = v_unsub_sess AND r.status = 'trainer_approved'
+     AND r.latest_submitted_version_id IS NULL;
+  IF v_reports0 <> 1 THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the not-submitted subject report is not at trainer_approved with a NULL submitted pointer';
+  END IF;
+  SELECT pg_catalog.count(*) INTO v_reports0 FROM public.reports;
+
+  -- -----------------------------------------------------------------
+  -- THE POSITIVE CONTROL. Without this the whole gate could be satisfied
+  -- by a boundary that denies everything.
+  -- -----------------------------------------------------------------
+  PERFORM pg_temp.c2_be('parent');
+  v_pos := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF pg_catalog.split_part(v_pos, '|', 1) <> 'ROWS' OR pg_catalog.split_part(v_pos, '|', 2) <> '1' THEN
+    RAISE EXCEPTION 'FAIL T-C2-9 POSITIVE CONTROL: the linked parent could not read their OWN child''s SUBMITTED report -- got "%"', v_pos;
+  END IF;
+
+  -- -----------------------------------------------------------------
+  -- (a) the REFERENCE denial: a pair that exists nowhere.
+  -- -----------------------------------------------------------------
+  v_ref := pg_temp.c2_canon(v_nil_sess, v_nil_stud);
+  IF v_ref <> 'ROWS|0|' THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(a): the non-existent pair did not produce the generic ZERO-ROW denial -- got "%"', v_ref;
+  END IF;
+  IF v_pos = v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the positive control is byte-identical to the denial, so this test cannot distinguish a working boundary from a broken one';
+  END IF;
+
+  -- (b) an EXISTING SUBMITTED report of ANOTHER CHILD in the SAME centre.
+  v_r := pg_temp.c2_canon(v_other_sess, v_other_stud);
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(b): another child''s EXISTING SUBMITTED report gave "%", which is distinguishable from "%" -- the read is an existence oracle', v_r, v_ref;
+  END IF;
+
+  -- (c) an EXISTING SUBMITTED report in ANOTHER CENTRE.
+  v_r := pg_temp.c2_canon(v_d2_sess, v_d2_stud);
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(c): another centre''s EXISTING SUBMITTED report gave "%", which is distinguishable from "%"', v_r, v_ref;
+  END IF;
+
+  -- (d) an EXISTING but NOT SUBMITTED report for the parent's OWN child.
+  --     This is the case that must not leak "a report is being worked on".
+  v_r := pg_temp.c2_canon(v_unsub_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(d): the parent''s OWN child''s NOT-SUBMITTED report gave "%", which is distinguishable from "%"', v_r, v_ref;
+  END IF;
+
+  -- (e1) an INACTIVE parent_student_links row, over the pair the parent
+  --      could read one statement ago.
+  PERFORM pg_temp.c2_be('trainer');
+  UPDATE public.parent_student_links
+     SET is_active = false, unlinked_at = pg_catalog.now()
+   WHERE id = 'c3000000-0000-4000-8000-000000000001';
+  PERFORM pg_temp.c2_be('parent');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(e1): an INACTIVE parent link gave "%", which is distinguishable from "%"', v_r, v_ref;
+  END IF;
+  PERFORM pg_temp.c2_be('trainer');
+  UPDATE public.parent_student_links
+     SET is_active = true, unlinked_at = NULL
+   WHERE id = 'c3000000-0000-4000-8000-000000000001';
+
+  -- (e2) an INACTIVE parent MEMBERSHIP, over the same pair.
+  UPDATE public.centre_memberships
+     SET status = 'deactivated', deactivated_at = pg_catalog.now()
+   WHERE id = 'c1000000-0000-4000-8000-000000000003';
+  PERFORM pg_temp.c2_be('parent');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(e2): an INACTIVE parent membership gave "%", which is distinguishable from "%"', v_r, v_ref;
+  END IF;
+  PERFORM pg_temp.c2_be('trainer');
+  UPDATE public.centre_memberships
+     SET status = 'active', deactivated_at = NULL
+   WHERE id = 'c1000000-0000-4000-8000-000000000003';
+
+  -- (f) an UNAUTHENTICATED caller of the very same RPC -- no JWT claim, so
+  --     `app_current_account_id()` is NULL and the function body itself
+  --     must answer with the same generic denial.
+  PERFORM pg_temp.c2_be('none');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(f): an UNAUTHENTICATED caller gave "%", which is distinguishable from "%"', v_r, v_ref;
+  END IF;
+
+  -- (f2) THE SAME CALLER, ONE LAYER DOWN, AND THE HONEST LIMIT OF (f).
+  --      (f) runs as `postgres`, so it proves the FUNCTION BODY is uniform
+  --      for an unauthenticated caller -- it does NOT exercise the GRANT.
+  --      `report_get_canonical` holds EXECUTE for `authenticated` only
+  --      (PUBLIC/anon/service_role/authenticator are revoked, by design and
+  --      by the Step 7I grant test), so a real unauthenticated PostgREST
+  --      request is refused by PRIVILEGE with SQLSTATE 42501 rather than by
+  --      zero rows. That is MEASURED here rather than assumed, and it is
+  --      deliberately NOT "fixed" by granting `anon` EXECUTE, which would
+  --      widen the grant posture to hide a difference.
+  --
+  --      It is closed one layer up instead: `getCanonicalReportCore` in
+  --      server/modules/parent-view/projections.ts collapses EVERY
+  --      non-success -- 42501 included -- to the single frozen
+  --      `CANONICAL_READ_DENIED` value, so the ENDPOINT the parent surface
+  --      actually calls emits one answer. That collapse is pinned by
+  --      T-C2-S6 in scripts/tests/c2/c2-static.mjs. Before it, 42501 fell
+  --      through to `unexpected_failure` + "The operation could not be
+  --      completed." and rendered a visibly different panel from the
+  --      `unavailable` an authenticated-but-denied caller received.
+  PERFORM pg_catalog.set_config('role', 'anon', true);
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  PERFORM pg_catalog.set_config('role', 'postgres', true);
+  IF pg_catalog.split_part(v_r, '|', 1) <> 'RAISED'
+     OR pg_catalog.split_part(v_r, '|', 2) <> '42501' THEN
+    RAISE EXCEPTION 'FAIL T-C2-9(f2): the anon grant posture changed -- an unauthenticated database caller got "%", expected a 42501 privilege refusal. If anon was GRANTED EXECUTE this is a widened grant, not a fix', v_r;
+  END IF;
+
+  -- -----------------------------------------------------------------
+  -- The POSITIVE CONTROL still holds after the link and membership were
+  -- restored -- so (e1)/(e2) proved a live predicate, not a broken one.
+  -- -----------------------------------------------------------------
+  PERFORM pg_temp.c2_be('parent');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_pos THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the positive control did not survive restoring the link and membership -- "%" vs "%"', v_r, v_pos;
+  END IF;
+
+  -- -----------------------------------------------------------------
+  -- R-C2-6 item 6 -- MANAGEMENT AND TRAINER BEHAVIOUR IS PRESERVED.
+  -- Both still read the canonical submitted report of their own centre,
+  -- and both still get the SAME generic denial for a non-existent pair.
+  -- -----------------------------------------------------------------
+  PERFORM pg_temp.c2_be('trainer');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_pos THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the TRAINER read of the submitted canonical report changed -- "%" vs "%"', v_r, v_pos;
+  END IF;
+  IF pg_temp.c2_canon(v_nil_sess, v_nil_stud) IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the TRAINER denial is distinguishable from the shared generic denial';
+  END IF;
+  PERFORM pg_temp.c2_be('management');
+  v_r := pg_temp.c2_canon(v_own_sess, pg_temp.c2_student());
+  IF v_r IS DISTINCT FROM v_pos THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the MANAGEMENT read of the submitted canonical report changed -- "%" vs "%"', v_r, v_pos;
+  END IF;
+  IF pg_temp.c2_canon(v_nil_sess, v_nil_stud) IS DISTINCT FROM v_ref THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the MANAGEMENT denial is distinguishable from the shared generic denial';
+  END IF;
+
+  -- No probe created anything.
+  SELECT pg_catalog.count(*) INTO v_reports1 FROM public.reports;
+  IF v_reports1 <> v_reports0 THEN
+    RAISE EXCEPTION 'FAIL T-C2-9: the denial probes created % report(s)', v_reports1 - v_reports0;
+  END IF;
+
+  PERFORM pg_temp.c2_be('trainer');
+  RAISE NOTICE 'PASS T-C2-9: with a REAL submitted report for another child, a REAL submitted report in another centre and a REAL not-submitted report for the parent''s own child all present on this database, every one of the six parent denial cases returned the IDENTICAL FULL result "ROWS|0|" -- while the linked parent still read their own child''s submitted report, and trainer and management behaviour is unchanged';
+END $t9$;
 
 -- ---------------------------------------------------------------------
 -- Final posture: the audit chain still verifies end to end.

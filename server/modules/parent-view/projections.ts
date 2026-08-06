@@ -13,11 +13,25 @@
  *
  * Enumeration runs over the parent's OWN Step 7G scope: live
  * `parent_student_links`, the linked students, and their enrolled sessions.
+ *
+ * ---------------------------------------------------------------------
+ * R-C2-6 — THE PARENT DENIAL IS ONE ANSWER, AND ONLY ONE
+ * ---------------------------------------------------------------------
+ * Operator ruling R-C2-6 requires that every Parent-facing denial of the
+ * canonical read be INDISTINGUISHABLE — same application outcome, same
+ * body, same error code and message, same projected shape — across all of:
+ * a non-existent (session, student) pair; an existing report belonging to
+ * another child; an existing report in another centre; an existing but NOT
+ * SUBMITTED report; an inactive or absent parent membership; and an
+ * unauthenticated caller of the same endpoint.
+ *
+ * That is enforced HERE, at the server-side boundary, and in the database
+ * — not in a frontend message. See `CANONICAL_READ_DENIED` below for what
+ * was actually disclosing and what closing it cost.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
-import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { firstRow, type CanonicalReportRow } from "@/server/modules/report-workflow/rpc-types";
 
@@ -121,6 +135,52 @@ export async function getParentAvailabilityCore(
 // ---------------------------------------------------------------------
 // R-11 — the canonical submitted detail
 // ---------------------------------------------------------------------
+/**
+ * THE ONE NON-DISCLOSING DENIAL OF THE CANONICAL READ (operator ruling
+ * R-C2-6). Every path out of `getCanonicalReportCore` that is not a
+ * successful canonical read returns THIS EXACT VALUE — one outcome, no
+ * message, no field list, no code, no discriminator of any kind.
+ *
+ * It is a frozen module constant rather than an object literal repeated at
+ * each return site, for the same reason the Trainer-side assessment RPC
+ * carries a BYTE-IDENTICAL message at all four of its BC101 raise sites: a
+ * single authored value cannot drift apart at one site and become an
+ * oracle, and a test can compare the WHOLE result rather than selected
+ * fields.
+ *
+ * WHY EVERY SQL ERROR COLLAPSES HERE TOO, and why this is not a loss of
+ * signal. `mapSqlErrorToResult` is deliberately expressive — it separates
+ * BC001 (`unauthorized`) from BC002 (`unavailable`) from a transport fault
+ * (`retryable_failure`) from anything else (`unexpected_failure`), each
+ * with its own authored message, and `components/ui/state-panel.tsx`
+ * renders three visibly DIFFERENT panels across that union. On this read
+ * that expressiveness is a disclosure channel:
+ *
+ *   * `report_get_canonical` holds `EXECUTE` for `authenticated` ONLY —
+ *     `PUBLIC`, `anon`, `service_role` and `authenticator` are revoked. An
+ *     UNAUTHENTICATED caller of this same endpoint therefore receives
+ *     SQLSTATE 42501 from PostgREST, which fell through to
+ *     `unexpected_failure` + "The operation could not be completed." and
+ *     rendered "Something went wrong";
+ *   * an AUTHENTICATED-BUT-DENIED caller receives the RPC's zero-row
+ *     outcome, which returned `unavailable` and rendered "This item isn't
+ *     available".
+ *
+ * Those two are the SAME EVENT — "you may not read this" — and they were
+ * telling a caller which of the two it was. That is exactly what R-C2-6
+ * item 2's sixth bullet forbids, and collapsing every non-success to one
+ * value is what closes it. Retryability is not signalled here: this is a
+ * VIEW-ONLY read that the surface re-issues on navigation, so nothing is
+ * lost but the discriminator.
+ *
+ * The database half of the boundary is already uniform and stays that way —
+ * RPC-13 answers ALL SIX denial cases (non-existent pair, another child,
+ * another centre, not submitted, inactive/absent parent membership,
+ * unauthenticated) with the SAME ZERO ROWS, and
+ * `scripts/tests/c2/c2-suite.sql` T-C2-9 pins that byte-for-byte.
+ */
+const CANONICAL_READ_DENIED: ActionResult<never> = { outcome: "unavailable" };
+
 export async function getCanonicalReportCore(
   client: SupabaseClient,
   sessionId: string,
@@ -129,13 +189,24 @@ export async function getCanonicalReportCore(
   // Any of the three roles may read the canonical version (A-030); the RPC
   // itself decides reach. No role pre-check here beyond authentication —
   // adding one would duplicate authority the database already owns.
-  const { data, error } = await client.rpc("report_get_canonical", {
-    p_class_session_id: sessionId,
-    p_student_id: studentId,
-  });
-  if (error) return mapSqlErrorToResult(error.code, error.message);
+  let data: unknown;
+  try {
+    const response = await client.rpc("report_get_canonical", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    });
+    // The error object is deliberately NOT inspected, forwarded, mapped or
+    // logged: its code and message are the discriminators this boundary
+    // exists to withhold.
+    if (response.error) return CANONICAL_READ_DENIED;
+    data = response.data;
+  } catch {
+    // A thrown transport fault is the same single answer. Nothing about the
+    // thrown value reaches the caller.
+    return CANONICAL_READ_DENIED;
+  }
   const row = firstRow<CanonicalReportRow>(data);
-  if (!row) return { outcome: "unavailable" };
+  if (!row) return CANONICAL_READ_DENIED;
   return {
     outcome: "success",
     data: {
