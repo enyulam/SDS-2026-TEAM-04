@@ -167,15 +167,50 @@ async function readWorking(
   return firstRow<WorkingReportRow>(data);
 }
 
-async function readSessionDate(client: SupabaseClient, sessionId: string): Promise<string> {
-  const { data } = await client.from("class_sessions").select("id, session_date").eq("id", sessionId);
-  return ((data?.[0] as { session_date?: string } | undefined)?.session_date) ?? "";
+/**
+ * Both helpers return `null` — an EXPLICIT "not read" marker — for a failed
+ * read, a denied read and a zero-row read alike, so a caller can tell those
+ * apart from a genuine value. Corrected at F16-C1: they used to collapse the
+ * failure into `""` / `"Student"` inside the helper, which made a masked
+ * failure indistinguishable from real data at every call site.
+ *
+ * The two DTO fields these feed (`sessionDate`, `studentDisplayName`) are
+ * non-nullable `string` in the ratified adapter contract (`adapter-dtos.ts`)
+ * and in its frontend mirror, so the caller must still choose a display
+ * fallback at the boundary; the substitution is now VISIBLE at that boundary
+ * rather than hidden here. Carrying the distinction all the way to the surface
+ * requires a DTO contract change and is deliberately not made here.
+ */
+async function readSessionDate(
+  client: SupabaseClient,
+  sessionId: string,
+): Promise<string | null> {
+  const { data, error } = await client
+    .from("class_sessions")
+    .select("id, session_date")
+    .eq("id", sessionId);
+  if (error) return null;
+  return ((data?.[0] as { session_date?: string } | undefined)?.session_date) ?? null;
 }
 
-async function readStudentName(client: SupabaseClient, studentId: string): Promise<string> {
-  const { data } = await client.from("students").select("id, full_name").eq("id", studentId);
-  return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? "Student";
+async function readStudentName(
+  client: SupabaseClient,
+  studentId: string,
+): Promise<string | null> {
+  const { data, error } = await client
+    .from("students")
+    .select("id, full_name")
+    .eq("id", studentId);
+  if (error) return null;
+  return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? null;
 }
+
+/**
+ * The single, explicit place where an unreadable name/date becomes display
+ * text. `null` here means "not read", never "this is the value".
+ */
+const UNREAD_STUDENT_NAME = "Student";
+const UNREAD_SESSION_DATE = "";
 
 /**
  * The governed report-id -> (session, student) translation. The ONLY input is
@@ -278,7 +313,7 @@ export async function adapterGetAssessmentDraft(
       reportId: working ? working.report_id : null,
       sessionId,
       studentId,
-      studentDisplayName: await readStudentName(client, studentId),
+      studentDisplayName: (await readStudentName(client, studentId)) ?? UNREAD_STUDENT_NAME,
       ratings: FRAMEWORK_DIMENSIONS.map((dimension) => ({
         dimensionCode: dimension.code,
         rating: (ratingOf.get(dimension.code) ?? null) as AdapterRatingLevel | null,
@@ -312,7 +347,8 @@ export async function adapterGetTrainerWorkingReport(
       sessionId: report.data.sessionId,
       studentId: report.data.studentId,
       studentDisplayName: report.data.studentDisplayName,
-      sessionDate: await readSessionDate(client, report.data.sessionId),
+      sessionDate:
+        (await readSessionDate(client, report.data.sessionId)) ?? UNREAD_SESSION_DATE,
       status: report.data.status,
       lockVersion: report.data.lockVersion,
       versionId: report.data.versionId,
@@ -360,7 +396,8 @@ export async function adapterGetDraftGenerationContext(
     outcome: "success",
     data: {
       reportId: working.report_id,
-      studentDisplayName: await readStudentName(client, context.data.studentId),
+      studentDisplayName:
+        (await readStudentName(client, context.data.studentId)) ?? UNREAD_STUDENT_NAME,
       observationLockVersion: observation.data.observationLockVersion,
       status: working.status,
     },

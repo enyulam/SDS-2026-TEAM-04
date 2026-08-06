@@ -442,19 +442,37 @@ const fnBodies = new Map()
   // ------------------------------------------------------------------
   // T7I-40's ratified property is that PostgreSQL owns every transition and
   // TypeScript holds NO status authority ON THE GOVERNED PATH. Exactly one
-  // directory is excluded, `lib/frontend/fixtures/`, and nothing broader:
-  // not `lib/`, not any `server/` or `app/` path.
+  // MODULE is excluded, `lib/frontend/fixtures/physical-test-fixture`, and
+  // nothing broader: not the rest of `lib/frontend/fixtures/`, not `lib/`, not
+  // any `server/` or `app/` path.
   //
-  // WHY THE EXCLUSION IS SOUND. `lib/frontend/fixtures/physical-test-fixture.ts`
+  // NARROWED AT F16-C1. The exclusion used to cover the whole
+  // `lib/frontend/fixtures/` DIRECTORY while the compensating leg (d) covered
+  // only the one fixture module, so the sibling `dimensions.ts` was exempt
+  // from (c) but not carried by (d) -- a status literal added there would have
+  // been invisible. The two sets now COINCIDE on the single fixture module.
+  // The narrowing (rather than widening leg (d) to the directory) is the
+  // correct direction because `lib/frontend/fixtures/dimensions.ts` holds the
+  // ratified display labels and polarity bands and is LEGITIMATELY imported by
+  // three participant-path surfaces (`features/trainer/trainer-assessment`,
+  // `-report-review`, `-draft-generation`); widening (d) would have failed
+  // those three imports. It carries no status assignment, no lock_version
+  // mutation and no table access, so it passes (a)/(b)/(c) on its merits --
+  // and from now on it is REQUIRED to.
+  //
+  // WHY THE REMAINING EXCLUSION IS SOUND. `lib/frontend/fixtures/physical-test-fixture.ts`
   // is a browser-only SIMULATION of the backend for UI development. It touches
   // no database, no RPC and no session. Since F16-C it is also, provably, not
   // on the governed path:
   //   * the portals compose the REAL participant adapter by default --
   //     `features/portal/physical-test-runtime.tsx` is the single composition
   //     root and it constructs `createRealParticipantPhysicalTestPort()`;
-  //   * the fixture is selectable ONLY by the build-time development flag
-  //     NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE=1, which is OFF BY DEFAULT and
-  //     cannot be set from a query parameter, cookie, header or UI control;
+  //   * the fixture is selectable ONLY by NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE=1
+  //     set in the SERVER ENVIRONMENT the app is started in. It is OFF unless
+  //     the deploying operator sets it, and cannot be set from a query
+  //     parameter, cookie, header or UI control. (The read is a RUNTIME
+  //     `process.env` read, not a build-time fold, so no rebuild is needed to
+  //     change it -- see `lib/frontend/adapters/adapter-mode.ts`.);
   //   * when it IS composed it is VISIBLY IDENTIFIED -- `PortalShell` renders a
   //     persistent "Deterministic fixture mode" banner on every portal surface,
   //     keyed off the port's own `identity.kind`, which the real adapter can
@@ -471,8 +489,9 @@ const fnBodies = new Map()
   // `tests/frontend/fixture-isolation-browser-smoke.mjs` (participant-mode
   // navigation reaches no fixture surface, and the fixture banner is present
   // on every portal surface in a fixture-mode build).
-  const FIXTURE_DIR = 'lib/frontend/fixtures/'
-  const isFixtureModule = (rel) => rel.startsWith(FIXTURE_DIR)
+  // The excluded set and leg (d)'s asserted set are the SAME single module.
+  const FIXTURE_MODULE = 'lib/frontend/fixtures/physical-test-fixture'
+  const isFixtureModule = (rel) => rel === `${FIXTURE_MODULE}.ts` || rel === `${FIXTURE_MODULE}.tsx`
 
   const allAppFiles = [...serverFiles, ...walk(join(ROOT, 'app')), ...walk(join(ROOT, 'lib'))]
     .filter((f) => !isFixtureModule(relOf(f)))
@@ -515,7 +534,13 @@ const fnBodies = new Map()
   // is a governance failure, because it would put simulated data (and the
   // TypeScript status assignments the exclusion above tolerates) back on the
   // path a real participant can reach.
-  const FIXTURE_IMPORT = /from\s+['"][^'"]*lib\/frontend\/fixtures\/physical-test-fixture['"]|import\(\s*['"][^'"]*lib\/frontend\/fixtures\/physical-test-fixture['"]/
+  //
+  // The module named here is EXACTLY the module `isFixtureModule` exempts
+  // above: the exclusion and this compensating assertion cover the same set,
+  // so nothing can be exempt from (c) without being contained by (d).
+  const FIXTURE_IMPORT = new RegExp(
+    `from\\s+['"][^'"]*${FIXTURE_MODULE}['"]|import\\(\\s*['"][^'"]*${FIXTURE_MODULE}['"]`,
+  )
   const FIXTURE_IMPORT_ALLOWED = [
     'lib/frontend/fixtures/',                    // the fixture's own modules
     'features/dev-fixture/',                     // the flag-gated dev composition, off by default
@@ -543,7 +568,7 @@ const fnBodies = new Map()
       fail('T7I-40', 'the portal composition root does not construct the real participant adapter')
     }
     if (!/NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE|FIXTURE_MODE_ENABLED/.test(runtime)) {
-      fail('T7I-40', 'the portal composition root does not gate the fixture on the build-time flag')
+      fail('T7I-40', 'the portal composition root does not gate the fixture on the environment flag')
     }
     if (FIXTURE_IMPORT.test(runtime.replace(/import\([\s\S]*?\)/g, ''))) {
       fail('T7I-40', 'the portal composition root imports the fixture statically')
