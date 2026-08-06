@@ -292,8 +292,14 @@ SELECT count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oi
       'assessment_save_observation=false,false,false,false',
     ].join('\n')
     if (posture !== expected) fail('T-C3-1', `the EXECUTE posture is\n${posture}\nexpected\n${expected}`)
-    else if (total !== '24') fail('T-C3-1', `${total} functions hold authenticated EXECUTE, expected 24`)
-    else pass('T-C3-1', 'assessment_save_observation is reachable by NO client role; the R-C2-1 composer holds authenticated EXECUTE exclusively; 24 functions hold authenticated EXECUTE (was 25)')
+    // (Moved 24 -> 25 at Run C3-A Phase 2b: C2C-004's governed Management
+    // submitted-report list adds exactly one client-reachable READ. The
+    // property under test here is unchanged -- assessment_save_observation is
+    // still reachable by NO client role and the composer still holds
+    // authenticated EXECUTE exclusively -- and both are asserted by the
+    // posture comparison immediately above, which is the load-bearing half.)
+    else if (total !== '25') fail('T-C3-1', `${total} functions hold authenticated EXECUTE, expected 25`)
+    else pass('T-C3-1', 'assessment_save_observation is reachable by NO client role; the R-C2-1 composer holds authenticated EXECUTE exclusively; 25 functions hold authenticated EXECUTE (24 + the C2C-004 Management submitted-report list)')
   }
 
   // -----------------------------------------------------------------
@@ -489,7 +495,7 @@ SELECT count(*) FROM (VALUES ('anon'),('authenticated'),('service_role'),('publi
     } else if (dml !== '0') {
       fail('T-C3-7', `${dml} client DML privilege(s) exist on observations/observation_ratings/reports; expected 0`)
     } else {
-      pass('T-C3-7', 'of the 24 client-executable functions EXACTLY ONE reaches the observation write -- the composer, which opens the report shell in the same transaction -- and no client role holds INSERT, UPDATE, DELETE or TRUNCATE on observations, observation_ratings or reports')
+      pass('T-C3-7', 'of the 25 client-executable functions EXACTLY ONE reaches the observation write -- the composer, which opens the report shell in the same transaction -- and no client role holds INSERT, UPDATE, DELETE or TRUNCATE on observations, observation_ratings or reports')
     }
   }
 

@@ -252,8 +252,12 @@ export async function listManagementCorrectionTrackingCore(
  * empty set on every database, forever. The governed referent of the
  * Management Reports page's "Approved" option is `submitted`, and the
  * boundary — not this module — is what restricts the rows: the SQL function
- * takes NO status parameter and hard-codes `r.status = 'submitted'` in its
- * WHERE clause, so a preapproval report is never a row of the result at all.
+ * takes NO status parameter and restricts its WHERE clause to the `submitted`
+ * status alone, so a preapproval report is never a row of the result at all.
+ * (The comparison is deliberately not written out here as an assignment-shaped
+ * expression: T7I-40 scans this tree for a report-status literal on the left of
+ * an assignment, because TypeScript deciding a transition is forbidden, and a
+ * prose example would trip a scan that is doing exactly its job.)
  *
  * NO PREAPPROVAL TRAINER DRAFT CONTENT CAN REACH THIS FUNCTION, because the
  * boundary's RETURNS TABLE carries no column that could hold any. That is a
