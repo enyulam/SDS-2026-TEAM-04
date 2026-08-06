@@ -2036,18 +2036,60 @@ async function main() {
     'the presence of any report route in the document before the save',
   )
 
+  /*
+   * SCOPED TO THE SURFACE UNDER TEST, AND REQUIRED TO BE UNIQUE THERE.
+   *
+   * This selector used to scan the WHOLE DOCUMENT for `form button[type=submit]`
+   * and take `[0]` — the first enabled one, in DOM order, whatever it was. It
+   * was only ever correct by accident: the shared portal shell happened to
+   * contain no submit control, so the first document-wide match happened to be
+   * screen 07's. The moment the shell gained one (the C2C-023 Sign out form,
+   * which renders in the `<aside>` rail BEFORE `<main>`), `[0]` silently became
+   * a DIFFERENT control and this proof clicked Sign out, landed on `/login`,
+   * and reported that the save never navigated.
+   *
+   * The replacement is STRICTLY STRONGER, not narrower in coverage:
+   *   - it looks only inside `#main-content`, the landmark screen 07 renders
+   *     into, so a shell control can never again stand in for a screen control;
+   *   - it requires EXACTLY ONE enabled submit control there and FAILS LOUDLY
+   *     on any other count, where the old form silently picked one; and
+   *   - it reports the control's own accessible text back, which is asserted
+   *     below, so "the Save & Generate control was clicked" is a MEASUREMENT
+   *     rather than a claim about a selector.
+   */
   const submitted = await evaluateRaw(
     `(function () {
-       var buttons = Array.prototype.slice.call(document.querySelectorAll('form button[type="submit"]'));
-       var target = buttons.filter(function (b) { return !b.disabled })[0];
-       if (!target) return 'none';
-       target.click();
-       return 'clicked';
+       var root = document.querySelector('#main-content');
+       if (!root) return 'no-main';
+       var buttons = Array.prototype.slice.call(root.querySelectorAll('form button[type="submit"]'))
+         .filter(function (b) { return !b.disabled });
+       if (buttons.length === 0) return 'none';
+       if (buttons.length > 1) {
+         return 'ambiguous:' + buttons.map(function (b) { return (b.textContent || '').trim() }).join(' | ');
+       }
+       var label = (buttons[0].textContent || '').trim();
+       buttons[0].click();
+       return 'clicked:' + label;
      })()`,
     'the Save & Generate control on screen 07',
   )
-  if (submitted !== 'clicked') {
+  if (submitted === 'no-main') {
+    throw new SafeError('Screen 07 rendered no #main-content landmark, so the save control could not be located.')
+  }
+  if (submitted === 'none') {
     throw new SafeError('Screen 07 exposed no enabled submit control, so no save was performed.')
+  }
+  if (submitted.startsWith('ambiguous:')) {
+    throw new SafeError(
+      'Screen 07 exposed MORE THAN ONE enabled submit control inside #main-content, so which one performs the ' +
+        'governed save is not determined. Refusing to click an arbitrary one: ' + submitted.slice('ambiguous:'.length),
+    )
+  }
+  if (!submitted.startsWith('clicked:') || !submitted.includes('Save & Generate')) {
+    throw new SafeError(
+      'The single enabled submit control inside screen 07 is not the Save & Generate control; this proof will not ' +
+        'attribute a governed save to a control it did not identify.',
+    )
   }
   info('the enabled Save & Generate control was clicked; awaiting the client-side navigation')
 
