@@ -915,7 +915,95 @@ export function startDisposableStack(cli, workdir) {
         'Its output is captured and discarded by design, because the CLI prints local keys on success.',
     )
   }
-  return { elapsedMs: Date.now() - started }
+  const restart = denyDisposableAutoRestart()
+  return { elapsedMs: Date.now() - started, restart }
+}
+
+/**
+ * DISPOSABLE RESIDUE HAZARD — a STOPPED disposable container AUTO-RESTARTED.
+ *
+ * The Supabase CLI creates its containers with a Docker restart policy of
+ * `unless-stopped`. That policy is evaluated by the Docker DAEMON, not by this
+ * harness: if a run is killed hard (SIGKILL, a host reboot, Docker Desktop
+ * restarting) the container can be left in a state the daemon considers
+ * eligible for restart, and it comes back on its own — with its NAMED VOLUME
+ * still attached, so it comes back with its data. That is a disposable stack
+ * outliving the run that owned it, which is exactly the thing the disposable
+ * design exists to make impossible.
+ *
+ * The restart policy is not expressible in the generated `config.toml` (the
+ * CLI's embedded schema defines no such key and rejects one it does not know),
+ * so it is REMOVED IMMEDIATELY AFTER CREATION instead, with `docker update
+ * --restart=no`, targeted BY NAME at containers whose name ends in the
+ * disposable project suffix and at no others. A canonical container can
+ * therefore never be reached by this call: the suffix `_${DISPOSABLE_PROJECT_ID}`
+ * is asserted distinct from the canonical project id by `assertNoCollision()`
+ * before anything is provisioned.
+ *
+ * The result is REPORTED, never assumed: each container's effective policy is
+ * re-read from `docker inspect` afterwards, so "auto-restart is off" is a
+ * measurement rather than the absence of an error.
+ */
+export function denyDisposableAutoRestart() {
+  const containers = disposableContainersPresent()
+  const policies = []
+  for (const name of containers) {
+    runCapturedExitCode('docker', ['update', '--restart=no', name], { timeout: 60 * 1000 })
+    policies.push({ name, policy: containerRestartPolicy(name) })
+  }
+  return {
+    containers: containers.length,
+    policies,
+    allDisabled: containers.length > 0 && policies.every((entry) => entry.policy === 'no'),
+  }
+}
+
+/** The effective Docker restart policy of one container, or null if unknown. */
+export function containerRestartPolicy(name) {
+  const result = spawnSync(
+    'docker',
+    ['inspect', '--format', '{{.HostConfig.RestartPolicy.Name}}', name],
+    { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', windowsHide: true, shell: false },
+  )
+  if (result.error || result.status !== 0) return null
+  const value = (result.stdout || '').trim()
+  // Docker reports an absent policy as the empty string; both mean "no".
+  return value.length === 0 ? 'no' : value
+}
+
+/**
+ * The belt-and-braces half of teardown: after the CLI has been asked to stop
+ * and remove the disposable project, FORCE-REMOVE anything still carrying the
+ * disposable name — the container first, then its NAMED VOLUME.
+ *
+ * `supabase stop --no-backup` is the primary mechanism and is unchanged. This
+ * exists because that call can only remove what it still recognises as its own
+ * project: a container the daemon restarted after the CLI's workdir was gone,
+ * or a volume left behind when the CLI exited non-zero, is invisible to it and
+ * survives — which is precisely the residue that was found.
+ *
+ * TARGETING IS BY THE DISPOSABLE SUFFIX AND NOTHING ELSE. `docker rm` is never
+ * issued with `--all`, a filter, a prune or a wildcard, and never against a
+ * name this module did not derive from `DISPOSABLE_PROJECT_ID`.
+ */
+export function forceRemoveDisposableResidue() {
+  const removedContainers = []
+  for (const name of disposableContainersPresent()) {
+    runCapturedExitCode('docker', ['rm', '--force', '--volumes', name], { timeout: 60 * 1000 })
+    removedContainers.push(name)
+  }
+  const removedVolumes = []
+  for (const name of disposableVolumesPresent()) {
+    runCapturedExitCode('docker', ['volume', 'rm', '--force', name], { timeout: 60 * 1000 })
+    removedVolumes.push(name)
+  }
+  // Re-read from Docker rather than trusting the calls above.
+  return {
+    attemptedContainers: removedContainers,
+    attemptedVolumes: removedVolumes,
+    remainingContainers: disposableContainersPresent(),
+    remainingVolumes: disposableVolumesPresent(),
+  }
 }
 
 /**
@@ -1002,6 +1090,15 @@ export function stopDisposableStack(cli, workdir) {
   if (workdir && existsSync(workdir)) args.push('--workdir', workdir)
   args.push('stop', '--project-id', DISPOSABLE_PROJECT_ID, '--no-backup')
   const result = runCapturedExitCode(cli.command, args, { timeout: 5 * 60 * 1000 })
+  /*
+   * The CLI call above is the PRIMARY mechanism and is unchanged. The sweep
+   * that follows removes what the CLI can no longer see as its own — a
+   * container the Docker daemon restarted on its own, or a named volume left
+   * behind by a non-zero CLI exit. Both were observed as surviving residue.
+   * It is targeted by the disposable suffix only; see
+   * `forceRemoveDisposableResidue`.
+   */
+  forceRemoveDisposableResidue()
   return result.status
 }
 

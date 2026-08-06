@@ -309,6 +309,7 @@ const CHECK_TITLES = new Map([
   ['A-20', 'The canonical stack is STILL running after teardown'],
   ['A-21', 'The build artefact was rebuilt for the disposable target and RESTORED to the repository default at teardown'],
   ['A-22', 'No client bundle references any Supabase target, so the profile decision is server-side in fact as well as by design'],
+  ['A-23', 'No disposable container can be restarted by the Docker daemon after this run ends'],
 ])
 
 const GATE_TITLES = new Map([
@@ -1423,32 +1424,79 @@ async function main() {
    * Run BEFORE anything is provisioned: a build failure must not leave a
    * stack standing while it is investigated.
    * ----------------------------------------------------------------- */
+  /*
+   * WHY THIS NO LONGER GOES THROUGH `npm run`, AND WHY IT DISTINGUISHES
+   * "COULD NOT RUN" FROM "FAILED" (the reviewers' MEDIUM finding: G-20 failed
+   * SPURIOUSLY on a first invocation and aborted the whole proof before
+   * provisioning — a false FAIL).
+   *
+   * TWO DEFECTS, both mechanical, both fixed here rather than retried around.
+   *
+   *  1. G-20 was the ONLY invocation in this harness that went through `npm`
+   *     — and on Windows through `npm.cmd` with `shell: true`. Every other
+   *     child process in this file is `process.execPath` plus a RESOLVED,
+   *     project-local JavaScript entry point (`node_modules/typescript/bin/tsc`,
+   *     `node_modules/next/dist/bin/next`). The npm path adds a shell, npm's
+   *     own bootstrap, and a PATH/shim resolution that can differ between one
+   *     invocation and the next on the same machine — none of which is under
+   *     test, and any of which can fail for reasons unrelated to whether this
+   *     codebase typechecks, lints and builds. `npm run lint` IS `eslint` and
+   *     `npm run build` IS `next build` (package.json), so the two commands are
+   *     now invoked directly, exactly as the scripts define them, with the
+   *     ambiguous layer removed.
+   *
+   *  2. `runCapturedExitCode` reports `status: null` for a process that could
+   *     not be spawned at all, and for one killed by a signal or a timeout.
+   *     G-20 compared `status === 0` and reported everything else as FAIL, so
+   *     "the harness could not invoke tsc" was recorded as "typecheck failed".
+   *     Those are different facts and only one of them is a finding about the
+   *     code. An invocation that never produced an exit code now aborts with a
+   *     named harness error and leaves G-20 UNDECIDED rather than FAILED —
+   *     a gate must never claim a verdict it did not measure.
+   *
+   * Each command also carries an explicit timeout, so a hung command yields a
+   * named timeout instead of blocking the run forever or resolving to an
+   * unexplained null. No retry and no sleep is introduced anywhere.
+   */
   phase('G-20 — typecheck, lint, build')
-  const typecheck = runCapturedExitCode(
-    process.execPath,
-    [join(REPO_ROOT, 'node_modules', 'typescript', 'bin', 'tsc'), '--noEmit'],
-    { cwd: REPO_ROOT },
-  )
-  info(`tsc --noEmit exit ${typecheck.status}`)
-  const npmScript = (name) => {
-    const local = join(process.execPath, '..', 'node_modules', 'npm', 'bin', 'npm-cli.js')
-    if (existsSync(local)) return runCapturedExitCode(process.execPath, [local, 'run', name], { cwd: REPO_ROOT })
-    return runCapturedExitCode(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', name], {
-      cwd: REPO_ROOT,
-      shell: process.platform === 'win32',
-    })
+  const QUALITY_TIMEOUT_MS = 20 * 60 * 1000
+  const localEntry = (...segments) => {
+    const path = join(REPO_ROOT, 'node_modules', ...segments)
+    if (!existsSync(path)) {
+      throw new SafeError(
+        `The project-local entry point node_modules/${segments.join('/')} could not be resolved, so G-20 could ` +
+          'not be run at all. Nothing was provisioned and no verdict is claimed for it.',
+      )
+    }
+    return path
   }
-  const lint = npmScript('lint')
-  info(`npm run lint exit ${lint.status}`)
-  const build = npmScript('build')
-  info(`npm run build exit ${build.status}`)
+  const quality = (label, entrySegments, args) => {
+    const result = runCapturedExitCode(process.execPath, [localEntry(...entrySegments), ...args], {
+      cwd: REPO_ROOT,
+      timeout: QUALITY_TIMEOUT_MS,
+    })
+    if (result.spawnFailed || result.status === null) {
+      throw new SafeError(
+        `${label} produced NO exit code — it could not be spawned, or it was killed by a signal or the ` +
+          `${QUALITY_TIMEOUT_MS / 60000}-minute timeout. That is a fault in this harness's invocation, NOT evidence ` +
+          'that the codebase fails to typecheck, lint or build, so G-20 is left undecided rather than recorded as ' +
+          'a failure. Nothing was provisioned.',
+      )
+    }
+    info(`${label} exit ${result.status}`)
+    return result.status
+  }
+  const typecheck = quality('tsc --noEmit', ['typescript', 'bin', 'tsc'], ['--noEmit'])
+  const lint = quality('eslint (npm run lint)', ['eslint', 'bin', 'eslint.js'], [])
+  const build = quality('next build (npm run build)', ['next', 'dist', 'bin', 'next'], ['build'])
   gateFrom(
     'G-20',
-    typecheck.status === 0 && lint.status === 0 && build.status === 0,
-    'tsc --noEmit, npm run lint and npm run build each exited 0 (output captured, never rendered)',
-    `exit codes were tsc=${typecheck.status}, lint=${lint.status}, build=${build.status}`,
+    typecheck === 0 && lint === 0 && build === 0,
+    'tsc --noEmit, eslint and next build — the three commands package.json defines, invoked directly through ' +
+      'this Node runtime with no shell and no npm layer — each exited 0 (output captured, never rendered)',
+    `exit codes were tsc=${typecheck}, eslint=${lint}, next build=${build}`,
   )
-  if (typecheck.status !== 0 || lint.status !== 0 || build.status !== 0) {
+  if (typecheck !== 0 || lint !== 0 || build !== 0) {
     throw new SafeError(
       'Typecheck, lint or build failed. Their output was captured and discarded by design — run the failing ' +
         'command yourself to see it. Nothing was provisioned.',
@@ -1478,6 +1526,33 @@ async function main() {
   acquired.startAttempted = true
   const started = startDisposableStack(cli, workdir)
   acquired.stackStarted = true
+
+  /*
+   * A-23 — THE AUTO-RESTART RESIDUE HAZARD, closed at creation.
+   *
+   * A stopped disposable container with a named volume and the CLI's default
+   * `unless-stopped` policy survived a previous session and was restarted by
+   * the Docker daemon on its own. `startDisposableStack` now strips that policy
+   * from every disposable container the moment the stack exists. It is measured
+   * here from `docker inspect`, per container, and a stack that still carries a
+   * restarting policy stops this run before a session is minted — a stack that
+   * can outlive its owner is exactly what this proof must not create.
+   */
+  const restart = started.restart
+  checkFrom(
+    'A-23',
+    restart.allDisabled,
+    `all ${restart.containers} disposable containers report Docker restart policy "no", measured one by one with ` +
+      '`docker inspect`, so none of them can be brought back by the daemon after this run ends — the residue ' +
+      'hazard is removed at creation, not relied on being absent at teardown',
+    `containers=${restart.containers}; policies=${restart.policies.map((entry) => `${entry.name}=${entry.policy ?? 'unreadable'}`).join(', ') || 'none measured'}`,
+  )
+  if (!restart.allDisabled) {
+    throw new SafeError(
+      'One or more disposable containers still carry a Docker restart policy. Refusing to continue with a stack ' +
+        'that the daemon could restart after this run ends.',
+    )
+  }
 
   const disposableCensus = readDisposableCensus()
   checkFrom(
@@ -1761,18 +1836,41 @@ async function main() {
    * "parent-canonical-report"`) or the non-disclosing state panel
    * (`section[role="status"]`, which the loading skeleton does not carry — it
    * carries `aria-busy="true"` and no role). Only then is the document read.
+   *
+   * IT ALSO WAITS FOR THE SHELL, AND THAT IS THE G-14 NON-DETERMINISM FIX.
+   *
+   * The portal shell around this page performs its OWN post-mount Server Action
+   * — the identity read that fills the rail footer, the desktop header and the
+   * avatar initials — and until it settles those three regions read "Loading…".
+   * That read races the page's report read. A denial captured while the shell
+   * was still pending and a denial captured after it settled differ by those
+   * bytes, in the SHELL, for reasons that have nothing to do with parent
+   * isolation — which is exactly how G-14 came to FAIL on one of two otherwise
+   * identical runs. The diagnosis was a race between capture and render, not a
+   * flaky boundary.
+   *
+   * The remedy is NOT a retry and NOT a sleep. The shell now publishes
+   * `data-session-user="settled" | "pending"` (a flag carrying no identity,
+   * role or centre), and this wait requires BOTH conditions — the page terminal
+   * AND the shell settled — before a single byte is read. A surface that never
+   * reaches both REJECTS on the deadline, because a document captured mid-flight
+   * is not evidence of anything.
    */
+  const SETTLED_PROBE =
+    "(function () { var page = document.querySelector('[data-testid=\"parent-canonical-report\"]') !== null " +
+    "|| document.querySelector('section[role=\"status\"]') !== null; " +
+    "var shellEl = document.querySelector('[data-session-user]'); " +
+    "var shell = shellEl !== null && shellEl.getAttribute('data-session-user') === 'settled'; " +
+    "return (page ? 'page' : '-') + '|' + (shell ? 'shell' : '-') })()"
+
   const settledSurface = async (path) => {
     await visit(path)
     const deadline = Date.now() + NAVIGATION_TIMEOUT_MS
     let settled = false
+    let lastReading = 'never read'
     while (Date.now() < deadline) {
-      const ready = await evaluateRaw(
-        "(function () { return String(document.querySelector('[data-testid=\"parent-canonical-report\"]') !== null " +
-          "|| document.querySelector('section[role=\"status\"]') !== null) })()",
-        `the settled state of ${path}`,
-      )
-      if (ready === 'true') {
+      lastReading = await evaluateRaw(SETTLED_PROBE, `the settled state of ${path}`)
+      if (lastReading === 'page|shell') {
         settled = true
         break
       }
@@ -1780,8 +1878,10 @@ async function main() {
     }
     if (!settled) {
       throw new SafeError(
-        `${path} never reached a terminal state — neither the rendered report nor the non-disclosing state panel ` +
-          'appeared before the deadline. NOTHING is compared against a loading skeleton.',
+        `${path} never reached a fully settled state before the deadline (last reading "${lastReading}": ` +
+          '"page" means the rendered report or the non-disclosing state panel is present, "shell" means the ' +
+          'portal shell\'s identity read has come back). NOTHING is compared against a loading skeleton or ' +
+          'against a half-rendered shell.',
       )
     }
     const view = {
