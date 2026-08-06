@@ -6,11 +6,14 @@
 //
 // Two properties, proven together because neither is sufficient alone:
 //
-//   1. FRESH APPLICATION -- all FIVE migration files apply cleanly, in
+//   1. FRESH APPLICATION -- all NINE migration files apply cleanly, in
 //      order, to a database holding no project objects, with every
 //      end-of-migration assertion passing and the ratified census landing
-//      exactly (26 tables, 12 enums, 28 functions, 29 policies, 8 ordered
-//      report_status labels, 20 authenticated EXECUTE grants, 1/3/9 seeds).
+//      exactly (26 tables, 12 enums, 32 functions, 29 policies, 8 ordered
+//      report_status labels, 24 authenticated EXECUTE grants, 1/3/9 seeds).
+//      The function and EXECUTE figures were STALE in this header (they
+//      still read 28 and 20, the pre-assessment values) and are corrected
+//      here to the live pinned census; the pins below are authoritative.
 //
 //   2. EQUIVALENCE -- the CANONICAL fixture database, which was migrated
 //      incrementally, is catalogue-identical to that fresh application.
@@ -166,9 +169,9 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   if (stripped !== '0/0/0/0') fail(`the scratch database was not fully stripped (tables/functions/enums/migrations = ${stripped})`)
   else console.log('Scratch database stripped to 0 tables / 0 functions / 0 enums / 0 applied migrations.')
 
-  // Apply all eight migration files in order, exactly as a reset would.
+  // Apply all nine migration files in order, exactly as a reset would.
   const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (files.length !== 8) fail(`${files.length} migration files found, expected 8`)
+  if (files.length !== 9) fail(`${files.length} migration files found, expected 9`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -182,7 +185,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
     if (r.code !== 0) { fail(`migration ${version} failed on a fresh database:\n${r.err}`); return }
     console.log(`  applied ${f}`)
   }
-  pass('all eight migrations apply cleanly, in order, from a database with no project objects')
+  pass('all nine migrations apply cleanly, in order, from a database with no project objects')
 
   // The ratified census, re-derived from the freshly built database.
   const census = await q(SCRATCH, `
@@ -199,16 +202,16 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
                  FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='report_status')
     || '|' || (SELECT count(*) FROM public.centres) || '/' || (SELECT count(*) FROM public.class_grades)
     || '/' || (SELECT count(*) FROM public.assessment_dimensions);`)
-  const expected = '26|31|12|29|8|23|0|'
+  const expected = '26|32|12|29|9|24|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
-  else pass(`fresh census: 26 tables, 31 functions, 12 enums, 29 policies, 8 migrations, 23 authenticated EXECUTE, RLS everywhere, 8 ordered labels, 1/3/9 seeds`)
+  else pass(`fresh census: 26 tables, 32 functions, 12 enums, 29 policies, 9 migrations, 24 authenticated EXECUTE, RLS everywhere, 8 ordered labels, 1/3/9 seeds`)
 
   // Equivalence.
   const fresh = await q(SCRATCH, FINGERPRINT)
   const canon = await q(CANONICAL, FINGERPRINT)
   if (fresh === canon) {
-    pass('the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the eight committed migration files')
+    pass('the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the nine committed migration files')
   } else {
     const a = new Set(fresh.split('\n'))
     const b = new Set(canon.split('\n'))

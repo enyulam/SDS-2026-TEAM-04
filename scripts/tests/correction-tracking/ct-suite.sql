@@ -142,7 +142,7 @@ BEGIN
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 23 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 23', v_n; END IF;
+  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 24', v_n; END IF;
 
   -- No table privilege and no policy was added to reach the correction row.
   SELECT pg_catalog.count(*) INTO v_n
