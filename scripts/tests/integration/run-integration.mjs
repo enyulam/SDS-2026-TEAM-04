@@ -33,9 +33,24 @@
 //     from unresolved correction work, and parent visibility stays off
 //     until submission.
 //
-//   An optional bounded REAL-PROVIDER leg runs once inside Part 3 when
-//   LLM_API_KEY is configured; its absence or failure is RECORDED, never
-//   invented as success.
+//   A bounded REAL-PROVIDER leg (INT-L2b) exists inside Part 3, and it is
+//   OFF BY DEFAULT. It is the only outward-facing, billable call this suite
+//   can make, so it fires ONLY on an explicit, single-purpose, per-run
+//   opt-in — never merely because a key happens to be configured:
+//
+//     --run-real-provider-leg                 (argument, preferred)
+//     BEST_COACH_RUN_REAL_PROVIDER_LEG=1      (environment, for CI/operators)
+//
+//   Without one of those two the leg is RECORDED AS SKIPPED BY DEFAULT with
+//   its reason, the LLM selectors are not even read out of `.env.local`, no
+//   `OpenAiDraftProvider` is constructed, and no request leaves this machine.
+//   A skipped leg is NEVER reported as passed, and the leg is NEVER deleted:
+//   a deliberate G-6 activation still needs it. (Run C3-A correction cycle —
+//   an earlier run made a real provider call under the standing operator
+//   directive not to invoke any external provider, because presence of a key
+//   was treated as consent. Presence of a key is not consent.)
+//
+//   Its absence or failure is RECORDED, never invented as success.
 //
 // T7I-33 is claimed from Parts 2+3 jointly: Part 2 proves the real
 // credential path (local JWT -> auth.uid() -> governed RPC), Part 3 proves
@@ -87,16 +102,80 @@ const EMAIL = {
   parent: "parent.fixture@example.test",
 };
 
+// ---------------------------------------------------------------------
+// THE REAL-PROVIDER OPT-IN. Default: OFF.
+//
+// One flag, one environment variable, one purpose: authorize the single
+// bounded outward provider call in INT-L2b. It is deliberately NOT satisfied
+// by LLM_API_KEY / LLM_MODEL being configured — a configured key is a
+// capability, not a decision, and treating it as a decision is exactly the
+// defect this constant closes.
+//
+// The key is never read, printed, logged or persisted anywhere; only the
+// PRESENCE of the selectors is tested, and only after the opt-in is given.
+// ---------------------------------------------------------------------
+const REAL_PROVIDER_FLAG = "--run-real-provider-leg";
+const REAL_PROVIDER_ENV = "BEST_COACH_RUN_REAL_PROVIDER_LEG";
+const REAL_PROVIDER_OPT_IN =
+  process.argv.slice(2).includes(REAL_PROVIDER_FLAG) ||
+  process.env[REAL_PROVIDER_ENV] === "1";
+
+const REAL_PROVIDER_SKIP_REASON =
+  `SKIPPED BY DEFAULT — NOT PASSED. The bounded real-provider leg is off unless it is explicitly ` +
+  `authorized for this run (${REAL_PROVIDER_FLAG}, or ${REAL_PROVIDER_ENV}=1), and neither was given. ` +
+  `No OpenAiDraftProvider was constructed and NO outward request was attempted, so this run made ZERO ` +
+  `external provider calls. A configured LLM_API_KEY deliberately does NOT enable this leg: a key is a ` +
+  `capability, not an authorization. The leg is retained, unweakened, for a deliberate G-6 activation; ` +
+  `the deterministic fixture provider carries the lifecycle in INT-L3 onwards, and nothing downstream ` +
+  `depends on a live provider.`;
+
 let failures = 0;
 const fail = (id, msg) => { failures += 1; console.error(`FAIL ${id}: ${msg}`); };
 const pass = (id, msg) => console.log(`PASS ${id}${msg ? " -- " + msg : ""}`);
 const record = (id, msg) => console.log(`RECORDED ${id}: ${msg}`);
 
 // ---------------------------------------------------------------------
+// INT-PG -- THE OUTWARD-CALL TRIP-WIRE (armed on every default run).
+//
+// The INT-L2b guard closes the one known provider path. This closes the
+// CLASS: while the leg is not authorized, ANY non-loopback fetch from this
+// process is refused and FAILS the suite loudly. It exists so "zero external
+// calls" is a MEASURED property of the run rather than an argument from the
+// absence of evidence -- and so a future edit that reintroduces an outward
+// call cannot pass this suite quietly. Only the request HOST is examined;
+// no URL, header, body or credential is ever read or printed.
+// ---------------------------------------------------------------------
+const LOOPBACK = new Set(["127.0.0.1", "localhost", "::1", "[::1]", "0.0.0.0"]);
+let outwardFetchAttempts = 0;
+if (!REAL_PROVIDER_OPT_IN && typeof globalThis.fetch === "function") {
+  const passthrough = globalThis.fetch;
+  globalThis.fetch = function guardedFetch(input, init) {
+    let host = "";
+    try {
+      const raw = typeof input === "string" ? input
+        : input instanceof URL ? input.href
+        : (input && typeof input.url === "string" ? input.url : "");
+      host = raw ? new URL(raw).hostname : "";
+    } catch { host = ""; }
+    if (host && !LOOPBACK.has(host)) {
+      outwardFetchAttempts += 1;
+      fail("INT-PG", `an OUTWARD network request to host '${host}' was attempted while no provider authorization was given; it was REFUSED, not performed`);
+      throw new Error(`outward request to '${host}' refused: this run is not authorized to contact any external service`);
+    }
+    return passthrough(input, init);
+  };
+}
+
+// ---------------------------------------------------------------------
 // Environment: load ONLY the named variables from .env.local into process
 // memory. Values are never logged, echoed or interpolated into any output.
 // ---------------------------------------------------------------------
 function loadEnv() {
+  // DEFENCE IN DEPTH FOR THE OPT-IN: without the explicit authorization the
+  // LLM selectors are not loaded into this process AT ALL. The INT-L2b guard
+  // alone already makes the call impossible; declining to load the key means
+  // the key is not even in memory to be misused by a later edit.
+  if (!REAL_PROVIDER_OPT_IN) return;
   // ONLY the LLM selectors/key are taken from `.env.local` (main worktree —
   // it is untracked, so it does not follow worktrees). Its Supabase values
   // are DELIBERATELY IGNORED: they may point at the hosted project, and this
@@ -589,9 +668,14 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
     } else pass("INT-L2", "grounding rejected the contradictory draft twice; cancel left observation_saved and NO false draft_ready");
   }
 
-  // L2b -- ONE bounded real-provider attempt, when configured.
+  // L2b -- ONE bounded real-provider attempt, ONLY when explicitly
+  // authorized for this run. The opt-in is checked FIRST and on its own: the
+  // key/model presence test below is reached only after authorization, so a
+  // configured key can never, by itself, cause an outward call.
   let realProviderPanels = null;
-  if (process.env.LLM_API_KEY && process.env.LLM_MODEL) {
+  if (!REAL_PROVIDER_OPT_IN) {
+    record("INT-L2b", REAL_PROVIDER_SKIP_REASON);
+  } else if (process.env.LLM_API_KEY && process.env.LLM_MODEL) {
     const real = new OpenAiDraftProvider({ apiKey: process.env.LLM_API_KEY, model: process.env.LLM_MODEL, timeoutMs: 90_000 });
     const observation = await getTrainerObservationCore(trainerDb, SESSION, STUDENT);
     if (observation.outcome === "success") {
@@ -622,7 +706,7 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
       }
     }
   } else {
-    record("INT-L2b", "LLM_API_KEY is not configured in this environment; the bounded real-provider leg was not run");
+    record("INT-L2b", "NOT RUN — NOT PASSED. The real-provider leg was explicitly authorized for this run, but LLM_MODEL and LLM_API_KEY are not both present in this environment (presence-tested only; no value is read). No provider was constructed and no request was attempted.");
   }
 
   // L3 -- requestDraft with a compliant provider -> draft_ready through the
@@ -1014,7 +1098,16 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
 }
 
 async function main() {
-  console.log("=== Backend Round B2 integration suite ===\n");
+  console.log("=== Backend Round B2 integration suite ===");
+  // Announced BEFORE anything runs, so "no provider leg ran" can never be
+  // read as "the provider leg passed".
+  console.log(
+    REAL_PROVIDER_OPT_IN
+      ? `REAL-PROVIDER LEG (INT-L2b): EXPLICITLY AUTHORIZED for this run — ONE bounded outward call may be attempted.`
+      : `REAL-PROVIDER LEG (INT-L2b): OFF BY DEFAULT — NO external provider call will be made by this run. ` +
+        `Enable deliberately with ${REAL_PROVIDER_FLAG} or ${REAL_PROVIDER_ENV}=1.`,
+  );
+  console.log("");
   loadEnv();
   partGrounding();
   const auth = await partRealAuth();
@@ -1024,11 +1117,21 @@ async function main() {
 
 main().then(() => {
   console.log("");
+  if (!REAL_PROVIDER_OPT_IN) {
+    if (outwardFetchAttempts === 0) {
+      pass("INT-PG", "the outward-call trip-wire was armed for the whole run and observed ZERO non-loopback requests: every network call this suite made went to the local stack, and no external provider was contacted");
+    } else {
+      console.error(`FAIL INT-PG: ${outwardFetchAttempts} outward request(s) were attempted and refused.`);
+    }
+  }
   if (failures > 0) {
     console.error(`B2 integration suite: ${failures} failure(s).`);
     process.exitCode = 1;
   } else {
     console.log("B2 integration suite: all proofs passed; the canonical database was touched read-only.");
+    if (!REAL_PROVIDER_OPT_IN) {
+      console.log("B2 integration suite: INT-L2b was SKIPPED BY DEFAULT, not passed — this run made ZERO external provider calls.");
+    }
   }
 }).catch(async (e) => {
   console.error(`B2 integration suite aborted: ${e.message}`);
