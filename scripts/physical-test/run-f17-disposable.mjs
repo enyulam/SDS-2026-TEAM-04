@@ -100,7 +100,7 @@
 // =====================================================================
 
 import { createClient } from '@supabase/supabase-js'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
 import {
@@ -161,12 +161,13 @@ const RATIFIED_LLM_PROVIDER = 'openai'
 const RATIFIED_LLM_MODEL = 'gpt-5.6-terra'
 
 /**
- * The app's committed local-target contract, restated here so this runner
- * can DETECT the conflict rather than trip over it. `lib/supabase/public-config.ts`
- * classifies a loopback `NEXT_PUBLIC_SUPABASE_URL` as local ONLY on port
- * 54321 and fails E_PUB_URL_LOCAL_PORT otherwise. See the APP-TARGET gate.
+ * The app's committed local-target contract, restated here so this runner can
+ * REPORT it accurately. `lib/supabase/public-config.ts` no longer pins a
+ * single loopback port: R-C2-5 widened it into a closed profile -> port map,
+ * and the "f17-disposable" profile authorizes the DISPOSABLE API port. The
+ * marker below is what the posture check looks for in that committed file.
  */
-const APP_PINNED_LOCAL_API_PORT = 54321
+const APP_PROFILE_MARKER = '"f17-disposable": DISPOSABLE_LOCAL_API_PORT'
 
 // ---------------------------------------------------------------------
 // The gate ledger. Every gate gets its own line, one of PASS / FAIL /
@@ -262,19 +263,30 @@ function closeLedger(defaultReason) {
 }
 
 /**
- * THE APP-TARGET BLOCKER, stated once and reused verbatim wherever it bites.
+ * THE APP-SERVED OWNERSHIP BOUNDARY, stated once and reused verbatim
+ * wherever it bites.
  *
- * The lifecycle gates that need the real application server cannot be
- * decided while this holds, and they are recorded NOT-RUN with this reason
- * rather than guessed, softened or worked around. It is a conflict between
- * two binding constraints, and resolving it is an OPERATOR decision, not a
- * runner's.
+ * THIS IS NOT A BLOCKER AND IS NO LONGER DESCRIBED AS ONE. It used to say
+ * that lib/supabase/public-config.ts pinned a loopback NEXT_PUBLIC_SUPABASE_URL
+ * to the canonical API port and that widening it was an undecided operator
+ * question. R-C2-5 DECIDED that question and the pin was widened: the
+ * "f17-disposable" runtime profile now authorizes the disposable API port,
+ * and prove-disposable-app.mjs really does serve the application against the
+ * disposable stack. Repeating the old claim would report a resolved conflict
+ * as a live obstruction.
+ *
+ * What remains is a DELIBERATE DIVISION OF OWNERSHIP. This runner does not
+ * serve the application — by choice, not by impediment — so it cannot decide
+ * a gate that needs a served application, and it records those gates NOT-RUN
+ * with this reason rather than guessing, softening or working around them.
+ * They are OWNED by prove-disposable-app.mjs and are decided there.
  */
 const APP_TARGET_BLOCKED =
-  `requires the application served against the DISPOSABLE stack; lib/supabase/public-config.ts pins a loopback ` +
-  `NEXT_PUBLIC_SUPABASE_URL to port ${APP_PINNED_LOCAL_API_PORT} (E_PUB_URL_LOCAL_PORT) while R-C2-2's isolation ` +
-  `requirement forbids the disposable API port from being ${CANONICAL_API_PORT}; the two cannot both hold, and ` +
-  'widening that pin is an operator decision this runner will not make on its own'
+  'requires the application SERVED against the disposable stack, which this runner deliberately does not do: it ' +
+  'exercises the database and Auth layers only. The app-served gates are OWNED by ' +
+  'scripts/physical-test/prove-disposable-app.mjs, which serves the application against the disposable stack ' +
+  "under the widened port pin ratified by R-C2-5, and they are decided there. Nothing blocks them; they are " +
+  'simply not this runner\'s to decide, so they stay NOT-RUN here'
 
 // ---------------------------------------------------------------------
 // Arguments. There is deliberately NO argument that carries, names or
@@ -308,7 +320,8 @@ WHAT IT DOES, IN ORDER
   3. Reports the provider posture: LLM_PROVIDER and LLM_MODEL must equal the
      already-ratified "${RATIFIED_LLM_PROVIDER}" / "${RATIFIED_LLM_MODEL}", and LLM_API_KEY must be
      PRESENT. Presence only — no value is read, printed, hashed or written.
-  4. Reports the application-target posture (see BLOCKER below).
+  4. Reports the application-target posture and the app-served ownership
+     boundary (see below).
   5. G-20: npx tsc --noEmit, npm run lint, npm run build. Output captured and
      discarded; only exit codes are used.
   6. Provisions the DISPOSABLE stack in a temp workdir outside the repository,
@@ -338,10 +351,14 @@ WHAT IT WILL NEVER DO
   * Report G-6 PASS on fixture text, hard-coded output, a deterministic fake
     provider, a cached value or an unverified assumption that a call worked.
 
-KNOWN BLOCKER — recorded, not worked around
+APP-SERVED GATES — OWNED ELSEWHERE, recorded, not worked around
   ${APP_TARGET_BLOCKED}.
-  Until an operator resolves it, every gate that needs the served application
-  is recorded NOT-RUN with that exact reason. None of them is guessed.
+  This is a division of ownership, not an obstruction: R-C2-5 widened the
+  local-target pin and prove-disposable-app.mjs serves the application
+  against the disposable stack successfully. This runner does not serve it,
+  so every gate that needs the served application is recorded NOT-RUN with
+  that exact reason. None of them is guessed, and none is claimed from
+  another runner's result.
 
 DOCUMENTED, ACCEPTED LIMITATION — recorded, not hidden
   ${PUBLISHED_PORT_BIND_LIMITATION}.
@@ -636,12 +653,25 @@ function providerPosture() {
  * The application-target posture. This is a STRUCTURAL check against the
  * committed contract in `lib/supabase/public-config.ts`; it reads no
  * environment value and no `.env.local`.
+ *
+ * It reports a FACT, not an obstruction. The disposable API port is
+ * authorized by the committed profile map, so serving the application
+ * against the disposable stack is possible — `prove-disposable-app.mjs`
+ * does exactly that. THIS runner still does not serve it, by choice, and
+ * the app-served gates stay NOT-RUN here because they belong to that other
+ * runner.
  */
 function appTargetPosture() {
+  let contract = ''
+  try {
+    contract = readFileSync(join(REPO_ROOT, 'lib', 'supabase', 'public-config.ts'), 'utf8')
+  } catch {
+    // Reported as "unreadable" below; never inferred to be either state.
+  }
   return {
     disposableApiPort: DISPOSABLE_API_PORT,
-    appPinnedPort: APP_PINNED_LOCAL_API_PORT,
-    servable: DISPOSABLE_API_PORT === APP_PINNED_LOCAL_API_PORT,
+    contractReadable: contract.length > 0,
+    disposablePortAuthorized: contract.includes(APP_PROFILE_MARKER) && contract.includes(`"${DISPOSABLE_API_PORT}"`),
   }
 }
 
@@ -1171,14 +1201,25 @@ async function main() {
    * ---------------------------------------------------------------- */
   phase('Application-target posture')
   const target = appTargetPosture()
-  if (target.servable) {
-    pass(`the disposable API port ${target.disposableApiPort} satisfies the application's committed local-target pin`)
+  if (target.disposablePortAuthorized) {
+    pass(
+      `lib/supabase/public-config.ts authorizes the disposable API port ${target.disposableApiPort} under the ` +
+        '"f17-disposable" runtime profile (R-C2-5), so nothing in the committed contract prevents the application ' +
+        'from being served against the disposable stack',
+    )
+    info(
+      'this runner nevertheless does not serve it: it exercises the database and Auth layers only. The app-served ' +
+        'gates belong to scripts/physical-test/prove-disposable-app.mjs and are decided there, so they are recorded ' +
+        'NOT-RUN here — not guessed, not softened, and not claimed from a different runner.',
+    )
   } else {
     warn(
-      `BLOCKER: the disposable API port is ${target.disposableApiPort} and lib/supabase/public-config.ts accepts a ` +
-        `loopback NEXT_PUBLIC_SUPABASE_URL only on port ${target.appPinnedPort}. The application therefore cannot be ` +
-        'served against the disposable stack without an operator ruling. Every gate that needs the served ' +
-        'application is recorded NOT-RUN with that reason — none is guessed, softened or worked around.',
+      target.contractReadable
+        ? `lib/supabase/public-config.ts does not authorize the disposable API port ${target.disposableApiPort} ` +
+            'under the "f17-disposable" runtime profile. The app-served gates are still not for this runner to ' +
+            'decide, and prove-disposable-app.mjs would refuse before serving.'
+        : 'lib/supabase/public-config.ts could not be read, so the application-target posture is UNKNOWN. It is ' +
+            'reported as unknown rather than assumed to be either state.',
     )
   }
 
