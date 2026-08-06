@@ -102,12 +102,39 @@ function RolePortalShell({
   const fixtureIdentity =
     port.identity.kind === "deterministic_fixture" ? port.identity : null;
   const [user, setUser] = useState<SessionUserDto | null>(null);
+  /**
+   * WHETHER THE IDENTITY READ HAS SETTLED — not whether it succeeded.
+   *
+   * This shell renders `user?.displayName ?? "Loading…"` in three places (the
+   * rail footer, the desktop header and the avatar's initials), each filled by
+   * a Server Action that resolves AFTER mount. Until it settles, the shell is
+   * mid-render, and any capture of the document at that moment is a capture of
+   * a transient state.
+   *
+   * That is not a cosmetic concern. The G-14 parent-isolation proof compares
+   * WHOLE canonical-report documents byte for byte and requires every denial to
+   * be indistinguishable. Its own wait watched only the report region, so the
+   * two round-trips — this identity read and the page's report read — raced:
+   * one denial could be captured with the identity resolved and another with
+   * "Loading…" still in the rail, and the gate failed intermittently on a
+   * difference that had nothing to do with parent isolation.
+   *
+   * The state is therefore published on the DOM as a settled/pending flag the
+   * harness can wait on explicitly, with a rejecting deadline, instead of
+   * sleeping and hoping. It carries no identity, no role and no centre — only
+   * whether the read has come back — so it discloses nothing, and it is set on
+   * BOTH outcomes: a failed identity read settles the shell just as a
+   * successful one does, and must not hang a reader forever.
+   */
+  const [sessionSettled, setSessionSettled] = useState(false);
   const config = roleConfig[role];
 
   useEffect(() => {
     let active = true;
     void port.getSessionUser().then((result) => {
-      if (active && result.outcome === "success") setUser(result.data);
+      if (!active) return;
+      if (result.outcome === "success") setUser(result.data);
+      setSessionSettled(true);
     });
     return () => {
       active = false;
@@ -125,7 +152,10 @@ function RolePortalShell({
 
   return (
     // 15.625rem is LAYOUT_TOKENS.sidebarWidth — the reference sidebar width at 1440px.
-    <div className="min-h-screen bg-canvas lg:grid lg:grid-cols-[15.625rem_minmax(0,1fr)]">
+    <div
+      data-session-user={sessionSettled ? "settled" : "pending"}
+      className="min-h-screen bg-canvas lg:grid lg:grid-cols-[15.625rem_minmax(0,1fr)]"
+    >
       <aside className="hidden min-h-screen border-r border-line bg-surface px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="px-1.5">
           {/*
