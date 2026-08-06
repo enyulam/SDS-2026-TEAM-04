@@ -221,6 +221,104 @@ async function assertNoRatingTokenRendered(label) {
   );
 }
 
+/**
+ * The nine governed dimension display names, exactly as `lib/frontend/fixtures/dimensions.ts`
+ * renders them. Used ONLY for the structural check below — never as a prose substring match.
+ */
+const DIMENSION_DISPLAY_NAMES = [
+  "Body",
+  "Emotion",
+  "Speech",
+  "Tonality",
+  "Eye Contact",
+  "Vocal Projection",
+  "Emotional Expression",
+  "Sentence Flow",
+  "Audience Awareness",
+];
+
+/**
+ * REQUIRED NEGATIVE ASSERTION for operator ruling R-B5 (screen 19 / checkpoint F-12).
+ *
+ * The frozen reference 19 draws a "Performance Summary" grid of raw per-dimension ratings, an
+ * "Overall Grade" row, a "Class Video Evidence" region, a "Report for: Parent / Management"
+ * audience toggle and a "Save as draft" control. Every one of those is PROHIBITED on a
+ * Management surface (Amendment 004 A-034 / A-038; `CLAUDE.md` §6; GLOBAL_UI_RULES §4). They are
+ * deliberately not implemented, and this is what proves they stayed unimplemented — structurally,
+ * in the rendered production DOM, not by reading the source.
+ *
+ * The rating check is NOT a bare-word prose regex — Amendment 006 A-052 expressly prohibits one,
+ * because "at the beginning of the session" and "has mastered maintaining eye contact" are legal
+ * parent-facing prose that these four panels may legitimately contain, and the panels are exactly
+ * what Management is supposed to read. What is detected instead is the form A-052 authorises: an
+ * ISOLATED raw label or dimension name presented as a rendered value — any leaf element whose
+ * ENTIRE text is one token — plus any rating-bearing or evidence-bearing data attribute, and any
+ * embedded media element.
+ *
+ * Call this with the return dialog CLOSED. That dialog legitimately renders the nine dimension
+ * names as `<option>`s: naming the affected dimension is part of the governed return-to-trainer
+ * input (`ManagementReturnToTrainerInput.dimensionCode`), and a return is the ONLY way an
+ * assessment-level concern may be raised. Reading a rating is prohibited; naming the dimension a
+ * concern is about is required.
+ */
+async function assertManagementSurfaceClean(label) {
+  await assertNoRatingTokenRendered(label);
+
+  const offenders = await evaluate(`
+    (() => {
+      const tokens = ${JSON.stringify(DIMENSION_DISPLAY_NAMES)}.map((name) => name.toLowerCase());
+      const found = [];
+      for (const element of document.body.querySelectorAll("*")) {
+        const tag = element.tagName.toLowerCase();
+        if (["video", "iframe", "audio", "source", "track"].includes(tag)) {
+          found.push("media:" + tag);
+          continue;
+        }
+        for (const attribute of ["data-rating", "data-rating-level", "data-evidence-state"]) {
+          if (element.hasAttribute(attribute)) found.push(tag + "[" + attribute + "]");
+        }
+        if (element.children.length > 0) continue;
+        const text = (element.textContent || "").trim().toLowerCase();
+        if (tokens.includes(text)) found.push("dimension-cell:" + tag + '="' + text + '"');
+      }
+      return found;
+    })()
+  `);
+  assert(
+    offenders.length === 0,
+    `${label} rendered a prohibited internal element: ${offenders.join(", ")}`,
+  );
+
+  await assertTextAbsent(
+    [
+      "Performance Summary",
+      "Overall Grade",
+      "Overall grade:",
+      "Class Video Evidence",
+      "Session recording",
+      "Report for",
+      "Save as draft",
+      "Save as Draft",
+      "Trainer note",
+      "Coach Notes",
+      "Internal Only",
+      "Quality Checklist",
+      "Evidence confirms rating",
+      "Observation notes",
+      "Attendance",
+      "Present by default",
+      "content hash",
+      "Content hash",
+      "AI draft",
+      "AI history",
+      "AI generation",
+      "audit",
+      "revision",
+    ],
+    label,
+  );
+}
+
 async function completeTrainerChecklist() {
   const count = await evaluate(`document.querySelectorAll('input[type="checkbox"]').length`);
   assert(count === 3, `Expected three Trainer checklist items; found ${count}`);
@@ -323,7 +421,13 @@ try {
   assert(!(await bodyIncludes("Learner Birch")), "Trainer approval made Birch parent-visible");
 
   await navigate("/management/reports/report-birch/review");
-  await waitUntil("document.body.innerText.includes('Final quality decision')", "Management safe review");
+  await waitUntil("document.body.innerText.includes('Ready to approve?')", "Management safe review");
+  assert(
+    (await evaluate(
+      `document.querySelectorAll('[data-testid="management-safe-review"] [data-report-panel]').length`,
+    )) === 4,
+    "Management final review did not contain exactly four parent-facing panels",
+  );
   await assertTextAbsent(
     [
       "Beginning",
@@ -332,21 +436,27 @@ try {
       "Mastered",
       "Emerging",
       "Secure",
-      "Observation notes",
-      "Attendance",
-      "Evidence confirms rating",
-      "Quality Checklist",
-      "Coach Notes",
-      "content hash",
-      "revision",
-      "AI history",
     ],
     "Management review DOM",
   );
+  /* Screen 19 / R-B5 — the prohibited elements of the frozen frame, proved absent. */
+  await assertManagementSurfaceClean("Management final review (screen 19)");
   const managementScreenshot = await screenshot("management-safe-review.png");
 
   await clickExact("a", "Edit wording");
   await waitUntil("document.querySelectorAll('textarea').length === 4", "Management four-panel editor");
+  /*
+   * The wording-only boundary, proved by counting: FOUR editable fields and no fifth. The same
+   * cleanliness assertion runs here, because the editor is the one Management surface that can
+   * write content at all (A-034).
+   */
+  assert(
+    (await evaluate(
+      `document.querySelectorAll('input:not([type="hidden"]), textarea, select, [contenteditable="true"]').length`,
+    )) === 4,
+    "Management wording editor exposed a field outside the four parent-facing panels",
+  );
+  await assertManagementSurfaceClean("Management wording editor");
   await evaluate(`
     const element = document.querySelector('textarea');
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(
@@ -381,12 +491,14 @@ try {
   await navigate("/management/reports?status=trainer_approved");
   await waitUntil("document.body.innerText.includes('Pending final review')", "pending queue after return");
   assert(!(await bodyIncludes("Learner Birch")), "Returned Birch remained in pending review");
+  await assertManagementSurfaceClean("Management pending queue (screen 29)");
   await navigate("/management/reports?status=needs_edit");
   await waitUntil("document.body.innerText.includes('Learner Birch')", "correction tracking queue");
   assert(
     await bodyIncludes("Please re-check that the stated strength is supported"),
     "Management correction reason was not tracked",
   );
+  await assertManagementSurfaceClean("Management correction tracking (screen 29)");
 
   await navigate("/parent/reports");
   await waitUntil("document.body.innerText.includes('Learner Fern')", "Parent list after return");
@@ -416,9 +528,23 @@ try {
   await navigate("/management/reports?status=trainer_approved");
   await waitUntil("document.body.innerText.includes('Learner Birch')", "Birch returned to Management");
   await navigate("/management/reports/report-birch/review");
-  await waitUntil("document.body.innerText.includes('Final quality decision')", "reapproved Management review");
+  await waitUntil("document.body.innerText.includes('Ready to approve?')", "reapproved Management review");
+  await assertManagementSurfaceClean("Management final review (screen 19, after reapproval)");
   await clickExact("button", "Approve & Submit");
-  await waitUntil("document.body.innerText.includes('Approve & Submit this report?')", "final submission dialog");
+  /*
+   * The ratified confirmation copy (A-033; `CLAUDE.md` §6). No dedicated mockup exists for this
+   * dialog and none may be invented beyond this description, so the exact sentence is pinned.
+   */
+  await waitUntil(
+    "document.body.innerText.includes(\"Approve and submit Learner Birch's report?\")",
+    "final submission dialog",
+  );
+  assert(
+    await bodyIncludes(
+      "This will publish the final report, notify the linked parent, and update the student record.",
+    ),
+    "Approve & Submit confirmation did not carry the ratified description",
+  );
   await clickWithin('[role="dialog"]', "button", "Approve & Submit");
   await waitUntil("document.body.innerText.includes('Report submitted')", "Management final submission");
 
@@ -506,6 +632,9 @@ try {
           "Management final submission and canonical Parent availability",
           "Management and Parent DOM privacy exclusions",
           "no competency-rating token renders on any Parent surface (R-B6)",
+          "no per-dimension rating and no prohibited internal element renders on any Management surface (R-B5)",
+          "screen 19 exposes exactly four parent-facing panels and the editor exactly four fields",
+          "Approve & Submit carries the ratified confirmation copy",
           "loading, empty, linked-unavailable, unavailable, and denied states",
           "zero uncaught browser-console/runtime errors",
         ],
