@@ -1495,6 +1495,21 @@ export type Database = {
           term_evidence_notes: string
         }[]
       }
+      assessment_save_complete_and_open_report: {
+        Args: {
+          p_class_session_id: string
+          p_expected_lock_version: number
+          p_expected_observation_id: string
+          p_focus_chips: string[]
+          p_follow_up_notes: string
+          p_observation_notes: string
+          p_ratings: Json
+          p_strength_chips: string[]
+          p_student_id: string
+          p_term_evidence_notes: string
+        }
+        Returns: Record<string, unknown>
+      }
       assessment_save_observation: {
         Args: {
           p_class_session_id: string
