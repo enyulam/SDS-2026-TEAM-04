@@ -294,6 +294,174 @@ try {
   await waitUntil("document.body.innerText.includes('Learner Aster')", "session roster");
   assert(await bodyIncludes("Learner Delta"), "Full synthetic roster was not rendered");
 
+  /* -------------------------------------------------------------------------
+   * Screen 06 Trainer Student Roster — F-05.
+   *
+   * The load-bearing assertions here are the two governance rules the frame cannot
+   * demonstrate itself: an ABSENT learner's card offers no assessment or report path at
+   * all, and the per-student action is resolved from THAT student's actual report status
+   * rather than by one generic handler shared across every card.
+   * ----------------------------------------------------------------------- */
+
+  // The breadcrumb and the back control both reach the canonical Trainer entry route (F-04).
+  assert(
+    await evaluate(`
+      (() => {
+        const links = [...document.querySelectorAll('a')]
+          .filter((anchor) => new URL(anchor.href).pathname === '/trainer/schedule');
+        const back = links.find((anchor) => anchor.textContent.trim() === 'Back to Schedule');
+        const crumb = document.querySelector('nav[aria-label="Breadcrumb"] a');
+        return Boolean(back) && Boolean(crumb) &&
+          new URL(crumb.href).pathname === '/trainer/schedule';
+      })()
+    `),
+    "Breadcrumb and Back to Schedule must link to the canonical /trainer/schedule route",
+  );
+
+  // Class Session banner progress, computed over PRESENT learners only.
+  assert(
+    await bodyIncludes("2 of 3 present learners assessed"),
+    "The Class Session banner must report assessment progress across present learners",
+  );
+
+  // Continuity (persona §3.8): previous-session focus threads through the live roster.
+  assert(
+    // The region heading renders `uppercase`, and `innerText` reflects text-transform.
+    await evaluate(
+      `/focus carried over from the previous session/i.test(document.body.innerText)`,
+    ),
+    "Carried-over previous-session focus must be surfaced on the roster",
+  );
+  assert(
+    await evaluate(`
+      document.querySelector('[data-roster-card="student-aster"]').innerText
+        .includes('Pause after each main idea and reconnect with the listener.')
+    `),
+    "Each present learner's card must carry that learner's previous-session focus",
+  );
+
+  // The per-student action is gated on that student's ACTUAL report status.
+  const rosterActions = await evaluate(`
+    Object.fromEntries(
+      [...document.querySelectorAll('[data-roster-card]')].map((card) => [
+        card.dataset.rosterCard,
+        {
+          action: card.dataset.rosterAction,
+          attendance: card.dataset.attendance,
+          href: card.querySelector('a') ? new URL(card.querySelector('a').href).pathname : null,
+          text: card.innerText,
+        },
+      ]),
+    )
+  `);
+  assert(
+    Object.keys(rosterActions).length === 4,
+    `Expected the four governed roster entries; found ${Object.keys(rosterActions).length}`,
+  );
+  assert(
+    rosterActions["student-aster"].action === "assess" &&
+      rosterActions["student-aster"].href ===
+        "/trainer/sessions/session-storytelling-lab/students/student-aster/assess",
+    "An unstarted present learner must resolve to the assessment path",
+  );
+  assert(
+    rosterActions["student-birch"].action === "review" &&
+      rosterActions["student-birch"].href === "/trainer/reports/report-birch/review",
+    "A draft_ready learner must resolve to that report's review path",
+  );
+  assert(
+    rosterActions["student-cedar"].action === "review" &&
+      rosterActions["student-cedar"].href === "/trainer/reports/report-cedar/review",
+    "A returned (needs_edit) learner must resolve to that report's review path",
+  );
+  assert(
+    new Set(
+      Object.values(rosterActions).map((entry) => entry.action),
+    ).size >= 3,
+    "Roster actions must differ by report status, not share one generic handler",
+  );
+
+  // ABSENCE EXPOSES NOTHING: no link, no route, no lifecycle status on an absent card.
+  const absentCard = rosterActions["student-delta"];
+  assert(
+    absentCard.attendance === "absent" && absentCard.action === "inert",
+    "The absent learner's card must offer no assessment or report path",
+  );
+  assert(absentCard.href === null, "An absent learner's card must contain no link");
+  assert(
+    absentCard.text.includes("Not available for assessment today."),
+    "The absent card must state why no assessment is available",
+  );
+  assert(
+    !/No report|Assessment needed|Observation saved|Ready to review|Returned|With management|Submitted/.test(
+      absentCard.text,
+    ),
+    "An absent learner's card must expose no report lifecycle status",
+  );
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('[data-roster-card="student-delta"] button')]
+        .every((button) => button.disabled)
+    `),
+    "Every control on an absent learner's card must be inert",
+  );
+
+  // Filter and sort NARROW the governed projection; they can never widen it.
+  await evaluate(`
+    (() => {
+      const select = [...document.querySelectorAll('select')]
+        .find((candidate) => candidate.value === 'all');
+      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+      setter.call(select, 'absent');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    })()
+  `);
+  await waitUntil(
+    `document.querySelectorAll('[data-roster-card]').length === 1`,
+    "attendance filter narrowing the roster projection",
+  );
+  assert(
+    await evaluate(
+      `document.querySelector('[data-roster-card]').dataset.rosterCard === 'student-delta'`,
+    ),
+    "The absent filter must show only the absent learner",
+  );
+  await evaluate(`
+    (() => {
+      const select = [...document.querySelectorAll('select')]
+        .find((candidate) => candidate.value === 'absent');
+      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+      setter.call(select, 'all');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    })()
+  `);
+  await waitUntil(
+    `document.querySelectorAll('[data-roster-card]').length === 4`,
+    "roster projection restored",
+  );
+
+  // "View lesson plan" keeps the frame's label with no governed backing, so it is inert.
+  assert(
+    await evaluate(`
+      (() => {
+        const button = [...document.querySelectorAll('button')]
+          .find((candidate) => candidate.textContent.trim().startsWith('View lesson plan'));
+        return Boolean(button && button.disabled && button.getAttribute('aria-describedby'));
+      })()
+    `),
+    "View lesson plan must be disabled with a programmatically associated reason",
+  );
+
+  // Token convergence: this surface uses project tokens, not the Tailwind default palette.
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('main *')].every((element) =>
+        !/(^|\\s)(bg|text|border)-(slate|gray|zinc|indigo)-/.test(element.className.baseVal ?? element.className ?? ''))
+    `),
+    "The roster surface must use project tokens, not Tailwind default-palette classes",
+  );
+  const rosterScreenshot = await screenshot("trainer-student-roster.png");
+
   await navigate(
     "/trainer/sessions/session-storytelling-lab/students/student-aster/assess",
   );
@@ -449,6 +617,7 @@ try {
         checks: [
           "fixture role presentation and permanent fixture banner",
           "canonical /trainer/schedule route, /trainer compatibility redirect, month projection, inactive Add Agenda, day selection, view switch and empty state",
+          "screen 06 roster: canonical Schedule links, present-only progress, carried-over focus, per-status actions, absent card exposing no assessment or report path, filter narrowing, inert lesson plan, and project-token convergence",
           "roster and all-nine validation",
           "retryable observation save failure and recovery",
           "deterministic generation failure, bounded retry, and success",
@@ -456,7 +625,13 @@ try {
           "returned correction, empty, and unavailable states",
           "zero uncaught browser-console/runtime errors",
         ],
-        screenshots: [loginScreenshot, failureScreenshot, reviewScreenshot, approvalScreenshot],
+        screenshots: [
+          loginScreenshot,
+          rosterScreenshot,
+          failureScreenshot,
+          reviewScreenshot,
+          approvalScreenshot,
+        ],
       },
       null,
       2,
