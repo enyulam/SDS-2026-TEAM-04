@@ -950,11 +950,185 @@ try {
     15_000,
   );
   assert(await bodyIncludes("never displays the rejected draft"), "Failure containment copy is missing");
+  /* -------------------------------------------------------------------------
+   * Screen 08 Trainer AI Report Generation — F-08.
+   *
+   * The load-bearing assertions are the governance rules the frozen frame cannot demonstrate,
+   * and in four places actively contradicts: the frame is a TERM REPORT marked "Parent copy"
+   * (D1 — term generation is out of MVP scope and no Trainer working version is a parent copy),
+   * it draws a working drag-and-drop evidence UPLOADER (D3 — evidence scope and uploader are
+   * unresolved and no governed upload path exists), it draws "Lesson / Term / Overall Grade"
+   * rows no governed DTO carries (D4/D5), and it makes "Confirm & Submit" a TRAINER primary
+   * control with no Quality Checklist (D7 — the Trainer action is Approve, gated on the
+   * three-item version-scoped checklist, and the Trainer never publishes).
+   * ----------------------------------------------------------------------- */
+
+  /* Spec §15 — the failure state is a designed recovery, and the assessment survives it. */
+  assert(
+    await bodyIncludes("Your assessment is preserved"),
+    "The generation failure state must state that the saved assessment is preserved",
+  );
+  assert(
+    (await evaluate(`document.querySelectorAll('[data-report-panel]').length`)) === 0,
+    "No draft panel may render while grounding has rejected the draft",
+  );
+  assert(
+    (await evaluate(`document.querySelectorAll('[data-rating-level]').length`)) === 0,
+    "No rating snapshot may render before a validated draft exists",
+  );
   const failureScreenshot = await screenshot("generation-first-failure.png");
   await clickExact("button", "Retry once");
   await waitUntil("document.body.innerText.includes('Grounded draft ready')", "draft retry success", 15_000);
+  await waitUntil(
+    "document.querySelectorAll('[data-report-panel]').length === 4",
+    "generated draft panels hydrated",
+    15_000,
+  );
+
+  /* D2 — the four GOVERNED panels, in order, not the frame's Overview/Strengths/Areas/Remarks. */
+  const generatedPanels = await evaluate(
+    `[...document.querySelectorAll('[data-report-panel]')].map((node) => node.dataset.reportPanel)`,
+  );
+  assert(
+    JSON.stringify(generatedPanels) ===
+      JSON.stringify(["todaysStrength", "nextFocus", "practiceSuggestion", "sessionTakeaway"]),
+    `The four GOVERNED parent-facing panels must render in order; found ${generatedPanels.join(", ")}`,
+  );
+
+  /*
+   * D1 — the frame's term-report identity. End-of-term report GENERATION is expressly out of
+   * MVP scope, and "Parent copy" is a lifecycle claim only management's Approve & Submit can
+   * make (A-033). Neither may appear on this governed per-session Trainer surface.
+   */
+  assert(
+    !(await evaluate(`/term report|parent copy/i.test(document.body.innerText)`)),
+    "The generation surface must not present itself as a term report or a parent copy",
+  );
+
+  /*
+   * D7 — the frame's "Confirm & Submit" / "Save as draft" Trainer controls. The Trainer action
+   * is APPROVE, gated on the three-item version-scoped Quality Checklist, and the Trainer does
+   * not publish. Neither control may exist here, and nothing may claim publication.
+   */
+  assert(
+    !(await evaluate(`/confirm & submit|confirm and submit|save as draft/i.test(document.body.innerText)`)),
+    "The Trainer generation surface must not carry an ungoverned submit or save-as-draft control",
+  );
+  assert(
+    await bodyIncludes("You do not publish, and no parent is notified at this step"),
+    "The generation surface must state the two-stage boundary plainly",
+  );
+  assert(
+    await bodyIncludes("complete the three-item Quality Checklist"),
+    "The governed approve gate must be named on the hand-off to review",
+  );
+
+  /* D4 / D5 — no ungoverned Report Details field, and no invented overall grade. */
+  const generationDetailTerms = await evaluate(
+    `[...document.querySelectorAll('dt')].map((node) => node.textContent.trim())`,
+  );
+  assert(
+    !generationDetailTerms.some((term) => /^(overall grade|lesson|term)$/i.test(term)),
+    `Report Details must not carry an ungoverned field; found ${generationDetailTerms.join(", ")}`,
+  );
+  assert(
+    generationDetailTerms.includes("Name") && generationDetailTerms.includes("Class"),
+    `Report Details must carry the governed Name and Class rows; found ${generationDetailTerms.join(", ")}`,
+  );
+
+  /* D3 — the evidence region is kept, inert, reasoned, and carries no uploader. */
+  assert(
+    await evaluate(`
+      (() => {
+        const region = document.querySelector('[data-evidence-state="unavailable"]');
+        if (!region) return false;
+        const control = region.querySelector('button');
+        return Boolean(control && control.disabled && control.getAttribute('aria-describedby')) &&
+          region.querySelectorAll('a, input, video, iframe, form').length === 0;
+      })()
+    `),
+    "Class Video Evidence must be inert with a stated reason and no uploader or media path",
+  );
+  assert(
+    !(await evaluate(`/drag & drop|drag and drop|MP4|500MB/i.test(document.body.innerText)`)),
+    "No upload affordance or unratified media policy may be simulated",
+  );
+
+  /* A-038 — the content hash covers the four panels PLUS the nine ratings and is never shown. */
+  assert(
+    !(await evaluate(`/content hash|contentHash|[0-9a-f]{32,}/i.test(document.body.innerText)`)),
+    "The report content hash must never be rendered on the generation surface",
+  );
+
+  /*
+   * D6 + A-049 — the frame draws four tiles; all nine dimensions are mandatory (A-017) and no
+   * governed rule selects a subset, so all nine governed snapshots render, in the ratified
+   * vocabulary, and every label clears SC 1.4.3 in the production DOM.
+   */
+  const generationTiles = await evaluate(`
+    (() => {
+      ${CONTRAST_CORE}
+      return [...document.querySelectorAll('[data-rating-level]')].map((node) => ({
+        level: node.getAttribute('data-rating-level'),
+        label: node.textContent.trim(),
+        contrast: contrastOf(node),
+      }));
+    })()
+  `);
+  assert(
+    generationTiles.length === 9,
+    `Expected nine governed rating snapshots on the generation surface; found ${generationTiles.length}`,
+  );
+  const ratifiedGenerationPairs = {
+    beginning: "Beginning",
+    developing: "Developing",
+    mastering: "Mastering",
+    mastered: "Mastered",
+  };
+  const strayGenerationTiles = generationTiles.filter(
+    (tile) => ratifiedGenerationPairs[tile.level] !== tile.label,
+  );
+  assert(
+    strayGenerationTiles.length === 0,
+    `A rating snapshot rendered outside the ratified vocabulary: ${strayGenerationTiles
+      .map((tile) => `${tile.level}=${tile.label}`)
+      .join(", ")}`,
+  );
+  for (const level of Object.keys(ratifiedGenerationPairs)) {
+    const tile = generationTiles.find((candidate) => candidate.level === level);
+    assert(tile, `The ${level} rating state never reached the generation surface`);
+    assert(
+      tile.contrast >= 4.5,
+      `The ${level} rating label measured ${tile.contrast}:1 on screen 08; SC 1.4.3 requires 4.5:1`,
+    );
+    console.log(
+      `  · ${tile.label} rating-tile label contrast ${tile.contrast}:1 (rendered production DOM, screen 08)`,
+    );
+  }
+
+  /* Token convergence: this surface uses project tokens, not the Tailwind default palette. */
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('main *')].every((element) =>
+        !/(^|\\s)(bg|text|border|divide|accent)-(slate|gray|zinc|indigo|red|amber|teal|green|navy)-/.test(element.className.baseVal ?? element.className ?? ''))
+    `),
+    "The generation surface must use project tokens, not Tailwind default-palette classes",
+  );
+
+  const generationScreenshot = await screenshot("ai-report-generation.png");
+
   await clickExact("a", "Review four-panel report");
-  await waitUntil("document.body.innerText.includes('Quality Checklist')", "four-panel report review");
+  /*
+   * The wait is keyed on the three real checklist inputs, not on the words "Quality Checklist".
+   * Screen 08 now NAMES the governed gate in its hand-off copy (F-08 D7), so a text-only wait
+   * would settle on the generation surface and every following screen-10 assertion would run
+   * against the wrong page.
+   */
+  await waitUntil(
+    `document.querySelectorAll('input[type="checkbox"]').length === 3 &&
+      document.body.innerText.includes('Quality Checklist')`,
+    "four-panel report review",
+  );
   /* -------------------------------------------------------------------------
    * Screen 10 Trainer Student Report — F-09.
    *
@@ -1249,6 +1423,7 @@ try {
           "screen 07 grade student: one capture mode (no Quick/Full), the nine dimensions in ratified order, a behavioural anchor on every dimension, a distinct accessible name carrying the verbatim anchor on all 36 rating controls, the loaded Follow-up/Coach-Notes value, the REVIEW & APPROVE counters, the absent learner exposing no status and no path, per-status rail destinations, project-token convergence, and idle + selected AA contrast for all four rating states",
           "retryable observation save failure and recovery",
           "deterministic generation failure, bounded retry, and success",
+          "screen 08 AI report generation: assessment preserved across the grounding rejection with no panel or rating rendered, the four GOVERNED panels after a validated draft, no term-report or 'Parent copy' framing, no Confirm & Submit or Save as draft control, the two-stage and Quality-Checklist hand-off copy, no invented Lesson/Term/Overall Grade row, inert Class Video Evidence with no uploader or media policy, no rendered content hash, all nine ratified rating snapshots at AA contrast, and project-token convergence",
           "screen 10 trainer student report: the four GOVERNED panels in order, internal Coach Notes, no 'Official report' claim, no invented overall grade, no rendered content hash, inert Class Video Evidence with a stated reason, the disabled-until-complete approve gate with its server re-verification copy, project-token convergence, AA contrast on all four rating states in the nine tiles, and the trainer_approved banner claiming management review and never a parent notification",
           "four-panel review, wording edit, checklist reset, and approval",
           "returned correction, empty, and unavailable states",
@@ -1259,6 +1434,7 @@ try {
           rosterScreenshot,
           assessmentScreenshot,
           failureScreenshot,
+          generationScreenshot,
           reviewScreenshot,
           approvalScreenshot,
         ],
