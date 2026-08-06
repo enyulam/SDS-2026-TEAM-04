@@ -479,19 +479,182 @@ try {
     "all-nine validation",
   );
 
+  /*
+   * The nine selections are made in the RATIFIED Amendment 006 A-049 vocabulary and between
+   * them exercise ALL FOUR rating states — Beginning, Developing, Mastering and Mastered.
+   * A set that only touched three levels would leave one chip, one anchor and one polarity
+   * band unproven in the rendered DOM.
+   */
   const ratingSelections = [
-    "Secure",
+    "Mastering",
     "Developing",
-    "Secure",
-    "Emerging",
+    "Mastering",
+    "Beginning",
     "Developing",
-    "Emerging",
-    "Secure",
-    "Advanced",
+    "Beginning",
+    "Mastering",
+    "Mastered",
     "Developing",
   ];
+  assert(
+    new Set(ratingSelections).size === 4,
+    "The assessment walkthrough must exercise all four rating states",
+  );
   const ratingCount = await evaluate(`document.querySelectorAll('fieldset').length`);
   assert(ratingCount === 9, `Expected nine dimension fieldsets; found ${ratingCount}`);
+
+  /* -------------------------------------------------------------------------
+   * F-06 — the ratified competency vocabulary, proven in the rendered DOM
+   * ---------------------------------------------------------------------- */
+
+  /*
+   * Amendment 006 A-049: arity 4, ordered LOW to HIGH, applied to all nine dimensions, all
+   * nine mandatory (A-017). `developing` is unchanged in value and ordinal position. There is
+   * no fifth level. Both the display label and the STORAGE value are asserted, because a UI
+   * relabel that left the stored value behind would still read correctly on screen.
+   */
+  const RATIFIED_RATING_LABELS = ["Beginning", "Developing", "Mastering", "Mastered"];
+  const RATIFIED_RATING_VALUES = ["beginning", "developing", "mastering", "mastered"];
+
+  /*
+   * Amendment 006 A-050 — the four behavioural anchors, VERBATIM. These four strings are the
+   * backend's `RUBRIC_ANCHORS` character-for-character; A-050 requires the backend and frontend
+   * copies to be byte-identical, so asserting them here proves the shipped frontend copy did not
+   * drift during the relabel. The anchor TEXT did not change; only the label it is keyed to did.
+   */
+  const RATIFIED_ANCHORS = {
+    Beginning:
+      "Requires frequent prompting, modelling, and support to demonstrate the skill consistently.",
+    Developing:
+      "Demonstrates the skill with some guidance and increasing confidence, but consistency may still vary.",
+    Mastering:
+      "Demonstrates the skill independently and consistently across most classroom activities and presentations.",
+    Mastered:
+      "Exceeds the expected level: strong confidence, natural expression, independent application, consistent across different contexts.",
+  };
+
+  const chipReport = await evaluate(`
+    (() => {
+      const labels = ${JSON.stringify(RATIFIED_RATING_LABELS)};
+      const values = ${JSON.stringify(RATIFIED_RATING_VALUES)};
+      const problems = [];
+      const fieldsets = [...document.querySelectorAll('fieldset')];
+      for (const fieldset of fieldsets) {
+        const chips = [...fieldset.querySelectorAll('button[data-rating-level]')];
+        if (chips.length !== 4) {
+          problems.push('arity ' + chips.length);
+          continue;
+        }
+        chips.forEach((chip, index) => {
+          if (chip.textContent.trim() !== labels[index]) {
+            problems.push('label ' + chip.textContent.trim() + ' at ' + index);
+          }
+          if (chip.getAttribute('data-rating-level') !== values[index]) {
+            problems.push('value ' + chip.getAttribute('data-rating-level') + ' at ' + index);
+          }
+        });
+      }
+      return problems;
+    })()
+  `);
+  assert(
+    chipReport.length === 0,
+    `Rating chips must be exactly Beginning/Developing/Mastering/Mastered, low to high, on all nine dimensions: ${chipReport.join(", ")}`,
+  );
+
+  /*
+   * The three superseded competency labels must not render anywhere on the assessment surface.
+   * This is an EXACT-TEXT leaf check, not a bare-word prose regex — A-052 prohibits the latter.
+   * `Advanced` is checked as a competency chip only: the Class Grade vocabulary is a different,
+   * unchanged vocabulary (A-054) and marks itself `data-vocabulary="class-grade"`.
+   */
+  const supersededChips = await evaluate(`
+    (() => {
+      const superseded = ["Emerging", "Secure", "Advanced"];
+      return [...document.querySelectorAll('button, [data-rating-level]')]
+        .filter((element) => !element.closest('[data-vocabulary="class-grade"]'))
+        .filter((element) => superseded.includes(element.textContent.trim()))
+        .map((element) => element.textContent.trim());
+    })()
+  `);
+  assert(
+    supersededChips.length === 0,
+    `A superseded competency rating still renders as a control: ${supersededChips.join(", ")}`,
+  );
+
+  /*
+   * All four rating states, one at a time, on the first dimension: selecting a level must
+   * surface THAT level's ratified behavioural anchor verbatim, and the polarity-keyed chip
+   * treatment must meet 4.5:1 for its own label text in the selected state (SC 1.4.3).
+   * `Mastering` is a POSITIVE band (A-051) and is asserted alongside `Mastered`.
+   */
+  for (const label of RATIFIED_RATING_LABELS) {
+    await evaluate(`
+      [...document.querySelectorAll('fieldset')[0].querySelectorAll('button[data-rating-level]')]
+        .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)}).click()
+    `);
+    await waitUntil(
+      `document.body.innerText.includes(${JSON.stringify(label + " anchor:")})`,
+      `${label} anchor heading`,
+    );
+    assert(
+      await bodyIncludes(RATIFIED_ANCHORS[label]),
+      `The ${label} behavioural anchor did not render verbatim`,
+    );
+    /*
+     * Contrast is measured from the LIVE computed styles of the production build, and the
+     * computed values are rasterised through a 1x1 canvas before the ratio is taken. Tailwind v4
+     * resolves these tokens to `oklab()` / `lab()`, whose components can be NEGATIVE — a naive
+     * numeric scrape silently drops the minus sign and reports a plausible but wrong ratio.
+     * Rasterising asks the browser for the sRGB bytes it actually paints, which is the thing
+     * SC 1.4.3 is about.
+     */
+    const contrast = await evaluate(`
+      (() => {
+        const chip = [...document.querySelectorAll('fieldset')[0].querySelectorAll('button[data-rating-level]')]
+          .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)});
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        const toSrgb = (value) => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = '#000000';
+          context.fillStyle = value;
+          context.fillRect(0, 0, 1, 1);
+          const data = context.getImageData(0, 0, 1, 1).data;
+          return [data[0], data[1], data[2]];
+        };
+        const channel = (raw) => {
+          const c = raw / 255;
+          return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        };
+        const luminance = ([r, g, b]) =>
+          0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+        const style = getComputedStyle(chip);
+        let background = style.backgroundColor;
+        let node = chip;
+        while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
+          node = node.parentElement;
+          if (!node) { background = 'rgb(255, 255, 255)'; break; }
+          background = getComputedStyle(node).backgroundColor;
+        }
+        const a = luminance(toSrgb(style.color));
+        const b = luminance(toSrgb(background));
+        const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        return Math.round(ratio * 1000) / 1000;
+      })()
+    `);
+    assert(
+      typeof contrast === "number" && Number.isFinite(contrast),
+      `Contrast for the selected ${label} chip could not be measured (got ${JSON.stringify(contrast)})`,
+    );
+    assert(
+      contrast >= 4.5,
+      `Selected ${label} chip label text measured ${contrast}:1 in the production DOM; SC 1.4.3 requires 4.5:1`,
+    );
+    console.log(`  · ${label} chip label contrast ${contrast}:1 (rendered production DOM)`);
+  }
   await evaluate(`
     ${JSON.stringify(ratingSelections)}.forEach((rating, index) => {
       const button = [...document.querySelectorAll('fieldset')[index].querySelectorAll('button')]
@@ -539,6 +702,46 @@ try {
     (await evaluate(`document.querySelectorAll('input[type="checkbox"]').length`)) === 3,
     "The quality checklist must have exactly three items",
   );
+
+  /*
+   * F-06 — the Trainer-internal nine-rating source check renders the ratified A-049 vocabulary,
+   * and every one of the four states the walkthrough actually saved appears. This is a
+   * Trainer-only surface; the parent and management guards elsewhere prove the same tokens
+   * never reach those audiences.
+   */
+  const reviewSnapshots = await evaluate(`
+    (() => {
+      const nodes = [...document.querySelectorAll('[data-rating-level]')];
+      return {
+        count: nodes.length,
+        pairs: nodes.map((node) => node.getAttribute('data-rating-level') + '=' + node.textContent.trim()),
+      };
+    })()
+  `);
+  assert(
+    reviewSnapshots.count === 9,
+    `Expected nine rating snapshots on the Trainer review surface; found ${reviewSnapshots.count}`,
+  );
+  const expectedPairs = {
+    beginning: "beginning=Beginning",
+    developing: "developing=Developing",
+    mastering: "mastering=Mastering",
+    mastered: "mastered=Mastered",
+  };
+  const mislabelled = reviewSnapshots.pairs.filter(
+    (pair) => !Object.values(expectedPairs).includes(pair),
+  );
+  assert(
+    mislabelled.length === 0,
+    `A rating snapshot rendered outside the ratified vocabulary: ${mislabelled.join(", ")}`,
+  );
+  for (const value of Object.keys(expectedPairs)) {
+    assert(
+      reviewSnapshots.pairs.includes(expectedPairs[value]),
+      `The ${value} rating state never reached the Trainer review surface`,
+    );
+  }
+
   const reviewScreenshot = await screenshot("report-review.png");
 
   await clickExact("a", "Edit wording");

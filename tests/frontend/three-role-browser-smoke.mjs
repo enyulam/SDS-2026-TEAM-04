@@ -154,9 +154,15 @@ async function assertTextAbsent(terms, label) {
 /**
  * Every competency-rating token, in BOTH vocabularies.
  *
- * The four ratified Amendment 006 A-049 labels, plus the four superseded labels the frontend
- * contract still declares before the F6 / V3 checkpoint. A Parent surface must render none
- * of them as a rating, under either vocabulary.
+ * The four ratified Amendment 006 A-049 labels the frontend contract now declares (F-06 / V3),
+ * plus the three superseded labels it no longer declares. The superseded tokens are RETAINED
+ * deliberately: A-052 records that an assertion left pinned to labels that no longer exist
+ * "continues to pass while checking for values that no longer exist" — so this list checks the
+ * live vocabulary AND keeps the old one as a regression guard, rather than swapping one pin for
+ * another. A Parent surface must render none of them as a rating, under either vocabulary.
+ *
+ * `advanced` appears here as a superseded COMPETENCY RATING only. `Advanced` is still a Class
+ * Grade (A-054) and is classified by actual context below, never by keyword.
  */
 const RATING_TOKENS = [
   "beginning",
@@ -320,10 +326,12 @@ try {
   await waitUntil("document.body.innerText.includes('Final quality decision')", "Management safe review");
   await assertTextAbsent(
     [
-      "Emerging",
+      "Beginning",
       "Developing",
+      "Mastering",
+      "Mastered",
+      "Emerging",
       "Secure",
-      "Advanced",
       "Observation notes",
       "Attendance",
       "Evidence confirms rating",
@@ -434,10 +442,12 @@ try {
   );
   await assertTextAbsent(
     [
-      "Emerging",
+      "Beginning",
       "Developing",
+      "Mastering",
+      "Mastered",
+      "Emerging",
       "Secure",
-      "Advanced",
       "Observation",
       "Trainer note",
       "Correction",

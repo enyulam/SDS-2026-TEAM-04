@@ -1,8 +1,26 @@
+/**
+ * The ratified four-level competency-rating vocabulary (Amendment 006 A-049).
+ *
+ * Ordered LOW to HIGH, arity 4, applied to all nine dimensions, all nine
+ * mandatory (A-017). `developing` is unchanged in both value and ordinal
+ * position — that is why the authorized backend migration renames exactly
+ * three labels, not four. There is no fifth level.
+ *
+ * This union must agree EXACTLY with the backend's `RATING_LEVELS` in
+ * `server/modules/framework/dimensions.ts`. A-049's R-A6-5 ruling deliberately
+ * keeps the two declarations separate rather than unifying them; a divergence
+ * is a defect, not a variant.
+ *
+ * The Class Grade vocabulary — `Beginner` / `Intermediate` / `Advanced` — is a
+ * DIFFERENT, unchanged vocabulary (A-054) and is declared separately on the
+ * session DTOs below. `Advanced` is no longer a competency rating and IS still
+ * a Class Grade.
+ */
 export const RATING_LEVELS = [
-  "emerging",
+  "beginning",
   "developing",
-  "secure",
-  "advanced",
+  "mastering",
+  "mastered",
 ] as const;
 
 export type RatingLevel = (typeof RATING_LEVELS)[number];

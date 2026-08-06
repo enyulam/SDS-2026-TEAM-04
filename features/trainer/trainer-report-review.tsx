@@ -12,10 +12,10 @@ import { StatusPill } from "@/components/ui/status-pill";
 import type {
   ChecklistDto,
   DimensionCode,
-  RatingLevel,
   TrainerApproveSuccess,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
+import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type ResourceState } from "./resource-state";
@@ -43,12 +43,11 @@ const checklistConfig = [
   readonly supporting: string;
 }[];
 
-const ratingLabels: Readonly<Record<RatingLevel, string>> = {
-  emerging: "Emerging",
-  developing: "Developing",
-  secure: "Secure",
-  advanced: "Advanced",
-};
+/*
+ * The nine rating snapshots below are rendered in the ratified Amendment 006
+ * A-049 vocabulary from the single shared label table, so this Trainer-internal
+ * source check and the assessment form can never drift apart.
+ */
 
 export function TrainerReportReview() {
   const params = useParams<{ reportId: string }>();
@@ -283,7 +282,12 @@ export function TrainerReportReview() {
             {report.ratingSnapshots.map((rating) => (
               <li key={rating.dimensionCode} className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted px-3 py-2 text-xs">
                 <span className="font-bold text-navy-900">{rating.displayName}</span>
-                <span className="font-extrabold text-brand-600">{ratingLabels[rating.rating]}</span>
+                <span
+                  data-rating-level={rating.rating}
+                  className="font-extrabold text-brand-600"
+                >
+                  {RATING_DISPLAY_LABELS[rating.rating]}
+                </span>
               </li>
             ))}
           </ul>

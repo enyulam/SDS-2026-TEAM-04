@@ -24,6 +24,7 @@ import {
   type RatingLevel,
   type SaveObservationSuccess,
 } from "@/lib/frontend/contracts/physical-test";
+import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { usePhysicalTestPort } from "./trainer-fixture-runtime";
 import { asFailure, type ResourceState } from "./resource-state";
@@ -33,29 +34,33 @@ type AssessmentView = {
   readonly dimensions: readonly DimensionDto[];
 };
 
-const ratingLabels: Readonly<Record<RatingLevel, string>> = {
-  emerging: "Emerging",
-  developing: "Developing",
-  secure: "Secure",
-  advanced: "Advanced",
-};
-
+/**
+ * Amendment 006 A-049 display labels, and the chip treatment keyed to the
+ * A-051 polarity band each level carries — NOT to the grammatical form of the
+ * label. `mastering` is `positive`, so it keeps a positive treatment; only
+ * `beginning` reads as needs-support. The two positive levels are
+ * distinguished by hue (teal / green), never by one of them reading negative.
+ *
+ * These are competency ratings. The Class Grade vocabulary rendered elsewhere
+ * in the Trainer flow (`Beginner` / `Intermediate` / `Advanced`) is a
+ * different, unchanged vocabulary (A-054) and is not styled from this table.
+ */
 const ratingStyles: Readonly<Record<RatingLevel, { idle: string; selected: string }>> = {
-  emerging: {
-    idle: "border-red-200 bg-red-50 text-red-800 hover:border-red-400",
-    selected: "border-red-700 bg-red-100 text-red-900 ring-2 ring-red-200",
+  beginning: {
+    idle: "border-red-300 bg-red-50 text-red-800 hover:border-red-500",
+    selected: "border-red-800 bg-red-100 text-red-900 ring-2 ring-red-300",
   },
   developing: {
-    idle: "border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
-    selected: "border-amber-700 bg-amber-100 text-amber-900 ring-2 ring-amber-200",
+    idle: "border-amber-300 bg-amber-50 text-amber-900 hover:border-amber-500",
+    selected: "border-amber-800 bg-amber-100 text-amber-900 ring-2 ring-amber-300",
   },
-  secure: {
-    idle: "border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
-    selected: "border-teal-700 bg-teal-100 text-teal-900 ring-2 ring-teal-200",
+  mastering: {
+    idle: "border-teal-300 bg-teal-50 text-teal-900 hover:border-teal-500",
+    selected: "border-teal-800 bg-teal-100 text-teal-900 ring-2 ring-teal-300",
   },
-  advanced: {
-    idle: "border-green-200 bg-green-50 text-green-800 hover:border-green-400",
-    selected: "border-green-700 bg-green-100 text-green-900 ring-2 ring-green-200",
+  mastered: {
+    idle: "border-green-300 bg-green-50 text-green-900 hover:border-green-500",
+    selected: "border-green-800 bg-green-100 text-green-900 ring-2 ring-green-300",
   },
 };
 
@@ -382,6 +387,7 @@ export function TrainerAssessment() {
               <button
                 key={rating}
                 type="button"
+                data-rating-level={rating}
                 aria-pressed={active}
                 onClick={() => {
                   setRatings((current) => ({ ...current, [dimension.dimensionCode]: rating }));
@@ -392,7 +398,7 @@ export function TrainerAssessment() {
                   active ? ratingStyles[rating].selected : ratingStyles[rating].idle
                 }`}
               >
-                {ratingLabels[rating]}
+                {RATING_DISPLAY_LABELS[rating]}
               </button>
             );
           })}
@@ -402,7 +408,7 @@ export function TrainerAssessment() {
           className="mt-4 min-h-20 rounded-2xl bg-surface-muted p-3 text-sm leading-6 text-ink-muted"
         >
           <strong className="text-navy-900">
-            {selected ? `${ratingLabels[selected]} anchor:` : "Rubric anchor:"}
+            {selected ? `${RATING_DISPLAY_LABELS[selected]} anchor:` : "Rubric anchor:"}
           </strong>{" "}
           {selected
             ? dimension.rubricAnchors[selected]
@@ -410,7 +416,7 @@ export function TrainerAssessment() {
         </div>
         {missing && (
           <p id={`${dimension.dimensionCode}-error`} className="mt-2 text-sm font-bold text-danger-700">
-            Select Emerging, Developing, Secure, or Advanced.
+            Select Beginning, Developing, Mastering, or Mastered.
           </p>
         )}
       </fieldset>

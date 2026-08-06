@@ -115,27 +115,34 @@ const EMPTY_RATINGS = Object.fromEntries(
   DIMENSION_CODES.map((code) => [code, null]),
 ) as Record<DimensionCode, RatingLevel | null>;
 
+/**
+ * Deliberately mixed rating sets in the ratified Amendment 006 A-049
+ * vocabulary. Between them the two sets exercise ALL FOUR rating states, which
+ * is what makes the grounding-contradiction path (a `beginning` dimension that
+ * must never be presented as a strength — A-051) meaningful rather than
+ * decorative.
+ */
 const MIXED_RATINGS: Record<DimensionCode, RatingLevel | null> = {
-  body: "secure",
+  body: "mastering",
   emotion: "developing",
-  speech: "secure",
-  tonality: "emerging",
+  speech: "mastering",
+  tonality: "beginning",
   eye_contact: "developing",
-  vocal_projection: "emerging",
-  emotional_expression: "secure",
-  sentence_flow: "advanced",
+  vocal_projection: "beginning",
+  emotional_expression: "mastering",
+  sentence_flow: "mastered",
   audience_awareness: "developing",
 };
 
-const ADVANCED_MIXED_RATINGS: Record<DimensionCode, RatingLevel | null> = {
-  body: "advanced",
-  emotion: "secure",
-  speech: "secure",
+const MASTERED_MIXED_RATINGS: Record<DimensionCode, RatingLevel | null> = {
+  body: "mastered",
+  emotion: "mastering",
+  speech: "mastering",
   tonality: "developing",
-  eye_contact: "secure",
+  eye_contact: "mastering",
   vocal_projection: "developing",
-  emotional_expression: "advanced",
-  sentence_flow: "secure",
+  emotional_expression: "mastered",
+  sentence_flow: "mastering",
   audience_awareness: "developing",
 };
 
@@ -264,7 +271,7 @@ const INITIAL_STATE: FixtureState = {
       wordingHash: "fixture-wording-birch-draft-1",
       checklist: EMPTY_CHECKLIST,
       observation: {
-        ratings: ADVANCED_MIXED_RATINGS,
+        ratings: MASTERED_MIXED_RATINGS,
         notes:
           "Strong sequence and calm pacing. Projection softened at sentence endings.",
         followUp:
@@ -272,7 +279,7 @@ const INITIAL_STATE: FixtureState = {
         lockVersion: 2,
         validSaveAttempts: 2,
       },
-      versionRatings: ADVANCED_MIXED_RATINGS,
+      versionRatings: MASTERED_MIXED_RATINGS,
       observationChangedSinceVersion: false,
       generationAttempts: 2,
     },
@@ -347,13 +354,13 @@ const INITIAL_STATE: FixtureState = {
         privacyChecked: true,
       },
       observation: {
-        ratings: ADVANCED_MIXED_RATINGS,
+        ratings: MASTERED_MIXED_RATINGS,
         notes: "Clear purpose and sequence. Tonal variety can develop further.",
         followUp: "Add vocal variety between key ideas.",
         lockVersion: 2,
         validSaveAttempts: 2,
       },
-      versionRatings: ADVANCED_MIXED_RATINGS,
+      versionRatings: MASTERED_MIXED_RATINGS,
       observationChangedSinceVersion: false,
       generationAttempts: 2,
     },
@@ -1010,7 +1017,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         outcome: "generation_failure",
         retryable: true,
         message:
-          "Grounding rejected the first fixture draft because it described an Emerging rating as an achievement. The suspect draft was not shown or saved.",
+          "Grounding rejected the first fixture draft because it described a Beginning rating as an achievement. The suspect draft was not shown or saved.",
       };
     }
 
