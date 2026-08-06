@@ -151,6 +151,70 @@ async function assertTextAbsent(terms, label) {
   assert(found.length === 0, `${label} leaked forbidden text: ${found.join(", ")}`);
 }
 
+/**
+ * Every competency-rating token, in BOTH vocabularies.
+ *
+ * The four ratified Amendment 006 A-049 labels, plus the four superseded labels the frontend
+ * contract still declares before the F6 / V3 checkpoint. A Parent surface must render none
+ * of them as a rating, under either vocabulary.
+ */
+const RATING_TOKENS = [
+  "beginning",
+  "developing",
+  "mastering",
+  "mastered",
+  "emerging",
+  "secure",
+  "advanced",
+];
+
+/**
+ * Load-bearing privacy evidence for operator ruling R-B6 (CLAUDE.md §6; A-021; A-038; A-048;
+ * GLOBAL_UI_RULES §5): proves NO rating token renders on a Parent surface.
+ *
+ * Screen 32's frozen reference draws an aggregate rating chip on every report row. That chip
+ * is deliberately not implemented, and this assertion is what proves it stayed unimplemented —
+ * on the list, on the Parent home surface and on the canonical report detail.
+ *
+ * The check is deliberately NOT a bare-word prose regex. Amendment 006 A-052 expressly
+ * PROHIBITS `\b(beginning|developing|mastering|mastered)\b`, because "at the beginning of the
+ * session" and "has mastered maintaining eye contact" are legal parent-facing prose that a
+ * canonical narrative may legitimately contain. What is detected instead is precisely the form
+ * A-052 authorises — an ISOLATED raw label presented as a rendered value: any leaf element
+ * (chip, badge, pill, cell, span) whose ENTIRE text is one token, and any element carrying a
+ * rating-bearing data attribute.
+ *
+ * Class Grade is a different vocabulary and is unchanged (A-054): `Beginner` / `Intermediate` /
+ * `Advanced` are class grades, not ratings. No Parent surface renders a Class Grade today; if
+ * one ever does it must mark itself `data-vocabulary="class-grade"`, which this guard skips.
+ * Occurrences are classified by actual context, never by keyword.
+ */
+async function assertNoRatingTokenRendered(label) {
+  const offenders = await evaluate(`
+    (() => {
+      const tokens = ${JSON.stringify(RATING_TOKENS)};
+      const found = [];
+      for (const element of document.body.querySelectorAll("*")) {
+        if (element.closest('[data-vocabulary="class-grade"]')) continue;
+        if (element.hasAttribute("data-rating") || element.hasAttribute("data-rating-level")) {
+          found.push(element.tagName.toLowerCase() + "[data-rating]");
+          continue;
+        }
+        if (element.children.length > 0) continue;
+        const text = (element.textContent || "").trim().toLowerCase().replace(/[.,:;!?·|-]+$/, "").trim();
+        if (tokens.includes(text)) {
+          found.push(element.tagName.toLowerCase() + '="' + text + '"');
+        }
+      }
+      return found;
+    })()
+  `);
+  assert(
+    offenders.length === 0,
+    `${label} rendered a raw competency-rating token: ${offenders.join(", ")}`,
+  );
+}
+
 async function completeTrainerChecklist() {
   const count = await evaluate(`document.querySelectorAll('input[type="checkbox"]').length`);
   assert(count === 3, `Expected three Trainer checklist items; found ${count}`);
@@ -239,6 +303,10 @@ try {
   await navigate("/parent/reports");
   await waitUntil("document.body.innerText.includes('Learner Fern')", "initial Parent report list");
   assert(!(await bodyIncludes("Learner Birch")), "Trainer working content reached the Parent list");
+  await assertNoRatingTokenRendered("Parent report list (screen 32, initial)");
+  await navigate("/parent");
+  await waitUntil("document.body.innerText.includes('Family reports')", "Parent home surface");
+  await assertNoRatingTokenRendered("Parent home surface");
 
   await navigate("/trainer/reports/report-birch/review");
   await waitUntil("document.body.innerText.includes('Quality Checklist')", "Birch Trainer review");
@@ -352,6 +420,12 @@ try {
     await evaluate(`[...document.querySelectorAll('h2')].filter((heading) => heading.textContent.trim() === 'Learner Birch').length === 1`),
     "Parent list did not contain exactly one Birch report",
   );
+  /*
+   * Screen 32 after a real submission — the state the frozen frame draws its aggregate rating
+   * chip in. The chip is not implemented (operator ruling R-B6) and this proves it.
+   */
+  await assertNoRatingTokenRendered("Parent report list (screen 32, after submission)");
+  const parentListScreenshot = await screenshot("parent-reports-list.png");
   await navigate("/parent/students/student-birch/sessions/session-storytelling-lab/report");
   await waitUntil("document.body.innerText.includes('The confident opening was especially clear.')", "canonical Birch detail");
   assert(
@@ -374,6 +448,7 @@ try {
     ],
     "Parent canonical DOM",
   );
+  await assertNoRatingTokenRendered("Parent canonical report detail (screen 33)");
   const parentScreenshot = await screenshot("parent-canonical-report.png");
 
   await navigate("/parent?preview=none");
@@ -420,10 +495,11 @@ try {
           "Trainer explicit reaffirmation, fresh checklist, and reapproval",
           "Management final submission and canonical Parent availability",
           "Management and Parent DOM privacy exclusions",
+          "no competency-rating token renders on any Parent surface (R-B6)",
           "loading, empty, linked-unavailable, unavailable, and denied states",
           "zero uncaught browser-console/runtime errors",
         ],
-        screenshots: [managementScreenshot, parentScreenshot],
+        screenshots: [managementScreenshot, parentListScreenshot, parentScreenshot],
       },
       null,
       2,
