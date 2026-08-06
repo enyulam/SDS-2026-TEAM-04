@@ -153,26 +153,48 @@ if (ARMS_NOW.length !== 3) {
   const today = singaporeInstant();
   const expected = "eligible,future,past";
 
+  /*
+   * THE YEAR-AWAY DATE IS COMPUTED, NOT ASSUMED (Run C3-A correction cycle).
+   *
+   * This header claimed a sweep "at a simulated instant a year away" that the
+   * code did not perform. The claim is now IMPLEMENTED rather than deleted,
+   * because it is the stronger half of the property under test: a drifting
+   * fixture fails at a distant date long before it fails today. 365 days is
+   * added through UTC date arithmetic, so a leap day shifts the landing date
+   * by one and changes nothing about what is asserted — the relationship, not
+   * the calendar, is the invariant.
+   */
+  const [y, m, d] = today.isoDate.split("-").map(Number);
+  const yearAwayIso = new Date(Date.UTC(y, m - 1, d + 365)).toISOString().slice(0, 10);
+
+  const sweeps = [
+    ["today", today.isoDate],
+    ["a simulated instant a year away", yearAwayIso],
+  ];
+
   const drifted = [];
-  for (let minute = 0; minute < 1440; minute += 1) {
-    // The fixture derives its own dates from the CURRENT Singapore date, so a
-    // simulated minute-of-day on that same date is exactly the situation a
-    // real run at that time of day would face.
-    const seen = classify({ isoDate: today.isoDate, minutesOfDay: minute });
-    if (seen !== expected) {
-      drifted.push(`${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")} -> ${seen}`);
-      if (drifted.length > 4) break;
+  for (const [label, isoDate] of sweeps) {
+    for (let minute = 0; minute < 1440; minute += 1) {
+      // The fixture derives its own dates from the SIMULATED Singapore date, so
+      // a simulated minute-of-day on that date is exactly the situation a real
+      // run at that time of day, on that date, would face.
+      const seen = classify({ isoDate, minutesOfDay: minute });
+      if (seen !== expected) {
+        drifted.push(`${label} ${isoDate} ${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")} -> ${seen}`);
+        if (drifted.length > 4) break;
+      }
     }
+    if (drifted.length > 4) break;
   }
   if (drifted.length > 0) {
     fail(
       "E-2",
-      `the fixture's three sessions do not classify as exactly one past, one eligible and one future at every minute of the day: ${drifted.join("; ")}`,
+      `the fixture's three sessions do not classify as exactly one past, one eligible and one future at every simulated minute: ${drifted.join("; ")}`,
     );
   } else {
     pass(
       "E-2",
-      `at all 1440 simulated Singapore minutes of today the fixture presents EXACTLY one past, one eligible and one future session — the eligibility arms are derived from a pinned reference, so their meaning cannot drift with the wall clock`,
+      `at all 1440 simulated Singapore minutes of today AND at all 1440 simulated minutes of ${yearAwayIso} — a year away — the fixture presents EXACTLY one past, one eligible and one future session; the eligibility arms are derived from a pinned reference, so their meaning cannot drift with the wall clock`,
     );
   }
 }
@@ -275,11 +297,31 @@ if (ARMS_NOW.length !== 3) {
 
 // ---------------------------------------------------------------------
 // E-7  The DETERMINISTIC FIXTURE's assess read carries the same gate, so
-//      fixture mode is not a hole in the boundary. The EXECUTED DOM proof
-//      is in `tests/frontend/trainer-browser-smoke.mjs`, which drives the
-//      real surface against this port; this leg proves the gate exists,
-//      runs BEFORE any draft is assembled, and carries the governed
-//      reasons verbatim.
+//      fixture mode is not a hole in the boundary.
+//
+//      WHAT ACTUALLY EXECUTES HERE: this leg READS the fixture port's
+//      source and asserts, statically, that both conditions exist, that
+//      they are evaluated BEFORE any draft is assembled, and that they
+//      carry the governed BC102/BC104 reason strings verbatim. It drives
+//      no browser and renders no DOM.
+//
+//      (Run C3-A correction cycle. This comment used to name
+//      `tests/frontend/trainer-browser-smoke.mjs` as "the EXECUTED DOM
+//      proof" of this leg's behavioural half. It is not one, and has never
+//      been runnable as one here: since F16-B every `/trainer` route is
+//      guarded server-side by `proxy.ts` plus the portal guard, both
+//      resolving a LIVE session, so that harness's fixture login is
+//      redirected to `/login` before the assess surface ever renders — and
+//      `CLAUDE.md` §11 forbids this harness from holding a credential that
+//      would get past it.
+//
+//      The proof that DOES execute and DOES render is gate G-23 of
+//      `scripts/physical-test/prove-disposable-app.mjs`: it serves the
+//      application against the DISPOSABLE stack, signs in for real, follows
+//      both deep links in a real browser, and asserts the governed BC102 and
+//      BC104 states with no rating control present. Naming an unrun suite as
+//      executed evidence is the same defect class as a gate that passes
+//      without evidence, so the claim is corrected rather than restated.)
 // ---------------------------------------------------------------------
 {
   const fixture = stripComments(

@@ -13,18 +13,28 @@
  *      destinations for Pending and Corrections are PROHIBITED.
  *
  *   2. R-C2-3, deep-link half, plus GLOBAL_UI_RULES §7 / WCAG 2.2: on EVERY
- *      one of the 14 canonical portal routes, and on BOTH ratified
- *      `?status=` compatibility aliases, EXACTLY ONE navigation item is the
- *      current page — and it is the EXPECTED item. A bare count of one would
- *      pass with the wrong item highlighted, so the item is pinned by label.
+ *      shipped portal route — the list is DERIVED from `app/**\/page.tsx`, not
+ *      a number frozen into this header — and on EVERY ratified `?status=`
+ *      compatibility alias, EXACTLY ONE navigation item is the current page,
+ *      and it is the EXPECTED item. A bare count of one would pass with the
+ *      wrong item highlighted, so the item is pinned by label. Redirect-only
+ *      routes are exempt, and their exemption is MEASURED (N-0b), not claimed.
+ *
+ *      (Run C3-A correction cycle: this paragraph described a superseded
+ *      scope — "the 14 canonical portal routes" and "BOTH" aliases — from
+ *      before the route list became app-tree-derived and before the third and
+ *      fourth aliases landed. A header that pins a count it does not compute
+ *      goes stale silently, which is why it now names the source instead.)
  *
  *   3. The `exact` flag is LOAD-BEARING. Before this run, `portal-shell.tsx:192`
  *      read `item.exact ? pathname === item.path : pathname === item.path` —
  *      both branches identical — so `exact` was dead code, TWO Management items
  *      were current on `/management/reports`, and ZERO items were current on
- *      8 of the 14 canonical portal routes. This suite asserts a case that
- *      distinguishes the two branches (`/management` must NOT light up on
- *      `/management/reports`), so a regression to one shared expression FAILS.
+ *      8 of the 14 portal routes THIS SUITE THEN COVERED (a historical count,
+ *      recorded as of that fix, not a claim about today's census). This suite
+ *      asserts a case that distinguishes the two branches (`/management` must
+ *      NOT light up on `/management/reports`), so a regression to one shared
+ *      expression FAILS.
  *
  * WHY IT IS NOT A BROWSER SUITE
  *

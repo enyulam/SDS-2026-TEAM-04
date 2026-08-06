@@ -220,7 +220,11 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   const fresh = await q(SCRATCH, FINGERPRINT)
   const canon = await q(CANONICAL, FINGERPRINT)
   if (fresh === canon) {
-    pass('the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the eleven committed migration files')
+    // (Run C3-A correction cycle: this narrated the superseded eleven-file
+    //  census. The scratch database above is built from EVERY committed
+    //  migration file, and the census asserted immediately above pins that
+    //  count at twelve, so "eleven" was false against the twelfth.)
+    pass('the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the twelve committed migration files')
   } else {
     const a = new Set(fresh.split('\n'))
     const b = new Set(canon.split('\n'))

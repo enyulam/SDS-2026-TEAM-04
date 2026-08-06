@@ -107,7 +107,13 @@ const body = code(raw)
     if (h1 !== h2) fail('T-C3-S2', `${rel} differs from HEAD -- an applied migration must never be edited`)
   }
   if (failures === before) {
-    pass('T-C3-S2', 'eleven migration files; the ten already-applied files are byte-identical to HEAD; the closure sorts last')
+    // (Run C3-A correction cycle: this string narrated the superseded
+    //  eleven-file census and became FALSE when the twelfth migration
+    //  landed. The assertions above have always read `all.length !== 12`
+    //  and compared `all.slice(0, -1)`; the prose now says what they
+    //  measure, and the newest file is the C2C-004 Management
+    //  submitted-report list, not the single-entry-point closure.)
+    pass('T-C3-S2', `twelve migration files; the eleven already-applied files are byte-identical to HEAD; ${MIG_NAME} is present and ${NEWEST_MIG_NAME} sorts last`)
   }
 }
 
