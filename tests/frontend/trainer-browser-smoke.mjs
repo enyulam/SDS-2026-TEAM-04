@@ -129,6 +129,60 @@ async function bodyIncludes(text) {
   return evaluate(`document.body.innerText.includes(${JSON.stringify(text)})`);
 }
 
+/**
+ * Label-text contrast of one rating chip, measured from the LIVE computed styles of the
+ * production build (SC 1.4.3).
+ *
+ * The computed values are rasterised through a 1x1 canvas before the ratio is taken. Tailwind
+ * v4 resolves these tokens to `oklab()` / `lab()`, whose components can be NEGATIVE — a naive
+ * numeric scrape silently drops the minus sign and reports a plausible but wrong ratio.
+ * Rasterising asks the browser for the sRGB bytes it actually paints, which is the thing
+ * SC 1.4.3 is about.
+ */
+async function ratingChipContrast(fieldsetIndex, label) {
+  const contrast = await evaluate(`
+    (() => {
+      const chip = [...document.querySelectorAll('fieldset')[${fieldsetIndex}].querySelectorAll('button[data-rating-level]')]
+        .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)});
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      const toSrgb = (value) => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = '#000000';
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const data = context.getImageData(0, 0, 1, 1).data;
+        return [data[0], data[1], data[2]];
+      };
+      const channel = (raw) => {
+        const c = raw / 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      };
+      const luminance = ([r, g, b]) =>
+        0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+      const style = getComputedStyle(chip);
+      let background = style.backgroundColor;
+      let node = chip;
+      while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
+        node = node.parentElement;
+        if (!node) { background = 'rgb(255, 255, 255)'; break; }
+        background = getComputedStyle(node).backgroundColor;
+      }
+      const a = luminance(toSrgb(style.color));
+      const b = luminance(toSrgb(background));
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      return Math.round(ratio * 1000) / 1000;
+    })()
+  `);
+  assert(
+    typeof contrast === "number" && Number.isFinite(contrast),
+    `Contrast for the ${label} chip could not be measured (got ${JSON.stringify(contrast)})`,
+  );
+  return contrast;
+}
+
 try {
   const targets = await retry(async () => {
     const response = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
@@ -177,6 +231,20 @@ try {
   await command("Page.enable");
   await command("Runtime.enable");
   await command("Log.enable");
+
+  /*
+   * F-07 — MEASUREMENT DETERMINISM. `getComputedStyle` returns the CURRENTLY INTERPOLATED
+   * value while a CSS transition is running, so a contrast reading taken immediately after a
+   * class change measures the state the control is transitioning OUT OF, not the state it is
+   * in. Every rating chip carries `transition`, and the reading below fires as soon as the
+   * anchor text repaints — well inside the 150 ms window. Emulating `prefers-reduced-motion:
+   * reduce` makes `app/globals.css`'s reduced-motion block collapse every transition to
+   * 0.01 ms, so the measured value is the SETTLED value. This is also a condition the product
+   * must work under, so nothing is being measured in an unrealistic mode.
+   */
+  await command("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
 
   await navigate("/login?role=trainer");
   await waitUntil(
@@ -469,7 +537,7 @@ try {
   assert(
     await evaluate(`
       [...document.querySelectorAll('button')]
-        .find((button) => button.textContent.trim() === 'Save observation & generate draft').disabled
+        .find((button) => button.textContent.trim() === 'Save & Generate').disabled
     `),
     "Observation save should be disabled before all nine ratings",
   );
@@ -477,6 +545,183 @@ try {
   await waitUntil(
     "document.body.innerText.includes('All nine ratings are required')",
     "all-nine validation",
+  );
+
+  /* -------------------------------------------------------------------------
+   * Screen 07 Trainer Grade Student — F-07. THE ASSESSMENT INSTRUMENT.
+   *
+   * The load-bearing assertions are the governance rules a static frame cannot demonstrate:
+   * there is exactly ONE capture mode and it is the full nine (A-017); the nine render in the
+   * RATIFIED order rather than the frame's interleaved order; every dimension surfaces its
+   * behavioural anchor; the shared `observations.follow_up_notes` value is LOADED rather than
+   * blanked; and an ABSENT learner appears in the REVIEW & APPROVE rail with no lifecycle
+   * status, no path and no place in any counter.
+   * ----------------------------------------------------------------------- */
+
+  // A-017: ONE capture mode. No Quick/Full toggle, no four-dimension path, no `mode` control.
+  assert(
+    !(await evaluate(
+      `/quick mode|full mode|quick assessment|4 dimensions|four-dimension/i.test(document.body.innerText)`,
+    )),
+    "A Quick/Full capture mode must not exist on the assessment instrument (A-017)",
+  );
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('button, input, select, a')]
+        .every((element) => !/^(quick|full)$/i.test(element.textContent.trim()))
+    `),
+    "No Quick/Full mode control may exist (A-017)",
+  );
+
+  // The nine dimensions render in the RATIFIED order, not the frame's interleaved order (D1).
+  const RATIFIED_DIMENSION_ORDER = [
+    "body",
+    "emotion",
+    "speech",
+    "tonality",
+    "eye_contact",
+    "vocal_projection",
+    "emotional_expression",
+    "sentence_flow",
+    "audience_awareness",
+  ];
+  const renderedDimensions = await evaluate(
+    `[...document.querySelectorAll('fieldset[data-dimension]')].map((node) => node.dataset.dimension)`,
+  );
+  assert(
+    JSON.stringify(renderedDimensions) === JSON.stringify(RATIFIED_DIMENSION_ORDER),
+    `The nine dimensions must render in the ratified order; found ${renderedDimensions.join(", ")}`,
+  );
+
+  // Every dimension carries a behavioural anchor region (D2 — the frame draws none).
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('fieldset[data-dimension]')].every((node) => {
+        const anchor = node.querySelector('#' + node.dataset.dimension + '-anchor');
+        return Boolean(anchor) && anchor.textContent.includes('Rubric anchor:');
+      })
+    `),
+    "Every one of the nine dimensions must surface a behavioural anchor region",
+  );
+
+  /*
+   * All four rating states are measured in the IDLE treatment here; the selected treatment is
+   * measured, one state at a time, in the F-06 block below. The frame paints the selected
+   * segment in the saturated ramp colour with white label text, which measures 3.70 / 2.03 /
+   * 2.34 / 2.51 : 1 and fails SC 1.4.3 on all four — the fill therefore moves to the same
+   * hue's deeper step (D5), and BOTH treatments of all four states are proved in the DOM
+   * rather than reasoned about.
+   */
+  for (const idleLabel of ["Beginning", "Developing", "Mastering", "Mastered"]) {
+    const idleContrast = await ratingChipContrast(0, idleLabel);
+    assert(
+      idleContrast >= 4.5,
+      `Idle ${idleLabel} chip label text measured ${idleContrast}:1; SC 1.4.3 requires 4.5:1`,
+    );
+    console.log(`  · ${idleLabel} chip label contrast ${idleContrast}:1 (idle, production DOM)`);
+  }
+
+  // The frame's "Back to Student Roster" control reaches this Class Session's roster.
+  assert(
+    await evaluate(`
+      (() => {
+        const back = [...document.querySelectorAll('a')]
+          .find((anchor) => anchor.textContent.trim() === 'Back to Student Roster');
+        return Boolean(back) &&
+          new URL(back.href).pathname === '/trainer/sessions/session-storytelling-lab/roster';
+      })()
+    `),
+    "Back to Student Roster must reach this Class Session's roster",
+  );
+
+  assert(
+    await bodyIncludes("Coach Notes (Internal Only)"),
+    "The Follow-up field must state that it is the same governed note as Coach Notes",
+  );
+
+  /*
+   * REVIEW & APPROVE rail. The four counters are presentation grouping over the governed
+   * report states, and the ABSENT learner is in none of them and reaches nothing (D7, A-018).
+   */
+  const railBuckets = await evaluate(`
+    Object.fromEntries([...document.querySelectorAll('[data-review-bucket]')]
+      .map((node) => [node.dataset.reviewBucket, Number(node.dataset.reviewCount)]))
+  `);
+  assert(
+    railBuckets.not_started === 1 &&
+      railBuckets.in_progress === 2 &&
+      railBuckets.pending_approval === 0 &&
+      railBuckets.approved === 0,
+    `REVIEW & APPROVE counters must project the governed report states; found ${JSON.stringify(railBuckets)}`,
+  );
+  const railEntries = await evaluate(`
+    Object.fromEntries([...document.querySelectorAll('[data-rail-student]')].map((node) => [
+      node.dataset.railStudent,
+      { action: node.dataset.railAction, tag: node.tagName, text: node.innerText },
+    ]))
+  `);
+  assert(
+    Object.keys(railEntries).length === 4,
+    `Expected the four governed roster entries in the rail; found ${Object.keys(railEntries).length}`,
+  );
+  assert(
+    railEntries["student-delta"].action === "inert" &&
+      railEntries["student-delta"].tag !== "A",
+    "The absent learner must have no path from the REVIEW & APPROVE rail",
+  );
+  assert(
+    !/No report|Assessment needed|Observation saved|Ready to review|Returned|With management|Submitted/.test(
+      railEntries["student-delta"].text,
+    ),
+    "The absent learner must expose no report lifecycle status in the rail",
+  );
+  assert(
+    new Set(
+      Object.values(railEntries).map((entry) => entry.action),
+    ).size >= 3,
+    "Rail destinations must differ by report status, not share one generic handler",
+  );
+
+  // Token convergence: this surface uses project tokens, not the Tailwind default palette.
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('main *')].every((element) =>
+        !/(^|\\s)(bg|text|border)-(slate|gray|zinc|indigo|red|amber|teal|green)-/.test(element.className.baseVal ?? element.className ?? ''))
+    `),
+    "The assessment surface must use project tokens, not Tailwind default-palette classes",
+  );
+
+  /*
+   * `observations.follow_up_notes` is ONE field surfaced on TWO screens (`CLAUDE.md` §6): the
+   * B.E.S.T Form's "Follow-up for Next Session" and Review & Approve's "Coach Notes (Internal
+   * Only)". It must be LOADED with its current value, never rendered blank — otherwise a save
+   * from this screen silently overwrites the trainer's earlier note. Screen 07's frame draws
+   * no such field at all (D3); governance requires it, so it is here and it is proved LOADED
+   * against a learner that already carries one. Learner Aster's is legitimately empty — that
+   * observation has no earlier note — so the proof runs on Learner Cedar's returned report,
+   * which also exercises the correction banner state.
+   */
+  await navigate(
+    "/trainer/sessions/session-storytelling-lab/students/student-cedar/assess",
+  );
+  await waitUntil("document.querySelector('#follow-up-notes') !== null", "Cedar assessment form");
+  assert(
+    (await evaluate("document.querySelector('#follow-up-notes').value")) ===
+      "Use facial expression to make the story change clear.",
+    "Follow-up for Next Session must load the current governed value, never render blank",
+  );
+  assert(
+    await bodyIncludes("Returned assessment concern"),
+    "A returned report must surface its open correction on the assessment instrument",
+  );
+  const assessmentScreenshot = await screenshot("trainer-grade-student.png");
+
+  await navigate(
+    "/trainer/sessions/session-storytelling-lab/students/student-aster/assess",
+  );
+  await waitUntil(
+    "document.body.innerText.includes('0 of 9 dimensions rated')",
+    "assessment form restored",
   );
 
   /*
@@ -563,6 +808,41 @@ try {
   );
 
   /*
+   * F-07 — a REAL accessible name per control, carrying that level's ratified anchor VERBATIM.
+   * All 36 chips would otherwise expose only four distinct names ("Beginning" … "Mastered")
+   * repeated nine times, which is not a usable name in a nine-row instrument, and the
+   * behavioural meaning would reach a screen-reader user only AFTER the choice was made.
+   */
+  const namingReport = await evaluate(`
+    (() => {
+      const anchors = ${JSON.stringify(RATIFIED_ANCHORS)};
+      const problems = [];
+      for (const fieldset of document.querySelectorAll('fieldset[data-dimension]')) {
+        const dimension = fieldset.querySelector('p span').textContent.trim().replace(/^\\d+\\.\\s*/, '');
+        for (const chip of fieldset.querySelectorAll('button[data-rating-level]')) {
+          const label = chip.textContent.trim();
+          const name = chip.getAttribute('aria-label') ?? '';
+          if (!name.includes(dimension)) problems.push('no dimension in name: ' + name);
+          if (!name.includes(label)) problems.push('no level in name: ' + name);
+          if (!name.includes(anchors[label])) problems.push('anchor not verbatim in name: ' + name);
+        }
+      }
+      return problems.slice(0, 5);
+    })()
+  `);
+  assert(
+    namingReport.length === 0,
+    `Every rating control must carry a real accessible name with its verbatim anchor: ${namingReport.join(" | ")}`,
+  );
+  assert(
+    (await evaluate(`
+      new Set([...document.querySelectorAll('button[data-rating-level]')]
+        .map((chip) => chip.getAttribute('aria-label'))).size
+    `)) === 36,
+    "All 36 rating controls must have distinct accessible names",
+  );
+
+  /*
    * The three superseded competency labels must not render anywhere on the assessment surface.
    * This is an EXACT-TEXT leaf check, not a bare-word prose regex — A-052 prohibits the latter.
    * `Advanced` is checked as a competency chip only: the Class Grade vocabulary is a different,
@@ -597,58 +877,26 @@ try {
       `document.body.innerText.includes(${JSON.stringify(label + " anchor:")})`,
       `${label} anchor heading`,
     );
+    /*
+     * Belt and braces alongside the reduced-motion emulation above: the selected chip carries a
+     * SOLID fill, so a still-transparent computed background proves the transition has not
+     * settled and the reading that follows would be measuring the idle state.
+     */
+    await waitUntil(
+      `(() => {
+        const chip = [...document.querySelectorAll('fieldset')[0].querySelectorAll('button[data-rating-level]')]
+          .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)});
+        const background = getComputedStyle(chip).backgroundColor;
+        return chip.getAttribute('aria-pressed') === 'true' &&
+          background !== 'rgba(0, 0, 0, 0)' && background !== 'transparent';
+      })()`,
+      `${label} chip fill settled`,
+    );
     assert(
       await bodyIncludes(RATIFIED_ANCHORS[label]),
       `The ${label} behavioural anchor did not render verbatim`,
     );
-    /*
-     * Contrast is measured from the LIVE computed styles of the production build, and the
-     * computed values are rasterised through a 1x1 canvas before the ratio is taken. Tailwind v4
-     * resolves these tokens to `oklab()` / `lab()`, whose components can be NEGATIVE — a naive
-     * numeric scrape silently drops the minus sign and reports a plausible but wrong ratio.
-     * Rasterising asks the browser for the sRGB bytes it actually paints, which is the thing
-     * SC 1.4.3 is about.
-     */
-    const contrast = await evaluate(`
-      (() => {
-        const chip = [...document.querySelectorAll('fieldset')[0].querySelectorAll('button[data-rating-level]')]
-          .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)});
-        const canvas = document.createElement('canvas');
-        canvas.width = 1;
-        canvas.height = 1;
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        const toSrgb = (value) => {
-          context.clearRect(0, 0, 1, 1);
-          context.fillStyle = '#000000';
-          context.fillStyle = value;
-          context.fillRect(0, 0, 1, 1);
-          const data = context.getImageData(0, 0, 1, 1).data;
-          return [data[0], data[1], data[2]];
-        };
-        const channel = (raw) => {
-          const c = raw / 255;
-          return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-        };
-        const luminance = ([r, g, b]) =>
-          0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-        const style = getComputedStyle(chip);
-        let background = style.backgroundColor;
-        let node = chip;
-        while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
-          node = node.parentElement;
-          if (!node) { background = 'rgb(255, 255, 255)'; break; }
-          background = getComputedStyle(node).backgroundColor;
-        }
-        const a = luminance(toSrgb(style.color));
-        const b = luminance(toSrgb(background));
-        const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-        return Math.round(ratio * 1000) / 1000;
-      })()
-    `);
-    assert(
-      typeof contrast === "number" && Number.isFinite(contrast),
-      `Contrast for the selected ${label} chip could not be measured (got ${JSON.stringify(contrast)})`,
-    );
+    const contrast = await ratingChipContrast(0, label);
     assert(
       contrast >= 4.5,
       `Selected ${label} chip label text measured ${contrast}:1 in the production DOM; SC 1.4.3 requires 4.5:1`,
@@ -673,13 +921,13 @@ try {
       element.dispatchEvent(new Event('input', { bubbles: true }));
     });
   `);
-  await clickExact("button", "Save observation & generate draft");
+  await clickExact("button", "Save & Generate");
   await waitUntil(
     "document.body.innerText.includes('Observation was not saved')",
     "deterministic save failure",
   );
   assert(await bodyIncludes("9 of 9 dimensions rated"), "Ratings were lost after retryable failure");
-  await clickExact("button", "Save observation & generate draft");
+  await clickExact("button", "Save & Generate");
   await waitUntil("document.body.innerText.includes('Observation saved')", "observation save success");
 
   await clickExact("a", "Continue to AI draft");
@@ -822,6 +1070,7 @@ try {
           "canonical /trainer/schedule route, /trainer compatibility redirect, month projection, inactive Add Agenda, day selection, view switch and empty state",
           "screen 06 roster: canonical Schedule links, present-only progress, carried-over focus, per-status actions, absent card exposing no assessment or report path, filter narrowing, inert lesson plan, and project-token convergence",
           "roster and all-nine validation",
+          "screen 07 grade student: one capture mode (no Quick/Full), the nine dimensions in ratified order, a behavioural anchor on every dimension, a distinct accessible name carrying the verbatim anchor on all 36 rating controls, the loaded Follow-up/Coach-Notes value, the REVIEW & APPROVE counters, the absent learner exposing no status and no path, per-status rail destinations, project-token convergence, and idle + selected AA contrast for all four rating states",
           "retryable observation save failure and recovery",
           "deterministic generation failure, bounded retry, and success",
           "four-panel review, wording edit, checklist reset, and approval",
@@ -831,6 +1080,7 @@ try {
         screenshots: [
           loginScreenshot,
           rosterScreenshot,
+          assessmentScreenshot,
           failureScreenshot,
           reviewScreenshot,
           approvalScreenshot,
