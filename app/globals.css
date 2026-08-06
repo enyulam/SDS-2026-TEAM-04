@@ -1,26 +1,328 @@
 @import "tailwindcss";
 
+/*
+ * Final MVP shared visual foundation.
+ *
+ * Established at FRONTEND RECONSTRUCTION F1 from patterns repeated across the twelve frozen
+ * core reference.png files. Visual authority (Amendment 005 A-045): frozen reference.png ->
+ * node-specific Figma context -> existing frontend implementation.
+ *
+ * The final MVP is a LIGHT design. The dark navy that remains here is a deliberate accent
+ * surface that appears in the frozen references (the roster "class in session" banner and
+ * the report submit panel) — it is not a theme, and nothing sets it as a page background.
+ *
+ * Typed mirror: lib/frontend/design/tokens.ts. Keep the two in step.
+ * No external font, icon CDN or remote stylesheet is referenced. Icons are inline SVG.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f5fa;
+  --foreground: #1b2b4b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Surfaces */
+  --color-canvas: #f4f5fa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f5f9;
+  --color-surface-subtle: #fafbfd;
+  --color-line: #edeff5;
+  --color-line-strong: #e3e6ef;
+
+  /* Ink */
+  --color-ink: #33405c;
+  --color-ink-strong: #1b2b4b;
+  --color-ink-muted: #8a93a8;
+  --color-ink-subtle: #a6aec0;
+
+  /* Deliberate dark accent surface — not a theme */
+  --color-accent-ink: #16233f;
+  --color-accent-ink-soft: #1e2d4d;
+
+  /*
+   * LEGACY COMPATIBILITY — retire per screen, do not use in new work.
+   *
+   * The delivered feature components use a `navy-*` scale from the pre-reference build,
+   * overwhelmingly as heading ink and in a few places as a dark surface carrying white
+   * text. F1 does not rewrite feature components, so rather than delete the scale and
+   * leave white text on a transparent surface, it is re-pointed onto the accent-ink
+   * family above. These three aliases are the ONLY dark values the foundation retains,
+   * no page background uses them, and each screen checkpoint removes its own uses.
+   */
+  --color-navy-950: #16233f;
+  --color-navy-900: #1e2d4d;
+  --color-navy-800: #33405c;
+
+  /* Brand */
+  --color-brand-50: #fdf2f8;
+  --color-brand-100: #fce7f3;
+  --color-brand-200: #fbcfe4;
+  --color-brand-500: #f472b6;
+  --color-brand-600: #ec4899;
+  --color-brand-700: #d6357a;
+  --color-brand-800: #b02a63;
+
+  /* Four-step competency rating ramp, ordinal position 1..4, low to high.
+     Amendment 006 A-049 governs the LABELS; this ramp is position -> colour only, so the
+     Frontend V3 checkpoint renames labels by key rename without re-mapping the ramp. */
+  --color-rating-1: #ef4b35;
+  --color-rating-1-soft: #fdecea;
+  --color-rating-1-on-soft: #b3301f;
+  --color-rating-2: #f5b721;
+  --color-rating-2-soft: #fef6e0;
+  --color-rating-2-on-soft: #8a6106;
+  --color-rating-3: #2fbdbd;
+  --color-rating-3-soft: #e4f6f6;
+  --color-rating-3-on-soft: #186f6f;
+  --color-rating-4: #54bc77;
+  --color-rating-4-soft: #e9f6ed;
+  --color-rating-4-on-soft: #2c6b43;
+
+  /* Semantic status tints. The `soft` values come from the frozen references; the `on`
+     text values were deepened at F1 so every pair clears WCAG 2.2 AA 4.5:1 for
+     normal-size text. Hue preserved, luminance moved. */
+  --color-neutral-soft: #f1f3f8;
+  --color-neutral-on: #5f6880;
+  --color-info-soft: #e2f5f5;
+  --color-info-on: #166b6b;
+  --color-success-soft: #e4f6ea;
+  --color-success-on: #2a7248;
+  --color-warning-soft: #fef3d7;
+  --color-warning-on: #8a6106;
+  --color-danger-soft: #fdecea;
+  --color-danger-on: #b3301f;
+
+  /* Typography — local stacks only, no runtime font fetch */
+  --font-sans: "Segoe UI Variable Display", "Segoe UI", Aptos, system-ui,
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+
+  --text-micro: 0.6875rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.875rem;
+  --text-card-title: 1.0625rem;
+  --text-section-title: 1.25rem;
+  --text-page-title: 1.875rem;
+
+  /* Radii */
+  --radius-field: 0.625rem;
+  --radius-nav: 0.75rem;
+  --radius-card: 1rem;
+  --radius-panel: 1.25rem;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.05);
+  --shadow-raised: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-overlay: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  /* Layout */
+  --spacing-sidebar: 15.625rem;
+  --container-content-max: 96rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: #1b2b4b;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/*
+ * Form-control normalization — MUST stay inside `@layer base`.
+ *
+ * Browsers do not inherit font or colour into form controls, so this reset is deliberate
+ * and is kept. What was wrong was its cascade position, not its content: an UNLAYERED
+ * rule outranks every rule in every `@layer`, and `@import "tailwindcss"` emits its
+ * utilities into `@layer utilities` (layer order `theme, base, components, utilities`).
+ * Unlayered `font: inherit; color: inherit` therefore beat `text-white`, `font-bold` and
+ * every other typography/colour utility on every button, input, textarea and select in the
+ * application — the utility was generated, matched, and silently lost the cascade, so the
+ * control rendered its ancestor's colour and weight instead. On the primary action that
+ * produced white-declared label text rendering as `#1b2b4b` on `bg-brand-700` `#d6357a`
+ * = 3.113:1, a live WCAG 2.2 AA failure (F-01b).
+ *
+ * Declaring it in `@layer base` puts it below `utilities`, so the normalization still
+ * applies to any control that sets no utility, and any control that does set one wins.
+ * This is also exactly where Tailwind's own preflight declares the same normalization
+ * (`node_modules/tailwindcss/preflight.css`, `@layer base`), so the two now agree rather
+ * than fight. `@layer base { … }` appends to the existing layer; it does not redefine the
+ * layer order, and no token VALUE is changed here.
+ */
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+ * Focus — WCAG 2.2 AA oriented. Always visible, never removed, never colour-only.
+ * ------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 3px solid #d6357a;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+::selection {
+  background: #fce7f3;
+  color: #1b2b4b;
+}
+
+/* ---------------------------------------------------------------------------
+ * Shared surface primitives
+ * ------------------------------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.panel {
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.page-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Form fields — light fill, hairline border, pink focus ring
+ * ------------------------------------------------------------------------- */
+
+.form-field {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+  background: var(--color-surface-muted);
+  color: #1b2b4b;
+  padding: 0.75rem 0.875rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.form-field::placeholder {
+  color: #a6aec0;
+}
+
+.form-field:hover:not(:disabled) {
+  background: #eef0f6;
+}
+
+.form-field:focus {
+  background: #ffffff;
+  border-color: var(--color-brand-600);
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.16);
+  outline: none;
+}
+
+.form-field[aria-invalid="true"] {
+  border-color: #b3301f;
+  background: var(--color-danger-soft);
+}
+
+.form-field[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(179, 48, 31, 0.18);
+}
+
+.form-field:disabled {
+  cursor: not-allowed;
+  background: #eef0f6;
+  color: #a6aec0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Loading presentation
+ * ------------------------------------------------------------------------- */
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #eceef5 25%, #f7f8fc 50%, #eceef5 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.spinner-ring {
+  border-radius: 9999px;
+  border: 2px solid rgba(236, 72, 153, 0.25);
+  border-top-color: #ec4899;
+  animation: spinner 750ms linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Forced-colours support — never rely on colour alone
+ * ------------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  .card,
+  .panel,
+  .form-field {
+    border: 1px solid CanvasText;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
 }
