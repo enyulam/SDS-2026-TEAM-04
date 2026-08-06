@@ -30,10 +30,16 @@ const ROOT = process.cwd()
 const SUITE = join(ROOT, 'scripts', 'tests', 'step-7i', 'lifecycle-canonical.sql')
 const VERIFIER = join(ROOT, 'scripts', 'fixtures', 'verify-local-fixtures.sql')
 
-// The accepted Step 7F canonical fixture checksum. Step 7I must leave it
-// BYTE-IDENTICAL: the migration adds no fixture row, and every test is a
-// rolled-back decoy.
-const EXPECTED_CHECKSUM = 'd6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517'
+// The accepted POST-AMENDMENT-006 canonical fixture checksum. Step 7I must
+// leave it BYTE-IDENTICAL: the migration adds no fixture row, and every test
+// is a rolled-back decoy.
+//
+// The pin moved once, from the Step 7F value
+// d6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517, because the
+// Amendment 006 vocabulary rename rewrote three observation_ratings labels that
+// fall inside the canonical region. The rename is label text only: the canonical
+// row count is UNCHANGED at 28, and no fixture row was added or removed.
+const EXPECTED_CHECKSUM = '6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576'
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 

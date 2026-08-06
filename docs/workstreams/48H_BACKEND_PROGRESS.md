@@ -290,7 +290,7 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 
     entering the fixture passwords at the **no-echo prompt**. Then re-run the six blocked gates listed above.
   - **Consequence, stated without softening.** **Backend V2's database-dependent verification is INCOMPLETE.** **No readiness claim may be made for Backend V2.** It must not be treated as accepted, integration-ready or physical-test-ready until the operator has reloaded the fixture and the six blocked gates have been run and reported.
-- Carried forward unchanged: **CP-5 / N-4** (management bootstrap), **U-25** (eight blocked Figma families — none invented), **U-29**, **U-7I-25** (enum label rename irreversible in the forward-only migration set), **U-ASM-1 / U-ASM-2**, and the frontend `ManagementQueueRowDto.status` one-value widening noted at Round B2.1. **Frontend V3 remains pending and separately authorized** — the frontend still carries the superseded labels.
+- Carried forward unchanged: **CP-5 / N-4** (management bootstrap), **U-25** (eight blocked Figma families — none invented), **U-29**, **U-7I-25** (enum label rename irreversible in the forward-only migration set), **U-ASM-1 / U-ASM-2**, and the frontend `ManagementQueueRowDto.status` one-value widening noted at Round B2.1. **Frontend V3 has since LANDED** (corrected in place on 2026-08-06; the earlier "remains pending and separately authorized — the frontend still carries the superseded labels" reading is no longer true). Frontend V3 landed at commit `5dcbeeb6c45e97506cf2404e37df4e0d00b9dff0` on `feat/48h-frontend` and is **merged into `main` at `68ba4976ba9c5f19e54274a39877c77a854ca2bd`**. The frontend therefore now carries the Amendment 006 vocabulary (`beginning` / `developing` / `mastering` / `mastered`), not the superseded labels.
 
 #### Contract deviations
 
@@ -300,3 +300,54 @@ Use exactly these six values. Do not invent a seventh, and do not qualify one wi
 #### Next action
 
 **Operator:** reload the fixture as described in B-V2-BLOCK-1, then re-run the six blocked gates. Only after they report clean may Backend V2 be reviewed for acceptance. **Frontend V3 stays separately authorized.**
+
+### 2026-08-06 — Run C1 (canonical checksum reconciliation; Backend V2 database-dependent gate re-execution)
+
+**Scope.** One bounded change: reconcile the stale canonical fixture checksum pin left behind by the Amendment 006 vocabulary rename. No migration was created, no schema object was touched, no report lifecycle transition, status, policy, table, enum or column was changed, and the resolver work was deliberately left untouched for a later agent.
+
+#### Blocker closed
+
+**B-V2-BLOCK-1 is CLOSED.** The operator reloaded the fixture from an interactive local terminal. The fixture census was verified before this round began and is **not** re-derived here: `auth.users` = 3, `public.accounts` = 3, **25** ratified domain rows, **28** canonical rows. No credential was requested, accepted, printed, logged or persisted at any point in this round, and `npm run fixtures:local` was **not** run from the agent session.
+
+#### Backend V2 database-dependent gates — Run C1 results
+
+All gates were executed against the reloaded fixture database.
+
+| Gate | Exit code |
+| --- | --- |
+| `node scripts/tests/step-7i/static-scan.mjs` | **0** |
+| `node scripts/tests/assessment/asm-static.mjs` | **0** |
+| `node scripts/tests/correction-tracking/ct-static.mjs` | **0** |
+| `node scripts/tests/step-7i/verify-fresh-apply.mjs` | **0** |
+| `node scripts/tests/step-7i/run-canonical.mjs` | **1**, then **0** after the fix in this entry |
+| `node scripts/tests/assessment/run-assessment.mjs` | **0** |
+| `node scripts/tests/correction-tracking/run-correction-tracking.mjs` | **0** |
+| `node scripts/tests/step-7i/run-concurrency.mjs` | **0** |
+| `node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/run-integration.mjs` | **0** — Parts **1 + 2 + 3** all executed |
+| `npx tsc --noEmit` | **0** |
+| `npm run lint` | **0** |
+
+The single pre-fix failure was the checksum assertion and **nothing else**: every other proof in `run-canonical.mjs` — the full static scan, the 51-notice canonical lifecycle suite run twice back-to-back for T7I-31 repeatability, and both reconciled-verifier runs — passed on the failing run as well.
+
+#### The reconciled checksum
+
+- **Stale pin (Step 7F era):** `d6a314b40bb5eb1bc3169097e2a9cb03858791498ca5137a43050cee36b87517`
+- **Reconciled pin (post-Amendment 006):** `6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576`
+
+The new value was **derived from a successful execution of the reconciled verifier**, not precomputed from source. `run-canonical.mjs` now reports `28 rows, 6bdff280…c576, reproduced identically on two runs`.
+
+**Why it moved.** The Amendment 006 vocabulary rename rewrote **three `observation_ratings` labels that fall inside the canonical region**. The change is **label text only**: the canonical **row count is unchanged at 28**, and no fixture row was added or removed. The move is therefore expected and benign, and the pin — not the fixture — was the stale artefact.
+
+**What was edited.** Only the `EXPECTED_CHECKSUM` constant in `scripts/tests/step-7i/run-canonical.mjs` and its immediately adjacent explanatory comment, which now states the post-Amendment-006 provenance, the superseded value, and the label-only/28-row reasoning. No other line of that file and no other test file was touched.
+
+#### Canonical database end state
+
+The canonical database ended the round **pristine**: `report_versions` = **0** and `report_version_ratings` = **0**. Every lifecycle test in the canonical suite is a rolled-back decoy, so no committed report row survives it; the four R(C) coordinated proofs continue to run only on the disposable database via `run-concurrency.mjs`.
+
+#### Consequence
+
+With B-V2-BLOCK-1 closed and all eleven gates above green, **Backend V2's database-dependent verification is COMPLETE**. The "verification is INCOMPLETE / no readiness claim may be made" statement recorded under B-V2-BLOCK-1 above is a historical record of that blocker's open period and is superseded by this entry.
+
+#### Contract deviations
+
+**None.** Two files were changed: `scripts/tests/step-7i/run-canonical.mjs` and this log. No credential-bearing output was rendered. No hosted Supabase endpoint was contacted. No migration was created or edited, and `server/db/database.types.ts` was not touched.
