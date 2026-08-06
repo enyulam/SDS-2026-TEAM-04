@@ -76,15 +76,34 @@ The disposable runner enforces that structurally:
 
 The evidence a future PASS must carry, for the same reason, is differential rather than existential: two generations from two materially different rating profiles must produce **different** persisted panels, neither may equal any pinned deterministic-fixture panel string, and the report must have reached `draft_ready` through the real `request_draft` path — a path that cancels the draft rather than storing an empty or ungrounded response. A fixture, a cache and a hard-coded string each fail at least one of those independently.
 
-## 5. Open blocker — recorded, not worked around
+## 5. The former app-target blocker — resolved by operator ruling R-C2-5
 
-**The disposable runner cannot currently serve the application against the disposable stack, and therefore cannot decide the gates that need it.**
-
-Two binding constraints conflict:
+Until R-C2-5 the disposable runner could not serve the application against the disposable stack. Two binding constraints conflicted:
 
 - R-C2-2's isolation requirement forbids the disposable API port from being `54321`;
-- `lib/supabase/public-config.ts` classifies a loopback `NEXT_PUBLIC_SUPABASE_URL` as a valid local target **only** on port `54321`, failing `E_PUB_URL_LOCAL_PORT` otherwise.
+- `lib/supabase/public-config.ts` classified a loopback `NEXT_PUBLIC_SUPABASE_URL` as a valid local target **only** on port `54321`, failing `E_PUB_URL_LOCAL_PORT` otherwise.
 
-Both cannot hold at once. Widening that pin is a change to a committed product control and is an **operator decision**, not a runner's, so the disposable runner detects the conflict, states it once, and records every affected gate `NOT-RUN` with that exact reason. It does not soften the check, does not choose a non-loopback hostname, and does not reuse the canonical port.
+Widening that pin was an operator decision, not a runner's. **Operator ruling R-C2-5 made it**, and it is deliberately narrow: there are now **exactly two** Supabase runtime profiles and no others.
 
-Everything that does **not** depend on the served application — provisioning, migration replay, the separate synthetic identities, real three-role authentication against the disposable Auth service, the disposable audit chain, the canonical before/after protection, teardown and hygiene — is unaffected and is decided normally.
+| Profile | Project | Local API port |
+|---|---|---|
+| `default` (the value an **absent** profile variable resolves to) | `best-coach-mvp` | `54321` |
+| `f17-disposable` | `bc-f17-disposable` | `55421` |
+
+The profile is read from `process.env.BEST_COACH_SUPABASE_RUNTIME_PROFILE` inside `lib/supabase/public-config.ts` — the one place the active target is already classified. It is **not** a `NEXT_PUBLIC_` variable, which is the only thing that would put it into a browser bundle, so it is structurally unreadable and unsettable from the browser and resolves to `default` in any client context. It is a **server-side child-process environment input only**: not a query parameter, cookie, header, request body, form, `localStorage`, `sessionStorage` or UI control.
+
+Each of the ruling's fail-closed cases is a real coded rejection, tested one case per assertion by `scripts/tests/config/run-runtime-profile.mjs` (`npm run test:runtime-profile`):
+
+| Case | Code |
+|---|---|
+| a disposable URL without the disposable profile active | `E_PUB_DISPOSABLE_PORT_UNAUTHORIZED` |
+| a canonical URL while the disposable profile is active | `E_PUB_PROFILE_TARGET_CANONICAL` |
+| any local port other than `54321` or `55421` | `E_PUB_URL_LOCAL_PORT` |
+| a malformed or unknown profile value (including blank and wrong-case) | `E_PUB_PROFILE_UNKNOWN` |
+| any non-loopback hostname while the disposable profile is active | `E_PUB_PROFILE_TARGET_NOT_LOCAL` |
+| a hosted `https://*.supabase.co` target while the disposable profile is active | `E_PUB_PROFILE_TARGET_NOT_LOCAL` |
+| a linked-project fallback (hosted and non-loopback by construction) while the disposable profile is active | `E_PUB_PROFILE_TARGET_NOT_LOCAL` |
+
+The normal configuration is **not** weakened: with the profile variable absent, a loopback target is still accepted on `54321` and only `54321`, and a hosted `https://*.supabase.co` target is still accepted exactly as before.
+
+**The interactive disposable runner `run-f17-disposable.mjs` is unchanged by R-C2-5.** It still keeps its TTY-only, no-echo, operator-typed password prompts, still records the app-dependent gates `NOT-RUN`, and still serves no application. Serving the application against the disposable stack belongs to a separate autonomous script; this ruling authorizes the configuration that makes it possible, and changes no runner.
