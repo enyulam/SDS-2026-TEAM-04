@@ -163,7 +163,8 @@ BEGIN
   -- VALUE statements, changes no function, table or enum count.)
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
   -- (Reconciled again at Round C2 Phase C2-A: Round C2 Phase C2-A adds the atomic complete-save composer (R-C2-1): one migration file and one function, no table and no enum.)
-  IF v_n <> 10 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 10', v_n; END IF;
+  -- (Reconciled again at Run C3-A Phase 1: the single-entry-point closure adds one migration file that contains exactly one REVOKE -- no function, no table, no enum, and not one DML statement.)
+  IF v_n <> 11 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 11', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
   IF v_n <> 33 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 33', v_n; END IF;
@@ -198,7 +199,23 @@ BEGIN
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 25 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 25', v_n; END IF;
+  -- (Reconciled at Run C3-A Phase 1: assessment_save_observation loses its
+  --  authenticated EXECUTE, because keeping it left a direct PostgREST route
+  --  by which a COMPLETE nine-rating assessment could commit with no report
+  --  shell. The census falls 25 -> 24 and moves DOWNWARD only.)
+  IF v_n <> 24 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 24', v_n; END IF;
+  SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
+   WHERE ns.nspname = 'public'
+     AND p.proname = 'assessment_save_observation'
+     AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
+  IF v_n <> 0 THEN RAISE EXCEPTION 'T-ASM-42: assessment_save_observation is still client-reachable'; END IF;
+  SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
+   WHERE ns.nspname = 'public'
+     AND p.proname = 'assessment_get_trainer_observation'
+     AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
+  IF v_n <> 1 THEN RAISE EXCEPTION 'T-ASM-42: the governed trainer read lost its authenticated EXECUTE'; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'

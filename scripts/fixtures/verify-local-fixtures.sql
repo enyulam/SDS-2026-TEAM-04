@@ -419,18 +419,19 @@ BEGIN
   -- adds the competency-vocabulary rename (A-053), moving it 7 -> 8; and
   -- Round C2 adds the report-context resolver (R-22), moving it 8 -> 9; and
   -- Round C2 Phase C2-A adds the atomic complete-save composer (R-C2-1),
-  -- moving it 9 -> 10.
+  -- moving it 9 -> 10; and Run C3-A Phase 1 adds the single-entry-point
+  -- closure (one REVOKE, no object), moving it 10 -> 11.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 10 applied migrations, found %', v_n; END IF;
+  IF v_n <> 11 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 11 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
                      '20260805090000', '20260805090500', '20260806090000',
                      '20260806103000', '20260806160000', '20260806190000',
-                     '20260806220000');
-  IF v_n <> 10 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000 and 20260806220000';
+                     '20260806220000', '20260807090000');
+  IF v_n <> 11 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000 and 20260807090000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -542,7 +543,17 @@ BEGIN
   -- A35 (assessment, CP-2/CP-4): the two governed assessment functions.
   -- Both postgres-owned SECURITY DEFINER plpgsql with a pinned search_path
   -- and non-STRICT; the save VOLATILE, the read STABLE (so the engine itself
-  -- forbids it writing); authenticated EXECUTE on both and nothing else.
+  -- forbids it writing); and NO client role but `authenticated` reaches
+  -- either, with no PUBLIC entry in the ACL.
+  --
+  -- (Reconciled at Run C3-A Phase 1. `assessment_save_observation` no longer
+  --  holds `authenticated` EXECUTE: keeping it made the R-C2-1 atomicity a
+  --  property of ONE ROUTE rather than of the database, because any
+  --  authenticated caller could commit a COMPLETE nine-rating assessment
+  --  through PostgREST with no report shell. The client entry point for a
+  --  complete save is now the composer alone. The assertion is SPLIT rather
+  --  than relaxed: the READ still requires the grant, the SAVE now requires
+  --  its ABSENCE, and both still require zero reach for every other role.)
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
@@ -557,13 +568,44 @@ BEGIN
      AND p.proconfig::text LIKE '%search_path=%'
      AND ((p.proname = 'assessment_save_observation'         AND p.provolatile = 'v')
        OR (p.proname = 'assessment_get_trainer_observation'  AND p.provolatile = 's'))
-     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND ((p.proname = 'assessment_get_trainer_observation'
+           AND has_function_privilege('authenticated', p.oid, 'EXECUTE'))
+       OR (p.proname = 'assessment_save_observation'
+           AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')))
      AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
      AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
      AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
      AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
   IF v_n <> 2 THEN
     RAISE EXCEPTION 'FAIL A35: expected the 2 assessment functions to satisfy their full ratified contract, matched %', v_n;
+  END IF;
+
+  -- A35 (Run C3-A Phase 1): THE CLOSURE, stated as a canonical-verifier
+  -- property rather than only as a migration assertion. Of every function a
+  -- client may execute, EXACTLY ONE reaches the observation write, and it
+  -- is the composer -- whose body also walks T0 and T1. So a complete
+  -- nine-rating observation cannot commit through any client-reachable
+  -- object without a report shell committing in the same transaction.
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND p.prosrc LIKE '%assessment_save_observation%';
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: % client-reachable function(s) reach the observation write, expected exactly 1 (the R-C2-1 composer)', v_n;
+  END IF;
+  SELECT count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND p.proname = 'assessment_save_complete_and_open_report'
+     AND p.prosrc LIKE '%public.assessment_save_observation(%'
+     AND p.prosrc LIKE '%public.report_create(%'
+     AND p.prosrc LIKE '%public.report_mark_observation_saved(%';
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL A35: the single client-reachable observation-write route is not the composer, or no longer opens the report shell in the same body';
   END IF;
 
   -- A35 (Step 7I): all eighteen new functions exist, exactly once each, are

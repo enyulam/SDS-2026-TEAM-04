@@ -230,14 +230,16 @@ BEGIN
   -- migration is the seventh. Reconciled again at Backend V2: the
   -- competency-vocabulary rename (Amendment 006 A-053) is the eighth.
   -- Reconciled again at Round C2 Phase C2-A: the R-C2-1 atomic complete-save
-  -- composer is the tenth ledger row.
+  -- composer is the tenth ledger row. Reconciled again at Run C3-A Phase 1:
+  -- the single-entry-point closure -- one REVOKE and no object at all -- is
+  -- the eleventh.
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 10', v_n; END IF;
+  IF v_n <> 11 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 11', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000');
-  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL T7I-73: the ten applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000');
+  IF v_n <> 11 THEN RAISE EXCEPTION 'FAIL T7I-73: the eleven applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -384,7 +386,32 @@ BEGIN
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 25 (6 + 14 + the 2 B2 assessment RPCs + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
+  -- (Reconciled at Run C3-A Phase 1: `assessment_save_observation` loses its
+  --  authenticated EXECUTE -- keeping it left a direct PostgREST route by
+  --  which a COMPLETE nine-rating assessment could commit with no report
+  --  shell -- so only ONE of the two B2 assessment RPCs is now
+  --  client-callable and the census falls 25 -> 24.)
+  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 24 (6 + 14 + the 1 remaining client-callable B2 assessment RPC + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
+
+  -- Run C3-A Phase 1: the closure itself, on the canonical database. The
+  -- observation write is reachable by NO client role, and exactly one
+  -- client-callable function reaches it -- the composer, which opens the
+  -- report shell in the same transaction.
+  SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname='assessment_save_observation'
+     AND NOT pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND NOT pg_catalog.has_function_privilege('anon', p.oid, 'EXECUTE')
+     AND NOT pg_catalog.has_function_privilege('service_role', p.oid, 'EXECUTE')
+     AND NOT pg_catalog.has_function_privilege('authenticator', p.oid, 'EXECUTE');
+  IF v_n <> 1 THEN RAISE EXCEPTION 'FAIL T7I-4: assessment_save_observation is still reachable by a client role'; END IF;
+  SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public'
+     AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE')
+     AND p.prosrc LIKE '%assessment_save_observation%'
+     AND p.proname = 'assessment_save_complete_and_open_report';
+  IF v_n <> 1 THEN RAISE EXCEPTION 'FAIL T7I-4: the composer is no longer the single client-reachable route to the observation write'; END IF;
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace

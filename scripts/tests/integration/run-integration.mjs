@@ -425,7 +425,22 @@ async function partRealAuth() {
   // A7 -- wrong-role WRITES are denied without residue (BC101/BC001 are
   // raised before any write, so nothing commits and nothing needs cleanup).
   {
-    const parentWrite = await clients.parent.rpc("assessment_save_observation", {
+    // (Retargeted at Run C3-A Phase 1, and STRENGTHENED rather than
+    // narrowed. `assessment_save_observation` no longer holds
+    // `authenticated` EXECUTE -- keeping it left a direct PostgREST route
+    // by which any authenticated caller could commit a COMPLETE nine-rating
+    // assessment with no report shell. The wrong-role write assertion moves
+    // to the composer, which IS the client entry point and still raises the
+    // authored BC101; and the old RPC's UNREACHABILITY is asserted as a
+    // second, additional leg rather than dropped.)
+    const parentWrite = await clients.parent.rpc("assessment_save_complete_and_open_report", {
+      p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT,
+      p_expected_observation_id: null, p_expected_lock_version: null,
+      p_strength_chips: [], p_focus_chips: [], p_observation_notes: null,
+      p_follow_up_notes: null, p_term_evidence_notes: null,
+      p_ratings: [],
+    });
+    const trainerLegacy = await clients.trainer.rpc("assessment_save_observation", {
       p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT,
       p_expected_observation_id: null, p_expected_lock_version: null,
       p_strength_chips: [], p_focus_chips: [], p_observation_notes: null,
@@ -437,8 +452,11 @@ async function partRealAuth() {
       p_observation_id: "c9000000-0000-4000-8000-000000000001",
     });
     if (!parentWrite.error || parentWrite.error.code !== "BC101") fail("INT-A7", "the parent write was not denied BC101");
+    else if (!trainerLegacy.error || trainerLegacy.error.code !== "42501") {
+      fail("INT-A7", `the old assessment_save_observation RPC is still reachable over PostgREST (${trainerLegacy.error ? trainerLegacy.error.code : "it succeeded"})`);
+    }
     else if (!managementWrite.error || managementWrite.error.code !== "BC001") fail("INT-A7", "the management report_create was not denied BC001");
-    else pass("INT-A7", "wrong-role governed writes are denied by the authored role predicates before anything is written");
+    else pass("INT-A7", "wrong-role governed writes are denied by the authored role predicates before anything is written, and the pre-C3-A direct observation-write RPC is no longer reachable over PostgREST at all (42501)");
   }
 
   // A8 -- R-22: the governed report-context resolver is NON-DISCLOSING about
@@ -787,7 +805,13 @@ SELECT count(*) FROM public.report_version_ratings a
   if (parity !== "9") fail("INT-L5", `only ${parity}/9 snapshots match the trainer-approved source after the wording edit`);
   // p_ratings is passed as an object-array so the psql channel serializes it
   // as jsonb; the role gate (step 4) fires long before ratings validation.
-  const mgmtAssess = await managementDb.rpc("assessment_save_observation", {
+  // (Retargeted at Run C3-A Phase 1 to the composer -- the client entry
+  // point for a complete save. This channel is a psql-backed RpcCaller
+  // running as the OWNER, so it is not constrained by the client ACL at
+  // all; what it proves is the AUTHORED role predicate, unchanged, and the
+  // ACL closure is proven separately by INT-A7 over the real PostgREST
+  // channel and exhaustively by scripts/tests/c3/run-c3-bypass.mjs.)
+  const mgmtAssess = await managementDb.rpc("assessment_save_complete_and_open_report", {
     p_class_session_id: SESSION, p_student_id: STUDENT, p_expected_observation_id: null,
     p_expected_lock_version: null, p_strength_chips: [], p_focus_chips: [],
     p_observation_notes: null, p_follow_up_notes: null, p_term_evidence_notes: null,

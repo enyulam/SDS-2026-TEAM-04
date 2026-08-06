@@ -87,7 +87,10 @@ export const CANONICAL_CONTAINERS = [
 export const EXPECTED_CANONICAL_CHECKSUM =
   '6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576'
 export const EXPECTED_CANONICAL_ROWS = 28
-export const EXPECTED_CANONICAL_MIGRATIONS = 10
+// (Moved 10 -> 11 at Run C3-A Phase 1. The eleventh committed migration is
+// the single-entry-point closure: one REVOKE and no object at all, so the
+// fixture checksum and the 28-row canonical region above are UNMOVED.)
+export const EXPECTED_CANONICAL_MIGRATIONS = 11
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 

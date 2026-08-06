@@ -143,8 +143,12 @@ BEGIN
    WHERE n.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
   -- (Reconciled at Round C2 Phase C2-A: the atomic complete-save composer
-  --  is the twenty-fifth authenticated-callable function.)
-  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 25', v_n; END IF;
+  --  is the twenty-fifth authenticated-callable function. Reconciled again
+  --  at Run C3-A Phase 1: `assessment_save_observation` LOSES its
+  --  authenticated EXECUTE, so the composer becomes the ONLY client entry
+  --  point for a complete assessment save and the census falls 25 -> 24.
+  --  This census moves DOWNWARD only; a widening still fails here.)
+  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 24', v_n; END IF;
 
   -- No table privilege and no policy was added to reach the correction row.
   SELECT pg_catalog.count(*) INTO v_n

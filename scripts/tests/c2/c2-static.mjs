@@ -103,11 +103,20 @@ function bodyOf(src, startNeedle, endNeedle) {
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  const newest = all[all.length - 1]
-  if (newest !== MIG_NAME) {
-    fail('T-C2-S2', `the newest migration is ${newest}, not the C2-A composer`)
+  // (Reconciled at Run C3-A Phase 1. The C2-A composer is no longer the
+  // LAST migration file -- the single-entry-point closure sorts after it --
+  // so this leg is anchored to the composer's own NAME rather than to
+  // "whatever sorts last". That is a strictly stronger anchor: the file it
+  // scans can no longer change identity as the ledger grows. Its position
+  // is still asserted, and the ledger length is pinned by T-C3-S2,
+  // T-CT-S4, T7I-73 and verify-fresh-apply.)
+  const index = all.indexOf(MIG_NAME)
+  if (index === -1) {
+    fail('T-C2-S2', `the C2-A composer migration ${MIG_NAME} is missing from the tree`)
+  } else if (index !== all.length - 2) {
+    fail('T-C2-S2', `the C2-A composer is at ledger position ${index + 1} of ${all.length}; expected the second-to-last file`)
   } else {
-    const raw = read(join(MIG_DIR, newest))
+    const raw = read(join(MIG_DIR, MIG_NAME))
     const body = stripSql(raw)
     // Every DDL/DML check is anchored to a STATEMENT START. The migration's
     // own end-of-run RAISE NOTICE legitimately names the constructs it does
