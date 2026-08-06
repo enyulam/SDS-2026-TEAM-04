@@ -796,6 +796,65 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     return { outcome: "success", data: rows };
   }
 
+  /**
+   * C2C-004 — the deterministic mirror of the governed
+   * `report_list_management_submitted` boundary.
+   *
+   * The two conditions below are the fixture's statement of the SAME rule the
+   * SQL WHERE clause enforces: the report must have COMMITTED at `submitted`
+   * AND must carry a canonical submitted version. A report at any earlier
+   * status is not a row of this result at all — it is not filtered out of a
+   * rendered list — so no preapproval Trainer draft content can reach the
+   * Approved queue in fixture mode either. The row carries publication
+   * metadata only: no panel, no rating, no version id and neither hash.
+   */
+  async listManagementSubmittedReports(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  > {
+    await delay(240);
+    const rows: ManagementQueueRowDto[] = [];
+    for (const report of Object.values(this.readState().reports)) {
+      if (report.status !== "submitted" || !report.latestSubmitted) continue;
+      const match = findStudent(report.sessionId, report.studentId);
+      if (!match) continue;
+      rows.push({
+        reportId: report.reportId,
+        sessionId: report.sessionId,
+        studentId: report.studentId,
+        studentDisplayName: match.student.displayName,
+        sessionDate: match.session.date,
+        status: "submitted",
+        submittedAt: report.latestSubmitted.submittedAt,
+      });
+    }
+    rows.sort((a, b) => (a.submittedAt ?? "") < (b.submittedAt ?? "") ? 1 : -1);
+    return { outcome: "success", data: rows };
+  }
+
+  /**
+   * C2C-004 — the canonical SUBMITTED report an Approved row opens. It
+   * resolves ONLY a report that has committed at `submitted`; a
+   * `trainer_approved` candidate is the final-review surface's read and is
+   * refused here with the same non-disclosing outcome a missing report gets.
+   */
+  async getManagementSubmittedReport(
+    reportId: string,
+  ): Promise<UiActionResult<CanonicalReportDto>> {
+    await delay(240);
+    if (reportId === "denied") return { outcome: "unauthorized" };
+    const report = this.readState().reports[reportId];
+    if (!report || report.status !== "submitted" || !report.latestSubmitted) {
+      return { outcome: "unavailable" };
+    }
+    return {
+      outcome: "success",
+      data: {
+        panels: clone(report.latestSubmitted.panels),
+        submittedAt: report.latestSubmitted.submittedAt,
+      },
+    };
+  }
+
   async getManagementReview(
     reportId: string,
   ): Promise<UiActionResult<ManagementReviewDto>> {

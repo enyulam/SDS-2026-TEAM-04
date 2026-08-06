@@ -15,6 +15,7 @@ import { asFailure, type ResourceState } from "@/features/trainer/resource-state
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 import {
   DIMENSION_CODES,
+  type CanonicalReportDto,
   type CorrectionRequestDto,
   type DimensionCode,
   type ManagementReviewDto,
@@ -151,6 +152,30 @@ const PANEL_PRESENTATION: Readonly<
 
 type ActionFailure = Exclude<UiActionResult<unknown>, { outcome: "success" }>;
 
+/**
+ * C2C-004 — this ONE route serves BOTH of the exactly two things A-038 permits
+ * Management to read, and nothing else:
+ *
+ *   kind "candidate"  the final-review candidate while the report is
+ *                     `trainer_approved`. Mutating: wording edit, return to
+ *                     trainer, Approve & Submit.
+ *   kind "published"  the canonical SUBMITTED version. READ ONLY — no edit
+ *                     link, no return control, no Approve & Submit, and no
+ *                     concurrency value to carry, because there is no
+ *                     operation to perform on a published report.
+ *
+ * Neither is a pre-approval draft, and no third kind exists. The two are
+ * resolved by two DIFFERENT governed reads and are never conflated: the
+ * published read refuses a `trainer_approved` report and the candidate read
+ * refuses a `submitted` one, each with the same non-disclosing outcome a
+ * missing report gets. No second route is created (R-C2-3).
+ */
+type PublishedView = {
+  readonly report: CanonicalReportDto;
+  readonly studentDisplayName: string | null;
+  readonly sessionDate: string | null;
+};
+
 type ReviewView = {
   readonly report: ManagementReviewDto;
   /**
@@ -168,6 +193,7 @@ export function ManagementReportReview() {
   const port = usePhysicalTestPort();
   const boundaryNoteId = useId();
   const [resource, setResource] = useState<ResourceState<ReviewView>>({ kind: "loading" });
+  const [published, setPublished] = useState<PublishedView | null>(null);
   const [dialog, setDialog] = useState<"return" | "submit" | null>(null);
   const [issueScope, setIssueScope] = useState<CorrectionRequestDto["issueScope"]>(
     "derived_assessment_fact",
@@ -183,16 +209,44 @@ export function ManagementReportReview() {
     void Promise.all([
       port.getManagementReview(params.reportId),
       port.listManagementPendingReviews(),
-    ]).then(([reviewResult, queueResult]) => {
+      port.listManagementSubmittedReports(),
+    ]).then(async ([reviewResult, queueResult, submittedRows]) => {
       if (!active) return;
-      if (reviewResult.outcome !== "success") {
-        setResource({ kind: "failed", result: asFailure(reviewResult) });
-        return;
-      }
       const row =
         queueResult.outcome === "success"
           ? (queueResult.data.find((item) => item.reportId === params.reportId) ?? null)
           : null;
+      if (reviewResult.outcome !== "success") {
+        /*
+         * C2C-004. The candidate read returns the SAME non-disclosing
+         * `unavailable` for "no such report", "not permitted" and "already
+         * published", so a miss here is not yet a denial — the published read
+         * below is the second of Management's two lawful reads. Any other
+         * outcome (unauthenticated, a transport fault) is reported as-is
+         * rather than retried against a different boundary.
+         */
+        if (reviewResult.outcome !== "unavailable") {
+          setResource({ kind: "failed", result: asFailure(reviewResult) });
+          return;
+        }
+        const publishedResult = await port.getManagementSubmittedReport(params.reportId);
+        if (!active) return;
+        if (publishedResult.outcome !== "success") {
+          setResource({ kind: "failed", result: asFailure(reviewResult) });
+          return;
+        }
+        const identity =
+          submittedRows.outcome === "success"
+            ? (submittedRows.data.find((item) => item.reportId === params.reportId) ?? null)
+            : null;
+        setPublished({
+          report: publishedResult.data,
+          studentDisplayName: identity?.studentDisplayName ?? null,
+          sessionDate: identity?.sessionDate ?? null,
+        });
+        setResource({ kind: "failed", result: { outcome: "unavailable" } });
+        return;
+      }
       setResource({
         kind: "ready",
         data: {
@@ -211,6 +265,7 @@ export function ManagementReportReview() {
     return <LoadingSkeleton label="Loading final review" rows={5} />;
   }
   if (resource.kind === "failed") {
+    if (published) return <PublishedReport view={published} />;
     return (
       <StatePanel
         result={resource.result}
@@ -690,4 +745,91 @@ function formatDate(date: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${date}T00:00:00Z`));
+}
+
+/**
+ * C2C-004 — the CANONICAL SUBMITTED report, rendered for Management read-only.
+ *
+ * WHAT THIS SURFACE DELIBERATELY DOES NOT CARRY, and why each absence is
+ * structural rather than a styling choice:
+ *
+ *  - NO wording-editor link, NO return-to-trainer control and NO Approve &
+ *    Submit. A published report has no governed operation. The port method
+ *    behind this view returns the CANONICAL report shape — four panels and a
+ *    publication time — so there is no lock version, no version id and no
+ *    wording hash on this surface for a mutation to be built from.
+ *  - NO per-dimension rating, NO trainer note, NO checklist or approval
+ *    internal and NO content hash. A-038 forbids all of them to Management at
+ *    every status, `submitted` included, and the governed read carries no
+ *    column that could hold one.
+ */
+function PublishedReport({ view }: { readonly view: PublishedView }) {
+  const learner = view.studentDisplayName ?? "this learner";
+  return (
+    <div className="page-grid" data-testid="management-published-report">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <Link
+            href="/management/reports?status=submitted"
+            className="inline-flex min-h-11 items-center gap-1 text-body font-bold text-brand-800 no-underline hover:text-brand-700"
+          >
+            <span aria-hidden="true">‹</span> Approved reports
+          </Link>
+          <h1 className="mt-1 text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
+            {learner}
+          </h1>
+          <p className="mt-1 text-body leading-6 text-ink">
+            Published {formatSubmitted(view.report.submittedAt)}
+            {view.sessionDate ? ` · Class Session ${formatSessionDate(view.sessionDate)}` : ""}
+          </p>
+        </div>
+        <StatusPill status="submitted" />
+      </header>
+
+      <FeedbackBanner tone="info" title="This report is published and read-only">
+        These are the four parent-facing panels the linked family sees. A published report has no
+        Management operation: there is no wording edit, no return to the Trainer and no further
+        approval. Correcting a published report is a governed reopen, not an edit here.
+      </FeedbackBanner>
+
+      <section className="card overflow-hidden p-0" aria-label="Submitted report">
+        <div className="grid gap-6 px-5 py-6 sm:gap-7 sm:px-7 sm:py-7">
+          {REPORT_PANEL_CONFIG.map((panel) => {
+            const presentation = PANEL_PRESENTATION[panel.key];
+            return (
+              <article key={panel.key} className="flex items-start gap-4">
+                <IconTile tone={presentation.tone} size="medium">
+                  <Icon name={presentation.icon} size={18} />
+                </IconTile>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-body font-extrabold text-ink-strong">{panel.label}</h2>
+                  <p className="mt-2 text-body leading-7 text-ink">
+                    {view.report.panels[panel.key]}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function formatSubmitted(value: string) {
+  return new Intl.DateTimeFormat("en-SG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Singapore",
+  }).format(new Date(value));
+}
+
+function formatSessionDate(value: string) {
+  return new Intl.DateTimeFormat("en-SG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Singapore",
+  }).format(new Date(`${value}T00:00:00+08:00`));
 }

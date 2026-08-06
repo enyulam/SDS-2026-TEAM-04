@@ -18,6 +18,7 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 const MIG_NAME = '20260807090000_assessment_complete_save_single_entry_point.sql'
+const NEWEST_MIG_NAME = '20260807113000_management_submitted_list.sql'
 const COMPOSER_MIG = '20260806220000_assessment_complete_save_opens_report.sql'
 const ASSESSMENT_MIG = '20260806090000_assessment_governed_persistence.sql'
 
@@ -84,9 +85,16 @@ const body = code(raw)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 11) fail('T-C3-S2', `${all.length} migration files exist, expected 11`)
-  if (all[all.length - 1] !== MIG_NAME) {
-    fail('T-C3-S2', `the newest migration is ${all[all.length - 1]}, not the C3-A single-entry-point closure`)
+  if (all.length !== 12) fail('T-C3-S2', `${all.length} migration files exist, expected 12`)
+  // Run C3-A Phase 2b added the Management submitted-report list (C2C-004),
+  // which sorts AFTER the single-entry-point closure. The closure is
+  // therefore an ALREADY-APPLIED file and sits in the byte-identical-to-HEAD
+  // leg below -- a strictly stronger assertion for it, not a weaker one.
+  if (!all.includes(MIG_NAME)) {
+    fail('T-C3-S2', 'the C3-A single-entry-point closure migration is missing')
+  }
+  if (all[all.length - 1] !== NEWEST_MIG_NAME) {
+    fail('T-C3-S2', `the newest migration is ${all[all.length - 1]}, not ${NEWEST_MIG_NAME}`)
   }
   // Every file EXCEPT the new one must be byte-identical to HEAD. An
   // already-applied migration is never edited (T-ASM-33 / T-CT-S4).

@@ -187,11 +187,22 @@ export type ManagementQueueRowDto = {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionDate: string;
-  readonly status: "trainer_approved" | "needs_edit" | "draft_ready";
+  /**
+   * C2C-004 added `submitted` — the governed referent of the Management
+   * Reports page's "Approved" filter. Under A-036 `approved` is
+   * transient-in-transaction and never commits, so it can never appear here.
+   */
+  readonly status: "trainer_approved" | "needs_edit" | "draft_ready" | "submitted";
   readonly openCorrectionScope?: CorrectionRequestDto["issueScope"];
   readonly openCorrectionStatus?: CorrectionRequestDto["status"];
   /** Present only on the correction-tracking projection for a request this fixture raised. */
   readonly openCorrectionReason?: string;
+  /**
+   * Present only on the submitted-list projection: the write-once publication
+   * timestamp of the canonical submitted version. Publication METADATA — it
+   * says when management published, never what was published.
+   */
+  readonly submittedAt?: string;
 };
 
 export type ManagementReviewDto = {

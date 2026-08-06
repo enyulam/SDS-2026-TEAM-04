@@ -46,6 +46,25 @@ const ROW_PRESENTATION = {
     /** The management final-review surface — the one permitted pre-submission read. */
     exposesContent: true,
   },
+  /*
+   * C2C-004 — "Approved", whose governed referent is `submitted`.
+   *
+   * Under A-036 `approved` is transient-in-transaction: the management
+   * Approve & Submit RPC moves trainer_approved -> approved -> submitted
+   * inside ONE exception-free transaction, so no reader outside it can ever
+   * observe `approved`. A filter over that literal label would be empty
+   * forever. `submitted` is what "Approved" means on this page, and it is the
+   * ONLY status the governed submitted-list boundary can return.
+   *
+   * A submitted row links to the CANONICAL SUBMITTED report — the second of
+   * the exactly two things A-038 permits Management to read. It never links
+   * to a pre-approval draft, and the surface it opens performs no mutation.
+   */
+  submitted: {
+    label: "Approved · published to the linked parent",
+    tone: "success",
+    exposesContent: true,
+  },
   needs_edit: {
     label: "Returned to Trainer",
     tone: "warning",
@@ -61,7 +80,7 @@ const ROW_PRESENTATION = {
     ManagementQueueRowDto["status"],
     {
       readonly label: string;
-      readonly tone: "brand" | "warning" | "info";
+      readonly tone: "brand" | "warning" | "info" | "success";
       readonly exposesContent: boolean;
     }
   >
@@ -76,8 +95,19 @@ export function ManagementReportsQueue() {
   const searchId = useId();
 
   const status = searchParams.get("status") ?? "trainer_approved";
-  const acceptedStatus = status === "trainer_approved" || status === "needs_edit";
-  const mode = status === "needs_edit" ? "corrections" : "pending";
+  /*
+   * C2C-004 — three in-page filters on ONE route. The two pre-existing
+   * `?status=` spellings remain WORKING ratified compatibility aliases
+   * (`29-management-reports/screen.md:18`) and `submitted` joins them as the
+   * third. No second route and no second rail destination is created (R-C2-3);
+   * `portal-navigation.ts` still declares exactly one Reports destination with
+   * no query string, and the navigation suite asserts that all three aliases
+   * resolve to that one active item.
+   */
+  const acceptedStatus =
+    status === "trainer_approved" || status === "needs_edit" || status === "submitted";
+  const mode =
+    status === "needs_edit" ? "corrections" : status === "submitted" ? "approved" : "pending";
   const [query, setQuery] = useState("");
   const [state, setState] = useState<ResourceState<readonly ManagementQueueRowDto[]>>({
     kind: "loading",
@@ -89,7 +119,9 @@ export function ManagementReportsQueue() {
     const request =
       status === "needs_edit"
         ? port.listManagementCorrectionTracking()
-        : port.listManagementPendingReviews();
+        : status === "submitted"
+          ? port.listManagementSubmittedReports()
+          : port.listManagementPendingReviews();
     void request.then((result) => {
       if (!active) return;
       setState(
@@ -140,8 +172,30 @@ export function ManagementReportsQueue() {
     );
   }
 
-  const pending = mode === "pending";
-  const caption = pending ? "Pending final review" : "Correction tracking";
+  const caption =
+    mode === "pending"
+      ? "Pending final review"
+      : mode === "corrections"
+        ? "Correction tracking"
+        : "Approved and published";
+  const captionNote =
+    mode === "pending"
+      ? "Trainer-approved reports waiting for Management’s final quality review."
+      : mode === "corrections"
+        ? "Assessment-fact concerns returned to the Trainer stay visible here until reapproval."
+        : "Reports this centre has published. Each row opens the canonical submitted version — the same four parent-facing panels the linked family sees.";
+  const emptyTitle =
+    mode === "pending"
+      ? "No reports waiting"
+      : mode === "corrections"
+        ? "No corrections in progress"
+        : "Nothing published yet";
+  const emptyBody =
+    mode === "pending"
+      ? "The final-review queue is clear in this fixture view."
+      : mode === "corrections"
+        ? "There are no open returned items in this fixture view."
+        : "No report in this centre has completed Approve & Submit.";
 
   return (
     <div className="page-grid">
@@ -175,6 +229,7 @@ export function ManagementReportsQueue() {
             options={[
               { value: "trainer_approved", label: "Pending final review" },
               { value: "needs_edit", label: "Correction tracking" },
+              { value: "submitted", label: "Approved" },
             ]}
           />
 
@@ -242,18 +297,10 @@ export function ManagementReportsQueue() {
       {visibleRows.length === 0 ? (
         <section className="card px-6 py-12 text-center" role="status">
           <h2 className="text-section-title font-extrabold text-ink-strong">
-            {query.trim()
-              ? "No students match that search"
-              : pending
-                ? "No reports waiting"
-                : "No corrections in progress"}
+            {query.trim() ? "No students match that search" : emptyTitle}
           </h2>
           <p className="mt-2 text-body text-ink">
-            {query.trim()
-              ? "Clear the search to see every report in this queue."
-              : pending
-                ? "The final-review queue is clear in this fixture view."
-                : "There are no open returned items in this fixture view."}
+            {query.trim() ? "Clear the search to see every report in this queue." : emptyBody}
           </p>
         </section>
       ) : (
@@ -262,11 +309,7 @@ export function ManagementReportsQueue() {
             <table className="w-full min-w-[44rem] border-collapse text-left">
               <caption className="px-5 pt-5 text-left text-card-title font-bold text-ink-strong sm:px-6">
                 {caption}
-                <span className="mt-1 block text-small font-normal text-ink">
-                  {pending
-                    ? "Trainer-approved reports waiting for Management's final quality review."
-                    : "Assessment-fact concerns returned to the Trainer stay visible here until reapproval."}
-                </span>
+                <span className="mt-1 block text-small font-normal text-ink">{captionNote}</span>
               </caption>
               <thead>
                 <tr className="border-b border-line">
@@ -420,7 +463,15 @@ function RowGroup({
             </span>
           </span>
         </td>
-        <td className="px-5 py-4 text-body text-ink">{formatDate(row.sessionDate)}</td>
+        <td className="px-5 py-4 text-body text-ink">
+          {formatDate(row.sessionDate)}
+          {row.submittedAt && (
+            /* Publication metadata, not content: WHEN it was published, never what. */
+            <span className="mt-0.5 block text-small text-neutral-on">
+              Published {formatDate(row.submittedAt.slice(0, 10))}
+            </span>
+          )}
+        </td>
         <td className="px-5 py-4">
           <Badge tone={presentation.tone}>{presentation.label}</Badge>
         </td>
@@ -430,7 +481,7 @@ function RowGroup({
               href={`/management/reports/${row.reportId}/review`}
               className="inline-flex min-h-11 items-center gap-1 rounded-field px-2 py-2 text-body font-bold text-brand-800 hover:text-brand-700"
             >
-              Review
+              {row.status === "submitted" ? "View report" : "Review"}
               <span aria-hidden="true">›</span>
               <span className="sr-only">{row.studentDisplayName}&apos;s report</span>
             </Link>

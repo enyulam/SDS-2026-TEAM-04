@@ -172,10 +172,16 @@ export interface AdapterManagementQueueRowDto {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionDate: string;
-  readonly status: "trainer_approved" | "needs_edit" | "draft_ready";
+  /**
+   * C2C-004 added `submitted`. It is produced ONLY by the governed
+   * submitted-list boundary, whose WHERE clause admits no other status, and
+   * it carries publication metadata only — never a panel, rating or hash.
+   */
+  readonly status: "trainer_approved" | "needs_edit" | "draft_ready" | "submitted";
   readonly openCorrectionScope?: AdapterIssueScope;
   readonly openCorrectionStatus?: "open" | "resolved";
   readonly openCorrectionReason?: string;
+  readonly submittedAt?: string;
 }
 
 export interface AdapterManagementReviewDto {

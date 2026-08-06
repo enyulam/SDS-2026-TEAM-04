@@ -83,8 +83,10 @@ import {
   adapterGetSessionRoster,
   adapterGetSessionUser,
   adapterGetTrainerWorkingReport,
+  adapterGetManagementSubmittedReport,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
+  adapterListManagementSubmittedReports,
   adapterListParentSubmittedReports,
   adapterListReturnedReports,
   adapterListTrainerSessions,
@@ -180,6 +182,16 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
 
     listManagementCorrectionTracking(): Promise<UiActionResult<readonly ManagementQueueRowDto[]>> {
       return guard(() => adapterListManagementCorrectionTracking());
+    },
+
+    /** C2C-004 — the governed "Approved" (`submitted`) list. */
+    listManagementSubmittedReports(): Promise<UiActionResult<readonly ManagementQueueRowDto[]>> {
+      return guard(() => adapterListManagementSubmittedReports());
+    },
+
+    /** Report-keyed: the pair is resolved SERVER-SIDE from the report id alone. */
+    getManagementSubmittedReport(reportId: string): Promise<UiActionResult<CanonicalReportDto>> {
+      return guard(() => adapterGetManagementSubmittedReport(reportId));
     },
 
     /** Report-keyed: as above. */

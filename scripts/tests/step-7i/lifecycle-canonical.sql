@@ -232,14 +232,17 @@ BEGIN
   -- Reconciled again at Round C2 Phase C2-A: the R-C2-1 atomic complete-save
   -- composer is the tenth ledger row. Reconciled again at Run C3-A Phase 1:
   -- the single-entry-point closure -- one REVOKE and no object at all -- is
-  -- the eleventh.
+  -- the eleventh. Reconciled again at Run C3-A Phase 2b (C2C-004): the
+  -- governed Management submitted-report list -- one STABLE read function
+  -- and one authenticated EXECUTE grant, no table, enum, label, policy or
+  -- row -- is the twelfth.
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 11 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 11', v_n; END IF;
+  IF v_n <> 12 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 12', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000');
-  IF v_n <> 11 THEN RAISE EXCEPTION 'FAIL T7I-73: the eleven applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000');
+  IF v_n <> 12 THEN RAISE EXCEPTION 'FAIL T7I-73: the twelve applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -282,7 +285,7 @@ BEGIN
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname='public';
-  IF v_n <> 33 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 33 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
+  IF v_n <> 34 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 34 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A Phase 2b Management submitted-report list)', v_n; END IF;
 
   -- All new objects owned by postgres.
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_class c
@@ -391,7 +394,7 @@ BEGIN
   --  which a COMPLETE nine-rating assessment could commit with no report
   --  shell -- so only ONE of the two B2 assessment RPCs is now
   --  client-callable and the census falls 25 -> 24.)
-  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 24 (6 + 14 + the 1 remaining client-callable B2 assessment RPC + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
+  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 25 (6 + 14 + the 1 remaining client-callable B2 assessment RPC + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A Phase 2b Management submitted-report list)', v_n; END IF;
 
   -- Run C3-A Phase 1: the closure itself, on the canonical database. The
   -- observation write is reachable by NO client role, and exactly one

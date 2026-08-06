@@ -61,6 +61,7 @@ import {
   getManagementReviewCandidateCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
+  listManagementSubmittedCore,
 } from "@/server/modules/management-view/projections";
 import {
   getCanonicalReportCore,
@@ -446,9 +447,14 @@ function narrowQueueRows(
     readonly openCorrectionScope?: CorrectionIssueScope;
     readonly openCorrectionStatus?: "open" | "resolved";
     readonly openCorrectionReason?: string;
+    readonly submittedAt?: string;
   }>,
+  // C2C-004: the submitted-list projection legitimately reports `submitted`,
+  // and nothing else does. The allow-list is passed in rather than widened
+  // globally, so a pending-review or correction-tracking row that somehow
+  // arrived at `submitted` would still be DROPPED rather than rendered.
+  allowed: ReadonlySet<string> = new Set(["trainer_approved", "needs_edit", "draft_ready"]),
 ): readonly AdapterManagementQueueRowDto[] {
-  const allowed = new Set(["trainer_approved", "needs_edit", "draft_ready"]);
   return rows
     .filter((row) => allowed.has(row.status))
     .map((row) => ({
@@ -463,6 +469,7 @@ function narrowQueueRows(
       ...(row.openCorrectionReason !== undefined
         ? { openCorrectionReason: row.openCorrectionReason }
         : {}),
+      ...(row.submittedAt !== undefined ? { submittedAt: row.submittedAt } : {}),
     }));
 }
 
@@ -486,6 +493,64 @@ export async function adapterListManagementCorrectionTracking(): Promise<
   // has produced a correction version) and `trainer_approved` (re-approved and
   // back in the queue). All three survive `narrowQueueRows`.
   return { outcome: "success", data: narrowQueueRows(result.data) };
+}
+
+/**
+ * C2C-004 — the Management "Approved" list.
+ *
+ * The centre, the authority and the status boundary all live inside
+ * `report_list_management_submitted`; this action supplies none of them and
+ * cannot. The narrowing below admits `submitted` and nothing else, so if the
+ * boundary ever returned another status the row would be DROPPED here rather
+ * than rendered as an Approved report.
+ */
+export async function adapterListManagementSubmittedReports(): Promise<
+  ActionResult<readonly AdapterManagementQueueRowDto[]>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listManagementSubmittedCore(client);
+  if (result.outcome !== "success") return result;
+  return { outcome: "success", data: narrowQueueRows(result.data, new Set(["submitted"])) };
+}
+
+/**
+ * C2C-004 — the canonical SUBMITTED report an Approved row opens.
+ *
+ * It goes through the SAME ratified status-gated read the final-review
+ * surface uses (RPC-15). No boundary is widened: RPC-15 already returns the
+ * published panels at `submitted`, with a NULL wording hash and no candidate
+ * version id, and this action refuses anything that is not `submitted` with a
+ * publication timestamp. The shape returned is the CANONICAL report shape —
+ * the four parent-facing panels and the publication time — so no management
+ * mutation control can be built on top of it by accident.
+ */
+export async function adapterGetManagementSubmittedReport(
+  reportId: string,
+): Promise<ActionResult<AdapterCanonicalReportDto>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveContext(client, reportId);
+  if (context.outcome !== "success") return context;
+
+  const review = await getManagementReviewCandidateCore(
+    client,
+    context.data.sessionId,
+    context.data.studentId,
+  );
+  if (review.outcome !== "success") return review;
+
+  // Anything other than a published report is the same non-disclosing
+  // `unavailable` the zero-row case already produces. In particular a
+  // `trainer_approved` candidate is NOT served here: that is the final-review
+  // surface's read, and conflating the two would let a preapproval candidate
+  // render as a published report.
+  if (review.data.status !== "submitted" || review.data.submittedAt === null) {
+    return { outcome: "unavailable" };
+  }
+
+  return {
+    outcome: "success",
+    data: { panels: review.data.panels, submittedAt: review.data.submittedAt },
+  };
 }
 
 export async function adapterGetManagementReview(

@@ -74,6 +74,28 @@ export interface PhysicalTestPort {
   listManagementCorrectionTracking(): Promise<
     UiActionResult<readonly ManagementQueueRowDto[]>
   >;
+  /**
+   * C2C-004 — the Management "Approved" list. Backed by the governed
+   * `report_list_management_submitted` boundary, which takes no parameters,
+   * derives the centre from the caller's live active management membership
+   * and admits only reports that have committed at `submitted`. It returns
+   * publication metadata only; no preapproval Trainer draft content can reach
+   * it because the SQL projection carries no column that could hold any.
+   */
+  listManagementSubmittedReports(): Promise<
+    UiActionResult<readonly ManagementQueueRowDto[]>
+  >;
+  /**
+   * C2C-004 — the canonical SUBMITTED report, for the one Management surface
+   * an Approved row opens. It reuses the ratified status-gated read RPC-15
+   * (`report_get_management_review`), which already returns the published
+   * panels at `submitted`; nothing about that boundary is widened here. A
+   * report at any other status resolves to the same non-disclosing
+   * `unavailable` outcome a missing report does.
+   */
+  getManagementSubmittedReport(
+    reportId: string,
+  ): Promise<UiActionResult<CanonicalReportDto>>;
   getManagementReview(
     reportId: string,
   ): Promise<UiActionResult<ManagementReviewDto>>;

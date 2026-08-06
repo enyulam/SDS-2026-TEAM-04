@@ -47,6 +47,23 @@ import {
   type RpcCaller,
 } from "@/server/modules/report-workflow/rpc-types";
 
+/**
+ * One row of the governed Management submitted-report list boundary
+ * `report_list_management_submitted` (C2C-004). It is deliberately the
+ * NARROWEST shape the boundary can return: publication metadata only. There
+ * is no field for a parent-facing panel, a rating, a version id or either
+ * hash, because the SQL projection carries no such column.
+ */
+interface ManagementSubmittedRow {
+  report_id: string;
+  student_id: string;
+  student_display_name: string;
+  class_session_id: string;
+  session_date: string;
+  report_status: ReportStatus;
+  submitted_at: string | null;
+}
+
 export interface ManagementQueueRowDto {
   readonly reportId: string;
   readonly sessionId: string;
@@ -61,6 +78,13 @@ export interface ManagementQueueRowDto {
    * projection, never on R-6 and never on `ManagementReviewDto`.
    */
   readonly openCorrectionReason?: string;
+  /**
+   * C2C-004 — the write-once publication timestamp of the canonical submitted
+   * version, present ONLY on the submitted-list projection. It is publication
+   * METADATA, not content: it says WHEN management published, never WHAT was
+   * published. No panel, rating, version id or hash accompanies it.
+   */
+  readonly submittedAt?: string;
 }
 
 export interface ManagementReviewDto {
@@ -211,6 +235,69 @@ export async function listManagementCorrectionTrackingCore(
   if (identity.outcome !== "success") return identity;
 
   return listManagementCorrectionsFromRpc(client);
+}
+
+// ---------------------------------------------------------------------
+// C2C-004 — the Management "Approved" list, through its own governed
+// boundary `report_list_management_submitted`
+// ---------------------------------------------------------------------
+/**
+ * WHY "APPROVED" READS `submitted`, STATED ONCE HERE AND ENFORCED IN SQL.
+ *
+ * Under A-036 the eight `report_status` labels include `approved`, but
+ * `report_management_approve_and_submit` performs
+ * `trainer_approved -> approved -> submitted` inside ONE exception-free
+ * transaction, so no reader outside that transaction can ever observe
+ * `approved`. A filter over the literal label would therefore return the
+ * empty set on every database, forever. The governed referent of the
+ * Management Reports page's "Approved" option is `submitted`, and the
+ * boundary — not this module — is what restricts the rows: the SQL function
+ * takes NO status parameter and hard-codes `r.status = 'submitted'` in its
+ * WHERE clause, so a preapproval report is never a row of the result at all.
+ *
+ * NO PREAPPROVAL TRAINER DRAFT CONTENT CAN REACH THIS FUNCTION, because the
+ * boundary's RETURNS TABLE carries no column that could hold any. That is a
+ * structural guarantee, not a rendering decision.
+ *
+ * The RPC-only half exists for the same reason its correction-tracking
+ * sibling's does: so a psql-backed caller can exercise the real projection.
+ * It adds NO authority of its own — the function re-derives the caller's live
+ * active management membership and its centre on every call, which is why a
+ * trainer, a parent or an unauthenticated caller reaching it directly still
+ * receives an empty list.
+ */
+export async function listManagementSubmittedFromRpc(
+  caller: RpcCaller,
+): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
+  const { data, error } = await caller.rpc("report_list_management_submitted", {});
+  if (error) return mapSqlErrorToResult(error.code, error.message);
+
+  const rows = (Array.isArray(data) ? data : []) as readonly ManagementSubmittedRow[];
+  return {
+    outcome: "success",
+    data: rows.map((row) => ({
+      reportId: row.report_id,
+      sessionId: row.class_session_id,
+      studentId: row.student_id,
+      studentDisplayName: row.student_display_name,
+      sessionDate: row.session_date,
+      status: row.report_status,
+      ...(row.submitted_at ? { submittedAt: row.submitted_at } : {}),
+    })),
+  };
+}
+
+export async function listManagementSubmittedCore(
+  client: SupabaseClient,
+): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
+  // As with correction tracking, the role gate is what turns a wrong-role
+  // caller's empty list into the contract's `unauthorized` outcome at the
+  // action boundary. It is a presentation improvement, NOT the security
+  // boundary — the database re-proves authority independently inside the RPC.
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  return listManagementSubmittedFromRpc(client);
 }
 
 // ---------------------------------------------------------------------

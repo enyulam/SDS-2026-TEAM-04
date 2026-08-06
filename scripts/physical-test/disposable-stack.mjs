@@ -90,7 +90,12 @@ export const EXPECTED_CANONICAL_ROWS = 28
 // (Moved 10 -> 11 at Run C3-A Phase 1. The eleventh committed migration is
 // the single-entry-point closure: one REVOKE and no object at all, so the
 // fixture checksum and the 28-row canonical region above are UNMOVED.)
-export const EXPECTED_CANONICAL_MIGRATIONS = 11
+// (Moved 11 -> 12 at Run C3-A Phase 2b, C2C-004. The twelfth committed
+// migration adds EXACTLY ONE read function — the governed Management
+// submitted-report list — and one authenticated EXECUTE grant. It creates no
+// table, enum, label, policy or row, so the fixture checksum and the 28-row
+// canonical region above are again UNMOVED.)
+export const EXPECTED_CANONICAL_MIGRATIONS = 12
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 
