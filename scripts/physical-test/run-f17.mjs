@@ -692,6 +692,28 @@ function psqlRows(sql) {
     .map((line) => line.split('|'))
 }
 
+/**
+ * Read a PostgreSQL boolean out of a `psql` field.
+ *
+ * `--tuples-only --no-align` renders a BARE boolean as `t`/`f`, but an
+ * EXPLICIT `::text` cast renders it as `true`/`false`. Both spellings occur
+ * in this project's queries, and a reader that accepted only one of them
+ * would silently misclassify every value of the other spelling. Anything
+ * that is neither spelling returns `null`, so an unreadable field can never
+ * be mistaken for a measured `true` OR a measured `false`.
+ *
+ * This is a DELIBERATE COPY of `disposable-stack.mjs`'s `readBoolean`,
+ * following the precedent already recorded in `prove-disposable-app.mjs`:
+ * this runner is the security-reviewed canonical runner and does not take a
+ * dependency on the disposable-stack harness. The two bodies are
+ * character-identical.
+ */
+function readBoolean(field) {
+  if (field === 't' || field === 'true') return true
+  if (field === 'f' || field === 'false') return false
+  return null
+}
+
 /** Run a SQL FILE and return stdout (used only for the canonical verifier). */
 function psqlFileStdout(absolutePath) {
   if (!existsSync(absolutePath)) throw new SafeError('The canonical fixture verifier SQL file is missing.')
@@ -2100,16 +2122,39 @@ async function main() {
       "COALESCE(first_failed_seq::text, '-'), COALESCE(failed_check, '-'), head_checked::text " +
       'FROM public.audit_verify_chain();',
   )
-  const corrupt = chainRows.filter((row) => row[1] !== 't')
+  /*
+   * `ok::text` and `head_checked::text` are EXPLICIT casts, so psql renders
+   * them `true`/`false` — never `t`/`f`. The predicate here used to be
+   * `row[1] !== 't'`, which classified EVERY HEALTHY CHAIN AS CORRUPT. The
+   * defect FAILS CLOSED (a healthy chain would be reported as a G-17 FAIL,
+   * never the reverse), so it is a correctness defect and not a
+   * gate-honesty hole — but it is masked today only because the canonical
+   * database holds zero audit events and this gate therefore takes its
+   * empty-chain FAIL branch instead. It would have surfaced as a false FAIL
+   * the moment the canonical chain became non-empty.
+   *
+   * `readBoolean` accepts BOTH spellings and REJECTS anything else, and an
+   * unreadable field is treated as NOT ok rather than quietly as ok. The
+   * head-inclusion measurement is read the same way, so a chain whose head
+   * was not covered can no longer count as verified.
+   *
+   * The empty-chain guard is UNCHANGED and still fails the gate: on the
+   * canonical fixture database an empty chain IS a defect, and G-17 must
+   * never PASS on one.
+   */
+  const corrupt = chainRows.filter((row) => readBoolean(row[1]) !== true)
+  const headsUnchecked = chainRows.filter((row) => readBoolean(row[5]) !== true)
   gateFrom(
     'G-17',
-    chainRows.length > 0 && corrupt.length === 0,
+    chainRows.length > 0 && corrupt.length === 0 && headsUnchecked.length === 0,
     `public.audit_verify_chain() reported ok for ${chainRows.length} centre chain(s), ${chainRows
       .map((row) => row[2])
       .join('+')} event(s) checked, head included`,
     chainRows.length === 0
       ? 'audit_verify_chain() returned no chain to verify'
-      : `chain(s) failing verification: ${corrupt.map((row) => `${row[0]} at seq ${row[3]} (${row[4]})`).join(', ')}`,
+      : corrupt.length > 0
+        ? `chain(s) failing verification: ${corrupt.map((row) => `${row[0]} at seq ${row[3]} (${row[4]})`).join(', ')}`
+        : `chain(s) whose head was not included in the verification: ${headsUnchecked.map((row) => row[0]).join(', ')}`,
   )
 
   /* -----------------------------------------------------------------
