@@ -117,6 +117,40 @@ export async function signOutAction(): Promise<ActionResult<null>> {
   return { outcome: "success", data: null };
 }
 
+/**
+ * C2C-023 — the `FormData` adapter the portal shells' Sign out control binds to.
+ *
+ * `signOutAction` has existed since F16-A and, until this checkpoint, had NO
+ * CONSUMER: a repository-wide grep returned its own definition and one
+ * documentation mention. There was no sign-out control anywhere in the
+ * application, on any portal, which is not a complete real-login flow on a
+ * shared or family device (ADR-4 makes the session the sole carrier of
+ * authority, so ending it is the only way to end that authority).
+ *
+ * This adapter INVENTS NO SERVER BEHAVIOUR. It is the exact shape
+ * `signInFormAction` already established — a thin `FormData` wrapper over the
+ * pre-existing action, followed by a `redirect` — and it is the reason the
+ * control can be a plain `<form action={…}>` inside the client shell rather
+ * than a fetch, a route handler or a new endpoint.
+ *
+ * WHY THE TERMINATION IS REAL, not cosmetic:
+ *   - `client.auth.signOut()` runs on the SERVER under the request-scoped
+ *     client, so Supabase Auth revokes the session itself; and
+ *   - the same call clears the auth cookies through the `setAll` pair, and a
+ *     Server Action is one of the few places Next.js honours a cookie write
+ *     (an RSC render silently swallows them). Clearing them anywhere else
+ *     would leave a live server-side session behind a discarded cookie.
+ *
+ * Nothing here reads, returns or logs a token, and the role/centre authority
+ * model is untouched: this ends a session, it never grants or re-derives one.
+ * The redirect is the constant login path — never a caller-supplied value, and
+ * never `portalHomeForRole`, because after sign-out there is no role.
+ */
+export async function signOutFormAction(): Promise<void> {
+  await signOutAction();
+  redirect("/login");
+}
+
 /** The server-derived session user for the shell (`SessionUserDto`). */
 export async function getSessionUserAction(): Promise<ActionResult<SessionUserDto>> {
   const client = await createRequestSupabaseClient();

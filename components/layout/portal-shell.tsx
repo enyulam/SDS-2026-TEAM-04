@@ -21,6 +21,53 @@ import {
   isNavigationItemActive,
   roleConfig,
 } from "@/components/layout/portal-navigation";
+import { signOutFormAction } from "@/server/modules/identity-access/actions";
+
+/**
+ * C2C-023 — THE SIGN-OUT CONTROL, on ALL THREE authenticated portal shells.
+ *
+ * Before this checkpoint there was NO sign-out control anywhere in the
+ * application. `signOutAction` had been fully written since F16-A and had
+ * exactly two references in the whole repository: its own definition and one
+ * documentation mention. It had no consumer. The frozen frame for screen 32
+ * draws a Logout row in the Parent rail, and `implementation-notes.md` recorded
+ * its absence as D4 attributed to A-044 deferral — reasoning that covers the
+ * deferred Overview and Calendar destinations but NOT Logout, which depends on
+ * nothing deferred.
+ *
+ * IT IS A REAL FORM POSTING A SERVER ACTION, not a link and not a client-side
+ * state clear. That matters: the termination has to happen on the server, under
+ * the caller's own request-scoped client, and the auth cookies have to be
+ * cleared in a context Next.js honours cookie writes in. A `<Link href="/login">`
+ * would navigate away while leaving the session fully alive — the proxy would
+ * simply bounce the caller straight back into the portal.
+ *
+ * This shell is a client component; `signOutFormAction` is imported from a
+ * `"use server"` module, which is exactly how a client component is permitted
+ * to bind one.
+ *
+ * The role/centre authority model is untouched. This control ends a session; it
+ * never grants, derives or names authority, and it carries no role, centre,
+ * identifier or return path — there is nothing on it for a caller to influence.
+ */
+function SignOutControl({ variant }: { readonly variant: "rail" | "header" }) {
+  return (
+    <form action={signOutFormAction} className={variant === "rail" ? "mt-4" : "shrink-0"}>
+      <button
+        type="submit"
+        data-testid="sign-out"
+        className={
+          variant === "rail"
+            ? "flex min-h-11 w-full items-center gap-3 rounded-nav px-3.5 py-2.5 text-body font-semibold text-neutral-on transition hover:bg-surface-muted hover:text-ink-strong"
+            : "flex min-h-11 items-center gap-2 rounded-nav px-2.5 py-2 text-small font-semibold text-neutral-on hover:bg-surface-muted hover:text-ink-strong"
+        }
+      >
+        <Icon name="logout" size={18} />
+        Sign out
+      </button>
+    </form>
+  );
+}
 
 export function PortalShell({ children }: { readonly children: ReactNode }) {
   return <RolePortalShell role="trainer">{children}</RolePortalShell>;
@@ -136,6 +183,7 @@ function RolePortalShell({
           <p className="mt-0.5 px-3.5 text-small text-neutral-on">
             {user?.centreDisplayName ?? "Synthetic centre"}
           </p>
+          <SignOutControl variant="rail" />
         </div>
       </aside>
 
@@ -173,6 +221,13 @@ function RolePortalShell({
               );
             })}
           </nav>
+          {/*
+            C2C-023 — the sign-out control sits OUTSIDE the navigation landmark
+            in both shells. It is not a destination and must not be counted as
+            one: the `nav` landmark's job is to enumerate the portal's pages,
+            and exactly one of those is the current page.
+          */}
+          <SignOutControl variant="header" />
         </header>
 
         <main
