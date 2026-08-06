@@ -150,8 +150,31 @@ function RolePortalShell({
     <div className="min-h-screen bg-canvas lg:grid lg:grid-cols-[15.625rem_minmax(0,1fr)]">
       <aside className="hidden min-h-screen border-r border-line bg-surface px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="px-1.5">
-          <BrandMark portalLabel={`${config.label} Portal`} />
+          {/*
+            F-01c — the brand mark is the FIRST keyboard tab stop in this shell, and this
+            shell renders on all three portals. Its destination and accessible name are
+            therefore derived from `config`, never hardcoded: Trainer -> `/trainer/schedule`
+            (the canonical route created at F-04), Management -> `/management`,
+            Parent -> `/parent`. `BrandHome` is a required prop of the interactive variant,
+            so there is no default for a caller to inherit another role's workspace from.
+          */}
+          <BrandMark
+            portalLabel={`${config.label} Portal`}
+            home={{ href: config.home, portal: config.label }}
+          />
         </div>
+        {/*
+          F-01c — SC 1.4.3, measured in the rendered production DOM, not asserted from the
+          token table. The inactive rail link rendered `text-ink-muted` (#8a93a8) on the
+          white sidebar at 3.079:1 and the workspace eyebrow rendered `text-ink-subtle`
+          (#a6aec0) at 2.225:1; both are normal-size text needing 4.5:1. Every failing node
+          in this shell moves to `text-neutral-on` (#5f6880) — an EXISTING darker token
+          already used across this codebase for quiet secondary text, and one of the `on`
+          values F1 deepened specifically to clear 4.5:1. No token VALUE is redefined, so
+          `ink-muted` and `ink-subtle` keep serving their other consumers (disabled controls,
+          placeholders, muted avatars) untouched. The active link stays `text-brand-800` and
+          the hover stays `text-ink-strong`; only the resting colour moves.
+        */}
         <nav aria-label={`${config.label} navigation`} className="mt-9 space-y-1.5">
           {config.navigation.map((item) => {
             const active = item.exact ? pathname === item.path : pathname === item.path;
@@ -163,7 +186,7 @@ function RolePortalShell({
                 className={`flex min-h-11 items-center gap-3 rounded-nav px-3.5 py-2.5 text-body font-semibold no-underline transition ${
                   active
                     ? "bg-brand-100 text-brand-800"
-                    : "text-ink-muted hover:bg-surface-muted hover:text-ink-strong"
+                    : "text-neutral-on hover:bg-surface-muted hover:text-ink-strong"
                 }`}
               >
                 {item.icon && <Icon name={item.icon} size={18} />}
@@ -173,13 +196,13 @@ function RolePortalShell({
           })}
         </nav>
         <div className="mt-auto border-t border-line pt-4">
-          <p className="px-3.5 text-micro font-bold uppercase tracking-[0.14em] text-ink-subtle">
+          <p className="px-3.5 text-micro font-bold uppercase tracking-[0.14em] text-neutral-on">
             {config.label} workspace
           </p>
           <p className="mt-2 px-3.5 text-body font-bold text-ink-strong">
             {user?.displayName ?? "Loading…"}
           </p>
-          <p className="mt-0.5 px-3.5 text-small text-ink-muted">
+          <p className="mt-0.5 px-3.5 text-small text-neutral-on">
             {user?.centreDisplayName ?? "Synthetic centre"}
           </p>
         </div>
@@ -187,7 +210,7 @@ function RolePortalShell({
 
       <div className="min-w-0">
         <header className="flex min-h-16 items-center justify-between border-b border-line bg-surface px-4 lg:hidden">
-          <BrandMark compact />
+          <BrandMark compact home={{ href: config.home, portal: config.label }} />
           <nav
             aria-label={`Mobile ${config.label} navigation`}
             className="flex gap-1.5 text-small"
@@ -196,7 +219,7 @@ function RolePortalShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-nav px-2.5 py-2 font-semibold text-ink-muted no-underline hover:bg-surface-muted hover:text-ink-strong"
+                className="rounded-nav px-2.5 py-2 font-semibold text-neutral-on no-underline hover:bg-surface-muted hover:text-ink-strong"
               >
                 {item.label}
               </Link>
@@ -218,7 +241,7 @@ function RolePortalShell({
                 <span className="block text-body font-bold text-ink-strong">
                   {user?.displayName ?? "Loading…"}
                 </span>
-                <span className="block text-small text-ink-muted">{config.label}</span>
+                <span className="block text-small text-neutral-on">{config.label}</span>
               </span>
             </span>
           </div>
@@ -236,7 +259,7 @@ function RolePortalShell({
             server write, external notification, or publication occurs in this mode.
           </FeedbackBanner>
           <div className="mt-6">{children}</div>
-          <footer className="mt-10 border-t border-line py-5 text-small text-ink-muted">
+          <footer className="mt-10 border-t border-line py-5 text-small text-neutral-on">
             Adapter: <strong>deterministic_fixture</strong> · Participant eligible:{" "}
             <strong>no</strong> · Persistence: <strong>browser session only</strong>
           </footer>

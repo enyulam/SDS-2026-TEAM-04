@@ -78,9 +78,19 @@ export function TrainerDashboard() {
           tone="warning"
           title="A report needs your attention"
           actions={
+            /*
+              F-01c — `bg-warning-800` and `hover:bg-amber-900` named a token this project
+              never defines (`app/globals.css` declares `--color-warning-soft` and
+              `--color-warning-on`, no `warning` numeric ramp), so Tailwind emitted NO rule
+              and this control rendered its declared white label on the inherited
+              `bg-warning-soft` banner — white on #fef3d7, about 1.1:1. Moved to the defined
+              `bg-warning-on` (#8a6106) with the same hover pair F-09 already established on
+              `trainer-report-review.tsx` and `trainer-report-editor.tsx`; white on #8a6106
+              measures 5.537:1.
+            */
             <Link
               href="/trainer/reports?status=needs_edit"
-              className="inline-flex min-h-10 items-center rounded-xl bg-warning-800 px-3.5 py-2 text-sm font-bold text-white hover:bg-amber-900"
+              className="inline-flex min-h-10 items-center rounded-xl bg-warning-on px-3.5 py-2 text-sm font-bold text-white hover:bg-[#6f4d05]"
             >
               Open returned queue
             </Link>
@@ -169,7 +179,8 @@ function Metric({
   return (
     <div className={`card px-5 py-4 ${tone === "attention" ? "border-amber-300" : ""}`}>
       <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-muted">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${tone === "attention" ? "text-warning-800" : "text-navy-950"}`}>
+      {/* F-01c — same undefined `warning-800` token as above; `text-warning-on` is defined. */}
+      <p className={`mt-2 text-3xl font-black ${tone === "attention" ? "text-warning-on" : "text-navy-950"}`}>
         {value}
       </p>
     </div>

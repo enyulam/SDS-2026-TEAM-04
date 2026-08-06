@@ -7,7 +7,7 @@
  * Run compiled, the same way the existing fixture assertion suites are run.
  */
 
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   BRAND_TOKENS,
@@ -199,6 +199,98 @@ check(
   rootLayout.includes("bg-canvas"),
   "the root layout carries the light canvas on <html> and <body>",
 );
+
+console.log("Design foundation — no utility names an UNDEFINED project token (F-01c)");
+
+/**
+ * F-01c. `features/trainer/trainer-dashboard.tsx` declared `bg-warning-800` and
+ * `text-warning-800`. This project defines `--color-warning-soft` and `--color-warning-on` and
+ * NO numeric `warning` ramp, so Tailwind emitted no rule at all: the element rendered its
+ * declared white label on whatever background it inherited. A declared class is not evidence it
+ * applied — the same class of defect that voided `.text-white` on every button at F-01b.
+ *
+ * The guard is structural rather than a hardcoded blocklist. It reads the token names
+ * `app/globals.css` actually declares, then flags any colour utility that names one of THIS
+ * PROJECT's token families with a step that family does not have. Default Tailwind palette
+ * families (`amber-*`, `slate-*`, …) are not project families and are deliberately not flagged —
+ * they resolve to real Tailwind rules.
+ */
+const declaredTokens = new Set(
+  [...css.matchAll(/--color-([a-z0-9-]+):/g)].map((match) => match[1]),
+);
+const projectFamilies = new Set([...declaredTokens].map((name) => name.split("-")[0]));
+
+const COLOUR_UTILITY_PREFIXES = [
+  "bg", "text", "border", "ring", "fill", "stroke", "divide", "placeholder",
+  "decoration", "outline", "accent", "caret", "from", "via", "to",
+];
+const utilityPattern = new RegExp(
+  `\\b(?:${COLOUR_UTILITY_PREFIXES.join("|")})-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\\b`,
+  "g",
+);
+
+/** Comments legitimately NAME the broken token when they explain the fix; strip them first. */
+function stripComments(source: string): string {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+}
+
+function sourceFiles(directory: string): string[] {
+  const collected: string[] = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const full = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (["node_modules", ".next", ".git"].includes(entry.name)) continue;
+      collected.push(...sourceFiles(full));
+    } else if (/\.tsx?$/.test(entry.name)) {
+      collected.push(full);
+    }
+  }
+  return collected;
+}
+
+/** Paths this checkpoint owns. Offenders anywhere else are REPORTED, never silently fixed. */
+const OWNED = [
+  join("components", ""),
+  join("app", ""),
+  join("features", "trainer", "trainer-dashboard.tsx"),
+];
+
+const ownedOffenders: string[] = [];
+const unownedOffenders: string[] = [];
+
+for (const file of [
+  ...sourceFiles(join(process.cwd(), "components")),
+  ...sourceFiles(join(process.cwd(), "app")),
+  ...sourceFiles(join(process.cwd(), "features")),
+]) {
+  const relative = file.slice(process.cwd().length + 1);
+  const source = stripComments(readFileSync(file, "utf8"));
+  for (const match of source.matchAll(utilityPattern)) {
+    const name = match[1];
+    if (declaredTokens.has(name)) continue;
+    if (!projectFamilies.has(name.split("-")[0])) continue;
+    const record = `${relative}: ${match[0]}`;
+    if (OWNED.some((owned) => relative.startsWith(owned))) ownedOffenders.push(record);
+    else unownedOffenders.push(record);
+  }
+}
+
+check(
+  ownedOffenders.length === 0,
+  `no utility in components/, app/ or trainer-dashboard.tsx names an undefined project token${
+    ownedOffenders.length ? ` — found ${[...new Set(ownedOffenders)].join(", ")}` : ""
+  }`,
+);
+
+if (unownedOffenders.length > 0) {
+  console.log(
+    `  note UNOWNED residual, reported not fixed (outside the F-01c owned paths): ${[
+      ...new Set(unownedOffenders),
+    ].join(", ")}`,
+  );
+}
 
 console.log("Design foundation — no external runtime asset");
 

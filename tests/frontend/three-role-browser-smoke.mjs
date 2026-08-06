@@ -152,6 +152,151 @@ async function assertTextAbsent(terms, label) {
 }
 
 /**
+ * The rasterising contrast core (F-01c), identical to `trainer-browser-smoke.mjs`'s.
+ *
+ * Tailwind v4 resolves these tokens to `oklab()` / `lab()`, whose components can be NEGATIVE —
+ * a naive numeric scrape silently drops the minus sign and reports a plausible but wrong ratio.
+ * Painting the computed value into a 1x1 canvas asks the browser for the sRGB bytes it actually
+ * paints, which is the thing SC 1.4.3 is about.
+ */
+const CONTRAST_CORE = `
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const toSrgb = (value) => {
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = '#000000';
+    context.fillStyle = value;
+    context.fillRect(0, 0, 1, 1);
+    const data = context.getImageData(0, 0, 1, 1).data;
+    return [data[0], data[1], data[2]];
+  };
+  const channel = (raw) => {
+    const c = raw / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  const luminance = ([r, g, b]) =>
+    0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  const contrastOf = (element) => {
+    const style = getComputedStyle(element);
+    let background = style.backgroundColor;
+    let node = element;
+    while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
+      node = node.parentElement;
+      if (!node) { background = 'rgb(255, 255, 255)'; break; }
+      background = getComputedStyle(node).backgroundColor;
+    }
+    const a = luminance(toSrgb(style.color));
+    const b = luminance(toSrgb(background));
+    return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 1000) / 1000;
+  };
+`;
+
+/**
+ * F-01c — CROSS-ROLE NAVIGATION. The brand mark is the FIRST keyboard tab stop in the portal
+ * shell, and one component renders it on all three portals. Before F-01c its destination and
+ * accessible name were hardcoded to `/trainer` / "B.E.S.T. Coach Trainer home", so on
+ * `/parent/reports` and `/management/reports` the first tab stop announced itself to assistive
+ * technology as "Trainer home" and navigated a Parent or Management user into the Trainer
+ * portal. It granted no authority (no auth exists yet) but it was a real navigation and
+ * assistive-technology defect that would become authorization-adjacent once F-16 wires guards.
+ *
+ * This asserts the mark belongs to the portal it is rendered in, AND that it is the first
+ * focusable element — so the check keeps testing the thing that actually failed.
+ */
+async function assertBrandMarkBelongsToPortal(portal, expectedHref) {
+  const mark = await evaluate(`
+    (() => {
+      const link = document.querySelector('a[aria-label^="B.E.S.T. Coach"]');
+      if (!link) return null;
+      const firstFocusable = [...document.querySelectorAll('a[href], button:not([disabled]), input, select, textarea')]
+        .find((element) => element.offsetParent !== null || element === document.activeElement);
+      return {
+        href: link.getAttribute('href'),
+        ariaLabel: link.getAttribute('aria-label'),
+        isFirstFocusable: link === firstFocusable,
+      };
+    })()
+  `);
+  assert(mark, `No brand-mark link was found in the ${portal} shell`);
+  assert(
+    mark.href === expectedHref,
+    `The ${portal} shell brand mark points at ${mark.href}; it must point at its own portal (${expectedHref})`,
+  );
+  assert(
+    mark.ariaLabel === `B.E.S.T. Coach ${portal} home`,
+    `The ${portal} shell brand mark is announced as "${mark.ariaLabel}"; it must name its own portal`,
+  );
+  assert(
+    mark.isFirstFocusable,
+    `The ${portal} shell brand mark is no longer the first focusable element — re-verify this assertion still covers the first tab stop`,
+  );
+}
+
+/**
+ * F-01c — SC 1.4.3 on the shared portal shell, measured in the RENDERED PRODUCTION DOM.
+ *
+ * A declared Tailwind class is not evidence it applied: F-01b shipped exactly that mistake when
+ * an unlayered CSS rule silently voided `.text-white` on every button. So this reads the live
+ * computed colour of every visible, non-disabled text-bearing leaf in the shell chrome — the
+ * sidebar, the identity strip and the footer — and rasterises it before taking the ratio.
+ *
+ * Scope is the SHELL, not feature content: this file owns the shell regression, and page-level
+ * copy belongs to its own screen checkpoint.
+ */
+async function assertShellChromeContrast(label) {
+  const rows = await evaluate(`
+    (() => {
+      ${CONTRAST_CORE}
+      const roots = [
+        ...document.querySelectorAll('aside'),
+        ...document.querySelectorAll('main > div:first-child'),
+        ...document.querySelectorAll('main > footer'),
+      ];
+      const seen = new Set();
+      const measured = [];
+      for (const root of roots) {
+        for (const node of [root, ...root.querySelectorAll('*')]) {
+          if (seen.has(node)) continue;
+          seen.add(node);
+          if (node.closest('[aria-hidden="true"]')) continue;
+          if (node.disabled || node.getAttribute('aria-disabled') === 'true') continue;
+          const own = [...node.childNodes]
+            .filter((child) => child.nodeType === 3)
+            .map((child) => child.textContent.trim())
+            .join(' ')
+            .trim();
+          if (!own) continue;
+          const style = getComputedStyle(node);
+          if (style.visibility === 'hidden' || style.display === 'none') continue;
+          const rect = node.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) continue;
+          const px = parseFloat(style.fontSize);
+          const bold = Number(style.fontWeight) >= 700;
+          measured.push({
+            text: own.slice(0, 48),
+            color: style.color,
+            contrast: contrastOf(node),
+            threshold: px >= 24 || (px >= 18.66 && bold) ? 3 : 4.5,
+          });
+        }
+      }
+      return measured;
+    })()
+  `);
+  assert(rows.length > 0, `${label}: no shell text node could be measured`);
+  const failures = rows.filter((row) => row.contrast < row.threshold);
+  assert(
+    failures.length === 0,
+    `${label} — SC 1.4.3 failures in the production DOM: ${failures
+      .map((row) => `"${row.text}" ${row.color} ${row.contrast}:1 (needs ${row.threshold})`)
+      .join(" | ")}`,
+  );
+  return Math.min(...rows.map((row) => row.contrast));
+}
+
+/**
  * Every competency-rating token, in BOTH vocabularies.
  *
  * The four ratified Amendment 006 A-049 labels the frontend contract now declares (F-06 / V3),
@@ -505,7 +650,53 @@ try {
     "F2 role presentation",
   );
   assert(await bodyIncludes("Selecting a role changes presentation only"), "Role query warning is missing");
+
+  /*
+   * F-01c — the pre-authentication brand mark must remain NON-INTERACTIVE (set at F3 and
+   * PRESERVED here): a pre-authentication screen offers no route into any workspace, so the
+   * mark is a `role="img"` span with no `href` and no nested link, on all three login variants.
+   */
+  for (const loginRole of ["trainer", "management", "parent"]) {
+    await navigate(`/login?role=${loginRole}`);
+    const authMark = await evaluate(`
+      (() => {
+        const mark = document.querySelector('[role="img"][aria-label="B.E.S.T. Coach"]');
+        return {
+          present: Boolean(mark),
+          tag: mark ? mark.tagName.toLowerCase() : null,
+          href: mark ? mark.getAttribute('href') : null,
+          nestedLink: mark ? Boolean(mark.querySelector('a')) : false,
+          anyBrandLink: Boolean(document.querySelector('a[aria-label^="B.E.S.T. Coach"]')),
+        };
+      })()
+    `);
+    assert(authMark.present, `The ${loginRole} login brand mark is missing`);
+    assert(
+      authMark.tag === "span" && authMark.href === null && !authMark.nestedLink && !authMark.anyBrandLink,
+      `The ${loginRole} login brand mark became a route into a workspace: ${JSON.stringify(authMark)}`,
+    );
+  }
+  await navigate("/login?role=management");
   await evaluate("sessionStorage.clear()");
+
+  /*
+   * F-01c — cross-role brand navigation and shared-shell SC 1.4.3, on all three portals.
+   * Both readings come from the rendered production DOM, never from a declared class.
+   */
+  const shellContrast = [];
+  for (const [portal, home, probe] of [
+    ["Trainer", "/trainer/schedule", "/trainer/reports?status=needs_edit"],
+    ["Management", "/management", "/management/reports?status=trainer_approved"],
+    ["Parent", "/parent", "/parent/reports"],
+  ]) {
+    for (const path of [home, probe]) {
+      await navigate(path);
+      await waitUntil("Boolean(document.querySelector('aside'))", `${portal} shell at ${path}`);
+      await assertBrandMarkBelongsToPortal(portal, home);
+      shellContrast.push(await assertShellChromeContrast(`${portal} shell at ${path}`));
+    }
+  }
+  console.log(`  · portal-shell chrome worst measured contrast ${Math.min(...shellContrast)}:1 (rendered production DOM, all three portals)`);
 
   await navigate("/parent/reports");
   await waitUntil("document.body.innerText.includes('Learner Fern')", "initial Parent report list");
@@ -733,6 +924,8 @@ try {
         result: "passed",
         checks: [
           "role presentation grants no authority",
+          "the brand mark is the first tab stop and belongs to the portal it renders in — Trainer -> /trainer/schedule, Management -> /management, Parent -> /parent — and stays non-interactive on all three logins (F-01c)",
+          "portal-shell chrome meets WCAG 2.2 AA SC 1.4.3 on all three portals, measured in the rendered production DOM (F-01c)",
           "Trainer approval remains Parent-invisible",
           "Management safe review and four-panel wording edit",
           "bounded return and durable correction tracking",
