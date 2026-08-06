@@ -27,7 +27,7 @@
 // environment the case authored and nothing else.
 // =====================================================================
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -490,31 +490,172 @@ const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
   }
 }
 
+// ---------------------------------------------------------------------
+// The application source tree. T-P43 and T-P44 both walk it.
+// ---------------------------------------------------------------------
+// The old T-P43 scanned a FIXED FOUR-FILE LIST and swallowed a read error
+// as "no offender" (the reviewers' LOW finding): renaming, moving or
+// deleting any of the four turned a real regression into a silent PASS,
+// and a fifth file naming the variable was never looked at. Both cases are
+// now failures -- the tree is walked, and every required anchor file must
+// be present and readable.
+const APP_ROOTS = ['app', 'components', 'features', 'hooks', 'lib', 'server', 'types']
+const APP_FILES = ['proxy.ts', 'next.config.ts', 'next.config.mjs', 'middleware.ts']
+
+function walkSourceTree() {
+  const found = []
+  const visit = (absolute, relative) => {
+    let entries
+    try {
+      entries = readdirSync(absolute, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
+      const nextAbsolute = join(absolute, entry.name)
+      const nextRelative = relative ? relative + '/' + entry.name : entry.name
+      if (entry.isDirectory()) visit(nextAbsolute, nextRelative)
+      else if (/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(entry.name)) found.push({ path: nextAbsolute, relative: nextRelative })
+    }
+  }
+  for (const root of APP_ROOTS) visit(join(ROOT, root), root)
+  for (const file of APP_FILES) {
+    const absolute = join(ROOT, file)
+    try {
+      readFileSync(absolute, 'utf8')
+      found.push({ path: absolute, relative: file })
+    } catch {
+      // A root-level file that does not exist in this project is not an
+      // omission; the REQUIRED anchors are asserted separately below.
+    }
+  }
+  return found
+}
+
+/**
+ * Read a file that MUST exist. An unreadable or renamed required file is a
+ * FAILURE, never "no offender" -- that is the substance of the LOW finding.
+ */
+function readRequired(id, relative) {
+  try {
+    return readFileSync(join(ROOT, relative), 'utf8')
+  } catch {
+    fail(id, 'the required file ' + relative + ' could not be read; a renamed or deleted anchor is a regression, not an absence of offenders')
+    return null
+  }
+}
+
+const SOURCE_FILES = walkSourceTree()
+const DECISION_MODULE = 'lib/supabase/public-config.ts'
+const BROWSER_MODULE = 'lib/supabase/browser.ts'
+
 {
   const id = 'T-P43'
-  // The profile variable must not be read or written anywhere else in the
-  // application source. The harness scripts are its only other mention, and
-  // they SET it in a child environment rather than reading it.
-  const scanned = [
-    join(ROOT, 'proxy.ts'),
-    join(ROOT, 'server', 'platform', 'env.ts'),
-    join(ROOT, 'server', 'platform', 'supabase', 'request.ts'),
-    join(ROOT, 'lib', 'supabase', 'browser.ts'),
-  ]
-  const offenders = scanned.filter((path) => {
-    try {
-      return readFileSync(path, 'utf8').includes('BEST_COACH_SUPABASE_RUNTIME_PROFILE')
-    } catch {
-      return false
-    }
-  })
+  // The profile variable has EXACTLY ONE home: the decision module itself.
+  // Anything else in the application tree that names it is an offender.
+  const before = failures
+
+  if (SOURCE_FILES.length < 50) {
+    fail(id, 'only ' + SOURCE_FILES.length + ' application source files were found; the scan did not reach the application tree')
+  }
+  const decisionSource = readRequired(id, DECISION_MODULE)
+  if (decisionSource !== null && !decisionSource.includes(PROFILE_VAR)) {
+    fail(id, DECISION_MODULE + ' no longer names the profile variable, so the decision has no home at all')
+  }
+  // Every anchor the old fixed list named must still exist, so a rename can
+  // never quietly remove a file from the scan.
+  for (const anchor of ['proxy.ts', 'server/platform/env.ts', 'server/platform/supabase/request.ts', BROWSER_MODULE]) {
+    readRequired(id, anchor)
+  }
+  const offenders = SOURCE_FILES.filter(
+    (entry) => entry.relative !== DECISION_MODULE && readFileSync(entry.path, 'utf8').includes(PROFILE_VAR),
+  ).map((entry) => entry.relative)
   if (offenders.length > 0) {
-    fail(id, `the profile variable is referenced outside the single decision point: ${offenders.join(', ')}`)
-  } else {
+    fail(id, 'the profile variable is referenced outside the single decision point: ' + offenders.join(', '))
+  }
+  if (failures === before) {
     pass(
       id,
-      'proxy.ts, server/platform/env.ts, server/platform/supabase/request.ts and lib/supabase/browser.ts name the profile variable nowhere — the decision has exactly one home',
+      SOURCE_FILES.length + ' application source files were walked (not a fixed list); ' + DECISION_MODULE + ' is the ONLY one that names the profile variable, and every required anchor file was present and readable',
     )
+  }
+}
+
+{
+  const id = 'T-P44'
+  // ---------------------------------------------------------------------
+  // NO CLIENT BUNDLE CAN CARRY A SUPABASE TARGET -- pinned, not assumed.
+  // ---------------------------------------------------------------------
+  // The reviewers' LOW finding: `prove-disposable-app.mjs` A-22 observes
+  // that no emitted client bundle references a Supabase target, but that
+  // property rests entirely on `lib/supabase/browser.ts` being UNIMPORTED
+  // DEAD CODE, and nothing committed pinned it. If a future client
+  // component imported it, a disposable build would inline the disposable
+  // URL and publishable key straight into a browser bundle -- and A-22
+  // only catches that AFTER a full disposable build, inside a runner
+  // nobody executes on an ordinary change.
+  //
+  // Three properties are pinned here, in source, in milliseconds:
+  //   1. NEXT_PUBLIC_SUPABASE_* is read in exactly two modules -- the
+  //      decision module and the server environment contract;
+  //   2. the decision module is imported only by the server environment
+  //      contract, the request-scoped server client, `proxy.ts` and the
+  //      browser client;
+  //   3. the browser client is imported by NOTHING, and its exported
+  //      factory is named nowhere else.
+  //
+  // Together those mean no client component's module graph can reach a
+  // Supabase URL or publishable key, so no client bundle can carry one.
+  const before = failures
+  const ALLOWED_CONFIG_IMPORTERS = new Set([
+    'server/platform/env.ts',
+    'server/platform/supabase/request.ts',
+    'proxy.ts',
+    BROWSER_MODULE,
+  ])
+  const CONFIG_IMPORT = /["'](?:@\/lib\/supabase\/public-config|(?:\.{1,2}\/)+(?:lib\/)?supabase\/public-config|\.\/public-config)["']/
+  const BROWSER_IMPORT = /["'](?:@\/lib\/supabase\/browser|(?:\.{1,2}\/)+(?:lib\/)?supabase\/browser|\.\/browser)["']/
+
+  if (readRequired(id, BROWSER_MODULE) === null || readRequired(id, DECISION_MODULE) === null) {
+    // readRequired already recorded the failure.
+  } else {
+    const publicEnvReaders = []
+    const configImporters = []
+    const browserImporters = []
+    for (const entry of SOURCE_FILES) {
+      const text = readFileSync(entry.path, 'utf8')
+      if (entry.relative !== DECISION_MODULE && /NEXT_PUBLIC_SUPABASE_[A-Z_]+/.test(text)) {
+        publicEnvReaders.push(entry.relative)
+      }
+      if (entry.relative !== DECISION_MODULE && CONFIG_IMPORT.test(text)) {
+        configImporters.push(entry.relative)
+      }
+      if (entry.relative !== BROWSER_MODULE && BROWSER_IMPORT.test(text)) {
+        browserImporters.push(entry.relative)
+      }
+      if (entry.relative !== BROWSER_MODULE && text.includes('createBrowserSupabaseClient')) {
+        browserImporters.push(entry.relative + ' (names createBrowserSupabaseClient)')
+      }
+    }
+
+    const strayEnvReaders = publicEnvReaders.filter((relative) => relative !== 'server/platform/env.ts')
+    if (strayEnvReaders.length > 0) {
+      fail(id, 'NEXT_PUBLIC_SUPABASE_* is read outside the decision module and the server environment contract: ' + strayEnvReaders.join(', '))
+    }
+    const strayConfigImporters = configImporters.filter((relative) => !ALLOWED_CONFIG_IMPORTERS.has(relative))
+    if (strayConfigImporters.length > 0) {
+      fail(id, DECISION_MODULE + ' is imported by a module outside the four permitted ones: ' + strayConfigImporters.join(', '))
+    }
+    if (browserImporters.length > 0) {
+      fail(id, BROWSER_MODULE + ' is no longer unimported: ' + browserImporters.join(', ') + ' -- a disposable build would inline the disposable URL and publishable key into a browser bundle')
+    }
+    if (failures === before) {
+      pass(
+        id,
+        'no client module graph can reach a Supabase target: NEXT_PUBLIC_SUPABASE_* is read only in ' + DECISION_MODULE + ' and server/platform/env.ts, ' + DECISION_MODULE + ' is imported only by the four permitted modules, and ' + BROWSER_MODULE + ' is imported by nothing at all (' + SOURCE_FILES.length + ' files walked)',
+      )
+    }
   }
 }
 
