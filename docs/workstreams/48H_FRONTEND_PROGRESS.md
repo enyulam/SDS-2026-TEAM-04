@@ -524,3 +524,45 @@ Any genuinely required cross-owned edit is a **blocker**, reported **before** mo
   3. **The absent skip-to-content bypass link (SC 2.4.1)** — `main` carries `id="main-content"` but nothing targets it.
   4. **The unlayered `*`, `body`, `h1`–`h4`, `.card`, `.panel` and `.form-field` rules in `app/globals.css`**, and the `brand-700` white-on-pink primary action at 4.517:1.
 - **Next action:** Operator review of F-01c. **The two defects this checkpoint owned are closed and guarded; the four residuals above are not, and item 1 in particular is a live AA failure on every screen carrying a page description.** F4 (05 Trainer Schedule) remains blocked on the operator route decision (inventory §7.3, U-A5-1). F-01c was a bounded correction — two defects, one checkpoint, one stop.
+
+---
+
+## 2026-08-06 — Run C1 Phase C4: F16 real integration (checkpoint F-16)
+
+**Branch:** `main`. **Starting commit:** `70a04be` (the Run C1 backend continuation merge). **Ending commit:** `e8318f2`.
+**Run B recorded F-16 as NOT STARTED.** Its entire blocking set was discharged before this checkpoint began: Backend V2 committed and merged, Frontend V3 committed and merged, 12 of 12 core screens implementation-complete, R-27 resolved by the operator, and R-22 closed by the governed report-context resolver merged at `70a04be`.
+
+F-16 was split into four bounded subcheckpoints. **A, B and C were each independently verified by an agent that did not write them, before the next began.**
+
+| Sub | Commit | Subject | Independent verdict |
+|---|---|---|---|
+| F16-A | `a649c47` | `feat(integration): wire real authentication and root routing` | PASS — 12/12 checks, 0 Critical, 0 High |
+| F16-B | `b4aaa89` | `feat(integration): enforce server-side portal authorization` | PASS — 0 Critical, 0 High |
+| F16-C | `ad451af` | `feat(integration): connect governed physical-test adapter` | PASS — 0 Critical, 0 High, 3 non-blocking defects |
+| F16-D | `e84371b` | `test(integration): prove authenticated route boundaries` | the suite is the verification — 25/25 assertions PASS |
+| — | `0bc8a3a` | `fix(integration): correct fixture-mode isolation record and scan scope` | bounded correction of the F16-C verifier's D1/D2 |
+
+### What landed
+
+- **Real authentication.** The login form now posts to a `"use server"` wrapper over the pre-existing `signInAction`. Credential fields enabled; primary action is a real `<button type="submit">` reading **"Sign in"** (which is also what the frozen reference `AUTH-01` shows, so reference and governance agree). Post-sign-in destination is derived from `resolveSessionIdentity`'s server role through `portalHomeForRole`, which is keyed by the **type** `SessionRole` so a destination cannot be obtained from a caller-supplied string. Failure state is a closed two-valued type with no channel for a discriminator — wrong password, unknown email, deactivated account and missing membership are one message and one DOM.
+- **Root routing.** `app/page.tsx` is a server route that renders nothing: unauthenticated → `/login`, authenticated → the server-derived portal home. The create-next-app starter and its five template SVGs are gone.
+- **Server-side route protection, two independent layers.** `proxy.ts` at the repository root — the correct convention for the installed Next.js 16.2.10, where `middleware` is deprecated, having both files is a hard build error, and the proxy runtime is `nodejs`. Plus a per-layout guard in each of the three portals that re-resolves identity with its own literal role. Identity comes from `auth.getUser()` and the live accounts/memberships chain, never from raw cookie claims. The `role` query parameter is ignored for authorization.
+- **The real adapter.** `RealParticipantPhysicalTestPort` implemented, with all **23** port members backed by governed server actions — independently re-enumerated by the verifier: 0 stubbed, 0 blanket-unsupported, 0 fabricated data returns. The three reportId-keyed reads resolve server-side through the C2 resolver; no client-supplied session or student id is ever trusted. The elevated client is unreachable from any participant path.
+- **Fixture isolation.** Off by default, selectable only by an explicit build/server configuration flag, not reachable from any query parameter, cookie, header or UI control, visibly identified by a banner keyed off the adapter's own `identity.kind`, and proven absent across 65 live HTTP responses. `features/trainer/trainer-fixture-runtime.tsx` was deleted from the integrated path.
+
+### Two findings worth carrying forward
+
+**A pre-existing red gate on `main` was discovered and resolved.** `static-scan.mjs` leg T7I-40 had been failing on `main` since `68ba4976` — the frontend fixture assigns report statuses in TypeScript, and Run B verified merge 2 with `tsc`/`eslint`/`build` and the browser smokes only, so the scan was never re-run on the fully merged tree. Proven pre-existing by reading `68ba497` directly. Resolved by **narrowing the scan to the governed path** — never by editing the fixture's literals, which would be cosmetic evasion — and the price was paid: a new leg fails on any import of the fixture from a participant path, and the verifier demonstrated it actually fires with a probe file.
+
+**A false security claim was caught by verification, not by inspection.** F16-C's comments asserted Next.js folds the fixture flag at build time and never emits the chunk. The verifier read the emitted bundle and found a runtime `process.env` read with the chunk present. Behaviour was correct, but the recorded justification was wrong and denied a real consequence: the mode can be changed at `next start` without a rebuild. Corrected at `0bc8a3a`.
+
+### Not done, deliberately
+
+- **The six canonical route migrations** recorded in the frontend tracker's Table A (`/trainer/schedule/[sessionId]/student-roster` and the rest) were **not created**. Each is a screen-level route move that would touch reconstructed screens, and Run C1 is directed not to redo the twelve core screen reconstructions. The flow is navigable on the 17 existing routes. **No working route was deleted.**
+- **Every authenticated test leg** — cross-role denial with a live session, `/login`-while-authenticated, the authorized `/trainer` chain, and the success paths of all 23 members — requires a valid password. They are enumerated as `F17-X01…X10`, printed on every suite run, and left to the operator-assisted F17 runner. **They are not faked and not claimed.**
+
+**Gates at `e8318f2`:** `npx tsc --noEmit` 0 · `npm run lint` 0 · `npm run build` 0 · `static-scan.mjs` 0 · `run-canonical.mjs` 0 · `verify-fresh-apply.mjs` 0 · `asm-static.mjs` 0 · `ct-static.mjs` 0 · integration suite (Parts 1+2+3) 0 · `integrated-route-security.mjs` 0 (25/25). Route census **17**, unchanged. Canonical fixture checksum unmoved; `report_versions` and `report_version_ratings` both **0**.
+
+**No credential was requested, accepted, printed, logged or persisted at any point in this checkpoint, and every test written here passes without one.**
+
+**Next action:** operator review of F-16, then the operator-assisted F17 walkthrough — `npm run physical-test:f17`, from an interactive terminal. F-16 is **implementation complete; operator-assisted valid-login proof pending**. It is not fully accepted and must not be recorded as such.
