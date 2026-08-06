@@ -142,7 +142,9 @@ BEGIN
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 24', v_n; END IF;
+  -- (Reconciled at Round C2 Phase C2-A: the atomic complete-save composer
+  --  is the twenty-fifth authenticated-callable function.)
+  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 25', v_n; END IF;
 
   -- No table privilege and no policy was added to reach the correction row.
   SELECT pg_catalog.count(*) INTO v_n

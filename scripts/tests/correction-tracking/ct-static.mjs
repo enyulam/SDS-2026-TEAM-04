@@ -18,10 +18,10 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 const MIG_NAME = '20260806103000_management_correction_tracking.sql'
-// The newest migration file in the tree (Round C2, the R-22 report-context
-// resolver). It is not this suite's subject; it is only what "sorts last"
-// now means.
-const NEWEST_MIG_NAME = '20260806190000_report_context_resolver.sql'
+// The newest migration file in the tree (Round C2 Phase C2-A, the R-C2-1
+// atomic complete-save composer). It is not this suite's subject; it is
+// only what "sorts last" now means.
+const NEWEST_MIG_NAME = '20260806220000_assessment_complete_save_opens_report.sql'
 const MIG = join(MIG_DIR, MIG_NAME)
 const PROJECTIONS = join(ROOT, 'server', 'modules', 'management-view', 'projections.ts')
 
@@ -152,7 +152,7 @@ const bodyCode = code(body)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 9) fail('T-CT-S4', `${all.length} migration files exist, expected 9`)
+  if (all.length !== 10) fail('T-CT-S4', `${all.length} migration files exist, expected 10`)
   if (all[all.length - 1] !== NEWEST_MIG_NAME) fail('T-CT-S4', `the newest migration is not the last file (last is ${all[all.length - 1]})`)
   if (!all.includes(MIG_NAME)) fail('T-CT-S4', `${MIG_NAME} is missing`)
 
@@ -164,7 +164,7 @@ const bodyCode = code(body)
     const h2 = createHash('sha256').update(read(join(MIG_DIR, f))).digest('hex')
     if (h1 !== h2) fail('T-CT-S4', `${rel} differs from HEAD -- an applied migration must never be edited`)
   }
-  if (failures === before) pass('T-CT-S4', 'nine migration files; the eight already-applied files are byte-identical to HEAD; the newest one sorts last')
+  if (failures === before) pass('T-CT-S4', 'ten migration files; the nine already-applied files are byte-identical to HEAD; the newest one sorts last')
 }
 
 // ---------------------------------------------------------------------

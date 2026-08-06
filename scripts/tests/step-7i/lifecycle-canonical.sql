@@ -229,13 +229,15 @@ BEGIN
   -- ledger row. Reconciled again at Round B2.1: the correction-tracking
   -- migration is the seventh. Reconciled again at Backend V2: the
   -- competency-vocabulary rename (Amendment 006 A-053) is the eighth.
+  -- Reconciled again at Round C2 Phase C2-A: the R-C2-1 atomic complete-save
+  -- composer is the tenth ledger row.
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 9 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 9', v_n; END IF;
+  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 10', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000');
-  IF v_n <> 9 THEN RAISE EXCEPTION 'FAIL T7I-73: the nine applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000');
+  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL T7I-73: the ten applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -278,7 +280,7 @@ BEGIN
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname='public';
-  IF v_n <> 32 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 32 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver)', v_n; END IF;
+  IF v_n <> 33 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 33 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
 
   -- All new objects owned by postgres.
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_class c
@@ -382,7 +384,7 @@ BEGIN
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 24 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 24 (6 + 14 + the 2 B2 assessment RPCs + the B2.1 correction-tracking read + the C2 report-context resolver)', v_n; END IF;
+  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T7I-4: % function(s) hold authenticated EXECUTE; expected 25 (6 + 14 + the 2 B2 assessment RPCs + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer)', v_n; END IF;
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace

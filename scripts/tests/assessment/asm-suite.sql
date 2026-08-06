@@ -162,10 +162,11 @@ BEGIN
   -- rename adds one migration file and, being three ALTER TYPE ... RENAME
   -- VALUE statements, changes no function, table or enum count.)
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 9 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 9', v_n; END IF;
+  -- (Reconciled again at Round C2 Phase C2-A: Round C2 Phase C2-A adds the atomic complete-save composer (R-C2-1): one migration file and one function, no table and no enum.)
+  IF v_n <> 10 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 10', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
-  IF v_n <> 32 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 32', v_n; END IF;
+  IF v_n <> 33 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 33', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace
    WHERE ns.nspname = 'public' AND c.relkind = 'r';
@@ -197,7 +198,7 @@ BEGIN
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
-  IF v_n <> 24 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 24', v_n; END IF;
+  IF v_n <> 25 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 25', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'

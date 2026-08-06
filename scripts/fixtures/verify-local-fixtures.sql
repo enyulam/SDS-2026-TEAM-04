@@ -417,17 +417,20 @@ BEGIN
   -- (CP-2/CP-4), moving the count 5 -> 6; Round B2.1 adds the
   -- correction-tracking migration (U-B2-1), moving it 6 -> 7; Backend V2
   -- adds the competency-vocabulary rename (A-053), moving it 7 -> 8; and
-  -- Round C2 adds the report-context resolver (R-22), moving it 8 -> 9.
+  -- Round C2 adds the report-context resolver (R-22), moving it 8 -> 9; and
+  -- Round C2 Phase C2-A adds the atomic complete-save composer (R-C2-1),
+  -- moving it 9 -> 10.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 9 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 9 applied migrations, found %', v_n; END IF;
+  IF v_n <> 10 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 10 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
                      '20260805090000', '20260805090500', '20260806090000',
-                     '20260806103000', '20260806160000', '20260806190000');
-  IF v_n <> 9 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000 and 20260806190000';
+                     '20260806103000', '20260806160000', '20260806190000',
+                     '20260806220000');
+  IF v_n <> 10 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000 and 20260806220000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -442,8 +445,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 32 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 32 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver), found %', v_n;
+  IF v_n <> 33 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 33 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver + 1 atomic complete-save composer), found %', v_n;
   END IF;
 
   -- A35 (report-context resolver, R-22): the one governed key translation.
@@ -1360,8 +1363,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 32 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 32 Step 7G/7H/7I/assessment/correction-tracking/context-resolver functions after the negative suite, found %', v_n;
+  IF v_n <> 33 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 33 Step 7G/7H/7I/assessment/correction-tracking/context-resolver/complete-save functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n
