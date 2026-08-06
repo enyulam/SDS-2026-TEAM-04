@@ -130,6 +130,47 @@ async function bodyIncludes(text) {
 }
 
 /**
+ * The rasterising contrast core, shared by the rating-chip reading below and by F-09's
+ * per-dimension rating-tile reading. Tailwind v4 resolves these tokens to `oklab()` / `lab()`,
+ * whose components can be NEGATIVE — a naive numeric scrape silently drops the minus sign and
+ * reports a plausible but wrong ratio. Painting the computed value into a 1x1 canvas asks the
+ * browser for the sRGB bytes it actually paints, which is the thing SC 1.4.3 is about.
+ */
+const CONTRAST_CORE = `
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const toSrgb = (value) => {
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = '#000000';
+    context.fillStyle = value;
+    context.fillRect(0, 0, 1, 1);
+    const data = context.getImageData(0, 0, 1, 1).data;
+    return [data[0], data[1], data[2]];
+  };
+  const channel = (raw) => {
+    const c = raw / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  const luminance = ([r, g, b]) =>
+    0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  const contrastOf = (element) => {
+    const style = getComputedStyle(element);
+    let background = style.backgroundColor;
+    let node = element;
+    while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
+      node = node.parentElement;
+      if (!node) { background = 'rgb(255, 255, 255)'; break; }
+      background = getComputedStyle(node).backgroundColor;
+    }
+    const a = luminance(toSrgb(style.color));
+    const b = luminance(toSrgb(background));
+    return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 1000) / 1000;
+  };
+`;
+
+/**
  * Label-text contrast of one rating chip, measured from the LIVE computed styles of the
  * production build (SC 1.4.3).
  *
@@ -142,38 +183,10 @@ async function bodyIncludes(text) {
 async function ratingChipContrast(fieldsetIndex, label) {
   const contrast = await evaluate(`
     (() => {
+      ${CONTRAST_CORE}
       const chip = [...document.querySelectorAll('fieldset')[${fieldsetIndex}].querySelectorAll('button[data-rating-level]')]
         .find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)});
-      const canvas = document.createElement('canvas');
-      canvas.width = 1;
-      canvas.height = 1;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      const toSrgb = (value) => {
-        context.clearRect(0, 0, 1, 1);
-        context.fillStyle = '#000000';
-        context.fillStyle = value;
-        context.fillRect(0, 0, 1, 1);
-        const data = context.getImageData(0, 0, 1, 1).data;
-        return [data[0], data[1], data[2]];
-      };
-      const channel = (raw) => {
-        const c = raw / 255;
-        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-      };
-      const luminance = ([r, g, b]) =>
-        0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-      const style = getComputedStyle(chip);
-      let background = style.backgroundColor;
-      let node = chip;
-      while (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
-        node = node.parentElement;
-        if (!node) { background = 'rgb(255, 255, 255)'; break; }
-        background = getComputedStyle(node).backgroundColor;
-      }
-      const a = luminance(toSrgb(style.color));
-      const b = luminance(toSrgb(background));
-      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-      return Math.round(ratio * 1000) / 1000;
+      return contrastOf(chip);
     })()
   `);
   assert(
@@ -942,13 +955,114 @@ try {
   await waitUntil("document.body.innerText.includes('Grounded draft ready')", "draft retry success", 15_000);
   await clickExact("a", "Review four-panel report");
   await waitUntil("document.body.innerText.includes('Quality Checklist')", "four-panel report review");
+  /* -------------------------------------------------------------------------
+   * Screen 10 Trainer Student Report — F-09.
+   *
+   * The load-bearing assertions are the governance rules the frozen frame cannot demonstrate,
+   * because the frame draws only the already-approved end state: the four GOVERNED panels
+   * (not the frame's Overview/Strengths/Areas/Remarks headings — D2), the real three-item
+   * approve gate, the non-publishing approval copy, the inert Class Video Evidence region
+   * (D3), the omitted Overall Grade (D5), and AA contrast on all four rating states.
+   * ----------------------------------------------------------------------- */
+
+  const reportPanels = await evaluate(
+    `[...document.querySelectorAll('[data-report-panel]')].map((node) => node.dataset.reportPanel)`,
+  );
   assert(
-    (await evaluate(`document.querySelectorAll('article').length`)) >= 5,
-    "The four report panels and internal note panel were not rendered",
+    JSON.stringify(reportPanels) ===
+      JSON.stringify(["todaysStrength", "nextFocus", "practiceSuggestion", "sessionTakeaway"]),
+    `The four GOVERNED parent-facing panels must render in order; found ${reportPanels.join(", ")}`,
+  );
+  assert(
+    await bodyIncludes("Coach Notes (Internal Only)"),
+    "The internal Coach Notes panel must render on the Trainer review surface",
   );
   assert(
     (await evaluate(`document.querySelectorAll('input[type="checkbox"]').length`)) === 3,
     "The quality checklist must have exactly three items",
+  );
+
+  /*
+   * D1 — the frame's "Official report" claim is a lifecycle claim only management's Approve &
+   * Submit can make (A-033), so it must not appear on this Trainer working surface.
+   */
+  assert(
+    !(await bodyIncludes("Official report")),
+    "The Trainer working version must not be presented as an official/published report",
+  );
+
+  /*
+   * D5 — no governed overall or roll-up competency grade exists. A single headline rating here
+   * would be a derived assessment fact this frontend computed.
+   */
+  const detailTerms = await evaluate(
+    `[...document.querySelectorAll('dt')].map((node) => node.textContent.trim())`,
+  );
+  assert(
+    !detailTerms.some((term) => /^(overall grade|lesson|term)$/i.test(term)),
+    `Report Details must not carry an ungoverned field; found ${detailTerms.join(", ")}`,
+  );
+  assert(
+    detailTerms.includes("Name") && detailTerms.includes("Class"),
+    `Report Details must carry the governed Name and Class rows; found ${detailTerms.join(", ")}`,
+  );
+
+  /*
+   * A-038 — the content hash covers the four panels PLUS the nine ratings and is never
+   * rendered. It is carried to the server as a concurrency proof only.
+   */
+  assert(
+    !(await evaluate(
+      `/content hash|contentHash|[0-9a-f]{32,}/i.test(document.body.innerText)`,
+    )),
+    "The report content hash must never be rendered",
+  );
+
+  /* D3 — Class Video Evidence: frame region kept, rendered inert with a stated reason. */
+  assert(
+    await evaluate(`
+      (() => {
+        const region = document.querySelector('[data-evidence-state="unavailable"]');
+        if (!region) return false;
+        const control = region.querySelector('button');
+        return Boolean(control && control.disabled && control.getAttribute('aria-describedby')) &&
+          region.querySelectorAll('a, video, iframe').length === 0;
+      })()
+    `),
+    "Class Video Evidence must be inert with a programmatically associated reason and no media path",
+  );
+  assert(
+    await bodyIncludes("unresolved governance decision"),
+    "The evidence region must state why it is inactive rather than simulating an uploader",
+  );
+
+  /* The approve gate renders visually disabled until all three attestations are checked. */
+  assert(
+    await evaluate(`
+      (() => {
+        const approve = [...document.querySelectorAll('button')]
+          .find((candidate) => candidate.textContent.trim() === 'Approve');
+        return Boolean(approve && approve.disabled);
+      })()
+    `),
+    "Approve must render disabled until all three checklist items are checked",
+  );
+  assert(
+    await bodyIncludes("The server re-checks all three attestations for this exact version"),
+    "The copy must state that the server re-verifies the gate for the exact version",
+  );
+  assert(
+    await bodyIncludes("It does not make the report parent-visible"),
+    "Trainer approval must not be presented as publication",
+  );
+
+  /* Token convergence: this surface uses project tokens, not the Tailwind default palette. */
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('main *')].every((element) =>
+        !/(^|\\s)(bg|text|border|divide|accent)-(slate|gray|zinc|indigo|red|amber|teal|green|navy)-/.test(element.className.baseVal ?? element.className ?? ''))
+    `),
+    "The report surface must use project tokens, not Tailwind default-palette classes",
   );
 
   /*
@@ -987,6 +1101,46 @@ try {
     assert(
       reviewSnapshots.pairs.includes(expectedPairs[value]),
       `The ${value} rating state never reached the Trainer review surface`,
+    );
+  }
+
+  /*
+   * F-09 — THE CARRY-OVER DEFECT, RE-MEASURED. The F-06 verifier found these nine per-dimension
+   * rating labels rendering `text-brand-600`: one brand pink for all four states, measuring
+   * 3.53:1 on white in the production DOM and failing SC 1.4.3. They now carry the
+   * ordinal-keyed `rating-N-on-soft` foreground on the matching `rating-N-soft` fill. ALL FOUR
+   * states are measured here — a fix proved on only the states that happen to be on screen is
+   * not proved — and colour is never the only carrier, because each tile states its level in
+   * text.
+   */
+  const ratingTileContrast = await evaluate(`
+    (() => {
+      ${CONTRAST_CORE}
+      return [...document.querySelectorAll('[data-rating-level]')].map((node) => ({
+        level: node.getAttribute('data-rating-level'),
+        label: node.textContent.trim(),
+        contrast: contrastOf(node),
+      }));
+    })()
+  `);
+  assert(
+    ratingTileContrast.length === 9,
+    `Expected nine rating tiles to measure; found ${ratingTileContrast.length}`,
+  );
+  const measuredLevels = new Set(ratingTileContrast.map((tile) => tile.level));
+  assert(
+    measuredLevels.size === 4,
+    `All four rating states must be measured on this surface; found ${[...measuredLevels].join(", ")}`,
+  );
+  for (const level of ["beginning", "developing", "mastering", "mastered"]) {
+    const tile = ratingTileContrast.find((candidate) => candidate.level === level);
+    assert(tile, `The ${level} rating state never reached the Trainer report surface`);
+    assert(
+      tile.contrast >= 4.5,
+      `The ${level} rating label measured ${tile.contrast}:1 in the production DOM; SC 1.4.3 requires 4.5:1`,
+    );
+    console.log(
+      `  · ${tile.label} rating-tile label contrast ${tile.contrast}:1 (rendered production DOM, screen 10)`,
     );
   }
 
@@ -1044,6 +1198,28 @@ try {
     "Trainer approval success",
   );
   assert(await bodyIncludes("Parent visibility is unchanged"), "Approval success privacy copy is missing");
+
+  /*
+   * F-09 — `trainer_approved` is the state the frozen frame actually draws, and its banner is
+   * correct and expected: the report has gone to MANAGEMENT, not to a parent. The three
+   * assertions below are the whole point of A-033 on this screen.
+   */
+  assert(
+    await bodyIncludes("Report sent to management for approval"),
+    "The trainer_approved state must render the frame's management-approval banner",
+  );
+  assert(
+    !(await evaluate(
+      `/parent (has been |will be )?notified|notify the parent|sent to the parent|published to/i.test(document.body.innerText)`,
+    )),
+    "The approved state must never claim publication or a parent notification",
+  );
+  assert(
+    await evaluate(`
+      [...document.querySelectorAll('input[type="checkbox"]')].every((input) => input.disabled)
+    `),
+    "The checklist must be inert once this version carries a Trainer approval",
+  );
   const approvalScreenshot = await screenshot("trainer-approved.png");
 
   await navigate("/trainer/reports?status=needs_edit");
@@ -1073,6 +1249,7 @@ try {
           "screen 07 grade student: one capture mode (no Quick/Full), the nine dimensions in ratified order, a behavioural anchor on every dimension, a distinct accessible name carrying the verbatim anchor on all 36 rating controls, the loaded Follow-up/Coach-Notes value, the REVIEW & APPROVE counters, the absent learner exposing no status and no path, per-status rail destinations, project-token convergence, and idle + selected AA contrast for all four rating states",
           "retryable observation save failure and recovery",
           "deterministic generation failure, bounded retry, and success",
+          "screen 10 trainer student report: the four GOVERNED panels in order, internal Coach Notes, no 'Official report' claim, no invented overall grade, no rendered content hash, inert Class Video Evidence with a stated reason, the disabled-until-complete approve gate with its server re-verification copy, project-token convergence, AA contrast on all four rating states in the nine tiles, and the trainer_approved banner claiming management review and never a parent notification",
           "four-panel review, wording edit, checklist reset, and approval",
           "returned correction, empty, and unavailable states",
           "zero uncaught browser-console/runtime errors",
