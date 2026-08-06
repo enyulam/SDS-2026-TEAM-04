@@ -319,6 +319,109 @@ async function assertManagementSurfaceClean(label) {
   );
 }
 
+/**
+ * REQUIRED NEGATIVE ASSERTION for operator ruling R-B6 (screen 33 / checkpoint F-15).
+ *
+ * The frozen reference 33 draws FOUR things a Parent may never receive, and the whole point of
+ * the F-15 reconstruction is that it reproduces the frame's shell without reproducing any of
+ * them. This assertion is what proves they stayed unimplemented — structurally, in the rendered
+ * production DOM, not by reading the source:
+ *
+ *  1. a "PERFORMANCE SUMMARY" grid of per-dimension ratings — the leak `CLAUDE.md` §6 names as
+ *     already caught, prohibited "in any form or wording", softened wording included;
+ *  2. "OVERALL GRADE: MASTERING" — an aggregate competency grade;
+ *  3. PROSE RATING ATTRIBUTION / taxonomy disclosure ("Assessed as Mastered in ...", "to the
+ *     Mastering band");
+ *  4. the "WATCH TOGETHER" evidence video — no governed parent evidence path exists (A-001
+ *     gating; A-014 scope and uploader UNRESOLVED), so no media element may render at all.
+ *
+ * It additionally proves the standing parent-boundary exclusions: no correction history, no
+ * content hash, no revision or version metadata, and no audit internal (A-021; A-038; A-048;
+ * GLOBAL_UI_RULES §5). Applied to EVERY Parent surface, not only the report detail.
+ *
+ * The rating check is NOT a bare-word prose regex — Amendment 006 A-052 expressly prohibits one,
+ * because "at the beginning of the session" and "has mastered maintaining eye contact" are legal
+ * parent-facing prose that the governed canonical narrative may legitimately contain. What is
+ * detected instead is the form A-052 authorises: an ISOLATED raw label or dimension name
+ * presented as a rendered value — any leaf element whose ENTIRE text is one token — plus any
+ * rating-, evidence-, hash- or version-bearing data attribute, and any embedded media element.
+ */
+async function assertParentSurfaceClean(label) {
+  await assertNoRatingTokenRendered(label);
+
+  const offenders = await evaluate(`
+    (() => {
+      const dimensions = ${JSON.stringify(DIMENSION_DISPLAY_NAMES)}.map((name) => name.toLowerCase());
+      const attributes = [
+        "data-rating",
+        "data-rating-level",
+        "data-dimension",
+        "data-dimension-code",
+        "data-evidence-state",
+        "data-evidence-url",
+        "data-content-hash",
+        "data-version-id",
+        "data-revision",
+        "data-report-status",
+        "data-correction",
+      ];
+      const found = [];
+      for (const element of document.body.querySelectorAll("*")) {
+        const tag = element.tagName.toLowerCase();
+        if (["video", "iframe", "audio", "source", "track", "embed", "object"].includes(tag)) {
+          found.push("media:" + tag);
+          continue;
+        }
+        for (const attribute of attributes) {
+          if (element.hasAttribute(attribute)) found.push(tag + "[" + attribute + "]");
+        }
+        if (element.children.length > 0) continue;
+        const text = (element.textContent || "").trim().toLowerCase().replace(/[.,:;!?·|-]+$/, "").trim();
+        if (dimensions.includes(text)) found.push("dimension-cell:" + tag + '="' + text + '"');
+      }
+      return found;
+    })()
+  `);
+  assert(
+    offenders.length === 0,
+    `${label} rendered a prohibited internal element: ${offenders.join(", ")}`,
+  );
+
+  await assertTextAbsent(
+    [
+      "Performance Summary",
+      "Overall Grade",
+      "Overall grade:",
+      "Watch Together",
+      "Class Video Evidence",
+      "Session recording",
+      "Re-watch",
+      "Assessed as",
+      "assessed as",
+      "band.",
+      "Observation",
+      "Trainer note",
+      "Coach Notes",
+      "Internal Only",
+      "Quality Checklist",
+      "Correction",
+      "Returned",
+      "Needs edit",
+      "content hash",
+      "Content hash",
+      "revision",
+      "version",
+      "audit",
+      "report status",
+      "AI draft",
+      "AI history",
+      "AI generation",
+      "draft",
+    ],
+    label,
+  );
+}
+
 async function completeTrainerChecklist() {
   const count = await evaluate(`document.querySelectorAll('input[type="checkbox"]').length`);
   assert(count === 3, `Expected three Trainer checklist items; found ${count}`);
@@ -407,10 +510,10 @@ try {
   await navigate("/parent/reports");
   await waitUntil("document.body.innerText.includes('Learner Fern')", "initial Parent report list");
   assert(!(await bodyIncludes("Learner Birch")), "Trainer working content reached the Parent list");
-  await assertNoRatingTokenRendered("Parent report list (screen 32, initial)");
+  await assertParentSurfaceClean("Parent report list (screen 32, initial)");
   await navigate("/parent");
   await waitUntil("document.body.innerText.includes('Family reports')", "Parent home surface");
-  await assertNoRatingTokenRendered("Parent home surface");
+  await assertParentSurfaceClean("Parent home surface");
 
   await navigate("/trainer/reports/report-birch/review");
   await waitUntil("document.body.innerText.includes('Quality Checklist')", "Birch Trainer review");
@@ -558,7 +661,7 @@ try {
    * Screen 32 after a real submission — the state the frozen frame draws its aggregate rating
    * chip in. The chip is not implemented (operator ruling R-B6) and this proves it.
    */
-  await assertNoRatingTokenRendered("Parent report list (screen 32, after submission)");
+  await assertParentSurfaceClean("Parent report list (screen 32, after submission)");
   const parentListScreenshot = await screenshot("parent-reports-list.png");
   await navigate("/parent/students/student-birch/sessions/session-storytelling-lab/report");
   await waitUntil("document.body.innerText.includes('The confident opening was especially clear.')", "canonical Birch detail");
@@ -566,25 +669,30 @@ try {
     (await evaluate(`document.querySelectorAll('[data-testid="parent-canonical-report"] article').length`)) === 4,
     "Parent canonical detail did not contain exactly four panels",
   );
+  /*
+   * The four governed panels (spec §8) are the ENTIRE parent-facing payload — exactly four
+   * sections, each carrying its governed heading, and nothing beside them.
+   */
+  const parentPanelHeadings = await evaluate(`
+    [...document.querySelectorAll('[data-testid="parent-canonical-report"] article h3')]
+      .map((element) => element.textContent.trim())
+  `);
+  assert(
+    JSON.stringify(parentPanelHeadings) ===
+      JSON.stringify(["Today's Strength", "Next Focus", "Practice Suggestion", "Session Takeaway"]),
+    `Parent canonical detail did not render exactly the four governed panels: ${parentPanelHeadings.join(" | ")}`,
+  );
   await assertTextAbsent(
-    [
-      "Beginning",
-      "Developing",
-      "Mastering",
-      "Mastered",
-      "Emerging",
-      "Secure",
-      "Observation",
-      "Trainer note",
-      "Correction",
-      "content hash",
-      "revision",
-      "audit",
-      "report status",
-    ],
+    ["Beginning", "Developing", "Mastering", "Mastered", "Emerging", "Secure"],
     "Parent canonical DOM",
   );
-  await assertNoRatingTokenRendered("Parent canonical report detail (screen 33)");
+  /*
+   * Screen 33 after a real submission — the state the frozen frame draws its per-dimension
+   * "Performance Summary" grid, its "Overall Grade: Mastering" row, its prose rating
+   * attributions and its "Watch Together" evidence video in. None of the four is implemented
+   * (operator ruling R-B6) and this proves it.
+   */
+  await assertParentSurfaceClean("Parent canonical report detail (screen 33)");
   const parentScreenshot = await screenshot("parent-canonical-report.png");
 
   await navigate("/parent?preview=none");
@@ -632,6 +740,7 @@ try {
           "Management final submission and canonical Parent availability",
           "Management and Parent DOM privacy exclusions",
           "no competency-rating token renders on any Parent surface (R-B6)",
+          "screen 33 renders exactly the four governed panels, and no per-dimension grid, overall grade, rating attribution, evidence media, correction history, content hash or version metadata reaches any Parent surface (R-B6)",
           "no per-dimension rating and no prohibited internal element renders on any Management surface (R-B5)",
           "screen 19 exposes exactly four parent-facing panels and the editor exactly four fields",
           "Approve & Submit carries the ratified confirmation copy",
