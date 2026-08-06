@@ -76,6 +76,27 @@
 //  * The canonical stack is never started, stopped, reconfigured or written
 //    to. `supabase/config.toml` is never modified. `supabase stop --all` is
 //    never called.
+//
+// ---------------------------------------------------------------------
+// FAIL CLOSED ON ABSENT EVIDENCE — what a gate here may be stamped from
+// ---------------------------------------------------------------------
+//  * A gate is stamped PASS only from POSITIVE evidence actually measured on
+//    this run. G-17 requires a chain really verified over a NON-EMPTY set of
+//    audit events; an empty audit table is NOT-RUN with an authored reason,
+//    never PASS. H-1 is stamped only from measurements ACTUALLY TAKEN: an
+//    array that no instrument populated is `null`, not `[]`, and an
+//    unmeasured subject can never satisfy the gate.
+//  * Teardown issues the targeted `supabase stop --project-id … --no-backup`
+//    whenever provisioning was ATTEMPTED, not only when it succeeded, so a
+//    start that failed part-way cannot orphan containers.
+//  * The exit code is honest: 0 only when every owned gate was decided and
+//    none failed; 2 when nothing failed but an owned gate is unproved; 1 on a
+//    FAIL or an aborted run; 130 on Ctrl+C. NOT-RUN is never converted into
+//    FAIL to produce this — it stays an honest verdict that now carries a
+//    consequence.
+//  * The ledger is written on every path but `--help`, including an abort
+//    before the first gate, so the file at the fixed path can never be an
+//    earlier run's result read as this run's.
 // =====================================================================
 
 import { createClient } from '@supabase/supabase-js'
@@ -95,6 +116,7 @@ import {
   DISPOSABLE_PUBLISHED_PORTS,
   EXPECTED_CANONICAL_MIGRATIONS,
   FIXTURE_MODE_VARIABLE,
+  PUBLISHED_PORT_BIND_LIMITATION,
   REPO_ROOT,
   SafeError,
   assertCanonicalConfigUntouched,
@@ -106,6 +128,7 @@ import {
   destroyDisposableWorkdir,
   diffCanonical,
   disposableContainersPresent,
+  disposablePortBindings,
   disposableVolumesPresent,
   info,
   pass,
@@ -173,6 +196,46 @@ const GATE_TITLES = new Map([
   ['G-21', 'Browser console has no uncaught errors during the dry run'],
   ['H-1', 'Process hygiene — this run leaves no stack, no server, no browser, no volume and no held port behind'],
 ])
+
+/**
+ * EVERY gate in the map above is a gate THIS RUNNER OWNS an instance of —
+ * that is what it means for it to be on this runner's own ledger. The exit
+ * code is computed from this set, so a run that leaves any of them unproved
+ * cannot present as an unqualified success. See EXIT CODES below.
+ */
+const OWNED_GATES = new Set(GATE_TITLES.keys())
+
+/**
+ * EXIT CODES — an honest exit code, not a FAIL count.
+ *
+ * The previous scheme computed the exit code from the FAIL count alone, so a
+ * walkthrough that proved almost nothing — every owned gate NOT-RUN, not one
+ * of them decided — exited 0 and read to any caller, script or CI as success.
+ * NOT-RUN is a legitimate and honest verdict and is NOT turned into FAIL to
+ * fix that; instead "no failure" and "no failure AND everything proved" are
+ * given DIFFERENT exit codes, so the difference is visible without reading
+ * the ledger.
+ */
+const EXIT_ALL_OWNED_GATES_PROVED = 0
+const EXIT_GATE_FAILED_OR_RUN_ABORTED = 1
+const EXIT_OWNED_GATES_UNPROVED = 2
+const EXIT_INTERRUPTED = 130
+
+/**
+ * What this run is and how it ended, recorded so the PERSISTED LEDGER can
+ * never be mistaken for a different run's. The file lives at one fixed path;
+ * before this, an abort before the first gate wrote nothing at all and left
+ * the PREVIOUS run's ledger sitting there, describing a run that was not this
+ * one.
+ */
+const runState = {
+  mode: 'run',
+  startedAt: new Date().toISOString(),
+  pid: process.pid,
+  abortMessage: null,
+  interrupted: false,
+  portBindings: null,
+}
 
 const ledger = new Map()
 
@@ -278,11 +341,35 @@ KNOWN BLOCKER — recorded, not worked around
   Until an operator resolves it, every gate that needs the served application
   is recorded NOT-RUN with that exact reason. None of them is guessed.
 
+DOCUMENTED, ACCEPTED LIMITATION — recorded, not hidden
+  ${PUBLISHED_PORT_BIND_LIMITATION}.
+  The bindings Docker actually reports are MEASURED while the stack is up and
+  written into the ledger, so the exposure is stated rather than assumed.
+
 OPTIONS
-  --help            print this and exit 0.
+  --help            print this and exit 0. --help is not a run: it decides no
+                    gate and writes no ledger, so it cannot disturb the
+                    persisted artifact.
   --preflight-only  steps 1-4 only. Read-only, prompts for nothing, needs no
                     terminal, provisions nothing and decides no gate that
-                    requires a session or a write.
+                    requires a session or a write. It therefore proves none of
+                    the gates this runner owns and exits ${EXIT_OWNED_GATES_UNPROVED}, not 0.
+
+EXIT CODES — a walkthrough that proves nothing does NOT exit 0
+  0    every gate this runner owns was decided and none FAILED.
+  ${EXIT_GATE_FAILED_OR_RUN_ABORTED}    at least one gate FAILED, or the run aborted with an error.
+  ${EXIT_OWNED_GATES_UNPROVED}    no gate FAILED, but at least one gate this runner OWNS was NOT-RUN.
+       This is NOT a success. NOT-RUN stays an honest verdict and is never
+       converted into FAIL to produce this code; the code exists so that
+       "nothing failed" and "everything was proved" stop looking identical.
+  ${EXIT_INTERRUPTED}  interrupted (Ctrl+C). Teardown and the ledger still run.
+
+THE PERSISTED LEDGER ALWAYS DESCRIBES THIS RUN
+  The ledger is written at one fixed path on EVERY run path except --help,
+  including an abort that happened before the first gate was decided. Such a
+  run writes a ledger that records the abort — it never leaves an earlier
+  run's ledger in place to be read as if it described this one. G-18 is
+  decided, or explicitly recorded NOT-RUN, on every one of those paths.
 
 NON-CREDENTIAL ENVIRONMENT (all optional; none may carry a Supabase secret)
   BEST_COACH_F17_DISPOSABLE_EVIDENCE_DIR   ledger directory, outside Git
@@ -639,6 +726,16 @@ async function createDisposableIdentities(admin, secrets) {
  * rows at the DISPOSABLE addresses. The fixture file is not forked, edited
  * or reordered — it is executed verbatim, and only the disposable database
  * is touched.
+ *
+ * THE RE-POINT IS READ BACK, NOT ASSERTED. The previous verification counted
+ * accounts joined to `auth.users` and required 3 — a number that is 3 whether
+ * or not the UPDATE matched a single row, because the fixture creates those
+ * three links itself. So it proved the fixture had loaded and proved NOTHING
+ * about the re-point. It now reads the ACTUAL `normalized_email` of each of
+ * the three account rows and requires it to equal that identity's disposable
+ * address exactly; a re-point that silently matched no row now stops the run.
+ * The failure messages name the ROLE only and never echo a value read back
+ * from the database.
  */
 function seedDisposableDomain() {
   psqlFileStdout(DISPOSABLE_DB_CONTAINER, join(REPO_ROOT, 'scripts', 'fixtures', 'local_fixtures.sql'), {
@@ -661,6 +758,41 @@ function seedDisposableDomain() {
         `${DISPOSABLE_IDENTITIES.length} are required.`,
     )
   }
+
+  // READ BACK the actual stored addresses, one row per identity, and require
+  // each to be the disposable one. An account id is a committed, non-secret
+  // fixture literal and an address is a synthetic .example.test literal
+  // authored in this repository, so nothing read here is a credential.
+  const readBack = new Map(
+    psqlRows(
+      DISPOSABLE_DB_CONTAINER,
+      'SELECT a.id::text, a.normalized_email, (u.id IS NOT NULL)::text ' +
+        'FROM public.accounts a LEFT JOIN auth.users u ON u.id = a.auth_user_id;',
+    )
+      .filter((row) => row.length === 3)
+      .map((row) => [row[0], { email: row[1], linkedToAuth: row[2] === 't' }]),
+  )
+  const repointed = []
+  for (const identity of DISPOSABLE_IDENTITIES) {
+    const row = readBack.get(identity.accountId)
+    if (row === undefined) {
+      throw new SafeError(`The ${identity.label} disposable account row was not found after the fixture load.`)
+    }
+    if (row.email !== identity.email) {
+      throw new SafeError(
+        `The ${identity.label} disposable account row does not carry its disposable address after the re-point. ` +
+          'The stored value is deliberately not reported. The UPDATE matched no row, or matched the wrong one.',
+      )
+    }
+    if (!row.linkedToAuth) {
+      throw new SafeError(`The ${identity.label} disposable account row is not linked to a disposable Auth user.`)
+    }
+    repointed.push(identity.key)
+  }
+  if (repointed.length !== DISPOSABLE_IDENTITIES.length) {
+    throw new SafeError('Not every disposable account row was verified by read-back.')
+  }
+  return { repointed: repointed.length }
 }
 
 /**
@@ -695,7 +827,13 @@ async function signIn(apiUrl, publishableKey, identity, password) {
 // Teardown state and hygiene (H-1), on EVERY exit path.
 // ---------------------------------------------------------------------
 
-const acquired = { cli: null, workdir: null, stackStarted: false }
+/**
+ * H-1's subjects, populated AS THEY ARE ACQUIRED. `startAttempted` is set
+ * BEFORE `supabase start` is invoked, not after it returns: a start that
+ * fails part-way is exactly the path on which containers are most likely to
+ * be orphaned, and a flag set only on success cannot see it.
+ */
+const acquired = { cli: null, workdir: null, startAttempted: false, stackStarted: false }
 const readings = { canonicalBefore: null, canonicalAfter: null }
 
 let teardownPromise = null
@@ -704,35 +842,105 @@ function teardown() {
   return teardownPromise
 }
 
+/**
+ * Teardown, and H-1 FROM MEASUREMENTS ACTUALLY TAKEN.
+ *
+ * Two defects are closed here, both on the same path — a partial or failed
+ * `supabase start`, which is precisely where an orphan is most likely.
+ *
+ *  (a) NO STOP WAS ISSUED on that path. `stackStarted` was set only after
+ *      `startDisposableStack` RETURNED, so a start that threw part-way left
+ *      the targeted `supabase stop --project-id … --no-backup` unexecuted and
+ *      could orphan containers. The stop is now issued whenever provisioning
+ *      was ATTEMPTED.
+ *
+ *  (b) H-1 WAS STAMPED FROM UNMEASURED EMPTY ARRAYS. `stackStarted ? … : []`
+ *      handed the gate three empty arrays that no instrument had ever
+ *      populated, and empty compared equal to clean, so H-1 read PASS having
+ *      measured nothing — while `prove-disposable-isolation.mjs` fails closed
+ *      on the same question. Every subject below is now `null` until an
+ *      instrument really returns a value: "measured zero" and "not measured"
+ *      are different states, and only the first can satisfy the gate.
+ */
 async function runTeardown() {
-  if (!acquired.stackStarted && acquired.workdir === null) return
+  if (!acquired.stackStarted && !acquired.startAttempted && acquired.workdir === null) return
 
   phase('Teardown — the disposable stack only; the canonical stack is left running')
 
-  if (acquired.stackStarted && acquired.cli !== null) {
+  if (acquired.cli !== null && (acquired.stackStarted || acquired.startAttempted)) {
+    // Targeted at the DISPOSABLE project id. `--all` is never used: it would
+    // stop the canonical stack. Issued whether the start succeeded or failed.
     const status = stopDisposableStack(acquired.cli, acquired.workdir)
-    info(`supabase stop --project-id ${DISPOSABLE_PROJECT_ID} --no-backup exit ${status}`)
+    info(
+      `supabase stop --project-id ${DISPOSABLE_PROJECT_ID} --no-backup exit ${status} ` +
+        `(start ${acquired.stackStarted ? 'succeeded' : 'was attempted and did not complete'})`,
+    )
+  } else {
+    info('provisioning was never attempted, so there is no disposable stack to stop')
   }
 
-  const containers = acquired.stackStarted ? disposableContainersPresent() : []
-  const volumes = acquired.stackStarted ? disposableVolumesPresent() : []
-  const stillServing = []
-  if (acquired.stackStarted) {
-    for (const port of DISPOSABLE_PUBLISHED_PORTS) {
-      if (!(await waitForPortSilent(port))) stillServing.push(port)
-    }
+  // null = NOT MEASURED. Never a pass.
+  const measured = { containers: null, volumes: null, stillServing: null, workdirRemoved: null }
+
+  try {
+    measured.containers = disposableContainersPresent()
+  } catch {
+    // Left null: an unavailable instrument must not read as a clean result.
   }
-  const workdirRemoved = destroyDisposableWorkdir()
+  try {
+    measured.volumes = disposableVolumesPresent()
+  } catch {
+    // Left null.
+  }
+  try {
+    const serving = []
+    for (const port of DISPOSABLE_PUBLISHED_PORTS) {
+      if (!(await waitForPortSilent(port))) serving.push(port)
+    }
+    measured.stillServing = serving
+  } catch {
+    // Left null.
+  }
+  try {
+    measured.workdirRemoved = destroyDisposableWorkdir() && !existsSync(acquired.workdir ?? '')
+  } catch {
+    // Left null.
+  }
 
   if (!ledger.has('H-1')) {
-    gateFrom(
-      'H-1',
-      containers.length === 0 && volumes.length === 0 && stillServing.length === 0 && workdirRemoved,
-      `every disposable container and data volume is gone, ports ${DISPOSABLE_PUBLISHED_PORTS.join(', ')} refuse a ` +
-        'TCP connection, and the temporary workdir was deleted; the canonical stack was never stopped',
-      `containers left: ${containers.join(', ') || 'none'}; volumes left: ${volumes.join(', ') || 'none'}; ` +
-        `ports still serving: ${stillServing.join(', ') || 'none'}; workdir removed: ${workdirRemoved}`,
-    )
+    const unmeasured = [
+      ['disposable containers', measured.containers],
+      ['disposable volumes', measured.volumes],
+      ['disposable published ports', measured.stillServing],
+      ['the temporary workdir', measured.workdirRemoved],
+    ]
+      .filter(([, value]) => value === null)
+      .map(([name]) => name)
+
+    if (unmeasured.length > 0) {
+      gate(
+        'H-1',
+        'FAIL',
+        `hygiene could not be MEASURED for: ${unmeasured.join('; ')}. This run acquired something, so an unmeasured ` +
+          'subject is an unproven one, and an unproven subject is never a pass — check for orphaned disposable ' +
+          `containers, volumes and listeners on ports ${DISPOSABLE_PUBLISHED_PORTS.join(', ')} by hand`,
+      )
+    } else {
+      gateFrom(
+        'H-1',
+        measured.containers.length === 0 &&
+          measured.volumes.length === 0 &&
+          measured.stillServing.length === 0 &&
+          measured.workdirRemoved === true,
+        `MEASURED after the stop, not inferred from it: docker ps -a lists ${measured.containers.length} container(s) ` +
+          `named for "${DISPOSABLE_PROJECT_ID}", docker volume ls lists ${measured.volumes.length}, all ` +
+          `${DISPOSABLE_PUBLISHED_PORTS.length} disposable ports (${DISPOSABLE_PUBLISHED_PORTS.join(', ')}) refuse a ` +
+          'TCP connection, and the temporary workdir is deleted; the canonical stack was never stopped',
+        `containers left: ${measured.containers.join(', ') || 'none'}; volumes left: ` +
+          `${measured.volumes.join(', ') || 'none'}; ports still serving: ` +
+          `${measured.stillServing.join(', ') || 'none'}; workdir removed: ${measured.workdirRemoved}`,
+      )
+    }
   }
 }
 
@@ -788,7 +996,16 @@ function evidenceDirectory() {
   return target
 }
 
-function writeLedger() {
+/**
+ * Write the ledger. It is written on EVERY path except `--help`, including a
+ * run that aborted before deciding a single gate, because the alternative —
+ * writing nothing — leaves an EARLIER run's ledger at this same fixed path
+ * for a reader to mistake for this one's. The header therefore identifies the
+ * run (start time and pid), states its outcome plainly, and says how many
+ * gates it actually decided.
+ */
+function writeLedger(decidedGateCount) {
+  const aborted = decidedGateCount === 0
   const lines = []
   lines.push('# F17 — disposable-stack writable-lifecycle gate ledger')
   lines.push('')
@@ -796,11 +1013,39 @@ function writeLedger() {
   lines.push('REDACTED BY CONSTRUCTION: gate ids, verdicts, authored reasons, counts, ports, container')
   lines.push('names and public checksums only. No password, token, cookie, key, header or request body.')
   lines.push('')
+  lines.push(`- Run started: ${runState.startedAt} (pid ${runState.pid})`)
   lines.push(`- Completed: ${new Date().toISOString()}`)
+  lines.push(
+    `- Run outcome: ${
+      aborted
+        ? 'ABORTED BEFORE ANY GATE WAS DECIDED — this file describes that abort and nothing else. It deliberately ' +
+          'REPLACES any earlier ledger at this path so no reader can take a previous run\'s result for this run\'s.'
+        : `${decidedGateCount} gate(s) were decided by this run${runState.interrupted ? ', which was then interrupted' : ''}`
+    }`,
+  )
+  if (runState.abortMessage !== null) lines.push(`- Abort reason (authored in-repo): ${runState.abortMessage}`)
   lines.push(`- Canonical project: ${CANONICAL_PROJECT_ID} (never started, stopped, written to or reconfigured)`)
-  lines.push(`- Disposable project: ${DISPOSABLE_PROJECT_ID} (provisioned, then removed)`)
+  lines.push(
+    `- Disposable project: ${DISPOSABLE_PROJECT_ID} (${
+      acquired.stackStarted
+        ? 'provisioned, then removed'
+        : acquired.startAttempted
+          ? 'provisioning was ATTEMPTED and did not complete; the targeted stop was issued and removal was measured'
+          : 'never provisioned in this run'
+    })`,
+  )
   lines.push(`- Canonical checksum before: ${readings.canonicalBefore?.checksum.sha256 ?? 'not read'}`)
   lines.push(`- Canonical checksum after:  ${readings.canonicalAfter?.checksum.sha256 ?? 'not read'}`)
+  lines.push(`- Accepted, documented limitation: ${PUBLISHED_PORT_BIND_LIMITATION}.`)
+  lines.push(
+    `- Published-port bindings measured while the stack was up: ${
+      runState.portBindings === null
+        ? 'not measured (the disposable stack was never running in this run)'
+        : runState.portBindings.length === 0
+          ? 'none reported by Docker'
+          : runState.portBindings.map((entry) => `${entry.name} -> ${entry.ports}`).join(' ; ')
+    }`,
+  )
   lines.push('')
   lines.push('| Gate | Verdict | Reason |')
   lines.push('|---|---|---|')
@@ -833,11 +1078,36 @@ let finished = false
 async function finish() {
   if (finished) return
   finished = true
-  if (ledger.size === 0) return
+
+  // `--help` is not a run: it provisions nothing, decides nothing and must
+  // not disturb the persisted artifact. EVERY other path writes a ledger,
+  // including one that aborted before deciding a single gate — that is the
+  // path on which a stale file used to be left behind to misrepresent it.
+  if (runState.mode === 'help') return
+
+  // How much this run really decided, read BEFORE G-18 is auto-decided and
+  // before closeLedger() fills the map with NOT-RUN defaults.
+  const decidedGateCount = ledger.size
+
+  // G-18 is decided — or explicitly recorded NOT-RUN — on every path,
+  // including the abort path, before anything else is closed.
   await decideCanonicalGate()
-  closeLedger('not reached: the run ended before this gate could be decided')
+
+  closeLedger(
+    decidedGateCount === 0
+      ? 'not reached: this run aborted before any gate could be decided'
+      : 'not reached: the run ended before this gate could be decided',
+  )
   printLedger()
-  writeLedger()
+
+  const tally = { PASS: 0, FAIL: 0, 'NOT-RUN': 0 }
+  for (const entry of ledger.values()) tally[entry.verdict] += 1
+  say('')
+  say(
+    `  ${tally.PASS} PASS · ${tally.FAIL} FAIL · ${tally['NOT-RUN']} NOT-RUN, of ${OWNED_GATES.size} gates this ` +
+      'runner owns. A NOT-RUN gate is unproved, not passed, and it carries an exit consequence (see --help).',
+  )
+  writeLedger(decidedGateCount)
 }
 
 // ---------------------------------------------------------------------
@@ -847,9 +1117,12 @@ async function finish() {
 async function main() {
   const options = parseArgs(process.argv)
   if (options.help) {
+    // --help decides no gate and writes no ledger.
+    runState.mode = 'help'
     say(HELP.trim())
     return
   }
+  runState.mode = options.preflightOnly ? 'preflight' : 'run'
 
   say('B.E.S.T Coach — F17 writable lifecycle on the DISPOSABLE Supabase stack (R-C2-2, R-C2-4)')
   say('No credential is read from an environment variable, an argument, a file, a default or a')
@@ -984,8 +1257,20 @@ async function main() {
   pass(`${migrations.length} committed migrations copied into a temp workdir and verified byte-identical by SHA-256`)
 
   info('provisioning; CLI stdout and stderr are captured and DISCARDED because the CLI prints local keys')
+  // Recorded BEFORE the call, so a start that fails part-way still causes
+  // teardown to issue the targeted stop instead of orphaning containers.
+  acquired.startAttempted = true
   startDisposableStack(cli, workdir)
   acquired.stackStarted = true
+  // MEASURE the published-port bindings while the stack is up, so the
+  // accepted all-interfaces limitation is recorded from Docker rather than
+  // described from memory. Names and port mappings only.
+  runState.portBindings = disposablePortBindings()
+  info(
+    `published-port bindings (accepted, documented limitation — not loopback-restricted): ${
+      runState.portBindings.map((entry) => `${entry.name} -> ${entry.ports}`).join(' ; ') || 'none reported'
+    }`,
+  )
   const census = readDisposableCensus()
   if (census.appliedMigrations !== EXPECTED_CANONICAL_MIGRATIONS) {
     throw new SafeError(
@@ -1016,8 +1301,11 @@ async function main() {
     await createDisposableIdentities(admin, secrets)
     pass(`${DISPOSABLE_IDENTITIES.length} SEPARATE synthetic Auth identities created on the disposable stack`)
 
-    seedDisposableDomain()
-    pass('the SAME committed synthetic domain fixture loaded verbatim, then re-pointed at the disposable addresses')
+    const seeded = seedDisposableDomain()
+    pass(
+      `the SAME committed synthetic domain fixture loaded verbatim; all ${seeded.repointed} account rows READ BACK ` +
+        'and confirmed to carry their disposable addresses (not merely asserted)',
+    )
 
     phase('G-1 — real three-role authentication against the disposable stack')
     for (const identity of DISPOSABLE_IDENTITIES) {
@@ -1045,19 +1333,78 @@ async function main() {
   /* -----------------------------------------------------------------
    * 8 — G-17 on the disposable stack, read-only through its own verifier.
    * ---------------------------------------------------------------- */
+  /*
+   * POSITIVE EVIDENCE, OR NOT-RUN — NEVER PASS ON AN EMPTY AUDIT TABLE.
+   *
+   * `run-f17.mjs` guards this gate with `chainRows.length > 0` and fails it
+   * with "audit_verify_chain() returned no chain to verify". That guard was
+   * LOST when the primitive was duplicated here, and on this stack the empty
+   * case is not hypothetical: the lifecycle that would write audit events
+   * cannot currently run, so `public.audit_events` is empty on EVERY run and
+   * `corrupt.length === 0` stamped G-17 PASS over zero chains and zero
+   * events, every time. That was a live false PASS.
+   *
+   * The guard is restored and made stronger for the disposable case. G-17
+   * can now only reach PASS on four positive measurements together: the
+   * verifier really returned at least one chain; it really checked at least
+   * one event; it ran in COMPLETE mode and included the head of every chain
+   * it returned; and the number of events it checked really equals the number
+   * of rows in `public.audit_events`, so no event was silently skipped.
+   *
+   * With zero events there is nothing to corrupt and nothing to verify, so
+   * the honest verdict is NOT-RUN with an authored reason. This runner
+   * deliberately records NOT-RUN where the canonical runner records FAIL:
+   * on the canonical fixture database an empty chain would be a defect,
+   * while here it is the expected consequence of a blocker recorded
+   * elsewhere in this same ledger. Neither one is PASS.
+   */
   phase('G-17 — audit chain on the disposable stack')
   const chainRows = psqlRows(
     DISPOSABLE_DB_CONTAINER,
-    "SELECT centre_id::text, ok::text, events_checked::text FROM public.audit_verify_chain();",
+    'SELECT centre_id::text, ok::text, events_checked::text, mode, ' +
+      "COALESCE(first_failed_seq::text, '-'), COALESCE(failed_check, '-'), head_checked::text " +
+      'FROM public.audit_verify_chain();',
   )
+  const auditEventRowsRaw = psqlRows(DISPOSABLE_DB_CONTAINER, 'SELECT count(*) FROM public.audit_events;')[0]?.[0]
+  const auditEventRows = Number(auditEventRowsRaw)
+  const auditEventRowsKnown = Number.isInteger(auditEventRows)
+  const eventsChecked = chainRows.reduce((total, row) => total + (Number(row[2]) || 0), 0)
   const corrupt = chainRows.filter((row) => row[1] !== 't')
-  gateFrom(
-    'G-17',
-    corrupt.length === 0,
-    `public.audit_verify_chain() reported ok for ${chainRows.length} chain(s) on the disposable database ` +
-      `(${chainRows.map((row) => row[2]).join('+') || '0'} event(s) checked)`,
-    `chain(s) failing verification: ${corrupt.map((row) => row[0]).join(', ')}`,
-  )
+  const partial = chainRows.filter((row) => row[3] !== 'complete')
+  const headsUnchecked = chainRows.filter((row) => row[6] !== 't')
+
+  if (chainRows.length === 0 || eventsChecked === 0 || !auditEventRowsKnown || auditEventRows === 0) {
+    gate(
+      'G-17',
+      'NOT-RUN',
+      `no chain was verified over a NON-EMPTY set of audit events: public.audit_verify_chain() returned ` +
+        `${chainRows.length} chain(s) covering ${eventsChecked} event(s), and public.audit_events holds ` +
+        `${auditEventRowsKnown ? auditEventRows : 'an unreadable number of'} row(s) on the disposable database. ` +
+        'With zero events there is nothing to corrupt and nothing to verify, so this gate is NOT-RUN — it is never ' +
+        `PASS on an empty audit table. The lifecycle that would write those events ${APP_TARGET_BLOCKED}`,
+    )
+  } else {
+    gateFrom(
+      'G-17',
+      corrupt.length === 0 &&
+        partial.length === 0 &&
+        headsUnchecked.length === 0 &&
+        eventsChecked === auditEventRows,
+      `public.audit_verify_chain() ran in COMPLETE mode over ${chainRows.length} chain(s) on the disposable database ` +
+        `and reported ok for every one, checking ${eventsChecked} event(s) — exactly the ${auditEventRows} row(s) ` +
+        'present in public.audit_events, with the head of each chain included in the verification',
+      corrupt.length > 0
+        ? `chain(s) failing verification: ${corrupt
+            .map((row) => `${row[0]} at seq ${row[4]} (${row[5]})`)
+            .join(', ')}`
+        : partial.length > 0
+          ? `${partial.length} chain(s) were verified in partial mode, which cannot claim complete-chain integrity`
+          : headsUnchecked.length > 0
+            ? `${headsUnchecked.length} chain(s) were verified without their head`
+            : `the verifier checked ${eventsChecked} event(s) but public.audit_events holds ${auditEventRows} row(s), ` +
+              'so some events were not covered',
+    )
+  }
 
   /* -----------------------------------------------------------------
    * 9 — G-19. Positively asserted, not merely configured.
@@ -1118,8 +1465,9 @@ let interrupted = false
 const onSignal = () => {
   if (interrupted) return
   interrupted = true
+  runState.interrupted = true
   process.stdout.write('\nAborting. Removing the disposable stack, then verifying and writing the ledger.\n')
-  process.exitCode = 130
+  process.exitCode = EXIT_INTERRUPTED
   try {
     // A signal during a hidden prompt must not leave echo disabled.
     if (process.stdin.isTTY && typeof process.stdin.setRawMode === 'function') process.stdin.setRawMode(false)
@@ -1145,11 +1493,18 @@ const onSignal = () => {
 process.on('SIGINT', onSignal)
 process.on('SIGTERM', onSignal)
 
+let hardFailure = false
+
 main()
   .catch((error) => {
+    // Every SafeError message is AUTHORED in this repository and is never
+    // derived from captured output, an Auth response or an environment value,
+    // so it is safe to record. Anything else is replaced with a fixed string.
     const message = error instanceof SafeError ? error.message : 'The disposable F17 runner failed.'
+    runState.abortMessage = message
+    hardFailure = true
     process.stderr.write(`\nFAILED: ${message}\n`)
-    process.exitCode = 1
+    process.exitCode = EXIT_GATE_FAILED_OR_RUN_ABORTED
   })
   .then(async () => {
     try {
@@ -1158,8 +1513,23 @@ main()
       // Never surfaces captured output.
     }
     await finish()
+
+    /*
+     * AN HONEST EXIT CODE. The previous scheme counted FAILs only, so a run
+     * that decided nothing and proved nothing exited 0. NOT-RUN is still an
+     * honest verdict and is NOT converted into FAIL to fix that; instead an
+     * owned gate left unproved gets its own non-zero code, documented in
+     * --help and in the ledger, so "nothing failed" can no longer be read as
+     * "everything was proved".
+     */
+    if (process.exitCode === EXIT_INTERRUPTED) return
     const failed = [...ledger.values()].filter((entry) => entry.verdict === 'FAIL').length
-    if (failed > 0 && process.exitCode !== 130) process.exitCode = 1
+    const unproved = [...ledger.entries()].filter(
+      ([id, entry]) => entry.verdict === 'NOT-RUN' && OWNED_GATES.has(id),
+    ).length
+    if (failed > 0 || hardFailure) process.exitCode = EXIT_GATE_FAILED_OR_RUN_ABORTED
+    else if (unproved > 0) process.exitCode = EXIT_OWNED_GATES_UNPROVED
+    else process.exitCode = EXIT_ALL_OWNED_GATES_PROVED
   })
   .finally(() => {
     // Nothing may keep the event loop alive once the run is over. stdin is

@@ -740,6 +740,11 @@ export function disposableWorkdir() {
  * `[db] major_version` is pinned to 17 to match the canonical stack, so the
  * ten committed migrations replay against the same PostgreSQL major version
  * they were accepted on.
+ *
+ * NO LOOPBACK PIN IS WRITTEN HERE BECAUSE NONE CAN BE. See
+ * `PUBLISHED_PORT_BIND_LIMITATION`: the installed CLI's schema has no bind,
+ * host or listen key, so every port below is a bare integer published on all
+ * interfaces. The limitation is measured and recorded, not hidden.
  */
 function disposableConfigToml() {
   return `# GENERATED — the disposable F17 stack (operator ruling R-C2-2).
@@ -986,6 +991,62 @@ export function disposableContainersPresent() {
 /** Every disposable volume currently present. */
 export function disposableVolumesPresent() {
   return [...allVolumes()].filter((name) => name.includes(DISPOSABLE_PROJECT_ID)).sort()
+}
+
+/**
+ * DOCUMENTED, ACCEPTED LIMITATION — the disposable stack's published ports
+ * bind on ALL interfaces, not on loopback only, for the duration of a run.
+ *
+ * This was checked against the INSTALLED CLI rather than assumed. The
+ * project-local Supabase CLI (devDependency `supabase` 2.109.1) embeds its
+ * own `config.toml` schema, and every port it exposes there — `api.port`,
+ * `db.port`, `db.shadow_port`, `db.pooler.port`, `studio.port`,
+ * `local_smtp.port` — is a bare INTEGER. The schema carries no bind address,
+ * no host, no listen address and no interface key at any level, and the CLI
+ * rejects a key its schema does not define, so a loopback restriction CANNOT
+ * BE EXPRESSED in the generated config. The CLI publishes through Docker,
+ * which binds 0.0.0.0 by default.
+ *
+ * It is therefore recorded as an accepted limitation rather than silently
+ * left: the runner MEASURES the actual bindings with `disposablePortBindings()`
+ * while the stack is up and writes them into its ledger. The exposure is
+ * bounded — the stack exists only for the duration of one run, is torn down
+ * with `--no-backup` on every exit path, and holds only synthetic fixture
+ * data — but it is real while the run is in progress, and an operator reading
+ * the ledger is told so in these words.
+ */
+export const PUBLISHED_PORT_BIND_LIMITATION =
+  `the installed Supabase CLI's config schema exposes published ports as bare integers only — it has no bind, host, ` +
+  `listen or interface key at any level — so the disposable stack's ports ${DISPOSABLE_PUBLISHED_PORTS.join(', ')} ` +
+  'are published by Docker on ALL interfaces (0.0.0.0) for the duration of a run and cannot be pinned to loopback ' +
+  'through configuration; this is an accepted, documented limitation, measured and recorded rather than left silent'
+
+/**
+ * The ACTUAL published-port bindings of the disposable containers, as Docker
+ * reports them. Names and port mappings only — no protocol byte is read and
+ * nothing a credential could occupy is examined. Returns an empty array if
+ * Docker cannot be queried, so a caller can distinguish "measured" from
+ * "unavailable" by checking the length against the containers it expects.
+ */
+export function disposablePortBindings() {
+  const result = spawnSync('docker', ['ps', '-a', '--format', '{{.Names}}\t{{.Ports}}'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: 'utf8',
+    windowsHide: true,
+    shell: false,
+  })
+  if (result.error || result.status !== 0) return []
+  const suffix = `_${DISPOSABLE_PROJECT_ID}`
+  return (result.stdout || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const [name, ports] = line.split('\t')
+      return { name: (name || '').trim(), ports: (ports || '').trim() }
+    })
+    .filter((entry) => entry.name.endsWith(suffix) && entry.ports.length > 0)
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 /** The disposable stack's own migration and schema census. */
