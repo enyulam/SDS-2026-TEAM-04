@@ -107,3 +107,24 @@ Each of the ruling's fail-closed cases is a real coded rejection, tested one cas
 The normal configuration is **not** weakened: with the profile variable absent, a loopback target is still accepted on `54321` and only `54321`, and a hosted `https://*.supabase.co` target is still accepted exactly as before.
 
 **The interactive disposable runner `run-f17-disposable.mjs` is unchanged by R-C2-5.** It still keeps its TTY-only, no-echo, operator-typed password prompts, still records the app-dependent gates `NOT-RUN`, and still serves no application. Serving the application against the disposable stack belongs to a separate autonomous script; this ruling authorizes the configuration that makes it possible, and changes no runner.
+
+## 6. `prove-disposable-app.mjs` — the autonomous app-served proof
+
+`scripts/physical-test/prove-disposable-app.mjs` (`npm run physical-test:f17-app`) provisions the disposable stack, **serves the application against it** with the `f17-disposable` profile set in the **child process environment only**, drives headless Chrome over CDP on port 9418, proves the **live screen 07 → 08 transition** through the real report identifier the server returned, tears everything down, and re-reads the canonical database.
+
+It is a **third autonomous script**, not a runner. `run-f17.mjs` and `run-f17-disposable.mjs` are both byte-untouched by it.
+
+**Authentication — minted sessions, no password.** The three disposable identities are created through the disposable stack's own Auth Admin API **without a `password` field**; sessions are minted admin-side (`generateLink` → `verifyOtp` on a cookie-writing `@supabase/ssr` client). **No password is created, stored, typed or used anywhere on that path** — which is why it needs no TTY, and why it is stronger than a generated password would have been. A structural refusal (`assertDisposableApiTarget`) runs before any admin client is constructed, so the path is incapable of targeting the canonical stack.
+
+**What it decides, and what it deliberately does not:**
+
+| | Gates |
+|---|---|
+| Decided from positive evidence | G-2, G-5, G-14, G-17, G-18, G-20, G-21, H-1 |
+| `NOT-RUN`, admin mint is not a password sign-in | **G-1** — stays owned by the interactive operator runs |
+| `NOT-RUN`, no real AI provider is activated (R-C2-5 step 7) | **G-6** |
+| `NOT-RUN`, decided elsewhere on its own disposable database | G-4, G-11 |
+| `NOT-RUN`, half-decidable — the fixture-mode half is positively satisfied and stated, the concurrency half is not run here | G-19 |
+| `NOT-RUN`, the lifecycle beyond 07 → 08 is not driven | G-3, G-7, G-8, G-9, G-10, G-12, G-13, G-15, G-16 |
+
+Its own `A-1 … A-20` ledger carries the environment and lifecycle evidence: isolation, the passwordless identities, the served binding, the live transition and the id read-back, teardown, and the canonical before/during/after readings.
