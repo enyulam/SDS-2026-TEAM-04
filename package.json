@@ -12,7 +12,9 @@
     "start": "next start",
     "lint": "eslint",
     "fixtures:local": "node scripts/fixtures/load-local-fixtures.mjs",
-    "physical-test:f17": "node scripts/physical-test/run-f17.mjs"
+    "physical-test:f17": "node scripts/physical-test/run-f17.mjs",
+    "physical-test:f17-disposable": "node scripts/physical-test/run-f17-disposable.mjs",
+    "physical-test:f17-isolation": "node scripts/physical-test/prove-disposable-isolation.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",
