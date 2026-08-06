@@ -38,6 +38,16 @@
 //  * The runner refuses anything but the local stack: project id, database
 //    container and loopback API/DB hosts are all verified, and there is no
 //    login, link, --linked, db push/pull/dump or hosted fallback.
+//    That claim is about THIS RUNNER'S OWN channel, and it is stated no more
+//    widely than it is true. The application the runner serves with
+//    `next start` loads its own `.env.local`, whose values this file never
+//    reads — so the runner cannot assert what the served app's
+//    NEXT_PUBLIC_SUPABASE_URL says. What it DOES assert, without reading a
+//    value: every http(s) ORIGIN the exercised pages actually requested is
+//    loopback (origins only — never a path, query or header). A divergent
+//    Supabase URL would additionally break the project-ref-scoped session
+//    cookie names and fail G-1/G-2 loudly rather than silently, and this
+//    runner performs no governed write in any case.
 //  * NO GOVERNED WRITE is performed against the canonical fixture
 //    database. That is not timidity, it is gate G-18: the canonical
 //    verifier database must remain pristine, and a lifecycle walkthrough
@@ -165,6 +175,30 @@ const OPAQUE_SESSION = '00000000-0000-4000-8000-0000000000a2'
 /** The fixture's REAL student and session — real, and not this parent's to read. */
 const FIXTURE_STUDENT = 'c2000000-0000-4000-8000-000000000001'
 const FIXTURE_SESSION = 'c5000000-0000-4000-8000-000000000001'
+
+/**
+ * Deadlines. NOTHING that talks to the browser is unbounded: a dropped socket
+ * or a wedged renderer must end the run, not hold the server, Chrome and both
+ * ports open forever with no ledger written.
+ */
+const CDP_TIMEOUT_MS = 20_000
+const NAVIGATION_TIMEOUT_MS = 30_000
+const CONSOLE_LIVENESS_TIMEOUT_MS = 5_000
+
+/**
+ * The shortest thing that can honestly be called a rendered document. A
+ * document shorter than this, or one that is not a complete <html> element,
+ * is treated as "not obtained" rather than compared. Its BYTES are never
+ * printed — only this length bound and the structural verdict are.
+ */
+const MINIMUM_DOCUMENT_BYTES = 200
+
+/**
+ * The literal the console-collector liveness self-test emits and looks for.
+ * It is authored here, contains nothing sensitive, and the collected text is
+ * still never rendered — only whether the collector saw it.
+ */
+const CONSOLE_LIVENESS_TOKEN = 'best-coach-f17-console-collector-liveness-probe'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(HERE, '..', '..')
@@ -310,10 +344,14 @@ WHAT IT DOES, IN ORDER
      Supabase sign-in call and dropped.
   7. Drives the authenticated security, isolation and console gates in a real
      browser, captures non-credential screenshots, then decides G-11/G-19 by
-     running the Step 7I concurrency proofs on a DISPOSABLE database.
-  8. Stops the server and the browser on every exit path, verifies both ports
-     are released and neither process survives, and writes a REDACTED gate
-     ledger outside this repository.
+     running the Step 7I concurrency proofs on a DISPOSABLE database. Every
+     browser step is bounded by a deadline and FAILS CLOSED: a navigation that
+     errored, a page value that could not be read and a console collector that
+     could not catch its own deliberate probe all produce FAIL or an abort,
+     never a verdict reached on evidence that was not collected.
+  8. Stops the server and the browser on every exit path — including Ctrl+C —
+     verifies both ports are released and neither process survives, and writes
+     a REDACTED gate ledger outside this repository.
 
 WHAT IT WILL NEVER DO
   * Read a password from an environment variable, a command-line argument, a
@@ -323,7 +361,10 @@ WHAT IT WILL NEVER DO
   * Render the stdout or stderr of any child process.
   * Screenshot a login form, filled or otherwise.
   * Perform a governed write against the canonical fixture database.
-  * Contact, link to, or fall back to any non-local target.
+  * Contact, link to, or fall back to any non-local target on its OWN channel,
+    and it aborts if a page the served application rendered requested any
+    non-loopback origin. It does not read the served application's .env.local,
+    so it makes no claim about a value it has never seen.
 
 OPTIONS
   --help            print this and exit 0.
@@ -339,8 +380,11 @@ NON-CREDENTIAL ENVIRONMENT (all optional; none may carry a secret)
 
 ABORTING
   Press Ctrl+C at any point, including at a password prompt. The run stops,
-  the server and the browser are killed, both ports are checked released, and
-  nothing captured is printed.
+  the server and the browser are killed, both ports are then verified released
+  by re-binding them, H-1 is recorded from that verification, the gate ledger
+  is written with whatever was decided, and nothing captured is printed. The
+  exit code is 130. The abort path does not wait for the run to settle: it is
+  the same teardown the normal path uses, and it runs exactly once.
 `
 
 function parseArgs(argv) {
@@ -1181,42 +1225,153 @@ function startChrome(debugPort) {
 // resulting session cookies are installed into the browser.
 // ---------------------------------------------------------------------
 
-function createCdpClient(socket, consoleErrors) {
+function createCdpClient(socket, consoleErrors, timeoutMs = CDP_TIMEOUT_MS) {
   let messageId = 0
+  let closedReason = null
   const pending = new Map()
+  const waiters = new Set()
+
+  /** Arm a timer that never keeps the event loop alive on its own. */
+  const armed = (ms, onExpiry) => {
+    const timer = setTimeout(onExpiry, ms)
+    if (typeof timer.unref === 'function') timer.unref()
+    return timer
+  }
 
   socket.addEventListener('message', (event) => {
-    const message = JSON.parse(event.data)
-    if (message.id && pending.has(message.id)) {
-      const settle = pending.get(message.id)
-      pending.delete(message.id)
-      settle(message)
+    let message
+    try {
+      message = JSON.parse(event.data)
+    } catch {
+      // A frame that is not JSON cannot answer anything; ignore it. Its
+      // content is never rendered, here or anywhere.
       return
     }
-    if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') {
+
+    if (message.id && pending.has(message.id)) {
+      const entry = pending.get(message.id)
+      pending.delete(message.id)
+      clearTimeout(entry.timer)
+      // FAIL CLOSED. A CDP error must never be handed on as a result: an
+      // undefined result read out of an error response is what lets a gate
+      // "pass" having compared nothing. Only the method name (a literal
+      // authored in this file) and the numeric CDP code are surfaced; the
+      // error text is not, because it can quote page or request content.
+      if (message.error) {
+        entry.fail(
+          new SafeError(
+            `The browser rejected the CDP command ${entry.method} (code ${Number(message.error.code) || 'unknown'}).`,
+          ),
+        )
+        return
+      }
+      entry.settle(message)
+      return
+    }
+
+    if (typeof message.method === 'string') {
+      for (const waiter of [...waiters]) {
+        if (waiter.methods.includes(message.method)) {
+          waiters.delete(waiter)
+          clearTimeout(waiter.timer)
+          waiter.settle(message.method)
+        }
+      }
+    }
+
+    if (message.method === 'Runtime.consoleAPICalled' && message.params?.type === 'error') {
       consoleErrors.push(
         message.params.args?.map((argument) => argument.value ?? argument.description ?? '').join(' ') ??
           'console error',
       )
     }
     if (message.method === 'Runtime.exceptionThrown') {
-      consoleErrors.push(message.params.exceptionDetails?.text ?? 'uncaught exception')
+      consoleErrors.push(message.params?.exceptionDetails?.text ?? 'uncaught exception')
     }
-    if (message.method === 'Log.entryAdded' && message.params.entry.level === 'error') {
+    if (message.method === 'Log.entryAdded' && message.params?.entry?.level === 'error') {
       consoleErrors.push(message.params.entry.text)
     }
   })
 
+  /** A dropped socket must reject every outstanding wait, not hang the run. */
+  const abandon = (reason) => {
+    closedReason = reason
+    for (const [id, entry] of [...pending.entries()]) {
+      pending.delete(id)
+      clearTimeout(entry.timer)
+      entry.fail(new SafeError(`The CDP connection closed while ${entry.method} was outstanding.`))
+    }
+    for (const waiter of [...waiters]) {
+      waiters.delete(waiter)
+      clearTimeout(waiter.timer)
+      waiter.fail(new SafeError('The CDP connection closed while a page event was awaited.'))
+    }
+  }
+  socket.addEventListener('close', () => abandon('closed'), { once: true })
+  socket.addEventListener('error', () => abandon('errored'), { once: true })
+
+  /**
+   * Send one command. EVERY send is bounded: an unanswered command rejects at
+   * the deadline instead of hanging the run with the server, the browser and
+   * both ports still held.
+   */
   const send = (method, params = {}) => {
+    if (closedReason !== null) {
+      return Promise.reject(new SafeError(`The CDP connection is ${closedReason}; ${method} was not sent.`))
+    }
     messageId += 1
     const id = messageId
-    return new Promise((settle) => {
-      pending.set(id, settle)
-      socket.send(JSON.stringify({ id, method, params }))
+    return new Promise((settle, fail) => {
+      const entry = { method, settle, fail, timer: null }
+      entry.timer = armed(timeoutMs, () => {
+        pending.delete(id)
+        fail(new SafeError(`The CDP command ${method} was not answered within ${timeoutMs} ms.`))
+      })
+      pending.set(id, entry)
+      try {
+        socket.send(JSON.stringify({ id, method, params }))
+      } catch {
+        pending.delete(id)
+        clearTimeout(entry.timer)
+        fail(new SafeError(`The CDP command ${method} could not be sent.`))
+      }
     })
   }
 
-  return { send }
+  /**
+   * Watch for the first of `methods`. The watcher is armed BEFORE the command
+   * that provokes the event is sent, so a fast event cannot be missed, and it
+   * can be cancelled without producing an unhandled rejection.
+   */
+  const watch = (methods, ms = timeoutMs) => {
+    let settle
+    let fail
+    const promise = new Promise((res, rej) => {
+      settle = res
+      fail = rej
+    })
+    if (closedReason !== null) {
+      fail(new SafeError(`The CDP connection is ${closedReason}; no page event can arrive.`))
+      return { promise, cancel: () => {} }
+    }
+    const waiter = { methods, settle, fail, timer: null }
+    waiter.timer = armed(ms, () => {
+      waiters.delete(waiter)
+      fail(new SafeError(`No ${methods.join(' or ')} event arrived within ${ms} ms.`))
+    })
+    waiters.add(waiter)
+    return {
+      promise,
+      cancel: () => {
+        if (waiters.delete(waiter)) {
+          clearTimeout(waiter.timer)
+          settle(null)
+        }
+      },
+    }
+  }
+
+  return { send, watch }
 }
 
 async function findPageTarget(debugPort) {
@@ -1400,7 +1555,7 @@ async function main() {
     closeLedger('not attempted: --preflight-only performs read-only checks and decides no session-dependent gate')
     say('')
     say('Preflight only. Nothing was prompted for; no server, no browser and no governed write.')
-    return { context: runContext, appPort: null, debugPort: null, socket: null }
+    return
   }
 
   const appPort = readPortFromEnv('BEST_COACH_F17_APP_PORT', DEFAULT_APP_PORT)
@@ -1410,6 +1565,16 @@ async function main() {
   }
   if (appPort === debugPort) throw new SafeError('The application port and the CDP port must differ.')
 
+  /*
+   * H-1's subjects are recorded THE MOMENT they are chosen, not when `main`
+   * returns. A failure thrown anywhere after this point — and a Ctrl+C — must
+   * still find real port numbers to verify, because those are precisely the
+   * paths on which a leak is most likely. Nothing here has bound a port yet;
+   * knowing WHICH ports this run owns is what makes the check possible at all.
+   */
+  teardownState.appPort = appPort
+  teardownState.debugPort = debugPort
+
   phase('Ports')
   await assertPortFree(appPort, 'application server')
   await assertPortFree(debugPort, 'Chrome CDP')
@@ -1417,6 +1582,7 @@ async function main() {
 
   const context = runContext
   context.debugPort = debugPort
+  teardownState.context = context
 
   /* -----------------------------------------------------------------
    * G-20 — typecheck, lint and build. Captured, unrendered, exit codes only.
@@ -1462,35 +1628,166 @@ async function main() {
     socket.addEventListener('error', reject, { once: true })
   })
   const cdp = createCdpClient(socket, consoleErrors)
+  teardownState.socket = socket
   await cdp.send('Page.enable')
   await cdp.send('Runtime.enable')
   await cdp.send('Log.enable')
-  await cdp.send('Network.enable')
+  // `Network.enable` is deliberately NOT called. Only Network.setCookie and
+  // Network.clearBrowserCookies are used, and both are commands that need no
+  // enabled domain. Enabling it would stream every request and response header
+  // — including the `Cookie:` header carrying this run's session JWTs —
+  // through this process for no benefit. The cheapest exposure to remove is
+  // the one that was never needed.
   pass(`headless Chrome is driving on CDP port ${debugPort}`)
 
-  const navigate = async (path) => {
-    await cdp.send('Page.navigate', { url: `${origin}${path}` })
-    await new Promise((r) => setTimeout(r, 1200))
+  /* -----------------------------------------------------------------
+   * Browser primitives, all FAIL-CLOSED.
+   *
+   * Every one of these throws rather than returning a soft value. A gate is
+   * allowed to compare only what was actually obtained: `undefined === undefined`
+   * is not evidence of anything, and must never be able to reach a verdict.
+   * ---------------------------------------------------------------- */
+
+  /** Chrome's own net-error tokens are a fixed enumeration and carry no content. */
+  const NET_ERROR = /^net::ERR_[A-Z0-9_]+$/
+
+  const navigateRaw = async (url, what) => {
+    // Armed BEFORE the navigate command so a fast load cannot be missed.
+    const loaded = cdp.watch(['Page.loadEventFired', 'Page.frameStoppedLoading'], NAVIGATION_TIMEOUT_MS)
+    let response
+    try {
+      response = await cdp.send('Page.navigate', { url })
+    } catch (error) {
+      loaded.cancel()
+      throw error
+    }
+    const errorText = response.result?.errorText
+    if (typeof errorText === 'string' && errorText.length > 0) {
+      loaded.cancel()
+      throw new SafeError(
+        `Navigation to ${what} failed in the browser (${NET_ERROR.test(errorText) ? errorText : 'an unrecognised browser error'}). ` +
+          'A failed navigation leaves the PREVIOUS document in place and is never accepted as a result.',
+      )
+    }
+    // The deadline REJECTS. There is no fixed sleep anywhere on this path.
+    await loaded.promise
   }
-  const evaluate = async (expression) => {
+
+  /**
+   * Read one value out of the page. Rejects on a CDP error (handled in the
+   * client), on a thrown page expression, and on a missing result.
+   */
+  const evaluateRaw = async (expression, what) => {
     const response = await cdp.send('Runtime.evaluate', {
       expression,
       returnByValue: true,
       awaitPromise: true,
     })
-    return response.result?.result?.value
+    if (response.result?.exceptionDetails) {
+      throw new SafeError(`The page expression for ${what} threw inside the browser.`)
+    }
+    const remote = response.result?.result
+    if (!remote || typeof remote !== 'object' || remote.type === 'undefined') {
+      throw new SafeError(`The page expression for ${what} returned no value; nothing was obtained to compare.`)
+    }
+    return remote.value ?? null
   }
+
+  const evaluateString = async (expression, what) => {
+    const value = await evaluateRaw(expression, what)
+    if (typeof value !== 'string' || value.length === 0) {
+      throw new SafeError(`The page expression for ${what} did not return a non-empty string.`)
+    }
+    return value
+  }
+
+  const evaluateNullableString = async (expression, what) => {
+    const value = await evaluateRaw(expression, what)
+    if (value === null) return null
+    if (typeof value !== 'string') {
+      throw new SafeError(`The page expression for ${what} returned neither a string nor null.`)
+    }
+    return value
+  }
+
+  /**
+   * Capture a document and ASSERT it is one. The bytes are never printed; only
+   * the structural verdict is. A gate that compares documents may only ever
+   * see a value that got past this.
+   */
+  const evaluateDocument = async (what) => {
+    const html = await evaluateString('document.documentElement.outerHTML', `the document at ${what}`)
+    const lower = html.toLowerCase()
+    if (html.length < MINIMUM_DOCUMENT_BYTES || !lower.startsWith('<html') || !lower.includes('</html>')) {
+      throw new SafeError(
+        `The document captured at ${what} is not a complete rendered HTML document (${html.length} bytes), ` +
+          'so there is nothing to compare and no verdict is available from it.',
+      )
+    }
+    return html
+  }
+
+  /**
+   * Every foreign-portal leg is preceded by a real about:blank navigation. A
+   * navigation that silently fails therefore leaves about:blank behind — a
+   * value no gate accepts — instead of the identity's OWN previous portal,
+   * which is exactly the value that would have been mistaken for a correct
+   * redirect.
+   */
+  const blank = async () => {
+    await navigateRaw('about:blank', 'about:blank')
+    const href = await evaluateString('location.href', 'the blank document')
+    if (href !== 'about:blank') {
+      throw new SafeError('The browser did not return to about:blank between navigations.')
+    }
+  }
+
+  /** Origins the served application actually requested. Loopback is enforced. */
+  const observedOrigins = new Set()
+
+  const collectOrigins = async (what) => {
+    const raw = await evaluateString(
+      "JSON.stringify(Array.from(new Set((performance.getEntriesByType('resource') || [])" +
+        '.map(function (entry) { try { return new URL(entry.name).origin } catch (e) { return null } })' +
+        '.filter(function (value) { return typeof value === "string" && /^https?:/.test(value) }))))',
+      `the resource origins at ${what}`,
+    )
+    let list
+    try {
+      list = JSON.parse(raw)
+    } catch {
+      throw new SafeError(`The resource-origin reading at ${what} could not be parsed.`)
+    }
+    for (const entry of Array.isArray(list) ? list : []) observedOrigins.add(String(entry))
+  }
+
+  const visit = async (path) => {
+    await blank()
+    await navigateRaw(`${origin}${path}`, path)
+    const href = await evaluateString('location.href', `the document at ${path}`)
+    if (href === 'about:blank') {
+      throw new SafeError(
+        `The browser still holds about:blank after navigating to ${path}; the navigation did not produce a document.`,
+      )
+    }
+  }
+
+  const navigate = visit
+
   const surface = async (path) => {
-    await navigate(path)
-    return {
+    await visit(path)
+    const view = {
       path,
-      landing: await evaluate('location.pathname'),
-      html: await evaluate('document.documentElement.outerHTML'),
-      adapterKind: await evaluate(
-        "(document.querySelector('[data-adapter-kind]') || {}).getAttribute ? " +
-          "document.querySelector('[data-adapter-kind]').getAttribute('data-adapter-kind') : null",
+      landing: await evaluateString('location.pathname', `the landing path at ${path}`),
+      html: await evaluateDocument(path),
+      adapterKind: await evaluateNullableString(
+        "(function () { var el = document.querySelector('[data-adapter-kind]'); " +
+          "return el ? el.getAttribute('data-adapter-kind') : null })()",
+        `the adapter kind at ${path}`,
       ),
     }
+    await collectOrigins(path)
+    return view
   }
   const screenshot = async (name) => {
     const result = await cdp.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
@@ -1500,8 +1797,48 @@ async function main() {
     context.screenshots.push(name)
   }
   const findTerms = (haystack, terms) => {
-    const lower = String(haystack ?? '').toLowerCase()
+    if (typeof haystack !== 'string' || haystack.length === 0) {
+      // Never search "nothing" and report a clean result: an empty haystack is
+      // an absence of evidence, not evidence of absence.
+      throw new SafeError('A marker scan was asked to search a document that was never obtained.')
+    }
+    const lower = haystack.toLowerCase()
     return terms.filter((term) => lower.includes(term.toLowerCase()))
+  }
+
+  /* -----------------------------------------------------------------
+   * G-21's collector must PROVE it is attached before G-21 may mean
+   * anything. An empty error list from a collector that was never wired up
+   * is indistinguishable from a clean run — so the collector is made to
+   * catch a deliberate error first, and the buffer is reset before the real
+   * navigation begins. Only the outcome of the self-test is printed; the
+   * collected TEXT is never rendered, here or at the gate.
+   * ---------------------------------------------------------------- */
+  phase('G-21 collector liveness self-test')
+  let consoleCollectorLive = false
+  try {
+    await blank()
+    const before = consoleErrors.length
+    await cdp.send('Runtime.evaluate', {
+      expression: `console.error(${JSON.stringify(CONSOLE_LIVENESS_TOKEN)})`,
+      returnByValue: true,
+      awaitPromise: true,
+    })
+    const deadline = Date.now() + CONSOLE_LIVENESS_TIMEOUT_MS
+    while (Date.now() < deadline && consoleErrors.length === before) {
+      await new Promise((r) => setTimeout(r, 50))
+    }
+    consoleCollectorLive = consoleErrors.length > before
+  } catch {
+    consoleCollectorLive = false
+  }
+  // The probe and anything else observed so far is discarded: G-21 judges the
+  // real navigation only.
+  consoleErrors.length = 0
+  if (consoleCollectorLive) {
+    pass('the console/runtime error collector caught a deliberately emitted error and was then reset')
+  } else {
+    info('the console/runtime error collector did NOT catch its own probe; G-21 will be recorded FAIL')
   }
 
   /* -----------------------------------------------------------------
@@ -1526,6 +1863,8 @@ async function main() {
    * answers differ in any way, the denial disclosed existence.
    */
   let parentDenialPair = null
+  /** Why the pair could not be captured, if it could not. Authored, never captured. */
+  let parentDenialFailure = null
 
   try {
     for (const identity of IDENTITIES) {
@@ -1568,16 +1907,27 @@ async function main() {
       roleSurfaces.set(identity.key, { own, foreign, loginWithSession, roleQuery })
 
       if (identity.key === 'parent') {
-        const unknown = await surface(
-          `/parent/students/${OPAQUE_STUDENT}/sessions/${OPAQUE_SESSION}/report`,
-        )
-        const real = await surface(
-          `/parent/students/${FIXTURE_STUDENT}/sessions/${FIXTURE_SESSION}/report`,
-        )
-        parentDenialPair = {
-          identical: unknown.landing === real.landing && unknown.html === real.html,
-          landing: unknown.landing,
-          leaked: findTerms(real.html, FIXTURE_MARKERS),
+        // G-14's whole substance is a byte comparison, so its degenerate case
+        // — "no bytes at all" — must be a FAILURE to obtain, never a match.
+        // Both documents are asserted to exist and to be real documents before
+        // either is compared, and an inability to capture them is recorded as
+        // such rather than silently satisfying `undefined === undefined`.
+        try {
+          const unknown = await surface(
+            `/parent/students/${OPAQUE_STUDENT}/sessions/${OPAQUE_SESSION}/report`,
+          )
+          const real = await surface(
+            `/parent/students/${FIXTURE_STUDENT}/sessions/${FIXTURE_SESSION}/report`,
+          )
+          parentDenialPair = {
+            identical: unknown.landing === real.landing && unknown.html === real.html,
+            landing: unknown.landing,
+            bytes: real.html.length,
+            leaked: findTerms(real.html, FIXTURE_MARKERS),
+          }
+        } catch (error) {
+          parentDenialFailure =
+            error instanceof SafeError ? error.message : 'the denial pair could not be captured from the browser'
         }
       }
 
@@ -1668,13 +2018,21 @@ async function main() {
    * G-14 — parent isolation and non-disclosing denial.
    * ---------------------------------------------------------------- */
   phase('G-14 — parent non-disclosing denial')
-  if (parentDenialPair === null) {
+  if (parentDenialFailure !== null) {
+    // FAIL, not PASS and not NOT-RUN: the session WAS live and the comparison
+    // was attempted, and it could not obtain both documents.
+    gate(
+      'G-14',
+      'FAIL',
+      `both canonical-report denial documents could not be obtained with the live parent session, so nothing was compared: ${parentDenialFailure}`,
+    )
+  } else if (parentDenialPair === null) {
     gate('G-14', 'NOT-RUN', 'the live parent session was never reached, so no denial pair could be compared')
   } else {
     gateFrom(
       'G-14',
       parentDenialPair.identical && parentDenialPair.leaked.length === 0,
-      `with a live parent session, a canonical report for a non-existent pair and one for the REAL fixture pair rendered byte-identical documents at ${parentDenialPair.landing} — existence is not disclosed and no substance leaked`,
+      `with a live parent session, a canonical report for a non-existent pair and one for the REAL fixture pair rendered byte-identical documents of ${parentDenialPair.bytes} bytes at ${parentDenialPair.landing} — existence is not disclosed and no substance leaked`,
       parentDenialPair.identical
         ? `the denial for the real pair carried: ${parentDenialPair.leaked.join(', ')}`
         : 'the two canonical-report denials differed, which discloses that one of the two pairs exists',
@@ -1684,12 +2042,45 @@ async function main() {
   /* -----------------------------------------------------------------
    * G-21 — browser console.
    * ---------------------------------------------------------------- */
-  gateFrom(
-    'G-21',
-    consoleErrors.length === 0,
-    `no uncaught error, console error or error-level log entry across every authenticated surface navigated in this run`,
-    `${consoleErrors.length} browser console/runtime error(s) were observed`,
-  )
+  if (!consoleCollectorLive) {
+    // A collector that never proved it was attached cannot produce a PASS: an
+    // empty error list from a detached collector is not a clean run.
+    gate(
+      'G-21',
+      'FAIL',
+      'the console/runtime error collector failed its liveness self-test — a deliberately emitted console error was not captured — so an empty error list proves nothing',
+    )
+  } else {
+    gateFrom(
+      'G-21',
+      consoleErrors.length === 0,
+      'the collector proved live on a deliberate error, was reset, and then recorded no uncaught error, console error or error-level log entry across every authenticated surface navigated in this run',
+      `${consoleErrors.length} browser console/runtime error(s) were observed`,
+    )
+  }
+
+  /* -----------------------------------------------------------------
+   * The SERVED application's own targets. `next start` loads the
+   * application's own `.env.local`, which this runner never reads. What it
+   * CAN assert without reading a single value is where the served pages
+   * actually went: every http(s) origin the exercised surfaces requested must
+   * be loopback. Only ORIGINS are collected — never a path, query or header —
+   * so nothing a credential could occupy is examined or printed.
+   * ---------------------------------------------------------------- */
+  const foreignOrigins = [...observedOrigins].filter((entry) => {
+    try {
+      return !LOOPBACK_HOSTS.has(new URL(entry).hostname)
+    } catch {
+      return true
+    }
+  })
+  if (foreignOrigins.length > 0) {
+    throw new SafeError(
+      `The served application requested ${foreignOrigins.length} non-loopback origin(s): ${foreignOrigins.join(', ')}. ` +
+        'This runner refuses every non-local target.',
+    )
+  }
+  pass(`every origin the served application requested is loopback (${observedOrigins.size} distinct)`)
 
   /* -----------------------------------------------------------------
    * G-17 — audit chain, read-only, through the in-database verifier.
@@ -1754,17 +2145,27 @@ async function main() {
   for (const id of ['G-3', 'G-4', 'G-5', 'G-6', 'G-7', 'G-8', 'G-9', 'G-10', 'G-12', 'G-13', 'G-15']) {
     gate(id, 'NOT-RUN', LIFECYCLE_NOT_RUN)
   }
-
-  return { context, appPort, debugPort, socket }
 }
 
 // ---------------------------------------------------------------------
 // Teardown and hygiene (H-1), on EVERY exit path.
 // ---------------------------------------------------------------------
 
-let teardownState = { appPort: null, debugPort: null, socket: null, context: null }
+/**
+ * H-1's subjects, populated AS THEY ARE ACQUIRED — the ports the moment they
+ * are chosen, the socket the moment it is open — and never at `main`'s return.
+ * A run that throws after starting the server must still be able to name the
+ * ports it has to prove released; a run that cannot name them records FAIL,
+ * because "there is nothing to check" is not the same as "nothing is held".
+ */
+const teardownState = { appPort: null, debugPort: null, socket: null, context: null }
+
+let toreDown = false
 
 async function teardownAndVerify() {
+  if (toreDown) return
+  toreDown = true
+
   const { appPort, debugPort, socket } = teardownState
   try {
     socket?.close()
@@ -1775,44 +2176,93 @@ async function teardownAndVerify() {
 
   const serverGone = !processAlive(owned.serverPid)
   const chromeGone = !processAlive(owned.chromePid)
-  const appPortReleased = appPort === null ? true : await waitForPortReleased(appPort)
-  const debugPortReleased = debugPort === null ? true : await waitForPortReleased(debugPort)
+  // `null` means UNVERIFIED, and unverified is never a pass.
+  const appPortReleased = appPort === null ? null : await waitForPortReleased(appPort)
+  const debugPortReleased = debugPort === null ? null : await waitForPortReleased(debugPort)
+  const describe = (value, port) =>
+    value === null ? 'unverified (this run never recorded which port it owned)' : `${port} released=${value}`
 
   if (!ledger.has('H-1')) {
     gateFrom(
       'H-1',
-      serverGone && chromeGone && appPortReleased && debugPortReleased,
-      `this run's server PID and Chrome PID are gone and ports ${appPort ?? '-'} and ${debugPort ?? '-'} are released`,
-      `server gone=${serverGone}, chrome gone=${chromeGone}, app port released=${appPortReleased}, CDP port released=${debugPortReleased}`,
+      serverGone && chromeGone && appPortReleased === true && debugPortReleased === true,
+      `this run's server PID and Chrome PID are gone, and ports ${appPort} (server) and ${debugPort} (CDP) were re-bound successfully, which proves they are released`,
+      `server gone=${serverGone}, chrome gone=${chromeGone}, app port ${describe(appPortReleased, appPort)}, ` +
+        `CDP port ${describe(debugPortReleased, debugPort)}`,
     )
   }
 }
 
+/**
+ * The single end-of-run routine: close every undecided gate, print the ledger
+ * and write it. It runs exactly once, on the normal path AND on the signal
+ * path, which is what makes the abort documentation true.
+ */
+let ledgerFinished = false
+function finishRun() {
+  if (ledgerFinished) return
+  ledgerFinished = true
+  if (ledger.size === 0) return
+
+  closeLedger('not reached: the run ended before this gate could be decided')
+  printLedger()
+  const context = teardownState.context ?? runContext
+  context.completedAt = new Date().toISOString()
+  try {
+    const directory = evidenceDirectory()
+    writeLedger(directory, context)
+    say('')
+    say(`Redacted gate ledger written to ${directory}`)
+  } catch {
+    say('')
+    say('The gate ledger could not be written to the external evidence pack.')
+  }
+}
+
 let interrupted = false
+
+/**
+ * The abort path does what the documentation says it does: kill, VERIFY the
+ * ports are released, record H-1 from that verification, close and write the
+ * ledger, then exit 130. It does not merely kill and hope — and it does not
+ * depend on `main` ever settling, which it may not if the browser has stopped
+ * answering.
+ */
+async function abortAndExit() {
+  try {
+    await teardownAndVerify()
+  } catch {
+    // Teardown must never mask the abort, and never surfaces captured output.
+  }
+  try {
+    finishRun()
+  } catch {
+    // Neither must the ledger.
+  }
+  process.exit(130)
+}
+
 const onSignal = () => {
   if (interrupted) return
   interrupted = true
-  process.stdout.write('\nAborting. Stopping this run\'s server and browser.\n')
+  process.stdout.write('\nAborting. Stopping this run\'s server and browser, then verifying the ports.\n')
   // No captured output is printed here, or anywhere on this path.
-  killOwned(owned.chrome)
-  killOwned(owned.server)
   process.exitCode = 130
-  setTimeout(() => process.exit(130), 1500).unref()
+  try {
+    // A signal during a hidden prompt must not leave echo disabled.
+    if (process.stdin.isTTY && typeof process.stdin.setRawMode === 'function') process.stdin.setRawMode(false)
+  } catch {
+    // Restoring the terminal must never mask the abort.
+  }
+  // A last-resort deadline, generous enough for a real port-release check.
+  const hardStop = setTimeout(() => process.exit(130), 45_000)
+  if (typeof hardStop.unref === 'function') hardStop.unref()
+  void abortAndExit()
 }
 process.on('SIGINT', onSignal)
 process.on('SIGTERM', onSignal)
 
 main()
-  .then((result) => {
-    if (result && typeof result === 'object') {
-      teardownState = {
-        appPort: result.appPort,
-        debugPort: result.debugPort,
-        socket: result.socket,
-        context: result.context,
-      }
-    }
-  })
   .catch((error) => {
     const message = error instanceof SafeError ? error.message : 'The F17 runner failed.'
     process.stderr.write(`\nFAILED: ${message}\n`)
@@ -1824,23 +2274,9 @@ main()
       await teardownAndVerify()
     }
 
-    if (ledger.size > 0) {
-      closeLedger('not reached: the run ended before this gate could be decided')
-      printLedger()
-      const context = teardownState.context ?? runContext
-      context.completedAt = new Date().toISOString()
-      try {
-        const directory = evidenceDirectory()
-        writeLedger(directory, context)
-        say('')
-        say(`Redacted gate ledger written to ${directory}`)
-      } catch {
-        say('')
-        say('The gate ledger could not be written to the external evidence pack.')
-      }
-      const failed = [...ledger.values()].filter((entry) => entry.verdict === 'FAIL').length
-      if (failed > 0) process.exitCode = 1
-    }
+    finishRun()
+    const failed = [...ledger.values()].filter((entry) => entry.verdict === 'FAIL').length
+    if (failed > 0 && process.exitCode !== 130) process.exitCode = 1
   })
   .finally(() => {
     // Nothing may keep the event loop alive once the run is over. stdin is
