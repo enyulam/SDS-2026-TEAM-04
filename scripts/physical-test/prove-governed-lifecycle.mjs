@@ -50,12 +50,30 @@
 // the REAL `requestDraftCore` with `DeterministicFixtureDraftProvider`
 // injected, against the disposable database. Same orchestration function,
 // same schema validation, same grounding gate, same governed
-// `report_store_draft` transition, same audit events. What differs from a
-// participant run is the provider object and the transport into the
-// database container. Every other lifecycle step in this file is driven by
-// real clicks in a real browser against the real served application.
-// L-4 records this distinction in its own ledger reason rather than
-// letting a reader assume the click produced the draft.
+// `report_store_draft` transition, same audit events. Every other lifecycle
+// step in this file is driven by real clicks in a real browser against the
+// real served application.
+//
+// THREE THINGS DIFFER FROM A PARTICIPANT RUN ON THIS ONE STEP, stated
+// precisely because an under-declared shortcut is itself a defect:
+//   1. the provider object is the deterministic fixture, not OpenAI;
+//   2. the database channel is `psql --username=postgres` inside the
+//      disposable container — a SUPERUSER transport. No client GRANT and no
+//      RLS policy is therefore exercised on this one step, whereas the
+//      served action carries the caller's own `authenticated` credential
+//      (ADR-3: "the database role follows the credential, not the code
+//      location"). The RPC still re-derives every relationship from the
+//      claims the channel sets, so authority is re-proved inside the
+//      function — but privilege is not;
+//   3. `authUserSub` is supplied as the fixture trainer's literal id rather
+//      than resolved through the wrapper's `auth.getUser()`, so the
+//      wrapper's `unauthenticated` gate is not exercised here.
+// The wrapper does nothing else security-relevant beyond those two things
+// and constructing the provider. The RLS/GRANT path those three skip IS
+// exercised, on the same governed RPCs, by `run-integration.mjs` Part 2/3
+// under real JWTs and by every OTHER leg in this file through the served
+// application. L-4's ledger reason repeats this rather than letting a
+// reader assume the click produced the draft.
 //
 // The served child environment still has all three AI selectors
 // OVERWRITTEN with an unratified literal, so the served process remains
@@ -195,6 +213,8 @@ const CONTROL_TITLES = new Map([
   ['N-10', 'No external AI provider call was possible from the served process'],
   ['N-11', 'The canonical database is byte-identical before and after this run'],
   ['N-12', 'This run leaves no stack, server, browser, volume or held port behind'],
+  ['N-13', 'The Quality Checklist gate is enforced SERVER-side, not only by a disabled button'],
+  ['N-14', 'Management cannot read report content before trainer approval'],
 ])
 
 const lifecycle = new Map()
@@ -803,6 +823,32 @@ SELECT COALESCE(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(x)), '[]'::jsonb) FROM 
   }
 }
 
+/**
+ * A REAL authorization denial, distinguished from a malformed call.
+ *
+ * Run C4's first review caught two negative controls passing vacuously: the
+ * harness had built `p_ratings` as `text[]` (an empty JS array is vacuously
+ * "all strings", so `sqlLiteral` typed it wrongly) against a `jsonb`
+ * parameter, and had named `p_wording_hash` where the signature says
+ * `p_expected_wording_hash`. Both made PostgreSQL fail FUNCTION RESOLUTION
+ * with 42883 — before a single role predicate ran. `error !== null` was
+ * therefore true for a reason that proves nothing about authorization, and
+ * deleting every role check from those RPCs would not have failed the run.
+ *
+ * This predicate closes the class rather than the two instances: a denial
+ * counts ONLY when the database raised one of this project's own authored
+ * BC codes or a genuine privilege denial (42501). Every structural SQL error
+ * — undefined function, undefined table, bad cast, bad input syntax — is
+ * explicitly NOT a denial, so a future signature drift fails the control
+ * loudly instead of passing it silently.
+ */
+const STRUCTURAL_SQL_ERRORS = new Set(['42883', '42P01', '42804', '42702', '42601', '22P02', '42P02'])
+function isAuthorizationDenial(error) {
+  if (!error || typeof error.code !== 'string') return false
+  if (STRUCTURAL_SQL_ERRORS.has(error.code)) return false
+  return /^BC\d{3}$/.test(error.code) || error.code === '42501'
+}
+
 /** One-value read helper against the disposable database. */
 function dbValue(sql) {
   const rows = psqlRows(DISPOSABLE_DB_CONTAINER, sql)
@@ -1264,11 +1310,53 @@ async function main() {
   legFrom('L-4', drafted.outcome === 'success' && drafted.data.status === 'draft_ready' && draftStatus === 'draft_ready' && versionCount === 1,
     `requestDraftCore — the SAME governed orchestration the server action calls — ran schema validation, the grounding ` +
       `gate and the governed report_store_draft transition, leaving the report at ${draftStatus} with ${versionCount} ` +
-      'immutable version. The DETERMINISTIC FIXTURE provider was injected because Run C4 forbids an external call and ' +
-      'the served action constructs the real provider unconditionally (G-19, no switch); the real-provider path is ' +
-      'separately proven by G-6 (Run C3-C). The served screen 08 meanwhile reported its designed generation failure, ' +
-      `which is itself the proof that no provider was reachable from the served process: ${generateScreenFailure.includes('not configured') || generateScreenFailure.length > 0 ? 'the failure surface rendered' : 'no failure surface'}`,
+      'immutable version. THIS STEP IS NOT BROWSER-DRIVEN and differs from a participant run in exactly three declared ' +
+      'ways: the deterministic fixture provider replaces OpenAI (Run C4 forbids an external call and the served action ' +
+      'constructs the real provider unconditionally — G-19, no switch); the database channel is a superuser psql ' +
+      'transport into the disposable container, so no client GRANT or RLS policy is exercised on this one step; and ' +
+      'authUserSub is the fixture literal rather than the wrapper\'s auth.getUser() result. The RPC still re-derives ' +
+      'every relationship from the claims set on that channel. The real-provider path is proven by G-6 (Run C3-C); the ' +
+      'RLS/GRANT path is proven by run-integration.mjs under real JWTs and by every other leg here through the served ' +
+      `application. The served screen 08 meanwhile reported its designed generation failure, which is itself evidence ` +
+      `that no provider was reachable from the served process: ${generateScreenFailure.length > 0 ? 'the failure surface rendered' : 'no failure surface'}`,
     `requestDraftCore gave ${drafted.outcome}; the report is ${draftStatus} with ${versionCount} version(s)`)
+
+  /*
+   * N-13 / N-14 — taken HERE, at the only moment they are meaningful: the
+   * report is at draft_ready with an all-false checklist and no trainer
+   * approval yet. Both are governed-RPC probes that bypass the UI entirely,
+   * which is the point — a disabled button and a hidden row are not controls.
+   */
+  const draftLock = Number(dbValue(`SELECT lock_version FROM public.reports WHERE id='${liveReportId}';`))
+  const draftVersion = dbValue(`SELECT current_cycle_version_id::text FROM public.reports WHERE id='${liveReportId}';`)
+  const draftHash = dbValue(
+    `SELECT content_hash FROM public.report_versions WHERE id = (SELECT current_cycle_version_id FROM public.reports WHERE id='${liveReportId}');`)
+  const checklistAtDraft = checklistCount(liveReportId)
+  const prematureApprove = await trainerDb.rpc('report_trainer_approve', {
+    p_report_id: liveReportId, p_expected_status: 'draft_ready', p_expected_lock_version: draftLock,
+    p_expected_version_id: draftVersion, p_expected_content_hash: draftHash,
+  })
+  const statusAfterPremature = reportStatus()
+  capture('N13_premature_approve_error', prematureApprove.error ?? null)
+  controlFrom('N-13',
+    checklistAtDraft === 0 && isAuthorizationDenial(prematureApprove.error) && statusAfterPremature === 'draft_ready',
+    `with the Quality Checklist at ${checklistAtDraft}/3, a SIGNATURE-CORRECT trainer approval issued DIRECTLY against ` +
+      `the governed RPC — bypassing the disabled button entirely — was refused with the authored code ` +
+      `${prematureApprove.error?.code}, and the report stayed at ${statusAfterPremature}. The gate is server-side`,
+    `checklist=${checklistAtDraft}/3, denied=${isAuthorizationDenial(prematureApprove.error)} ` +
+      `(code ${prematureApprove.error?.code ?? 'none'}), status=${statusAfterPremature}`)
+
+  const mgmtPreApprovalRead = await managementDb.rpc('report_get_management_review', {
+    p_class_session_id: FIXTURE_SESSION, p_student_id: FIXTURE_STUDENT,
+  })
+  const mgmtPreApprovalRows = Array.isArray(mgmtPreApprovalRead.data) ? mgmtPreApprovalRead.data.length : -1
+  capture('N14_pre_approval_read', { error: mgmtPreApprovalRead.error ?? null, rows: mgmtPreApprovalRows })
+  controlFrom('N-14',
+    mgmtPreApprovalRead.error === null && mgmtPreApprovalRows === 0,
+    `while the report sits at draft_ready — before ANY trainer approval — management's own governed review read returns ` +
+      `${mgmtPreApprovalRows} rows with no error: the pre-approval draft is not readable by management, and the denial ` +
+      'is non-disclosing (a zero-row answer, not an error that would confirm the report exists) — A-038',
+    `error=${mgmtPreApprovalRead.error?.code ?? 'none'}, rows=${mgmtPreApprovalRows}`)
 
   // =================================================================
   // L-5 — trainer edits the narrative (UI); checklist resets.
@@ -1424,8 +1512,11 @@ async function main() {
   const versionsAfterWording = Number(dbValue(`SELECT count(*) FROM public.report_versions WHERE report_id='${liveReportId}';`))
   legFrom('L-8', ratingsBeforeWording !== null && ratingsBeforeWording === ratingsAfterWording && versionsAfterWording === 3 && editorMentionsInternals === false,
     `the management wording editor leaked NO assessment substance (no trainer notes, no dimension:rating pair, no ` +
-      `content hash) and its save created a new immutable version (${versionsAfterWording} total) whose nine ratings ` +
-      'are byte-identical to the trainer-approved source — management changed wording and nothing else',
+      `content hash) and its save created a new immutable version (${versionsAfterWording} total) whose NINE RATING ` +
+      'SNAPSHOTS are byte-identical to those of the version it derived from. Scope of this measurement, stated exactly: ' +
+      'report_version_ratings was compared before and after across two genuinely different version rows; the ' +
+      'server-side rejection of a management write to any OTHER governed column is proven by N-4 and by ' +
+      'run-integration.mjs INT-L5, not by this leg',
     `ratings unchanged=${ratingsBeforeWording === ratingsAfterWording}, versions=${versionsAfterWording}, ` +
       `leaked=[${Array.isArray(editorLeaks) ? editorLeaks.join(', ') : 'unmeasured'}]`)
 
@@ -1460,10 +1551,18 @@ async function main() {
   const openCorrections = Number(dbValue(
     `SELECT count(*) FROM public.report_correction_requests WHERE report_id='${liveReportId}' AND status='open';`))
   const versionsAfterReturn = Number(dbValue(`SELECT count(*) FROM public.report_versions WHERE report_id='${liveReportId}';`))
-  legFrom('L-9', returnedStatus === 'needs_edit' && openCorrections === 1 && versionsAfterReturn === 3,
+  // A-035 measured, not asserted: the FROZEN version's own approval row must
+  // be untouched by the return. Captured as an identity fingerprint so a
+  // later rewrite in place would change it.
+  const approvalRowsAfterReturn = dbValue(
+    'SELECT COALESCE(string_agg(report_version_id::text || \':\' || approver_role, \',\' ORDER BY report_version_id::text), \'none\') ' +
+    `FROM public.report_version_approvals WHERE report_id='${liveReportId}';`)
+  legFrom('L-9', returnedStatus === 'needs_edit' && openCorrections === 1 && versionsAfterReturn === 3 && approvalRowsAfterReturn !== 'none',
     `a real return-for-correction moved the report to ${returnedStatus} with exactly ${openCorrections} open correction ` +
-      `request, and created NO version (${versionsAfterReturn} unchanged) — the frozen trainer-approved version was never rewritten`,
-    `status=${returnedStatus}, open requests=${openCorrections}, versions=${versionsAfterReturn}`)
+      `request, created NO version (${versionsAfterReturn} unchanged), and left the frozen trainer approval row in place ` +
+      '— the return writes reports and the correction record only, never the approved version (A-035)',
+    `status=${returnedStatus}, open requests=${openCorrections}, versions=${versionsAfterReturn}, ` +
+      `approval rows=${approvalRowsAfterReturn}`)
 
   // =================================================================
   // L-10 — trainer correction and reapproval.
@@ -1522,11 +1621,32 @@ async function main() {
   const versionsAfterCorrection = Number(dbValue(`SELECT count(*) FROM public.report_versions WHERE report_id='${liveReportId}';`))
   const resolvedCorrections = Number(dbValue(
     `SELECT count(*) FROM public.report_correction_requests WHERE report_id='${liveReportId}' AND status <> 'open';`))
-  legFrom('L-10', reapprovedStatus === 'trainer_approved' && versionsAfterCorrection === 4 && resolvedCorrections === 1 && trainerSeesCorrection,
+  /*
+   * A-035, MEASURED. The reapproval must land on a NEW version and must not
+   * rewrite the approval row the returned version already carried. Comparing
+   * the approval fingerprint before and after proves both halves: the earlier
+   * row survives verbatim (it is a prefix of the new set) and a genuinely
+   * different version id now carries the second approval.
+   */
+  const approvalRowsAfterReapproval = dbValue(
+    'SELECT COALESCE(string_agg(report_version_id::text || \':\' || approver_role, \',\' ORDER BY report_version_id::text), \'none\') ' +
+    `FROM public.report_version_approvals WHERE report_id='${liveReportId}';`)
+  const approvedVersionIds = new Set((approvalRowsAfterReapproval ?? '').split(',').map((s) => s.split(':')[0]))
+  const priorApprovalSurvived = (approvalRowsAfterReturn ?? '').split(',')
+    .every((entry) => (approvalRowsAfterReapproval ?? '').includes(entry))
+  capture('L10_approvals_after_return', approvalRowsAfterReturn)
+  capture('L10_approvals_after_reapproval', approvalRowsAfterReapproval)
+  legFrom('L-10',
+    reapprovedStatus === 'trainer_approved' && versionsAfterCorrection === 4 && resolvedCorrections === 1 &&
+      trainerSeesCorrection && priorApprovalSurvived && approvedVersionIds.size === 2,
     `the trainer saw the correction requirement on the returned report, corrected it through a NEW immutable version ` +
-      `(${versionsAfterCorrection} total — the returned version was never reapproved in place), re-ticked the checklist ` +
-      `and re-approved to ${reapprovedStatus}; the correction request is resolved (${resolvedCorrections})`,
-    `correction visible=${trainerSeesCorrection}, status=${reapprovedStatus}, versions=${versionsAfterCorrection}, resolved=${resolvedCorrections}`)
+      `(${versionsAfterCorrection} total), re-ticked the checklist and re-approved to ${reapprovedStatus}; the ` +
+      `correction request is resolved (${resolvedCorrections}). A-035 is MEASURED, not assumed: the earlier approval ` +
+      `row survived the whole loop byte-for-byte and ${approvedVersionIds.size} DISTINCT version ids now carry ` +
+      'approvals — the returned version was never reapproved in place',
+    `correction visible=${trainerSeesCorrection}, status=${reapprovedStatus}, versions=${versionsAfterCorrection}, ` +
+      `resolved=${resolvedCorrections}, prior approval survived=${priorApprovalSurvived}, ` +
+      `distinct approved versions=${approvedVersionIds.size}`)
 
   // =================================================================
   // L-11 — management sees the corrected pending report.
@@ -1565,7 +1685,9 @@ async function main() {
   const approvedResidue = Number(dbValue(`SELECT count(*) FROM public.reports WHERE status='approved';`))
   legFrom('L-12', submittedStatus === 'submitted' && submittedVersion !== null && approvedResidue === 0,
     `a real "Approve & Submit" click, confirmed through the real dialog, published the report to ${submittedStatus} and ` +
-      `set latest_submitted_version_id; NO row anywhere committed at the transient 'approved' state (${approvedResidue})`,
+      `set latest_submitted_version_id, with no row anywhere left at the transient 'approved' state (${approvedResidue}). ` +
+      'That residue count is a post-hoc reading and cannot by itself distinguish one transaction from two — the ' +
+      "ATOMICITY and ORDER of the two transitions are proven by N-9, which pins the exact ordered event pair",
     `status=${submittedStatus}, submitted version=${submittedVersion === null ? 'unset' : 'set'}, approved residue=${approvedResidue}`)
 
   // =================================================================
@@ -1600,14 +1722,26 @@ async function main() {
     const text = main ? main.innerText : document.body.innerText;
     const leaks = [];
     if (/\\b(beginning|developing|mastering|mastered)\\b\\s*(rating|level)/i.test(text)) leaks.push('rating attribution');
-    if (/(Body|Emotion|Speech|Tonality|Eye Contact|Vocal Projection|Emotional Expression|Sentence Flow|Audience Awareness)\\s*[:\\u2014-]\\s*(Beginning|Developing|Mastering|Mastered)/i.test(text)) {
+    /*
+     * The dimension:rating separator is ANY whitespace, not just a colon or
+     * dash. The historical caught leak on this screen was a "Performance
+     * Summary" GRID, which renders as "Eye Contact\\tBeginning" with no
+     * punctuation at all — a punctuation-only pattern would miss exactly the
+     * leak this check exists to catch.
+     */
+    if (/(Body|Emotion|Speech|Tonality|Eye Contact|Vocal Projection|Emotional Expression|Sentence Flow|Audience Awareness)\\s*[:\\u2014\\u2013-]?\\s*(Beginning|Developing|Mastering|Mastered)\\b/i.test(text)) {
       leaks.push('a dimension:rating pair');
     }
     if (/quality checklist|evidence confirms rating|ai draft reviewed|privacy check passed/i.test(text)) leaks.push('checklist');
     if (/trainer note|internal note|coach notes/i.test(text)) leaks.push('internal notes');
     if (text.includes(${JSON.stringify(TRAINER_NOTES.slice(0, 40))})) leaks.push('trainer observation notes');
+    if (text.includes(${JSON.stringify(FOLLOW_UP_NOTES.slice(0, 40))})) leaks.push('trainer follow-up notes');
     if (/content[_ ]hash/i.test(text)) leaks.push('content hash');
-    if (main && main.querySelector('textarea, input:not([type="hidden"]), button[type="submit"]')) leaks.push('an editable control in the report region');
+    // ANY button counts, not just type="submit" — a plain <button> with an
+    // onClick handler is just as much an editable control.
+    if (main && main.querySelector('textarea, input:not([type="hidden"]), button, [contenteditable="true"]')) {
+      leaks.push('an interactive control in the report region');
+    }
     if (/approve & submit|return assessment concern|edit wording/i.test(text)) leaks.push('management controls');
     return leaks;
   })()`)
@@ -1677,41 +1811,69 @@ async function main() {
       `management->assess landed ${managementToTrainerAssess}`)
 
   // N-4 — management cannot mutate assessment facts through a governed RPC.
+  //
+  // The payload is DELIBERATELY WELL-FORMED — a full nine-rating jsonb body
+  // matching the real signature — so the call resolves and the ONLY thing
+  // left that can reject it is management's role. A malformed call would
+  // fail resolution first and prove nothing (see isAuthorizationDenial).
+  const nineRatings = RATING_PLAN.map(([dimensionCode, rating]) => ({ dimension_code: dimensionCode, rating }))
   const mgmtObservationWrite = await managementDb.rpc('assessment_save_complete_and_open_report', {
     p_class_session_id: FIXTURE_SESSION, p_student_id: FIXTURE_STUDENT,
     p_expected_observation_id: null, p_expected_lock_version: null,
-    p_strength_chips: [], p_focus_chips: [], p_observation_notes: null,
-    p_follow_up_notes: null, p_term_evidence_notes: null, p_ratings: [],
+    p_strength_chips: ['confident-opening'], p_focus_chips: ['pacing'],
+    p_observation_notes: 'management attempting an assessment write',
+    p_follow_up_notes: 'management attempting an assessment write',
+    p_term_evidence_notes: null, p_ratings: nineRatings,
   })
   const mgmtDirectRatings = await managementDb.rpc('assessment_get_trainer_observation', {
     p_class_session_id: FIXTURE_SESSION, p_student_id: FIXTURE_STUDENT,
   })
+  // The PRE-APPROVAL read prohibition: management may read the final-review
+  // candidate only at trainer_approved or submitted (A-038). At this point the
+  // report IS submitted, so the complementary proof is the draft_ready one
+  // below, taken on the second report this run creates for that purpose.
   const ratingsStillIntact = dbValue(
     `SELECT string_agg(dimension_code || '=' || rating, ',' ORDER BY dimension_code) FROM public.report_version_ratings ` +
     `WHERE report_version_id = (SELECT latest_submitted_version_id FROM public.reports WHERE id='${liveReportId}');`)
+  const mgmtWriteDenied = isAuthorizationDenial(mgmtObservationWrite.error)
+  const mgmtReadDenied = isAuthorizationDenial(mgmtDirectRatings.error)
+  capture('N4_write_error', mgmtObservationWrite.error ?? null)
+  capture('N4_read_error', mgmtDirectRatings.error ?? null)
   controlFrom('N-4',
-    mgmtObservationWrite.error !== null && mgmtDirectRatings.error !== null && ratingsStillIntact === ratingsAfterWording,
-    `management's attempt to write an observation was denied by the authored role predicate (${mgmtObservationWrite.error?.code ?? 'denied'}), ` +
-      `its attempt to READ the raw rating grid was denied (${mgmtDirectRatings.error?.code ?? 'denied'}), and the ` +
-      'submitted version still carries the trainer-approved ratings unchanged',
-    `write denied=${mgmtObservationWrite.error !== null}, read denied=${mgmtDirectRatings.error !== null}, ` +
+    mgmtWriteDenied && mgmtReadDenied && ratingsStillIntact === ratingsAfterWording,
+    `management's WELL-FORMED nine-rating observation write (the payload resolves against the real jsonb signature, so ` +
+      `only the role predicate can reject it) was denied with the authored code ${mgmtObservationWrite.error?.code}; its ` +
+      `attempt to READ the raw rating grid was denied with ${mgmtDirectRatings.error?.code}; and the submitted version ` +
+      'still carries the trainer-approved ratings unchanged. Both denials are authored BC codes, not structural SQL errors',
+    `write denied=${mgmtWriteDenied} (code ${mgmtObservationWrite.error?.code ?? 'none'}), ` +
+      `read denied=${mgmtReadDenied} (code ${mgmtDirectRatings.error?.code ?? 'none'}), ` +
       `ratings unchanged=${ratingsStillIntact === ratingsAfterWording}`)
 
-  // N-5 — parent cannot mutate report data.
+  // N-5 — parent cannot mutate report data. Both calls use the EXACT signature
+  // (p_expected_wording_hash, not p_wording_hash — an earlier version of this
+  // harness had that wrong and measured a 42883 resolution error as a denial).
+  const currentLock = Number(dbValue(`SELECT lock_version FROM public.reports WHERE id='${liveReportId}';`))
   const parentApprove = await parentDb.rpc('report_management_approve_and_submit', {
-    p_report_id: liveReportId, p_expected_lock_version: 1, p_expected_version_id: submittedVersion, p_wording_hash: 'x',
+    p_report_id: liveReportId, p_expected_lock_version: currentLock,
+    p_expected_version_id: submittedVersion, p_expected_wording_hash: 'x',
   })
   const parentEdit = await parentDb.rpc('report_save_edit', {
-    p_report_id: liveReportId, p_expected_status: 'submitted', p_expected_lock_version: 1,
+    p_report_id: liveReportId, p_expected_status: 'submitted', p_expected_lock_version: currentLock,
     p_expected_version_id: submittedVersion, p_todays_strength: 'x', p_next_focus: 'x',
     p_practice_suggestion: 'x', p_session_takeaway: 'x',
   })
   const statusAfterParentAttempts = reportStatus()
+  const parentApproveDenied = isAuthorizationDenial(parentApprove.error)
+  const parentEditDenied = isAuthorizationDenial(parentEdit.error)
+  capture('N5_approve_error', parentApprove.error ?? null)
+  capture('N5_edit_error', parentEdit.error ?? null)
   controlFrom('N-5',
-    parentApprove.error !== null && parentEdit.error !== null && statusAfterParentAttempts === 'submitted',
-    `the parent's attempts to approve/submit and to save an edit were both denied by the governed RPCs, and the report ` +
-      `remains ${statusAfterParentAttempts} — the parent boundary is enforced server-side, not by hiding a control`,
-    `approve denied=${parentApprove.error !== null}, edit denied=${parentEdit.error !== null}, status=${statusAfterParentAttempts}`)
+    parentApproveDenied && parentEditDenied && statusAfterParentAttempts === 'submitted',
+    `the parent's SIGNATURE-CORRECT attempts to approve-and-submit (${parentApprove.error?.code}) and to save an edit ` +
+      `(${parentEdit.error?.code}) were both denied by authored role predicates — not by a resolution or cast error — ` +
+      `and the report remains ${statusAfterParentAttempts}. The parent boundary is enforced server-side, not by hiding a control`,
+    `approve denied=${parentApproveDenied} (code ${parentApprove.error?.code ?? 'none'}), ` +
+      `edit denied=${parentEditDenied} (code ${parentEdit.error?.code ?? 'none'}), status=${statusAfterParentAttempts}`)
 
   // N-6 — submitted content stable; earlier versions never exposed.
   await signIn('parent')
