@@ -17,6 +17,22 @@ Each future entry should record:
 - **Commit**
 - **Next permitted action**
 
+**Extended 2026-08-08 (operating-policy reconciliation, `CLAUDE.md` §15.4).** The fields above are unchanged and still required. Add, where applicable:
+
+- **Track / workstream**, and **branch / worktree**
+- **Starting HEAD → ending HEAD**
+- **Migration or schema changes** (or an explicit "none")
+- **Reviewer findings** — adversarial/independent review results, their severity, and how each was remediated
+- **Operator decisions received** during the entry's window
+- **Blockers opened or closed**, by ID
+- **Environment / infrastructure changes** (local services, hosted state)
+- **Cleanup / rollback state** — whether any partial mutation occurred
+- **Multi-agent synthesis**, where used: which workstreams ran, significant findings, contradictions, accepted resolutions, unresolved matters. **Never paste a subagent transcript.**
+
+**Never record** an API key, password, service-role key, authorization header, connection string, other secret, real participant data, or raw private AI content with no evidentiary purpose. Follow the established **redaction-by-construction** discipline — verdicts, counts, routes and public checksums only, generated prose represented by its hash — rather than filtering credential-bearing output after the fact (`CLAUDE.md` §11).
+
+**This log is the canonical HISTORICAL PROGRESS LOG** (`CLAUDE.md` §15.1). It is append-only and is never rewritten, even when a later ruling supersedes an entry. `STATUS.md` is the canonical CURRENT STATUS snapshot; chronology belongs here, not there.
+
 ---
 
 # Initial history (migration → MVP scaffold → governance)
@@ -954,3 +970,84 @@ Each log carries the required header (workstream, owning agent, owning branch, p
 **Commit.** `test(backend): reconcile fixtures, assessment, lifecycle and integration suites to the ratified vocabulary`. Local only, on `feat/48h-backend`; **no tag, no remote, nothing pushed, nothing merged into `main`.**
 
 **Next permitted action.** **Operator:** reload the fixture as described above, then re-run the blocked gates. Only after they report clean may Backend V2 be reviewed for acceptance. **Frontend V3 remains pending and separately authorized** — the frontend still carries the superseded labels — and cross-branch **V4** follows it.
+
+---
+
+## 2026-08-08 — CLAUDE.md operating-policy reconciliation (multi-agent execution + continuity/status/logging) — GOVERNANCE/DOCUMENTATION ONLY
+
+**Scope.** Establish standing operating policy in two domains — (1) multi-agent execution/orchestration, (2) execution continuity, status and progress logging — by **reconciling existing policy rather than appending new policy**. Follows the Phase A governance reconciliation, the Authority Lock, and the OD-4 report-semantics ruling. **Phase A2 not started. Phase B implementation not started. No application change of any kind.**
+
+**Track / workstream.** Governance/documentation only, on `main`, no worktree.
+
+**Starting HEAD → ending HEAD.** `139d7533c126acc6a5162d0fcb889e86e80ed59e` → `139d7533c126acc6a5162d0fcb889e86e80ed59e` (**unchanged — nothing committed**).
+
+**Method — multi-agent, per the policy being written.** Five independent READ-ONLY subagents ran in parallel (A multi-agent policy · B status/logging system · C resume/blocker/operator-decision rules · D autonomy and safety gates · E overlap/duplication and canonical assignment). The orchestrator re-verified every material finding at source before recording it. Two independent adversarial reviews followed — one full falsification pass, one focused re-review of the corrections.
+
+**What already existed (preserved, not duplicated).**
+- **Continuity: PARTIAL.** Amendment 001 **A-008** already ratified the two-document model — `STATUS.md` + `BUILD_NOTES.md`. Preserved unchanged; §15 supplies only what A-008 never specified (canonical role assignment, required fields, snapshot-vs-log discipline, verification on resume).
+- **Multi-agent: effectively ABSENT from standing authority.** `CLAUDE.md` contained zero occurrences of subagent/multi-agent/worktree/single-writer/adversarial. The best material in the project — `AUTONOMOUS_48H_AGENT_CONTRACTS.md` §0 and `PHYSICAL_TEST_SLICE_48H.md` §7 — was sprint-scoped, self-declared subordinate, and outside git. **Promoted and generalized into standing policy; no safeguard weakened.**
+
+**Files changed — 7 tracked (all `.md`) + 4 outside git.**
+- `CLAUDE.md` — §1 precedence ladder now names the four root governance instruments and the Authority Lock (previously absent entirely), with the two-ladder visual/functional split restored per A-045; §11 session continuity extended with forward pointers; §12 gained six stop-and-ask conditions (billable/financial · hosted-or-external provisioning and deployment, paid **or free** · editing ratified authority as distinct from deleting it · Critical/High defect as a halt trigger · legal/privacy ambiguity · retry and commit discipline); **new §14 Execution orchestration**; **new §15 Continuity, blockers and Operator escalation**. §1–§13 numbering deliberately unchanged so existing cross-references stay valid.
+- `docs/progress/STATUS.md` — new CURRENT EXECUTION STATE snapshot block; canonical-role and verify-against-reality header.
+- `docs/progress/BUILD_NOTES.md` — entry format extended; canonical historical-log role stated.
+- `docs/progress/DEMO_TO_MVP_MIGRATION.md` + `BEST_COACH_DEMO_TO_MVP_MIGRATION_TRACKER.md` (root) — HISTORICAL banners; the superseded ChatGPT-seated checkpoint-acceptance protocol explicitly retired; D-1…D-317 ownership preserved.
+- `docs/workstreams/48H_{BACKEND,FRONTEND}_PROGRESS.md` — closed-sprint banners; stale "Amendments 001–004" precedence flagged.
+- `FINAL_MVP_SUBMISSION_READINESS_PLAN.md`, `UI_REFERENCE_FINAL_MVP/FRONTEND_RECONSTRUCTION_TRACKER.md`, `UI_REFERENCE_FINAL_MVP/AUTONOMOUS_48H_EXECUTION_TRACKER.md` — currency/scope markers so they stop competing for "current status".
+
+**Canonical assignment recorded.** AUTHORITY → `FINAL_MVP_AUTHORITY_LOCK.md` · EXECUTION PLAN → `FINAL_MVP_EXECUTION_PLAN.md` (workspace root, **not yet created**) · CURRENT STATUS → `docs/progress/STATUS.md` · HISTORICAL LOG → `docs/progress/BUILD_NOTES.md`. **No new tracker, status file or log was created.**
+
+**Migration / schema changes.** **None.**
+
+**Automated verification.** None applicable — no code changed. Scope proven instead by `git status --porcelain -uall` and `git diff --name-only`: **every changed path is `.md`; zero untracked files.** `docker ps` fails (daemon down), so no database or migration could have run.
+
+**Reviewer findings and remediation.** Full review returned 1 CRITICAL + 8 HIGH + 7 MEDIUM. All remediated: the status block understated the dirty-file set and bundled a pre-existing Phase A edit under a blanket `git restore` (would have destroyed the ratified C-8 correction); a stale environment claim wore a fresh-verification date; two precedence contradictions; the missing free-tier hosted/deployment gate; a checksummably false "byte-identical" claim; three surfaces still reading as live. Focused re-review then caught **four numeric falsehoods introduced by the corrections themselves** (file counts 3-vs-4 and 5-vs-7; "40 commits" where git says **38**; the "byte-identical twin" phrase surviving in §15.1) — all four verified at source and fixed.
+
+**Operator decisions received.** One: the bounded instruction authorizing this reconciliation.
+
+**Blockers opened.** One, **escalated not mitigated** — the frozen worktrees each carry a complete stale governance corpus including their own `CLAUDE.md`/`STATUS.md` predating Phase A and OD-4. A session launched inside one loads the wrong contract and cannot see the warning, which lives in the canonical copy. Authority Lock §31.11 forbids touching them, so the fix requires an Operator ruling: bounded unfreeze to place pointer banners, removal, or explicit risk acceptance. Recorded at `CLAUDE.md` §14.3.
+
+**Environment / infrastructure changes.** None. Docker down throughout; nothing hosted contacted.
+
+**Cleanup / rollback state.** No mutation of any kind. All seven tracked edits individually reversible with `git restore <path>` — **except `docs/plan/BEST_Coach_Implementation_Plan.md`, which is a PRE-EXISTING Phase A edit and must NOT be restored.** The four out-of-git edits are unbacked.
+
+**Deliberately not done.** No commit · no push or remote · no Phase A2 · no implementation · no schema, migration, fixture, test or `.env` change · no hosted/Vercel/GCP action · no external provider call · nothing deleted, moved or archived · frozen demo and both worktrees untouched · Authority Lock and OD-4 ruling untouched · the two OD-4 implementation-time decisions (content-hash envelope V1-vs-V2; grounding rule-4 re-derivation) left **unresolved by design**, and the five-deny-list fail-open hazard left recorded with its negative-control requirement intact.
+
+**Commit.** **NONE — nothing was committed.** The tree is deliberately left dirty for Operator review, consistent with the Phase A and OD-4 runs and with the commit discipline this run added to §12.
+
+**Next permitted action.** **Operator review of the cumulative documentation diff.** No further work is authorized until the Operator authorizes a bounded phase — Phase A2 cleanup, creation of `FINAL_MVP_EXECUTION_PLAN.md`, or the OD-4 implementation track. The worktree stale-corpus hazard above also needs a ruling.
+
+---
+
+## 2026-08-08 — Operator ruling: the two 48H worktrees are CLOSED_BY_NONUSE_POLICY — GOVERNANCE/DOCUMENTATION ONLY
+
+**Scope.** Record the Operator's ruling that `worktrees/backend-48h` (`feat/48h-backend` @ `402b0b6`) and `worktrees/frontend-48h` (`feat/48h-frontend` @ `6762b5c`) are **HISTORICAL / FROZEN IMPLEMENTATION ARTEFACTS**, and propagate the prohibition into active governance and status. This closes the stale-contract execution hazard escalated earlier the same day in the operating-policy reconciliation.
+
+**Track / workstream.** Governance/documentation only, on `main`, no worktree. **Bounded ruling — no Phase A2, no implementation.**
+
+**Starting HEAD → ending HEAD.** `139d753` → `139d753` (**unchanged — nothing committed**).
+
+**The ruling.** Neither worktree's stale `CLAUDE.md`, `STATUS.md` or other governance file may be modified. **Neither may be used for ANY future Final MVP implementation.** All future parallel implementation worktrees are created **fresh from the current accepted `main` baseline, after Phase A2 and after `FINAL_MVP_EXECUTION_PLAN.md` is established.** Phase A2 is authorized to inspect them **read-only** and classify them, and may later **propose** removing the physical directories only on proof of five conditions — reachability from the main repository · no unique required evidence held only in the physical worktree · no effect on the frozen demo · inclusion in the cleanup manifest · **explicit Operator approval**. **Removal is not authorized and was not performed.**
+
+**Risk disposition.** Recorded as **`CLOSED_BY_NONUSE_POLICY`** — closed by prohibiting use, explicitly **not** by accepting stale-contract execution risk and **not** by editing the worktrees. The earlier hazard was that a session launched inside a worktree would load its superseded contract (pre-Phase-A, pre-OD-4, precedence stopping at Amendment 004) and never see a warning living in the canonical copy. A worktree that may never be a launch target never loads that contract. The §31.11 freeze is preserved intact.
+
+**Files changed — 2 tracked, 1 out-of-git. All `.md`.**
+- `CLAUDE.md` — §14.3's OPEN-HAZARD escalation replaced by new **§14.3a**, the ruling in full with the three prohibitions, the fresh-worktree requirement, the read-only Phase A2 authorization and the five removal conditions.
+- `docs/progress/STATUS.md` — worktree row rewritten; new pinned ruling block; active-blockers row records the hazard CLOSED; out-of-git file list corrected 4 → 5.
+- `FINAL_MVP_AUTHORITY_LOCK.md` (out of git) — §31 item 11 extended from "untouched" to the full non-use policy; §2.3 records the ruling. Edited **only** under the explicit Operator instruction authorizing it, per the editing-ratified-authority gate added to §12 earlier the same day.
+
+**Verification — read-only git inspection, no mutation.** `git for-each-ref refs/heads` shows all three branch refs live in the **main repository's shared `.git`**; `git cat-file -t` confirms both commits are objects in that store; `git rev-list --count main..feat/48h-backend` = **0** and the same for frontend — **both branches are fully merged into `main` and hold no unmerged history.** Recorded as evidence for removal-condition 1 **only**; conditions 2–5 are untested and remain the future proposal's burden.
+
+**Reviewer findings.** None commissioned — bounded single-ruling propagation, done directly rather than fanned out, per `CLAUDE.md` §14.1 (*"a small, well-scoped task is done directly"*). One self-caught defect: editing the Authority Lock made the out-of-git file count 4 → 5, and the STATUS.md working-tree row was corrected in the same pass rather than left stale — the §15.2/§15.3 discipline applied to this run's own output.
+
+**Operator decisions received.** One: this ruling.
+
+**Blockers.** **One CLOSED** — the 48H worktree stale-contract hazard, now `CLOSED_BY_NONUSE_POLICY`. None opened.
+
+**Migration / schema changes.** **None.** **Environment changes.** None. **Cleanup / rollback state.** No mutation; nothing deleted, moved, renamed or archived.
+
+**Deliberately not done.** Nothing inside either worktree was read for content, edited, moved or removed · no branch deleted · no `git worktree remove` · no commit · no push · Phase A2 not started · implementation not started · frozen demo untouched.
+
+**Commit.** **NONE.** Tree deliberately left dirty for Operator review.
+
+**Next permitted action.** **Operator review of the cumulative documentation diff.** No further work authorized until the Operator authorizes a bounded phase — Phase A2 cleanup, creation of `FINAL_MVP_EXECUTION_PLAN.md`, or the OD-4 implementation track.

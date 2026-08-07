@@ -1,6 +1,20 @@
 # B.E.S.T Coach — Demo-to-MVP Migration Tracker
 
-**Purpose:** Durable source of truth for selectively migrating the completed local trainer-flow demo into the fresh MVP repository without relying on chat memory.
+> ## ⚠️ HISTORICAL — NOT THE CURRENT STATUS OF THIS PROJECT
+>
+> **Status banner added 2026-08-08 (operating-policy reconciliation, `CLAUDE.md` §15.1). No entry below was edited, reordered or deleted.**
+>
+> **This tracker does not record where the project is now.** Its "Current checkpoint", "Checkpoint status" and "Current permitted action" lines below are frozen at **2026-08-05** and are **stale** — for example they still say *"CP-3 and CP-5 remain open"* (CP-3 was ruled **CLOSED** at Phase A, G-9) and still direct work that has since completed.
+>
+> **The canonical current status is `docs/progress/STATUS.md`, in this same directory.** The canonical historical log is `docs/progress/BUILD_NOTES.md`. The Final MVP baseline is `FINAL_MVP_AUTHORITY_LOCK.md` at the workspace root.
+>
+> ⚠️ **§1's "Mandatory operating workflow" below seats checkpoint acceptance in ChatGPT. That protocol is superseded and must not be followed.** Authority now runs: **explicit Operator rulings → the canonical PDFs → spec + Amendments 001–006 → `FINAL_MVP_AUTHORITY_LOCK.md` → `CLAUDE.md`.** **Only the Operator accepts a checkpoint.**
+>
+> **What this file remains authoritative for:** it is the **sole holder of the `D-1 … D-317` decision register**, which is cited by ID throughout the Authority Lock and the Phase A reconciliation. It is protected material (Authority Lock §31.12) and **must not be deleted, moved, renamed or archived.**
+>
+> **Note:** `BEST_COACH_DEMO_TO_MVP_MIGRATION_TRACKER.md` at the workspace root is a **copy of this file**. The two were byte-identical until this banner was added, and now **differ only in the localized paths inside this banner**. The body below — including the full `D-1 … D-317` register — is identical in both. Neither copy is more current than the other.
+
+**Purpose:** Durable source of truth for selectively migrating the completed local trainer-flow demo into the fresh MVP repository without relying on chat memory. **(Superseded as a status source — see the banner above.)**
 
 **Scope:** This tracker governs only the demo-to-MVP migration. It ends when every relevant demo asset has been ported, rejected, or superseded and the MVP has no dependency on demo-only architecture.
 

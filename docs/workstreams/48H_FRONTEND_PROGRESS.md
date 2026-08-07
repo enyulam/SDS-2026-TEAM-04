@@ -1,5 +1,17 @@
 # 48-Hour Frontend Workstream — Progress Log
 
+> ## ⚠️ HISTORICAL — CLOSED SPRINT. NOT THE CURRENT STATUS, AND NOT A LIVE ASSIGNMENT.
+>
+> **Scope banner added 2026-08-08 (`CLAUDE.md` §15.1). No entry below was edited, reordered or deleted.**
+>
+> The 48-hour physical-test sprint this log covers is **closed and formally accepted**. The "Owning agent / Owning branch / Planned worktree path" header below describes that sprint — **it is not a standing assignment**, and its branch `feat/48h-frontend` is **FROZEN** (Authority Lock §31.11: *"untouched, and must remain so"*).
+>
+> **Canonical CURRENT STATUS: `docs/progress/STATUS.md`. Canonical HISTORICAL LOG: `docs/progress/BUILD_NOTES.md`. Final MVP baseline: `FINAL_MVP_AUTHORITY_LOCK.md`.**
+>
+> ⚠️ **The precedence chain stated below stops at "Amendments 001–004" and is STALE.** Amendments **005 and 006 are ratified and active** (A-041 … A-055), as is `FINAL_MVP_AUTHORITY_LOCK.md` and the **OD-4** report-semantics ruling — which supersedes the four report panel concepts this log was written against. Use `CLAUDE.md` §1 for precedence, never this file.
+>
+> The self-subordinating rules below — *"an operational log, not a governance authority"* and *"canonical progress is reconciled only from `main`"* — remain correct and are now standing policy (§14.3, §15.1).
+
 ## Header
 
 | Field | Value |

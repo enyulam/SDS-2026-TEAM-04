@@ -467,7 +467,7 @@ Basic check only for an MVP — confirm the AI drafting call has a visible loadi
 ### 5.6 STATUS.md and BUILD_NOTES.md final review
 Confirm both permanent continuity documents are accurate (Amendment 001 A-008): `docs/progress/STATUS.md` reflects the final phase/state, and `docs/progress/BUILD_NOTES.md` captures the full chronological build history — together they become the handoff record if anyone else picks up the project later.
 
-**Exit condition for the whole MVP:** every checklist item above is checked, every automated test passes from a clean checkout, and you have personally walked all four UAT scripts without finding a governance violation.
+**Exit condition for the whole MVP:** every checklist item above is checked, every automated test passes from a clean checkout, and you have personally walked ~~all four~~ **the three** UAT scripts without finding a governance violation. **CORRECTED 2026-08-07 (Phase A, C-8):** "four" contradicted this plan's own §5.2 and `:41`, and contradicts **Amendment 002 A-024**, which states *"Final UAT covers **Management, Trainer and Parent**. **TA is removed as a required MVP UAT flow.**"* A-024 governs; the answer is **three**.
 
 ---
 

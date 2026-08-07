@@ -1,6 +1,10 @@
 # CLAUDE.md — B.E.S.T Coach
 
-This file is read by Claude Code at the start of every session in this repo. It is the standing contract for how this project gets built. If anything here conflicts with an ad-hoc instruction in chat, **stop and ask** rather than silently picking one — see "When to stop and ask" at the end.
+This file is read by Claude Code at the start of every session in this repo. It is the standing contract for how this project gets built. If anything here conflicts with an ad-hoc instruction in chat, **stop and ask** rather than silently picking one — see **§12 "When to stop and ask"**.
+
+> ⚠️ **Read these two before acting on anything below.**
+> 1. **"The orchestrator" means the HUMAN OPERATOR** everywhere in §1–§13 (every one of its ~50 uses). It does **not** mean a Claude session. §14 introduces the **"Main Orchestrator"** for the lead Claude Code session — a coordination role that **decides nothing the Operator has not delegated**. **Never read one as the other — see §14.0.**
+> 2. **The standing operating policy now runs to §15**, not §13: **§14 Execution orchestration** (multi-agent, single-writer, worktrees, adversarial review, evidence reuse) and **§15 Continuity, blockers and Operator escalation** (canonical status/log files, resume protocol, blocker schema, consultation handoff). §12's stop-and-ask conditions bind the Main Orchestrator exactly as they bind any session.
 
 ---
 
@@ -24,7 +28,22 @@ If a change you're about to make would let AI-generated content reach a parent v
 
 These documents govern this build. Read the specification and its ratified amendment fully before starting Phase 0, and re-read the relevant section before starting any new phase or module.
 
-**Precedence (highest first):** Specification v3 → ratified amendments (Amendment 001, then Amendment 002, then Amendment 003, then Amendment 004, then Amendment 005, then **Amendment 006** for the clauses each names) → this `CLAUDE.md` → Implementation Plan → **Figma Design 2** (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker → the 48-hour physical-test contract.
+**Precedence (highest first):** **explicit operator rulings** → the two canonical submission PDFs (`FINAL_SUBMISSION_BRIEF/`, never edited) → Specification v3 → ratified amendments (Amendment 001, then Amendment 002, then Amendment 003, then Amendment 004, then Amendment 005, then **Amendment 006** for the clauses each names) → **`FINAL_MVP_AUTHORITY_LOCK.md`** and the ruling instruments it indexes → this `CLAUDE.md` → Implementation Plan → the `docs/plan/` lifecycle and authorization baselines → the ratified implementation contract → **Figma Design 2 (visual/interaction reference — LOWEST on the functional ladder)**.
+
+~~*(Original tail, struck 2026-08-08 and preserved per annotate-never-delete:* "→ **Figma Design 2** (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker → the 48-hour physical-test contract."*)*~~ **Why it was struck:** it seated **Figma above `STATUS.md`**, contradicting Authority Lock §2.4, which puts Figma **lowest**; and it placed the **continuity records inside the functional ladder**, which they are not — `STATUS.md`, `BUILD_NOTES.md` and the migration tracker are **continuity records, not functional authority** (§15.1). The 48-hour physical-test contract remains an active procedural contract; it never held functional precedence over the baselines above it.
+
+**(Added 2026-08-08, operating-policy reconciliation.)** The four Final MVP governance instruments live at the **workspace root, one level above this repository**, and were previously absent from this ladder even though one of them declares itself canonical. They are now named here so no session can miss them:
+
+| Instrument | Role |
+|---|---|
+| **`FINAL_MVP_AUTHORITY_LOCK.md`** | **WHAT THE FINAL MVP MUST BE** — the canonical Final MVP baseline. Where any other workspace document disagrees on a Final-MVP-defining question, it governs — except where a higher authority is cited inline (the PDFs, the spec and its amendments, or an explicit operator ruling). **It records decisions; it creates no requirements of its own**, which is why it sits below the spec but above this file for those questions. |
+| **`FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`** | Operator ruling (§2.3 class) — the canonical four report panels and the Phase B migration register. |
+| `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md` · `FINAL_MVP_SUBMISSION_READINESS_PLAN.md` | Reconciliation and planning instruments. **Authorize nothing.** |
+| **`FINAL_MVP_EXECUTION_PLAN.md`** *(workspace root — **does not exist yet**)* | **HOW THE PROJECT PLANS TO GET THERE.** When created, it is the canonical Final MVP execution plan. Until then the nearest thing is the **NOT AUTHORIZED** Phase B track table in the Phase A reconciliation §7. |
+
+⚠️ **These four files are outside every git repository and are not recoverable by `git restore` or any commit.** Treat every edit to them as unbackable, and never delete, move, rename or archive one (Authority Lock §31.12a).
+
+⚠️ **The single ladder above is the FUNCTIONAL / SECURITY / PRIVACY ladder. There is a SECOND, separate VISUAL ladder, and collapsing the two is a governance error** (A-045, Authority Lock §2.4). **Visual authority, highest first: frozen `reference.png` → node-specific Figma context → existing frontend implementation.** A frame is authoritative for visual layout, hierarchy, component composition, visible fields, screen labels, microcopy and page relationships — and is **never** authoritative for schema, RLS, server authorization, report lifecycle, audit behaviour, Auth, AI governance, persistence, state-machine rules or transaction boundaries. On the functional ladder **Figma is the LOWEST rank**, below the `docs/plan/` baselines and the ratified implementation contract. *(Corrected 2026-08-08: the flat list above previously placed Figma above `STATUS.md` with no ladder split, which contradicted Authority Lock §2.4. Read the functional ladder as: spec + amendments → Authority Lock → this file → `docs/plan/` baselines → ratified implementation contract → **Figma, lowest**; `STATUS.md`/`BUILD_NOTES.md`/the migration tracker are **continuity records, not functional authority at all** — see §15.1.)*
 
 | Document | Location | What it governs |
 |---|---|---|
@@ -95,7 +114,7 @@ These are lenses for *you* to reason through, not separate agents to simulate li
 - Evidence URLs are short-TTL and server-minted; no bucket or object is ever public.
 - Secrets live only in server env / secret manager; verify none leak into the client bundle.
 - OWASP ASVS baseline: validate every server action's input, use parameterized queries only, never string-concatenated SQL.
-- PDPA-relevant tables (`consent_records`, `retention_policies`, `erasure_requests`) exist from the Phase 0 schema even though their enforcement logic isn't built until Phase 4.
+- ~~PDPA-relevant tables (`consent_records`, `retention_policies`, `erasure_requests`) exist from the Phase 0 schema even though their enforcement logic isn't built until Phase 4.~~ **CORRECTED 2026-08-07 (Phase A, G-1).** This sentence was a restatement of spec §20 and is **factually false**: none of the three tables exists in any of the 12 migrations, and §6.1 — which *"is authoritative over any older spec §20 table name or shape"* — omits all three from its exact 22-table inventory. **PDPA enforcement (consent, retention, erasure) is Phase 4 scope; no PDPA table exists, and none may be created without an amendment** (§12 makes creating a table §6.1 does not list a stop-and-ask). ADR-6's synthetic-data-only rule keeps the obligation dormant meanwhile. Where a real usability study generates participant consent/retention data, that data lives **outside the product** entirely.
 
 ### 3.2 Database / data architect
 **Mandate:** the schema is normalized, constrained, and every change is reversible and reviewable.
@@ -280,8 +299,8 @@ Full detail in spec §3. Summary so you don't have to re-derive it every session
   - **management never modifies assessment substance** — ratings, observations, attendance, evidence, trainer notes — and the version it submits must carry **exactly the same nine ratings** as the trainer-approved source it derives from;
   - **AI never publishes directly.**
 
-  **The exact report sections, labels, field arrangement, component hierarchy, visible content, and presentation styling come from the approved Figma Design 2 report frame — and that frame has not yet been verified.** **Do not fabricate report fields.** Until the frame is supplied, the authoritative content baseline is spec §8's parent panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway) plus the confirmed prohibition on any per-dimension rating grid in the parent view (below). If a required field cannot be established from an authoritative document or a verified frame, **stop and ask** — do not invent it.
-- **One confirmed parent-view leak, and one confirmed parent-view feature with specific required gating.** (1) **No per-dimension rating grid on the Parent Feedback Report, in any form or wording — this is a caught leak, fix it.** A screen was found showing a "Performance Summary" grid of raw B.E.S.T dimension:rating pairs (e.g. "Eye Contact — Needs Attention") directly to a parent — a clear violation of spec §8's explicit rule for this screen ("No internal trainer notes, raw B.E.S.T ratings, or AI draft history"). The screen's "simplified performance summary" requirement is satisfied by the prose panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway) — do not add a second panel that restates the same per-dimension ratings in grid form, even with softened wording; that recreates the same leak. (2) **Per-child evidence video on the Parent Feedback Report is a confirmed feature, not a leak — but only under specific gating, confirmed by the orchestrator.** **(Amendment 001 A-001 ratifies this gated feature and supersedes spec §21's absolute "parents never receive evidence URLs"; the parent evidence workflow and this access are implemented and tested in Phase 2, not Phase 1 — A-002/A-003.)** **(Amendment 002 A-014 — conditional):** whether evidence media remains in MVP scope, and **who uploads it now that the TA flow is deferred**, are **UNRESOLVED**; the safeguards below are **not weakened** and apply in full whenever evidence is implemented, but no replacement uploader may be invented. Evidence capture is per-individual-child (each student filmed during their own presentation/assessment turn), and `evidence` rows are already scoped to one `student_id` per spec §20, so showing a parent their own child's evidence clip is intentional. It must be gated on all three of: **(a)** the associated report has reached `Submitted` — never show evidence tied to a draft or unapproved report, the same rule that governs every other field on this screen; **(b)** the `evidence_media` consent scope (spec §22) is granted for that student; **(c)** access is via a short-TTL, server-minted signed URL scoped to the requesting parent's **`parent_student_links`** row (Amendment 003 A-031 naming; `parent_child_link` is historical), same as every other evidence access path. The guarantee that a clip contains only one child is a filming-process assumption, not something the app verifies — flag this to whoever trains TAs on capture, but it isn't a code-level fix.
+  **The exact report sections, labels, field arrangement, component hierarchy, visible content, and presentation styling come from the approved Figma Design 2 report frame — and that frame has not yet been verified.** **Do not fabricate report fields.** ~~Until the frame is supplied, the authoritative content baseline is spec §8's parent panels (Today's Strength, Next Focus, Practice Suggestion, Session Takeaway)~~ **SUPERSEDED_BY_OD-4_FINAL_REPORT_MODEL — operator ruling, 2026-08-07.** **The four canonical Final MVP report narrative panels are `Overview` · `Strengths` · `Areas for Development` · `Remarks`.** Their meanings are: **Overview** — a general narrative summary of the learner's performance/session, which *may* synthesize strengths, overall performance and developmental context and is **not restricted to positive observations**; **Strengths** — positive demonstrated capabilities, behaviours, progress or performance supported by the Trainer's governed assessment facts; **Areas for Development** — specific capabilities, behaviours or performance areas that would benefit from continued development/support; **Remarks** — additional relevant commentary that does not belong in the other three, and **never** an unrestricted place for unsupported claims. **This is a semantic-model change, not a relabel**, and it applies to **one canonical model across Trainer, Management and Parent** — role differences are authority and lifecycle state, not panel semantics. **The implementation, the database columns, the RPC signatures, the generated types, the AI schema and prompt, grounding, the fixtures and all three role UIs still carry the superseded names: that is a registered Phase B migration, NOT a licence to "fix" a mismatch you find.** Do not migrate any of it without the Phase B authorization named in `FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md` (workspace root), which also carries the classified inventory and the two open sub-rulings (the content-hash envelope version; the grounding rule-4 re-derivation). The confirmed prohibition on any per-dimension rating grid in the parent view (below) is **unchanged and absolute**. If a required field cannot be established from an authoritative document or a verified frame, **stop and ask** — do not invent it.
+- **One confirmed parent-view leak, and one confirmed parent-view feature with specific required gating.** (1) **No per-dimension rating grid on the Parent Feedback Report, in any form or wording — this is a caught leak, fix it.** A screen was found showing a "Performance Summary" grid of raw B.E.S.T dimension:rating pairs (e.g. "Eye Contact — Needs Attention") directly to a parent — a clear violation of spec §8's explicit rule for this screen ("No internal trainer notes, raw B.E.S.T ratings, or AI draft history"). The screen's "simplified performance summary" requirement is satisfied by the prose panels (~~Today's Strength, Next Focus, Practice Suggestion, Session Takeaway~~ **since OD-4, 2026-08-07: Overview, Strengths, Areas for Development, Remarks** — see the correction three bullets above; the old four are `SUPERSEDED_BY_OD-4_FINAL_REPORT_MODEL`) — do not add a second panel that restates the same per-dimension ratings in grid form, even with softened wording; that recreates the same leak. **The leak prohibition is entirely unaffected by OD-4** — the panels' names and meanings changed; the parent boundary did not. (2) **Per-child evidence video on the Parent Feedback Report is a confirmed feature, not a leak — but only under specific gating, confirmed by the orchestrator.** **(Amendment 001 A-001 ratifies this gated feature and supersedes spec §21's absolute "parents never receive evidence URLs"; the parent evidence workflow and this access are implemented and tested in Phase 2, not Phase 1 — A-002/A-003.)** **(Amendment 002 A-014 — conditional):** whether evidence media remains in MVP scope, and **who uploads it now that the TA flow is deferred**, are **UNRESOLVED**; the safeguards below are **not weakened** and apply in full whenever evidence is implemented, but no replacement uploader may be invented. Evidence capture is per-individual-child (each student filmed during their own presentation/assessment turn), and `evidence` rows are already scoped to one `student_id` per spec §20, so showing a parent their own child's evidence clip is intentional. It must be gated on all three of: **(a)** the associated report has reached `Submitted` — never show evidence tied to a draft or unapproved report, the same rule that governs every other field on this screen; **(b)** the `evidence_media` consent scope (spec §22) is granted for that student; **(c)** access is via a short-TTL, server-minted signed URL scoped to the requesting parent's **`parent_student_links`** row (Amendment 003 A-031 naming; `parent_child_link` is historical), same as every other evidence access path. The guarantee that a clip contains only one child is a filming-process assumption, not something the app verifies — flag this to whoever trains TAs on capture, but it isn't a code-level fix.
 - **"Follow-up for Next Session" is one field, surfaced on two screens — confirmed by the orchestrator.** The B.E.S.T Form's "Follow-up for Next Session" field and the Review & Approve screen's "Coach Notes (Internal Only)" field are **the same `observations.follow_up_notes` column**, not two separate notes. The Review & Approve screen must load the trainer's current value into that field (not render it blank) so the trainer is editing their earlier note after seeing the AI draft and evidence, not overwriting it unknowingly. Whatever server action saves this field must be callable from both screens against the same column.
 - **The trainer's "Approve" button is gated on the Quality Checklist, confirmed by the orchestrator. (Amendment 004 A-036: this gate now sits on the trainer Approve action, not on a trainer Approve & Submit action — the gate itself is unchanged.)** The three-item Quality Checklist remains a **trainer** instrument attesting to that exact text; it is never a management instrument, and management is never asked to satisfy it. All three checklist items (Evidence confirms rating / AI Draft reviewed / Privacy check passed) must be checked before the button is enabled — it should render visually disabled until then, not merely clickable-with-a-warning. This is a real interaction rule that a static design frame can't demonstrate itself; build it as described here rather than inferring it from the screen alone. This is the concrete implementation of the "trainer approval checklist and Approve & Submit gate" in spec §8, and backs the guarded `approve` transition in the state machine (spec §13). **The disabled button is a UX convenience only** — the `approve` transition's server-side guard must independently check that all three checklist items above are satisfied **for the exact version being approved** (`report_version_checklist_progress` — Amendment 003 A-028) before allowing the transition, per ADR-3. A disabled button with no server-side check is not a real gate.
 
@@ -291,9 +310,9 @@ Full detail in spec §3. Summary so you don't have to re-derive it every session
 
 > **Step 7E is completed and accepted (2026-08-03).** The governed-core migration was authored, corrected, applied to a **local disposable database only**, verified against the catalogue, and committed as **`252ef9b13008629cadc238bdf58b7016c50bb7b2`**; its acceptance record was committed as **`20e3650be26c0f40fda32078da32398c924e2672`**. The inventory below is therefore the **live schema**, and it remains the **exact** boundary — **do not add a table, enum or seed row to it, and do not write a second migration, without an explicit orchestrator authorization.** **(Amendment 004 A-040 — one bounded, exhaustive exception, for Step 7I only.)** A-031's inventory was the boundary of the **first** migration, not a permanent ceiling. Amendment 004 authorizes exactly: **one `report_status` label** (`trainer_approved`); **two new enums** (correction issue-scope, correction-request status); **one new table** (the correction-request record); **three new `report_versions` columns** (`content_hash`, its envelope version, and a trainer-approved-source reference); and **five constraint and default changes** on provably-empty tables (widen `report_versions` authorship role to trainer-or-management; **narrow** `report_versions` submission role to management only; widen `report_version_approvals`' primary key to (version id, approver role); widen its approver-role pin to trainer-or-management; **DROP its `approver_role` `DEFAULT 'trainer'`**, so that under the composite key an omitted role fails loudly instead of silently manufacturing a trainer approval). **Nothing else, and this is still not an implementation authorization.** **Step 7I ships exactly two migration files** — the first contains **only** `ALTER TYPE public.report_status ADD VALUE 'trainer_approved' AFTER 'needs_edit'` and commits; the second contains everything else and is the only file permitted to reference the new label (A-040; a `LANGUAGE sql` or `BEGIN ATOMIC` body using a label added in the same transaction fails at `CREATE FUNCTION`, and only `plpgsql` defers that analysis). **The next checkpoint is Step 7F — synthetic Auth users and domain fixtures — which is ready by design but remains unauthorized and unstarted, and requires a separate explicit orchestrator authorization.**
 
-**Exactly 10 enums:** `centre_membership_role` · `account_status` · `centre_membership_status` · `class_grade_code` · `dimension_code` · `dimension_group` · `competency_rating` · `attendance_status` · `invitation_status` · `report_status`.
+**Exactly 10 enums** *(as of Step 7E; the live census is **12** — Amendment 004 A-040 additively authorized the correction issue-scope and correction-request-status enums, as recorded two paragraphs above. Corrected 2026-08-07, Phase A, C-2)***:** `centre_membership_role` · `account_status` · `centre_membership_status` · `class_grade_code` · `dimension_code` · `dimension_group` · `competency_rating` · `attendance_status` · `invitation_status` · `report_status`.
 
-**Exactly 22 tables:** `centres` · `accounts` · `centre_memberships` · `trainer_profiles` · `parent_profiles` · `students` · `parent_student_links` · `class_grades` · `class_modules` · `class_sessions` · `enrolments` · `class_session_assignments` · `attendance` · `invitations` · `assessment_dimensions` · `observations` · `observation_ratings` · `reports` · `report_versions` · `report_version_ratings` · `report_version_checklist_progress` · `report_version_approvals`.
+**Exactly 22 tables** *(as of Step 7E; the live census is **26** — A-040 additively authorized `report_correction_requests`, and Step 7H added the three audit tables. The 22 named here remain the exact Step 7E boundary. Corrected 2026-08-07, Phase A, C-2)***:** `centres` · `accounts` · `centre_memberships` · `trainer_profiles` · `parent_profiles` · `students` · `parent_student_links` · `class_grades` · `class_modules` · `class_sessions` · `enrolments` · `class_session_assignments` · `attendance` · `invitations` · `assessment_dimensions` · `observations` · `observation_ratings` · `reports` · `report_versions` · `report_version_ratings` · `report_version_checklist_progress` · `report_version_approvals`.
 
 **Exactly 13 deterministic seed rows:** **one centre** — code **`ispeak`**, display name **`iSpeak Academy`**; **three centre-owned Class Grades** — `beginner`/Beginner/1, `intermediate`/Intermediate/2, `advanced`/Advanced/3; **nine global assessment dimensions** — Body, Emotion, Speech, Tonality (`competency`, 1–4) and Eye Contact, Vocal Projection, Emotional Expression, Sentence Flow, Audience Awareness (`speech_linguistics`, 5–9). **Seed UUIDs are fixed literals, identical across every environment**, and a seed insert **asserts on the natural key and fails on divergence** — never a silent upsert and never a quiet do-nothing.
 
@@ -498,7 +517,7 @@ Retention jobs, erasure-request endpoints, data-subject access/correction endpoi
 
 **This is the exception the bullet above anticipates, not a contradiction of it.** The broader shape — **2 trainers, 2 class modules, 3–4 enrolled students per module, 2 parent accounts, and a second Class Session for previous-focus continuity** — is **deferred, not deleted**. It remains required as a **later additive fixture expansion** before the Phase 1 grounding-validation contradiction proof (persona §3.4) and the session-to-session continuity proof can be demonstrated. Do not treat the Step 7F minimum as the final fixture, and do not delete or weaken the broader requirement.
 
-**Step 7F implementation remains unauthorized and unstarted.** Ratifying the fixture design authorized nothing. **Do not create `scripts/fixtures/*`, `supabase/seed.sql`, a fixture migration, an Auth user, or any fixture row until the orchestrator issues an explicit Step 7F authorization.**
+~~**Step 7F implementation remains unauthorized and unstarted.**~~ **CORRECTED 2026-08-07 (Phase A, G-5): Step 7F was authorized (bounded to 7F alone), executed, independently runtime-verified and ACCEPTED on 2026-08-03** — implementation commit `e197f91`, sub-checkpoints 7F1A-7F1E all Completed and Accepted per `docs/progress/STATUS.md:48`, and `scripts/fixtures/` holds the three ratified files at HEAD. **The prohibition below is spent and must not be acted on.** Ratifying the fixture design authorized nothing *at the time*. **Do not create `scripts/fixtures/*`, `supabase/seed.sql`, a fixture migration, an Auth user, or any fixture row until the orchestrator issues an explicit Step 7F authorization.**
 
 #### Fixture credentials — absolute
 
@@ -518,14 +537,18 @@ Retention jobs, erasure-request endpoints, data-subject access/correction endpoi
 
 ### Session continuity — read these first, write these last, every session
 Claude Code has no memory of prior sessions beyond this file, the code, and git history. **(Amendment 001 A-008):** maintain **two** permanent documents to close that gap — `docs/progress/STATUS.md` **and** `docs/progress/BUILD_NOTES.md`:
-- **At the start of every session**, read `STATUS.md` (current state, accepted checkpoint, blockers, latest commit, next permitted action) and the recent `BUILD_NOTES.md` entries before doing anything else — they are your record of what happened in sessions you don't otherwise remember.
-- **At the end of every session** (or at a natural stopping point), update **both**: `STATUS.md` with what is now true (phase, accepted checkpoint, blockers, latest commit, next action); `BUILD_NOTES.md` with a dated chronological entry — scope, files changed, commands run, automated/manual verification, failures and recovery, decisions, and commit.
+- **At the start of every session**, read `STATUS.md` (current state, accepted checkpoint, blockers, latest commit, next permitted action) and the recent `BUILD_NOTES.md` entries before doing anything else — they are your record of what happened in sessions you don't otherwise remember. **Then verify the recorded state against the repository — see §15.3.**
+- **At the end of every session** (or at a natural stopping point), update **both**: `STATUS.md` with what is now true (phase, accepted checkpoint, blockers, latest commit, next action); `BUILD_NOTES.md` with a dated chronological entry — scope, files changed, commands run, automated/manual verification, failures and recovery, decisions, and commit. **The required field sets are in §15.2 and §15.4.**
 - Don't rely on git history or code inspection alone to reconstruct status — these two capture *why* a decision was made, not just *what* changed, which a diff can't tell you.
 - The workspace migration tracker is **temporary** and is archived after migration closure; `STATUS.md` and `BUILD_NOTES.md` are the permanent continuity record.
+
+**(Extended 2026-08-08, operating-policy reconciliation.)** A-008's two-document principle is sound and is **preserved unchanged**. What it never specified — which file is canonical for which role, what fields are mandatory, and that a snapshot must be *replaced* rather than *appended to* — is specified in **§15**. Nothing in §15 relaxes anything above.
 
 ---
 
 ## 12. When to stop and ask the orchestrator
+
+> **"The orchestrator" here is the HUMAN OPERATOR, not a lead Claude session (§14.0). Every condition below binds the Main Orchestrator exactly as it binds any other session — a Claude session never services its own stop-and-ask.**
 
 Proceed autonomously on implementation details (component structure, exact query shape, naming within the conventions above). **Stop and ask** when:
 
@@ -538,13 +561,24 @@ Proceed autonomously on implementation details (component structure, exact query
 - **(Amendment 005)** You're about to treat a **Figma screen as authorization** for a transition, role, permission, mutation, AI operation or protected-content access; **add, remove or renumber** a screen in the ratified 36-screen inventory, or **shift portal numbering 01–33**; **change the twelve-screen physical-test subset**, or require any of the **24 deferred portal screens** to be visually complete before the physical test; **treat the `role` query parameter as authority**; **create, move or restyle a route or component** as part of an inventory or documentation checkpoint; **execute a route-compatibility treatment** (move/redirect/alias/replace) without its own authorization; **assign an inventory ID or node to one of the eight blocked design families**, or otherwise **invent a frame, node ID or field**; **introduce a `classes` entity** between Class Grade and Class Module instead of mapping "class type" to Class Module; **implement Management Term Report (ID 28)**, which stays separately governed; or **amend the competency-rating vocabulary**, which **Amendment 006 (A-049 … A-055) has now ratified** — A-048's reservation is **discharged**, and any further vocabulary change needs a new amendment. Every one of these is ratified out or reserved — stop and ask.
 - **(Amendment 006)** You're about to **implement** the vocabulary change — the enum rename, backend constants, grounding, fixtures, generated types or frontend labels — **without the V2 or V3 authorization** named in `docs/plan/COMPETENCY_VOCABULARY_RECONCILIATION_PLAN.md`; **rename an enum label without the fail-closed zero-row guard** over `report_versions` / `report_version_ratings` / `observation_ratings`; **hand-edit generated database types**; implement a **bare-word rating-label regex**; **change a behavioural anchor's text or threshold**, or add a fifth level; **change the Class Grade vocabulary** or any `class_grade_code` artefact; or perform a **global keyword replacement** over `advanced`, `secure`, `emerging`, `beginning`, `mastering` or `mastered`. Every one of these is prohibited or unauthorized — stop and ask.
 - **(Step 7F fixtures)** You're about to **begin Step 7F without an explicit orchestrator authorization**; create `scripts/fixtures/*`, `supabase/seed.sql`, a fixture migration, an Auth user or any fixture row; **deviate from the ratified inventory** in `docs/plan/STEP_7F_SYNTHETIC_FIXTURE_BASELINE.md` (3 Auth identities, 25 domain rows, Option B) or re-derive its values instead of using them; create a **`reports`, report-version, approval, checklist or `invitations`** row in the fixture; **insert directly into `auth.users`** or supply a `password_hash`; **ask for, accept, print or persist a password or any other credential**; add an **environment-variable password path**; or treat the Step 7F minimum as having **replaced** the broader §11 fixture shape rather than deferring it. Stop and ask.
+- **(OD-4 — report semantics, ruled 2026-08-07)** You're about to **implement** the four-panel semantic migration — the `report_versions` column rename, either hash serializer, any of the eight report RPC signatures, the generated database types, the AI structured-output schema or system prompt, the grounding rules, the fixture provider, the frontend contracts, `report-panel-config.ts` or any of the three role UIs — **without a Phase B authorization**; **relabel** the old four concepts at the UI while the AI still drafts them internally (expressly prohibited); **retarget grounding rule 4 at `overview` by rename** instead of re-deriving it (`Overview` may legitimately carry developmental context, so a rename **false-rejects** valid drafts); **widen or narrow** the four-column management wording allow-list; **hand-edit** the generated database types; **redefine or increment the content-hash envelope** without ruling §5.1 of the OD-4 instrument; or **rewrite historical evidence documents** that accurately record the superseded model. Stop and ask.
 - A phase's exit condition (§10) seems met and you're about to start the next phase.
 - A persona checklist item in §3 can't be satisfied without a design decision you're not sure is yours to make.
 - Something in the spec's §3.6 "pending client ratification" items needs to be treated as final rather than provisional.
 - A request would pull a §8 deferred feature into current scope.
 - Code and spec disagree and reconciling them isn't obviously safe.
 - You're about to add a dependency not implied by the locked stack (§2).
-- It's the start of a new session and `STATUS.md` or `BUILD_NOTES.md` is missing, stale, or doesn't match what you find in the repo — reconcile before proceeding.
+- It's the start of a new session and `STATUS.md` or `BUILD_NOTES.md` is missing, stale, or doesn't match what you find in the repo — reconcile before proceeding. **§15.3 is the procedure.**
+
+**(Added 2026-08-08, operating-policy reconciliation — six conditions the list above did not cover.** Everything already in §12 is unchanged and none of it is relaxed. These close gaps found by audit: the seventeen bullets above gate the **build**, and said nothing about money, the environment, or this contract itself.**)**
+
+- **Spending money, or activating a billable/external service.** You're about to make a **billable provider call** (OpenAI or any paid API), enable a paid tier, provision a paid resource, or take any action with a cost. **No standing authorization to spend exists.** The real-provider G-6 runs were each separately authorized; that authorization did not carry forward. Any purchase, subscription, plan change or spend decision is the operator's alone.
+- **Leaving this machine — deploying, provisioning, or linking ANY hosted or external environment, PAID OR FREE.** Creating or linking a hosted Supabase project · running `supabase link` · deploying to Vercel · any GCP action · creating a GitHub remote or repository · registering a domain · enabling any external service. ⚠️ **Cost is not the trigger — leaving the local machine is.** A free tier is not self-authorization. Everything hosted is currently **NONE**, and the ratified hosted architecture (Supabase + Vercel, Singapore) is **future work whose region, secrets, Auth hardening and management bootstrap are all still open**; provisioning it wrongly means **re-provisioning, not reconfiguring**. Being inside an authorized implementation phase does **not** carry authorization to go hosted — that needs its own explicit operator authorization. *(§14.4 lists hosted provisioning and public deployment among work to serialize; **serializing is a scheduling rule, never a licence to proceed** — this bullet is the gate.)*
+- **Editing ratified authority, as distinct from deleting it.** You're about to modify `docs/spec/**` (the specification or any amendment), **`FINAL_MVP_AUTHORITY_LOCK.md`**, an operator-ruling instrument, or **this file**. Authority Lock §31 protects these against deletion, moving, archiving and renaming — it does **not** address editing, and that gap is now closed here. **Substantive change requires an amendment or an explicit operator ruling.** The one permitted exception is the ratified **annotate-never-delete** reconciliation method (Phase A §4): strike the stale text, preserve it inline, cite the ruling that supersedes it, and date it — **and even that requires an explicit bounded operator instruction for the run**, exactly as Phase A and OD-4 each received. Never silently rewrite a rule. **Never rewrite historical evidence that accurately records superseded state.**
+- **A Critical or High defect that invalidates the plan you are executing.** Finding one is not a licence to re-plan. Stop, record it, and report — an unexpected Critical/High finding that breaks the current track's premise is itself a stop-and-ask, not just another work item.
+- **Legal, privacy or PDPA ambiguity.** A question about real personal data, consent, retention, erasure, cross-border transfer or a DPA that the ratified documents do not clearly answer. Do not resolve it by inference. **The synthetic-data-only rule (ADR-6) is meanwhile absolute — real student, parent or child data never enters this system, in any environment.**
+- **Re-attempting a failed destructive, billable, security-sensitive or production-facing operation.** One honest failure is a finding; a retry loop against a live or costly system is a hazard. Fix the diagnosed cause, or stop and ask. **Never work around a fail-closed refusal by weakening the thing that refused** — that is how a credential path, a preflight or a grounding gate gets quietly disabled.
+- **Committing, and anything touching shared git state.** Local commits at coherent checkpoints remain expected during an **authorized implementation** phase (§11 Git discipline). But **during a documentation, governance or analysis run, do not commit** — leave the diff for operator review, as Phase A and OD-4 both did. Never `push`, add a remote, `reset`, `rebase`, `amend`, force, `stash`, `tag`, `gc`, `prune`, or `checkout` another branch **in a working tree that already holds work**: branch history is the audit record, and the only history-touching operation compatible with SHA-cited evidence is a **forward `git revert`**. *(Narrow carve-out: `git worktree add` — including with `-b` — is permitted where §14.3 requires a new isolated worktree, because it creates a fresh tree and moves no existing one. Creating or deleting a worktree is otherwise an Operator decision.)* Never run `supabase db reset` — it destroys the three synthetic Auth identities, whose recreation needs an interactive password prompt no agent may handle.
 
 When in doubt, a short question to the orchestrator costs little; a governance mechanism — or a professional standard — built quietly wrong costs a rebuild.
 
@@ -557,4 +591,196 @@ A throwaway trainer-flow **demo** was built and frozen locally before this MVP (
 - **Never import demo architecture into the MVP:** its React Context / in-memory state, hardcoded users/classes/students/schedules/reports, cosmetic login (any-input-succeeds), its demo AI route, forced-failure controls, or browser object-URL "persistence." None of these satisfy the ADRs, RLS, grounding, audit, or state-machine requirements above.
 - **Demo visual assets are not free to copy.** Any reference export or component may be reused only after an explicit disposition — `PORT`, `REFERENCE ONLY`, `REBUILD`, `REJECT`, or `NOT APPLICABLE` — recorded by the orchestrator (Amendment 001 A-013, whose disposition discipline survives Amendment 002 A-022). Until then, treat the demo as read-only reference, not a source directory. **The demo's Stitch exports are not the UI source of truth — Figma Design 2 is (§7).**
 - **Rebuild, don't lift:** presentation and proven interaction patterns may inspire the MVP build; data flow, persistence, auth, authorization, workflow, AI governance, evidence handling, and audit are always built fresh against this contract and the specification.
-- The demo's own `AGENTS.md`, `DEMO_BUILD_PLAN.md`, and `progress_tracking.md` are **migration provenance only** and never govern the MVP.
+- The demo's own `AGENTS.md`, `DEMO_BUILD_PLAN.md`, and `progress_tracking.md` are **migration provenance only** and never govern the MVP. **This is the only `AGENTS.md` in the workspace; there is no active one, and it must not be edited — the frozen demo is protected material (Authority Lock §31.10).**
+
+---
+
+## 14. Execution orchestration — how work is decomposed and who may write
+
+*(Added 2026-08-08. Promoted from `UI_REFERENCE_FINAL_MVP/AUTONOMOUS_48H_AGENT_CONTRACTS.md` §0 and `docs/plan/PHYSICAL_TEST_SLICE_48H.md` §7, generalized from those sprint-scoped instruments into standing policy. Those documents remain the historical record of the 48-hour sprint; **this section is the standing rule.** No safeguard from either is weakened here.)*
+
+### 14.0 Two words that are not the same word
+
+- **The Operator** — the human. **Every one of the ~50 existing uses of "the orchestrator" in §1–§13 means the Operator**, without exception, and they are unchanged. The Operator alone ratifies, authorizes checkpoints, accepts work, rules on decisions, and does anything requiring a browser, a credential or money.
+- **The Main Orchestrator** — the lead Claude Code session, when this section's model is in use. It coordinates; **it decides nothing the Operator has not delegated.**
+
+**Never read "Main Orchestrator" as a grant of Operator authority.** A Claude session may not ratify, may not accept its own work, and may not create or alter a governed decision. Where §12 says stop and ask, the Main Orchestrator stops and asks too.
+
+### 14.1 Default execution model
+
+For **substantial** work that decomposes into genuinely independent workstreams, default to a multi-agent model with the lead session as Main Orchestrator, which owns: authority interpretation · scope · phase control · decomposition · sequencing · dependency resolution · synthesis · acceptance-gate evaluation · stopping conditions · Operator escalation · and **final write authority**.
+
+Good candidates: repository reconnaissance · specification reconciliation · screen-by-screen UI analysis · route/component inventory · schema/RLS/RPC inspection · test and evidence analysis · deployment-readiness analysis · documentation audits · duplicate/orphan scanning · independent security review · adversarial falsification.
+
+⚠️ **"Acceptance-gate evaluation" above means evaluating and reporting, never accepting.** A Main-Orchestrator verdict of `PASS` is a **readiness claim backed by evidence** — it does **not** satisfy a §10 phase gate, does not accept a checkpoint, and does not open the next phase. **§10 is unchanged: only the Operator confirms a phase exit, and `Accepted` is Operator-set only** (§14.7, §15.6). A session never accepts its own work.
+
+Roughly **4–8 concurrent subagents** may be appropriate for large decomposable work, subject to real independence, task size, dependency structure and write-risk.
+
+**Optimize for the shortest *safe* time-to-completion, never for agent count.** Do not spawn agents to hit a number. **A small, well-scoped task is done directly** — multi-agent overhead on a one-file change is waste, not rigour.
+
+⚠️ **This does not touch §10.** *"Do not reorder or parallelize across phases"* is unchanged and absolute. Parallelism is permitted **within** an already-authorized phase or track, never across phase gates, and **never as a way to start unauthorized work early**.
+
+⚠️ **The §3 engineering personas are not agents.** §3 says they are *"lenses for you to reason through, not separate agents to simulate literally"* — still true. Do not spawn one agent per persona.
+
+### 14.2 Single-writer default
+
+**Subagents are READ-ONLY everywhere, always — with exactly one exception: a single designated writer inside its own owned worktree, under §14.3, inside an explicitly authorized implementation phase.** Outside that exception:
+
+- **Subagents are READ-ONLY.** They do not edit files, do not commit, do not mutate any database, do not deploy, and do not call an external provider.
+- **The Main Orchestrator is the only writer.**
+
+**Authorizing an implementation phase does not by itself lift the read-only default** — §14.3's conditions must all be satisfied first, and the lift extends only to that writer, only inside that worktree.
+
+### 14.3 Isolated-worktree parallelism — the implementation exception
+
+Only inside an authorized implementation phase, and only with these conditions all satisfied:
+
+1. **Exactly one writer per worktree, ever.** Two writers may run concurrently **only in different worktrees**. Two worktrees share one object store but hold separate index/HEAD/reflog, so cross-worktree concurrency is safe; **intra-worktree concurrency is not.**
+2. **Explicit branch and worktree ownership**, named before work starts.
+3. **Explicit, disjoint file/path ownership.** No path appears under two owners. **A cross-owned edit is a blocker, reported *before* modification, never performed and reported afterwards.**
+4. **One designated log writer per checkpoint.**
+5. **An explicit integration sequence**, pinned in advance.
+6. **The Main Orchestrator does not edit a writer's owned files** — it reads, reconciles, and rejects; it does not implement.
+7. **Validation is a global mutex.** Test agents never run concurrently with a writer in the same worktree, and **no two test agents run anywhere in the workspace at once** — the suites bind fixed ports and a shared local stack, and a collision produces a **silent false green**, which is worse than a crash.
+8. **Canonical records are reconciled only from `main`**, never written from a worktree.
+
+### 14.3a ✅ THE TWO EXISTING 48H WORKTREES — `CLOSED_BY_NONUSE_POLICY` (operator ruling, 2026-08-08)
+
+**Ruled by the Operator. The stale-contract execution risk is CLOSED — closed by prohibiting use, not by accepting the risk and not by editing the worktrees.**
+
+`worktrees/backend-48h` (`feat/48h-backend` @ `402b0b6`) and `worktrees/frontend-48h` (`feat/48h-frontend` @ `6762b5c`) are **HISTORICAL / FROZEN IMPLEMENTATION ARTEFACTS.**
+
+**The prohibitions — standing and absolute:**
+
+1. **Do NOT modify their `CLAUDE.md`, `STATUS.md`, or any other stale governance file inside them.** They remain protected under Authority Lock §31.11 (*"untouched, and must remain so"*).
+2. **Do NOT use either worktree for ANY future Final MVP implementation.** Not for a track, not for a checkpoint, not for a quick fix, not "because it is already set up."
+3. **Never take a contract, a status, a precedence chain or a report-panel model from a worktree copy.** Each carries a complete governance corpus predating the Phase A corrections and the **OD-4** ruling — their copies still describe the **superseded** four report panels and still state a precedence chain stopping at Amendment 004.
+
+**Why this closes the risk rather than accepting it.** The hazard was that a session launched inside a worktree would legitimately load that stale `CLAUDE.md` as its standing contract and never see a warning living in the canonical copy. **A worktree that may never be used for implementation is never a launch target, so the stale contract is never loaded.** The freeze is preserved intact; nothing inside either worktree was touched to achieve this.
+
+**All future parallel implementation worktrees are created FRESH** from the current accepted `main` baseline — and only **after Phase A2** and **after `FINAL_MVP_EXECUTION_PLAN.md` is established**. A fresh worktree from current `main` carries the current corpus by construction, which is what makes §14.3's model safe.
+
+**Phase A2 is authorized to inspect these two worktrees READ-ONLY and classify them.** Inspection and classification only — no edit, no move, no deletion.
+
+**Phase A2 may later PROPOSE removal of the physical worktree directories**, but a proposal is admissible only if it first proves **all five**:
+
+1. their branches and commits **remain reachable from the main repository**;
+2. **no unique required evidence exists only inside the physical worktree**;
+3. removal **would not affect the frozen demo**;
+4. removal is **included in the cleanup manifest**;
+5. the **Operator explicitly approves** it.
+
+**Removal is not authorized by this ruling and must not be performed.** ⚠️ Note for whoever tests condition 1: the branch refs and all objects live in the **main repository's shared `.git`** — a worktree directory is a checkout, not the storage. Verified read-only on 2026-08-08: both branches are **0 commits ahead of `main`** (`git rev-list --count main..feat/48h-backend` = 0, same for frontend), so both are fully merged and hold no unmerged history. **That is evidence for condition 1 only — conditions 2–5 are untested and remain the proposal's burden.**
+
+### 14.4 Serialize, do not parallelize, when parallelism raises risk
+
+Serialize work that: depends strictly on a prior result · touches the same file or subsystem · creates or changes a migration · changes an authorization or security contract · alters governed lifecycle behaviour · performs destructive cleanup · uses production credentials · provisions hosted infrastructure · deploys publicly · makes a billable call · requires Operator approval · has rollback-sensitive side effects · or is simply too small for the overhead to pay for itself.
+
+### 14.5 Subagent authority — findings, not rulings
+
+Subagents return **evidence**. They never redefine Final MVP authority. The Main Orchestrator must **verify material findings at source**, reconcile disagreements, inspect primary evidence where findings conflict, and reject unsupported conclusions.
+
+**Never accept a claim because a subagent returned it.** This is not theoretical: in the Phase A run, **three of six subagent claims were corrected rather than accepted**, and every count in the Authority Lock was independently re-verified rather than restated. A finding that changes a governed conclusion must be checked against the file, the catalogue or the command output before it is recorded.
+
+### 14.6 Adversarial review
+
+For substantial **governance · lifecycle · authorization · security · deployment · destructive cleanup · final acceptance** work, run **at least one independent READ-ONLY adversarial reviewer, instructed to falsify rather than confirm.** For high-risk phases prefer **two reviewers with separate failure domains**.
+
+**Valid Critical/High findings must be remediated before PASS.** After remediating, re-review the corrected area where practical. This practice has found real defects on every pass it has ever run in this project — treat a clean adversarial review as a rare outcome, not the expected one.
+
+### 14.7 Accepted evidence is reused, not re-proved
+
+Do not burn time re-proving an accepted gate without cause. Reuse accepted evidence where its scope genuinely covers the current claim — **Run C3-C / G-6** and **Run C4** are accepted and remain so.
+
+**Reopen an accepted gate only when:** the relevant code or contract changed · new evidence contradicts it · the environment changed materially · a hosted/UAT claim needs environment-specific proof · or the acceptance scope now includes a changed contract.
+
+**Worked example, already ruled:** implementing **OD-4 will reopen** the AI structured-output, grounding, persistence, review, projection, G-6 and C4 contracts, because the semantics change. The historical C3-C and C4 evidence stays **valid for the pre-OD-4 baseline** and is **not** retroactively invalidated.
+
+**A gate is `PASS`, `FAIL` or `NOT-RUN` — there is no fourth value and no default, and no gate reaches `PASS` without positive evidence that the thing actually happened.** An absent document, an unread value, an empty collector or an unanswered command yields `FAIL` or `NOT-RUN`, never a verdict. **`Accepted` is Operator-set only.**
+
+---
+
+## 15. Continuity, blockers and Operator escalation
+
+*(Added 2026-08-08. This is the operational detail behind §11's A-008 rule, which is preserved unchanged. It creates no new tracker and no new log — it assigns roles to files that already exist.)*
+
+### 15.1 The four layers — do not collapse them
+
+| Layer | Canonical file | Question it answers |
+|---|---|---|
+| **AUTHORITY** | **`FINAL_MVP_AUTHORITY_LOCK.md`** (workspace root) + the operator-ruling instruments it indexes | **What the Final MVP must be** |
+| **EXECUTION PLAN** | **`FINAL_MVP_EXECUTION_PLAN.md`** (workspace root) — **not yet created**; until it exists, the nearest thing is the **NOT AUTHORIZED** track table at Phase A reconciliation §7 | **How the project plans to get there** |
+| **CURRENT STATUS** | **`docs/progress/STATUS.md`** | **Where execution is now** |
+| **HISTORICAL LOG** | **`docs/progress/BUILD_NOTES.md`** | **What actually happened** |
+
+**These four are canonical for their roles. Do not create a competing tracker, status file or execution log.** Several other files carry live-sounding language for slices of the project or for closed sprints — the frontend reconstruction tracker, the 48-hour execution tracker, the two workstream progress logs, the demo-to-MVP migration tracker and its near-identical second copy (`BEST_COACH_DEMO_TO_MVP_MIGRATION_TRACKER.md` at the workspace root and `docs/progress/DEMO_TO_MVP_MIGRATION.md` — the two differ only in the localized paths inside their status banners; **neither is more current than the other, and neither may be regenerated from the other**). **They are track-scoped or historical and none is the project's current status.** Where one of them is the right place to record track detail, record it there *and* reflect the material outcome in the canonical status.
+
+**Neither `STATUS.md` nor `BUILD_NOTES.md` is functional authority.** They are continuity records. **A progress log must never be the sole authority for a product decision** — if a decision only exists in a log, it is unratified, and the correct response is to escalate it, not to build on it.
+
+**When implementation deviates from the Execution Plan:** record the deviation in the historical log with its reason, then decide whether only *this execution* changed or the *future roadmap* changed. Edit `FINAL_MVP_EXECUTION_PLAN.md` only in the second case, and never turn it into a command-by-command journal.
+
+### 15.2 CURRENT STATUS is a snapshot — replace, do not append
+
+`STATUS.md` must open with a current-state block that a fresh session can read in under a minute, carrying: **phase · track/workstream · branch · worktree · HEAD · working-tree clean/dirty · last accepted checkpoint · work in progress · next authorized action · active blockers · outstanding Operator decisions · relevant local/hosted environment state · acceptance-gate state.**
+
+**Update it by replacing the block, not by stacking another entry on top.** Chronology belongs in `BUILD_NOTES.md`. A status file that accumulates superseded "current" entries stops being readable and starts being wrong — and it has: at the time this policy was written, `STATUS.md` simultaneously asserted three different current states and named a HEAD **38 commits** behind reality, while its live "next permitted action" demanded the Operator clear a blocker the same file recorded as closed.
+
+Update at **meaningful boundaries**, not per command: a bounded unit completed · a checkpoint or commit · an acceptance gate · a migration applied · a substantial regression run · a Critical/High issue resolved · a decision ratified · an Operator decision received · a blocker opened or closed · a hosted/deployment change · before stopping for Operator input · before ending a substantial session. **Optimize for reconstructability, not log volume.**
+
+### 15.3 Resume protocol — verify, never trust
+
+At the start of every substantial session, reconstruct state **from the workspace**, not from conversational memory. Read in this **load order** — ⚠️ **this is a reading sequence, NOT a precedence order; precedence is §1**, where the Authority Lock and operator rulings outrank this file: **`CLAUDE.md` (read first because it tells you what else to read) → `FINAL_MVP_AUTHORITY_LOCK.md` and any operator ruling → `FINAL_MVP_EXECUTION_PLAN.md` (once it exists) → `STATUS.md` → recent `BUILD_NOTES.md` → track-specific plans and evidence.**
+
+**Then independently verify the recorded state against reality** — branch, HEAD, worktree, `git status --porcelain -uall`, and local services or hosted state where relevant.
+
+**If actual state and recorded status disagree, pause and reconcile before doing any work.** Existence governs facts; precedence governs rules — **a document never outranks a file that demonstrably exists on disk.** Reconcile the record to reality, say plainly what was stale, and only then identify the next authorized step. **Never continue from stale status**, and never quietly "fix" the discrepancy by acting as though the document were right.
+
+### 15.4 The historical log
+
+`BUILD_NOTES.md` is append-only and **never rewritten**, even when a later ruling supersedes an entry. Its entry format is at the top of that file; every entry should also carry **branch/worktree · starting and ending HEAD · reviewer findings and their remediation · Operator decisions received · blockers opened or closed · environment changes · and the exact next step.**
+
+**Never log** an API key, password, service-role key, authorization header, connection string, other secret, real participant data, or raw private AI content that serves no evidentiary purpose. The established discipline is **redaction by construction** — verdicts, counts, routes and public checksums only, with generated prose represented by its hash — not filtering a credential-bearing stream after the fact (§11 already forbids relying on pattern-based redaction).
+
+**Subagents never write project logs.** The Main Orchestrator synthesizes material outcomes — workstreams used, significant findings, contradictions, reviewer findings, accepted resolutions, unresolved matters. **Do not paste subagent transcripts into a project log.**
+
+### 15.5 Recording a blocker
+
+When execution stops, record enough that a fresh session or an outside consultant can continue **without reconstructing the project's history**:
+
+**ID · class · owner (`OPERATOR-ONLY` where only the Operator can act) · state (`OPEN`/`CLOSED`) · phase · track · objective · the failed operation · the exact NON-SECRET error or output · expected vs observed behaviour · the relevant file/function/route/RPC/migration · HEAD · branch/worktree · working-tree state · partial changes already made · relevant commits · diagnostics run and their results · hypotheses tested and eliminated · remaining likely causes · whether any partial mutation occurred and the rollback/cleanup state · blast radius (what is now blocked and therefore unrun — recorded as *neither passing nor failing*) · what was deliberately NOT done · the recommended next diagnostic · and whether Operator input is required, with the exact action, working directory and command.**
+
+**Do not automatically retry an unresolved destructive, billable, security-sensitive or production-facing failure** (§12).
+
+### 15.6 Completion states
+
+Use these explicitly rather than implying progress from the existence of code:
+
+`NOT_STARTED` · `IN_PROGRESS` · `BLOCKED` · `AWAITING_OPERATOR` · `IMPLEMENTED_AWAITING_VERIFICATION` · `PASS` · `SUPERSEDED`
+
+**Code existing is not work being complete.** A track reaches **`PASS` only when its acceptance gate is satisfied** with positive evidence, and **only the Operator marks anything `Accepted`.** Existing narrower vocabularies stay valid inside their own instruments (the F17 ledger's `PASS`/`FAIL`/`NOT-RUN`, the reconstruction tracker's statuses, the OD-4 migration classes) — map to the list above when reporting project-level state.
+
+### 15.7 Operator decisions
+
+Every Operator ruling that changes scope, product behaviour, architecture, authorization, security, deployment, UI authority, data governance or submission requirements must be **propagated into the appropriate ACTIVE authority document** — using the ratified **annotate-never-delete** method: strike the superseded text, preserve it inline, cite the ruling, date it.
+
+The historical log may record **that** a decision happened; it must never become the **sole** authority for it. Where `FINAL_MVP_AUTHORITY_LOCK.md` covers the question, the ruling is reflected there (or in a ruling instrument the Lock indexes), and **changing locked authority follows §12's editing-ratified-authority gate**.
+
+### 15.8 Consultation handoff
+
+When the Operator needs outside help — a blocker, an architecture decision, an unexpected failure, a failed gate, governance ambiguity, a deployment problem — generate a **consultation handoff on demand from the canonical records.** **Do not create a permanent handoff file for each consultation** unless there is a concrete reason.
+
+It must carry: **project (B.E.S.T Coach Final MVP) · current phase · current track · applicable Authority Lock section or ruling · HEAD · branch/worktree · the objective attempted · the exact blocker or question · the exact NON-SECRET error or output · relevant files, functions, routes, RPCs, migrations and components · changes already made · relevant commits · tests and diagnostics already run and their results · hypotheses already ruled out · working-tree state · environment/service state · partial-mutation and cleanup state · known options · Claude's recommendation where the evidence supports one · and the exact decision required.**
+
+It must let an external consultant understand the immediate problem **without the Operator manually reconstructing previous sessions**. **Never include a credential or secret.**
+
+### 15.9 The intended autonomous model, once a phase is authorized
+
+> Operator authorizes a bounded phase/track → Main Orchestrator reads workspace authority and status → **verifies actual state** → decomposes → parallel subagents/worktrees where safe → implements → tests → adversarial review → remediates → acceptance gate → commits per governance → updates `STATUS.md` and `BUILD_NOTES.md` → continues to the next authorized dependent unit.
+
+**Within an already-authorized phase, proceed autonomously through normal implementation units.** Do not relay every small step to the Operator, and do not manufacture gates for routine choices already delegated. **Stop only when a §12 condition is genuinely reached** — and when one is, stop completely rather than improvising past it.
+
+**A blocked checkpoint reported honestly is a good outcome.**
+
+### 15.10 Session-end checkpoint
+
+Before ending a substantial session, ensure the canonical records are current and record or verify: **HEAD · branch/worktree · clean/dirty state · last accepted checkpoint · work completed · outstanding work · any blocker or pending Operator decision · relevant test state · and the exact next authorized step.** A fresh session must be able to continue safely from that alone.
