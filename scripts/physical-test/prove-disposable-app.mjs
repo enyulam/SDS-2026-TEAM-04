@@ -810,15 +810,44 @@ const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]', '0.0.0
 /**
  * Read the ratified provider and model selectors out of the application's own
  * environment contract, and prove the neutralising literal is neither.
+ *
+ * THE CONTRACT MOVED, AND THIS GUARD CAUGHT IT (Run C4). Run C3-C extracted
+ * `ACCEPTED_LLM_PROVIDER` / `ACCEPTED_LLM_MODEL` out of `server/platform/env.ts`
+ * into `server/platform/llm-config.ts`, so that a plain-Node script could
+ * reuse the selector check without tripping env.ts's `server-only` guard.
+ * This function still read env.ts alone, found zero selectors and — exactly
+ * as designed — REFUSED TO SERVE rather than proceed unable to prove its own
+ * neutralising literal. That fail-closed refusal is the control working; the
+ * defect was that the constants had moved out from under it.
+ *
+ * Both locations are now searched and their results combined, so the guard
+ * survives the constants living in either file (or being re-exported across
+ * both) without pinning a single path that the next refactor can move again.
+ * The requirement is unchanged and unweakened: at least two ratified
+ * selectors must actually be READ, from somewhere, or this run refuses.
  */
+const RATIFIED_SELECTOR_SOURCES = [
+  ['server', 'platform', 'llm-config.ts'],
+  ['server', 'platform', 'env.ts'],
+]
+
 function assertNeutralisingLiteralIsUnratified() {
-  const source = readFileSync(join(REPO_ROOT, 'server', 'platform', 'env.ts'), 'utf8')
-  const accepted = [...source.matchAll(/const ACCEPTED_LLM_(?:PROVIDER|MODEL)\s*=\s*"([^"]+)"/g)].map((m) => m[1])
+  const accepted = []
+  const searched = []
+  for (const segments of RATIFIED_SELECTOR_SOURCES) {
+    const path = join(REPO_ROOT, ...segments)
+    searched.push(segments.join('/'))
+    if (!existsSync(path)) continue
+    const source = readFileSync(path, 'utf8')
+    for (const match of source.matchAll(/const ACCEPTED_LLM_(?:PROVIDER|MODEL)\s*=\s*"([^"]+)"/g)) {
+      accepted.push(match[1])
+    }
+  }
   providerControl.ratifiedSelectorsRead = accepted.length
   if (accepted.length < 2) {
     throw new SafeError(
-      'The ratified AI provider and model selectors could not be read from server/platform/env.ts, so this run ' +
-        'cannot prove its neutralising literal is not one of them. Refusing to serve.',
+      `The ratified AI provider and model selectors could not be read from any of ${searched.join(' or ')}, so this ` +
+        'run cannot prove its neutralising literal is not one of them. Refusing to serve.',
     )
   }
   providerControl.literalIsUnratified = !accepted.includes(PROVIDER_DISABLED_LITERAL)
