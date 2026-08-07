@@ -1,0 +1,81 @@
+{
+  "generatedAt": "2026-08-06T09:57:41.979850",
+  "backendSource": "worktrees/backend-48h/server/modules/framework/dimensions.ts (READ-ONLY; never written, never committed)",
+  "frontendAnchorSource": "worktrees/frontend-48h/lib/frontend/fixtures/dimensions.ts",
+  "frontendUnionSource": "worktrees/frontend-48h/lib/frontend/contracts/physical-test.ts",
+  "ratingUnion": {
+    "backend": [
+      "beginning",
+      "developing",
+      "mastering",
+      "mastered"
+    ],
+    "frontend": [
+      "beginning",
+      "developing",
+      "mastering",
+      "mastered"
+    ],
+    "agreeExactly": true
+  },
+  "anchors": [
+    {
+      "level": "beginning",
+      "backendBytes": 90,
+      "frontendBytes": 90,
+      "backendSha256": "33a1b83a8e55ad8d5bc7cd4b2c67a3dfca2ed3a5f7998a42814e9600e71c508b",
+      "frontendSha256": "33a1b83a8e55ad8d5bc7cd4b2c67a3dfca2ed3a5f7998a42814e9600e71c508b",
+      "byteIdentical": true,
+      "text": "Requires frequent prompting, modelling, and support to demonstrate the skill consistently."
+    },
+    {
+      "level": "developing",
+      "backendBytes": 100,
+      "frontendBytes": 100,
+      "backendSha256": "f1a444a0a3b5a0315dbc925ba436daef67a066a81e568f736eaf122ff7b1b748",
+      "frontendSha256": "f1a444a0a3b5a0315dbc925ba436daef67a066a81e568f736eaf122ff7b1b748",
+      "byteIdentical": true,
+      "text": "Demonstrates the skill with some guidance and increasing confidence, but consistency may still vary."
+    },
+    {
+      "level": "mastering",
+      "backendBytes": 105,
+      "frontendBytes": 105,
+      "backendSha256": "c4a5e229786f6ed787aceb04830d7f852bc51c31e7f9699d97ed2f0518154b23",
+      "frontendSha256": "c4a5e229786f6ed787aceb04830d7f852bc51c31e7f9699d97ed2f0518154b23",
+      "byteIdentical": true,
+      "text": "Demonstrates the skill independently and consistently across most classroom activities and presentations."
+    },
+    {
+      "level": "mastered",
+      "backendBytes": 129,
+      "frontendBytes": 129,
+      "backendSha256": "69fc5c0c62c5a7ae6ea1e00f0342ca9b7eb2e278bdb0570e485a6d05387308d4",
+      "frontendSha256": "69fc5c0c62c5a7ae6ea1e00f0342ca9b7eb2e278bdb0570e485a6d05387308d4",
+      "byteIdentical": true,
+      "text": "Exceeds the expected level: strong confidence, natural expression, independent application, consistent across different contexts."
+    }
+  ],
+  "anchorsAllByteIdentical": true,
+  "polarity": {
+    "backend": {
+      "beginning": "needs_support",
+      "developing": "developing",
+      "mastering": "positive",
+      "mastered": "positive"
+    },
+    "frontend": {
+      "beginning": "needs_support",
+      "developing": "developing",
+      "mastering": "positive",
+      "mastered": "positive"
+    },
+    "agreeExactly": true,
+    "masteringIsPositive": true
+  },
+  "classGradeUnion": {
+    "frontendContract": "\"Beginner\" | \"Intermediate\" | \"Advanced\"",
+    "byteUnchangedFromHead": true,
+    "note": "Verified with `git diff` over every classGrade-bearing line: only line numbers shifted; no character changed."
+  }
+}

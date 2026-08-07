@@ -7,7 +7,8 @@
  * that check for the three authentication references so it is re-run mechanically at F3, F10
  * and F13 rather than performed by eye once.
  *
- * It reads the external UI reference pack, which lives outside every Git repository. If the
+ * It reads the UI reference pack, which lives inside this repository at UI_REFERENCE_FINAL_MVP/
+ * (moved in on 2026-08-08 — repository-boundary normalization, CLAUDE.md §9.1). If the
  * pack is not present the module reports that plainly and exits non-zero — it never silently
  * passes on a missing reference.
  *
@@ -18,10 +19,15 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-/** The pack sits beside the repository worktrees, at the workspace root. */
+/**
+ * The pack is inside this repository, at the repository root.
+ * The previous `"..", ".."` form resolved from a 48H worktree cwd; both worktrees were
+ * physically removed on 2026-08-08, so that path had already been broken before the
+ * repository-boundary normalization moved the pack in.
+ */
 const PACK_ROOT =
   process.env.BEST_COACH_UI_PACK ??
-  resolve(process.cwd(), "..", "..", "UI_REFERENCE_FINAL_MVP");
+  resolve(process.cwd(), "UI_REFERENCE_FINAL_MVP");
 
 /**
  * Values transcribed from `CORE_SCREENSHOT_VALIDATION_REPORT.md` §11 and each screen's

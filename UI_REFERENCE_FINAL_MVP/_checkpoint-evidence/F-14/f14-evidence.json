@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-08-06T00:04:39.769Z",
+  "origin": "http://127.0.0.1:3100",
+  "steps": [
+    {
+      "step": "render 1440x1120",
+      "file": "C:\\Users\\enyul\\Vibe Studio\\B.E.S.T-Coach-Workspace\\UI_REFERENCE_FINAL_MVP\\_checkpoint-evidence\\F-14\\screen-32-parent-reports-1440x1120.png"
+    },
+    {
+      "step": "R-B6 rating-token guard, unmodified DOM",
+      "offenders": [],
+      "pass": true
+    },
+    {
+      "step": "R-B6 guard falsifiability — reference aggregate chip injected into the live DOM",
+      "offenders": [
+        "span=\"mastering\""
+      ],
+      "detected": true
+    },
+    {
+      "step": "A-052 — ordinary contextual prose using beginning/mastered/mastering is NOT flagged",
+      "offenders": [],
+      "pass": true
+    },
+    {
+      "step": "A-054 — a context-marked Class Grade (Advanced) is not treated as a rating token",
+      "offenders": [],
+      "pass": true
+    },
+    {
+      "step": "WCAG 2.2 AA contrast within the owned surface, measured from computed styles",
+      "measured": 8,
+      "failures": [],
+      "pass": true
+    },
+    {
+      "step": "empty state",
+      "file": "C:\\Users\\enyul\\Vibe Studio\\B.E.S.T-Coach-Workspace\\UI_REFERENCE_FINAL_MVP\\_checkpoint-evidence\\F-14\\screen-32-parent-reports-empty-1440x1120.png"
+    },
+    {
+      "step": "no horizontal page scroll at 1024px",
+      "horizontalScroll": false,
+      "pass": true
+    },
+    {
+      "step": "render 1024x900",
+      "file": "C:\\Users\\enyul\\Vibe Studio\\B.E.S.T-Coach-Workspace\\UI_REFERENCE_FINAL_MVP\\_checkpoint-evidence\\F-14\\screen-32-parent-reports-1024x900.png"
+    },
+    {
+      "step": "no horizontal page scroll at 480px",
+      "horizontalScroll": false,
+      "pass": true
+    },
+    {
+      "step": "render 480x900",
+      "file": "C:\\Users\\enyul\\Vibe Studio\\B.E.S.T-Coach-Workspace\\UI_REFERENCE_FINAL_MVP\\_checkpoint-evidence\\F-14\\screen-32-parent-reports-480x900.png"
+    }
+  ],
+  "contrast": [
+    {
+      "text": "Reports",
+      "tag": "h1",
+      "fontSize": 30,
+      "fontWeight": 800,
+      "ratio": 12.912,
+      "floor": 3,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Reports you've received for Learner Fern.",
+      "tag": "p",
+      "fontSize": 14,
+      "fontWeight": 400,
+      "ratio": 9.508,
+      "floor": 4.5,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Viewing",
+      "tag": "p",
+      "fontSize": 11,
+      "fontWeight": 600,
+      "ratio": 10.352,
+      "floor": 4.5,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Learner Fern",
+      "tag": "p",
+      "fontSize": 14,
+      "fontWeight": 700,
+      "ratio": 14.059,
+      "floor": 4.5,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "All Reports",
+      "tag": "h2",
+      "fontSize": 20,
+      "fontWeight": 800,
+      "ratio": 12.912,
+      "floor": 3,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Learner Fern",
+      "tag": "h2",
+      "fontSize": 17,
+      "fontWeight": 800,
+      "ratio": 14.059,
+      "floor": 4.5,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Session 4 Aug 2026 · Received 5 Aug 2026",
+      "tag": "p",
+      "fontSize": 13,
+      "fontWeight": 400,
+      "ratio": 10.352,
+      "floor": 4.5,
+      "srOnly": false,
+      "disabled": false,
+      "pass": true
+    },
+    {
+      "text": "Learner Fern's report for 4 Aug 2026",
+      "tag": "span",
+      "fontSize": 14,
+      "fontWeight": 700,
+      "ratio": 4.517,
+      "floor": 4.5,
+      "srOnly": true,
+      "disabled": false,
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "result": "passed"
+}

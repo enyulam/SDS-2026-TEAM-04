@@ -1,0 +1,52 @@
+SCREENSHOT REQUIRED - AUTH-01 Trainer Login
+
+Export the exact node-specific Figma frame for this screen and save it in this
+folder as reference.png. Do not use an overview-canvas screenshot.
+
+Exact Figma URL : https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=546-370&m=dev
+Figma node      : 546:370
+Figma file key  : sSY1TYw3jyVlZDy8V2Mu7g
+Figma file name : SDS-dashboard
+Expected role   : Trainer
+Priority        : CORE - required before the physical test
+Canonical route : /login?role=trainer
+
+Recommendation  : export at native frame dimensions (1x, PNG). Record the native
+                  dimensions in screen.md section 3 when you save the file.
+
+Synthetic data only. No real student, parent, trainer or staff data may appear in
+an exported frame.
+
+Reference status: PRESENT AND VALIDATED - reference.png exists in this folder and
+                  its SHA-256 is pinned in UI_PACK_MANIFEST.json. It is byte-
+                  identical to the corresponding pack in
+                  UI_REFERENCE_FINAL_MVP/reference/. No re-export is required.
+
+-------------------------------------------------------------------------------
+FILE RECONSTRUCTION NOTICE - 2026-08-08 (Final MVP Phase A2)
+
+This file was RECONSTRUCTED on 2026-08-08 from legitimate B.E.S.T authority only.
+
+Between 2026-08-05 23:47 and 2026-08-07 01:30 the previous contents of this file
+were overwritten by an accidental paste of unrelated coursework belonging to a
+different module. The foreign text contained no B.E.S.T material and no Figma
+node record.
+
+Nothing was lost. The Figma node ID for this screen (546:370) was independently
+preserved in TWO other places, and this file was rebuilt from them:
+
+  - UI_REFERENCE_FINAL_MVP/UI_PACK_MANIFEST.json  (figmaNodeId, figmaUrl)
+  - UI_REFERENCE_FINAL_MVP/SCREEN_INDEX.md        (AUTH-01 row)
+
+The format follows the valid sibling packs AUTH-02 and AUTH-03.
+
+No content in this file is derived from the foreign text. The original
+contaminated bytes were preserved byte-exact, before any modification, in two
+independent verified preservation snapshots outside this workspace, and remain
+recoverable in full.
+
+The authoritative visual reference for this screen (reference.png) was never
+affected by the incident.
+
+See UI_REFERENCE_FINAL_MVP/CHANGE_LOG.md for the full incident record.
+-------------------------------------------------------------------------------

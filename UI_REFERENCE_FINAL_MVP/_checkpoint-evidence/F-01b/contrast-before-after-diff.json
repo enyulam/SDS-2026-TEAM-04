@@ -1,0 +1,2953 @@
+{
+  "totals": {
+    "controlsBefore": 122,
+    "controlsAfter": 122,
+    "unchanged": 23,
+    "changed": 99,
+    "onlyBefore": 0,
+    "onlyAfter": 0,
+    "enabledTextFailuresBefore": 5,
+    "enabledTextFailuresAfter": 3
+  },
+  "namedBefore": {
+    "management Approve & Submit": {
+      "tag": "button",
+      "type": "button",
+      "label": "Approve & Submit",
+      "disabled": false,
+      "color": "#1b2b4b",
+      "background": "#d6357a",
+      "fontSizePx": 14,
+      "fontWeight": 400,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 3.113,
+      "required": 4.5,
+      "passes": false,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b"
+    },
+    "trainer Save observation & generate draft (enabled)": {
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": false,
+      "color": "#1b2b4b",
+      "background": "#d6357a",
+      "fontSizePx": 14,
+      "fontWeight": 400,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 3.113,
+      "required": 4.5,
+      "passes": false,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b"
+    }
+  },
+  "namedAfter": {
+    "management Approve & Submit": {
+      "tag": "button",
+      "type": "button",
+      "label": "Approve & Submit",
+      "disabled": false,
+      "color": "#ffffff",
+      "background": "#d6357a",
+      "fontSizePx": 14,
+      "fontWeight": 700,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 4.517,
+      "required": 4.5,
+      "passes": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b"
+    },
+    "trainer Save observation & generate draft (enabled)": {
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": false,
+      "color": "#ffffff",
+      "background": "#d6357a",
+      "fontSizePx": 14,
+      "fontWeight": 700,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 4.517,
+      "required": 4.5,
+      "passes": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b"
+    }
+  },
+  "contrastRepairs": [
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-review-checklist-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve for management review",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "management-final-review",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve & Submit",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    }
+  ],
+  "contrastRegressions": [
+    {
+      "surface": "login-trainer",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "login-management",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "login-parent",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "trainer-roster",
+      "tag": "button",
+      "type": null,
+      "label": "Absent · assessment unavailable",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "min-h-11 w-full cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-extrabold text-slate-500",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#62748e"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "ratio": {
+          "before": 12.833,
+          "after": 4.349
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#a6aec0"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 12.663,
+          "after": 2.004
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "management-wording-editor",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save wording changes",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#a6aec0"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 12.663,
+          "after": 2.004
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    }
+  ],
+  "allChanged": [
+    {
+      "surface": "login-trainer",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "login-management",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "login-parent",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong",
+      "delta": {
+        "color": {
+          "before": "#33405c",
+          "after": "#8a93a8"
+        },
+        "ratio": {
+          "before": 10.352,
+          "after": 3.079
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "trainer-dashboard",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-roster",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-roster",
+      "tag": "button",
+      "type": null,
+      "label": "Absent · assessment unavailable",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "min-h-11 w-full cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-extrabold text-slate-500",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#62748e"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "ratio": {
+          "before": 12.833,
+          "after": 4.349
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "trainer-reports",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "management-dashboard",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "management-reports",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "parent-dashboard",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "parent-reports",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Check required fields",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-line bg-surface text-ink-strong shadow-raised hover:border-brand-200 hover:bg",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-initial",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#a6aec0"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 12.663,
+          "after": 2.004
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-700 bg-teal-100 text-teal-900 ring-2 ring-teal-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#0b4f4a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.457,
+          "after": 8.339
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-700 bg-amber-100 text-amber-900 ring-2 ring-amber-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#7b3306"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.619,
+          "after": 8.131
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-700 bg-teal-100 text-teal-900 ring-2 ring-teal-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#0b4f4a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.457,
+          "after": 8.339
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-700 bg-red-100 text-red-900 ring-2 ring-red-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#82181a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 11.534,
+          "after": 8.225
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-700 bg-amber-100 text-amber-900 ring-2 ring-amber-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#7b3306"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.619,
+          "after": 8.131
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-700 bg-red-100 text-red-900 ring-2 ring-red-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#82181a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 11.534,
+          "after": 8.225
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-700 bg-teal-100 text-teal-900 ring-2 ring-teal-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#0b4f4a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.457,
+          "after": 8.339
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#973c00"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.557,
+          "after": 6.836
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-700 bg-green-100 text-green-900 ring-2 ring-green-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#0d542b"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.78,
+          "after": 8.228
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Emerging",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-red-200 bg-red-50 text-red-800 hover:border-red-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#9f0712"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.852,
+          "after": 7.638
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Developing",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-amber-700 bg-amber-100 text-amber-900 ring-2 ring-amber-200",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#7b3306"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 12.619,
+          "after": 8.131
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Secure",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#005f5a"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.48,
+          "after": 7.231
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Advanced",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "min-h-10 rounded-full border-2 px-2 py-2 text-xs font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 border-green-200 bg-green-50 text-green-800 hover:border-green-400",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#016630"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 800
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 12
+        },
+        "ratio": {
+          "before": 13.43,
+          "after": 6.813
+        }
+      }
+    },
+    {
+      "surface": "trainer-assess-complete",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save observation & generate draft",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-review-checklist-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-review-checklist-complete",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Cancel",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-line bg-surface text-ink-strong shadow-raised hover:border-brand-200 hover:bg",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        }
+      }
+    },
+    {
+      "surface": "trainer-approval-dialog",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve for management review",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "management-final-review",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "management-final-review",
+      "tag": "button",
+      "type": "button",
+      "label": "Return assessment concern",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-line bg-surface text-ink-strong shadow-raised hover:border-brand-200 hover:bg",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        }
+      }
+    },
+    {
+      "surface": "management-final-review",
+      "tag": "button",
+      "type": "button",
+      "label": "Approve & Submit",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#ffffff"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 3.113,
+          "after": 4.517
+        },
+        "passes": {
+          "before": false,
+          "after": true
+        }
+      }
+    },
+    {
+      "surface": "management-wording-editor",
+      "tag": "button",
+      "type": "button",
+      "label": "Reset fixture",
+      "disabled": false,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-white/25 bg-transparent text-white hover:bg-white/10 disabled:border-white/10",
+      "delta": {
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "fontSizePx": {
+          "before": 14,
+          "after": 13
+        }
+      }
+    },
+    {
+      "surface": "management-wording-editor",
+      "tag": "button",
+      "type": "submit",
+      "label": "Save wording changes",
+      "disabled": true,
+      "textBearing": true,
+      "classes": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition disabled:cursor-not-allowed border-transparent bg-brand-700 text-white shadow-raised hover:bg-brand-800 active:b",
+      "delta": {
+        "color": {
+          "before": "#1b2b4b",
+          "after": "#a6aec0"
+        },
+        "fontWeight": {
+          "before": 400,
+          "after": 700
+        },
+        "ratio": {
+          "before": 12.663,
+          "after": 2.004
+        },
+        "passes": {
+          "before": true,
+          "after": false
+        }
+      }
+    }
+  ],
+  "remainingFailuresAfter": [
+    {
+      "surface": "login-trainer",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "color": "#8a93a8",
+      "background": "#ffffff",
+      "fontSizePx": 14,
+      "fontWeight": 400,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 3.079,
+      "required": 4.5,
+      "passes": false,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong"
+    },
+    {
+      "surface": "login-management",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "color": "#8a93a8",
+      "background": "#ffffff",
+      "fontSizePx": 14,
+      "fontWeight": 400,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 3.079,
+      "required": 4.5,
+      "passes": false,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong"
+    },
+    {
+      "surface": "login-parent",
+      "tag": "button",
+      "type": "button",
+      "label": "Show password",
+      "disabled": false,
+      "color": "#8a93a8",
+      "background": "#ffffff",
+      "fontSizePx": 14,
+      "fontWeight": 400,
+      "largeText": false,
+      "textBearing": true,
+      "ratio": 3.079,
+      "required": 4.5,
+      "passes": false,
+      "classes": "absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-[0.5rem] text-ink-muted transition hover:text-ink-strong"
+    }
+  ],
+  "consoleErrors": {
+    "before": [],
+    "after": []
+  }
+}

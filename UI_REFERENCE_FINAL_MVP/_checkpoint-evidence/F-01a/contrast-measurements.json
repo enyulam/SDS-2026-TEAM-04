@@ -1,0 +1,103 @@
+{
+  "measuredAt": "2026-08-05T22:14:09.253Z",
+  "origin": "http://127.0.0.1:3000",
+  "consoleErrors": [],
+  "results": {
+    "/trainer/sessions/session-storytelling-lab/roster": [
+      {
+        "text": "Start nine-dimension assessment",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ],
+    "/trainer/reports": [
+      {
+        "text": "Return to Trainer workspace",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ],
+    "/parent": [
+      {
+        "text": "View available reports",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ],
+    "/parent/reports": [
+      {
+        "text": "Open report",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ],
+    "/management": [
+      {
+        "text": "Open review queue",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      },
+      {
+        "text": "Open correction tracking",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ],
+    "/management/reports": [
+      {
+        "text": "Open safe review",
+        "rest": {
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(214, 53, 122)",
+          "ratio": 4.517
+        },
+        "hover": {
+          "bg": "#b02a63",
+          "ratio": 6.255
+        }
+      }
+    ]
+  }
+}

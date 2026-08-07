@@ -1,0 +1,20 @@
+SCREENSHOT REQUIRED - 13 Management Class Overview
+
+Export the exact node-specific Figma frame for this screen and save it in this
+folder as reference.png. Do not use an overview-canvas screenshot.
+
+Exact Figma URL : https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=689-66&m=dev
+Figma node      : 689:66
+Figma file key  : sSY1TYw3jyVlZDy8V2Mu7g
+Figma file name : SDS-dashboard
+Expected role   : Management
+Priority        : DEFERRED - required for final-MVP completion after the physical test
+Canonical route : /management/classes/[classModuleId]
+
+Recommendation  : export at native frame dimensions (1x, PNG). Record the native
+                  dimensions in screen.md section 3 when you save the file.
+
+Synthetic data only. No real student, parent, trainer or staff data may appear in
+an exported frame.
+
+Deferred - required for final-MVP completion after physical test

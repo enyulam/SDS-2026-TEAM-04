@@ -1,0 +1,1082 @@
+[
+  {
+    "ratio": 5.006,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "TF",
+    "cls": "grid shrink-0 place-items-center font-bold rounded-full size-10 text-small bg-neutral-soft"
+  },
+  {
+    "ratio": 12.912,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Trainer Fixture",
+    "cls": "block text-body font-bold text-ink-strong"
+  },
+  {
+    "ratio": 2.828,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Trainer",
+    "cls": "block text-small text-ink-muted"
+  },
+  {
+    "ratio": 15.598,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Deterministic fixture mode — not the participant adapter",
+    "cls": "text-sm font-extrabold"
+  },
+  {
+    "ratio": 15.598,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Simulated Trainer data and browser-session actions only. No ",
+    "cls": "mt-0.5 text-sm leading-6 opacity-90"
+  },
+  {
+    "ratio": 15.598,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Reset fixture",
+    "cls": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition di"
+  },
+  {
+    "ratio": 12.912,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "Grade Student",
+    "cls": "text-page-title font-extrabold tracking-[-0.02em] text-ink-strong"
+  },
+  {
+    "ratio": 9.508,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "All nine governed dimensions are required. Each level’s beha",
+    "cls": "mt-1 max-w-2xl text-body leading-6 text-ink"
+  },
+  {
+    "ratio": 5.321,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Back to Student Roster",
+    "cls": "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-field bg-brand-100 px-4 py-2.5 te"
+  },
+  {
+    "ratio": 6.255,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Review & Approve",
+    "cls": "text-brand-800"
+  },
+  {
+    "ratio": 5.729,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "1",
+    "cls": "block text-section-title font-extrabold leading-tight"
+  },
+  {
+    "ratio": 5.729,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Not started",
+    "cls": "mt-0.5 block text-micro font-extrabold uppercase tracking-[0.1em]"
+  },
+  {
+    "ratio": 5.013,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "2",
+    "cls": "block text-section-title font-extrabold leading-tight"
+  },
+  {
+    "ratio": 5.013,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "In progress",
+    "cls": "mt-0.5 block text-micro font-extrabold uppercase tracking-[0.1em]"
+  },
+  {
+    "ratio": 5.557,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "0",
+    "cls": "block text-section-title font-extrabold leading-tight"
+  },
+  {
+    "ratio": 5.557,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Pending approval",
+    "cls": "mt-0.5 block text-micro font-extrabold uppercase tracking-[0.1em]"
+  },
+  {
+    "ratio": 5.187,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "0",
+    "cls": "block text-section-title font-extrabold leading-tight"
+  },
+  {
+    "ratio": 5.187,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Approved",
+    "cls": "mt-0.5 block text-micro font-extrabold uppercase tracking-[0.1em]"
+  },
+  {
+    "ratio": 5.557,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "LA",
+    "cls": "grid shrink-0 place-items-center font-bold rounded-full size-8 text-micro bg-info-soft tex"
+  },
+  {
+    "ratio": 5.729,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Learner Aster",
+    "cls": "block truncate text-small font-bold text-brand-800"
+  },
+  {
+    "ratio": 5.013,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Assessment needed",
+    "cls": "inline-flex min-h-7 items-center rounded-full px-2.5 py-1 text-small font-bold bg-warning-"
+  },
+  {
+    "ratio": 12.876,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "— Grade student",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 5.013,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "LB",
+    "cls": "grid shrink-0 place-items-center font-bold rounded-full size-8 text-micro bg-warning-soft "
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Learner Birch",
+    "cls": "block truncate text-small font-bold text-ink-strong"
+  },
+  {
+    "ratio": 5.557,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Ready to review",
+    "cls": "inline-flex min-h-7 items-center rounded-full px-2.5 py-1 text-small font-bold bg-info-sof"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "— Review this report",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 5.187,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "LC",
+    "cls": "grid shrink-0 place-items-center font-bold rounded-full size-8 text-micro bg-success-soft "
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Learner Cedar",
+    "cls": "block truncate text-small font-bold text-ink-strong"
+  },
+  {
+    "ratio": 5.013,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Returned",
+    "cls": "inline-flex min-h-7 items-center rounded-full px-2.5 py-1 text-small font-bold bg-warning-"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "— Review this report",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 5.006,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "LD",
+    "cls": "grid size-8 shrink-0 place-items-center rounded-full bg-neutral-soft text-micro font-bold "
+  },
+  {
+    "ratio": 13.578,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Learner Delta",
+    "cls": "block truncate text-small font-bold text-ink-strong"
+  },
+  {
+    "ratio": 5.368,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Not available for assessment today.",
+    "cls": "mt-0.5 block text-micro text-neutral-on"
+  },
+  {
+    "ratio": 5.557,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "LA",
+    "cls": "grid shrink-0 place-items-center font-bold rounded-full size-12 text-body bg-info-soft tex"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "Learner Aster",
+    "cls": "text-ink-strong"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginner · Storytelling Foundations · Wed, 5 Aug 2026",
+    "cls": "mt-0.5 text-body text-ink"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginner",
+    "cls": ""
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 3,
+    "large": true,
+    "disabled": false,
+    "text": "Assessment Rubric",
+    "cls": "text-ink-strong"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Select a level for each speaking skill",
+    "cls": "mt-1 text-body text-ink"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "9 of 9 dimensions rated",
+    "cls": "text-small font-bold text-ink"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "B.E.S.T. Competency",
+    "cls": "text-neutral-on"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Body, Emotion, Speech and Tonality",
+    "cls": "mt-1 text-small text-ink"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Body — Posture & Gesture (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "1. Body",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Posture & Gesture",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.929,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor: Demonstrates the skill independently and c",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Emotion — Facial Expression (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "2. Emotion",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Facial Expression",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.536,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor: Demonstrates the skill with some guidance",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Speech — Clarity & Structure (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "3. Speech",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Clarity & Structure",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.929,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor: Demonstrates the skill independently and c",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Tonality — Voice Control (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "4. Tonality",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Voice Control",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 6.251,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning anchor: Requires frequent prompting, modelling, an",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Speech Linguistics Pattern",
+    "cls": "text-neutral-on"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Eye Contact, Vocal Projection, Emotional Expression, Sentenc",
+    "cls": "mt-1 text-small text-ink"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Eye Contact — Listener connection (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "5. Eye Contact",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Listener connection",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.536,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor: Demonstrates the skill with some guidance",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Vocal Projection — Audibility and reach (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "6. Vocal Projection",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Audibility and reach",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 6.251,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning anchor: Requires frequent prompting, modelling, an",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Emotional Expression — Expressive delivery (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "7. Emotional Expression",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Expressive delivery",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.929,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor: Demonstrates the skill independently and c",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Sentence Flow — Pacing and continuity (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "8. Sentence Flow",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Pacing and continuity",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 6.381,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered anchor: Exceeds the expected level: strong confiden",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Audience Awareness — Adapting to listeners (required)",
+    "cls": "sr-only"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "9. Audience Awareness",
+    "cls": "block text-body font-extrabold text-ink-strong"
+  },
+  {
+    "ratio": 5.558,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Adapting to listeners",
+    "cls": "mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Beginning",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 5.536,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastering",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 9.502,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Mastered",
+    "cls": "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor: Demonstrates the skill with some guidance",
+    "cls": "mt-2 text-small leading-6 text-ink md:pl-[13rem]"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Developing anchor:",
+    "cls": "font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Observation Notes",
+    "cls": "text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "What was observed in this Class Session",
+    "cls": "block text-small font-bold text-ink-strong"
+  },
+  {
+    "ratio": 14.059,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Follow-up for Next Session",
+    "cls": "block text-small font-bold text-ink-strong"
+  },
+  {
+    "ratio": 10.352,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "The same governed note appears as “Coach Notes (Internal Onl",
+    "cls": "mt-2 text-small leading-6 text-ink"
+  },
+  {
+    "ratio": 9.508,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Completion is re-validated by the governed save against all ",
+    "cls": "max-w-2xl text-small leading-6 text-ink"
+  },
+  {
+    "ratio": 4.517,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Save & Generate",
+    "cls": "inline-flex items-center justify-center gap-2 rounded-field border font-bold transition di"
+  },
+  {
+    "ratio": 2.828,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "Adapter: deterministic_fixture · Participant eligible: no · ",
+    "cls": "mt-10 border-t border-line py-5 text-small text-ink-muted"
+  },
+  {
+    "ratio": 2.828,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "deterministic_fixture",
+    "cls": ""
+  },
+  {
+    "ratio": 2.828,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "no",
+    "cls": ""
+  },
+  {
+    "ratio": 2.828,
+    "threshold": 4.5,
+    "large": false,
+    "disabled": false,
+    "text": "browser session only",
+    "cls": ""
+  }
+]

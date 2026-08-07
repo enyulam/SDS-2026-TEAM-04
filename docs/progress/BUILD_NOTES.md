@@ -1167,3 +1167,51 @@ Phase A2's own worst defect is now a standing rule rather than a war story. **Pr
 **What the reviewer attacked and could not break:** no active parent-ratings authorization survives anywhere in the corpus · the exclusion is stated as a projection/data-layer boundary in all six carriers, never as CSS-only · **OD-4 byte-identical to the pre-run snapshot** · **zero visual bytes altered** (74 `reference/` `.png`/`.html` + 12 frozen `reference.png`; nothing under `reference/` has an mtime newer than the 2026-08-06 bulk import) · no visual-acceptance checklist anywhere would flag the card's absence as a regression · Profile Details promote-upward recorded in **7** places including both files an implementer opens first · **no ID collision and no falsified registry** — `Q-1 … Q-26` byte-identical, the *"exactly 26 Q-items"* claim unmodified, Q-27↔GC-3 coherent as elevate-and-close with no parallel identifier · **no history rewritten** — all **five** unversioned files were **additive or superset-in-place**: three lines were **rewritten, not appended** (`screen.md`'s "Component composition" acceptance item, the Authority Lock §15 conflict-table row, the reconciliation plan's GC-3 row), and each replacement is a **strict superset of its predecessor** — **no existing content was removed anywhere**. Those three are disclosed as section edits in "Files changed" above. `implementation-notes.md`'s **append-only rule is honoured strictly** — zero existing lines touched, verified by diff against the pre-run archive snapshot. Every existing strikethrough retained. *(An earlier draft of this entry said "all four diffable unversioned files purely additive" — wrong on both the count and the shape, corrected here rather than left standing.)* · no code, schema, config, test, fixture or migration change · all JSON parses, 0 BOM, no CRLF introduced, `screen.md`'s 3 pre-existing mojibake sequences **not worsened** · Q-28 has no conflicting policy and no surviving recommender of the prohibited path.
 
 **A focused read-only re-review was run after these corrections.**
+
+---
+
+## 2026-08-08 — REPOSITORY-BOUNDARY NORMALIZATION: active governance + UI authority folded into the main repository — GOVERNANCE/PATH ONLY
+
+**Scope.** Fold the ACTIVE Final MVP governance and UI authority estate from the workspace root **into** `SDS Project Final (BEST Coach)/`, so future execution runs against **one versioned canonical filesystem boundary**. **No Phase B. `FINAL_MVP_EXECUTION_PLAN.md` NOT created. The known `/reference/` instruction-layer gaps were deliberately NOT repaired** — that is the next run.
+
+**Baseline verified before writing.** `main` · HEAD **`d6fec445f004aa005188c61d391e4aec65f08e30`** · tree clean · 0 remotes · 1 worktree · 4 tags · frozen demo `8d4acf4…` clean · Q-27 and Q-28 present · no `FINAL_MVP_EXECUTION_PLAN.md` · PeakPalate 58,387,212 B untouched.
+
+### ⚠️ This entry SUPERSEDES the structural claim recorded above at the Q-27/Q-28 run
+
+That entry stated: *"the git repository is `SDS Project Final (BEST Coach)/` only … `FINAL_MVP_AUTHORITY_LOCK.md` … and the whole of `UI_REFERENCE_FINAL_MVP/` sit at the workspace root, outside any repository — untracked, uncommittable and not recoverable by git … A clean `git status` is not evidence that the governance corpus is safe."* **It was true when written and is left standing unedited, per the append-only rule.** It is **no longer true**: this run is precisely the action that ended it. **A clean `git status` now DOES cover the governance corpus.**
+
+### What moved
+
+Six documents to the repository root — `FINAL_MVP_AUTHORITY_LOCK.md` · `FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md` · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md` · `FINAL_MVP_PHASE_A2_WORKSPACE_AUDIT.md` · `FINAL_MVP_PHASE_A2_CLEANUP_MANIFEST.md` · `FINAL_MVP_SUBMISSION_READINESS_PLAN.md` — plus the **complete `UI_REFERENCE_FINAL_MVP/` tree: 343 files, 94 directories, 19,602,695 B.** Names and relative structure preserved exactly; no reorganized `docs/governance/` hierarchy was invented, so citation paths did not churn.
+
+### What deliberately did NOT move, and why
+
+A read-only inventory enumerated **all 18 workspace-root entries** and recommended **zero additions** to the approved set. `FINAL_SUBMISSION_BRIEF/` (the two canonical PDFs — §31.1 *"never edited, never moved"*) · `SDS Project Sprint 2/` (frozen demo, own `.git`; nesting it would corrupt both repos) · `00-PeakPalate-Master.mp4` (Q-2 `KEEP_IN_PLACE`, barred from this repo) · `governance-source/` (**A-055 non-authoritative mirror, and a hash-assertion target whose path must stay stable — moving it would break the very assertions that justify keeping it**) · `BEST_COACH_DEMO_TO_MVP_MIGRATION_TRACKER.md` (historical; its `D-1…D-317` register is **already** tracked here as `docs/progress/DEMO_TO_MVP_MIGRATION.md`) · `complete mvp screens compiled figma list.txt` (superseded; node data already in `docs/plan/`) · the three `_*-evidence/` trees (historical; committing them is a **gated** Phase B rework item behind a secret/redaction/third-party scan, not an authority move) · `worktrees/` (**verified empty — 0 files**). All backups stayed out.
+
+### Method — copy, verify, commit, only then remove
+
+**Gate 2 — preservation, both targets, before touching anything.** `2026-08-08_PRE_REPOSITORY_BOUNDARY_NORMALIZATION` written to the SUTD OneDrive archive **and** `D:\B.E.S.T-Coach-Archive\` (independent physical devices). Refused-to-overwrite guard armed. **343/343 UI files + 6/6 governance files SHA-256 verified in each — PASS/PASS.**
+
+**Gate 3 — pre-move census** (hashes, never mtimes): 37 `/reference/` packs · 111 `/reference/` files (37 PNG / 37 HTML / 37 MD) · 36 governed packs / 120 files · 12 local frozen `reference.png` · 24 UI root files · 88 `_checkpoint-evidence` files. Full SHA-256 manifest retained.
+
+**Gate 4 — copy first, delete never-before-verified.** Copied into the repo with the originals left in place; **343/343 + 6/6 byte-identical**, zero missing, zero extra. `git status --ignored` confirmed **nothing** silently excluded — the `.gitignore` rules are root-anchored (`/node_modules`, `/.next/`, `/build`, `/out/`) and none collides. All 349 files stageable.
+
+**Gates 8–10 — the removal was gated on proof, not on confidence:** byte-identity PASS → active path rewrite → commit → `git show <commit>:<path>` retrieval → *then* the workspace-root originals were removed.
+
+### Path-reference census — the part that mattered
+
+A read-only census classified **~321 hits**. The critical distinction was between references that merely **name** a file (≈290 — these keep working, several become *more* correct as repo-relative) and those that assert its **location** (**31 — these became false**). **~35 correctly-fenced historical statements and ~12 provenance records were deliberately left untouched.**
+
+**🔴 One real functional break, found only because the census read code and not just prose.** `scripts/physical-test/run-f17.mjs:206-212` resolved its evidence directory as `REPO_ROOT/../UI_REFERENCE_FINAL_MVP/_checkpoint-evidence/F17`. Post-move that `'..'` would not have crashed — `mkdirSync(…, {recursive:true})` would have **silently created a phantom `UI_REFERENCE_FINAL_MVP/` back at the workspace root** and written the F17 gate ledger and screenshots into it, orphaned from the real pack and perfectly positioned to be mistaken for authority by a later agent. **The `'..'` segment was removed** and the two prose strings describing the pack as "outside this repository" / "the external pack" corrected.
+
+**🟠 A second path was already broken before this run.** `tests/frontend/auth-reference-fidelity.assertions.ts:24` used `resolve(process.cwd(), "..", "..", …)`, a form written for a 48H **worktree** cwd — and both worktrees were physically removed on 2026-08-08, so it had been resolving to a non-existent directory since then. Corrected to the repo-root form and its two stale comments fixed. It remains `NOT_RUN` (no runner) and fails closed, so nothing had been silently passing.
+
+**Also corrected because they would have actively misdirected a future run:** `FINAL_MVP_PHASE_A2_CLEANUP_MANIFEST.md`'s backup instruction, which post-move would have **excluded the entire governance corpus it exists to protect** — the exact inversion of its intent · `CLAUDE.md`'s *"outside every git repository … treat every edit as unbackable"* warning, now wholly reversed · `STATUS.md`'s Working-tree row, every clause of which was falsified · Authority Lock §31.12a, whose **rationale** ("none is recoverable after deletion") collapsed while its **prohibition** is unchanged and absolute · `FINAL_MVP_SUBMISSION_READINESS_PLAN.md` §8.3 item 3, where the "a marker cloning the repo gets zero evidence" conclusion is now half-wrong — **and where the risk inverted: the tree is committable today, so the unmet secret/redaction/third-party precondition is MORE urgent, not less** · the F17 operator README, which told the operator nothing there is committed.
+
+### What was deliberately NOT changed
+
+`UI_PACK_MANIFEST.json` was **not edited** — it contains **zero** path strings, so the move required nothing (verified: parses, `screenCount: 36`, no BOM, 0 mojibake, 12 em dashes, 48,568 B unchanged). Q-28's prohibition on the PowerShell 5.1 structured-write path was honoured; every edit went through a BOM-less writer. `docs/progress/BUILD_NOTES.md`'s historical entries were **appended to, never rewritten**. No `/reference/` visual byte was touched. **The 24-pack instruction-layer gaps are untouched and still open.**
+
+### Verification
+
+**UI integrity in the repo copy:** 36 governed packs · 37 `/reference/` packs · 111 `/reference/` files (37/37/37) · **12/12 frozen `reference.png` still SHA-match their `/reference/` counterpart** · Q-27 carriers present in pack 30. **Regression: `npx tsc --noEmit` 0 · `npm run lint` 0 · `npm run build` 0 with 17 routes — unchanged.** **Secrets sweep over all 349 moved files: zero `.env`/`.pem`/key files, zero credential-like content** (the `service_role` matches are governance prose asserting it holds *zero* privileges), zero media/archives, zero SPORTSTER material — only governance records *about* the incident. No DB, migration, provider, hosted-Supabase, Vercel, remote or push action of any kind.

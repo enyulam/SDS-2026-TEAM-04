@@ -203,9 +203,12 @@ const CONSOLE_LIVENESS_TOKEN = 'best-coach-f17-console-collector-liveness-probe'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(HERE, '..', '..')
 
+// The UI reference pack moved INTO this repository on 2026-08-08 (repository-boundary
+// normalization; CLAUDE.md §9.1). The '..' segment that used to reach the workspace root
+// is gone: leaving it would silently mkdir a phantom UI_REFERENCE_FINAL_MVP/ back at the
+// old location and orphan the evidence from the pack it belongs to.
 const DEFAULT_EVIDENCE_DIR = resolve(
   REPO_ROOT,
-  '..',
   'UI_REFERENCE_FINAL_MVP',
   '_checkpoint-evidence',
   'F17',
@@ -351,7 +354,7 @@ WHAT IT DOES, IN ORDER
      never a verdict reached on evidence that was not collected.
   8. Stops the server and the browser on every exit path — including Ctrl+C —
      verifies both ports are released and neither process survives, and writes
-     a REDACTED gate ledger outside this repository.
+     a REDACTED gate ledger into the in-repository UI pack.
 
 WHAT IT WILL NEVER DO
   * Read a password from an environment variable, a command-line argument, a
@@ -375,7 +378,7 @@ OPTIONS
 NON-CREDENTIAL ENVIRONMENT (all optional; none may carry a secret)
   BEST_COACH_F17_APP_PORT      application port      (default ${DEFAULT_APP_PORT})
   BEST_COACH_F17_DEBUG_PORT    Chrome CDP port       (default ${DEFAULT_DEBUG_PORT})
-  BEST_COACH_F17_EVIDENCE_DIR  evidence directory    (default the external pack)
+  BEST_COACH_F17_EVIDENCE_DIR  evidence directory    (default the in-repo UI pack)
   CHROME_PATH                  headless Chrome binary
 
 ABORTING

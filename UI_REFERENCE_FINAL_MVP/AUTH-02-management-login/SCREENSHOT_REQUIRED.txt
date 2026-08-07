@@ -1,0 +1,29 @@
+SCREENSHOT REQUIRED - AUTH-02 Management Login
+
+Export the exact node-specific Figma frame for this screen and save it in this
+folder as reference.png. Do not use an overview-canvas screenshot.
+
+Exact Figma URL : https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=459-13&m=dev
+Figma node      : 459:13
+Figma file key  : sSY1TYw3jyVlZDy8V2Mu7g
+Figma file name : SDS-dashboard
+Expected role   : Management
+Priority        : CORE - required before the physical test
+Canonical route : /login?role=management
+
+Recommendation  : export at native frame dimensions (1x, PNG). Record the native
+                  dimensions in screen.md section 3 when you save the file.
+
+Synthetic data only. No real student, parent, trainer or staff data may appear in
+an exported frame.
+
+Reference status: PRESENT AND VALIDATED - reference.png exists in this folder and
+                  its SHA-256 is pinned in UI_PACK_MANIFEST.json. It is byte-
+                  identical to the corresponding pack in
+                  UI_REFERENCE_FINAL_MVP/reference/. No re-export is required.
+
+                  [Status corrected 2026-08-08, Final MVP Phase A2, ruling Q-15.
+                   This line previously read "Missing - required before physical-
+                   test visual reconstruction", which contradicted SCREEN_INDEX.md
+                   and UI_PACK_MANIFEST.json. The Figma node record above is
+                   unchanged and remains the authority for any future re-export.]

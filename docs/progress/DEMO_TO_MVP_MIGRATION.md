@@ -6,7 +6,7 @@
 >
 > **This tracker does not record where the project is now.** Its "Current checkpoint", "Checkpoint status" and "Current permitted action" lines below are frozen at **2026-08-05** and are **stale** — for example they still say *"CP-3 and CP-5 remain open"* (CP-3 was ruled **CLOSED** at Phase A, G-9) and still direct work that has since completed.
 >
-> **The canonical current status is `docs/progress/STATUS.md`, in this same directory.** The canonical historical log is `docs/progress/BUILD_NOTES.md`. The Final MVP baseline is `FINAL_MVP_AUTHORITY_LOCK.md` at the workspace root.
+> **The canonical current status is `docs/progress/STATUS.md`, in this same directory.** The canonical historical log is `docs/progress/BUILD_NOTES.md`. The Final MVP baseline is `FINAL_MVP_AUTHORITY_LOCK.md` at the **repository root** (moved in on 2026-08-08 — repository-boundary normalization, `CLAUDE.md` §9.1; ~~workspace root~~).
 >
 > ⚠️ **§1's "Mandatory operating workflow" below seats checkpoint acceptance in ChatGPT. That protocol is superseded and must not be followed.** Authority now runs: **explicit Operator rulings → the canonical PDFs → spec + Amendments 001–006 → `FINAL_MVP_AUTHORITY_LOCK.md` → `CLAUDE.md`.** **Only the Operator accepts a checkpoint.**
 >

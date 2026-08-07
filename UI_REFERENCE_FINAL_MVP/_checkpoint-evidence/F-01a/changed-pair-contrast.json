@@ -1,0 +1,126 @@
+{
+  "measuredAt": "2026-08-05T22:15:28.850Z",
+  "method": "live computed styles in the production build, one probe element per changed source line",
+  "rows": [
+    {
+      "site": "features/trainer/trainer-roster.tsx:153",
+      "className": "flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/trainer/trainer-roster.tsx:162",
+      "className": "flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/trainer/returned-reports-queue.tsx:61",
+      "className": "mt-6 inline-flex min-h-11 items-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/trainer/trainer-draft-generation.tsx:142",
+      "className": "mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-700 px-5 py-3 text-base font-extrabold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/parent/parent-reports-list.tsx:82",
+      "className": "mt-4 inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800 sm:mt-0",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/parent/parent-dashboard.tsx:91",
+      "className": "mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/management/management-wording-editor.tsx:94",
+      "className": "inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/management/management-report-review.tsx:137",
+      "className": "inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/management/management-reports-queue.tsx:115",
+      "className": "mt-4 inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800 sm:mt-0",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    },
+    {
+      "site": "features/management/management-dashboard.tsx:105",
+      "className": "mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(214, 53, 122)",
+      "restRatio": 4.517,
+      "hover": {
+        "token": "--color-brand-800",
+        "value": "#b02a63",
+        "ratio": 6.255
+      }
+    }
+  ]
+}

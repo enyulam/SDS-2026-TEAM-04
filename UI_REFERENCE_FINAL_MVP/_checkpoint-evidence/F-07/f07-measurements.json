@@ -1,0 +1,62 @@
+{
+  "checkpoint": "F-07",
+  "screen": "07 Trainer Grade Student",
+  "referenceViewport": "1650x1200",
+  "overflowScrollWidth": {
+    "480": 480,
+    "1024": 1024,
+    "1650": 1650
+  },
+  "horizontalPageScroll": [
+    "480:480",
+    "1024:1024",
+    "1650:1650"
+  ],
+  "contrastNodesMeasured": 135,
+  "contrastFailures": 5,
+  "contrastFailureDetail": [
+    {
+      "ratio": 2.828,
+      "threshold": 4.5,
+      "large": false,
+      "disabled": false,
+      "text": "Trainer",
+      "cls": "block text-small text-ink-muted"
+    },
+    {
+      "ratio": 2.828,
+      "threshold": 4.5,
+      "large": false,
+      "disabled": false,
+      "text": "Adapter: deterministic_fixture · Participant eligible: no · ",
+      "cls": "mt-10 border-t border-line py-5 text-small text-ink-muted"
+    },
+    {
+      "ratio": 2.828,
+      "threshold": 4.5,
+      "large": false,
+      "disabled": false,
+      "text": "deterministic_fixture",
+      "cls": ""
+    },
+    {
+      "ratio": 2.828,
+      "threshold": 4.5,
+      "large": false,
+      "disabled": false,
+      "text": "no",
+      "cls": ""
+    },
+    {
+      "ratio": 2.828,
+      "threshold": 4.5,
+      "large": false,
+      "disabled": false,
+      "text": "browser session only",
+      "cls": ""
+    }
+  ],
+  "followUpLoadedValue": "Use facial expression to make the story change clear.",
+  "absentLearnerNonDisclosing": true,
+  "consoleErrors": []
+}
