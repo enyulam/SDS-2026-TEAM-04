@@ -1,5 +1,7 @@
 # FINAL MVP PHASE A2 — COMPLETE WORKSPACE LEGACY / OBSOLESCENCE AUDIT
 
+> 📍 **LOCATION (2026-08-08, repository-boundary normalization).** This file now lives at the **root of the main MVP repository** and is git-tracked, as does the whole `UI_REFERENCE_FINAL_MVP/` tree it audits. **This report describes the workspace as it stood on 2026-08-08 BEFORE that move** — its "outside every git repository" / "workspace root" statements about the six `FINAL_MVP_*` documents and `UI_REFERENCE_FINAL_MVP/` are **historical and must not be followed as current paths**. Statements about `FINAL_SUBMISSION_BRIEF/`, the frozen demo, PeakPalate, `governance-source/`, the migration tracker, the figma list and the three `_*-evidence/` trees **remain true** — those did not move. See `CLAUDE.md` §9.1 and `FINAL_MVP_AUTHORITY_LOCK.md` §1.1.
+
 **Instrument type:** Read-only discovery and classification report.
 **Produced:** 2026-08-08, Asia/Singapore.
 **Status:** COMPLETE. Findings only — **no cleanup was performed and none is authorized by this document.**
@@ -401,7 +403,7 @@ Not cleanup items — recorded because Phase A2 discovered them and the manifest
 
 ## 12. EVIDENCE ESTATE — 95 FILES, ENTIRELY UNTRACKED
 
-**Not one of the 95 evidence files is in any git repository.** `_c4-lifecycle-evidence`, `_f17-disposable-evidence`, `_g6-activation-evidence` and `UI_REFERENCE_FINAL_MVP/_checkpoint-evidence` sit outside all four repos — by design, and stated in their own READMEs. **Therefore no deletion anywhere in the evidence estate is reversible, and the proposed action for all 95 files is PRESERVE**, including the items classified duplicate or superseded. Total cost: **10,309,554 B (10.3 MB)** — *corrected from an earlier "~13 MB"; 99.3% of it is `_checkpoint-evidence`, 88 of the 95 files.*
+⚠️ **PARTLY SUPERSEDED 2026-08-08 (repository-boundary normalization): `UI_REFERENCE_FINAL_MVP/_checkpoint-evidence` — 88 of these 95 files — is now TRACKED and git-recoverable.** The finding below still holds for the remaining **7** files in the three `_*-evidence/` trees, which stayed at the workspace root. *(The consequence is conservative — it over-protects — so acting on the original text is safe; it is corrected for accuracy, not because it is dangerous.)* ~~**Not one of the 95 evidence files is in any git repository.**~~ `_c4-lifecycle-evidence`, `_f17-disposable-evidence`, `_g6-activation-evidence` ~~and `UI_REFERENCE_FINAL_MVP/_checkpoint-evidence`~~ sit outside all four repos — by design, and stated in their own READMEs. **Therefore no deletion anywhere in the evidence estate is reversible, and the proposed action for all 95 files is PRESERVE**, including the items classified duplicate or superseded. Total cost: **10,309,554 B (10.3 MB)** — *corrected from an earlier "~13 MB"; 99.3% of it is `_checkpoint-evidence`, 88 of the 95 files.*
 
 **Coverage:** C1 ✅ · C2 ✅ · C3-A ⚠️ harness only, no ledger, no narrative · C3-C/G-6 ✅ strongest (16/16 PASS, real provider, 2 billed calls) · C4 ✅ (29 PASS / 0 FAIL / 0 NOT-RUN) · F17 ⚠️ split.
 

@@ -17,17 +17,22 @@
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * The pack is inside this repository, at the repository root.
- * The previous `"..", ".."` form resolved from a 48H worktree cwd; both worktrees were
- * physically removed on 2026-08-08, so that path had already been broken before the
- * repository-boundary normalization moved the pack in.
+ *
+ * Resolved MODULE-RELATIVE, not from `process.cwd()`. The previous `"..", ".."` form was
+ * cwd-relative and assumed a 48H worktree; both worktrees were physically removed on
+ * 2026-08-08, so it had already been broken before the repository-boundary normalization
+ * moved the pack in. A cwd-relative replacement would repeat that same failure class —
+ * correct from the repo root, silently wrong from anywhere else.
  */
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
 const PACK_ROOT =
-  process.env.BEST_COACH_UI_PACK ??
-  resolve(process.cwd(), "UI_REFERENCE_FINAL_MVP");
+  process.env.BEST_COACH_UI_PACK ?? resolve(REPO_ROOT, "UI_REFERENCE_FINAL_MVP");
 
 /**
  * Values transcribed from `CORE_SCREENSHOT_VALIDATION_REPORT.md` §11 and each screen's

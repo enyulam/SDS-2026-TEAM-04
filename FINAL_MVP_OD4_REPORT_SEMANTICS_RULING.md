@@ -1,5 +1,7 @@
 # OD-4 — FINAL MVP REPORT SEMANTICS · OPERATOR RULING AND MIGRATION REGISTER
 
+> 📍 **LOCATION (2026-08-08, repository-boundary normalization).** This file now lives at the **root of the main MVP repository** and is git-tracked. Any statement anywhere — including in this file — placing it at the *workspace root* is **historical**, not a current path. Paths here are repository-relative. See `CLAUDE.md` §9.1 and `FINAL_MVP_AUTHORITY_LOCK.md` §1.1. **The ruling's content is unchanged by the move.**
+
 **Instrument type:** Operator ruling (§2.3 class) + read-only implementation inventory.
 **Ruled:** 2026-08-07, Asia/Singapore, by explicit operator ruling.
 **Status:** **RATIFIED.** This is the canonical Final MVP report-narrative model.

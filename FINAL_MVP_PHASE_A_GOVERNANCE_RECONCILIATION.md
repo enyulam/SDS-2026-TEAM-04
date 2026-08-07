@@ -1,5 +1,7 @@
 # FINAL MVP PHASE A — Governance Reconciliation & Authority-Lock Gate
 
+> 📍 **LOCATION (2026-08-08, repository-boundary normalization).** This file now lives at the **root of the main MVP repository** and is git-tracked. Its Part II is governing; Part I is historical. Any "(workspace root)" or "outside every git repository" phrasing about the six `FINAL_MVP_*` documents or `UI_REFERENCE_FINAL_MVP/` is **historical** — those are repository-relative now. See `CLAUDE.md` §9.1 and `FINAL_MVP_AUTHORITY_LOCK.md` §1.1. **No reconciliation finding is changed by the move.**
+
 **Date:** 2026-08-07 (Asia/Singapore)
 **HEAD at start and end:** `139d7533c126acc6a5162d0fcb889e86e80ed59e` — branch `main`, no remote, **nothing committed, nothing pushed**.
 **Working tree:** **DIRTY by design** — three tracked *documentation* files carry the Phase A corrections applied under §4: `CLAUDE.md`, `docs/progress/STATUS.md`, `docs/plan/BEST_Coach_Implementation_Plan.md` (8 insertions, 8 deletions, documentation only). **No application code, schema, migration, fixture or configuration file was touched.** The changes are uncommitted and fully reversible with `git restore`.
@@ -485,7 +487,7 @@ Columns: **ID · ISSUE · AUTHORITATIVE SOURCES · CONFLICTING SOURCES · CURREN
 
 ### G-26 · **OD-4 — the Final MVP report narrative semantics** *(added 2026-08-07, after the Authority Lock was created)*
 
-- **Authoritative source:** an **explicit operator ruling**, 2026-08-07 — the highest authority on the question it addresses (Authority Lock §2.3). Canonical instrument: **`FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`** (workspace root)
+- **Authoritative source:** an **explicit operator ruling**, 2026-08-07 — the highest authority on the question it addresses (Authority Lock §2.3). Canonical instrument: **`FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`** (**repository root** — ~~workspace root~~; moved 2026-08-08, Authority Lock §1.1 / `CLAUDE.md` §9.1)
 - **Conflicting sources:** spec §8's four panels; `CLAUDE.md:283-284`; G-10 above; Authority Lock §15/§15.1 as first written; the `reference` tree's own internal inconsistency on the third label
 - **Current implementation:** the superseded four are physically present in **1 table (4 columns)**, **8 SQL functions**, the **generated database types (44 occurrences)**, **6 TypeScript contract/domain types**, the **AI structured-output schema and prompt**, **grounding rule 4**, the **fixture provider**, **all three role UIs**, and the **C3/G-6, C4, integration and concurrency harnesses**
 - **Historical decision:** raised 3× in the screen plan, ruled **R — keep the governed four** at G-10, and carried by the Authority Lock as the one **time-boxed** open operator decision
