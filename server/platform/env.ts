@@ -18,9 +18,10 @@ import {
   type SupabaseEnvironment,
   type SupabaseKeyFamily,
 } from "@/lib/supabase/public-config";
+import { requireRatifiedLlmConfig, type RatifiedLlmConfig } from "@/server/platform/llm-config";
 
-const ACCEPTED_LLM_PROVIDER = "openai";
-const ACCEPTED_LLM_MODEL = "gpt-5.6-terra";
+export { requireRatifiedLlmConfig, type RatifiedLlmConfig } from "@/server/platform/llm-config";
+
 const MODERN_PUBLISHABLE_PREFIX = "sb_publishable_";
 
 export interface ServerConfig {
@@ -31,11 +32,7 @@ export interface ServerConfig {
     readonly secretKey: string;
     readonly keyFamily: SupabaseKeyFamily;
   };
-  readonly llm: {
-    readonly provider: typeof ACCEPTED_LLM_PROVIDER;
-    readonly model: typeof ACCEPTED_LLM_MODEL;
-    readonly apiKey: string;
-  };
+  readonly llm: RatifiedLlmConfig;
 }
 
 /** Diagnostic error containing only a code, the variable name, and an expectation. */
@@ -84,17 +81,7 @@ export function getServerConfig(): ServerConfig {
     fail("E_SRV_KEY_REUSE", "SUPABASE_SECRET_KEY", "must not be identical to the publishable key");
   }
 
-  const provider = requireNonBlank("LLM_PROVIDER", process.env.LLM_PROVIDER, "E_SRV_LLM_PROVIDER_MISSING");
-  if (provider !== ACCEPTED_LLM_PROVIDER) {
-    fail("E_SRV_LLM_PROVIDER", "LLM_PROVIDER", "must equal the accepted project provider");
-  }
-
-  const model = requireNonBlank("LLM_MODEL", process.env.LLM_MODEL, "E_SRV_LLM_MODEL_MISSING");
-  if (model !== ACCEPTED_LLM_MODEL) {
-    fail("E_SRV_LLM_MODEL", "LLM_MODEL", "must equal the accepted project model");
-  }
-
-  const apiKey = requireNonBlank("LLM_API_KEY", process.env.LLM_API_KEY, "E_SRV_LLM_KEY_MISSING");
+  const llm = requireRatifiedLlmConfig();
 
   return Object.freeze({
     supabase: Object.freeze({
@@ -104,10 +91,6 @@ export function getServerConfig(): ServerConfig {
       secretKey,
       keyFamily: secretFamily,
     }),
-    llm: Object.freeze({
-      provider: ACCEPTED_LLM_PROVIDER,
-      model: ACCEPTED_LLM_MODEL,
-      apiKey,
-    }),
+    llm: Object.freeze(llm),
   });
 }
