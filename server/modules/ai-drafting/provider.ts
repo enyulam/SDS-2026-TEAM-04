@@ -48,8 +48,27 @@ export interface ReportPanels {
   readonly sessionTakeaway: string;
 }
 
+/**
+ * Redacted, non-secret call metadata (Run C3-C, G-6 evidence contract item
+ * 14/§4). Carries only what a cost/usage record needs: the model string the
+ * PROVIDER echoed back (not the requested one — an independent cross-check),
+ * a request identifier for provider-side support lookups, and token counts.
+ * Never a header, never a full response, never a prompt or completion body.
+ */
+export interface AiDraftUsageMetadata {
+  readonly promptTokens: number | null;
+  readonly completionTokens: number | null;
+  readonly totalTokens: number | null;
+}
+
+export interface AiDraftMetadata {
+  readonly model: string | null;
+  readonly requestId: string | null;
+  readonly usage: AiDraftUsageMetadata | null;
+}
+
 export type AiDraftOutcome =
-  | { readonly kind: "ok"; readonly panels: ReportPanels }
+  | { readonly kind: "ok"; readonly panels: ReportPanels; readonly metadata?: AiDraftMetadata }
   | { readonly kind: "schema_rejected"; readonly detail: string }
   | { readonly kind: "grounding_rejected"; readonly detail: string }
   | { readonly kind: "provider_failure"; readonly retryable: boolean };
@@ -171,9 +190,27 @@ export class OpenAiDraftProvider implements AiDraftProvider {
     }
 
     let panels: unknown;
+    let metadata: AiDraftMetadata = { model: null, requestId: null, usage: null };
     try {
       const body = (await response.json()) as {
+        id?: string;
+        model?: string;
         choices?: Array<{ message?: { content?: string } }>;
+        usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+      };
+      // Redacted metadata ONLY: the model string, a request id and token
+      // counts. The rest of the response body is never retained past this
+      // block — never a header, never a prompt, never a completion string.
+      metadata = {
+        model: typeof body.model === "string" ? body.model : null,
+        requestId: typeof body.id === "string" ? body.id : null,
+        usage: body.usage
+          ? {
+              promptTokens: typeof body.usage.prompt_tokens === "number" ? body.usage.prompt_tokens : null,
+              completionTokens: typeof body.usage.completion_tokens === "number" ? body.usage.completion_tokens : null,
+              totalTokens: typeof body.usage.total_tokens === "number" ? body.usage.total_tokens : null,
+            }
+          : null,
       };
       const content = body.choices?.[0]?.message?.content;
       if (typeof content !== "string") return { kind: "schema_rejected", detail: "no content" };
@@ -184,7 +221,7 @@ export class OpenAiDraftProvider implements AiDraftProvider {
 
     const validated = validatePanelShape(panels);
     if (!validated) return { kind: "schema_rejected", detail: "output does not match the panel schema" };
-    return { kind: "ok", panels: validated };
+    return { kind: "ok", panels: validated, metadata };
   }
 }
 
