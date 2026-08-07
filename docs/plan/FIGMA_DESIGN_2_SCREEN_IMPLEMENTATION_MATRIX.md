@@ -1,5 +1,17 @@
 # B.E.S.T Coach — Figma Design 2 Screen Implementation Matrix
 
+> ## ⚠️ OD-4 SUPERSESSION BANNER — added 2026-08-08 (Final MVP Phase A2)
+>
+> **This document predates the OD-4 ruling (2026-08-07) and still names the SUPERSEDED report panels as the governing workflow.** It was reachable from a live, unqualified instruction in the rank-2 contract, so this banner is mandatory. *(Caught by adversarial review — its two sibling baselines received banners in the same pass and this one was missed.)*
+>
+> **The canonical Final MVP report panels are: `Overview` · `Strengths` · `Areas for Development` · `Remarks`** (`FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`; Authority Lock §15.1).
+>
+> **Wherever this file says the four parent-facing wording panels are *Today's Strength · Next Focus · Practice Suggestion · Session Takeaway* — including §0 item 4 and §5.2 — those names are `SUPERSEDED_BY_OD-4_FINAL_REPORT_MODEL`.** This is a **semantic-model change, not a cosmetic relabel**: "Overview" and "Remarks" have no counterpart in the old four, so the mapping is a Phase B migration, not a rename.
+>
+> **Route correction (operator ruling Q-20):** the wording-only editor is **`/management/reports/[reportId]/edit`**, not the `/management/reviews/[reportId]/wording` this file names.
+>
+> **Unchanged and still correct:** Management's authority remains **exactly four wording columns and nothing else** — it may never change ratings, attendance, observations, trainer notes, evidence or any assessment fact. Retained unrewritten; a ratified planning artefact is annotated, never silently rewritten.
+
 **Status:** Planning artefact — created at the Step 7E0 governance reconciliation checkpoint (2026-07-30)
 **Authority:** Governed by **Amendment 002 A-022** (Figma Design 2 is the final UI authority), **A-014** (three-flow, one-centre boundary), **A-016** (canonical hierarchy), **A-017** (mandatory nine dimensions), **A-018** (attendance), **A-019** (management administration), **A-020** (identity/invitation), **A-021** (one canonical report), **A-024** (revised phasing), and **Amendment 004 A-033 … A-040** (the two-stage governed report workflow).
 **Precedence:** This document is **procedural planning material**. It cannot override Specification v3, Amendment 001, Amendment 002, Amendment 003, Amendment 004, or `CLAUDE.md`.

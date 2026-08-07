@@ -1,6 +1,16 @@
 # B.E.S.T Coach — Competency Vocabulary Reconciliation Plan
 
-**Status:** Implementation baseline — **procedural, subordinate to Amendment 006**
+> ## ✅ COMPLETED — HISTORICAL. V2 AND V3 HAVE BOTH LANDED.
+>
+> **Banner added 2026-08-08 (Phase A2, S-55).** This plan is **discharged**. Migration `supabase/migrations/20260806160000_competency_vocabulary_rename.sql` is at HEAD; **V3 merged at `68ba4976`**; Phase A **G-20** additively ratified the post-rename census. **The database stores `beginning` · `developing` · `mastering` · `mastered`.**
+>
+> ⚠️ **Two things below are actively dangerous if read as current instructions:**
+> 1. The **V2/V3 rows marked *"Pending — requires authorization"*** are **complete**, not pending.
+> 2. Their **Branch column assigns work to `feat/48h-backend` and `feat/48h-frontend`** — both are **`CLOSED_BY_NONUSE_POLICY`** frozen historical artefacts (`CLAUDE.md` §14.3a) whose physical worktrees were removed in Phase A2. **Never start work there. All future work begins from `main`.**
+>
+> Retained unrewritten as the historical record of how the rename was sequenced.
+
+**Status:** ~~Implementation baseline~~ **HISTORICAL implementation record (completed 2026-08-06)** — **procedural, subordinate to Amendment 006**
 **Created:** 2026-08-05 23:20 (Asia/Singapore), at Vocabulary Governance Checkpoint **V1**
 **Governing instrument:** `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_006.md` (**A-049 … A-055**)
 

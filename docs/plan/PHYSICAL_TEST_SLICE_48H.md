@@ -1,6 +1,14 @@
 # B.E.S.T Coach — 48-Hour Physical-Test Slice Contract
 
-**Status:** Shared implementation contract — created 2026-08-05 (Asia/Singapore).
+> ## ⚠️ HISTORICAL_PROCEDURAL_EVIDENCE — added 2026-08-08 (Phase A2, S-58/S-59; operator ruling Q-13)
+>
+> **Classification: `HISTORICAL_PROCEDURAL_EVIDENCE` for the accepted 48-hour sprint. This is NOT the current Final MVP execution contract.** The current execution contract will be `FINAL_MVP_EXECUTION_PLAN.md` (not yet created). Preserved in full.
+>
+> **What is stale and must not be acted on:** the claim that ***"No implementation exists today"***. Twelve migrations and 34 functions are at HEAD, and the two assessment RPCs this file says do not exist **do** exist (`supabase/migrations/20260806090000_assessment_governed_persistence.sql`). The competency vocabulary is likewise **ratified AND implemented** — V2/V3 both landed 2026-08-06.
+>
+> **What is NOT stale and must not be "corrected":** the phrase *"the ratified Step 7I counts of **5 migrations, 28 functions and 75 tests**"* is a **correctly-scoped frozen Step 7I snapshot** and is accurate in that frame. Do not rewrite it to the current 12/34 — see the banner in `STEP_7I_REPORT_LIFECYCLE_BASELINE.md`.
+
+**Status:** ~~Shared implementation contract~~ **HISTORICAL_PROCEDURAL_EVIDENCE** — created 2026-08-05 (Asia/Singapore).
 **Purpose:** Pin the exact shared boundary between the backend workstream (Claude Code) and the frontend workstream (Codex) so a locally runnable, desktop-first, synthetic-data vertical slice can be delivered in two focused days and used for a supervised physical test.
 
 > **Amendment 006 supersession note — appended 2026-08-05 23:20 (Asia/Singapore). No accepted contract row was rewritten.**

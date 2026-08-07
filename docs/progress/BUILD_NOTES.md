@@ -1051,3 +1051,37 @@ Each log carries the required header (workstream, owning agent, owning branch, p
 **Commit.** **NONE.** Tree deliberately left dirty for Operator review.
 
 **Next permitted action.** **Operator review of the cumulative documentation diff.** No further work authorized until the Operator authorizes a bounded phase — Phase A2 cleanup, creation of `FINAL_MVP_EXECUTION_PLAN.md`, or the OD-4 implementation track.
+
+---
+
+## 2026-08-08 — FINAL MVP PHASE A2: CONTROLLED PRESERVATION, RECONCILIATION, CLEANUP AND VERIFICATION
+
+**Authorized by explicit operator instruction** (rulings OR-PA2-1 … OR-PA2-4 and Q-1 … Q-26). **Documentation, governance metadata and filesystem hygiene only — no application source, schema, migration, fixture, configuration or test file was changed.**
+
+### Preservation gates (all PASS, before any destructive or reconstructive action)
+
+- **Gate 0 — state verified.** HEAD `139d7533`, branch `main`, 0 remotes, 7 modified `.md` files, **zero non-documentation changes**, `git diff --check` clean, frozen demo clean at `8d4acf4`.
+- **Gate 1 — targets verified.** SUTD OneDrive writable; `D:\` present, writable, 629.5 GB free. **`C:` is disk 0 and `D:` is disk 1 — two separate physical NVMe devices, so there is NO residual backup-independence risk to record.**
+- **Gate 2 — two snapshots created and verified.** 1,726 files / 107.2 MB each (`node_modules`, `.next`, `.env.local` excluded), **0 failures**. Subtree counts matched source exactly across all three locations: 37 reference packs, 343 UI files, 12 migrations, 7 spec files, 88 checkpoint-evidence files, 2 canonical PDFs, 3 governance-source files, 762 + 111 git objects. **`.env.local` copied ONLY to a protected D: location** (OneDrive verified to contain zero). **AUTH-01 and PeakPalate hash-verified byte-exact in all three locations.**
+- **Gate 3 — checkpoint commit `3930db9164d7f7e6353b00eccdf4dd31074610c2`**, tag `final-mvp/pre-phase-a2-cleanup-2026-08-08`. Staged set was exactly 7 `.md` files. **`git restore` was deliberately NOT used**, protecting the pre-existing C-8 correction in `docs/plan/BEST_Coach_Implementation_Plan.md`.
+- **Gate 4 — frozen tags created BEFORE removal:** `frozen/48h-backend-402b0b6`, `frozen/48h-frontend-6762b5c`. *Rationale: git refuses to delete a branch checked out in a worktree; removing the worktree lifts that protection, and both branches are fully merged, so a plain `git branch -d` would then succeed silently. The tags make the commits reachable independently of the mutable branch refs.*
+- **Gate 5 — portable git bundles**, both verified *"records a complete history"*, stored and independently re-verified at **both** locations.
+
+### Cleanup executed
+
+- **58 stale-segment rewrites** in annotate-never-delete style (strike-through + date + ruling citation), across `CLAUDE.md`, `STATUS.md`, `FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md`, `BEST_Coach_Implementation_Plan.md`, `STEP_7I_REPORT_LIFECYCLE_BASELINE.md`, `PHYSICAL_TEST_SLICE_48H.md`, `COMPETENCY_VOCABULARY_RECONCILIATION_PLAN.md`, and three ungit'd workspace-root documents. **Four clauses in the rank-2 contract that instructed agents NOT to build a ratified deliverable are now corrected.**
+- **`S-57` deliberately NOT applied** (operator ruling). It proposed rewriting *"Total `authenticated` EXECUTE grants = 14"* to 25 in the Step 7I baseline — but that line self-scopes (*"This counts only functions Step 7I creates"*) and is correct in its frame. **Applying it would have committed the very two-frames error the Phase A2 audit condemns.** The four explicit NOT-STALE guards were likewise left untouched.
+- **AUTH-01 foreign contamination resolved** — byte-exact preservation to two independent devices, verified, then reconstruction from Figma node `546:370` only. Zero foreign content remains in active UI authority. Full record in `UI_REFERENCE_FINAL_MVP/CHANGE_LOG.md`.
+- **Two `.txt` → `.html` renames** with **bytes unchanged** (pre/post SHA-256 identical). `reference/` now holds 37 `.html`, 37 `.png`, 37 `.md`, **zero `.txt`**.
+- **11 stale screenshot trailers corrected**; verified afterwards that **12 packs hold a `reference.png` and exactly 12 claim one — zero mismatches against disk**. None manufactured.
+- **`UI_PACK_MANIFEST.json` reconciled** — 24 phantom `referenceScreenshot` paths nulled; `screenCount: 36` and the 12 validated frozen relationships preserved.
+- **GC-1 … GC-14 recorded into 19 packs' `implementation-notes.md`.** Packs 30 and 31 previously carried **no** recorded conflict, so nothing had stopped a future agent building GC-2 and GC-3 — parent-facing per-dimension rating surfaces — exactly as drawn. **No PNG or HTML byte was altered.**
+- **Both physical worktree directories removed** via `git worktree remove`; `git worktree list` now contains only `main`. **~1.59 GB reclaimed** (91,779 → 46,072 files; 3.28 → 1.69 GB).
+
+### Explicitly NOT done
+
+**Zero file deletions. Zero archival.** No application source, schema, DB, migration or test change. **PeakPalate retained in place, byte-identical** (`FOREIGN_REFERENCE_RETAINED_BY_OPERATOR`, OR-PA2-1) — its earlier removal proposal is withdrawn and its presence must never be reported as unresolved contamination. No hosted Supabase, no Vercel deploy, no GCP action, no GitHub remote, no push, no external provider call. **`FINAL_MVP_EXECUTION_PLAN.md` was NOT created.** The frozen demo was not modified.
+
+### Verification
+
+Census re-derived: **12 migrations · 26 tables · 34 functions · 29 policies.** UI tree: 36 governed screen packs · 37 reference packs — **kept as distinct scopes; Auth 04 was NOT promoted to screen 37.** Regression: `tsc` 0, `lint` 0, `build` 0 (17 routes), 5 portable suites 0. `integrated-route-security` and the four `.assertions.ts` recorded **`NOT_RUN`** with reasons — **no suite was reported as passing without a real runner, and no external or billable service was started to make one green.**

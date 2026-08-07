@@ -59,7 +59,7 @@ Authentication IDs sit **outside** the numbered portal sequence deliberately, so
 | `Governance decision missing` | The screen's behaviour is not ratified; building it would require inventing governance. |
 | `Post-48-hour final-MVP scope` | In ratified final-MVP scope, not required before the physical test. |
 
-**No screen in this inventory is marked `Implemented and visually aligned`.** No frozen `reference.png` exists yet for any of the 36 screens, so visual alignment cannot be claimed for any of them.
+**No screen in this inventory is marked `Implemented and visually aligned`.** ~~No frozen `reference.png` exists yet for any of the 36 screens, so visual alignment cannot be claimed for any of them.~~ **✅ CORRECTED 2026-08-08 (Phase A2, S-14). FALSE — 12 frozen `reference.png` files exist**, each SHA-256-verified against `UI_REFERENCE_FINAL_MVP/UI_PACK_MANIFEST.json` and byte-identical to its `reference/` twin (Authority Lock §28.1, §28.6, §31.5). **The correct statement: 12 of the 36 governed screens have a frozen reference; 24 do not, so alignment cannot be claimed for those 24.** ⚠️ Left uncorrected, the struck sentence would let a future reader **deny that visual-authority rank 1 is populated at all**.
 
 ### 0.4 Route notation
 
@@ -389,7 +389,7 @@ The currently implemented routes were built to **`docs/plan/PHYSICAL_TEST_SLICE_
 
 ### 7.3 Coverage gap — one core screen has no route at all
 
-**ID 05 Trainer Schedule (`/trainer/schedule`, flow order 2) has no implemented route.** Session selection is currently performed on the trainer landing surface at `/trainer`. This is a **coverage gap, not a route mismatch**, and it is the single most consequential finding of this reconciliation for the physical test.
+~~**ID 05 Trainer Schedule (`/trainer/schedule`, flow order 2) has no implemented route.** Session selection is currently performed on the trainer landing surface at `/trainer`. This is a **coverage gap, not a route mismatch**, and it is the single most consequential finding of this reconciliation for the physical test.~~ **✅ CORRECTED 2026-08-08 (Phase A2, S-15). THE GAP IS CLOSED.** `app/(portals)/trainer/schedule/page.tsx` exists and is verified on disk; it was created by checkpoint **F-04** under operator ruling **R-B1**, and `/trainer` now redirects to it as a compatibility alias (Authority Lock §28.6). **Open decision U-A5-1 is closed** and must not be re-raised from this paragraph.
 
 **Treatment: `Operator decision required`.** Two defensible options, neither of which this checkpoint may choose:
 
@@ -407,6 +407,9 @@ The currently implemented routes were built to **`docs/plan/PHYSICAL_TEST_SLICE_
 | `/management/reports/[reportId]/review` | Management **final review** (blocked family 2), distinct from ID 19's canonical submitted report | **Operator decision required** — the route currently carries two governed surfaces; whether they separate is a design decision |
 | `/trainer/reports?status=needs_edit` | Returned-correction queue | **Preserve as compatibility alias** — a query variant of ID 09, not a separate route |
 | `/management/reports?status=trainer_approved` / `?status=needs_edit` | Pending-review and correction-tracking queues | **Preserve as compatibility alias** — query variants of ID 29 |
+| `/` (`app/page.tsx`) | Root entry — redirect-only, `dynamic="force-dynamic"`; sends the caller to `/login` or their portal home. Renders nothing | **✅ ADDED 2026-08-08 (Phase A2, S-17).** This register listed **5** unmapped implemented routes; there are **6** — the root route was absent (Authority Lock §28.6). **No decision required:** it is a redirect, not a screen surface, and correctly holds no inventory ID |
+
+**✅ Dispositions updated 2026-08-08 (Phase A2, operator rulings Q-20, Q-23):** `/trainer/reports/[reportId]/edit` is **RULED a canonical sub-route/state of governed screen ID 10** and does **not** receive another screen ID without explicit future authority (Q-23). `/management/reports/[reportId]/edit` is **RULED required Final MVP functionality** to be implemented in Phase B as a **derived governed surface** inheriting the nearest authoritative Management report shell, layout, typography and interaction conventions — exposing only wording-only controls, and **not becoming a new authoritative Figma screen** (Q-20). Management still may never change ratings, attendance, observations, trainer notes, evidence or any assessment fact.
 
 ---
 
@@ -414,7 +417,11 @@ The currently implemented routes were built to **`docs/plan/PHYSICAL_TEST_SLICE_
 
 **Screen presence is not authorization.** Everything below is recorded as a **dependency**, never invented as behaviour.
 
-### 8.1 Delivered on `feat/48h-backend` (not yet merged to `main`)
+### 8.1 ~~Delivered on `feat/48h-backend` (not yet merged to `main`)~~ → **Delivered and MERGED to `main`**
+
+> **✅ CORRECTED 2026-08-08 (Phase A2, S-16/S-18).** All work described in this section **is on `main`**. Both 48H branches are **0 commits ahead of `main`** (`git rev-list --count main..feat/48h-backend` = 0; `git diff main...feat/48h-backend --stat` = empty), and both are **`CLOSED_BY_NONUSE_POLICY`** (`CLAUDE.md` §14.3a; Authority Lock §31.11) — **frozen historical artefacts that may never be used for Final MVP implementation**. Their physical worktree directories were removed in Phase A2 after preservation; the branches and commits remain, anchored by tags `frozen/48h-backend-402b0b6` and `frozen/48h-frontend-6762b5c`.
+>
+> ⚠️ **Every "delivered on `feat/48h-backend`" phrase below is historical provenance, not a live delivery surface.** Do not check out, branch from, or look for current code in either worktree. **All future work starts from `main`.**
 
 Real authentication and server-derived role resolution; the Step 7I governed report lifecycle and its RPCs; governed assessment persistence (`assessment_save_observation`, `assessment_get_trainer_observation`); trainer, management and parent read projections; the AI provider boundary and deterministic grounding; management correction tracking. These carry the **core-slice** screens.
 

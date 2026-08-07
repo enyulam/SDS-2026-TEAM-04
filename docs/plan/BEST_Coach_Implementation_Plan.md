@@ -1,6 +1,17 @@
 # B.E.S.T Coach — Implementation Plan (Orchestrator's Script)
 
-**Companion to:** `CLAUDE.md` (the agent's standing contract), the Complete MVP Specification (v3), its ratified **Amendment 001** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md`), its ratified **Amendment 002** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md`), and its ratified **Amendment 003** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_003.md`)
+**Companion to:** `CLAUDE.md` (the agent's standing contract), the Complete MVP Specification (v3), its ratified **Amendment 001** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md`), its ratified **Amendment 002** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_002.md`), its ratified **Amendment 003** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_003.md`), its ratified **Amendment 004**, its ratified **Amendment 005** and its ratified **Amendment 006** *(004–006 added 2026-08-08, Phase A2, S-63 — all six are ratified and active per Authority Lock §2.2)*
+
+> ## ⚠️ CHECKPOINT-STATE BANNER — added 2026-08-08 (Phase A2, S-60/S-61/S-62)
+>
+> **Steps 7E, 7F, 7G, 7H and 7I have ALL shipped.** Every *"remains unauthorized and unstarted"* / *"remains blocked"* statement below was accurate when written and is now **historical**, not a current instruction. Live census: **12 migrations · 26 tables · 34 functions · 12 enums · 29 policies** (Authority Lock §19.1).
+> - **Step 7E** — completed and accepted 2026-08-03 (`252ef9b`).
+> - **Step 7F** — authorized, executed, verified and accepted (`e197f91`; Phase A **G-5**). `scripts/fixtures/` holds the three ratified files.
+> - **Step 7I** — both migrations at HEAD. *(This was Phase A correction **C-4**, unblocked by G-20 and never applied until now.)*
+>
+> **The underlying principle is unchanged and permanent: ratifying an amendment or a design authorizes nothing; construction always needs separate explicit authorization.** Read these statements as expressing that rule, never as a claim about today's state. **For current state read `docs/progress/STATUS.md`.**
+>
+> ⚠️ **This file also carries the ratified Phase A C-8 correction (`docs/progress/STATUS.md:21`). Never `git restore` it.**
 **Audience:** you, as orchestrator and reviewer, working with Claude Code in VS Code
 **Purpose:** a start-to-end script for driving the build, with concrete tasks, verification steps, and review checklists at every stage — not just a restatement of the phases in `CLAUDE.md`.
 
