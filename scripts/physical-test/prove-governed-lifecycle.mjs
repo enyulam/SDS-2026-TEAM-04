@@ -215,7 +215,11 @@ const CONTROL_TITLES = new Map([
   ['N-12', 'This run leaves no stack, server, browser, volume or held port behind'],
   ['N-13', 'The Quality Checklist gate is enforced SERVER-side, not only by a disabled button'],
   ['N-14', 'Management cannot read report content before trainer approval'],
+  ['N-15', 'The served application used the REAL participant adapter, not the fixture adapter'],
 ])
+
+/** The adapter kind the served application must report. Anything else means fixture mode. */
+const REAL_ADAPTER_KIND = 'real_participant_adapter'
 
 const lifecycle = new Map()
 const controls = new Map()
@@ -1120,9 +1124,47 @@ function makeBrowser(cdp, origin) {
     throw new SafeError(`Timed out waiting for ${description}.`)
   }
 
+  /**
+   * Wait for the ASSESSMENT ROUTE to reach a TERMINAL state — either the
+   * instrument rendered, or the governed refusal rendered instead of it.
+   *
+   * Review 2 caught N-2 passing vacuously without this. `navigate()` settles
+   * on `[data-session-user="settled"]`, which `portal-shell.tsx` sets from
+   * SESSION resolution alone; `trainer-assessment.tsx` then sits at
+   * `resource.kind === "loading"` rendering a LoadingSkeleton until an
+   * awaited round-trip returns. Reading "is the instrument absent?" inside
+   * that window is true for EVERY route, eligible or not — so the future-
+   * session gate could have been deleted entirely and N-2 would still have
+   * passed. The race was one-directional: the failing case takes strictly
+   * longer than the passing observation, which is the worst kind.
+   *
+   * Terminal is therefore defined POSITIVELY: the rated-count element exists
+   * (the instrument is live) or the authored refusal title is on the page.
+   * A route that reaches neither within the timeout is a real failure and is
+   * reported as one, never silently read as "refused".
+   */
+  const waitForAssessTerminal = async (timeoutMs = 30_000) => {
+    await waitUntil(
+      'document.querySelector(\'[data-rated-count]\') !== null || ' +
+      'document.querySelector(\'fieldset[data-dimension]\') !== null || ' +
+      '/This assessment is not open/i.test(document.body.innerText)',
+      'the assessment route to reach a terminal state (instrument or governed refusal)', timeoutMs)
+    return {
+      instrumentPresent: await evaluate(
+        'document.querySelector(\'[data-rated-count]\') !== null || document.querySelector(\'fieldset[data-dimension]\') !== null'),
+      dimensionControls: await evaluate('document.querySelectorAll(\'fieldset[data-dimension]\').length'),
+      refusalShown: await evaluate('/This assessment is not open/i.test(document.body.innerText)'),
+    }
+  }
+
+  /** The served adapter kind, read off the portal shell (`port.identity.kind`). */
+  const adapterKind = () => evaluate(
+    '(() => { const n = document.querySelector(\'[data-adapter-kind]\'); return n ? n.getAttribute("data-adapter-kind") : null; })()')
+
   return {
     evaluate, currentPath, bodyText, waitUntil, navigate, installCookies,
     clearCookies, clickText, fillField, clickSelector, exists, waitForPath,
+    waitForAssessTerminal, adapterKind,
   }
 }
 
@@ -1237,6 +1279,26 @@ async function main() {
   const trainerShell = await browser.evaluate(
     'document.querySelector(\'[data-session-user]\') ? document.querySelector(\'[data-session-user]\').dataset.sessionUser : null',
   )
+
+  /*
+   * N-15 — FIXTURE MODE OFF, PROVEN FROM THE SERVED DOM, before any leg is
+   * judged. Deleting NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE from the child env
+   * is NOT proof: `@next/env` fills any key the child does not already carry
+   * from the application's own `.env.local`, so a DELETED variable is exactly
+   * the one that can be silently restored — the same hazard
+   * prove-disposable-app.mjs documents for the AI selectors. Under the
+   * fixture adapter this whole run would exercise no governance at all, so
+   * this is read from the shell's own `data-adapter-kind`, which is
+   * `port.identity.kind`, on a page this run actually loaded.
+   */
+  const servedAdapter = await browser.adapterKind()
+  capture('N15_adapter_kind', servedAdapter)
+  controlFrom('N-15', servedAdapter === REAL_ADAPTER_KIND,
+    `the served application reported data-adapter-kind="${servedAdapter}" — the REAL participant adapter — so every ` +
+      'leg below ran against the real backend, RLS and governed RPCs, not against the frontend fixture adapter',
+    `the served application reported data-adapter-kind=${servedAdapter === null ? 'ABSENT' : `"${servedAdapter}"`}, ` +
+      `expected "${REAL_ADAPTER_KIND}"; under the fixture adapter no governance would be exercised at all`)
+
   legFrom('L-1', trainerLanding.startsWith('/trainer') && trainerShell === 'settled',
     `the minted Trainer session resolved server-side and landed on ${trainerLanding} with the portal shell settled`,
     `the Trainer landed on ${trainerLanding} with shell state ${trainerShell}`)
@@ -1772,22 +1834,35 @@ async function main() {
   const absentAction = await browser.evaluate(
     `document.querySelector('article[data-roster-card="${FIXTURE_STUDENT}"]').dataset.rosterAction`)
   await browser.navigate(`/trainer/sessions/${ABSENT_SESSION}/students/${FIXTURE_STUDENT}/assess`)
-  const absentAssessText = await browser.bodyText()
+  const absentTerminal = await browser.waitForAssessTerminal()
   const absentReports = Number(dbValue(`SELECT count(*) FROM public.reports WHERE class_session_id='${ABSENT_SESSION}';`))
+  capture('N1_absent_terminal', absentTerminal)
   controlFrom('N-1',
-    absentAttendance === 'absent' && absentAction === 'inert' && absentReports === 0 && !absentAssessText.includes('dimensions rated'),
-    `the absent learner's card rendered inert with no assessment path, the assess route refused to open the instrument, ` +
-      `and no report exists for that session (${absentReports})`,
-    `attendance=${absentAttendance}, action=${absentAction}, reports=${absentReports}`)
+    absentAttendance === 'absent' && absentAction === 'inert' && absentReports === 0 &&
+      absentTerminal.refusalShown === true && absentTerminal.instrumentPresent === false &&
+      absentTerminal.dimensionControls === 0,
+    `the absent learner's card rendered inert with no assessment path; the assess route reached its TERMINAL state and ` +
+      `rendered the governed refusal INSTEAD of the instrument (${absentTerminal.dimensionControls} rating fieldsets — ` +
+      `there is nothing to focus, tab to or fill), and no report exists for that session (${absentReports})`,
+    `attendance=${absentAttendance}, action=${absentAction}, reports=${absentReports}, ` +
+      `refusal shown=${absentTerminal.refusalShown}, instrument present=${absentTerminal.instrumentPresent}, ` +
+      `fieldsets=${absentTerminal.dimensionControls}`)
 
-  // N-2 — future session.
+  // N-2 — future session. Waits for a TERMINAL state before judging, so the
+  // refusal is proven POSITIVELY rather than inferred from a loading skeleton.
   await browser.navigate(`/trainer/sessions/${FUTURE_SESSION}/students/${FIXTURE_STUDENT}/assess`)
-  const futureText = await browser.bodyText()
+  const futureTerminal = await browser.waitForAssessTerminal()
   const futureReports = Number(dbValue(`SELECT count(*) FROM public.reports WHERE class_session_id='${FUTURE_SESSION}';`))
-  const futureRefused = !futureText.includes('dimensions rated') && futureReports === 0
-  controlFrom('N-2', futureRefused,
-    `a future-dated session refused to open the assessment instrument through its own route and created no report (${futureReports})`,
-    `the future session rendered the instrument or created ${futureReports} report(s)`)
+  capture('N2_future_terminal', futureTerminal)
+  controlFrom('N-2',
+    futureTerminal.refusalShown === true && futureTerminal.instrumentPresent === false &&
+      futureTerminal.dimensionControls === 0 && futureReports === 0,
+    `a future-dated session reached its TERMINAL state on its own route and rendered the governed refusal INSTEAD of ` +
+      `the instrument (${futureTerminal.dimensionControls} rating fieldsets present), creating no report ` +
+      `(${futureReports}). The refusal is observed positively — an earlier version of this control read the page while ` +
+      'it was still a loading skeleton, which would have passed even with the gate deleted',
+    `refusal shown=${futureTerminal.refusalShown}, instrument present=${futureTerminal.instrumentPresent}, ` +
+      `fieldsets=${futureTerminal.dimensionControls}, reports=${futureReports}`)
 
   // N-3 — direct URL role bypass.
   await signIn('parent')
@@ -1951,29 +2026,48 @@ async function main() {
     `sign-out did not terminate: ${signOutResults.filter((r) => !r.ok).map((r) => `${r.roleKey}->${r.landed}`).join(', ')}`)
 
   // N-9 — audit events exactly once + chain verification.
+  // seq_no is carried so ADJACENCY can be proven, not merely relative order.
   const eventRows = psqlRows(DISPOSABLE_DB_CONTAINER,
-    `SELECT action, COALESCE(state_from,'-'), COALESCE(state_to,'-') FROM public.audit_events e ` +
+    `SELECT e.seq_no::text, action, COALESCE(state_from,'-'), COALESCE(state_to,'-') FROM public.audit_events e ` +
     `WHERE e.centre_id='${FIXTURE_CENTRE}' AND (` +
     `  (e.target_type='report' AND e.target_id='${liveReportId}') OR EXISTS (` +
     `    SELECT 1 FROM public.audit_event_targets t WHERE t.event_id=e.id AND t.target_type='report' ` +
     `    AND t.target_id='${liveReportId}')) ORDER BY e.seq_no;`)
-  const transitions = eventRows.map((row) => `${row[0]}:${row[1]}->${row[2]}`)
-  const submitPair = transitions.filter((t) => t === 'report.state_changed:trainer_approved->approved' || t === 'report.state_changed:approved->submitted')
+  const events = eventRows.map((row) => ({ seq: Number(row[0]), transition: `${row[1]}:${row[2]}->${row[3]}` }))
+  const transitions = events.map((e) => e.transition)
   const createdOnce = transitions.filter((t) => t.startsWith('report.created')).length
+  /*
+   * ADJACENCY, not just relative order. Filtering the list down to the two
+   * expected strings and then checking their order discards anything
+   * committed BETWEEN them — two separate transactions minutes apart would
+   * still have passed. The two transitions must be CONSECUTIVE in the dense
+   * per-centre seq_no, which is exactly what "one transaction, two ordered
+   * events, no residue" means.
+   */
+  const approvedIdx = transitions.indexOf('report.state_changed:trainer_approved->approved')
+  const submittedIdx = transitions.indexOf('report.state_changed:approved->submitted')
+  const submitAdjacent =
+    approvedIdx >= 0 && submittedIdx === approvedIdx + 1 &&
+    events[submittedIdx].seq === events[approvedIdx].seq + 1
+  const approvedOccurrences = transitions.filter((t) => t === 'report.state_changed:trainer_approved->approved').length
+  const submittedOccurrences = transitions.filter((t) => t === 'report.state_changed:approved->submitted').length
+  capture('N9_transitions', events)
   const chainRow = psqlRows(DISPOSABLE_DB_CONTAINER,
     'SELECT ok::text, events_checked::text, mode, head_checked::text FROM public.audit_verify_chain() ' +
     `WHERE centre_id='${FIXTURE_CENTRE}';`)[0] ?? []
   const totalEvents = Number(dbValue(`SELECT count(*) FROM public.audit_events WHERE centre_id='${FIXTURE_CENTRE}';`))
   const chainOk = chainRow[0] === 'true' && chainRow[2] === 'complete' && chainRow[3] === 'true' && Number(chainRow[1]) === totalEvents
   controlFrom('N-9',
-    createdOnce === 1 && submitPair.length === 2 &&
-      submitPair[0] === 'report.state_changed:trainer_approved->approved' &&
-      submitPair[1] === 'report.state_changed:approved->submitted' && chainOk,
-    `this report emitted report.created exactly once and Approve & Submit emitted exactly the two ORDERED state changes ` +
-      `(trainer_approved->approved then approved->submitted) with no committed 'approved' residue; ` +
-      `audit_verify_chain() reports ok in COMPLETE mode with the head checked over all ${totalEvents} centre events`,
-    `report.created x${createdOnce}; submit pair=[${submitPair.join(', ')}]; chain ok=${chainRow[0]}, ` +
-      `mode=${chainRow[2]}, head=${chainRow[3]}, checked=${chainRow[1]}/${totalEvents}`)
+    createdOnce === 1 && approvedOccurrences === 1 && submittedOccurrences === 1 && submitAdjacent && chainOk,
+    `this report emitted report.created exactly once, and Approve & Submit emitted its two state changes ` +
+      `(trainer_approved->approved then approved->submitted) exactly once each and CONSECUTIVELY — seq ` +
+      `${events[approvedIdx]?.seq} then ${events[submittedIdx]?.seq}, with nothing committed between them, which is ` +
+      `what one transaction means. audit_verify_chain() reports ok in COMPLETE mode with the head checked over all ` +
+      `${totalEvents} centre events (the whole per-centre chain, including the negative-control sessions)`,
+    `report.created x${createdOnce}; trainer_approved->approved x${approvedOccurrences}; approved->submitted ` +
+      `x${submittedOccurrences}; adjacent=${submitAdjacent} (seq ${events[approvedIdx]?.seq ?? '-'} then ` +
+      `${events[submittedIdx]?.seq ?? '-'}); chain ok=${chainRow[0]}, mode=${chainRow[2]}, head=${chainRow[3]}, ` +
+      `checked=${chainRow[1]}/${totalEvents}`)
 
   // N-10 — provider control.
   providerControl.nonLoopbackPeers = sampleNonLoopbackPeers(owned.serverPid)
@@ -1984,11 +2078,13 @@ async function main() {
     providerControl.overwritten.size === 3 && providerControl.literalIsUnratified === true &&
       providerControl.peerSampleTaken === true && providerControl.nonLoopbackPeers === 0,
     `all ${providerControl.overwritten.size} ratified AI selectors were overwritten in the served child environment with ` +
-      'a literal proven (by reading server/platform/llm-config.ts) to match neither ratified selector, so ' +
-      'getServerConfig() refuses before any provider object exists; the served process held ' +
-      `${providerControl.nonLoopbackPeers} non-loopback TCP peers when sampled against its own PID. The ` +
-      `${storedDraftsFromProvider} stored version(s) came from the deterministic fixture provider through requestDraftCore, ` +
-      'never from a network call',
+      'a literal proven (by reading the ratified contract itself) to match neither ratified selector, so ' +
+      'getServerConfig() refuses before any provider object is CONSTRUCTED — that structural impossibility is this ' +
+      `control's real evidence. The ${storedDraftsFromProvider} stored version(s) came from the deterministic fixture ` +
+      'provider through requestDraftCore, never from a network call. The non-loopback peer sample ' +
+      `(${providerControl.nonLoopbackPeers}) is recorded as a corroborating reading only, and is deliberately NOT ` +
+      'claimed as strong evidence: it is taken long after the only window in which a call could have occurred, and a ' +
+      'completed connection would no longer appear in it',
     `overwritten=${providerControl.overwritten.size}/3, literal unratified=${providerControl.literalIsUnratified}, ` +
       `peer sample taken=${providerControl.peerSampleTaken}, non-loopback peers=${providerControl.nonLoopbackPeers}`)
 
