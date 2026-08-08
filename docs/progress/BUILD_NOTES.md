@@ -2094,3 +2094,55 @@ One **read-only** adversarial reviewer was run against the recovery, instructed 
 **One reported non-defect.** A blockquote continuation marker was restored at the state-block boundary so the file remains one continuous quote rather than two adjacent boxes. Cosmetic only; no content was involved.
 
 **Post-remediation verification.** Encoding re-checked on all 7 touched files (Q-28): **no BOM, no mojibake, exact UTF-8 round-trip**. Strikethrough balance re-checked — this session's `~~` pairs are all balanced; the two odd counts found are (a) pre-existing in `HEAD` and (b) a literal `~~` inside a code span in this entry. **G-06 / P1-T09 re-confirmed still OPEN and un-weakened.**
+
+---
+
+## 2026-08-09 — PHASE 0 EXITED: FIXTURES RELOADED BY THE OPERATOR, ALL FOUR SUITES GREEN, B-P0-1/B-P0-2 CLOSED
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 0 → **EXIT**. **Verification and documentation only.** No application, schema, migration, generated-type, test or UI-asset file changed.
+**Branch / worktree.** `main`, single worktree. **Starting HEAD** `0f008525a8d9969c82aacf52fd9573a7110c2351` → **ending HEAD** this entry's commit.
+**Migration or schema changes.** **NONE.**
+
+**Operator action received.** The Operator ran `npm run fixtures:local` (correctly **without `--reload`**) at an interactive terminal and entered the three no-echo passwords. **No agent requested, received, piped, stored, logged or transmitted any credential**, in either direction.
+
+**State verified before trusting the report** (§15.3 — the recorded state is never assumed). `auth.users` = **3**, under the **exact ratified deterministic UUIDs** `d0000000-…-0001/0002/0003` mapped to the three reserved `*.fixture@example.test` addresses; `accounts` 3 · `centre_memberships` 3 · `students` 1 · `observations` 1 · `observation_ratings` 9; and `reports` / `report_versions` / `audit_events` / `audit_event_targets` / `audit_chain_heads` all **0** — the ratified Step 7F zero-event baseline.
+
+**Fixture verifier: PASS.** Section A all positive assertions; Section B canonical region emitted; **Section C all 7 negative tests correctly rejected**; Section D rollback left no residue with fixture, Option B, seed and audit-guard boundaries intact. The nine observation ratings carry the ratified vocabulary in the deliberately mixed set (`beginning` … `mastered`) that the grounding-contradiction proof depends on.
+
+**All four formerly-red suites re-run SEQUENTIALLY — never concurrently (§14.3 item 7: a collision produces a silent false green) — and ALL PASS, exit 0:**
+
+| Suite | Result | Evidence |
+|---|---|---|
+| `run-canonical` | **0** | static scan + lifecycle suite twice byte-identically + reconciled verifier twice; canonical fixture checksum **28 rows, `6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576`**, reproduced identically on both runs |
+| `run-correction-tracking` | **0** | 19 runtime proofs (T-CT-1…T-CT-20); 16 committed audit events **on the disposable database only** |
+| `prove-clock-hour-determinism` | **0** | all **1444** cases — every minute of a day plus four microsecond boundaries — against the REAL `class_sessions_time_order_chk`; **negative control fired at exactly 63 cases, all at/after 23:00, none before**, proving the defect real and one hour wide |
+| `run-assessment` | **0** | all **45** T-ASM proofs including both R(C) races (T-ASM-25 stale-lock, T-ASM-26 concurrent-create) |
+
+Each destroyed its disposable database and independently re-proved the canonical one untouched. **Zero leftover `bc_*` databases** afterwards.
+
+**Audit chain for the fresh fixture state.** `audit_verify_chain()` returns **zero rows** — correct and expected, because the ratified fixture state holds **zero** audit events and zero chain heads. Recorded precisely rather than as a false `ok=true`: there is no chain to verify, and the append-only guards were independently exercised by the verifier's Section D and by T-CT-17.
+
+**B-P0-1 and B-P0-2: CLOSED**, on evidence and not on expectation. The previous entry deliberately withheld closure pending exactly this evidence; it now exists.
+
+**⚠️ NEW FINDING F-P0-3 — `verify-fresh-apply.mjs` equivalence leg fails on an EOL artefact. Diagnosed to root cause, NOT forced green, NOT "fixed".**
+
+Its two substantive assertions **pass**: all 12 migrations apply cleanly and in order to a database stripped of every project object, and the fresh census lands **exactly** on the ratified pin `26|34|12|29|12|25|0|<8 ordered labels>|1/3/9`. Only the byte-equivalence leg fails.
+
+*Root cause, proven.* All 12 migration files are **CRLF on disk** (`core.autocrlf=true`; the CR is present in the committed blobs too, and `.gitattributes` already records *"6 of 12 sit CRLF today"* and deliberately declines to pin them). `supabase start` applies them **raw**, so **22 of 34** public functions carry `CR` inside `pg_proc.prosrc`. The script normalises CRLF→LF **only on its scratch side** (line 182) and fingerprints with `md5(p.prosrc)`, so those 22 hashes differ. Its own comment states that normalisation exists precisely so the comparison measures *"the schema rather than the TRANSPORT"* — and the premise it rests on, *"The Supabase CLI normalises them too"*, is **false for `supabase start`**.
+
+*Proof that the difference is exclusively EOL.* A purpose-built **read-only** diagnostic (written to the scratchpad; **the repository's test file was not modified**) rebuilt the scratch database identically and compared both fingerprints. **Raw:** 22 fresh-only and 22 canon-only lines, **every one a `function` line, over an identical object set**. **With `CR` stripped from `prosrc` on both sides: identical — zero differences.** So there is **zero structural drift**: no column, constraint, index, EXECUTE grant, table privilege, policy, RLS flag, trigger or enum differs. Generated database types derive from tables, columns, enums and signatures — **none of which differ** — which is the exact property this check exists to protect.
+
+*Why it passed before.* Recorded at `e8318f2` (2026-08-06) as exit 0 with *"the local database is catalogue-identical to that fresh application"*. The check's own header explains why: canonical *"was migrated incrementally"*. The reconstruction rebuilt it through a single `supabase start`, which is what introduced CRLF into `prosrc`.
+
+*Disposition.* **Reported, not remediated.** Two fixes exist and **both are the Operator's call**: normalise `CR` on both sides of the fingerprint (a one-line change to a verification instrument, which would alter its verdict), or pin `supabase/migrations/*.sql` in `.gitattributes` (which reverses a documented repository decision and would rewrite files). `CLAUDE.md` §12 forbids working around a fail-closed refusal by weakening the thing that refused, and a session must not quietly re-tune a proof to make its own work pass. **Not plan-invalidating and it does not block Phase 1 entry** — but the plan names this script as a proof at **P1-T02**, so it should be settled before P1-T02 completes.
+
+**Blockers.** **B-P0-1 CLOSED. B-P0-2 CLOSED.** **F-P0-3 OPEN**, class VERIFICATION-INSTRUMENT, owner OPERATOR (decision), **non-blocking for Phase 1 entry**.
+
+**Environment changes.** Local fixtures loaded by the Operator. No hosted, remote, provider, public or human action. Frozen demo and PeakPalate untouched.
+
+**Cleanup / rollback state.** No partial mutation. All disposable databases destroyed and verified gone.
+
+**Decisions.** None made by this session. Phase-0 exit and Phase-1 continuation were both instructed by the Operator; F-P0-3 is escalated rather than decided.
+
+**Next permitted action.** **Plan Phase 1 — OD-4 CONTRACT FOUNDATION**, autonomously through the dependency graph from **P1-T01**, stopping at **G-06 / P1-T09**, which is a genuine Operator ratification gate and must not be pre-decided.
