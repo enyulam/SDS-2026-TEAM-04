@@ -44,16 +44,16 @@ This screen is a blocking visual and functional dependency for the integrated ph
 | Field | Value |
 |---|---|
 | Screenshot filename | `reference.png` |
-| Screenshot status | Validated — ready for implementation |
+| Screenshot status | Validated — ready for implementation. **Current visual reference: `UI_REFERENCE_FINAL_MVP/reference/Management - Student Report/`**; the pack-local `reference.png` is a frozen SHA-identical duplicate of it. |
 | Native dimensions | **1440 × 1330 px** (aspect 144:133) - measured from the frozen file |
 | Validation classification | `PASS WITH NOTE — READY` |
 | Validation date | 2026-08-06 |
 | File size | 281,963 bytes |
 | SHA-256 | `394d8475498602aee27675d8437ee9395316c45da986b5a8f4db46a9ef94e6f0` |
 | Validation note | Figma connector unavailable at validation; native node dimensions not independently verified and node-level comparison not performed. Node association is from recorded pack metadata and corroborating visual identity. Local technical and visual evidence sufficient. |
-| Export rule | Export the exact node-specific Figma frame. An overview-canvas screenshot is not acceptable. |
+| Export rule | **No export is required — the ratified frame already exists at `UI_REFERENCE_FINAL_MVP/reference/Management - Student Report/`.** If a future re-export is ever authorized, it must be the exact node-specific Figma frame; an overview-canvas screenshot is never acceptable. |
 
-The frozen `reference.png` **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. If the live canvas has moved on, that is a change to record in `CHANGE_LOG.md` and re-freeze, not a reason to drift.
+The ratified `/reference/` frame **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. If the live canvas has moved on, that is a change to record in `CHANGE_LOG.md` and re-freeze — **not** a reason to drift, and **not** a reason to re-export over the ratified asset.
 
 ---
 
@@ -61,9 +61,12 @@ The frozen `reference.png` **overrides later unreviewed live-Figma changes** for
 
 **Visual authority (highest first):**
 
-1. This folder's frozen `reference.png`
-2. The exact node-specific Figma frame
-3. The existing frontend implementation
+1. **THE CURRENT `/reference/` PACK — `UI_REFERENCE_FINAL_MVP/reference/Management - Student Report/`** — the ratified Final MVP visual source for this screen. Frame `Management - Student Report.png`, HTML render `Management - Student Report.html`, pack notes `Management - Student Report.md`.
+2. **This pack's frozen `reference.png`, when present** — a frozen local **duplicate / integrity copy** of (1). It is provenance evidence and a byte-identity anchor; it **does not supersede (1)**, and its **absence does not mean the visual reference is missing**. **This pack HAS one**, SHA-256-identical to (1).
+3. The exact node-specific Figma frame — **only where no ratified `/reference/` asset exists**. A live re-export never outranks (1); it can import post-freeze canvas drift.
+4. The existing frontend implementation.
+
+⚠️ **An explicit higher-ranked governed functional / product / privacy ruling may override a SPECIFIC visible element of (1) without invalidating the rest of the pack.** Where that happens it is recorded in this pack's `implementation-notes.md`, and the omission is **EXPECTED / REQUIRED**, never a visual regression.
 
 **Functional, privacy and security authority (highest first):**
 
@@ -183,7 +186,7 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 
 | Field | Value |
 |---|---|
-| `reference.png` present | Yes |
+| `reference.png` present (local duplicate only) | Yes — frozen duplicate, SHA-identical to `/reference/` |
 | Native dimensions recorded | Yes |
 | Figma context retrieved | No - connector unavailable at the validation checkpoint |
 | Existing route audited | No |

@@ -1237,3 +1237,49 @@ A read-only census classified **~321 hits**. The critical distinction was betwee
 **Two corrections to this run's own records.** The migration commit message (`f9a0d56`) says location assertions were corrected in *"four files inside the UI tree"*; the byte-diff shows **three** — the commit message is immutable and history is not rewritten, so the correction is recorded here. And the reviewer brief for the frozen-PNG check listed `02-trainer-my-classes → "Trainer -  My Classes"` among the 12 frozen pairs; **pack 02 has no local `reference.png`** and is not one of the 12. The double-space folder name is real, but it is a mapping curiosity, not a frozen relationship. The 12 are 05 · 06 · 07 · 08 · 10 · 19 · 29 · 32 · 33 · AUTH-01 · AUTH-02 · AUTH-03.
 
 **After remediation:** `tsc` 0 · `lint` 0 · no BOM, no mojibake, trailing newline present on all five remediated documents · `git diff --check` exit 0.
+
+---
+
+## 2026-08-08 — FINAL UI REFERENCE AUTHORITY SYNCHRONIZATION — GOVERNANCE / UI METADATA ONLY
+
+**Scope.** Close the four `/reference/` instruction-layer gaps the read-only mapping audit found, and one Git reproducibility defect. **The mapping itself was never broken** — 36/36 resolved before this run. What was broken was every document that should have *told* an agent so. **No Phase B. `FINAL_MVP_EXECUTION_PLAN.md` not created. No application change.**
+
+**Recovery note.** This run was interrupted at its `.gitattributes` write and resumed. Reconstruction found HEAD still `459b1b3`, working tree **clean**, no commits, no `.gitattributes`, no disposable clone — **the interrupted run had written nothing**. Gates 0 and 1 (both read-only) were re-verified rather than assumed, and work resumed at the first incomplete gate. No partial edit needed repair.
+
+### The defect, stated plainly
+
+Authority Lock §28.1 has said since Phase A2 that `UI_REFERENCE_FINAL_MVP/reference/` is the Final MVP visual authority. **That ruling had never propagated to the instruction layer.** A fresh agent opening screen 30 would have been told, three separate times, that a ratified frame it already had did not exist:
+
+1. `screen.md` §4 ranked *"This folder's frozen `reference.png`"* **first** — and for 24 of 36 packs that file does not exist, so rank 1 dangled and rank 2 was live Figma. **Zero of 36 `screen.md` mentioned `/reference/` at all.**
+2. `SCREEN_INDEX.md` asserted **24 times**, verbatim, *"Not started - no frozen reference exists"* — an affirmative false negative, not merely an omission.
+3. All **24** of those packs' `SCREENSHOT_REQUIRED.txt` ordered *"Export the exact node-specific Figma frame … save it in this folder as reference.png"*. **The 12 packs that did NOT need the pointer were the only ones that had it** — the instruction existed exactly where it was redundant and was absent exactly where it was load-bearing.
+
+### What changed
+
+**Visual ladder reconciled in every carrier** — 36/36 `screen.md`, `GLOBAL_UI_RULES.md` §1.1, `CLAUDE.md` §1 / §7 (A-045) / new **§7.4**, and Authority Lock **§28.1a**. New rank order: **`/reference/<mapped pack>/` → optional pack-local frozen duplicate → node-specific Figma (only where no ratified asset exists) → existing implementation.** Each `screen.md` names *its own* counterpart explicitly and states whether it carries a local duplicate. The post-freeze-drift protection is preserved and strengthened: **a live re-export never outranks a ratified asset, and must not be run merely to manufacture a local duplicate.**
+
+**24/24 `SCREENSHOT_REQUIRED.txt` corrected** — each now opens with `NO EXPORT IS REQUIRED`, gives the exact `/reference/` pack, frame, HTML and notes paths, states that a missing local copy is not a missing reference, and **retains the superseded instruction verbatim under an explicit history fence**. Figma node, URL, file key, role, priority and route are untouched.
+
+**The authoritative 36-row mapping is published twice.** Human-readable in `SCREEN_INDEX.md`; machine-readable as **`currentReferencePack`** (plus `currentReferenceFrame`) on every screen entry in `UI_PACK_MANIFEST.json`.
+
+**Manifest decision and its justification.** Gate 1 proved **zero runtime consumers** — no `.ts`, `.tsx`, `.mjs`, `.js`, `.json` or `package.json` reference reads the file — so an additive field cannot break a consumer. `referenceScreenshot` was **not repurposed**: it still means *optional pack-local frozen duplicate*, and remains `"reference.png"` on 12 and `null` on 24. A structural diff proves the document is **semantically identical after stripping only the new fields**, all **12 frozen PNG SHA pins preserved**, `screenCount: 36`, **em dashes 12 → 12** (exact Unicode round-trip), no BOM, no mojibake, `JSON.parse` PASS. Written with Node per **Q-28**; the prohibited PowerShell path was not used.
+
+**Three irregular names, recorded so they are never guessed again:** `32-parent-reports` → `Parent - Report` (**singular**) · `AUTH-02-management-login` → `Auth 02 - **Mangement** - Login` (**misspelled on disk — deliberately not corrected**) · `02-trainer-my-classes` → `Trainer -  My Classes` (**two spaces**). Renaming a ratified pack folder is not authorized, which is exactly why an explicit mapping had to exist.
+
+**Forgot Password unchanged:** `reference/Auth 04 - All Users - Forgot Password/` remains `EXTRA_REFERENCE_ONLY_AUTH_FLOW_PACK` — no governed counterpart, no screen ID, no invented node, **not screen 37** (Q-4). Stated in `SCREEN_INDEX.md`, `CLAUDE.md` §7.4 and Authority Lock §28.1a.
+
+**Two stale records closed:** the reconciliation plan's *"packs 30 and 31 currently carry no recorded conflict"* (both now carry GC-3 / GC-2 under Q-24; pack 30's was elevated to Q-27) and **R6** in the UI cleanup manifest (the 24 phantom `referenceScreenshot` paths, nulled under Q-16 — and the entry's framing was itself corrected, since those screens were never without a *reference*, only without a *duplicate*).
+
+### `.gitattributes` — narrow by audit, not by caution
+
+`core.autocrlf=true` with no `.gitattributes` meant the manifest's byte invariant was **machine-local, not clone-reproducible**. Exactly **one** path is pinned, `UI_REFERENCE_FINAL_MVP/UI_PACK_MANIFEST.json -text`. Three classes were examined and **deliberately excluded**:
+
+- the **119 tracked PNGs** are already `-text` by Git's own detection, so every frozen-image SHA contract is inherently safe;
+- **`supabase/migrations/*.sql`** carry a real byte-identity assertion (T-C3-S2 / T-CT-S4 / T-ASM-33) — **but those suites already normalize CRLF on both sides** (`c3-static.mjs:29`, `ct-static.mjs:33`, and `asm-static.mjs`'s `norm()`, whose comment names `core.autocrlf` outright). **6 of the 12 already sit CRLF in the worktree and pass.** Pinning them would have rewritten six files for zero gain;
+- **`_checkpoint-evidence/*.json`** are historical records with no consumer — **an audit hash is not a checkout-byte contract.**
+
+**`git add --renormalize` was NOT run.** Zero-churn proven: introducing the file left `git status` showing only the new untracked `.gitattributes`, no tracked file modified, and the **23 pre-existing mixed-EOL files still 23**.
+
+### Verification
+
+**74/74** `/reference/` PNG+HTML SHA-256 identical to the pre-run census · **12/12** frozen local copies still match their mapped counterpart · **36/36** governed packs map uniquely, exactly one `/reference/` pack (Auth 04) intentionally unmapped, none claimed twice · **0** false "no frozen reference" rows (was 24) · **0** stale live-Figma instructions (was 24). **Encoding proven against HEAD rather than asserted:** mojibake **107 → 107** across the 72 pack files (all pre-existing, none introduced), missing trailing newlines **71 → 47** (improved), and **no file made worse**. `SCREEN_INDEX.md` is a CRLF document — the inserted block was emitted in its own EOL convention, leaving it **152 CRLF / 0 bare LF** rather than mixed.

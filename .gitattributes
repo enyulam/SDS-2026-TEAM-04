@@ -1,0 +1,28 @@
+# Deliberately minimal. core.autocrlf=true rewrites EOLs on checkout, which is
+# fine everywhere except files whose exact checkout bytes are a governed
+# invariant. Only one path qualifies (audited 2026-08-08).
+#
+# Excluded by audit, not oversight:
+#   - the 119 tracked PNGs are already binary (-text) to Git, so every frozen
+#     reference.png SHA contract is inherently safe;
+#   - supabase/migrations/*.sql are hashed against HEAD, but those suites
+#     already normalize CRLF on both sides (c3-static.mjs:29,
+#     ct-static.mjs:33, asm-static.mjs norm()), and 6 of 12 sit CRLF today
+#     and pass — pinning them would rewrite files for no gain;
+#   - _checkpoint-evidence/*.json are historical records with no consumer.
+#
+# No renormalization was run. The path below is already LF, so this pins the
+# status quo rather than changing it.
+
+# Exact-byte checkout invariant. This file carries the pinned SHA-256 of the 12
+# frozen reference.png files, screenCount 36, every Figma node record, and (as of
+# 2026-08-08) the machine-readable currentReferencePack mapping that resolves the
+# three irregular /reference/ directory names. Without -text a Windows clone
+# checks it out CRLF, changing its size and SHA, so the invariant would be
+# machine-local instead of reproducible. Q-28 exists because a PowerShell
+# ConvertTo-Json round-trip already corrupted this exact file once in Phase A2.
+#
+# Canonical bytes (verify after any authorized edit):
+#   size    55434
+#   sha256  598c714a37ededf200881deb18e1f92d882c77f784be8c91782ec04288a0b10f
+UI_REFERENCE_FINAL_MVP/UI_PACK_MANIFEST.json -text

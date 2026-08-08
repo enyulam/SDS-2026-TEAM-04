@@ -101,7 +101,7 @@ SHA-256 was recomputed for all 12 present `reference.png` files and compared aga
 
 At *file* level, all 36 screens declare `"referenceScreenshot": "reference.png"` but **24 of those files do not exist**: screens `01, 02, 03, 04, 09, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 31`.
 
-This is **expected and honestly documented** (README line 52; `SCREENSHOT_CHECKLIST.md` §B state the 24 deferred exports are intentionally not yet produced). It is a **manifest-schema weakness, not a missing file**: the field is unconditional and does not distinguish "declared filename" from "present file", so a machine consumer 404s on 24 declared paths. Carried as **R6**.
+✅ **RESOLVED 2026-08-08 (Phase A2, Q-16 — R6 closed).** The 24 phantom paths were **nulled**: the manifest now declares `"referenceScreenshot": "reference.png"` on exactly the 12 packs that hold a local duplicate and `null` on the other 24, with **0 declared-vs-disk mismatches**. ⚠️ **And the framing below was itself misleading**: those 24 screens were never without a visual reference — each has a ratified frame in `UI_REFERENCE_FINAL_MVP/reference/` (mapping published in `SCREEN_INDEX.md`). What was absent was only the **optional pack-local duplicate**. *Historical text follows.* This is **expected and honestly documented** (README line 52; `SCREENSHOT_CHECKLIST.md` §B state the 24 deferred exports are intentionally not yet produced). It is a **manifest-schema weakness, not a missing file**: the field is unconditional and does not distinguish "declared filename" from "present file", so a machine consumer 404s on 24 declared paths. Carried as **R6**.
 
 ### 3.2 On disk, not declared in the manifest
 
@@ -252,7 +252,7 @@ The correct premise is narrower and still yields the same answer here: **every r
 | **R3** | `reference/Auth 04 - All Users - Forgot Password/` | Is password recovery a **scope gap** in the ratified 36-screen inventory, or an out-of-scope export? Adding a 37th screen requires an amendment. Tracked as OD-1 in the screen reconciliation plan | 35,573 |
 | **R4** | Two HTML documents carrying a `.txt` extension (screens 04, 17) | Export accident or deliberate? Any `*.html` consumer silently skips both screens | 83,740 |
 | **R5** | 11 stale `SCREENSHOT_REQUIRED.txt` trailers claiming `Missing` for screens that have a validated reference | Correct the trailers, or accept the drift? They contradict `SCREEN_INDEX.md:86` and the manifest | ~9,700 |
-| **R6** | `UI_PACK_MANIFEST.json` declares `referenceScreenshot` for all 36 including the 24 absent | Add a presence flag, or accept the 404s? | — |
+| ~~**R6**~~ ✅ **CLOSED 2026-08-08** | ~~`UI_PACK_MANIFEST.json` declares `referenceScreenshot` for all 36 including the 24 absent~~ | ~~Add a presence flag, or accept the 404s?~~ **Resolved in Phase A2 under Q-16: the 24 phantom paths were nulled.** The manifest now carries `"referenceScreenshot": "reference.png"` on exactly the **12** packs that hold a local duplicate and `null` on the other **24** — verified on disk, **0 declared-vs-disk mismatches**. The field's meaning is settled: *optional pack-local frozen duplicate*, never "the current visual reference". The current reference for all 36 is the mapped `/reference/` pack, published in `SCREEN_INDEX.md` (2026-08-08). | **No action outstanding** |
 | **R7** | README "Files in this pack root" omits 10 root files and both subdirectories | Update the README, or accept it as a point-in-time scaffold record? | — |
 
 ---

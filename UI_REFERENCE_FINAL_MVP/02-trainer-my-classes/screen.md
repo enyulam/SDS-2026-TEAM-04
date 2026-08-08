@@ -44,11 +44,11 @@ This screen is part of the final MVP but is not required before the 48-hour phys
 | Field | Value |
 |---|---|
 | Screenshot filename | `reference.png` |
-| Screenshot status | Deferred - required for final-MVP completion after physical test |
+| Screenshot status | ✅ **CURRENT VISUAL REFERENCE EXISTS** — `UI_REFERENCE_FINAL_MVP/reference/Trainer -  My Classes/`. **Pack-local `reference.png`: not duplicated locally** (optional integrity copy only). ~~Deferred - required for final-MVP completion after physical test~~ — *corrected 2026-08-08: that wording implied no current reference existed, which was false.* |
 | Native dimensions | Not yet known - record the native frame dimensions here when the screenshot is exported |
-| Export rule | Export the exact node-specific Figma frame. An overview-canvas screenshot is not acceptable. |
+| Export rule | **No export is required — the ratified frame already exists at `UI_REFERENCE_FINAL_MVP/reference/Trainer -  My Classes/`.** If a future re-export is ever authorized, it must be the exact node-specific Figma frame; an overview-canvas screenshot is never acceptable. |
 
-The frozen `reference.png` **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. If the live canvas has moved on, that is a change to record in `CHANGE_LOG.md` and re-freeze, not a reason to drift.
+The ratified `/reference/` frame **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. If the live canvas has moved on, that is a change to record in `CHANGE_LOG.md` and re-freeze — **not** a reason to drift, and **not** a reason to re-export over the ratified asset.
 
 ---
 
@@ -56,9 +56,12 @@ The frozen `reference.png` **overrides later unreviewed live-Figma changes** for
 
 **Visual authority (highest first):**
 
-1. This folder's frozen `reference.png`
-2. The exact node-specific Figma frame
-3. The existing frontend implementation
+1. **THE CURRENT `/reference/` PACK — `UI_REFERENCE_FINAL_MVP/reference/Trainer -  My Classes/`** — the ratified Final MVP visual source for this screen. Frame `Trainer -  My Classes.png`, HTML render `Trainer -  My Classes.html`, pack notes `Trainer -  My Classes.md`.
+2. **This pack's frozen `reference.png`, when present** — a frozen local **duplicate / integrity copy** of (1). It is provenance evidence and a byte-identity anchor; it **does not supersede (1)**, and its **absence does not mean the visual reference is missing**. **This pack does NOT carry one** — one of the 24 that are not duplicated locally. Use (1).
+3. The exact node-specific Figma frame — **only where no ratified `/reference/` asset exists**. A live re-export never outranks (1); it can import post-freeze canvas drift.
+4. The existing frontend implementation.
+
+⚠️ **An explicit higher-ranked governed functional / product / privacy ruling may override a SPECIFIC visible element of (1) without invalidating the rest of the pack.** Where that happens it is recorded in this pack's `implementation-notes.md`, and the omission is **EXPECTED / REQUIRED**, never a visual regression.
 
 **Functional, privacy and security authority (highest first):**
 
@@ -166,7 +169,7 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 
 | Field | Value |
 |---|---|
-| `reference.png` present | No |
+| `reference.png` present (local duplicate only) | No — **the current reference lives in `/reference/`; this is not a gap** |
 | Native dimensions recorded | No |
 | Figma context retrieved | No |
 | Existing route audited | No |

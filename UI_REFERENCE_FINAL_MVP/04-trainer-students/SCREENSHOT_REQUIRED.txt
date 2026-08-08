@@ -1,7 +1,28 @@
 SCREENSHOT REQUIRED - 04 Trainer Students
 
+[STATUS CORRECTED 2026-08-08 - FINAL UI REFERENCE AUTHORITY SYNCHRONIZATION]
+
+NO EXPORT IS REQUIRED. A ratified, current Final MVP visual reference for this
+screen ALREADY EXISTS inside this repository:
+
+  Current visual source : UI_REFERENCE_FINAL_MVP/reference/Trainer - Students/
+  Frame (PNG)           : UI_REFERENCE_FINAL_MVP/reference/Trainer - Students/Trainer - Students.png
+  HTML render           : UI_REFERENCE_FINAL_MVP/reference/Trainer - Students/Trainer - Students.html
+  Pack notes            : UI_REFERENCE_FINAL_MVP/reference/Trainer - Students/Trainer - Students.md
+
+Implement against that. Do NOT re-export from live Figma merely to create a
+pack-local duplicate - a live re-export can import post-freeze canvas drift and
+never outranks the ratified asset above.
+
+Pack-local reference.png : not duplicated locally. This is an OPTIONAL frozen
+                           integrity copy, and its absence does NOT mean the
+                           visual reference is missing. 12 of the 36 governed
+                           packs carry one; this is one of the 24 that do not.
+
+--- superseded instruction, retained as history ---
 Export the exact node-specific Figma frame for this screen and save it in this
 folder as reference.png. Do not use an overview-canvas screenshot.
+--- end superseded instruction ---
 
 Exact Figma URL : https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=529-9&m=dev
 Figma node      : 529:9
@@ -11,10 +32,13 @@ Expected role   : Trainer
 Priority        : DEFERRED - required for final-MVP completion after the physical test
 Canonical route : /trainer/students
 
-Recommendation  : export at native frame dimensions (1x, PNG). Record the native
-                  dimensions in screen.md section 3 when you save the file.
+Recommendation  : none outstanding. Only if a future re-export is explicitly
+                  authorized: export at native frame dimensions (1x, PNG) and
+                  record them in screen.md section 3.
 
 Synthetic data only. No real student, parent, trainer or staff data may appear in
 an exported frame.
 
-Deferred - required for final-MVP completion after physical test
+Reference status: PRESENT IN /reference/ - no local duplicate, none required.
+                  Deferred priority refers to IMPLEMENTATION order, not to the
+                  availability of the visual reference.

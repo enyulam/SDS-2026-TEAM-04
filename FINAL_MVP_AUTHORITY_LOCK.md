@@ -1015,6 +1015,19 @@ Each pack carries `.md` + `.png` + an HTML render. ~~Two packs — `Management -
 
 **Scope of the "clean" claim in §31.1:** that `reference/` is free of contamination rests on a **keyword search for `SPORTSTER`/`PeakPalate`**, not on a provenance audit. It is accurate as far as it goes — and §8.1 of this same document rejects keyword-count reasoning, so the limit is stated rather than glossed. Note also that the import (21:52) and the two foreign-artefact events (00:55 and 01:30 the following morning) fall within one overnight window; the cleanup manifest recommends re-scoping the incident question from *"what else was written at 01:30?"* to **"what else arrived that night, and does any of it belong to another module?"** That re-scoping is **adopted here as binding on Phase A2.**
 
+### 28.1a ✅ The instruction layer now matches this ruling (2026-08-08)
+
+**§28.1 promoted `reference/` to Final MVP visual authority, but that promotion had never reached the documents an implementing agent actually opens.** Until 2026-08-08 all 36 governed `screen.md` files ranked *"this folder's frozen `reference.png`"* first and never mentioned `reference/` at all; `SCREEN_INDEX.md` stated **24 times** that *"no frozen reference exists"*; and the 24 packs without a local duplicate carried a `SCREENSHOT_REQUIRED.txt` ordering a **live Figma re-export**. A fresh agent could therefore be told three times over that a ratified frame it already had did not exist.
+
+**Closed by the Final UI Reference Authority Synchronization.** No ruling in this section changed — only its propagation:
+
+- the visual ladder in all 36 `screen.md`, in `GLOBAL_UI_RULES.md` §1.1 and in `CLAUDE.md` (§1, §7 A-045 and the new §7.4) now ranks **`reference/<mapped pack>/` first**, with a pack-local `reference.png` demoted to an **optional frozen duplicate / integrity anchor** that never outranks it and whose absence is not a missing reference;
+- the **authoritative 36-row governed→`/reference/` mapping is published in `SCREEN_INDEX.md`**, including the three names that cannot be derived (`Parent - Report`, `Auth 02 - **Mangement** - Login`, `Trainer -  My Classes` with two spaces) — **none of which may be renamed**;
+- **live re-export is prohibited** where a ratified `/reference/` asset exists, preserving §28.3's protection against post-freeze canvas drift;
+- **`Auth 04 - All Users - Forgot Password` remains `EXTRA_REFERENCE_ONLY_AUTH_FLOW_PACK`** — 36 governed screens, 37 reference packs, **not screen 37** (Q-4), no invented node or ID.
+
+**No `/reference/` PNG, HTML or Markdown byte was altered** — 74/74 visual files verified SHA-256-identical. **§28.2's boundary below is untouched:** pack Markdown gains no functional rank, and the fourteen GC conflicts stand.
+
 ### 28.2 ⚠️ THE BOUNDARY — visual authority only
 
 **Promoting `reference/` to Final MVP UI authority promotes it on the VISUAL ladder only. Its Markdown does NOT become functional, security or privacy authority.** Under A-045 the pack prose sits at **rank 5 — the lowest** — of the functional ladder and loses to the specification, the amendments and `CLAUDE.md` on every functional point.

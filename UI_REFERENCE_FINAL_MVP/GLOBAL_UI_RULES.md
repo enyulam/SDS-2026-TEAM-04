@@ -8,13 +8,20 @@ These rules apply to **every** screen in this pack. A per-screen `screen.md` may
 
 ### 1.1 Visual authority — highest first
 
-1. **The folder's frozen `reference.png`**
-2. **The exact node-specific Figma frame**
-3. **The existing frontend implementation**
+*(Reconciled 2026-08-08 by the Final UI Reference Authority Synchronization. The old rank 1 — "the folder's frozen `reference.png`" — is **superseded**: it made 24 of the 36 governed packs look as though they had no visual reference at all, when every one of them has a ratified frame in `/reference/`.)*
 
-A frozen `reference.png` **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. Where the live canvas has moved on, record the change in `CHANGE_LOG.md` and re-freeze deliberately.
+1. **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** — the **current Final MVP visual source** for every one of the 36 governed screens. The authoritative pack→counterpart mapping is published in **`SCREEN_INDEX.md`**; resolve it from there, never by guessing a folder name.
+2. **The governed pack's frozen `reference.png`, when present** — an **optional frozen duplicate and byte-identity anchor** of (1), held by 12 of the 36 packs and SHA-256-identical to it. It is provenance evidence. **It does not outrank (1), and its absence in the other 24 packs does NOT mean the visual reference is missing.**
+3. **The exact node-specific Figma frame** — **only where no ratified `/reference/` asset exists**. A live re-export must **never** replace or override a ratified `/reference/` asset.
+4. **The existing frontend implementation.**
+
+The ratified `/reference/` frame **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. Where the live canvas has moved on, record the change in `CHANGE_LOG.md` and re-freeze deliberately. **Never re-export from live Figma merely to manufacture a pack-local duplicate** — that imports post-freeze drift and manufactures nothing of authority.
 
 An **overview-canvas screenshot is never an acceptable substitute** for a node-specific frame.
+
+⚠️ **A higher-ranked functional / product / privacy ruling may override a SPECIFIC visible element of a `/reference/` frame without invalidating the rest of that pack.** The visual and functional ladders stay separate (§1.2): `/reference/` wins on appearance, governance wins on behaviour and disclosure. Where such a ruling exists it is recorded in the governed pack's `implementation-notes.md`, and the resulting omission is **EXPECTED / REQUIRED**, never a visual regression. The live example is **Q-27** on screen `30`.
+
+**The governed packs are not obsolete.** `/reference/` is the visual source; the 36 governed packs remain current for **implementation, governance, provenance and deviations**. A pack lacking a local screenshot is fully implementable.
 
 ### 1.2 Functional, privacy and security authority — highest first
 
