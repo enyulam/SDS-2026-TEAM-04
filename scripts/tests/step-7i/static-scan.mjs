@@ -14,6 +14,8 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { discoverSerializers, assertAnchors, guardedFunctions, findForbiddenGrants,
+  findMissingRevokes, EXPECTED_SERIALIZERS } from './od4-grant-guard.mjs'
 
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
@@ -71,6 +73,57 @@ const body2 = stripComments(file2)
     if (/\bBEGIN\s+ATOMIC\b/i.test(body)) fail('T7I-73', `${name} contains a BEGIN ATOMIC body`)
   }
   if (failures === 0) pass('T7I-73', 'two files, label position, no sql/BEGIN ATOMIC body')
+}
+
+// ---------------------------------------------------------------------
+// T7I-OD4-GRANT -- no owner-only function is granted to a client role,
+// anywhere in the COMPLETE current migration corpus (operator ruling PD-2).
+//
+// This is the authoring-time counterpart to the runtime zero-EXECUTE
+// assertions. It reads EVERY .sql file in supabase/migrations, including
+// whichever migration is being authored right now, so a stray
+// `GRANT EXECUTE ON FUNCTION public.report_content_hash_v2(...) TO
+// authenticated;` is rejected before the migration is ever applied.
+//
+// It replaces a false claim in the execution plan: ct-static.mjs:214 pins one
+// already-applied migration by name and can never see a new one.
+//
+// EXPECTED_SERIALIZERS is pinned deliberately. Serializer DISCOVERY is
+// automatic, so V2 is guarded the moment M13 creates it with no second edit
+// to remember -- but an unpinned discovery scan would also pass vacuously if
+// the naming convention drifted and the regex stopped matching. The pin is
+// what converts silence into a loud failure. RE-PIN IT IN THE SAME COMMIT
+// that legitimately adds a serializer: 2 today, 4 once M13 lands.
+// ---------------------------------------------------------------------
+{
+  const files = readdirSync(MIG_DIR)
+    .filter((f) => f.endsWith('.sql'))
+    .sort()
+    .map((name) => ({ name, sql: readFileSync(join(MIG_DIR, name), 'utf8') }))
+
+  const serializers = discoverSerializers(files)
+  const anchorProblems = assertAnchors(serializers, EXPECTED_SERIALIZERS)
+  for (const p of anchorProblems) fail('T7I-OD4-GRANT', p)
+
+  const guarded = guardedFunctions(files)
+  const violations = findForbiddenGrants(files, guarded)
+  for (const v of violations) {
+    fail('T7I-OD4-GRANT',
+      `${v.file} [${v.kind}] hands ${v.fn} to ${v.role}: ${v.statement}`)
+  }
+
+  // A serializer created without an explicit REVOKE ships client-executable,
+  // because a new postgres-owned function defaults to PUBLIC EXECUTE. No
+  // GRANT statement exists in that case, so the scan above cannot see it.
+  const missing = findMissingRevokes(files, serializers)
+  for (const m of missing) fail('T7I-OD4-GRANT', m)
+
+  if (anchorProblems.length === 0 && violations.length === 0 && missing.length === 0) {
+    pass('T7I-OD4-GRANT',
+      `${files.length} migration file(s) scanned; ${guarded.length} owner-only function(s) guarded `
+      + `(${guarded.join(', ')}); no client GRANT, no blanket/default-privilege grant, no dynamic-SQL `
+      + 'grant, and every serializer carries an explicit REVOKE')
+  }
 }
 
 // ---------------------------------------------------------------------

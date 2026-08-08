@@ -2310,3 +2310,57 @@ Step 5 matters as much as step 4: it proves detection of real drift is **not tra
 **Decisions.** None ratified. The DROP-vs-RENAME choice is a design judgement, recorded with its reasoning and independently reviewed; it changes no governed rule.
 
 **Next permitted action.** **P1-T03 — write and apply migration M13** to the corrected design above, then P1-T04–T08. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**
+
+---
+
+## 2026-08-09 — PD-1 AND PD-2 CLOSED: plan corrected, and an authoring-time V2 GRANT guard built, broken by review, and rebuilt
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 1, between P1-T02 and P1-T03. **No migration was written or applied.**
+**Branch / worktree.** `main`, single writer. **Starting HEAD** `6510af72614050703ed227bcc77b2c39ef51c77f` → this entry's commit.
+**Migration or schema changes.** **NONE. All 12 migration files byte-identical** — `sha256sum supabase/migrations/*.sql | md5sum` = `073e6fabdff4bb1bdc7be2ddd6785743` at session start and at commit, and `git status --porcelain -- supabase/migrations/` is empty throughout.
+
+### PD-1 — historical migration-resident assertions are immutable
+
+**Operator ruling:** previously-applied migrations are **immutable historical instruments**; the plan's *"update all eight"* is wrong wherever a carrier lives inside one. Their inability to mention a future V2 function is **correct, not a gap**.
+
+Corrected at **three** sites — §6.5 item 4, **P1-T02 step 7**, and **P1-T03 Files/systems** — under annotate-never-delete. **The third was found by Reviewer 1 and I had missed it**, and it was the most dangerous of the three: an implementer scoping M13 reads *Files/systems* first, and it contradicted its own task's Negative control three lines below (*"Do not edit a previously applied migration"*). §6.5 item 4 now carries a **four-class table** distinguishing **HISTORICAL MIGRATION-RESIDENT** · **CURRENT REUSABLE** · **NEW-MIGRATION END ASSERTIONS** · **AUTHORING-TIME STATIC GRANT GUARD**.
+
+Two further Reviewer-1 findings accepted and fixed: the correction said *"carriers 5–8"* while its own class table listed **three** files and PD-2 declared carrier 8 vacuous — now **5–7, with carrier 8 expressly not updated**; and *"the complete current zero-client-EXECUTE set"* was ambiguous — measured live there are **9** functions with no `authenticated` EXECUTE today (11 after M13), because the **7H audit set** and `assessment_save_observation` are also owner-only but belong to **different governed sets**. The plan now names the **six** M13 must assert and says explicitly not to merge the sets.
+
+**The DDL conclusion was independently re-proved before accepting it:** `20260805090500_…:3125` loops `FOREACH v_name IN ARRAY (v_granted || v_zero_exec)` asserting each named function **exists**; on a fresh apply that block runs **before** M13 creates V2, so naming V2 there makes the migration **fail**. Editing is separately forbidden by `CLAUDE.md` §12 and by two suites' literal *"an applied migration must never be edited"*.
+
+### PD-2 — the authoring-time guard, and the two rounds it took
+
+**Operator ruling:** at least one portable authoring-time static test must actually inspect the new migration (or the whole corpus) and fail on a V2 grant to a client role.
+
+**Architecture chosen: option A**, into the **Step 7I** static scan — the serializers are Step 7I objects and `static-scan.mjs` already read the whole migration directory. **Deliberately not `ct-static.mjs`**: making a correction-tracking test responsible for global migration security is the coupling the ruling warned against, and would have re-pinned the guard to one historical file. Predicates live in a **pure module**, `scripts/tests/step-7i/od4-grant-guard.mjs`, so the scan and its proof exercise **the same code**.
+
+**⚠️ The first version was wrong, and adversarial review took it apart.** It was a keyword matcher — a statement had to start with `GRANT` **and** literally contain a guarded name. **Nine bypasses passed it green**, four re-confirmed by direct probe before acceptance:
+
+| | Bypass | Why it mattered |
+|---|---|---|
+| B1 | `GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated` | never names a function |
+| B2 | `ALTER DEFAULT PRIVILEGES … GRANT EXECUTE ON FUNCTIONS TO authenticated` | **the mirror image of the corpus's own hardening statement** (`20260803034500_…:52-53`) — the single statement establishing A-030 deny-by-default, reversed |
+| B3/B3a/B8 | `EXECUTE 'GRANT …'` in a `DO` block, via `format()`, or in a helper function | dynamic SQL |
+| B5 | `COMMENT … IS 'V2 -- envelope'; GRANT … TO authenticated;` | `--` inside a **string literal** is data; the naive stripper deleted the rest of the line **including the GRANT**. **68 lines of the current corpus already carry `--` inside quoted prose** — house style |
+
+**And the firing proof could not tell a working guard from a broken one.** Mutating the guard to `files.slice(-1)` — scanning only the newest migration, *precisely the `ct-static.mjs` defect PD-2 exists to eliminate* — left the proof passing 6/6, exit 0, because every planted violation went into a file **appended to the end** of the corpus. It also computed `EXPECTED = serializers.length` from the corpus, so the shipped pin was never validated.
+
+**Rebuilt.** `redact()` is now a **single-pass scanner** rather than sequenced regexes. *(That rewrite had its own bug, caught by running it: stripping string literals with a regex after the dollar pass consumed **91%** of `20260805090500_…` — comment prose here is full of apostrophes (`Today's Strength`), so an unpaired quote matched forward to a distant one and swallowed the very `CREATE` the guard looks for. Ordering the passes the other way just reinstates B5. **Only a scanner that tracks which context it is in can be correct**, which is why the fix is a scanner and not a better regex.)* The guard now detects **named, blanket, default-privilege, dynamic-SQL and role-chaining** forms, and adds a **missing-REVOKE** check — the hazard no GRANT scan can see, because a new `postgres`-owned function defaults to `PUBLIC EXECUTE` (`proacl IS NULL`), so a serializer created without a REVOKE ships client-executable with **no GRANT statement anywhere to find**. That is the exact defect adversarial review caught in the P1-T02 design.
+
+**Firing proof — 12/12, and it now exercises what it claims.** Section 0 validates the **shipped** `EXPECTED_SERIALIZERS` pin against the real corpus. Section 2 plants a violation into an **existing, deliberately non-last** migration, which is what kills a "scan only the newest file" regression. Section 3: 30 (function × client role) grants. Section 4: **all 11 known bypass forms**. Section 5: missing-REVOKE caught **while the GRANT scan reports nothing**, which is precisely why that check exists. Section 6: **no false positives** on REVOKE, block comments, `postgres` grants, or roles whose names embed a client role. Section 7: anchor loss, single-anchor loss and count drift all fail loudly. Section 8: the real corpus is **byte-identical afterwards**.
+
+**No longer orphaned.** `run-canonical.mjs` now runs the firing proof immediately after the static scan — reviewer 2's point that nothing invoked it, so a wiring break would go unnoticed.
+
+**Honest limits, recorded in both the module and the plan:** it is a **static text scan, not a SQL parser** — a **necessary, not sufficient** control. Role chaining is heuristic; only `supabase/migrations/*.sql` is in scope; the runtime catalogue assertions in M13 and carriers 5–7 remain the authority on the live ACL.
+
+### Verification
+
+`git diff --check` clean · **12/12 migration SHA-256 unchanged** · `.gitattributes`, `core.autocrlf` and all Git config untouched · `static-scan` **0** (`PASS T7I-OD4-GRANT`) · firing proof **0** · `run-canonical` **0** · `tsc` **0** · `lint` **0** · plan strikethrough balanced · the only unstruck *"all eight"* left in the plan is the unrelated G-16 paid-gates line.
+
+**Blockers.** **PD-1 CLOSED. PD-2 CLOSED.** None open.
+
+**Decisions.** None ratified. The guard's architectural home is a design choice, documented and reviewed.
+
+**Next permitted action.** **P1-T03 — write and apply migration M13** from the committed P1-T02 design, with the three corrections that review forced into it (8 REVOKEs not 6 · all six RPCs `DROP`+`CREATE` · the V1 freeze pinned across signature, ACL and COMMENT as well as `prosrc`). Re-pin `EXPECTED_SERIALIZERS` **2 → 4** in that same commit. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**

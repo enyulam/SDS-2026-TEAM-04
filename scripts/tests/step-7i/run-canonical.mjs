@@ -80,6 +80,20 @@ async function main() {
   process.stdout.write(scan.out)
   if (scan.code !== 0) { process.stderr.write(scan.err); fail('the static scan failed') }
 
+  // 1b -- the OD-4 GRANT guard's FIRING PROOF (operator ruling PD-2).
+  // A guard nobody proves can fire is a guard nobody can trust: adversarial
+  // review showed the first version of that proof still passed 6/6 against a
+  // guard mutated to scan only the newest migration -- exactly the ct-static
+  // defect PD-2 exists to eliminate. Running it here is what stops the proof
+  // being an orphaned script someone has to remember to type.
+  const guardProof = await run(process.execPath,
+    [join(ROOT, 'scripts', 'tests', 'step-7i', 'prove-od4-grant-guard.mjs')])
+  process.stdout.write(guardProof.out)
+  if (guardProof.code !== 0) {
+    process.stderr.write(guardProof.err)
+    fail('the OD-4 GRANT guard firing proof failed')
+  }
+
   // 2 -- the lifecycle suite, twice (T7I-31)
   const a = await psqlFile(SUITE)
   if (a.code !== 0) { process.stderr.write(a.err); fail('canonical suite run 1 failed'); return }

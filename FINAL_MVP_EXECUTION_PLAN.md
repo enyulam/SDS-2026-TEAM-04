@@ -495,18 +495,78 @@ Every migration-adding task **must**, in the same commit:
      `scripts/tests/step-7i/lifecycle-canonical.sql:376` (**`v_zero`**) ·
      `scripts/fixtures/verify-local-fixtures.sql:668-677` (**an inline `IN`-list, no variable**) ·
      `scripts/tests/assessment/asm-suite.sql:236-240` (**a `proname IN (…)` +
-     `has_function_privilege` check, T-ASM-42**) · **`scripts/tests/correction-tracking/
+     `has_function_privilege` check, T-ASM-42**) · ~~**`scripts/tests/correction-tracking/
      ct-static.mjs:214` (a JS literal array scanning migration TEXT for `GRANT … TO` — the ONLY
      authoring-time static scan that would catch a stray `GRANT … ON FUNCTION
      report_content_hash_v2 … TO authenticated` in a new migration file; leave it un-updated and V2
-     has no static-scan coverage at all).**
+     has no static-scan coverage at all).**~~ 🔴 **CORRECTED 2026-08-09 — PLAN DEFECT PD-2. That
+     claim is FALSE.** `ct-static.mjs` pins `MIG_NAME = '20260806103000_management_correction_
+     tracking.sql'` at `:20` and tests `bodyCode`, read from **that one already-applied migration**.
+     It never reads a new migration, so it could **never** have caught a stray V2 grant in M13, and
+     adding the V2 names to its array yields **exactly zero** coverage. **Superseded by
+     `T7I-OD4-GRANT` in `scripts/tests/step-7i/static-scan.mjs`**, whose predicates live in the pure
+     module `scripts/tests/step-7i/od4-grant-guard.mjs`: it reads **every `.sql` in
+     `supabase/migrations`, including the migration being authored**, discovers the serializers
+     rather than hard-coding them, and fails on a `GRANT` reaching any owner-only function from
+     `PUBLIC`, `anon`, `authenticated`, `service_role` or `authenticator`. It is **anchor-pinned**
+     (`EXPECTED_SERIALIZERS`), so it fails loudly rather than passing vacuously if the naming
+     convention drifts — **re-pin that count in the same commit that adds a serializer (2 today, 4
+     once M13 lands)**. Its firing proof is `scripts/tests/step-7i/prove-od4-grant-guard.mjs`, which
+     imports the **shipped** predicates and is **run by `run-canonical.mjs`**, so it cannot rot as
+     an orphan. **It was deliberately NOT bolted onto `ct-static.mjs`:** making a correction-tracking
+     test responsible for global migration security would couple unrelated concerns and would leave
+     the guard pinned to one historical file again.
+
+     ⚠️ **Stated honestly, because two rounds of adversarial review were needed to reach this.** The
+     first version was a keyword matcher and **nine bypasses passed it green** — among them
+     `GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated` and
+     `ALTER DEFAULT PRIVILEGES … GRANT EXECUTE ON FUNCTIONS TO authenticated`, the latter being the
+     **mirror image of the corpus's own hardening statement** at `20260803034500_…:52-53`. Its
+     firing proof could also not tell a working guard from one mutated to scan only the newest file.
+     Both are fixed: `redact()` is now a **single-pass scanner** (sequenced regexes cannot handle
+     interleaved comment/string/dollar-quote contexts — the attempt consumed **91%** of
+     `20260805090500_…` because `--` prose in this corpus is full of apostrophes), the guard detects
+     **blanket, default-privilege, dynamic-SQL and role-chaining** forms, the proof plants a
+     violation **mid-corpus**, and a **missing-REVOKE** check covers the hazard no GRANT scan can
+     see: a new `postgres`-owned function defaults to `PUBLIC EXECUTE`, so a serializer created
+     without a REVOKE ships client-executable with **no GRANT statement anywhere to find**.
+     **It remains a static text scan, not a SQL parser — a NECESSARY, not sufficient, control.**
+     Role chaining is heuristic, only `supabase/migrations/*.sql` is in scope, and the runtime
+     catalogue assertions in M13 and carriers 5–7 remain the authority on the live ACL.
      **Two of the eight hard-assert `IF v_n <> 4`** (`lifecycle-canonical.sql:428`,
      `verify-local-fixtures.sql:676`) — adding the two V2 serializers takes the set to 6 and both
      **fail loudly** unless re-pinned. ⚠️ A **fourth** spelling exists, `v_7h_zero_exec`
      (`20260806090000:679`, `20260806103000:408`, `20260807113000:348`) — it holds the **7H audit**
      set, not the serializer set, so it does **not** take V2; do not update it by mistake, and do
-     not let its existence make a grep look conclusive. **Update all eight and re-pin both arity
-     assertions.**
+     not let its existence make a grep look conclusive. ~~**Update all eight and re-pin both arity
+     assertions.**~~
+
+     🔴 **CORRECTED 2026-08-09 under bounded Operator authorization — PLAN DEFECT PD-1. "Update all
+     eight" was WRONG and must not be followed.** Carriers **1–4 live inside already-applied
+     migrations** (`20260805090500_…:3053` · `20260806090000_…:675` · `20260806103000_…:404` ·
+     `20260807113000_…:344`). **They are IMMUTABLE HISTORICAL INSTRUMENTS and must remain
+     byte-identical.** Two independent reasons, both proved: (a) `CLAUDE.md` §12 forbids editing an
+     applied migration, and `ct-static.mjs:166` / `c3-static.mjs:107` hard-fail with the literal
+     message *"an applied migration must never be edited"*; (b) **it would break the fresh-apply
+     proof** — `20260805090500_…:3125` loops `FOREACH v_name IN ARRAY (v_granted || v_zero_exec)`
+     asserting each named function **EXISTS**, and on a fresh apply that block runs **before** M13
+     creates the V2 serializers, so naming them there makes the migration fail. **Their inability to
+     mention a future function is CORRECT, not a gap.** **Only carriers 5–7 — the reusable
+     current-state test/fixture layer — are updated** (`lifecycle-canonical.sql` ·
+     `verify-local-fixtures.sql` · `asm-suite.sql`), and both `<> 4` arity assertions are re-pinned
+     to the evidenced current count. **Carrier 8 is NOT updated**: PD-2 below establishes that
+     `ct-static.mjs:214` reads only one already-applied migration, so adding the V2 names there is
+     **vacuous**, and its role passes to `T7I-OD4-GRANT`. **Never edit a historical migration assertion merely to make a
+     count agree.**
+
+     **The four assertion classes, which this clause previously conflated:**
+
+     | Class | Where | Rule |
+     |---|---|---|
+     | **HISTORICAL MIGRATION-RESIDENT** | inside an applied migration | **Immutable point-in-time proof. NEVER updated for a future function.** |
+     | **CURRENT REUSABLE** | `lifecycle-canonical.sql` · `verify-local-fixtures.sql` · `asm-suite.sql` (re-derive exact paths before editing) | Updated whenever the governed **current** catalogue changes |
+     | **NEW-MIGRATION END ASSERTIONS** | the migration being authored | Proves the **current** catalogue immediately after that migration. **M13 must assert the complete current zero-client-EXECUTE set itself.** ⚠️ **Scope it explicitly — "the zero-EXECUTE set" is ambiguous and the carriers disagree.** M13 asserts the **Step 7I serializer/owner-only set, which becomes SIX**: `report_store_draft` · `app_parent_reaches_student` · `report_content_hash_v1` · `report_wording_hash_v1` · **`report_content_hash_v2`** · **`report_wording_hash_v2`**. That is **not** the same as "every function without `authenticated` EXECUTE" — measured live there are **9** such functions today (11 after M13), because the **7H audit set** (`audit_append_event`, `audit_verify_chain`, `audit_canonical_json`, `audit_block_mutation`, held by `v_7h_zero_exec`) and `assessment_save_observation` are also owner-only but belong to **different** governed sets. `asm-suite.sql:236-240` deliberately asserts **8** (7I + 7H). **Do not merge these sets.** |
+     | **AUTHORING-TIME STATIC GRANT GUARD** | see PD-2 below | Must inspect the migration **actually being authored**, or the complete current corpus |
    - Function census (currently 34), and table/enum/policy counts wherever pinned.
 5. Add end-of-migration catalogue assertions in the established style, and **never copy a stale
    deny-list forward**.
@@ -1347,9 +1407,17 @@ that authorization (§7.6-A).
   REVOKE/GRANT** for the **six** changed signatures — all six carry panel columns (four as IN
   parameters, three in `RETURNS TABLE`): **six REVOKEs, five GRANTs**, because `report_store_draft`
   is REVOKE-only and keeps zero client EXECUTE under R-27. 7) Addition of the two new serializers
-  to **all EIGHT** zero-EXECUTE assertion carriers enumerated at §6.5 item 4 — **not six; six is the
+  to ~~**all EIGHT** zero-EXECUTE assertion carriers enumerated at §6.5 item 4 — **not six; six is the
   new arity value, not the carrier count** — **and re-pinning both `<> 4` arity assertions to 6**.
-  Missing the eighth (`ct-static.mjs:214`) ships V2 with **no authoring-time static-scan coverage**.
+  Missing the eighth (`ct-static.mjs:214`) ships V2 with **no authoring-time static-scan coverage**.~~
+  🔴 **CORRECTED 2026-08-09 — PD-1/PD-2, see §6.5 item 4.** Add them to the **CURRENT REUSABLE**
+  carriers **only** — carriers **5–8** — and re-pin both `<> 4` arity assertions to the evidenced
+  current count. **Carriers 1–4 are inside applied migrations and MUST remain byte-identical**;
+  naming a future function there breaks the fresh-apply proof. **M13 carries its own current-state
+  zero-client-EXECUTE assertion**, which is where the post-M13 six-function set is proved.
+  **Authoring-time grant coverage is `T7I-OD4-GRANT`** (`static-scan.mjs` +
+  `od4-grant-guard.mjs`), which reads the whole corpus — **not** `ct-static.mjs:214`, which reads
+  only one already-applied migration and never could have covered M13.
 - **Negative controls** — **V1's body, `v_names` array, domain string, signature, ACL and COMMENT
   must not change.** V1 is preserved as historical semantics. **No historical-row backmigration is
   invented** — no production data requires one. `report_store_draft` keeps zero client EXECUTE
@@ -1378,12 +1446,33 @@ that authorization (§7.6-A).
 - **Objective** — Land the OD-4 contract in the database.
 - **Authority** — P1-T02 design; §6.5 migration protocol.
 - **Depends on** — P1-T02.
-- **Files/systems** — new `supabase/migrations/<ts>_od4_report_contract.sql`; **all eight**
-  zero-EXECUTE assertion carriers and every pinned census array (§6.5 item 4); every pinned
+- **Files/systems** — new `supabase/migrations/<ts>_od4_report_contract.sql`; ~~**all eight**
+  zero-EXECUTE assertion carriers~~ 🔴 **CORRECTED 2026-08-09 — PD-1. "All eight" was WRONG here
+  too, and this is the highest-risk place it survived: an implementer scoping M13 reads
+  Files/systems first, and it contradicted this same task's own Negative control three lines below
+  (*"Do **not** edit a previously applied migration"*).** The correct scope is: **the CURRENT
+  REUSABLE carriers 5–7 only** — `scripts/tests/step-7i/lifecycle-canonical.sql` (arity `<> 4` at
+  `:428` → **6**) · `scripts/fixtures/verify-local-fixtures.sql` (arity `<> 4` at `:676` → **6**) ·
+  `scripts/tests/assessment/asm-suite.sql` — **plus M13's own end-of-migration assertion**, which is
+  where the post-M13 set is proved. **Carriers 1–4 are migration-resident and MUST remain
+  byte-identical.** **Carrier 8 (`ct-static.mjs:214`) is NOT updated** — PD-2 established it reads
+  only one already-applied migration, so adding V2 names there is vacuous; its role is taken by
+  **`T7I-OD4-GRANT`**, and the `EXPECTED_SERIALIZERS` pin in `scripts/tests/step-7i/static-scan.mjs`
+  must be re-pinned **2 → 4** in this same commit; and every pinned census array (§6.5 item 4); every pinned
   migration count (12 → 13).
 - **Owner** — Main Orchestrator, sole migration writer.
 - **Steps** — Per §6.5, all seven protocol items. Then apply locally and run
-  `verify-fresh-apply.mjs`.
+  `verify-fresh-apply.mjs`. 🔴 **ADDED 2026-08-09 — PD-1: §6.5 item 5 says only "add end-of-migration
+  catalogue assertions in the established style", which is too generic to convey the requirement
+  this task must satisfy.** M13 **must** carry its own end-of-migration assertion pinning the
+  **post-M13 Step 7I owner-only set at SIX** (see §6.5 item 4's class table for the exact six and
+  for why that is not the same as "every function without `authenticated` EXECUTE"). It **must**
+  also pin the **V1 freeze** across all of `prosrc` (EOL-canonicalized per F-P0-3),
+  `pg_get_function_identity_arguments`, `pg_get_function_result`, `proargnames`, `provolatile`,
+  `proparallel`, `prosecdef`, `proconfig`, owner, literal `proacl` and
+  `obj_description(oid,'pg_proc')` — a `prosrc` digest alone misses signature, ACL and COMMENT, and
+  `verify-fresh-apply` is structurally blind to a V1 change because M13 runs on **both** sides of
+  its comparison.
 - **Negative controls** — Do **not** copy any deny-list forward unchanged (see P1-T04). Do **not**
   edit a previously applied migration. Carry the P-1 ownership guard.
 - **Acceptance** — Migration applies from scratch; all end-of-migration catalogue assertions pass;
