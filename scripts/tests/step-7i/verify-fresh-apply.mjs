@@ -94,7 +94,36 @@ DELETE FROM supabase_migrations.schema_migrations;`
 
 // The catalogue fingerprint compared between the two databases. It covers
 // every object Step 7I touches plus everything it must leave alone.
-const FINGERPRINT = `
+//
+// ---------------------------------------------------------------------
+// LINE-ENDING INVARIANCE (operator ruling F-P0-3, 2026-08-09)
+// ---------------------------------------------------------------------
+// `srcExpr` is the ONLY parameterized part: the expression used to digest
+// pg_proc.prosrc. Everything else -- object set, identity arguments, result
+// type, volatility, security, strictness, parallelism, proconfig, columns,
+// constraints, indexes, EXECUTE privileges, table privileges, policies, RLS
+// and triggers -- is fixed and compared exactly, unchanged by this ruling.
+//
+// WHY THIS EXISTS. The scratch database is built by piping migration files
+// through psql after normalising CRLF -> LF (see the loop in main()). The
+// canonical database is built by `supabase start`, which applies the SAME
+// files RAW. The 12 committed migration files sit CRLF in a Windows checkout
+// (core.autocrlf=true), so the canonical database stores CR inside prosrc and
+// the scratch database does not. Comparing md5(prosrc) then measures the
+// TRANSPORT, not the schema -- which is precisely what this comparison must
+// never do. The earlier header claim that "the Supabase CLI normalises them
+// too" was FALSE for `supabase start`, and that is the whole defect.
+//
+// WHAT IS AND IS NOT NORMALISED. Only end-of-line representation: CRLF -> LF,
+// then any surviving bare CR -> LF. NOTHING else. No trimming, no space
+// collapsing, no tab handling, no clause reordering, no case folding, no
+// quote normalisation. Two function bodies differing by so much as one
+// character that is not an end-of-line marker still produce different
+// digests and still FAIL. The negative control in the suite log proves this.
+const CANON_SRC = "md5(replace(replace(p.prosrc, chr(13)||chr(10), chr(10)), chr(13), chr(10)))"
+const RAW_SRC = 'md5(p.prosrc)'
+
+const buildFingerprint = (srcExpr) => `
 SELECT string_agg(line, E'\\n' ORDER BY line) FROM (
   SELECT 'enum|' || t.typname || '|' || e.enumlabel || '|' || e.enumsortorder::text AS line
     FROM pg_type t JOIN pg_enum e ON e.enumtypid=t.oid
@@ -116,7 +145,7 @@ SELECT string_agg(line, E'\\n' ORDER BY line) FROM (
   SELECT 'function|' || p.proname || '|' || pg_get_function_identity_arguments(p.oid)
          || '|' || pg_get_function_result(p.oid) || '|' || p.provolatile::text || p.prosecdef::text
          || p.proisstrict::text || p.proparallel::text || '|' || coalesce(p.proconfig::text,'~')
-         || '|' || md5(p.prosrc)
+         || '|' || ${srcExpr}
     FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public'
   UNION ALL
   SELECT 'exec|' || p.proname || '|' || r.rn || '|' ||
@@ -216,23 +245,57 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
   else pass(`fresh census: 26 tables, 34 functions, 12 enums, 29 policies, 12 migrations, 25 authenticated EXECUTE, RLS everywhere, 8 ordered labels, 1/3/9 seeds`)
 
-  // Equivalence.
-  const fresh = await q(SCRATCH, FINGERPRINT)
-  const canon = await q(CANONICAL, FINGERPRINT)
+  // Equivalence, reported in two separate registers (operator ruling F-P0-3).
+  //
+  //   RAW_TEXT_DIFFERENCES        -- byte-level, including EOL representation.
+  //                                  DIAGNOSTIC ONLY. Never the verdict.
+  //   CANONICALIZED_SCHEMA_DIFFERENCES -- EOL-invariant. THIS is the verdict.
+  //
+  // Reporting both is deliberate: it would be false to claim the two raw
+  // prosrc byte strings are identical when they are not. The honest claim
+  // this proof makes is "catalogue/schema equivalent modulo CRLF/LF transport
+  // representation" -- and the raw count is printed so the transport
+  // difference never becomes invisible.
+  const diffCount = (x, y) => {
+    const a = new Set(x.split('\n'))
+    const b = new Set(y.split('\n'))
+    const onlyA = [...a].filter((l) => !b.has(l))
+    const onlyB = [...b].filter((l) => !a.has(l))
+    return { onlyA, onlyB, total: onlyA.length + onlyB.length }
+  }
+
+  const rawFresh = await q(SCRATCH, buildFingerprint(RAW_SRC))
+  const rawCanon = await q(CANONICAL, buildFingerprint(RAW_SRC))
+  const raw = diffCount(rawFresh, rawCanon)
+  const rawKinds = {}
+  for (const l of [...raw.onlyA, ...raw.onlyB]) {
+    const k = l.split('|')[0]
+    rawKinds[k] = (rawKinds[k] || 0) + 1
+  }
+  console.log(`RAW_TEXT_DIFFERENCES: ${raw.total}`
+    + (raw.total ? ` (${Object.entries(rawKinds).map(([k, v]) => `${k}=${v}`).join(', ')})` : '')
+    + ' -- diagnostic only; end-of-line representation is included here')
+
+  const fresh = await q(SCRATCH, buildFingerprint(CANON_SRC))
+  const canon = await q(CANONICAL, buildFingerprint(CANON_SRC))
+  const cnl = diffCount(fresh, canon)
+  console.log(`CANONICALIZED_SCHEMA_DIFFERENCES: ${cnl.total} -- this is the verdict`)
+
   if (fresh === canon) {
     // (Run C3-A correction cycle: this narrated the superseded eleven-file
     //  census. The scratch database above is built from EVERY committed
     //  migration file, and the census asserted immediately above pins that
     //  count at twelve, so "eleven" was false against the twelfth.)
-    pass('the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the twelve committed migration files')
+    // Stated precisely. Where RAW_TEXT_DIFFERENCES is non-zero the two
+    // databases are NOT byte-identical, and this proof does not claim they
+    // are -- it claims catalogue equivalence modulo end-of-line transport.
+    pass(raw.total === 0
+      ? 'the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the twelve committed migration files (raw byte-identical too)'
+      : `the canonical fixture database is CATALOGUE-EQUIVALENT to a fresh application of the twelve committed migration files, MODULO CRLF/LF TRANSPORT REPRESENTATION (${raw.total} raw text difference(s), 0 canonicalized) -- object set, signatures, attributes, ACLs, policies, RLS, triggers, columns, constraints and indexes all match exactly`)
   } else {
-    const a = new Set(fresh.split('\n'))
-    const b = new Set(canon.split('\n'))
-    const onlyFresh = [...a].filter((l) => !b.has(l)).slice(0, 15)
-    const onlyCanon = [...b].filter((l) => !a.has(l)).slice(0, 15)
-    fail('the canonical database differs from a fresh application')
-    for (const l of onlyFresh) console.error(`  fresh-only : ${l}`)
-    for (const l of onlyCanon) console.error(`  canon-only : ${l}`)
+    fail('the canonical database differs from a fresh application, and the difference is NOT end-of-line representation')
+    for (const l of cnl.onlyA.slice(0, 15)) console.error(`  fresh-only : ${l}`)
+    for (const l of cnl.onlyB.slice(0, 15)) console.error(`  canon-only : ${l}`)
   }
 
   await psql('template1', `DROP DATABASE IF EXISTS ${SCRATCH};`,

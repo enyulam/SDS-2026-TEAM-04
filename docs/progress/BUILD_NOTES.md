@@ -2192,3 +2192,58 @@ git grep -o -I -E "Today's Strength|Next Focus|Practice Suggestion|Session Takea
 **Decisions.** None. P1-T01 produces evidence only.
 
 **Next permitted action.** **P1-T02 — design migration M13** (design artefact only, no DDL applied), then P1-T03 writes and applies it. ⚠️ **Stopping here deliberately:** P1-T03 authors and APPLIES a real schema migration, and P1-T04–T08 then regenerate types and migrate every contract above. That is a large, mutating sequence which must not be begun without enough working room to finish, verify and roll back cleanly — starting it and stopping mid-way is the one outcome worse than not starting. **The inventory above is the complete input P1-T02 needs**, so the next session resumes at P1-T02 with no re-derivation. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**
+
+---
+
+## 2026-08-09 — F-P0-3 CLOSED: fresh-apply comparison made line-ending invariant
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 1, between P1-T01 and P1-T02. **One test file changed. No migration, schema, application, generated-type or UI change.**
+**Branch / worktree.** `main`, single writer. **Starting HEAD** `819760b3e4cd67b359eaa2741d74569e27b05257` → this entry's commit.
+
+**Operator ruling received.** F-P0-3 resolved as **VERIFICATION-SIDE LINE-ENDING CANONICALIZATION**; the `.gitattributes` option was **expressly rejected**. The finding is accepted as a **transport-only CRLF/LF comparison asymmetry in the verification instrument**.
+
+**Key facts RE-PROVED before editing anything** (the ruling required this, and the instruction's own values were not taken on trust). A read-only diagnostic rebuilt the scratch database and compared both representations: **raw `md5(prosrc)` → 22 fresh-only and 22 canon-only lines, every one a `function` line over an identical object set**; with the ruled transformation applied to both sides → **identical, zero differences**. All 12 migration files are CRLF in the checkout; **22 of 34** function bodies carry `CR` in `prosrc`.
+
+**The defect, exactly.** `scripts/tests/step-7i/verify-fresh-apply.mjs` builds its scratch database by piping migration files through `psql` **after** `.replace(/\r\n/g, '\n')`, while the canonical database is built by `supabase start`, which applies the same files **raw**. The fingerprint digested `md5(p.prosrc)`, so the comparison measured the **transport** rather than the schema — the exact failure mode the script's own comment says the normalisation exists to prevent. Its stated premise, *"The Supabase CLI normalises them too"*, is **false for `supabase start`**.
+
+**The correction, exactly.** The fingerprint became `buildFingerprint(srcExpr)`, parameterized in **one place only** — the expression digesting `prosrc`. Two expressions are now used:
+
+- `RAW_SRC = md5(p.prosrc)` — diagnostic;
+- `CANON_SRC = md5(replace(replace(p.prosrc, chr(13)||chr(10), chr(10)), chr(13), chr(10)))` — **CRLF → LF, then any surviving bare CR → LF, and nothing else.**
+
+**Nothing else in the fingerprint changed.** Object set, identity arguments, result type, volatility, security, strictness, parallelism, `proconfig`, columns, constraints, indexes, EXECUTE privileges, table privileges, policies, RLS flags and triggers are all still compared **exactly**. **No trimming, no space collapsing, no tab handling, no clause reordering, no case folding, no quote normalisation, and no weakening of any census assertion.**
+
+**Both registers are now reported separately, as ruled:**
+
+```
+RAW_TEXT_DIFFERENCES: 44 (function=44) -- diagnostic only; end-of-line representation is included here
+CANONICALIZED_SCHEMA_DIFFERENCES: 0 -- this is the verdict
+```
+
+and the PASS line states the honest claim — **"CATALOGUE-EQUIVALENT … MODULO CRLF/LF TRANSPORT REPRESENTATION (44 raw text difference(s), 0 canonicalized)"**. **It does not claim raw byte-equivalence**, because that is not true; the success message even branches, reporting raw byte-identity only when `RAW_TEXT_DIFFERENCES` is genuinely 0.
+
+**NEGATIVE CONTROL — required, and it passed 6/6.** Run on **two disposable databases** cloned from canonical, mutating only a control function the harness creates itself (**no governed object was touched, and canonical was never written to**):
+
+| Step | Condition | RAW | CANON | Verifier | Expected |
+|---|---|---|---|---|---|
+| 1 | two identical clones | 0 | 0 | **PASS** | PASS ✓ |
+| 2 | identical control function in both | 0 | 0 | **PASS** | PASS ✓ |
+| 3 | **EOL-only**, CRLF vs LF | 2 | 0 | **PASS** | PASS ✓ |
+| 3b | **EOL-only**, CRLF vs bare CR | 2 | 0 | **PASS** | PASS ✓ |
+| 4 | **SUBSTANTIVE** body change (one literal) | 2 | **2** | **FAIL** | FAIL ✓ |
+| 5 | same substantive change re-encoded CRLF | 2 | **2** | **FAIL** | FAIL ✓ |
+
+Step 5 matters as much as step 4: it proves detection of real drift is **not transport-dependent**, so the canonicalization cannot be used to smuggle a substantive change past the check by re-encoding it. **Canonical function-digest identical before and after (`617700f2a59f7d0b664282e4c0501b31`), row counts `0/3/34` unchanged, 0 leftover `bc_*` databases.**
+
+**Migration bytes — protected and proven.** SHA-256 computed for all 12 `supabase/migrations/*.sql` **before and after**: **all 12 byte-identical**. No migration file was modified, `.gitattributes` was **not** touched, **no** `text eol=lf` rule was added, **no** renormalization was run, and **`core.autocrlf` (still `true`) and all Git configuration were left unchanged.**
+
+**F-P0-3 acceptance — all ten criteria met.** (1) all 12 migrations apply from fresh ✓ (2) census exact — `26 tables / 34 functions / 12 enums / 29 policies / 12 migrations / 25 authenticated EXECUTE / RLS everywhere / 8 ordered labels / 1-3-9 seeds` ✓ (3) raw transport differences recorded honestly ✓ (4) canonicalized zero ✓ (5) substantive-drift negative control FAILS ✓ (6) 12 migration hashes unchanged ✓ (7) canonical fixture database unchanged ✓ (8) fixture verifier **PASS** ✓ (9) four formerly-red suites **all PASS, exit 0** ✓ (10) **no provider or external call occurred** ✓.
+
+**Gates.** `tsc` **0** · `lint` **0** · `verify-fresh-apply` **0** · fixture verifier **0** · `run-canonical` **0** · `run-correction-tracking` **0** · `prove-clock-hour-determinism` **0** · `run-assessment` **0**.
+
+**Blockers.** **F-P0-3 CLOSED.** None open.
+
+**Decisions.** None made by this session — the remedy and its boundary were both ruled by the Operator.
+
+**Next permitted action.** **P1-T02 — design migration M13 / the OD-4 report contract**, using the committed P1-T01 inventory as starting evidence and verifying any path immediately before modifying it. **G-06 / P1-T09 remains a hard gate.**
