@@ -41,17 +41,22 @@ will drift.
 
 ### 2.1 Precedence (restated from `CLAUDE.md` §1 and Authority Lock §2.4, §29)
 
-> One deliberate difference from the sources: rank 1 reads **Amendments 001–007**, because
+> ~~One deliberate difference from the sources: rank 1 reads **Amendments 001–007**, because
 > Amendment 007 / A-056 is ratified. `CLAUDE.md` §1 and Lock §29 both still enumerate **001–006** —
-> that staleness is real and P0-T04 exists to correct it. Everything else below matches the sources.
+> that staleness is real and P0-T04 exists to correct it.~~ **✅ DISCHARGED 2026-08-08 — P0-T04 executed
+> the correction under bounded Operator instruction G-00a, so `CLAUDE.md` §1 and Lock §2.2/§29/§31
+> now enumerate the full set and no longer disagree with this table.** Rank 1 now reads
+> **Amendments 001–008**: **Amendment 008 / `A-057`** was ratified 2026-08-08 under the Phase-0
+> ruling set (G-05 item 6) and adds exactly two evidence audit actions. Everything else below
+> matches the sources.
 
 Explicit Operator rulings outrank everything. Below them, the **functional ladder**:
 
 | Rank | Source |
 |---|---|
 | 0 | The two canonical submission PDFs in `FINAL_SUBMISSION_BRIEF/` (never edited) |
-| 1 | `docs/spec/BEST_Coach_Complete_MVP_Specification_v3.md` + Amendments **001–007**, for the clauses each names |
-| **2** | **`FINAL_MVP_AUTHORITY_LOCK.md` and the ruling instruments it indexes** (OD-4, Q-4, Q-27, Q-28, PA-OD-1/5/5b/8/9, R-27, …). Lock §4: *"Where any other workspace document disagrees with this file on a Final-MVP-defining question, this file governs."* |
+| 1 | `docs/spec/BEST_Coach_Complete_MVP_Specification_v3.md` + Amendments **001–008**, for the clauses each names |
+| **2** | **`FINAL_MVP_AUTHORITY_LOCK.md` and the ruling instruments it indexes** (OD-4, **the Phase-0 ruling set `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md` — added 2026-08-08**, Q-4, Q-27, Q-28, PA-OD-1/5/5b/8/9, R-27, …). Lock §4: *"Where any other workspace document disagrees with this file on a Final-MVP-defining question, this file governs."* |
 | 3 | `CLAUDE.md` |
 | 4 | `docs/plan/BEST_Coach_Implementation_Plan.md` (procedural; cannot override the spec — A-012) |
 | 5 | The `docs/plan/` lifecycle and authorization baselines + the ratified 36-screen inventory |

@@ -1797,3 +1797,142 @@ accompanies this entry, and also carries **B-P0-1** and the **G-05a** premise br
 additionally requires Operator confirmation, and **Phase 1 additionally requires the separate OD-4
 Phase B authorization, which no range grant confers.** No `Accepted` mark has been written or
 implied by this session.
+
+---
+
+## 2026-08-08 — PHASE-0 OPERATOR RULINGS RECORDED · D-0A PRESERVATION DONE · D-0B PROVED IMPOSSIBLE
+
+**Date/time.** 2026-08-08, Asia/Singapore.
+**Checkpoint / phase.** `FINAL_MVP_EXECUTION_PLAN.md` **PHASE 0**. Rulings received on P0-T09 and
+P0-T10 and recorded; **D-0A executed; D-0B proved structurally impossible.** **Phase 0 has NOT
+exited and Plan Phase 1 has NOT started.**
+
+**Track / workstream.** Single-writer, `main`, no worktrees. One **read-only adversarial reviewer**
+was launched over the governance diff, instructed to falsify rather than confirm.
+
+**Operator decisions received.** In the message *"RESOLVE THE PHASE-0 OPERATOR DECISION PACKET AND
+RESUME FINAL MVP EXECUTION"*: **D-0** (residue classified **synthetic development/verification
+residue**; remedy = preserve first, then Operator-supervised governed fixture reload; expressly
+rejecting indefinite preservation, targeted row deletion and `supabase db reset`) · **G-05a**
+(OD-4 content hash: V1 frozen byte/semantically, **parallel V2**, new versions at
+`content_hash_version = 2`, constraint widened to `1 or 2`, no backmigration, **no silent
+relabelling of any future production V1 row**, `report_store_draft` keeps zero client `EXECUTE`) ·
+**G-04** (four dispositions) · **G-05** (seven evidence dispositions, including bounded authority to
+author a two-action audit-registry amendment) · **G-03** (external inputs) · **G-02** (recruitment
+preparation) · **no calendar descoping** · and the **OD-4 Plan Phase-1 authorization, expressly
+conditioned on a clean Phase-0 exit**.
+
+**Starting HEAD → ending HEAD.** `1fa7a25410a4e58efe938a1466780a4dd9adb35c` → this entry's
+checkpoint commit.
+
+**Migration or schema changes.** **NONE.** No migration authored, applied or edited. No DDL. No
+generated types. No application, test or UI-asset file changed. **The live audit registry still
+holds 16 actions** — Amendment 008 ratifies two strings but authorizes no migration.
+
+**Scope.**
+
+*D-0A — preservation of the residual synthetic lifecycle: **DONE**, before any state change.*
+Written to **both** approved archives as `2026-08-08_PRE_OD4_SYNTHETIC_RESIDUE`: an exact
+`--column-inserts` data export, a restorable custom-format `pg_dump`, a structured metadata report
+that deliberately carries **panel lengths rather than panel text**, and the chain-verification
+record. Both copies verified **SHA-identical** (`sha256sum -c`, 4/4 OK); a credential-pattern scan
+over the set returned no match; **the raw generated draft text was NOT committed to Git**, exactly
+as the ruling requires. Chain state at capture: **`ok = true`, mode `complete`, 5 events,
+`head_checked = true`, no failed check** — the residue is a coherent verifiable chain, not
+corruption.
+
+*D-0B — governed fixture reload: **BLOCKED, and the block is structural**.* Before touching
+anything, the outcome was proved on a **disposable clone** (`CREATE DATABASE … TEMPLATE postgres`),
+and the canonical database was verified unchanged afterwards. Two independent walls:
+
+**B1.** `local_fixtures.sql` deliberately scopes itself to the 25 fixture domain rows and its own
+header excludes *"invitations [7I] · audit rows [7H] · evidence rows · AI rows"*. Its cleanup half
+therefore aborts on `reports_observation_fk` — it cannot delete `observations` while `reports`
+references it. Because the loader runs that SQL as `--reload`'s **first** step, the run dies
+**before** deleting any Auth user and **before** the password prompt. **This is not a TTY problem,
+and an Operator sitting at the keyboard does not change it.**
+
+**B2.** With the report family removed on the clone, the cleanup advances ten rows and aborts on
+`audit_events_actor_membership_fk` — **A-029's ratified durable actor `RESTRICT` FK** pinning
+`centre_memberships`. The audit rows cannot be deleted to relieve it: the append-only trigger
+refuses `DELETE` **even for the `postgres` owner/superuser** (*"audit append-only violation … design
+section 5.5: correction is a new event; repair never mutates evidence"*), and `authenticated` holds
+no `DELETE` privilege at all.
+
+**Conclusion: while any audit event exists the reload is impossible — and the reload was the
+instrument meant to clear the residue whose audit half blocks it. That is circular and cannot be
+resolved inside the ruling as written.** The guarantee is working as designed; `CLAUDE.md` §12
+forbids working around a fail-closed refusal by weakening the thing that refused. Recorded as
+blocker **B-P0-2**, OPERATOR-ONLY. **Nothing was deleted, truncated, reset or worked around**, and
+the probe database was dropped.
+
+*Rulings recorded.* New carrier **`FINAL_MVP_PHASE0_OPERATOR_RULINGS.md`** (repository root), indexed
+at Authority Lock **§2.3** and in `CLAUDE.md` §1 and §9.1. It records D-0, G-05a, G-04 (×4), G-05
+(×7), G-03, G-02 and the no-descoping ruling, each as the Operator stated it, and records the D-0B
+block against the ruling it belongs to rather than burying it in a log.
+
+*Amendment authored.* **`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_008.md`, clause
+`A-057`** — the minimal evidence audit-registry extension, under the message's explicit bounded
+authority. Exactly two strings, `evidence.uploaded` and `evidence.accessed`; registry **16 → 18**;
+**`evidence.deleted` expressly not added**; denied attempts never emit `evidence.accessed`; payloads
+carry no PII or raw evidence content; **no table, enum, column or seed row**, so A-031's ceiling is
+untouched and the registry stays a function-enforced `text[]` per A-026. Clause continuity was
+checked on disk before writing: highest existing clause **A-056**, no `A-057` anywhere, no existing
+Amendment 008. **Amendments 001–007 verified byte-unchanged** (`git status docs/spec/` shows only the
+new file).
+
+*Recruitment materials.* `docs/plan/PHASE_9_USABILITY_RECRUITMENT_MATERIALS.md` — recruitment
+message, information/consent sheet, scheduling instructions and the task protocol, all **drafts**.
+It opens with a status table reading **contacted 0 · consented 0 · sessions 0 · findings 0** and
+states that automated evidence may never be relabelled as human evidence. **Adults only; no children
+recruited; no real child records.**
+
+*Enumeration reconciliation.* Adding Amendment 008 made three carriers stale in the same breath, so
+they were corrected in the same run: Authority Lock §2.2/§29/§31.2a and `CLAUDE.md` §1/§9 now read
+**001–008**, and the execution plan's §2.1 rank-1 row was updated with its note about
+`CLAUDE.md`/Lock staleness **struck and marked discharged**, since P0-T04 had already fixed what
+that note described.
+
+**Commands run.** `git rev-parse/status/diff`; `docker ps`; `docker exec … psql` (catalogue, exact
+row counts, chain verification, clone probe); `pg_dump` (plain and custom format); `sha256sum` /
+`sha256sum -c`; `CREATE DATABASE … TEMPLATE postgres` and `DROP DATABASE` for the probe.
+
+**Automated verification.** Encoding verified on all six touched/new documents (Q-28): **no BOM, no
+mojibake**, Unicode round-trips. `git status docs/spec/` confirms **only** Amendment 008 is new.
+Contradiction scan run across `CLAUDE.md`, the Authority Lock and the execution plan for stale
+amendment enumerations and for any surviving claim that `consent_records` is required — the two
+remaining Lock mentions are historical narrative and a deferred-media-class reference, both
+consistent with the ruling. **`tsc`/`lint`/`build` were not re-run: this run changed no code**, and
+the four red suites were not re-run because **nothing that could change their result was changed**.
+
+**Reviewer findings.** A read-only adversarial reviewer was run over the governance diff, instructed
+to falsify — checking for fabricated authority, clause collision, historical rewriting, internal
+contradiction, scope overreach and stale enumeration. Its findings and their remediation are
+recorded with the checkpoint.
+
+**Failures and recovery.** No command failed unexpectedly. The two FK aborts were the **intended
+output** of a deliberate probe, not failures of this run, and both occurred on a disposable clone.
+
+**Blockers.** **B-P0-2 OPENED** (above), OPERATOR-ONLY. **B-P0-1 remains OPEN** and is now understood
+to be a symptom rather than the root problem: the residue is removable in principle, but the
+authorized removal mechanism is not executable. Blast radius unchanged and still recorded as
+**neither passing nor failing**: `run-canonical`, `run-correction-tracking`,
+`prove-clock-hour-determinism`, `run-assessment`.
+
+**Environment / infrastructure changes.** Local stack remained up throughout. One probe database was
+created and dropped. `report_versions` is still **1** — the residue is intact and preserved.
+
+**Cleanup / rollback state.** No partial mutation. Canonical row counts re-verified identical after
+the probe. Rollback for this checkpoint is a forward `git revert`.
+
+**Decisions.** Every ruling recorded here is the **Operator's**. This session ratified nothing and
+accepted nothing. Where the D-0 ruling's stated premise turned out to be unachievable, the finding
+was **reported against the ruling**, not resolved by inference and not worked around.
+
+**Commit.** `docs(governance): record Phase-0 operator rulings and the evidence audit amendment`.
+
+**Next permitted action.** **STOP for the Operator on B-P0-2.** Plan Phase 1 is authorized but its
+condition — a clean Phase-0 exit — is not met, and the Operator's own instruction was *"Do not start
+Phase 1 if the baseline remains unexpectedly red."* Once the baseline is green, Phase 1 begins at
+**P1-T01** under the authorization already granted and runs to **G-06 / P1-T09**, which must not be
+pre-decided.
