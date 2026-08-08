@@ -2247,3 +2247,66 @@ Step 5 matters as much as step 4: it proves detection of real drift is **not tra
 **Decisions.** None made by this session — the remedy and its boundary were both ruled by the Operator.
 
 **Next permitted action.** **P1-T02 — design migration M13 / the OD-4 report contract**, using the committed P1-T01 inventory as starting evidence and verifying any path immediately before modifying it. **G-06 / P1-T09 remains a hard gate.**
+
+---
+
+## 2026-08-09 — P1-T02 DESIGN OF MIGRATION M13, ADVERSARIALLY REVIEWED AND CORRECTED · TWO PLAN DEFECTS FOUND
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 1, **P1-T02**. **Design artefact only — no DDL was written or applied** (the plan sets `Commit — None` for T02's own deliverable; this entry is the durable record so P1-T03 needs no re-derivation).
+**Branch / worktree.** `main`, single writer. **Starting HEAD** `e84c621` → this entry's commit.
+**Migration or schema changes.** **NONE.**
+
+**Gate status.** P1-T02's Operator gate was **already satisfied** by **G-05a** (2026-08-08); the three stale carriers that paragraph named were closed on 2026-08-08, and its Stop condition on the G-05a premise break was discharged 2026-08-09. No new gate applies.
+
+### Measured preconditions (live, not restated)
+
+`report_versions` rows **0** · panel columns `todays_strength`(5) `next_focus`(6) `practice_suggestion`(7) `session_takeaway`(8), all `text`, **all NULLABLE** · constraint **`report_versions_content_hash_version_chk`** = `CHECK ((content_hash_version = 1))` · **11** functions reference the panel identifiers: **6** signature-changing (`report_store_draft` **auth EXECUTE false**; `report_save_edit`, `report_management_edit_wording`, `report_get_canonical`, `report_get_working`, `report_get_management_review` **all true**), **3** re-hash call sites (`report_trainer_approve`, `report_management_approve_and_submit`, `report_reopen_submitted`), **2** frozen V1 serializers. Census **34 functions · 26 tables · 12 enums · 29 policies · 25 authenticated EXECUTE · 0 anon**.
+
+### The design, as corrected
+
+**1. Panel columns — DROP + ADD, not RENAME.** A positional rename would write a **semantically false** correspondence into the permanent record: *Today's Strength* is a positive demonstrated capability, so it belongs to **`strengths`**, not `overview`; *Next Focus* is developmental, so it belongs to **`areas_for_development`**, not `strengths`. The mapping is **not positional and not 1:1** — which is exactly why the ruling insists this is *"a semantic-model change, not a relabel"*. With **zero rows** RENAME buys nothing and leaves a misleading artefact a later reader could take as ratified. **DROP + ADD states plainly that no mapping exists.** Reviewer confirmed the drop is safe: **`pg_depend` on attnums 5–8 returns 0 rows**, no constraint `conkey` contains them, no index/trigger/policy/view/generated column references them, no column comments or defaults exist on them, and all four `INSERT` sites plus every `%ROWTYPE` use explicit names — so **no `CASCADE` is required and nothing is silently lost**. The new columns land at attnum 20–23; ordinal position is not fingerprinted (`verify-fresh-apply.mjs` emits `column|relname|attname|…` with **no attnum** and excludes tombstones via `NOT attisdropped`). Guarded by an **in-transaction fail-closed zero-row check** on the ratified `20260806160000` precedent, wrapped in `DO $guard$ … $guard$;`. **That guard is the single control making DROP COLUMN safe and must never be relaxed to make the migration run.**
+
+**2. Envelope constraint** — dropped and re-added **preserving the name** (it is asserted *by name* at `20260805090500_…:3229` and re-checked by `verify-fresh-apply.mjs`), widened to `CHECK (content_hash_version IN (1, 2))`. G-05a item 5 exactly; no backmigration (item 6); item 7's protection for a future **real production** V1 row untouched.
+
+**3. V2 serializers** — new, parallel, additive. Identical envelope grammar, identical hard-coded nine-dimension order, identical nine-non-NULL arity raise, identical `IMMUTABLE PARALLEL SAFE` / `SECURITY INVOKER` / `SET search_path = ''`. Changed only: domain strings → `BESTCOACH-REPORT-CONTENT-V2` / `BESTCOACH-REPORT-WORDING-V2`, `content_version` value → `'2'`, and `v_names` → `content_version, overview, strengths, areas_for_development, remarks`. **No normalization, trimming or case folding.** Four mutually domain-separated envelopes result.
+
+**4. RPC re-signature** — the six above; the three re-hash sites keep their signatures and call V2. **Management wording allow-list stays EXACTLY four columns**, neither widened nor narrowed; A-034/A-038 unchanged. Every version-creating INSERT writes **`content_hash_version = 2`**.
+
+### Adversarial review — 12 items. Four REFUTED, and the design was materially WRONG on three.
+
+**Every finding was re-verified at source before acceptance (§14.5); one was corrected against the reviewer.**
+
+**① CRITICAL — ACCEPTED. The design would have shipped both V2 serializers with client `EXECUTE`.** It claimed they would be *"owner-only from birth"*. **False, and proved false by probe:** a new `postgres`-owned function in `public` has `proacl IS NULL`, which means the **default `PUBLIC` EXECUTE** — measured `authenticated = t`, `anon = t`. The `ALTER DEFAULT PRIVILEGES … REVOKE ALL ON FUNCTIONS` at `20260803034500_…:51-52` does **not** produce a stored owner-only ACL at creation, and the project already documents this exact trap at `20260805090500_…:3173-3175`. **This would have been a `CLAUDE.md` §12 violation by omission** — granting client EXECUTE on a content/wording serializer is a stop-and-ask — and it would have broken `verify-fresh-apply`'s `…|25|…` pin (it would read 27) and both re-pinned arity assertions, which require `proacl IS NOT NULL` and no grantee 0. **Corrected: M13 emits explicit `REVOKE ALL … FROM PUBLIC, anon, authenticated, service_role, authenticator` for both V2 serializers. The count is therefore EIGHT REVOKEs and FIVE GRANTs, not six and five.**
+
+**② CRITICAL — ACCEPTED. All six RPCs need `DROP` + `CREATE`, not three.** The design said only the three `RETURNS TABLE` readers needed it. **Probed:** `CREATE OR REPLACE` also refuses an **IN-parameter rename** — `ERROR: cannot change name of input parameter "p_old" / HINT: Use DROP FUNCTION first`. Both failures are `42P13`. The three write RPCs rename `p_todays_strength → p_overview` with **identical argument types**, so they too must be dropped and recreated. Reviewer also corrected the *mechanism*: **no argument-type list changes for any of the six**, so grants are not "orphaned by a renamed parameter list" as §6.5 item 3 says — what destroys the ACL is the mandatory `DROP`. The REVOKE/GRANT list was right by coincidence; its stated reason was wrong for 3 of 6. `pg_depend` shows **no dependents**, so no `CASCADE` is needed.
+
+**③ HIGH — ACCEPTED, and it is a PLAN DEFECT the design amplified.** §6.5 item 4 calls `ct-static.mjs:214` *"the ONLY authoring-time static scan that would catch a stray `GRANT … ON FUNCTION report_content_hash_v2 … TO authenticated` in a new migration file"*. **False.** That file pins `MIG_NAME = '20260806103000_management_correction_tracking.sql'` at `:20` and tests `bodyCode`, read from **that one already-applied migration**. It never reads M13 or any other file. Adding the V2 names there yields **exactly zero** coverage of M13. **The true state — that V2 would have NO authoring-time static-scan coverage under any of the eight carriers — is what the design should have reported.** Remedy belongs with P1-T04.
+
+**④ PROCEDURAL — ACCEPTED. The design resolved a binding plan conflict unilaterally, and contradicted itself doing so.** Its §6 heading read *"all EIGHT"* while its body said *"Only carriers 5–8 are updated"*. The **DDL conclusion is right** and independently proved twice: `20260805090500_…:3125` loops `FOREACH v_name IN ARRAY (v_granted || v_zero_exec)` asserting each named function **exists**, and on a fresh apply that block runs **before** M13 creates V2 — so adding V2 names there makes the migration **fail on fresh apply**; and `ct-static.mjs:166` / `c3-static.mjs:107` hard-fail with the literal message *"an applied migration must never be edited"*. `CLAUDE.md` §1 precedence settles it: **`CLAUDE.md` outranks the execution plan**, so applied migrations are not edited. **But the correct output was to RECORD the plan defect, not to reinterpret the clause and mark it settled** — see the two defects below.
+
+**⑤ ACCEPTED IN PART, and CORRECTED AGAINST THE REVIEWER.** The reviewer reported that `verify-fresh-apply.mjs:174` and `:214` are not count pins today and that the `expected` string pin at `:243` is *"missing from both the plan and the design"*. **The first half is true; the attribution and the second half are not.** Verified against `git show 819760b:` — at that commit the pins sat at exactly **`:174`** and **`:214`**, so **the plan's citations were correct**, and `:214` **is** the `expected` string the reviewer calls missing. **My own F-P0-3 commit (`e84c621`) shifted both by +29 lines**, to `:203` and `:243`. So this is not a plan error and not a design omission — **it is drift I introduced**, and it is recorded here as such. The reviewer's underlying point stands and is accepted: the design asserted *"every fact measured live"* and had copied those two line numbers forward unverified.
+
+**⑥ MEDIUM — ACCEPTED. The V1-freeze assertion covered 3 of G-05a's 6 protected properties.** A `prosrc` digest covers body, `v_names` and domain string (both are inside the body) but **not signature, ACL or COMMENT**: `ALTER FUNCTION … RENAME` and a changed `proargnames` leave `prosrc` byte-identical; a `GRANT` on `report_content_hash_v1` does not touch it; and `COMMENT ON FUNCTION` does not touch it — with **no COMMENT assertion anywhere in the tree**, a rewritten V1 comment currently passes every suite. `verify-fresh-apply` is **structurally incapable** of catching this, because M13 runs on both sides of its comparison. **Corrected: the assertion additionally pins `pg_get_function_identity_arguments`, `pg_get_function_result`, `proargnames`, `proacl` and `obj_description(oid,'pg_proc')` for both `_v1` functions.**
+
+**⑦ MEDIUM — ACCEPTED.** The **P-1 ownership guard** (`current_user = 'postgres'` preflight, §6.5 item 2, precedent `20260807113000_…:116-121`) was absent, as were §6.5 items 1 (next free timestamp), 6 (regenerate `database.types.ts`) and 7 (run `verify-fresh-apply`). All now carried into the design.
+
+**⑧ LOW — ACCEPTED.** REVOKEs omitted `authenticator`, deviating from the ratified precedent at `20260805090500_…:3032-3035`. Effect is nil today (`authenticator` is `rolinherit = f`), but three guarded-set assertions explicitly test it. Added.
+
+**REFUTED (design was right):** DROP+ADD safety and the attnum 20–23 argument (⑨) · the 6+3+2 = 11 classification and the 6-REVOKE/5-GRANT RPC arithmetic, with **no function missed** (⑩) · every census number, 34 → 36 (⑪) · the constraint name and all eight carrier line citations (⑫).
+
+**Also flagged, accepted for P1-T04:** `static-scan.mjs:209` (T7I-18) and `:385` (T7I-R22) hard-code the four old column names and go **vacuously green** the moment M13 lands — OD-4 §5.3 calls these *"the highest-consequence missed site"*, and M13's own commit must already touch `static-scan.mjs:46` for the count pin, so an implementer will be in that file with both guards silently rotting.
+
+### ⚠️ TWO PLAN DEFECTS — recorded, NOT unilaterally re-planned (`CLAUDE.md` §12)
+
+**PD-1 — §6.5 item 4 and P1-T02 step 7 instruct the impossible.** Both say *"Update **all eight**"* zero-EXECUTE carriers, and step 7 pre-empts the contrary reading (*"not six; six is the new arity value, not the carrier count"*). **Four of the eight are inside already-applied migrations.** Editing them is forbidden by `CLAUDE.md` §12 and by two suites' own assertions, **and doing it would break the fresh-apply proof**, because those blocks assert the named functions **exist** at a point in history before M13 creates them. **Only carriers 5–8 can be updated.** `CLAUDE.md` outranks the plan, so execution is not blocked — but **the plan clause is defective and should be corrected by its owner.**
+
+**PD-2 — §6.5 item 4's claim about carrier 8 is factually false**, per ③. `ct-static.mjs:214` scans exactly one already-applied migration and cannot see M13. **V2 would ship with no authoring-time static-scan coverage**, which is the opposite of what the clause promises.
+
+**Neither defect requires a new Operator ruling to proceed** — current authority (§1 precedence) resolves PD-1, and PD-2's remedy sits naturally in P1-T04. They are recorded for the plan owner, per §12's *"Finding one is not a licence to re-plan. Stop, record it, and report."*
+
+**Blockers.** None opened. **PD-1 and PD-2 recorded as plan defects**, owner: plan owner, non-blocking.
+
+**Decisions.** None ratified. The DROP-vs-RENAME choice is a design judgement, recorded with its reasoning and independently reviewed; it changes no governed rule.
+
+**Next permitted action.** **P1-T03 — write and apply migration M13** to the corrected design above, then P1-T04–T08. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**
