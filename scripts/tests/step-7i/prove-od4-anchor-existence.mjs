@@ -33,6 +33,7 @@
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
+import { derivePanelColumns, assertPanelAnchor } from './od4-panel-guard.mjs'
 
 const ROOT = process.cwd()
 const CONTAINER = 'supabase_db_best-coach-mvp'
@@ -48,6 +49,13 @@ const sh = (cmd, args, opts = {}) =>
 const psql = (sql) => sh('docker', ['exec', '-i', CONTAINER, 'psql', '--no-psqlrc',
   '--username=postgres', '--dbname=postgres', '--set=ON_ERROR_STOP=1', '--set=VERBOSITY=terse',
   '--quiet'], { input: sql })
+
+function scalar(sql) {
+  const r = sh('docker', ['exec', '-i', CONTAINER, 'psql', '--no-psqlrc', '--username=postgres',
+    '--dbname=postgres', '--set=ON_ERROR_STOP=1', '-t', '-A', '-c', sql])
+  if (r.status !== 0) throw new Error(`query failed: ${r.stderr}`)
+  return r.stdout.trim()
+}
 
 /** Extract the whole shipped `DO $t$ ... END $t$;` block mentioning `marker`. */
 function shippedBlock(file, marker) {
@@ -200,7 +208,7 @@ proveFileAbsence({
   find: 'export function deriveReportVersionColumns(migDir) {',
   replace: 'export function deriveReportVersionColumns(migDir) {\n  if (migDir) return [] // MUTANT: derivation silently yields nothing',
   runner: 'scripts/tests/step-7i/static-scan.mjs',
-  expect: 'derivation produced only',
+  expect: 'the immutable-column derivation produced',
 })
 
 // ---------------------------------------------------------------------
@@ -224,21 +232,47 @@ proveFileAbsence({
 {
   const id = 'anchor:column-rename'
   const decoy = join(ROOT, 'supabase', 'migrations', '20260809999998_DISPOSABLE_rename_probe.sql')
-  try {
-    writeFileSync(decoy,
-      'ALTER TABLE public.report_versions RENAME COLUMN overview TO narrative_summary;\n')
-    const r = sh('node', ['scripts/tests/step-7i/prove-od4-fail-open-controls.mjs'])
-    const out = `${r.stdout}\n${r.stderr}`
-    if (r.status === 0) {
-      bad(id, 'the derivation anchor did NOT fire when a migration renamed a panel column -- '
-        + 'either RENAME COLUMN is unhandled (the derivation kept the old name) or the anchor is not wired in')
-    } else if (!out.includes('disagrees with the live catalogue')) {
-      bad(id, `the run failed, but not via the derivation anchor: ${out.split('\n').find((l) => l.includes('FAIL')) || '(no FAIL line)'}`)
-    } else {
-      ok(id, 'a RENAME COLUMN in the corpus is followed by the derivation and reported by the live-catalogue anchor')
+  const MIG_DIR = join(ROOT, 'supabase', 'migrations')
+
+  // The SHIPPED predicates are called directly rather than by spawning
+  // prove-od4-fail-open-controls.mjs. That prover now refuses to start from
+  // a dirty supabase/migrations -- correctly, since an unexpected file there
+  // is residue from an interrupted run -- and this probe deliberately puts
+  // one there. Importing the predicates keeps the proof honest (it is still
+  // the shipped code under test) without fighting a guard that is right.
+  const live = scalar(`
+SELECT string_agg(a.attname, ',' ORDER BY a.attnum)
+  FROM pg_catalog.pg_attribute a
+ WHERE a.attrelid = 'public.report_versions'::regclass
+   AND a.attnum > 0 AND NOT a.attisdropped
+   AND a.attname NOT IN ('id','report_id','centre_id','revision_number',
+     'authored_by_membership_id','authored_by_role','derived_from_version_id',
+     'submitted_at','submitted_by_membership_id','submitted_by_role',
+     'created_at','updated_at','content_hash','content_hash_version',
+     'trainer_approved_source_version_id');`).split(',').filter(Boolean)
+
+  // Control: clean corpus must AGREE with the live catalogue, so a
+  // disagreement below cannot be a pre-existing condition.
+  if (assertPanelAnchor(derivePanelColumns(MIG_DIR), live).length !== 0) {
+    bad(id, 'the derivation already disagrees with the live catalogue before the probe -- '
+      + 'a disagreement after it would prove nothing')
+  } else {
+    try {
+      writeFileSync(decoy,
+        'ALTER TABLE public.report_versions RENAME COLUMN overview TO narrative_summary;\n')
+      const derived = derivePanelColumns(MIG_DIR)
+      const problems = assertPanelAnchor(derived, live)
+      if (!derived.includes('narrative_summary')) {
+        bad(id, `the derivation did NOT follow the RENAME (got [${derived.join(', ')}]) -- `
+          + 'RENAME COLUMN is unhandled and a renamed panel would be scanned under its old name')
+      } else if (!problems.some((p) => p.includes('disagrees with the live catalogue'))) {
+        bad(id, 'the derivation followed the rename but the live-catalogue anchor did not report it')
+      } else {
+        ok(id, 'a RENAME COLUMN in the corpus is followed by the derivation and reported by the live-catalogue anchor')
+      }
+    } finally {
+      try { unlinkSync(decoy) } catch { /* already gone */ }
     }
-  } finally {
-    try { unlinkSync(decoy) } catch { /* already gone */ }
   }
   if (existsSync(decoy)) bad(id, 'the disposable rename-probe migration was NOT removed')
 }

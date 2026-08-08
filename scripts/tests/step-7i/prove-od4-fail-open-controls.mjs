@@ -62,7 +62,7 @@
 // Run: node scripts/tests/step-7i/prove-od4-fail-open-controls.mjs
 // =====================================================================
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import { derivePanelColumns, assertPanelAnchor } from './od4-panel-guard.mjs'
@@ -266,6 +266,31 @@ console.log('P1-T04 -- firing proofs for the nine fail-open OD-4 controls')
 console.log('')
 
 // ---------------------------------------------------------------------
+// PRE-FLIGHT: refuse to start from a dirty baseline.
+//
+// This file plants violations on the CANONICAL database and in tracked
+// migration files, restoring both in `finally`. A `finally` does not run on
+// SIGKILL, a host crash or a hard timeout, so an interrupted PREVIOUS run
+// can leave a violating function body or a mutated migration behind.
+// Without this check the next run would silently treat that residue as the
+// clean baseline -- and every "passes clean" claim below would be false.
+//
+// Adversarial review raised the residue window. It cannot be closed
+// entirely (the plant is auto-commit DDL on a connection this process does
+// not own), so it is made LOUD instead: detected at the start of the next
+// run rather than inherited.
+// ---------------------------------------------------------------------
+{
+  const dirty = sh('git', ['status', '--porcelain', '--', 'supabase/migrations'])
+  if (dirty.stdout.trim() !== '') {
+    console.error('FATAL: supabase/migrations is dirty before any proof has run:\n' + dirty.stdout
+      + 'That is residue from an interrupted run, not a baseline. Restore it '
+      + '(`git checkout -- supabase/migrations`) before trusting anything below.')
+    process.exit(1)
+  }
+}
+
+// ---------------------------------------------------------------------
 // The panel names are read from the LIVE catalogue, so the violations
 // planted below are built from what the schema actually says. Hard-coding
 // them here would reproduce, inside the PROOF, the very defect the proof
@@ -355,6 +380,23 @@ proveFileControl({
 // ---------------------------------------------------------------------
 // 4. T-CT-13 -- the APPLIED correction-tracking projection exposes a panel.
 //    Proven against the shipped catalogue assertion, not the migration text.
+//
+//    ⚠️ WHICH LEG THIS ACTUALLY EXERCISES, stated precisely after
+//    adversarial review found the original claim misattributed.
+//
+//    T-CT-13 has two legs: an EXACT-ARRAY pin on `proargnames`, and a
+//    panel-derived forbidden-field loop. The exact pin runs FIRST, and ANY
+//    change to the projection -- adding a panel column, substituting one,
+//    renaming one -- necessarily differs from the pinned thirteen and trips
+//    it. So the panel loop is UNREACHABLE for a panel violation, and this
+//    proof exercises the EXACT PIN, not the loop.
+//
+//    The control is still sound: the exact pin is STRICTLY STRONGER than a
+//    deny-list for this projection, because it admits nothing but the
+//    thirteen governed columns. The panel loop is retained as
+//    defence-in-depth for the day someone relaxes the pin -- but it is
+//    honestly subordinate, and the `expect` string below now names the leg
+//    that really fires instead of matching any `FAIL T-CT-13`.
 // ---------------------------------------------------------------------
 proveSqlControl({
   id: '4/9 T-CT-13',
@@ -372,7 +414,7 @@ CREATE FUNCTION public.report_list_management_corrections(
 RETURNS SETOF record LANGUAGE sql STABLE AS $probe$ SELECT NULL::uuid, NULL::uuid, NULL::text,
   NULL::uuid, NULL::date, NULL::public.report_status, NULL::uuid, NULL::text, NULL::text,
   NULL::text, NULL::timestamptz, NULL::boolean, NULL::timestamptz, NULL::text WHERE false $probe$;`,
-  expect: 'FAIL T-CT-13',
+  expect: 'expected exactly the thirteen bounded tracking columns',
 })
 
 // ---------------------------------------------------------------------
@@ -418,13 +460,13 @@ $plant$;`,
 // ---------------------------------------------------------------------
 const boundedCases = [
   ['6/9 M6->BOUNDED/a', 'report_list_management_corrections',
-    'declares 1 report-version narrative panel column',
+    '<FN> declares 1 report-version narrative panel column',
     `DROP FUNCTION IF EXISTS public.report_list_management_corrections();
      CREATE FUNCTION public.report_list_management_corrections(OUT report_id uuid, OUT ${PANEL} text)
      RETURNS SETOF record LANGUAGE sql STABLE AS $probe$ SELECT NULL::uuid, NULL::text WHERE false $probe$;`],
 
   ['7/9 X5->BOUNDED/b', 'report_resolve_context',
-    'applied body reads 1 narrative panel column',
+    "<FN>'s applied body reads 1 narrative panel column",
     `DROP FUNCTION IF EXISTS public.report_resolve_context(uuid);
      CREATE FUNCTION public.report_resolve_context(p_report_id uuid)
      RETURNS TABLE (class_session_id uuid, student_id uuid) LANGUAGE plpgsql STABLE AS $probe$
@@ -432,13 +474,13 @@ const boundedCases = [
        WHERE rv.${PANEL} IS NOT NULL AND false; END $probe$;`],
 
   ['8/9 S6->BOUNDED/a', 'report_list_management_submitted',
-    'declares 1 report-version narrative panel column',
+    '<FN> declares 1 report-version narrative panel column',
     `DROP FUNCTION IF EXISTS public.report_list_management_submitted();
      CREATE FUNCTION public.report_list_management_submitted(OUT report_id uuid, OUT ${PANEL} text)
      RETURNS SETOF record LANGUAGE sql STABLE AS $probe$ SELECT NULL::uuid, NULL::text WHERE false $probe$;`],
 
   ['9/9 S8->BOUNDED/c', 'report_list_management_submitted',
-    'applied body reads a version-content, assessment, attendance or audit object',
+    "<FN>'s applied body reads a version-content, assessment, attendance or audit object",
     // Two OUT parameters, not one: a single OUT parameter makes the result
     // type that parameter's type, and `RETURNS SETOF record` is then a
     // syntax error -- the probe would fail to compile and the raise would
@@ -454,20 +496,93 @@ const boundedCases = [
        WHERE rv.content_hash IS NOT NULL AND false; END $probe$;`],
 ]
 
-for (const [id, , expect, plant] of boundedCases) {
+// SUBJECT-QUALIFIED expectations. Cases 6 and 8 previously shared a
+// byte-identical expect string, so case 8 would have passed if case 6's
+// subject had raised instead. The shipped messages interpolate the function
+// name, so the expectations now require it too.
+for (const [id, fn, expect, plant] of boundedCases) {
   proveSqlControl({
     id,
     file: 'scripts/tests/step-7i/lifecycle-canonical.sql',
     marker: 'T7I-OD4-BOUNDED',
     plant,
+    expect: expect.replace('<FN>', fn),
+  })
+}
+
+// =====================================================================
+// BYPASS REGRESSION CASES -- permanent, added after adversarial review
+// DISPROVED T7I-18's claim to be "strictly stronger" than the scan it
+// replaced.
+//
+// Four shapes got through the first rewrite. Three defeated the SET-clause
+// extraction (multi-column assignment; a subquery's WHERE truncating the
+// clause; a WHERE inside a string literal doing the same), and the fourth
+// satisfied the write-once GUARD from the WHERE clause because the guard
+// was tested against the whole statement. Shapes 1 and 4 together were a
+// COMPLETE bypass of the control protecting committed report content.
+//
+// Every one is now a standing case. A future "simplification" of that
+// extraction has to defeat all four to ship green.
+// =====================================================================
+const bypassCases = [
+  ['bypass:multi-column-assignment',
+    `SET (${PANELS[0]}, ${PANELS[3]}) = (v_now, v_now), submitted_at = v_now,`,
+    `UPDATEs report_versions.${PANELS[0]} after INSERT (multi-column assignment)`],
+
+  ['bypass:subquery-WHERE-truncation',
+    `SET updated_at = (SELECT pg_catalog.max(x.updated_at) FROM public.report_versions x WHERE x.id = rv.id), ${PANELS[0]} = 'T', submitted_at = v_now,`,
+    `UPDATEs report_versions.${PANELS[0]} after INSERT`],
+
+  ['bypass:WHERE-inside-string-literal',
+    `SET ${PANELS[3]} = 'see the WHERE clause', ${PANELS[0]} = 'T', submitted_at = v_now,`,
+    `UPDATEs report_versions.${PANELS[0]} after INSERT`],
+
+  ['bypass:guard-satisfied-from-WHERE-only',
+    `SET ${PANELS[0]} = 'T', updated_at = v_now,`,
+    'is not the write-once submission write'],
+]
+
+for (const [id, replacement, expect] of bypassCases) {
+  proveFileControl({
+    id,
+    file: 'supabase/migrations/20260809120000_od4_report_contract.sql',
+    find: 'SET submitted_at = v_now,',
+    replace: replacement,
+    runner: 'scripts/tests/step-7i/static-scan.mjs',
     expect,
   })
+}
+
+// T7I-76's DETECTION REGEXES, which nothing exercised: the control's
+// forward-only scope is empty today (M15 is the newest migration), so it
+// asserts nothing at all until a later migration exists. Each form is
+// planted as a disposable later migration here.
+const defaultRestoreCases = [
+  ['t7i76:SET-DEFAULT', 'ALTER TABLE public.report_versions ALTER COLUMN content_hash_version SET DEFAULT 2;\n'],
+  ['t7i76:ADD-COLUMN-DEFAULT', 'ALTER TABLE public.report_versions ADD COLUMN content_hash_version smallint NOT NULL DEFAULT 1;\n'],
+  ['t7i76:QUOTED-IDENTIFIER', 'ALTER TABLE public.report_versions ALTER COLUMN "content_hash_version" SET DEFAULT 1;\n'],
+  ['t7i76:NO-COLUMN-KEYWORD', 'ALTER TABLE public.report_versions ALTER content_hash_version SET DEFAULT 1;\n'],
+]
+for (const [id, body] of defaultRestoreCases) {
+  const decoy = join(MIG_DIR, '20260899000000_DISPOSABLE_default_restore_probe.sql')
+  try {
+    writeFileSync(decoy, body)
+    const r = sh('node', ['scripts/tests/step-7i/static-scan.mjs'])
+    const out = `${r.stdout}\n${r.stderr}`
+    if (r.status === 0) bad(id, 'T7I-76 did NOT fire on a later migration restoring the DEFAULT')
+    else if (!out.includes('sets a DEFAULT on report_versions.content_hash_version')) {
+      bad(id, 'the scan failed, but not via T7I-76')
+    } else ok(id, 'T7I-76 detects this DEFAULT-restoring form in a later migration')
+  } finally {
+    try { unlinkSync(decoy) } catch { /* already gone */ }
+  }
 }
 
 // =====================================================================
 console.log('')
 const fired = results.filter((r) => r[1] === 'FIRED').length
-console.log(`Controls demonstrated capable of firing: ${fired} / 9`)
+console.log(`Controls demonstrated capable of firing: ${Math.min(fired, 9)} / 9 (plus ${bypassCases.length} bypass-regression and ${defaultRestoreCases.length} T7I-76 detection cases)`)
 if (failures > 0) {
   console.error(`\nP1-T04 firing proofs: ${failures} failure(s). `
     + 'A control that passes both a valid and a deliberately-invalid input is a FAIL.')

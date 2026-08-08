@@ -119,9 +119,11 @@ async function main() {
   // project in exactly the state it was already in: green, and blind.
   //
   // This proof mutates files and plants function bodies. It restores both
-  // and VERIFIES the restoration (git for files, a prosrc digest for the
-  // database), so a run that leaves residue fails rather than poisoning the
-  // suites below it. It therefore runs BEFORE the canonical lifecycle suite,
+  // and VERIFIES the restoration -- an in-memory byte snapshot for files
+  // (deliberately NOT git, which answers "does this match HEAD" and would
+  // misreport on files carrying uncommitted work), and a prosrc digest for
+  // the database -- so a run that leaves residue fails rather than
+  // poisoning the suites below it. It therefore runs BEFORE the canonical lifecycle suite,
   // so any residue it did leave would be caught immediately by that suite
   // rather than at some later checkpoint.
   const failOpen = await run(process.execPath,

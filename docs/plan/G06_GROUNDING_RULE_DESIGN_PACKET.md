@@ -160,7 +160,8 @@ change; **no unratified Remarks polarity decision has been encoded.**
 | # | Rule | Overview | Strengths | Areas for Dev | Remarks |
 |---|---|---|---|---|---|
 | 1 | exactly nine ratings | — assessment-level — |||
-| **1b** | **NEW: every rating must resolve to a ratified polarity band, else REJECT** | — assessment-level — |||
+| **1b** | **NEW: the ratings must COVER all nine governed dimension codes, each resolving to a ratified polarity band — else REJECT** | — assessment-level — |||
+| **3b** | *(option)* **NEW: extend `ACHIEVEMENT_TERMS` with bare `strong`** — see §6.2 | ✅ | ✅ | ✅ | ✅ |
 | 2 | no rating attribution / taxonomy disclosure | ✅ | ✅ | ✅ | ✅ |
 | 3 | no achievement claim about a non-positive dimension | ✅ | ✅ | ✅ | ✅ |
 | **4** | **needs_support may not be presented as a demonstrated strength** | ❌ | ✅ | ❌ | **R-A ❌ / R-B ✅ — OPERATOR'S CHOICE** |
@@ -216,6 +217,21 @@ guard. Rule 3 is the stronger of the two and is unaffected by this escape.
 
 ---
 
+### 5.1 A second demonstration — the escape word INSIDE the contradicting sentence
+
+Case **C4** appends the escape word in a *separate* sentence. Adversarial
+review supplied the shape a model writing natural Strengths prose will
+actually emit, where it sits in the *same* sentence:
+
+> "Eye contact was a highlight of the session, and the student will keep
+> developing it."
+
+**Current behaviour: ACCEPT** (case **C8**). Sentence-scoping alone (§5 fix 1)
+does **not** repair this one — fix 2, narrowing the lexicon so `develop` is
+not itself an escape, is what closes it. Both fixes are required together.
+
+---
+
 ## 6. RULE-3 FAIL-OPEN — measured, and it is the A-053 shape again
 
 ```js
@@ -247,6 +263,46 @@ at test time. It is not a runtime guarantee.
 **Rating validation is not weakened anywhere by this proposal** — it is
 strengthened, and only in the fail-closed direction.
 
+### 6.1 A SECOND ROUTE to the same skip, found by adversarial review
+
+`bandOf` is a `Map` keyed by `dimensionCode`. Nine ratings in which one code
+is **duplicated** leave another code **absent**, so `bandOf.get(code)` returns
+`undefined` and rules 3 and 4 skip that dimension — with **no invalid enum
+value anywhere**. Rule 1's count of nine is satisfied.
+
+**MEASURED (case C6).** With `eye_contact` duplicated away, the exact
+contradiction that C1 rejects becomes **ACCEPTED**.
+
+This is reachable from any upstream read that does not enforce distinct-code
+coverage, so it does not depend on a corrupted enum. **Rule 1b must therefore
+assert COVERAGE of all nine governed dimension codes, not a count** — the
+version in §4 is worded that way.
+
+### 6.2 A THIRD gap — Overview can praise a `needs_support` dimension
+
+Rule 4 reads only `strengths`. Rule 3 fires only on `ACHIEVEMENT_TERMS`, which
+contains `very strong`, `particularly strong` and `strong command` but **not
+bare `strong`**.
+
+**MEASURED (case C7).**
+
+> Overview: *"The student showed strong, confident eye contact throughout the
+> session and held the audience well."* — with `eye_contact` = `beginning`.
+
+**Current behaviour: ACCEPT.**
+
+This matters *more* after OD-4, not less: `SYSTEM_PROMPT` now explicitly tells
+the model that Overview "MAY draw together demonstrated strengths", so the
+model is being steered toward exactly this sentence. Note this is **not** an
+argument for applying rule 4 to Overview — §3.2's reasoning stands, and doing
+so would false-reject C2a. It is an argument that **rule 3's lexicon is too
+narrow**, which is a different and safer fix (option **3b** in §4).
+
+**Recommendation:** add bare `strong` to `ACHIEVEMENT_TERMS`. It is an
+achievement claim in every panel, and rule 3 is already sentence-scoped and
+dimension-attributed, so the false-positive risk is bounded — but it does
+change rejection behaviour and therefore needs ratification.
+
 ---
 
 ## 7. Proof cases — required by the gate
@@ -261,11 +317,19 @@ strengthened, and only in the fail-closed direction.
 | **C3b** | needs_support named positively in **Remarks** | *R-A accept / R-B reject* | **ACCEPT** | ⚠️ **undecided — Operator's call** |
 | **C4** | C1 plus one incidental escape word elsewhere in the panel | REJECT | **ACCEPT** | 🔴 **defect — §5** |
 | **C5** | Unmapped rating label, blatant contradiction | REJECT | **ACCEPT** | 🔴 **defect — §6** |
+| **C6** | **Duplicated** dimension code (no invalid enum needed), same contradiction | REJECT | **ACCEPT** | 🔴 **defect — §6.1** |
+| **C7** | `needs_support` praised in **Overview** using bare *"strong"* | REJECT | **ACCEPT** | 🔴 **defect — §6.2** |
+| **C8** | Escape word **inside** the contradicting sentence | REJECT | **ACCEPT** | 🔴 **defect — §5.1** |
 
 **The mandated contradiction proof and the mandated legitimate-context proof
 both hold against the current implementation** (C1/C1b reject, C2a/C2b accept).
-The two open defects are C4 and C5, and neither is repaired here because both
-change rejection behaviour.
+The five open defects are C4, C5, C6, C7 and C8, and none is repaired here
+because every one of them changes rejection behaviour.
+
+**C6, C7 and C8 were found by the two independent adversarial reviewers, not
+by the original design pass** — recorded because it bears on how much
+confidence this packet's coverage deserves. The rule-4 retarget itself
+survived both reviews; the surrounding pipeline did not.
 
 ---
 
@@ -278,6 +342,26 @@ a second rejection reason for a dimension the sentence is not about. The
 verdict was still correct, so this is a **precision** defect, not a
 fail-open: it can produce a spurious *reason*, and in principle a spurious
 *rejection*. Whether to narrow that term is a G-06 sub-item.
+
+---
+
+## 8.1 Also found by review, recorded and NOT fixed here
+
+- **The fixture provider can fabricate a strength.** With every dimension at
+  `beginning`, `DeterministicFixtureDraftProvider` falls back to the literal
+  `"participation"` for `strongest` and emits *"showed steady, confident work
+  in participation"* into **both** `strengths` and `overview`. Grounding
+  returns `ok: true` — solely because `"participation"` is not in
+  `DIMENSION_TERMS`, i.e. it passes by being ungrounded rather than by being
+  correct. Under OD-4's definition of Strengths this is an unsupported claim.
+  It is a **fixture** provider, never reachable in the participant walkthrough
+  (gate G-19), so it is recorded rather than patched — but the fallback should
+  be re-derived when the rule set is ratified.
+- **One of the four re-authored fixture sentences is a verbatim carry.** The
+  `strengths` sentence is byte-identical to the old `todaysStrength`.
+  Defensible — it is the one panel whose role genuinely did carry over — but
+  the claim that all four were re-authored is imprecise, and it is corrected
+  here rather than left standing.
 
 ---
 
@@ -299,16 +383,22 @@ fail-open: it can produce a spurious *reason*, and in principle a spurious
 
 1. Ratify **rule 4 scoped to `strengths` only** (already in force as the
    minimum continuation).
-2. Ratify **rule 1b** — fail closed on an unmapped rating (§6). This is the
-   highest-value change in the packet: it is a real, measured fail-open of the
-   exact class that has already bitten this project once.
-3. Ratify the **sentence-scoped, narrowed support-framing escape** (§5), which
-   is what makes rule 4 non-vacuous.
-4. Choose **R-A / R-B / R-C for Remarks** (§3.4). Recommended: **R-A**.
-5. Decide the two sub-questions: `developing` in Strengths (§3.1 — recommended
+2. Ratify **rule 1b** — fail closed unless the ratings **cover all nine
+   governed dimension codes**, each resolving to a ratified polarity band
+   (§6, §6.1). This is the highest-value change in the packet: two independent
+   measured routes into the exact fail-open class that has already bitten this
+   project once, one of which needs no invalid enum value at all.
+3. Ratify the **sentence-scoped AND lexicon-narrowed support-framing escape**
+   (§5, §5.1). Both halves are required — sentence-scoping alone still accepts
+   C8.
+4. Ratify **option 3b** — add bare `strong` to `ACHIEVEMENT_TERMS` (§6.2) —
+   which closes Overview's gap **without** applying the Strengths rule to
+   Overview and therefore without false-rejecting C2a.
+5. Choose **R-A / R-B / R-C for Remarks** (§3.4). Recommended: **R-A**.
+6. Decide the two sub-questions: `developing` in Strengths (§3.1 — recommended
    NO) and the inverse rule 4b for Areas for Development (§3.3 — recommended
    yes, as a separate rule).
-6. Decide the `audience` term precision item (§8).
+7. Decide the `audience` term precision item (§8).
 
 Once ratified, P1-T09 implements the ruling and re-runs this probe as an
 acceptance test rather than as evidence.

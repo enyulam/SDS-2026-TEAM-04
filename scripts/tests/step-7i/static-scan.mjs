@@ -16,8 +16,8 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { discoverSerializers, assertAnchors, guardedFunctions, findForbiddenGrants,
   findMissingRevokes, EXPECTED_SERIALIZERS } from './od4-grant-guard.mjs'
-import { derivePanelColumns, deriveImmutableVersionColumns,
-  SUPERSEDED_PANEL_COLUMNS } from './od4-panel-guard.mjs'
+import { derivePanelColumns, deriveImmutableVersionColumns, deriveReportVersionColumns,
+  POST_INSERT_WRITABLE_COLUMNS, SUPERSEDED_PANEL_COLUMNS } from './od4-panel-guard.mjs'
 
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
@@ -141,11 +141,11 @@ const body2 = stripComments(file2)
 //           report_versions.content_hash_version
 // ---------------------------------------------------------------------
 // THE AUTHORING-TIME HALF of the default-removal control. Its runtime
-// sibling is T7I-75 in lifecycle-canonical.sql.
+// sibling is T7I-77 in lifecycle-canonical.sql.
 //
 // Why both are needed, and why neither alone is sufficient:
 //
-//   * T7I-75 reads the LIVE catalogue, so it catches a restored default
+//   * T7I-77 reads the LIVE catalogue, so it catches a restored default
 //     only AFTER someone has applied the migration that restored it.
 //   * This scan reads the migration TEXT, including the file currently
 //     being authored, so it refuses the change BEFORE it is applied --
@@ -165,7 +165,7 @@ const body2 = stripComments(file2)
 //
 // HONEST LIMIT: this is a text scan, not a SQL parser. It cannot see a
 // default set through dynamic SQL (`EXECUTE format(...)`), so it is a
-// NECESSARY, not sufficient, control -- T7I-75 remains the authority on
+// NECESSARY, not sufficient, control -- T7I-77 remains the authority on
 // the live catalogue, and it reads pg_attrdef, which no authoring trick
 // can hide from.
 {
@@ -185,8 +185,12 @@ const body2 = stripComments(file2)
     // The `SET DEFAULT` form and the `ALTER COLUMN ... DEFAULT` spelling,
     // matched against comment-stripped text so a prose mention of the
     // ruling is not a false positive.
-    const re = /ALTER\s+COLUMN\s+content_hash_version\b[\s\S]{0,120}?\bSET\s+DEFAULT\b/i
-    const reAdd = /\bADD\s+COLUMN\b[\s\S]{0,200}?\bcontent_hash_version\b[\s\S]{0,120}?\bDEFAULT\b/i
+    // The identifier may be quoted (`"content_hash_version"`), and the
+    // COLUMN keyword is optional in both forms -- review found the first
+    // draft evadable by either. Both are now accepted.
+    const COL = String.raw`"?content_hash_version"?`
+    const re = new RegExp(String.raw`ALTER\s+(?:COLUMN\s+)?${COL}\b[\s\S]{0,120}?\bSET\s+DEFAULT\b`, 'i')
+    const reAdd = new RegExp(String.raw`\bADD\s+(?:COLUMN\s+)?(?:IF\s+NOT\s+EXISTS\s+)?${COL}\b[\s\S]{0,160}?\bDEFAULT\b`, 'i')
 
     for (const f of later) {
       const body = stripComments(readFileSync(join(MIG_DIR, f), 'utf8'))
@@ -201,7 +205,7 @@ const body2 = stripComments(file2)
 
     if (failures === before) {
       pass('T7I-76', `${later.length} migration file(s) sort after ${M15}; none restores a DEFAULT on `
-        + 'report_versions.content_hash_version (the runtime authority is T7I-75)')
+        + 'report_versions.content_hash_version (the runtime authority is T7I-77)')
     }
   }
 }
@@ -380,18 +384,33 @@ const fnBodies = new Map()
   //
   // The set is now derived by SUBTRACTION from the corpus: every current
   // report_versions column EXCEPT T11's write-once submission metadata and
-  // updated_at. That is strictly stronger than the eleven names it replaces
-  // -- it covers content_hash_version and trainer_approved_source_version_id
-  // for the same reason it covers a column added tomorrow -- and it survives
-  // the NEXT rename without an edit.
+  // updated_at. That covers content_hash_version and
+  // trainer_approved_source_version_id for the same reason it covers a
+  // column added tomorrow, and it survives the NEXT rename without an edit.
   const forbiddenCols = deriveImmutableVersionColumns(MIG_DIR)
 
-  // ANCHOR (Q-26). A derivation that silently matched nothing would make
-  // this leg scan for zero columns and report PASS.
-  if (forbiddenCols.length < 12) {
-    fail('T7I-18', `the immutable-column derivation produced only ${forbiddenCols.length} column(s) `
-      + `(${forbiddenCols.join(', ') || 'none'}) -- report_versions has far more than that, so the `
-      + 'derivation is broken and this leg would pass vacuously')
+  // ANCHOR (Q-26) -- an EQUALITY, not a magnitude floor.
+  //
+  // 🔴 This was `length < 12` against an actual 15, which left THREE columns
+  // of silent slack: a derivation bug that lost up to three columns satisfied
+  // the anchor and silently stopped scanning them. Adversarial review flagged
+  // it, and it is the same "the check is satisfied but detects less" shape
+  // this whole task exists to remove.
+  const allCols = deriveReportVersionColumns(MIG_DIR)
+  const expectedForbidden = allCols.length - POST_INSERT_WRITABLE_COLUMNS.length
+  if (allCols.length === 0 || forbiddenCols.length !== expectedForbidden) {
+    fail('T7I-18', `the immutable-column derivation produced ${forbiddenCols.length} column(s) from a `
+      + `${allCols.length}-column table, expected exactly ${expectedForbidden} -- the derivation is `
+      + 'broken and this leg would scan an incomplete set')
+  }
+  // The columns whose immutability is the POINT of this leg must be present
+  // by name. A derivation that silently dropped them would still satisfy a
+  // count check if it also invented others.
+  for (const required of [...derivePanelColumns(MIG_DIR), 'content_hash', 'content_hash_version',
+                          'revision_number', 'derived_from_version_id']) {
+    if (!forbiddenCols.includes(required)) {
+      fail('T7I-18', `the derivation lost the immutable column "${required}" -- it would not be scanned`)
+    }
   }
   for (const old of SUPERSEDED_PANEL_COLUMNS) {
     if (forbiddenCols.includes(old)) {
@@ -400,33 +419,80 @@ const fnBodies = new Map()
     }
   }
 
+  // 🔴 REWRITTEN after adversarial review DISPROVED the previous version's
+  // claim to be "strictly stronger".
+  //
+  // The previous version took the SET clause as `/\bSET\b(.*?)(?:\bWHERE\b|$)/`
+  // and then tested `\bcol\s*=` against it, while testing the write-once
+  // GUARD against the whole statement. Four demonstrated bypasses:
+  //
+  //   1. `SET (overview, remarks) = (v_a, v_b)` -- the multi-column
+  //      assignment form assigns no `col =` token, so NOTHING matched.
+  //   2. `SET updated_at = (SELECT ... WHERE ...), overview = 'T'` -- a
+  //      subquery's WHERE truncated the SET clause before `overview`.
+  //   3. `SET remarks = 'see the WHERE clause', overview = 'T'` -- a WHERE
+  //      inside a STRING LITERAL truncated it the same way.
+  //   4. `SET overview='T' WHERE rv.submitted_at = v_now AND
+  //      rv.submitted_at IS NULL` -- the guard was tested against the whole
+  //      statement, so a WHERE-clause mention satisfied both of its legs.
+  //
+  // Combined, (1)+(4) was a COMPLETE bypass of T7I-18 on the one table whose
+  // committed content must never be mutated.
+  //
+  // The rewrite: blank string literals first, split at the TOP-LEVEL WHERE
+  // (paren depth 0), match BOTH assignment forms, and evaluate the guard's
+  // two legs against the clause each actually belongs to.
+  const blankLiterals = (s) => s.replace(/'(?:[^']|'')*'/g, (m) => "'" + ' '.repeat(Math.max(0, m.length - 2)) + "'")
+
+  const splitAtTopLevelWhere = (s) => {
+    let depth = 0
+    for (let i = 0; i < s.length; i += 1) {
+      const c = s[i]
+      if (c === '(') depth += 1
+      else if (c === ')') depth -= 1
+      else if (depth === 0 && /\s/.test(c) && /^where\b/i.test(s.slice(i + 1))) {
+        return [s.slice(0, i), s.slice(i + 1)]
+      }
+    }
+    return [s, '']
+  }
+
   for (const [name, raw] of fnBodies) {
     const fn = stripComments(raw)
     const updates = [...fn.matchAll(/UPDATE\s+public\.report_versions[\s\S]*?(?=;)/gi)].map((m) => m[0])
     for (const u of updates) {
-      // Scan the SET CLAUSE ONLY. Scanning the whole statement conflates an
-      // assignment with a WHERE predicate: the governed submission write
-      // legitimately reads `WHERE rv.id = v_cand.id`, which a whole-statement
-      // `\bid\s*=` match reports as "UPDATEs report_versions.id".
-      //
-      // The old eleven-name literal list masked this -- it happened to omit
-      // every column that appears in a predicate. Deriving the set properly
-      // exposed the imprecision, so the matcher is now correct rather than
-      // accidentally quiet. It is also STRICTER: a forbidden column assigned
-      // in the SET clause is caught even when the same name appears in the
-      // WHERE clause too.
-      const setClause = (/\bSET\b([\s\S]*?)(?:\bWHERE\b|$)/i.exec(u) || [, ''])[1]
+      const safe = blankLiterals(u)
+      const setIdx = safe.search(/\bSET\b/i)
+      if (setIdx < 0) {
+        fail('T7I-18', `${name} has an UPDATE on report_versions with no SET clause this scan can read`)
+        continue
+      }
+      const [setClause, whereClause] = splitAtTopLevelWhere(safe.slice(setIdx + 3))
+
+      // (a) single-column assignments: `col = ...`
       for (const col of forbiddenCols) {
         if (new RegExp(`\\b${col}\\s*=`).test(setClause)) {
           fail('T7I-18', `${name} UPDATEs report_versions.${col} after INSERT`)
         }
       }
+      // (b) MULTI-COLUMN assignment: `(a, b) = (x, y)`. Every identifier
+      //     inside a parenthesised group that is followed by `=` is assigned.
+      for (const m of setClause.matchAll(/\(([^()]*)\)\s*=/g)) {
+        for (const ident of m[1].split(',').map((x) => x.trim().replace(/^"|"$/g, '').toLowerCase())) {
+          if (forbiddenCols.includes(ident)) {
+            fail('T7I-18', `${name} UPDATEs report_versions.${ident} after INSERT (multi-column assignment)`)
+          }
+        }
+      }
+
       // The sole permitted post-approval write is T11's one-time submission
-      // metadata, guarded on all three fields being NULL.
-      if (!/submitted_at\s*=/.test(u)) {
+      // metadata. The ASSIGNMENT must be in the SET clause and the write-once
+      // GUARD must be in the WHERE clause -- testing either against the whole
+      // statement is what bypass (4) exploited.
+      if (!/\bsubmitted_at\s*=/i.test(setClause)) {
         fail('T7I-18', `${name} performs an UPDATE on report_versions that is not the write-once submission write`)
-      } else if (!/submitted_at IS NULL/.test(u)) {
-        fail('T7I-18', `${name}'s submission write is not guarded on submitted_at IS NULL`)
+      } else if (!/\bsubmitted_at\s+IS\s+NULL\b/i.test(whereClause)) {
+        fail('T7I-18', `${name}'s submission write is not guarded on submitted_at IS NULL in its WHERE clause`)
       }
     }
   }
@@ -613,7 +679,18 @@ const fnBodies = new Map()
     // corpus; the non-panel half is the resolver's OWN bounded contract
     // (hashes, revision, lock, centre) and is genuinely fixed vocabulary
     // rather than a copy of the panel list.
-    for (const forbiddenCol of [...derivePanelColumns(MIG_DIR), 'content_hash', 'wording_hash',
+    // ANCHOR (Q-26), added after review: this leg consumed derivePanelColumns
+    // with NO anchor of its own. If the derivation returned [], the loop
+    // still iterated the five hard-coded non-panel names and the leg
+    // reported PASS -- and the proof that claimed to cover this actually
+    // exercised T7I-18's anchor, never this one.
+    const r22Panels = derivePanelColumns(MIG_DIR)
+    if (r22Panels.length !== 4) {
+      fail('T7I-R22', `the panel derivation produced ${r22Panels.length} column(s) `
+        + `(${r22Panels.join(', ') || 'none'}), expected the four OD-4 panels -- this leg would `
+        + 'scan for the wrong names')
+    }
+    for (const forbiddenCol of [...r22Panels, 'content_hash', 'wording_hash',
                                 'revision_number', 'lock_version', 'centre_id']) {
       const body = src.slice(src.indexOf('CREATE FUNCTION public.report_resolve_context'))
       const header = body.slice(0, body.indexOf('AS $fn$'))

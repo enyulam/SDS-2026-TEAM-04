@@ -920,8 +920,23 @@ BEGIN
 END $t$;
 ROLLBACK;
 
--- T7I-75  content_hash_version is EXPLICIT, never defaulted (Operator
+-- T7I-77  content_hash_version is EXPLICIT, never defaulted (Operator
 --         ruling, 2026-08-09; implemented by M15).
+--
+-- ⚠️ THIS CONTROL WAS AUTHORED AS `T7I-75` AND RENUMBERED TO `T7I-77`.
+-- Adversarial review found the collision: `T7I-75` was already taken by
+-- RPC-8's prior-approval gate (further down this file), so two different
+-- tests were emitting `PASS T7I-75` in one run and the documented
+-- "each ID appears exactly once" invariant was false.
+--
+-- M15's `COMMENT ON COLUMN report_versions.content_hash_version` still
+-- cites this control as **T7I-75**, because M15 is COMMITTED AND APPLIED
+-- and an applied migration is never edited (plan section 11 R-1). That
+-- citation is a correct point-in-time record of the ID at authoring time.
+-- It is recorded here rather than "fixed" there: issuing a whole forward
+-- migration to correct a comment would move the migration count and every
+-- pin that follows it, for no behavioural gain. If you arrived here from
+-- M15's comment looking for T7I-75, this is the control it means.
 --
 -- THIS IS THE DURABLE NEGATIVE CONTROL FOR THE DEFAULT REMOVAL. M15's own
 -- end-of-migration assertion is a POINT-IN-TIME proof: it runs once, at
@@ -961,7 +976,7 @@ BEGIN
      WHERE d.adrelid = 'public.report_versions'::regclass
        AND a.attname = 'content_hash_version';
     RAISE EXCEPTION
-      'FAIL T7I-75: report_versions.content_hash_version carries a DEFAULT of %. '
+      'FAIL T7I-77: report_versions.content_hash_version carries a DEFAULT of %. '
       'The Operator ruled it must have NONE (2026-08-09): both 1 and 2 are valid '
       'provenance and the database must never guess which serializer ran. '
       'Restoring a DEFAULT -- 1 OR 2 -- requires a new explicit Operator ruling.', v_def;
@@ -977,7 +992,7 @@ BEGIN
      AND a.atttypid = 'smallint'::regtype;
   IF v_n <> 1 THEN
     RAISE EXCEPTION
-      'FAIL T7I-75: content_hash_version is missing, dropped, retyped or NULLABLE -- '
+      'FAIL T7I-77: content_hash_version is missing, dropped, retyped or NULLABLE -- '
       'leg (a) would pass vacuously';
   END IF;
 
@@ -986,7 +1001,7 @@ BEGIN
        WHERE conrelid = 'public.report_versions'::regclass
          AND conname = 'report_versions_content_hash_version_chk')
      IS DISTINCT FROM 'CHECK ((content_hash_version = ANY (ARRAY[1, 2])))' THEN
-    RAISE EXCEPTION 'FAIL T7I-75: the governed 1-or-2 envelope constraint is gone or widened';
+    RAISE EXCEPTION 'FAIL T7I-77: the governed 1-or-2 envelope constraint is gone or widened';
   END IF;
 
   -- (d) THE BEHAVIOURAL LEG. An INSERT omitting content_hash_version fails
@@ -999,11 +1014,11 @@ BEGIN
             'b0000000-0000-4000-8000-000000000001', 1, repeat('a',64)) $q$);
   IF v_err <> '23502' THEN
     RAISE EXCEPTION
-      'FAIL T7I-75: omitting content_hash_version gave %, expected 23502 not_null_violation. '
+      'FAIL T7I-77: omitting content_hash_version gave %, expected 23502 not_null_violation. '
       'A write that does not state its provenance must be REJECTED, never silently labelled.', v_err;
   END IF;
 
-  RAISE NOTICE 'PASS T7I-75 (no DEFAULT; NOT NULL smallint present; envelope pinned to 1-or-2; an omitted write is rejected 23502)';
+  RAISE NOTICE 'PASS T7I-77 (no DEFAULT; NOT NULL smallint present; envelope pinned to 1-or-2; an omitted write is rejected 23502)';
 END $t$;
 ROLLBACK;
 

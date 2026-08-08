@@ -166,10 +166,17 @@ const PANEL_PRESENTATION: Readonly<
     { readonly icon: IconName; readonly tone: "brand" | "info" | "success" | "warning" }
   >
 > = {
-  overview: { icon: "check", tone: "success" },
-  strengths: { icon: "chevronRight", tone: "warning" },
-  areasForDevelopment: { icon: "reports", tone: "info" },
-  remarks: { icon: "document", tone: "brand" },
+  // 🔴 RE-ASSIGNED AT THE P1-T08 REVIEW. These were carried over
+  // POSITIONALLY when the keys were renamed, shifting every treatment down
+  // one slot: Overview took the success tick and Strengths -- the panel that
+  // is by definition positive demonstrated capability -- rendered in the
+  // WARNING tone. Both independent reviewers flagged it. A positional
+  // carry-over is a relabelling shim in the presentation layer, which is
+  // exactly what OD-4 prohibits. Assigned below from what each panel MEANS.
+  overview: { icon: "document", tone: "info" },
+  strengths: { icon: "check", tone: "success" },
+  areasForDevelopment: { icon: "chevronRight", tone: "warning" },
+  remarks: { icon: "reports", tone: "brand" },
 };
 
 /**

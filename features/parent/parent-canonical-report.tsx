@@ -73,10 +73,27 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
 const PANEL_PRESENTATION: Readonly<
   Record<keyof ReportPanelsDto, { readonly tone: "brand" | "info" | "success" | "warning"; readonly icon: PanelIconName }>
 > = {
-  overview: { tone: "warning", icon: "star" },
-  strengths: { tone: "success", icon: "arrowUp" },
-  areasForDevelopment: { tone: "brand", icon: "target" },
-  remarks: { tone: "info", icon: "heart" },
+  // 🔴 RE-ASSIGNED AT THE P1-T08 REVIEW. These four entries were carried
+  // over POSITIONALLY when the keys were renamed, which shifted every
+  // treatment down one slot and inverted the visual semantics on a
+  // PARENT-FACING surface: Overview rendered with the `star` in the
+  // `warning` tone, and Strengths — the panel that is by definition
+  // positive demonstrated capability — got a neutral arrow. Both
+  // independent reviewers flagged it.
+  //
+  // A positional carry-over is a relabelling shim in the presentation
+  // layer, which is exactly what OD-4 prohibits. The treatments below are
+  // assigned from what each panel MEANS:
+  // The icon vocabulary here is the screen-33 local union (star, arrowUp,
+  // target, heart) and is NOT widened for this fix -- adding an icon is a
+  // visual-authority change, not a governance one. Within those four:
+  // arrowUp = overall trajectory (Overview), star = demonstrated positive
+  // (Strengths), target = what to aim at next (Areas for Development),
+  // heart = warm closing commentary (Remarks).
+  overview: { tone: "info", icon: "arrowUp" },
+  strengths: { tone: "success", icon: "star" },
+  areasForDevelopment: { tone: "warning", icon: "target" },
+  remarks: { tone: "brand", icon: "heart" },
 };
 
 export function ParentCanonicalReport() {

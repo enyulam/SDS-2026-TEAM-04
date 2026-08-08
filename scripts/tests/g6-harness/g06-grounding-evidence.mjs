@@ -124,6 +124,62 @@ const CASES = [
       ratings: RATINGS.map((r) => (r.dimensionCode === "eye_contact" ? { ...r, rating: "not_a_real_label" } : r)),
     },
   },
+
+  // -----------------------------------------------------------------
+  // CASE 6 -- A SECOND ROUTE TO THE SAME FAIL-OPEN, found by adversarial
+  // review and NOT anticipated by C5.
+  //
+  // Rule 1 checks only that the ratings array has LENGTH nine. `bandOf` is
+  // a Map keyed by dimensionCode, so nine ratings in which one code is
+  // DUPLICATED leave another code absent -- `bandOf.get(code)` is
+  // undefined, and rules 3 and 4 both skip it. This needs no invalid enum
+  // value at all, so it is reachable from any upstream read that does not
+  // enforce distinct-code coverage.
+  //
+  // Proposed rule 1b must therefore assert COVERAGE of all nine governed
+  // dimension codes, not a count.
+  // -----------------------------------------------------------------
+  {
+    id: "C6 duplicated dimension code / second fail-open route",
+    want: "REJECT",
+    panels: { ...BASE, strengths: "Eye contact was the highlight of the session." },
+    input: {
+      studentDisplayName: "Fixture Student One",
+      ratings: RATINGS.map((r) => (r.dimensionCode === "eye_contact" ? { ...r, dimensionCode: "body" } : r)),
+    },
+  },
+
+  // -----------------------------------------------------------------
+  // CASE 7 -- OVERVIEW CAN PRESENT A needs_support DIMENSION AS A
+  // DEMONSTRATED STRENGTH.
+  //
+  // Rule 4 reads only `strengths`. Rule 3 fires only on ACHIEVEMENT_TERMS,
+  // which contains "very strong" / "particularly strong" / "strong
+  // command" but NOT bare "strong". So ordinary praise about a
+  // needs_support dimension passes in Overview.
+  //
+  // This matters more after OD-4, not less: SYSTEM_PROMPT now tells the
+  // model Overview "MAY draw together demonstrated strengths". The G-06
+  // design must decide whether Overview needs its own rule, or whether
+  // ACHIEVEMENT_TERMS should carry bare "strong".
+  // -----------------------------------------------------------------
+  {
+    id: "C7 needs_support praised in Overview / bare-'strong' gap",
+    want: "REJECT",
+    panels: { ...BASE, overview: "The student showed strong, confident eye contact throughout the session and held the audience well." },
+  },
+
+  // -----------------------------------------------------------------
+  // CASE 8 -- THE SUPPORT-FRAMING ESCAPE, second demonstration. C4 shows
+  // an escape word in a SEPARATE sentence; this shows it in the SAME
+  // sentence as the contradiction, which is the shape a model producing
+  // natural Strengths prose will actually emit.
+  // -----------------------------------------------------------------
+  {
+    id: "C8 escape word inside the contradicting sentence",
+    want: "REJECT",
+    panels: { ...BASE, strengths: "Eye contact was a highlight of the session, and the student will keep developing it." },
+  },
 ];
 
 console.log("G-06 GROUNDING EVIDENCE PROBE -- CURRENT SHIPPED BEHAVIOUR");

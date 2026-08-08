@@ -977,10 +977,22 @@ SELECT count(*) FROM public.report_version_ratings a
   const corrected = await saveTrainerEditCore(trainerDb, {
     reportId, expectedStatus: "needs_edit", expectedLockVersion: state.lock_version,
     expectedVersionId: state.current_version_id,
+    // 🔴 RE-TARGETED AT THE P1-T08 REVIEW. The corrected sentence used to be
+    // written into `strengths` -- it is the OLD `nextFocus` prose, carried
+    // over verbatim when the keys were renamed. That is a relabelling shim,
+    // and it put a needs_support dimension (`eye_contact` is `beginning` in
+    // this lifecycle) into the ONE panel OD-4 defines as positive
+    // demonstrated capability only. It then became the shipped acceptance
+    // evidence for INT-L9. It escaped detection only because a trainer edit
+    // does not re-run validateGrounding.
+    //
+    // The developmental sentence now goes to Areas for Development, which is
+    // where it belongs and where the panel is EXPECTED to name a dimension
+    // needing support; `strengths` is left as the trainer's own text.
     panels: {
       overview: state.overview,
-      strengths: "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.",
-      areasForDevelopment: state.areas_for_development,
+      strengths: state.strengths,
+      areasForDevelopment: "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.",
       remarks: state.remarks,
     },
   });
@@ -1078,7 +1090,7 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
     // Sorted, so this list is in OD-4 ALPHABETICAL order, not panel order.
     if (keys !== "areas_for_development,overview,remarks,strengths,submitted_at") {
       fail("INT-L9", `the canonical read carries unexpected fields: ${keys}`);
-    } else if (row.strengths !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
+    } else if (row.areas_for_development !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
       fail("INT-L9", "the canonical panels are not the submitted version's");
     } else pass("INT-L9", "the parent reads exactly the four submitted panels + submitted_at — nothing else exists in the shape");
   }

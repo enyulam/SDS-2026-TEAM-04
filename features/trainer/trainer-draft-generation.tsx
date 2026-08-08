@@ -79,13 +79,26 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  *     PER-SESSION AI draft-generation surface it actually is. "Parent copy" is additionally a
  *     false lifecycle claim on a Trainer working version — only management's Approve & Submit
  *     makes a version canonical and parent-visible (A-033).
- *  D2 Panel headings "Overview / Strengths / Areas to Grow / Remarks". The governed four
- *     parent-facing panels are Overview / Strengths / Areas for Development / Session
- *     Takeaway (spec §8; `REPORT_PANEL_CONFIG`). The frame's headings are NOT a rename of those
- *     four — "Overview" and "Remarks" have no governed counterpart, and inventing a mapping
- *     would silently redefine what each stored field means to a parent. The frame's four-section
- *     composition, iconography, bullet marker and per-panel edit affordance are reproduced; the
- *     governed labels are kept. Same treatment as F-09 D2.
+ *  D2 ✅ RESOLVED — NO LONGER A DEVIATION (OD-4, Operator ruling 2026-08-07; implemented at
+ *     P1-T07/T08). The governed four panels are Overview / Strengths / Areas for Development /
+ *     Remarks (`REPORT_PANEL_CONFIG`), and the frame agrees on all four but the third.
+ *
+ *     The struck reasoning was: the frame's headings are not a rename of the governed four,
+ *     "Overview" and "Remarks" have no governed counterpart, and inventing a mapping would
+ *     silently redefine what each stored field means to a parent — the same treatment as F-09
+ *     D2. Correct WHEN WRITTEN, preserved rather than deleted. The adjudication has since been
+ *     ISSUED AND WENT THE OTHER WAY: the Operator DEFINED four concepts rather than renaming
+ *     four fields, and superseded the old model outright.
+ *
+ *     ⚠️ This block was left half-migrated by a mechanical substitution and was caught by
+ *     adversarial review: it listed FIVE panel names ("… / Areas for Development / Session
+ *     Takeaway") because "Session Takeaway" survived the replace, and then still asserted that
+ *     Overview has no governed counterpart one line after naming it as one of the four. Rewritten
+ *     here rather than patched.
+ *
+ *     The frame's third heading "Areas to Grow" remains a live divergence: it is the MINORITY
+ *     variant and is expressly ruled NOT canonical (Authority Lock §15.1). The ratified label is
+ *     "Areas for Development". Here the frame loses and the rule wins.
  *  D3 "Class Video Evidence" with a drag-and-drop uploader ("MP4, MOV · up to 500MB each").
  *     Evidence scope AND the uploading role are UNRESOLVED (Amendment 002 A-014), the evidence
  *     schema is excluded from the Step 7E boundary, `PhysicalTestPort` exposes NO upload or
@@ -141,10 +154,17 @@ const PANEL_PRESENTATION: Readonly<
     { readonly icon: IconName; readonly tone: "brand" | "info" | "success" | "warning" }
   >
 > = {
-  overview: { icon: "check", tone: "success" },
-  strengths: { icon: "chevronRight", tone: "warning" },
-  areasForDevelopment: { icon: "reports", tone: "info" },
-  remarks: { icon: "document", tone: "brand" },
+  // 🔴 RE-ASSIGNED AT THE P1-T08 REVIEW. These were carried over
+  // POSITIONALLY when the keys were renamed, shifting every treatment down
+  // one slot: Overview took the success tick and Strengths -- the panel that
+  // is by definition positive demonstrated capability -- rendered in the
+  // WARNING tone. Both independent reviewers flagged it. A positional
+  // carry-over is a relabelling shim in the presentation layer, which is
+  // exactly what OD-4 prohibits. Assigned below from what each panel MEANS.
+  overview: { icon: "document", tone: "info" },
+  strengths: { icon: "check", tone: "success" },
+  areasForDevelopment: { icon: "chevronRight", tone: "warning" },
+  remarks: { icon: "reports", tone: "brand" },
 };
 
 /**
