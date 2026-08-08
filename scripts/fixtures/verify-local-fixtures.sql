@@ -425,7 +425,7 @@ BEGIN
   -- one STABLE read function and one authenticated EXECUTE grant, no table,
   -- enum, label, policy or row), moving it 11 -> 12.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 14 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 14 applied migrations, found %', v_n; END IF;
+  IF v_n <> 15 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 15 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
@@ -433,9 +433,9 @@ BEGIN
                      '20260805090000', '20260805090500', '20260806090000',
                      '20260806103000', '20260806160000', '20260806190000',
                      '20260806220000', '20260807090000', '20260807113000',
-                     '20260809120000', '20260809160000');
-  IF v_n <> 14 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000, 20260807090000, 20260807113000, 20260809120000 and 20260809160000';
+                     '20260809120000', '20260809160000', '20260809180000');
+  IF v_n <> 15 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000, 20260807090000, 20260807113000, 20260809120000, 20260809160000 and 20260809180000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six

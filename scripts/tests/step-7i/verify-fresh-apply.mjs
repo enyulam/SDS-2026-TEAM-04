@@ -200,7 +200,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
 
   // Apply all twelve migration files in order, exactly as a reset would.
   const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (files.length !== 14) fail(`${files.length} migration files found, expected 14`)
+  if (files.length !== 15) fail(`${files.length} migration files found, expected 15`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -240,7 +240,11 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   //  -- with one authenticated EXECUTE grant. No table, enum, label or
   //  policy moves, so the census goes 33 -> 34 functions, 11 -> 12
   //  migrations and 24 -> 25 authenticated EXECUTE.)
-  const expected = '26|36|12|29|14|25|0|'
+  // (Moved 14 -> 15 migrations at M15, the content_hash_version default
+  //  removal. M15 adds and drops no object, so tables, functions, enums,
+  //  policies and the EXECUTE census are all UNMOVED -- only the migration
+  //  count changes.)
+  const expected = '26|36|12|29|15|25|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
   // The narration is DERIVED from the pinned literal, never retyped. It

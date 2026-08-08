@@ -45,7 +45,7 @@ const body2 = stripComments(file2)
     fail('T7I-73', `${step7i.length} Step 7I migration files exist, expected exactly 2`)
   }
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql'))
-  if (all.length !== 14) fail('T7I-73', `${all.length} migration files exist, expected 14`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list + the P1-T03 OD-4 report contract + the P1-T03 OD-4 reopen envelope-version forward fix
+  if (all.length !== 15) fail('T7I-73', `${all.length} migration files exist, expected 15`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list + the P1-T03 OD-4 report contract + the P1-T03 OD-4 reopen envelope-version forward fix + the M15 content_hash_version default removal
 
   // File 1 contains ONLY the ALTER TYPE statement and the P-1 guard.
   const adds1 = body1.match(/ALTER TYPE[\s\S]*?ADD VALUE/gi) || []
@@ -131,6 +131,76 @@ const body2 = stripComments(file2)
       + `(${guarded.join(', ')}); no client GRANT, no blanket/default-privilege grant, no dynamic-SQL `
       + `grant, and all ${guarded.length} carry an explicit REVOKE after their most recent `
       + 'CREATE or DROP+CREATE')
+  }
+}
+
+// ---------------------------------------------------------------------
+// T7I-76 -- no migration AFTER M15 restores a DEFAULT on
+//           report_versions.content_hash_version
+// ---------------------------------------------------------------------
+// THE AUTHORING-TIME HALF of the default-removal control. Its runtime
+// sibling is T7I-75 in lifecycle-canonical.sql.
+//
+// Why both are needed, and why neither alone is sufficient:
+//
+//   * T7I-75 reads the LIVE catalogue, so it catches a restored default
+//     only AFTER someone has applied the migration that restored it.
+//   * This scan reads the migration TEXT, including the file currently
+//     being authored, so it refuses the change BEFORE it is applied --
+//     the same reason T7I-OD4-GRANT exists as a text scan alongside the
+//     runtime ACL assertions.
+//   * M15's own end-of-migration assertion is point-in-time and cannot
+//     see a LATER migration at all.
+//
+// SCOPE IS FORWARD-ONLY, BY DESIGN. Migrations at or before M15 are
+// EXEMPT, because 20260805090500_step_7i_report_lifecycle.sql legitimately
+// contains `ADD COLUMN content_hash_version smallint NOT NULL DEFAULT 1`
+// and M15 itself contains a deliberate `SET DEFAULT 1` inside its C8
+// firing probe (restored and rolled back inside a subtransaction to prove
+// the detector works). Those are correct history, not violations -- and
+// scanning them would make this control unpassable, which is how a
+// well-meant guard gets deleted.
+//
+// HONEST LIMIT: this is a text scan, not a SQL parser. It cannot see a
+// default set through dynamic SQL (`EXECUTE format(...)`), so it is a
+// NECESSARY, not sufficient, control -- T7I-75 remains the authority on
+// the live catalogue, and it reads pg_attrdef, which no authoring trick
+// can hide from.
+{
+  const before = failures
+  const M15 = '20260809180000_od4_content_hash_version_no_default.sql'
+  const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
+
+  // ANCHOR EXISTENCE. If M15 is renamed or deleted, every later file
+  // becomes un-scanned and this control would pass on an empty set --
+  // exactly the vacuous-PASS shape Q-26 prohibits.
+  if (!all.includes(M15)) {
+    fail('T7I-76', `the default-removal migration ${M15} is missing from the tree -- `
+      + 'this control cannot establish which files are in forward scope')
+  } else {
+    const later = all.slice(all.indexOf(M15) + 1)
+
+    // The `SET DEFAULT` form and the `ALTER COLUMN ... DEFAULT` spelling,
+    // matched against comment-stripped text so a prose mention of the
+    // ruling is not a false positive.
+    const re = /ALTER\s+COLUMN\s+content_hash_version\b[\s\S]{0,120}?\bSET\s+DEFAULT\b/i
+    const reAdd = /\bADD\s+COLUMN\b[\s\S]{0,200}?\bcontent_hash_version\b[\s\S]{0,120}?\bDEFAULT\b/i
+
+    for (const f of later) {
+      const body = stripComments(readFileSync(join(MIG_DIR, f), 'utf8'))
+      if (re.test(body) || reAdd.test(body)) {
+        fail('T7I-76', `${f} sets a DEFAULT on report_versions.content_hash_version. `
+          + 'The Operator ruled (2026-08-09) that this column MUST HAVE NO DEFAULT: both 1 and 2 '
+          + 'are valid provenance, so an implicit value is the database guessing which serializer '
+          + 'produced a stored digest. Restoring a default -- 1 OR 2 -- requires a NEW explicit '
+          + 'Operator ruling, not a migration.')
+      }
+    }
+
+    if (failures === before) {
+      pass('T7I-76', `${later.length} migration file(s) sort after ${M15}; none restores a DEFAULT on `
+        + 'report_versions.content_hash_version (the runtime authority is T7I-75)')
+    }
   }
 }
 

@@ -239,10 +239,10 @@ BEGIN
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 14 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 14', v_n; END IF;
+  IF v_n <> 15 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 15', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000','20260809120000','20260809160000');
-  IF v_n <> 14 THEN RAISE EXCEPTION 'FAIL T7I-73: the fourteen applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000','20260809120000','20260809160000','20260809180000');
+  IF v_n <> 15 THEN RAISE EXCEPTION 'FAIL T7I-73: the fifteen applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -783,6 +783,93 @@ BEGIN
 END $t$;
 ROLLBACK;
 
+-- T7I-75  content_hash_version is EXPLICIT, never defaulted (Operator
+--         ruling, 2026-08-09; implemented by M15).
+--
+-- THIS IS THE DURABLE NEGATIVE CONTROL FOR THE DEFAULT REMOVAL. M15's own
+-- end-of-migration assertion is a POINT-IN-TIME proof: it runs once, at
+-- M15's position in the ledger, so a LATER migration that re-adds a DEFAULT
+-- would never re-run it and would ship silently green. A recurring
+-- guarantee has to live in a CURRENT REUSABLE carrier, which is what this
+-- is -- the same reasoning that placed T7I-OD4-ENVELOPE here at P1-T03.
+--
+-- WHY NO DEFAULT IS THE GOVERNED POSTURE. content_hash_version is integrity
+-- metadata naming WHICH serializer produced the stored digest. Both 1 (the
+-- frozen V1 envelope) and 2 (the native OD-4 V2 envelope) are valid
+-- provenance, so an implicit answer is a guess about a fact -- and M14
+-- proved the cost of guessing it: a literal 1 travelled with a V2 digest
+-- and no constraint could see the lie. A DEFAULT 2 would be the same defect
+-- mirrored, silently relabelling a V1 write (G-05a item 7).
+--
+-- This control is deliberately built as OMISSION-IS-REJECTED rather than
+-- only "pg_attrdef is empty", because the catalogue leg alone cannot
+-- distinguish a governed no-default column from one that also lost NOT NULL
+-- -- which would be a WORSE outcome than the default, storing NULL
+-- provenance instead of failing the write.
+BEGIN;
+DO $t$
+DECLARE
+  v_n bigint; v_err text; v_def text;
+BEGIN
+  -- (a) No DEFAULT, proven from pg_attrdef.
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM pg_catalog.pg_attrdef d JOIN pg_catalog.pg_attribute a
+      ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+   WHERE d.adrelid = 'public.report_versions'::regclass
+     AND a.attname = 'content_hash_version';
+  IF v_n <> 0 THEN
+    SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid) INTO v_def
+      FROM pg_catalog.pg_attrdef d JOIN pg_catalog.pg_attribute a
+        ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+     WHERE d.adrelid = 'public.report_versions'::regclass
+       AND a.attname = 'content_hash_version';
+    RAISE EXCEPTION
+      'FAIL T7I-75: report_versions.content_hash_version carries a DEFAULT of %. '
+      'The Operator ruled it must have NONE (2026-08-09): both 1 and 2 are valid '
+      'provenance and the database must never guess which serializer ran. '
+      'Restoring a DEFAULT -- 1 OR 2 -- requires a new explicit Operator ruling.', v_def;
+  END IF;
+
+  -- (b) The column still EXISTS and is still NOT NULL smallint. Without
+  --     this, leg (a) passes vacuously for a DROPPED column, and the
+  --     no-default posture would be meaningless without NOT NULL behind it.
+  SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_attribute a
+   WHERE a.attrelid = 'public.report_versions'::regclass
+     AND a.attname = 'content_hash_version'
+     AND a.attnotnull AND NOT a.attisdropped
+     AND a.atttypid = 'smallint'::regtype;
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION
+      'FAIL T7I-75: content_hash_version is missing, dropped, retyped or NULLABLE -- '
+      'leg (a) would pass vacuously';
+  END IF;
+
+  -- (c) The envelope CHECK still permits only 1 and 2, by EXACT definition.
+  IF (SELECT pg_catalog.pg_get_constraintdef(oid) FROM pg_catalog.pg_constraint
+       WHERE conrelid = 'public.report_versions'::regclass
+         AND conname = 'report_versions_content_hash_version_chk')
+     IS DISTINCT FROM 'CHECK ((content_hash_version = ANY (ARRAY[1, 2])))' THEN
+    RAISE EXCEPTION 'FAIL T7I-75: the governed 1-or-2 envelope constraint is gone or widened';
+  END IF;
+
+  -- (d) THE BEHAVIOURAL LEG. An INSERT omitting content_hash_version fails
+  --     with a NOT NULL violation rather than silently becoming a V1 row.
+  --     This is what legs (a)-(c) are proxies for; it is asserted directly
+  --     so the control cannot pass on catalogue shape alone.
+  v_err := pg_temp.errcode($q$
+    INSERT INTO public.report_versions (report_id, centre_id, revision_number, content_hash)
+    VALUES ('00000000-0000-4000-8000-00000000dead',
+            'b0000000-0000-4000-8000-000000000001', 1, repeat('a',64)) $q$);
+  IF v_err <> '23502' THEN
+    RAISE EXCEPTION
+      'FAIL T7I-75: omitting content_hash_version gave %, expected 23502 not_null_violation. '
+      'A write that does not state its provenance must be REJECTED, never silently labelled.', v_err;
+  END IF;
+
+  RAISE NOTICE 'PASS T7I-75 (no DEFAULT; NOT NULL smallint present; envelope pinned to 1-or-2; an omitted write is rejected 23502)';
+END $t$;
+ROLLBACK;
+
 -- =====================================================================
 -- SECTION 2 -- Lifecycle, transitions, immutability and audit
 -- =====================================================================
@@ -1066,9 +1153,15 @@ BEGIN
   -- report_versions_report_revision_key.
   SELECT r.current_cycle_version_id INTO v_ver FROM public.reports r WHERE r.id=v_report;
   SELECT rv.revision_number INTO v_rev FROM public.report_versions rv WHERE rv.id=v_ver;
+  -- content_hash_version is stated EXPLICITLY. It has carried no DEFAULT
+  -- since M15 (Operator ruling, 2026-08-09), so omitting it here would make
+  -- this decoy fail 23502 not_null_violation and T7I-13 would report the
+  -- WRONG constraint -- masking the revision-uniqueness property it exists
+  -- to prove. The value is 2 because the decoy is a native OD-4 write; it
+  -- is not load-bearing for this assertion, only its presence is.
   v_con := pg_temp.constraint_of(pg_catalog.format($q$
-    INSERT INTO public.report_versions (report_id, centre_id, revision_number, content_hash)
-    VALUES (%L,'b0000000-0000-4000-8000-000000000001',%s,'%s') $q$, v_report, v_rev, pg_catalog.repeat('a',64)));
+    INSERT INTO public.report_versions (report_id, centre_id, revision_number, content_hash, content_hash_version)
+    VALUES (%L,'b0000000-0000-4000-8000-000000000001',%s,'%s',2) $q$, v_report, v_rev, pg_catalog.repeat('a',64)));
   IF v_con <> 'report_versions_report_revision_key' THEN
     RAISE EXCEPTION 'FAIL T7I-13: a duplicate revision fired "%", expected report_versions_report_revision_key', v_con;
   END IF;

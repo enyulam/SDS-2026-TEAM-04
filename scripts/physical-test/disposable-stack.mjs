@@ -112,7 +112,11 @@ export const EXPECTED_CANONICAL_ROWS = 28
 // call sites across 6 harnesses, 4 of which are npm entry points, and it
 // fails CLOSED -- every disposable-stack run aborts until it is re-pinned.
 // RE-PIN IT IN THE SAME COMMIT AS ANY NEW MIGRATION.)
-export const EXPECTED_CANONICAL_MIGRATIONS = 14
+// (Moved 14 -> 15 at the M15 default-removal checkpoint. M15 removes the
+// report_versions.content_hash_version DATABASE DEFAULT by Operator ruling:
+// it adds and drops NO object, so functions/tables/enums/policies and the
+// fixture checksum are all UNMOVED -- only the migration count changes.)
+export const EXPECTED_CANONICAL_MIGRATIONS = 15
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 

@@ -166,7 +166,7 @@ BEGIN
   -- (Reconciled again at Run C3-A Phase 1: the single-entry-point closure adds one migration file that contains exactly one REVOKE -- no function, no table, no enum, and not one DML statement.)
   -- (Moved 11 -> 12 at Run C3-A Phase 2b: C2C-004's governed Management
   -- submitted-report list is the twelfth committed migration.)
-  IF v_n <> 14 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 14', v_n; END IF;
+  IF v_n <> 15 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 15', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
   -- (Moved 33 -> 34 at Run C3-A Phase 2b: C2C-004's submitted-report list.)

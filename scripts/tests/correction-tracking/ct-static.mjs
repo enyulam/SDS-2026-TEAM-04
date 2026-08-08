@@ -22,7 +22,7 @@ const MIG_NAME = '20260806103000_management_correction_tracking.sql'
 // single-entry-point closure that removes `authenticated` EXECUTE from
 // assessment_save_observation). It is not this suite's subject; it is only
 // what "sorts last" now means.
-const NEWEST_MIG_NAME = '20260809160000_od4_reopen_envelope_version_fix.sql'
+const NEWEST_MIG_NAME = '20260809180000_od4_content_hash_version_no_default.sql'
 const MIG = join(MIG_DIR, MIG_NAME)
 const PROJECTIONS = join(ROOT, 'server', 'modules', 'management-view', 'projections.ts')
 
@@ -153,7 +153,7 @@ const bodyCode = code(body)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 14) fail('T-CT-S4', `${all.length} migration files exist, expected 14`)
+  if (all.length !== 15) fail('T-CT-S4', `${all.length} migration files exist, expected 15`)
   if (all[all.length - 1] !== NEWEST_MIG_NAME) fail('T-CT-S4', `the newest migration is not the last file (last is ${all[all.length - 1]})`)
   if (!all.includes(MIG_NAME)) fail('T-CT-S4', `${MIG_NAME} is missing`)
 
