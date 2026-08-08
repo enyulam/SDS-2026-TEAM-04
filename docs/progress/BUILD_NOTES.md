@@ -1495,3 +1495,144 @@ touched.
 **Next permitted action.** **Await Operator authorization of gate `G-00`** — entering Phase 0 of the
 execution plan (baseline verification, live-catalogue re-derivation, register reconciliation, and
 arming the long-lead recruitment and external-input gates). Phase 0 contains no product work.
+
+---
+
+## 2026-08-08 — FINAL MVP EXECUTION PLAN CONSISTENCY CORRECTION — PLAN/PROCESS ONLY, ZERO IMPLEMENTATION
+
+**Scope.** Nine bounded corrections to `FINAL_MVP_EXECUTION_PLAN.md`'s execution graph and
+orchestration model, plus the minimum process wording in `CLAUDE.md` needed to encode a bounded
+`STANDING_LOCAL_EXECUTION_AUTHORIZATION`. **No product or governance decision was reopened.** No
+Phase 0 work, no implementation, no migration, no provider call, no hosted action, no worktree, no
+tag, no push.
+
+**Track / workstream.** Governance/documentation — execution-plan correction.
+**Branch / worktree.** `main`, single worktree.
+**Starting HEAD → ending HEAD.** `f53cae2853c4151d2a38ec29524573eed1af2e7b` → this entry's commit.
+**Migration or schema changes.** **NONE.**
+**Environment / infrastructure changes.** **NONE.**
+
+**Baseline verified before writing:** branch `main` · HEAD `f53cae2…` · tree **CLEAN** ·
+**0 remotes** · **1 worktree** · 4 tags. All checked against `git`, not restated.
+
+### The nine corrections
+
+1. **Critical path re-derived from real dependencies.** §5.2 previously skipped Phases 3, 5 and 9.
+   It now states the full mandatory chain `P0→P1→P2→P3→P4→P5→P6→P7→P8→P9→P10`, with the two
+   genuinely parallel branches (the long-lead human track armed at P0-T07 and converging at P9; the
+   P10 artefact-authoring track) **shown rather than omitted**, and an explicit bar on satisfying a
+   phase by a reduced "minimum acceptance" reading of the one before it.
+2. **Phase 3's entry de-circularized.** P3-T00 was an entry condition of the phase containing it.
+   Entry is now prior-phase exit + authorization + no blocking gate; P3-T00 and P3-T05a are
+   prerequisites to the **role-track fork**, not to entering Phase 3.
+3. **`P3_ROLE_TRACK_BASELINE` defined.** All three worktrees fork from **one** SHA: accepted `main`
+   HEAD after **both** P3-T00 **and** P3-T05a have landed and passed. Resolved at P3-T01, recorded
+   in `STATUS.md`, verified with `git worktree list`; differing SHAs are a halt. No future SHA is
+   hard-coded.
+4. **Phase 5 reclassified.** Three locality bands replace two: 0–4 local · **5 = local
+   infrastructure with a gated paid external call** · 6–10 hosted/public/human/submission. E-7 and
+   the per-invocation G-16 discipline are preserved unweakened.
+5. **Dangling `P2-T16` removed** — the ownership-guard owner is **P2-T13**, verified before
+   rewiring.
+6. **Q-27 cross-reference corrected** — P3-T02 pointed at Track M; it now points at **P3-T05a**
+   (data boundary) and **P3-T05** (UI). Q-27 itself untouched.
+7. **`STANDING_LOCAL_EXECUTION_AUTHORIZATION` defined** (plan §7.6, `CLAUDE.md` §15.11): a future
+   Operator may name a bounded **local** range; advance across ordinary phase boundaries then
+   requires all ten evidence conditions. **Conditional continuation, never self-acceptance** —
+   `PASS` stays Claude's, `Accepted` stays the Operator's. Fourteen categories can never be
+   inherited, and the list is declared **non-exhaustive** with `CLAUDE.md` §12 binding in addition.
+8. **Gate register classified A / B / C** — 37 gates: 3 satisfiable in-range, 16 genuine Operator
+   decisions, 16 hard external, 2 hybrid. It now states plainly which gates will actually stop an
+   autonomous run.
+9. **Baseline semantics separated** — `dff7a693…` is the **plan-authoring** baseline (historical,
+   never rewritten); `f53cae2…` is the **first committed-plan** baseline; **execution always begins
+   from actual current HEAD** after verifying intervening commits.
+
+### `CLAUDE.md` changes — process only, additive
+
+Under this run's explicit bounded Operator instruction: a **§10 scope note** (its five-phase model
+and persona sign-offs unchanged; the carve-out reaches only an Execution Plan's own finer *local*
+phases, and satisfying one numbering never satisfies the other) · new **§15.11** · **§15.2** gains
+three fields (standing-authorization range, outstanding `Accepted` marks, resolved fork baseline) ·
+**§12** gains two bullets that were missing from the canonical enumeration entirely — **human
+participant recruitment/consent/testing** and **final submission** — and a miscount corrected.
+**No product rule was changed, and no hosted/provider/human/push gate was made inheritable.**
+
+### Adversarial review and remediation
+
+Two independent read-only reviewers (execution graph; autonomy/safety), then a focused re-review.
+**2 Critical and 10 High** in the first pass; **4 High** survived into the second; all remediated.
+
+- 🔴 **The plan's own central safety premise was false.** *"Phases 0–4 are LOCAL-ONLY. No external
+  system is contacted, nothing is billed"* — but `report-workflow/actions.ts` constructs the **real**
+  provider unconditionally (Phase A gate G-19, *"there is no switch to flip"*), the machine's
+  selectors are ratified and present, and P4-T07's own suite **requires a non-fixture build**. So a
+  locally served build is a **billable** surface, and a standing local authorization would have been
+  a spend authorization. **This is not hypothetical:** `prove-disposable-app.mjs` records that a
+  *deleted* selector is silently refilled by `@next/env` — *"which is exactly what happened on an
+  earlier run of this proof, whose report reached `drafting`."* Closed by new **§7.4a**: overwrite
+  the three LLM selectors with a proven-unratified literal **and read them back** (never delete),
+  assert `BEST_COACH_RUN_REAL_PROVIDER_LEG` unset, arm the trip-wire — now **§7.4 stop condition 15**
+  and binding on every task below §8 whether or not the task repeats it.
+- 🔴 **Phase 5 had no entry gate and no exit condition**, while Phase 6's entry cited "Phase 5
+  complete" — a referent that did not exist, i.e. precisely the reduced reading §5.2 forbids. All
+  eleven phases now carry both an ENTRY and an EXIT block; Phase 7 and Phase 9 gained entries;
+  Phase 9's circular "participants" entry was disclaimed.
+- 🟠 **I had downgraded three gates while asserting none was weakened.** G-13 and G-14 are restored
+  to **Class B**; the A/B hybrid is gone; the false sentence is replaced by an honest account of the
+  three reclassifications that did happen (G-07, G-10, G-11 — the last justified by §12's explicit
+  `git worktree add` carve-out, which covers **creation only**, so worktree deletion gained its own
+  gate G-12a).
+- 🟠 **The bounded-edit carve-out was weaker than `CLAUDE.md` §12** — it permitted "bounded edits"
+  by any method, attached to a multi-phase range grant. Restored to §12's strength: annotate-never-
+  delete only, its own instruction **for that run** naming exact files and corrections, and
+  **`CLAUDE.md` itself never editable under a standing authorization**.
+- 🟠 **The same "no server contract" failure the plan closed for Management's *write* screens was
+  open for its *read* screens.** Verified: `management-view/projections.ts` exports only
+  report-workflow shapes — nothing statistical, no calendar, no student or class reads. Class Health
+  Summary and Management Insight are **mandated by `CLAUDE.md` §6 and undrawn in `/reference/`**, so
+  a reference-driven build omits them and a reference-driven sweep passes. New **P2-T07c**.
+- 🟠 **P3-T05's Profile Details criterion was unsatisfiable inside Track P/A** by the identical
+  mechanism the earlier split fixed for criterion 4, as was pack 31's Parent Calendar remediation.
+  **P3-T05a** widened to land the parent profile and calendar projections with DOB, contact details,
+  the TA field and trainer observations structurally excluded.
+- 🟠 **Resume could repeat an irreversible side effect** — §7.6-D deferred to §9.3, which had dropped
+  `SUBMISSION` and interrupted-destructive. Both restored, and the carve-out **re-keyed from the
+  recorded gate class to actual capability**, so a task recorded `Operator gate — NO` that can still
+  reach a provider or a credential is non-auto-resumable.
+- 🟠 **Eligibility was self-contradictory** — Phase 0 contains two Class C gates, so a literal
+  "contains no external action" test would have made the mechanism's own canonical `Phases 0–4`
+  example ineligible, and the converse argued a path into Phase 5's pre-flight. Re-based on the
+  phase's **deliverable**, with that analogy explicitly foreclosed.
+- Also corrected: P5-T02 told the Operator *"exactly two"* billable requests where the harness
+  documents **2–4**; twelve section cross-references resolving to the wrong document (one, `§15.5`,
+  fully dangling); `run-integration.mjs` cited unqualified in two in-range tasks; P3-T06 ordered
+  before the merge that makes it executable; the six-vs-eight zero-EXECUTE carrier count that would
+  have shipped V2 with no static-scan coverage; and several counts.
+
+**Operator decisions received.** One: the instruction to perform this correction run, which is also
+the explicit bounded instruction authorizing the `CLAUDE.md` process edits.
+
+**Blockers opened or closed.** None.
+
+### Files changed
+
+`FINAL_MVP_EXECUTION_PLAN.md` · `CLAUDE.md` (process/orchestration only) ·
+`docs/progress/STATUS.md` · `docs/progress/BUILD_NOTES.md`.
+
+### Verification
+
+`git diff --check` clean; complete diff inspected. **Zero application, schema, migration, test,
+fixture or configuration change** — verified by path filter over the commit.
+
+**Cleanup / rollback state.** No partial mutation; the checkpoint commit is revertible in one
+operation.
+
+**Confirmed NOT done:** zero Phase 0 execution · zero Phase B implementation · zero application
+behaviour change · zero schema/data change · zero migration · zero provider call · zero hosted
+action · zero deployment · zero worktree creation · zero tag · zero remote or push · frozen demo
+untouched · PeakPalate untouched.
+
+**Next permitted action.** **Await Operator authorization of gate `G-00`** — optionally carrying a
+`STANDING_LOCAL_EXECUTION_AUTHORIZATION` over a named local range such as `Plan Phases 0–4`. Without
+that range, each phase still needs its own entry instruction.

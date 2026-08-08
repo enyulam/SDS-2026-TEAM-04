@@ -33,7 +33,7 @@ will drift.
 - knowing *how to recover* when a unit fails halfway.
 
 **What this plan is not for:** re-deciding settled questions. Every decision indexed in
-`FINAL_MVP_AUTHORITY_LOCK.md` is closed. Reopening one is a §12 stop-and-ask, not a planning act.
+`FINAL_MVP_AUTHORITY_LOCK.md` is closed. Reopening one is a `CLAUDE.md` §12 stop-and-ask, not a planning act.
 
 ---
 
@@ -165,14 +165,29 @@ recorded as `NOT-RUN` with a reason. Silent truncation reads as coverage.
 
 ---
 
-## 4. ACCEPTED CURRENT BASELINE (verified 2026-08-08 at plan creation)
+## 4. ACCEPTED BASELINE
+
+> **Two baselines, both true, used for different things — do not conflate them.**
+>
+> | Baseline | SHA | What it is |
+> |---|---|---|
+> | **Plan-authoring baseline** | **`dff7a693a2e5c755bb6d809a3b158385f7397605`** | The HEAD this plan was **written against**, verified 2026-08-08. Every "current state" fact in the table below was observed at this commit. It is a **historical fact and is never rewritten**. |
+> | **First committed-plan baseline** | **`f53cae2853c4151d2a38ec29524573eed1af2e7b`** — `docs(plan): add final MVP execution plan` | The commit at which this plan **first existed in the repository**. Superseded by any later correction commit to the plan; the **currently recorded** committed-plan baseline is the one `STATUS.md` names. |
+>
+> **Execution always begins from ACTUAL current HEAD**, after verifying every commit between the
+> recorded committed-plan baseline and it. Neither SHA above is a target to check out, reset to, or
+> restore. A HEAD that is **not a descendant** of the recorded committed-plan baseline is a halt
+> (P0-T01).
+
+**State observed at the plan-authoring baseline** (re-verify at P0-T01; do not cite this table as
+current):
 
 | Fact | Verified value |
 |---|---|
 | Repository | `SDS Project Final (BEST Coach)` |
 | Branch | `main` |
 | **HEAD** | **`dff7a693a2e5c755bb6d809a3b158385f7397605`** — `docs(governance): supersede stale UI authority ladder` |
-| Working tree | **CLEAN** (`git status --porcelain -uall` empty) |
+| Working tree | **CLEAN** (`git status --porcelain -uall` empty) — *as at the authoring baseline, i.e. before this plan was written and committed* |
 | Git remotes | **0** — nothing has ever been pushed |
 | Worktrees | **1** — `main` only |
 | Branches | `main`, `feat/48h-backend`, `feat/48h-frontend` (the latter two `CLOSED_BY_NONUSE_POLICY`) |
@@ -200,35 +215,60 @@ must never mutate the Operator's global or system Git configuration.**
 
 ## 5. PHASE OVERVIEW
 
-| # | Phase | Nature | Operator gate to ENTER | Parallelism |
-|---|---|---|---|---|
-| **0** | Execution baseline / lock | Verify, reconcile, arm long-lead gates | **YES** (to authorize the plan) | Read-only fan-out |
-| **1** | OD-4 contract foundation | Migration + contracts + AI + controls | YES | **Serial** (single writer) |
-| **2** | Backend governance completion | Attendance · evidence · storage · bootstrap · auth · hosted transport | YES | **Serial** for migrations; limited parallel for non-DDL |
-| **3** | Final frontend reconstruction | Shared shell, then three role tracks | YES | **Parallel** after shared foundation lands |
-| **4** | Local integration / acceptance | Full local proof incl. C4 re-proof | YES | Parallel read-only reviewers; serial validation runs |
-| **5** | Bounded real-provider re-proof | G-6 against final AI contract + transport | **YES — paid, per-invocation** | Serial |
-| **6** | Hosted Supabase | Provision, migrate, configure, bootstrap | **YES — credentials** | Serial |
-| **7** | Vercel deployment | First public deployment | **YES — public** | Serial |
-| **8** | Production UAT | Three-role governed lifecycle on hosted | YES | Limited parallel per role |
-| **9** | Human usability testing | Real participants, observed behaviour | **YES — human subjects** | Recruitment armed at Phase 0 |
-| **10** | Final submission / presentation | Artefacts, scan, push, submit | **YES — push & submit** | Parallel authoring |
+| # | Phase | Nature | Locality | Authorization to ENTER | Parallelism |
+|---|---|---|---|---|---|
+| **0** | Execution baseline / lock | Verify, reconcile, arm long-lead gates | LOCAL | **G-00** — explicit | Read-only fan-out |
+| **1** | OD-4 contract foundation | Migration + contracts + AI + controls | LOCAL | Explicit, or in-range §7.6 — **PLUS the separate OD-4 Phase B authorization (`CLAUDE.md` §12); a range grant is not it** | **Serial** (single writer) |
+| **2** | Backend governance completion | Attendance · evidence · storage · bootstrap · auth · hosted transport | LOCAL | **G-07** — explicit, or in-range §7.6 | **Serial** for migrations; limited parallel for non-DDL |
+| **3** | Final frontend reconstruction | Shared shell, then three role tracks | LOCAL | **G-10** — explicit, or in-range §7.6 | **Parallel after `P3_ROLE_TRACK_BASELINE`** (§7.3) |
+| **4** | Local integration / acceptance | Full local proof incl. C4 re-proof | LOCAL | Explicit, or in-range §7.6 | Parallel read-only reviewers; serial validation runs |
+| **5** | Bounded real-provider re-proof | G-6 against final AI contract + transport | ⚠️ **LOCAL INFRA + GATED PAID EXTERNAL CALL** | **G-15 then G-16 — HARD. Never inheritable, per invocation** | Serial |
+| **6** | Hosted Supabase | Provision, migrate, configure, bootstrap | **HOSTED** | **G-17 — HARD, credentials** | Serial |
+| **7** | Vercel deployment | First public deployment | **PUBLIC** | **G-19 — HARD, public** | Serial |
+| **8** | Production UAT | Three-role governed lifecycle on hosted | **HOSTED** | **HARD** (plus G-16d/f paid legs) | Limited parallel per role |
+| **9** | Human usability testing | Real participants, observed behaviour | **HUMAN** | **G-21 — HARD, human subjects** | Recruitment armed at Phase 0; **Phase 9 itself never runs early** |
+| **10** | Final submission / presentation | Artefacts, scan, push, submit | **PUBLIC / EXTERNAL** | **G-25, G-26 — HARD, push & submit** | Parallel authoring |
 
-**98 actionable tasks across 11 phases.** Task IDs are stable labels, **not an execution sequence** —
-Phase 2 in particular executes in a different order from its numbering, for a reason stated at its
-header.
+**99 actionable tasks across 11 phases.** Task IDs are stable labels, **not an execution sequence** —
+**Phases 2 and 3 in particular execute in a different order from their numbering**, each for a
+reason stated at its own header. Read every task's `Depends on`, never the number.
 
-**Phases 0–5 are local. Phases 6–10 leave this machine.** Nothing in 6–10 may begin before Phase 4
-acceptance, with the single exception of the Phase 9 recruitment gate, which is armed at Phase 0
-because it is the longest-lead item in the project (Lock §26.5) and is gated on nothing.
+**Execution-locality classification — three bands, not two:**
+
+- **Phases 0–4 are LOCAL** — but ⚠️ **"local" is NOT the same as "non-billable", and assuming it is
+  has already cost this project a real provider call.** `server/modules/report-workflow/actions.ts`
+  constructs the **real** `OpenAiDraftProvider` **unconditionally** on the participant path (gate
+  G-19 — *"there is no switch to flip"*), and the machine's `.env.local` carries ratified LLM
+  selectors. **Therefore any locally served non-fixture build is a billable surface**, and a
+  browser test that clicks "Save & Generate" bills. This is not hypothetical:
+  `prove-disposable-app.mjs` records that *"a deleted selector is silently restored from the
+  application's own file and the real provider becomes reachable again — **which is exactly what
+  happened on an earlier run of this proof, whose report reached `drafting`**."*
+  **Phases 0–4 are non-billable ONLY under the mandatory serving discipline in §7.4a.** That
+  discipline is what makes the range eligible for a standing local execution authorization (§7.6) —
+  not the phase number.
+- **Phase 5 runs on LOCAL application and infrastructure but contains a GATED EXTERNAL, BILLABLE
+  PROVIDER INTERACTION.** ⚠️ **It is therefore NOT local-only.** P5-T02 makes real, paid OpenAI
+  requests. It is outside any standing local authorization and requires **G-16**, obtained
+  immediately before invocation and never inherited.
+- **Phases 6–10 involve HOSTED, PUBLIC, EXTERNAL, HUMAN and SUBMISSION systems** as applicable —
+  each with its own non-inheritable gate.
+
+Nothing in 5–10 may begin before Phase 4 exit, and nothing in 6–10 before Phase 5 completes, with
+the single exception of the Phase 9 **recruitment** gate, which is armed at Phase 0 because it is
+the longest-lead item in the project (Lock §26.5) and is gated on nothing. **Arming recruitment
+does not advance Phase 9, and no part of Phase 9 executes early.**
+
+Principle **E-7** is unchanged and governs all three bands: *cost is not the trigger — leaving this
+machine is*, and a paid call is a stop regardless of where the code that makes it runs.
 
 ### 5.1 Relationship to the ratified §10 phase model and A-024
 
 > ⚠️ **THE PHASE NUMBERS IN THIS PLAN ARE THIS PLAN'S OWN, AND THEY COLLIDE WITH `CLAUDE.md` §10.**
 > Both numberings are live and they mean different things. `CLAUDE.md` §10 Phase 2 is **Evidence**;
-> this plan's Phase 2 is **backend governance completion**. §10 Phase 3 is **Management read
-> breadth**; this plan's Phase 3 is **frontend reconstruction**. §10 Phase 4 is **PDPA hardening &
-> ops**; this plan's Phase 4 is **local acceptance**.
+> this plan's Phase 2 is **backend governance completion**. `CLAUDE.md` §10 Phase 3 is **Management
+> read breadth**; this plan's Phase 3 is **frontend reconstruction**. `CLAUDE.md` §10 Phase 4 is
+> **PDPA hardening & ops**; this plan's Phase 4 is **local acceptance**.
 > **Every unqualified "Phase N" in this document is a plan phase.** A `CLAUDE.md` phase is always
 > written as "`CLAUDE.md` §10 Phase N". Never satisfy one by citing the other.
 
@@ -271,13 +311,47 @@ Phases 0–10 does not fit that window. This is a genuine scoping problem and it
 to resolve, not the plan's** — this document therefore delivers the complete governed scope and
 marks the compressible tracks rather than silently descoping.
 
-The **irreducible critical path** to a demonstrable, submittable system is:
+The **mandatory dependency chain — every phase, none skippable** — is:
 
-`P0 → P1 (OD-4) → P2 auth hardening + bootstrap + administration & invitation write layers + draft transport → P4 minimum acceptance → P6 hosted → P7 Vercel → P8 UAT → P10 artefacts + push`
+```
+P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10
+```
 
-The administration and invitation write layers (P2-T07a / P2-T07b) are **on** the critical path and
-not optional: without them there is no permitted way to create a hosted UAT scenario, and six
+**Every arrow is a real entry condition stated by the phase it points at.** No phase may be
+bypassed, and **no phase may be satisfied by a reduced "minimum acceptance" reading of the phase
+before it** — a phase's exit condition is the one that phase declares, not a smaller one chosen to
+keep a schedule. Specifically:
+
+- **P3 is mandatory before P4.** P4-T04 (the C4 re-proof) depends on P3-T06, and P4's route,
+  visual, accessibility and projection proofs are proofs *of the reconstructed frontend*.
+- **P5 is mandatory before P6.** G-6 must be re-proven against the final OD-4 AI contract and the
+  final draft transport before hosted work builds on them; P6-T07b then closes the pooled leg P5
+  declares `NOT-RUN`.
+- **P9 is mandatory before P10.** The brief requires usability testing **and documented
+  improvements made as a result**; P10-T04 and P10-T08 both consume P9's findings register and its
+  remediation trace. Arming recruitment early does not discharge Phase 9.
+
+**Two legitimately parallel branches, shown rather than omitted:**
+
+```
+  ├─ HUMAN TRACK  — armed at P0-T07 (recruitment/consent, longest lead, gated on nothing)
+  │                 runs alongside P1…P8, and CONVERGES AT P9. Arming ≠ completing.
+  │
+  └─ ARTEFACT TRACK — the P10 authoring tasks that do not depend on the built system
+                      (P10-T04 Design Workbook, parts of P10-T01/T02/T03) may be drafted
+                      early — but ONLY under their own explicit authorization: they sit
+                      OUTSIDE a Phases 0-4 range and no standing local authorization
+                      reaches them. P10-T07 scan -> P10-T09 push -> P10-T11 submit remain
+                      terminal and depend on everything above.
+```
+
+The administration and invitation write layers (P2-T07a / P2-T07b) are **on** the chain and not
+optional: without them there is no permitted way to create a hosted UAT scenario, and six
 Management screens have no server contract.
+
+⚠️ **This chain is the schedule problem, stated honestly.** It is not a menu. Shortening it means
+the Operator explicitly descoping something from the list below — not the plan quietly reading an
+entry condition down.
 
 The **compressible** tracks, in the order a triage should consider them:
 
@@ -319,7 +393,9 @@ can happen with the real dependency graph in front of it.
                     │                                                                    │
                     ▼                                                                    │
         P3  FINAL FRONTEND RECONSTRUCTION                                                │
-        P3-T00 SHARED FOUNDATION (serial, on main)                                       │
+        P3-T00 SHARED FOUNDATION  →  P3-T05a Q-27 DATA BOUNDARY   (both serial, on main) │
+                    ▼                                                                    │
+        P3_ROLE_TRACK_BASELINE = accepted main HEAD after BOTH  ── resolved at P3-T01 ──  │
                     ├──────────────┬──────────────┐                                      │
                     ▼              ▼              ▼                                      │
               Track T          Track M        Track P/A     ── parallel worktrees ──      │
@@ -366,7 +442,7 @@ can happen with the real dependency graph in front of it.
 | Phase 0 | Read-only analysis/audit agents | Always safe |
 | Phase 1 | Read-only reviewers alongside the single writer | Writer owns all mutation |
 | Phase 2 | Non-DDL work (server actions, port mutators, module code, tests) alongside the **current** migration | Only one migration in flight; no two tasks edit the same module |
-| **Phase 3** | **Track T · Track M · Track P/A** in separate fresh worktrees | **Only after P3-T00 lands on `main`**; disjoint file ownership declared; merge order fixed |
+| **Phase 3** | **Track T · Track M · Track P/A** in separate fresh worktrees | **Only after BOTH P3-T00 AND P3-T05a have landed on `main` and passed their checks** — that commit is `P3_ROLE_TRACK_BASELINE`, and all three worktrees fork from it; disjoint file ownership declared; merge order fixed |
 | Phase 4 | Read-only adversarial reviewers | Validation runs themselves remain serial (S5) |
 | Phase 8 | Per-role UAT observation | Only after the shared lifecycle leg completes in order |
 | Phase 10 | Artefact authoring (README, diagrams, workbook, site, video) | Disjoint files; the final scan and push remain serial and gated |
@@ -388,7 +464,8 @@ Every migration-adding task **must**, in the same commit:
 
 1. Take the next free timestamp; never reuse or backdate one.
 2. Carry the **P-1 ownership guard** (`current_user = 'postgres'` preflight). Two existing
-   migrations lack it (`20260803034500`, `20260806160000`) — remediate those separately at P2-T16,
+   migrations lack it (`20260803034500`, `20260806160000`) — remediate those separately at **P2-T13
+   (Migration ownership-guard remediation)**,
    never by editing them retroactively into the new file's scope.
 3. **Re-emit signature-qualified `REVOKE`/`GRANT` for every function whose signature it changes.**
    All existing grants are signature-qualified, so a renamed parameter list silently orphans them.
@@ -449,6 +526,7 @@ ordering above supersedes them.
 | Usability participants | P9 | **P0** (longest lead) |
 | Evidence sub-rulings (`scan_status`, retention, size limit, A-038 reconciliation, consent instrument) | P2 evidence tasks | P0 |
 | Attendance control visual disposition (no ratified frame draws one) | P2-T02, P3 Track T | P0 |
+| Notification-surface scope ruling (`notifications` is `DEFERRED_BY_RATIFIED_DECISION`) | P3-T04's two notification families | P0 |
 | Audit-registry extension for evidence (requires an amendment) | P2 evidence audit | P0 |
 | Grounding rule-4 rule set ratification | P1 close-out | P1 |
 | Provider spend authorization | **P5, and again at P6-T07b, P7-T04, P8-T02, P8-T03, P9-T03, P10-T06, P10-T10** | Immediately before **each** — never inherited (G-16 … G-16h) |
@@ -489,7 +567,8 @@ both are anchored by `frozen/*` tags.
 **Every new worktree must:**
 
 1. be created **fresh from the current accepted `main` integration baseline** (never from an older
-   SHA, never from a frozen branch);
+   SHA, never from a frozen branch). For Phase 3 that baseline has a name and a definition —
+   **`P3_ROLE_TRACK_BASELINE`**, see §7.3;
 2. have **exactly one writer, ever**;
 3. declare **disjoint file ownership in advance** — a cross-owned edit is a blocker reported
    *before* modification;
@@ -516,10 +595,39 @@ window in this plan: **Phase 3's three role tracks.** Phases 0, 1, 2, 4–10 are
 **Merge order: P/A → T → M.** Smallest surface first, largest last, so conflict resolution happens
 against the most-settled baseline.
 
+#### `P3_ROLE_TRACK_BASELINE` — the one SHA all three worktrees fork from
+
+**Definition, not a literal:**
+
+```
+P3_ROLE_TRACK_BASELINE
+  = the current accepted `main` HEAD AFTER BOTH
+      P3-T00  (shared foundation)          — landed and passed its checks
+    AND
+      P3-T05a (Q-27 projection-layer data boundary) — landed and passed its checks
+```
+
+**Do not hard-code a SHA here.** It is not knowable when this plan is written; it is resolved at
+P3-T01 by reading `git rev-parse HEAD` on `main` once both tasks are in and green, and it is
+**recorded in `STATUS.md` at that moment** so a resuming session can verify the tracks actually
+forked from it.
+
+**All three worktrees fork from that same commit.** Not from P3-T00's commit — from the later one.
+P3-T05a lands the structural exclusion of the nine ratings from every parent-reachable projection,
+DTO, RPC result and client payload; if Track P/A forked before it, P3-T05 (the UI half) would be
+unsatisfiable inside the track, because its remaining data dependencies live in `server/**` and in
+frozen contracts the track may not write. **Forking early does not merely inconvenience the track —
+it makes a mandatory Q-27 acceptance criterion unreachable without breaking the ownership model.**
+
+*(This changes nothing about Q-27 itself. Q-27's ruling, its five acceptance criteria and its
+`DO_NOT_IMPLEMENT` scope are untouched — only the point in the graph at which its data half lands
+is stated precisely.)*
+
 **OWNERSHIP IS CLOSED-WORLD: anything not listed as owned above is FROZEN.** There is no
 unclaimed middle ground. A track may write only inside its own owned globs.
 
-**Frozen — landed at P3-T00 on `main` before the fork, then untouchable for the duration:**
+**Frozen — landed on `main` at or before `P3_ROLE_TRACK_BASELINE`, then untouchable for the
+duration:**
 
 ```
 components/layout/portal-navigation.ts     ← trainer/management/parent branches in ONE object
@@ -535,7 +643,7 @@ server/**                                  ← no UI track writes server code, e
 ```
 
 **Two files must be MOVED OUT of `features/trainer/**` at P3-T00, because they sit inside Track T's
-owned glob while all three tracks import them — the exact cross-owned edit §14.3 condition 3
+owned glob while all three tracks import them — the exact cross-owned edit `CLAUDE.md` §14.3 condition 3
 prohibits:**
 
 | File | Real importers |
@@ -574,7 +682,7 @@ within it:
 - edit local application code, docs and tests;
 - author migrations locally and apply them to the local stack;
 - start/stop the local Supabase stack and run non-destructive local tests, builds, lint, `tsc`;
-- run local browser-driven tests against a locally served app;
+- run local browser-driven tests against a locally served app — **only under §7.4a**;
 - make local commits at coherent checkpoints;
 - merge accepted local tracks into `main`;
 - update `STATUS.md` and append to `BUILD_NOTES.md`;
@@ -587,7 +695,7 @@ addition and is not reproduced here** — it includes, among many others: adding
 `report_status`; returning a content hash to Parent or Management; extending the Step 7H audit
 registry; granting client `EXECUTE` on `report_store_draft`, either hash serializer, or
 `app_parent_reaches_student`; hand-editing generated types; a bare-word rating regex; creating a
-table or enum §6.1 does not list; restoring `DEFAULT` on `report_version_approvals.approver_role`;
+table or enum `CLAUDE.md` §6.1 does not list; restoring `DEFAULT` on `report_version_approvals.approver_role`;
 implementing Management Term Report (ID 28); and inventing a Figma frame for any U-25 family.
 **Read `CLAUDE.md` §12 in full before any implementation phase.**
 
@@ -607,9 +715,46 @@ implementing Management Term Report (ID 28); and inventing a Figma frame for any
 | 12 | Legal, privacy or PDPA ambiguity. ADR-6 synthetic-data-only is absolute — **the moment real child data is loaded, the deferral becomes a breach** |
 | 13 | Re-attempting a failed destructive, billable, security-sensitive or production-facing operation |
 | 14 | Start of a session where `STATUS.md`/`BUILD_NOTES.md` disagree with the repository — reconcile first |
+| **15** | **Serving the application, running any browser-driven suite, or invoking `run-integration.mjs` WITHOUT §7.4a's S-1/S-2 proven for that run.** The real provider is constructed unconditionally, so an unguarded local serve is a **billable** surface — treat it exactly like a paid call |
 
 **Do not stop** for ordinary implementation decisions already governed by current authority. A
 blocked checkpoint reported honestly is a good outcome; a silently narrowed one is not.
+
+### 7.4a MANDATORY SERVING DISCIPLINE — the control that makes Phases 0–4 non-billable
+
+> **This is a binding precondition on every local task that serves the application or runs a
+> browser-driven suite, and on every task that invokes `run-integration.mjs`. Without it, the
+> "Phases 0–4 are local" claim is false and a standing authorization becomes a spend authorization.**
+
+**Why it is needed.** `report-workflow/actions.ts` constructs the real provider unconditionally on
+the participant path — by design, **Phase A gate G-19**: *"there is no switch to flip."* Fixture mode is a
+*runtime* env read, and `tests/frontend/integrated-route-security.mjs` (which P4-T07 requires)
+explicitly demands a build made **without** it. So the Phase 4 suite mandates a non-fixture served
+build, and in that build a trainer draft click bills.
+
+**S-1 — Neutralize the selectors in every served child process.** Before serving the app for any
+local test, **overwrite** `LLM_PROVIDER`, `LLM_MODEL` and `LLM_API_KEY` in the child environment
+with a proven-unratified literal, and **read them back to confirm**. Use the
+`prove-disposable-app.mjs` pattern verbatim.
+⚠️ **Never DELETE them — `@next/env` silently refills a deleted key from `.env.local`.** Deletion is
+the exact mistake that produced the earlier billed run. Overwriting also means the Operator's real
+key never enters the served process at all.
+
+**S-2 — `run-integration.mjs` runs with the real-provider leg OFF, always, in Phases 0–4.** Its
+opt-in is a **bare environment variable** (`BEST_COACH_RUN_REAL_PROVIDER_LEG=1`) or a flag — **no
+TTY, no per-call confirmation, no phrase**. An exported variable surviving from an earlier G-6
+session silently re-enables billing. **Assert the variable is unset before every invocation**;
+treat its presence as a **halt**, not as an authorization. *A key is a capability, not an
+authorization — and so is a stale env var.*
+
+**S-3 — Arm an outward-call trip-wire wherever the harness supports one**, and record any refused
+attempt as a finding rather than noise.
+
+**S-4 — If a task cannot satisfy S-1/S-2, it is not a local task.** Stop and obtain **G-16**. Do not
+proceed on the reasoning that the phase number is inside the authorized range.
+
+**Acceptance for any Phase 0–4 task that serves the app:** the selector overwrite is proven by
+read-back in the run record, and the run reports **zero** outward provider requests.
 
 ### 7.5 Commit policy
 
@@ -629,6 +774,168 @@ blocked checkpoint reported honestly is a good outcome; a silently narrowed one 
 foundation → each backend migration + its module → shared UI foundation → each role track merge →
 integration acceptance → deployment configuration → docs/submission.
 
+### 7.6 `STANDING_LOCAL_EXECUTION_AUTHORIZATION` — continuing across local phase boundaries
+
+> ⚠️ **THIS SECTION AUTHORIZES NOTHING.** It defines a mechanism a **future** Operator instruction
+> may invoke. No standing authorization exists at the time this plan is written, and its absence is
+> the default. Without one, each phase needs its own "enter Phase N" instruction as before.
+
+**The problem it solves.** Phases 0–4 are local-only and contain no external, billable, public or
+human side effect. Without this mechanism, the plan would return to the Operator **purely because a
+phase number changed** — which is friction, not safety, and would make an authorized local run stop
+ten times to be told to continue.
+
+#### A. What a future Operator may grant in one instruction
+
+An Operator instruction may explicitly grant:
+
+```
+STANDING_LOCAL_EXECUTION_AUTHORIZATION: <named bounded range>
+```
+
+over an explicitly named, bounded range of **local** plan phases or tasks — for example
+`Plan Phases 0–4`, or `Plan Phases 1–2`, or `P3-T00 through P3-T09`.
+
+**Constraints on the grant itself:**
+
+- The range must be **named explicitly**. There is no implied range, no "and onward", no default.
+- **Eligibility test — a phase is eligible when its own DELIVERABLE is local.** Not when it happens
+  to contain no Class C gate: Phase 0 is eligible and still contains two (G-01's off-machine copy,
+  G-02 recruitment). **A discrete Class C gate sitting inside an eligible phase stops its own task
+  only — never the range.**
+- **On that test, only Phases 0–4 are eligible.** **Phase 5 is ineligible because its DELIVERABLE
+  IS a paid external call** — not merely because it contains one — and Phases 6–10 deliver hosted,
+  public, human or submission outcomes. **An instruction that appears to grant a standing
+  authorization over Phase 5 or beyond is INVALID FOR THAT PHASE IN ITS ENTIRETY and must be
+  returned for narrowing.** ⚠️ **Do not reason by analogy from Phase 0** — *"only P5-T02 bills, so
+  treat P5-T01 like P0-T07"* is the exact argued path this test exists to foreclose. Phase 5's
+  pre-flight is inside an ineligible phase and is not covered.
+- The grant is **recorded in `STATUS.md`** on receipt, with its range, its date and its granting
+  instruction. **An unrecorded standing authorization does not exist.**
+- The grant may be **narrowed or withdrawn** by the Operator at any time.
+
+When present, the Main Orchestrator **may continue across ordinary phase boundaries inside that
+range without returning solely for another "enter Phase N" message** — provided every condition in
+B is satisfied at each boundary.
+
+⚠️ **What a range grant is NOT.** It is **not** the *"Phase B authorization"* `CLAUDE.md` §12
+requires before implementing the OD-4 four-panel migration, and it is **not** an A-040
+schema-object authorization for the two new V2 hash serializers. **Both remain separate, explicitly
+named Operator grants** — a range naming "Plan Phases 0–4" does not confer either, and Phase 1
+cannot begin without the OD-4 Phase B authorization even inside an authorized range.
+
+#### B. Conditions for autonomous phase advance — all ten, at every boundary
+
+Advance from one authorized local phase to the next **only when**:
+
+1. every required task for the phase is **complete or legitimately dispositioned**. ⚠️ A
+   disposition is legitimate **only if it is already recorded in this plan or in an Operator
+   ruling**, and it is recorded with its reason. **A novel disposition is a Class B stop, not a
+   judgement the in-range agent may make about its own work.** Silence is never a disposition;
+2. every required exit criterion is **objectively `PASS`**;
+3. all required tests and proofs have **actually run** — `NOT-RUN` is not `PASS`, and an unrun proof
+   blocks the boundary;
+4. **persona sign-offs** required by standing governance (`CLAUDE.md` §3, §10) are recorded, naming
+   which lenses were checked;
+5. both required **adversarial reviewers** are complete where the phase calls for them;
+6. **every valid Critical/High finding is closed**;
+7. **`STATUS.md` and `BUILD_NOTES.md` are current** as of the boundary;
+8. the **working tree is in the required checkpoint state** and the checkpoint commit exists;
+9. **no task-specific Operator gate is pending** anywhere in the completed phase or at the entry of
+   the next;
+10. **no new governance, product or security decision is required** to proceed.
+
+**This is conditional continuation on evidence. It is never Claude accepting its own work.** The
+vocabulary distinction is absolute and unchanged:
+
+| Term | Who sets it | Meaning |
+|---|---|---|
+| **`PASS`** | The Main Orchestrator | An **evidence-backed readiness result**. Sufficient to continue **inside** an authorized range. |
+| **`Accepted`** | **The Operator only** | Formal acceptance. **Claude may never write, imply or fabricate an Operator acceptance record**, and a standing authorization does not create one. |
+
+A standing authorization permits **continuation after `PASS`**. It does not convert `PASS` into
+`Accepted`, and outstanding `Accepted` marks remain outstanding and are reported at the end of the
+run.
+
+**Reconciliation with the phase-exit rows — stated honestly.** Exactly **three** gates were
+reclassified when this mechanism was introduced, and only these three:
+
+- **G-07 (Phase 1 exit)** and **G-10 (Phase 2 exit)** — previously plain `YES`, now **Class A**.
+  Both existed *solely* for routine local phase progression, which is the friction this mechanism
+  exists to remove.
+- **G-11 (worktree creation)** — previously plain `YES`, now **Class A**, and only because
+  `CLAUDE.md` §12 already carries an explicit carve-out: *"`git worktree add` — including with
+  `-b` — is permitted where `CLAUDE.md` §14.3 requires a new isolated worktree."* This plan requires exactly
+  these three worktrees. **The carve-out covers creation only — deletion remains an Operator
+  decision (P3-T07).**
+
+**No other gate changed class, and no task-specific Operator DECISION or ACCEPTANCE was
+reclassified.** G-13 (per-pack visual acceptance) and G-14 (C4 acceptance) were briefly drafted as
+A/B hybrids and are **restored to Class B**: they are task-specific acceptances, they satisfy
+condition 9's *"no task-specific Operator gate is pending"* only when granted, and `CLAUDE.md`
+§15.11 — which outranks this plan — recognises **no hybrid gate**. See §10's classification.
+
+#### C. Hard gates that NEVER inherit
+
+⚠️ **THIS LIST IS NOT EXHAUSTIVE.** `CLAUDE.md` §12's full enumeration binds **in addition**, and
+**nothing in §12 is inheritable by any standing authorization.** Read §12 in full before relying on
+the table below. A standing local authorization **must not carry across, satisfy, imply or shorten**
+any of these, and each remains an immediate stop:
+
+| # | Never inherited |
+|---|---|
+| 1 | A genuinely new governance, product or security ruling |
+| 2 | **Editing ratified authority — never inherited from a range grant, in any form.** The single permitted exception is `CLAUDE.md` §12's ratified **annotate-never-delete** method (strike · preserve inline · cite the ruling · date it), and even that **requires its own explicit bounded Operator instruction issued FOR THAT RUN, naming the exact files and the exact corrections** — as Phase A and OD-4 each received. A multi-phase range grant is **not** such an instruction. **`CLAUDE.md` itself is never editable under a standing authorization.** Any other edit method is prohibited outright |
+| 3 | Destructive or protected-material operations not already separately authorized |
+| 4 | Credentials of any kind |
+| 5 | Hosted Supabase provisioning, linking, or **any** hosted action |
+| 6 | **External or paid AI/provider invocation — per invocation, never inherited, not from a range, not from an earlier gate, not from a configured key.** ⚠️ Includes a **locally served build that has not satisfied §7.4a** |
+| 6a | **Any action with a cost** — a paid tier, a paid resource, a paid SMTP or captcha plan, a domain registration, enabling any external service (`CLAUDE.md` §12). Not only AI spend |
+| 7 | Public Vercel deployment |
+| 8 | Human recruitment, consent or testing |
+| 9 | External publication |
+| 10 | Adding a git remote |
+| 11 | Push |
+| 12 | Final submission |
+| 13 | Re-attempting a failed billable, hosted, destructive, **security-sensitive** or **production-facing** operation |
+| 13a | **Legal, privacy or PDPA ambiguity.** ADR-6 synthetic-data-only is absolute |
+| 13b | Any history-touching git operation — `reset`, `rebase`, `amend`, force, `stash`, `tag`, `gc`, `prune`, `checkout` in a tree holding work — and **`supabase db reset`**, ever |
+| 14 | Any Critical/High finding that invalidates the plan itself |
+
+**Hosted, public, human, push and submission authorizations are additionally non-inheritable across
+session boundaries — unconditionally.** A grant obtained in one session is not in force in the next.
+
+#### D. Resume behaviour under a standing authorization
+
+At the start of **every** session, verify actual repository and environment state **first** (§9.3).
+A standing local authorization may then be resumed **only if all four hold**:
+
+1. its **authorized range is still recorded** in `STATUS.md`;
+2. **actual state agrees with the continuity records** — any disagreement is reconciled before work;
+3. the **current task lies inside that range**;
+4. **no hard gate from C is pending**.
+
+If any fails, the standing authorization is **not** in force for this session; report and ask.
+
+**Never auto-resume** a `PAID`, `HOSTED`, `PUBLIC`, `HUMAN`, `PUSH` or `SUBMISSION` task, **or an
+interrupted destructive one** — this list is stated here in full and is **not** narrowed by any
+other section. The reasoning: an acceptance of `NOT-RUN` may mean the side effect **already
+happened** without being recorded.
+
+⚠️ **The carve-out keys off CAPABILITY, not off the recorded gate class.** A task whose steps can
+reach an external host, a paid provider, a credential, or a filesystem-destructive command is
+**non-auto-resumable regardless of its recorded Operator gate** — including tasks recorded
+`Operator gate — NO`. Establish what actually happened externally, report it, and re-obtain the
+gate.
+
+#### E. Relationship to `CLAUDE.md`
+
+`CLAUDE.md` §10's rule — *"do not start the next phase until the orchestrator has confirmed the
+current phase's exit condition is met"* — governs the **ratified `CLAUDE.md` §10 phase model**, and
+is unchanged. This mechanism operates on **this plan's own finer execution phases**, which §5.1
+already establishes are a different numbering. `CLAUDE.md` **§15.11** records the mechanism in
+standing governance so the two cannot drift apart.
+
 ---
 
 ## 8. PHASES AND TASKS
@@ -639,6 +946,14 @@ Negative controls · Acceptance · Tests/proofs · Commit · Rollback · Operato
 Where a task's file list says *"re-derive"*, the enumeration in this plan is a starting hypothesis
 from the 2026-08-08 analysis, not a contract — verify against the tree at execution time.
 
+> ⚠️ **§7.4a BINDS EVERY TASK BELOW THAT SERVES THE APPLICATION, DRIVES A BROWSER, OR INVOKES
+> `run-integration.mjs` — whether or not that task's record repeats it.** The real provider is
+> constructed unconditionally on the participant path, so an unguarded local serve is a **billable**
+> surface and §7.4 condition 15 makes it a stop. Prove S-1 (selector overwrite **with read-back**,
+> never deletion) and S-2 (`BEST_COACH_RUN_REAL_PROVIDER_LEG` asserted unset) **in the run record**,
+> and report **zero outward provider requests**. A task record that omits the citation has not
+> waived the requirement.
+
 ---
 
 ### PHASE 0 — EXECUTION BASELINE / LOCK
@@ -646,7 +961,8 @@ from the 2026-08-08 analysis, not a contract — verify against the tree at exec
 **Nature:** verification, reconciliation, and arming the long-lead human gates. **No product work.
 No migration. No application change.**
 
-**Entry gate:** Operator authorization of this plan.
+**PHASE 0 ENTRY** — Operator authorization of this plan (**G-00**), which may also carry a
+`STANDING_LOCAL_EXECUTION_AUTHORIZATION` range (§7.6).
 **Exit condition:** actual repository and environment state is known, recorded and reconciled; the
 recovery procedure exists; long-lead Operator inputs are requested.
 
@@ -660,15 +976,20 @@ recovery procedure exists; long-lead Operator inputs are requested.
 - **Files/systems** — Git only. No file modified.
 - **Owner** — Main Orchestrator, `main`.
 - **Steps** — 1) `git rev-parse HEAD`, `git status --porcelain -uall`, `git branch -a`,
-  `git remote -v`, `git worktree list`, `git tag`. 2) Compare against §4. 3) If HEAD has advanced
-  beyond `dff7a693`, **do not assume drift is corruption** — read the intervening commits and
-  record what they changed. 4) If the tree is dirty, classify every path before touching it; some
-  historical dirty files carry ratified corrections and must never be blanket-restored.
-- **Negative controls** — An unexpected remote, an unexpected worktree, or a HEAD that is not a
-  descendant of `dff7a693` each **halt** the phase. A dirty tree halts **unless every dirty path is
-  classified and accounted for** — note that this plan's own creation leaves
-  `FINAL_MVP_EXECUTION_PLAN.md` as an expected change, and the §4 "CLEAN" row describes the state
-  *before* the plan was written.
+  `git remote -v`, `git worktree list`, `git tag`. 2) Compare against §4, **reading its two
+  baselines correctly** — `dff7a693…` is the **plan-authoring** baseline (a historical fact about
+  when the plan was written) and `f53cae2…`, or the corrected descendant that supersedes it, is the
+  **first committed-plan** baseline. **Execution always begins from ACTUAL current HEAD.** 3) If
+  HEAD has advanced beyond the recorded committed-plan baseline, **do not assume drift is
+  corruption** — read every intervening commit and record what it changed. 4) If the tree is dirty,
+  classify every path before touching it; some historical dirty files carry ratified corrections
+  and must never be blanket-restored.
+- **Negative controls** — An unexpected remote, an unexpected worktree, or a HEAD that is **not a
+  descendant of the recorded committed-plan baseline** each **halt** the phase. A dirty tree halts
+  **unless every dirty path is classified and accounted for**. ⚠️ Do **not** expect
+  `FINAL_MVP_EXECUTION_PLAN.md` to appear as an uncommitted change — **it is committed**; if it
+  shows as modified or untracked at Phase 0, that is an unexplained divergence and a halt, not the
+  expected state.
 - **Acceptance** — Verified branch/HEAD/tree/remotes/worktrees/tags recorded verbatim.
 - **Tests/proofs** — Command transcripts.
 - **Commit** — None.
@@ -736,7 +1057,8 @@ recovery procedure exists; long-lead Operator inputs are requested.
   3) With the stack up: `run-canonical.mjs`, `run-concurrency.mjs`, `verify-fresh-apply.mjs`,
   `run-assessment.mjs`, `run-c2.mjs`, `run-c3-bypass.mjs`, `run-correction-tracking.mjs`,
   `run-management-approved.mjs`, `run-integration.mjs` (default: real-provider leg **off**).
-  4) With the app served: `integrated-route-security.mjs` — currently `NOT_RUN`.
+  4) With the app served **under §7.4a S-1/S-2, proven by read-back**:
+  `integrated-route-security.mjs` — currently `NOT_RUN`.
   5) Record every result as `PASS`/`FAIL`/`NOT-RUN` with its exit code.
 - **Negative controls** — Do **not** start a paid provider, a hosted service or an external call to
   make any suite green. `NOT-RUN` is an honest verdict.
@@ -898,12 +1220,12 @@ recovery procedure exists; long-lead Operator inputs are requested.
      control.** Needs an explicit A-013 → A-022.4 disposition before Track T can build one.
   4. **Notification surfaces** — Lock §20.2 records `notifications` as
      `DEFERRED_BY_RATIFIED_DECISION`: *"no notification table, enum, RPC, audit action or delivery
-     mechanism exists,"* and creating one is a §12 stop-and-ask. Two of the eight U-25 families
+     mechanism exists,"* and creating one is a `CLAUDE.md` §12 stop-and-ask. Two of the eight U-25 families
      (staff notification, parent notification) are notification surfaces. Rule whether they are in
      Final MVP scope; until ruled, **both are blocked** and P3-T04 must not build them.
 - **Negative controls** — Building either table "just in case" is a schema change without
-  authority. Inventing an attendance affordance from no frame is a §12 stop-and-ask. Creating any
-  notification table, enum, RPC or audit action before a ruling is a §12 stop-and-ask.
+  authority. Inventing an attendance affordance from no frame is a `CLAUDE.md` §12 stop-and-ask. Creating any
+  notification table, enum, RPC or audit action before a ruling is a `CLAUDE.md` §12 stop-and-ask.
 - **Acceptance** — Four written dispositions.
 - **Tests/proofs** — n/a.
 - **Commit** — Recorded into the Authority Lock by the Operator's instruction, not by inference.
@@ -939,7 +1261,8 @@ recovery procedure exists; long-lead Operator inputs are requested.
 - **Commit** — By Operator instruction.
 - **Rollback** — n/a.
 - **Operator gate** — **YES**.
-- **Stop** — P2-T04…T07 cannot start unresolved.
+- **Stop** — **P2-T03, T04 and T05 cannot start unresolved** (the evidence tasks). P2-T06, P2-T07,
+  P2-T07a/b/c, P2-T09 and P2-T10 proceed without these rulings.
 
 ---
 
@@ -961,7 +1284,9 @@ before OD-4 lands makes an already-hard change harder. OD-4 also **reopens** the
 output, grounding, persistence, review, projection, **G-6** and **C4** contracts, so it cannot be a
 late one-shot.
 
-**Entry gate:** Operator authorization; Phase 0 exit.
+**PHASE 1 ENTRY** — Phase 0 exit; authorization to execute Phase 1 (explicit, or in-range under
+§7.6). ⚠️ **Plus the OD-4 Phase B authorization `CLAUDE.md` §12 requires** — a range grant is not
+that authorization (§7.6-A).
 **Owner:** Main Orchestrator, single writer, on `main`. **No worktrees. No parallel writers.**
 
 ---
@@ -1017,12 +1342,13 @@ late one-shot.
   REVOKE/GRANT** for the **six** changed signatures — all six carry panel columns (four as IN
   parameters, three in `RETURNS TABLE`): **six REVOKEs, five GRANTs**, because `report_store_draft`
   is REVOKE-only and keeps zero client EXECUTE under R-27. 7) Addition of the two new serializers
-  to **all six** zero-EXECUTE assertion carriers per §6.5 item 4, **and re-pinning both `<> 4`
-  arity assertions to 6**.
+  to **all EIGHT** zero-EXECUTE assertion carriers enumerated at §6.5 item 4 — **not six; six is the
+  new arity value, not the carrier count** — **and re-pinning both `<> 4` arity assertions to 6**.
+  Missing the eighth (`ct-static.mjs:214`) ships V2 with **no authoring-time static-scan coverage**.
 - **Negative controls** — **V1's body, `v_names` array, domain string, signature, ACL and COMMENT
   must not change.** V1 is preserved as historical semantics. **No historical-row backmigration is
   invented** — no production data requires one. `report_store_draft` keeps zero client EXECUTE
-  (R-27) — granting it is a §12 stop-and-ask. The management wording allow-list stays **exactly
+  (R-27) — granting it is a `CLAUDE.md` §12 stop-and-ask. The management wording allow-list stays **exactly
   four columns** — neither widened nor narrowed.
 - **Acceptance** — A design an independent reviewer can check against the ruling clause by clause.
 - **Tests/proofs** — Design review by a read-only adversarial reviewer.
@@ -1047,8 +1373,9 @@ late one-shot.
 - **Objective** — Land the OD-4 contract in the database.
 - **Authority** — P1-T02 design; §6.5 migration protocol.
 - **Depends on** — P1-T02.
-- **Files/systems** — new `supabase/migrations/<ts>_od4_report_contract.sql`; the four assertion
-  carriers' census arrays; every pinned migration count (12 → 13).
+- **Files/systems** — new `supabase/migrations/<ts>_od4_report_contract.sql`; **all eight**
+  zero-EXECUTE assertion carriers and every pinned census array (§6.5 item 4); every pinned
+  migration count (12 → 13).
 - **Owner** — Main Orchestrator, sole migration writer.
 - **Steps** — Per §6.5, all seven protocol items. Then apply locally and run
   `verify-fresh-apply.mjs`.
@@ -1249,7 +1576,7 @@ late one-shot.
   rejection and a true acceptance is not proven.
 - **Acceptance** — Ratified rule set; both proof cases pass; the fail-open at rule 3 closed or
   explicitly recorded.
-- **Tests/proofs** — Contradiction-case suite; `run-integration.mjs`.
+- **Tests/proofs** — Contradiction-case suite; `run-integration.mjs` (**real-provider leg OFF**, per §7.4a S-2).
 - **Commit** — `feat(ai): re-derived OD-4 grounding rules`.
 - **Rollback** — `git revert`.
 - **Operator gate** — **YES** — ratification of the rule set (design and proof may be built
@@ -1335,9 +1662,12 @@ late one-shot.
 - **Acceptance** — All gates `PASS`; all three §10 Phase 1 exit conditions demonstrated; persona
   sign-offs recorded; both reviews closed; `STATUS.md` and `BUILD_NOTES.md` updated.
 - **Tests/proofs** — Full ledger.
-- **Commit** — `chore(checkpoint): OD-4 contract foundation accepted`.
+- **Commit** — `chore(checkpoint): OD-4 contract foundation PASS (Operator Accepted outstanding)`.
 - **Rollback** — §11 R-2.
-- **Operator gate** — **YES** (phase exit).
+- **Operator gate** — **G-07 · CLASS A (local progression).** Requires an explicit Operator
+  authorization to enter Phase 2 **unless** a `STANDING_LOCAL_EXECUTION_AUTHORIZATION` (§7.6) whose
+  range covers Phase 2 is in force — in which case advance is permitted on meeting all ten §7.6-B
+  conditions. **This never converts the phase's `PASS` into an Operator `Accepted`.**
 - **Stop** — Any unresolved Critical/High.
 
 ---
@@ -1354,14 +1684,21 @@ capable of firing**. **This is the precondition for any parallel UI work.**
 are **strictly serial**. Non-DDL work may proceed alongside the current migration where files are
 disjoint.
 
-**Entry gate:** Operator authorization; Phase 1 exit; the P0-T09 and P0-T10 rulings in hand.
+**PHASE 2 ENTRY** — Phase 1 exit (G-07); authorization to execute Phase 2 (explicit, or in-range
+under §7.6).
+
+> **The P0-T09 and P0-T10 rulings gate their DEPENDENT TASKS, not phase entry** — P0-T09 items 1–2
+> gate P2-T06, item 3 gates P2-T02, item 4 gates P3-T04; P0-T10 gates P2-T03…T05. Auth hardening
+> (P2-T09), bootstrap (P2-T07) and the administration/invitation layers (P2-T07a/T07b) proceed
+> without them, which is what §14 rows 14–17 already record.
 
 > **⚠️ EXECUTION ORDER — this differs from the task numbering, and the order is load-bearing.**
 > Task IDs are stable labels, not a sequence. Execute in this order:
 >
 > `P2-T09 (auth hardening) → P2-T07 (bootstrap) → P2-T08 (seed trap) → P2-T07a (administration
-> write layer) → P2-T07b (invitation lifecycle) → P2-T01/T02 (attendance) → P2-T03…T06 (evidence)
-> → P2-T10 (draft transport) → P2-T11 → P2-T12 → P2-T13 → P2-T14`
+> write layer) → P2-T07b (invitation lifecycle) → P2-T07c (management read/statistics projections)
+> → P2-T01/T02 (attendance) → P2-T03…T06 (evidence) → P2-T10 (draft transport) → P2-T11 → P2-T12 →
+> P2-T13 → P2-T14`
 >
 > **Auth hardening comes first.** Lock §17.6 requires email confirmations enabled *"before any
 > invitation/claim flow is designed"*, and A-027 makes the normalized email the acceptance-time
@@ -1680,6 +2017,58 @@ disjoint.
 
 ---
 
+**P2-T07c — Governed management read and statistics projections**
+
+- **Objective** — Land **every management-facing read projection Track M needs but may not write**:
+  the deterministic aggregation behind the two **mandated-but-undrawn** panels, **and** the
+  administrative-read breadth packs 12, 14, 17, 18 and 20–27 depend on.
+- **Authority** — `CLAUDE.md` §6 (Class Health Summary's literal exhaustive four-condition table;
+  Management Insight's fixed three-slot template over a nine-row lookup; "Students Needing
+  Follow-up"); A-019; A-024 step 12; A-038 (row-level status gating).
+- **Depends on** — P2-T07a (the entities these aggregate over must be creatable).
+- **Why this exists** — Same failure mode P2-T07a closed for the *write* screens, unclosed for the
+  *read* ones. Verified at source: `server/modules/management-view/projections.ts` exports only
+  report-workflow projections — queue rows, review DTOs, corrections, submitted lists. **Nothing
+  statistical exists**, no Phase 1 or Phase 2 task creates it, and `server/**` is frozen to the
+  tracks under §7.3's closed-world rule. Without this, **P3-T04's step 4 is unbuildable and Track
+  M's first act on packs 13 and 16 is a blocker report.**
+- **Files/systems** — `server/modules/management-view/projections.ts`; the management port surface.
+- **Owner** — Main Orchestrator. Non-DDL, so it may run alongside the current migration.
+- **Steps** — 0) ⚠️ **Land the management ADMINISTRATIVE-READ projections first.** P2-T07a builds
+  the *write* RPCs (create/enrol/assign/link); **it builds no reads**, and
+  `server/modules/management-view/projections.ts` today exports only report-workflow shapes. Track M
+  therefore has no projection for the **management calendar** (pack 12 — A-019 explicitly requires
+  *"see created sessions in the management calendar"*), class modules and sessions, lesson plans
+  (14), students (17), student profile (18), or the read side of the creation/edit screens (20–27).
+  Land them, centre-scoped, with **A-038's row-level status gating** applied to every per-student
+  action row. **Without this, Track M stops on contact for eleven more packs — the same failure mode
+  this task exists to close.** 1) **Class Health Summary** (pack 13): evaluate `CLAUDE.md` §6's four conditions **top
+  to bottom, first match wins, exactly one result** — no fifth condition, no escalation tier for how
+  long a report has been pending. 2) **Management Insight** (pack 16): the three slots — main
+  follow-up area, most-improved dimension (with the *"Not enough session data yet"* fallback below
+  two sessions), and the fixed per-dimension recommended-action lookup. 3) **"Students Needing
+  Follow-up."** 4) Compute the **main follow-up area identically for both panels** — `CLAUDE.md` §6
+  requires the same fact stated consistently and **never computed two different ways**. 5) Aggregate
+  over **`submitted`** reports (both panels were corrected from "approved" at Step 7I1D-R2, because
+  `approved` never commits and has an empty referent at aggregate level).
+- **Negative controls** — **No LLM, ever, on either panel** — expanding them into AI-authored prose
+  silently pulls the deferred Weekly Class Health Brief into scope. **No raw per-dimension rating
+  reaches Management** (A-038 stands). No freeform generation. No sixth condition or tenth lookup
+  row invented.
+- **Acceptance** — Both panels computable from governed data; the shared follow-up-area fact
+  provably identical across the two; **every Track M pack has a governed read projection it can
+  consume from inside its own owned globs**; Trainer and Parent refused; no pre-trainer-approval
+  content reachable by Management.
+- **Tests/proofs** — Deterministic aggregation suite covering all four Class Health conditions and
+  the fallback branch; role-refusal matrix.
+- **Commit** — `feat(management): deterministic read and statistics projections`.
+- **Rollback** — `git revert`.
+- **Operator gate** — NO (`CLAUDE.md` §6 specifies both panels exhaustively). **YES** if either
+  panel appears to need a condition, slot or lookup row §6 does not list.
+- **Stop** — Any temptation to generate either panel's prose.
+
+---
+
 **P2-T09 — Auth and signup production hardening (local configuration)**
 
 - **Objective** — Close the identity hazards **before** any claim/invitation flow is designed.
@@ -1765,7 +2154,7 @@ disjoint.
   the `authenticator` and `authenticated` directions**; a **planted subject mismatch is refused**;
   the role is provably `NOBYPASSRLS` with zero table privileges.
 - **Tests/proofs** — `run-canonical.mjs` (T7I-4 still gives `42501`); the new `proacl` assertion
-  with a planted-violation firing proof; `run-integration.mjs`.
+  with a planted-violation firing proof; `run-integration.mjs` (**real-provider leg OFF**, §7.4a S-2).
 - **Commit** — `feat(ai): hosted-compatible governed draft transport (PA-OD-9)`.
 - **Rollback** — §11 **R-7**.
 - **Operator gate** — NO locally; the hosted credential is P6.
@@ -1863,7 +2252,8 @@ disjoint.
 **P2-T14 — Phase 2 acceptance**
 
 - **Objective** — Prove the backend is governed-complete before the UI forks.
-- **Depends on** — P2-T01…T13.
+- **Depends on** — P2-T01…T13, **explicitly including the lettered tasks P2-T07a, P2-T07b and
+  P2-T07c** — a numeric range does not name them.
 - **Owner** — Main Orchestrator + two read-only adversarial reviewers (security; migration safety).
 - **Steps** — Full local suite; the new attendance, evidence, storage, bootstrap, administration,
   invitation and transport proofs; every negative-control matrix; `audit_verify_chain` complete +
@@ -1871,15 +2261,19 @@ disjoint.
   sign-offs `CLAUDE.md` §3 requires before any phase-gate exit is declared met**.
 - **Acceptance** — All `PASS`; persona sign-offs recorded; reviews closed; continuity records
   updated.
-- **Commit** — `chore(checkpoint): backend governance completion accepted`.
+- **Commit** — `chore(checkpoint): backend governance completion PASS (Operator Accepted outstanding)`.
 - **Rollback** — §11 R-2.
-- **Operator gate** — **YES** (phase exit).
+- **Operator gate** — **G-10 · CLASS A (local progression).** Same rule as G-07: satisfiable
+  in-range under §7.6 on all ten conditions; otherwise an explicit Phase 3 authorization is
+  required. `Accepted` remains Operator-only.
 - **Stop** — Any unresolved Critical/High.
 
 ---
 
 **PHASE 2 EXIT** — Signup/confirmation hardened **first** · a fresh database is enterable · the
-governed administration and invitation write layers exist (A-024 steps 2–6 and 11) · attendance
+governed administration and invitation write layers exist (A-024 steps 2–6 and 11) · **every
+management read projection exists, including the two mandated-but-undrawn panels (Class Health
+Summary, Management Insight) and the administrative reads packs 12/14/17/18/20–27 need** · attendance
 initializes Present-by-default, writes and audits · evidence media exists with private storage and
 a proven must-fail matrix · the draft transport is hosted-capable with R-27 literally intact and
 the §18.2.1a subject match enforced · the server-action surface is known · membership-less
@@ -1892,7 +2286,27 @@ identities are refused everywhere.
 at a non-canonical route, 5 partial, 20 absent** — 20 of 33 portal screens have no implementation
 at all, and **no screen is marked visually aligned**.
 
-**Entry gate:** Operator authorization; Phase 2 exit; **P3-T00 landed on `main`**.
+**PHASE 3 ENTRY** — three conditions, none of which is a Phase 3 task:
+
+1. **Phase 2 exit satisfied** (G-10);
+2. **authorization to execute Phase 3 satisfied** under the execution-authorization model —
+   either a phase-specific Operator authorization, or a **standing local execution authorization
+   (§7.6)** whose named range covers Phase 3 and whose advance conditions are all met;
+3. **no unresolved blocking gate** — in particular P0-T09 item 3 (attendance control disposition)
+   and item 4 (notification-surface scope) for the tracks that depend on them.
+
+> ⚠️ **P3-T00 is NOT an entry condition — it is the first task inside this phase.** Requiring it to
+> enter the phase that contains it would be circular. **P3-T00 (and P3-T05a) are prerequisites to
+> the ROLE-TRACK FORK at P3-T01, not to entering Phase 3.**
+
+**Intra-phase order is serial → parallel → serial:**
+`P3-T00 → P3-T05a → P3-T01 (fork) → Tracks P/A · T · M → **P3-T07 (merge)** → **P3-T06 (route
+canonicalization + `proxy.ts`, on merged `main`)** → P3-T08 → P3-T09`.
+
+> ⚠️ **P3-T07 precedes P3-T06**, despite the numbering. P3-T06 rewrites `app/(portals)/**` — the
+> tracks' owned globs — on `main`; before the merge those reconstructed route files exist only on
+> the track branches, so the moves cannot be made and its acceptance cannot be evaluated. The
+> Phase 3 exit paragraph already reads merge-first.
 
 > ### ⚠️ PHASE 3 SHARED PRECONDITION — binding on ALL THREE tracks
 >
@@ -1920,7 +2334,7 @@ at all, and **no screen is marked visually aligned**.
 >
 > **4. Notification surfaces are BLOCKED** until P0-T09 item 4 is ruled (Lock §20.2:
 > `notifications` is `DEFERRED_BY_RATIFIED_DECISION`; no table, enum, RPC, audit action or delivery
-> mechanism exists, and creating one is a §12 stop-and-ask).
+> mechanism exists, and creating one is a `CLAUDE.md` §12 stop-and-ask).
 
 ---
 
@@ -1953,7 +2367,7 @@ at all, and **no screen is marked visually aligned**.
   7) ⚠️ **Relocate the two cross-owned files out of `features/trainer/**` and freeze them** (§7.3):
   `report-panel-config.ts` (**6 importers across all three tracks**) and `resource-state.ts`
   (**15 importers across all three tracks**). Both currently sit inside Track T's owned glob while
-  Tracks M and P/A import them — the exact cross-owned edit §14.3 condition 3 prohibits. Move them
+  Tracks M and P/A import them — the exact cross-owned edit `CLAUDE.md` §14.3 condition 3 prohibits. Move them
   to shared locations before the fork. 8) Record the **closed-world ownership rule** and the frozen
   list, including `proxy.ts`, `server/**`, `lib/**` and `app/page.tsx`.
 - **Negative controls** — No role-specific behaviour is added here. No pack is implemented here.
@@ -1971,21 +2385,28 @@ at all, and **no screen is marked visually aligned**.
 
 - **Objective** — Fork safely from the accepted baseline.
 - **Authority** — `CLAUDE.md` §14.3, §14.3a; §7.2 of this plan.
-- **Depends on** — P3-T00 committed to `main`; **and P3-T05a committed to `main`** — the parent
-  rating exclusion must land **before** Track P/A forks, or P3-T05 becomes unsatisfiable inside the
-  track (its data half touches frozen and unowned files).
+- **Depends on** — **P3-T00 AND P3-T05a**, both landed on `main` and both passed their checks.
 - **Owner** — Main Orchestrator.
-- **Steps** — Create `feat/final-mvp-parent-auth`, `feat/final-mvp-trainer`,
-  `feat/final-mvp-management`, each **fresh from the P3-T00 `main` SHA**, in shallow paths. Record
+- **Steps** — 1) Confirm P3-T00 and P3-T05a are both in and green. 2) **Resolve
+  `P3_ROLE_TRACK_BASELINE`** = `git rev-parse HEAD` on `main` at that moment (§7.3), and **record
+  the resolved SHA in `STATUS.md`** so a resuming session can verify where the tracks actually
+  forked from. 3) Create `feat/final-mvp-parent-auth`, `feat/final-mvp-trainer`,
+  `feat/final-mvp-management`, **each from that same resolved SHA**, in shallow paths. 4) Record
   the ownership table (§7.3) and the merge order **P/A → T → M** before any writer starts.
 - **Negative controls** — **Never reuse `feat/48h-backend`, `feat/48h-frontend` or their old
-  directories.** Never branch from a `frozen/*` tag.
-- **Acceptance** — Three worktrees, each at the same baseline SHA, ownership recorded.
+  directories.** Never branch from a `frozen/*` tag. **Do not fork from P3-T00's commit if P3-T05a
+  landed after it** — a fork predating P3-T05a makes P3-T05 unsatisfiable inside Track P/A. If the
+  three worktrees are ever found at different SHAs, that is a **halt**, not a rebase-and-continue.
+- **Acceptance** — Three worktrees, **all three at the identical resolved
+  `P3_ROLE_TRACK_BASELINE` SHA** (verify with `git worktree list`, not by assumption), that SHA
+  recorded in `STATUS.md`, ownership table and merge order recorded.
 - **Tests/proofs** — `git worktree list`.
 - **Commit** — n/a.
 - **Rollback** — `git worktree remove` (nothing written yet).
-- **Operator gate** — **YES** — worktree creation is an Operator decision except where this plan
-  requires it; this plan requires it, so confirm rather than ask.
+- **Operator gate** — **G-11 · CLASS A (local progression).** `CLAUDE.md` §12 carves out
+  `git worktree add` where `CLAUDE.md` §14.3 requires a new isolated worktree, and this plan requires exactly
+  these three. In-range under §7.6, create them and record the resolved baseline; outside a
+  standing authorization, confirm with the Operator first.
 - **Stop** — Any writer starting before ownership is recorded.
 
 ---
@@ -2005,7 +2426,9 @@ at all, and **no screen is marked visually aligned**.
   the reference, honouring each pack's `screen.md` prohibitions. 3) The three AUTH packs share one
   route and one shell — **one work item, not three**. 4) Build loading/empty/validation/error/
   success/disabled states, not only the happy path.
-- **Negative controls** — Q-27 (see P3-T04). Parent must receive **no** aggregate rating chip —
+- **Negative controls** — **Q-27 — its data half is discharged at P3-T05a (before this track forks)
+  and its UI half at P3-T05, both inside this track's scope; neither is Track M's.** Parent must
+  receive **no** aggregate rating chip —
   the reference draws one on every report row and it is deliberately not implemented. No
   per-dimension grid, no "Overall grade" chip. **`Auth 04 - All Users - Forgot Password` has no
   governed counterpart, no screen ID, no Figma node, and is NOT screen 37 — do not implement it and
@@ -2052,7 +2475,9 @@ at all, and **no screen is marked visually aligned**.
 
 - **Objective** — Packs 11–27 and 29 to acceptance, plus the derived governed management surfaces.
 - **Authority** — As P3-T02; A-034; cleanup manifest **Q-20**; Lock §28.4 (U-25).
-- **Depends on** — P3-T01.
+- **Depends on** — P3-T01; **P2-T07a** (the six creation/edit screens' write contracts) and
+  **P2-T07c** (every management read projection, including the two mandated panels). Track M cannot
+  write `server/**`, so both must be on `main` before the fork.
 - **Owner** — Writer subagent, `feat/final-mvp-management`.
 - **Steps** — 1) Packs 11–27, 29. **Pack 28 (Management Term Report) is separately governed and out
   of MVP scope — implementing it is a stop-and-ask.** 2) Build the derived governed surfaces for
@@ -2063,7 +2488,8 @@ at all, and **no screen is marked visually aligned**.
   authoritative Figma screens**. ⚠️ **The remaining two U-25 families — staff notification and
   parent notification — are BLOCKED** pending P0-T09 item 4; do not build them.
   3) Keep the wording editor genuinely wording-only in presentation, matching the server contract.
-  4) ⚠️ **Build the two MANDATED-BUT-UNDRAWN management panels.** `CLAUDE.md` §6 ratifies **Class
+  4) ⚠️ **Build the two MANDATED-BUT-UNDRAWN management panels** — their server-side aggregation is
+  landed by **P2-T07c**, which this track depends on and may not write itself. `CLAUDE.md` §6 ratifies **Class
   Health Summary** (pack 13) as a literal, exhaustive four-condition table and **Management
   Insight** (pack 16) as a fixed three-slot template over a nine-row lookup, plus *"Students
   Needing Follow-up"*. Phase A records screen 16 as *"the most inverted screen in the pack —
@@ -2073,7 +2499,7 @@ at all, and **no screen is marked visually aligned**.
   omits them and a reference-driven visual sweep passes. Both carry an explicit anti-AI guardrail:
   neither may be expanded into AI-authored prose, which would pull the deferred Weekly Class Health
   Brief into scope. **No LLM, ever, on either panel.**
-- **Negative controls** — **Inventing a Figma frame, node ID or field for any U-25 family is a §12
+- **Negative controls** — **Inventing a Figma frame, node ID or field for any U-25 family is a `CLAUDE.md` §12
   stop-and-ask.** Management must never see raw per-dimension assessment data — A-038's bar stands
   and **Q-27 grants Management nothing**. **GC counts, stated precisely — the register is not
   Management-only:** **GC-6** (per-dimension rating surfaces the frame draws but governance forbids)
@@ -2094,32 +2520,54 @@ at all, and **no screen is marked visually aligned**.
 
 ---
 
-**P3-T05a — Q-27 data boundary: parent-projection rating exclusion (serial, on `main`)**
+**P3-T05a — Parent read-projection layer: Q-27 data boundary AND the projections Track P/A cannot build (serial, on `main`)**
 
-- **Objective** — Discharge Q-27's **data** half at the layer that actually governs it, before any
-  UI track can accidentally depend on ratings being available.
+- **Objective** — Land **every parent-facing read projection Track P/A will need but may not
+  write**, with Q-27's data boundary structural from the start. ⚠️ **Scope widened after adversarial
+  review:** the rating *exclusion* alone is not enough. Two Track P/A obligations require parent
+  projections that **do not exist today** and live in `server/**` (never in Track P/A's globs) and
+  in frozen contracts — so without them the track hits §7.3's "stop on contact" rule on **mandatory**
+  work, exactly as it would have on Q-27 criterion 4:
+  1. **P3-T05 criterion 2 — Profile Details** must be *built*, and `server/modules/parent-view/
+     projections.ts` today exports only report-list, availability and canonical-report shapes. No
+     profile projection exists.
+  2. **P3-T02 / pack 31 — Parent Calendar**, whose Lock §15 remediation the Phase 3 shared
+     precondition makes mandatory, has no parent calendar projection at all.
 - **Authority** — **Lock §15.2**: *"Parent users must not receive the nine-dimension assessment
   ratings through the Parent experience at all"* — excluded from Parent-facing **DTOs and
   projections**, **RPC results**, **APIs and server actions**, and **any client payload reachable
   by a Parent session**. *"Fetching the ratings into the Parent client and hiding them with CSS is
   a violation, not a compliance path … the exclusion happens at the governed projection/data
   layer."*
-- **Depends on** — P3-T00. **Executed before the tracks fork.**
+- **Depends on** — P3-T00. **Executed on `main` immediately after P3-T00 and before the tracks
+  fork — it is the second half of `P3_ROLE_TRACK_BASELINE` (§7.3).**
 - **Files/systems** — `server/modules/parent-view/projections.ts`;
   `server/modules/integration-adapter/adapter-dtos.ts`;
-  `lib/frontend/contracts/physical-test.ts`; the parent-reachable RPC surface.
+  `lib/frontend/contracts/physical-test.ts`; `lib/frontend/physical-test-port.ts`;
+  `lib/frontend/adapters/real-participant-port.ts`; the parent-reachable RPC surface. **All of these
+  are `server/**` or on §7.3's frozen list — which is precisely why this task exists.**
 - **Owner** — **Main Orchestrator, on `main`.** Not a track.
 - **Steps** — 1) Prove, from the type and RPC surface rather than by reading the UI, that no
   parent-reachable DTO, projection, RPC result, server action or client payload can carry a
   dimension rating. 2) Where the current shape merely *happens* not to include them, make the
   exclusion **structural** so a later widening cannot reintroduce it silently. 3) Add a firing-
-  proven negative test.
+  proven negative test. 4) **Land the parent profile-details projection** carrying only the governed
+  fields — Guardian, Class, assigned Trainer, enrolment date — and **structurally excluding the
+  three fields Lock §15 records as defects: the child's date of birth, contact details, and the
+  "Trainer Assistant (TA)" field.** 5) **Land the parent calendar projection** for pack 31, with the
+  Lock §15 leaks structurally excluded — **no rating, no rating-derived colouring, and no trainer
+  observation**, `Parent - Calendar.md:13` being *"the worst single line"* and `:23` the one a
+  remediation working only from `:13` would leave standing. 6) Extend the port contract and adapter
+  so Track P/A can consume all of it without touching a frozen file.
 - **Negative controls** — The test must **fail** when a rating field is deliberately planted into a
   parent projection. A test that passes on both the compliant and the planted shape proves nothing.
-- **Acceptance** — Structural exclusion proven at the projection/RPC layer, with the planted-field
-  case demonstrated failing.
+  **The same planted-field proof is required for DOB, contact details, the TA field and a trainer
+  observation** — each must be shown to be structurally unrepresentable, not merely absent today.
+- **Acceptance** — Structural exclusion proven at the projection/RPC layer with every planted-field
+  case demonstrated failing; **and Track P/A can satisfy P3-T05 criterion 2 and pack 31 entirely
+  inside its own owned globs.** If it cannot, this task is incomplete and the fork must not happen.
 - **Tests/proofs** — Parent-projection leak test (contract + runtime), retained as evidence.
-- **Commit** — `feat(parent): structural rating exclusion at the projection layer (Q-27)`.
+- **Commit** — `feat(parent): governed parent read projections with structural exclusions (Q-27, Lock §15)`.
 - **Rollback** — `git revert`.
 - **Operator gate** — NO (ruled); **any deviation is a stop**.
 - **Stop** — Any rating reachable by a Parent session by any path.
@@ -2131,7 +2579,7 @@ at all, and **no screen is marked visually aligned**.
 - **Objective** — Discharge the five acceptance criteria the Authority Lock **requires** this plan
   to carry.
 - **Authority** — **Lock §15.2, verbatim mandatory carry-forward.** Q-27 ratified 2026-08-08.
-- **Depends on** — **P3-T05a** (below); P3-T02.
+- **Depends on** — **P3-T05a** (defined above, and executed before the fork); P3-T02.
 - **Files/systems** — `features/parent/parent-dashboard.tsx` **only** — this task is the UI half.
 - **Owner** — Track P/A writer; verified by the Main Orchestrator.
 - ⚠️ **Split, because the data half cannot be executed by this owner.** Criterion 4 is a
@@ -2152,8 +2600,8 @@ at all, and **no screen is marked visually aligned**.
      ⚠️ **Build it EXCLUDING three fields the reference draws.** `Parent - Dashboard.md:20` lists
      *"date of birth, Parent, contact, Class, assigned Trainer, **Trainer Assistant (TA)**, and
      enrolment date."* Lock §15's table records **two separate defects** in that line — *a child's
-     date of birth and contact details on a parent surface*, against §15's four-prose-panels-only
-     rule; and a **"Trainer Assistant (TA)" field**, when §4 records there is no TA role and the TA
+     date of birth and contact details on a parent surface*, against Lock §15's four-prose-panels-only
+     rule; and a **"Trainer Assistant (TA)" field**, when Lock §4 records there is no TA role and the TA
      flow is deferred under A-014. **Lock §15.2 states expressly that Q-27 does not resolve them**,
      and pack 30's `implementation-notes.md` records no conflict for them — **Lock §15's table is
      the only record, so it must be carried here or the defect ships.** Their omission is
@@ -2187,8 +2635,9 @@ at all, and **no screen is marked visually aligned**.
 - **Objective** — Close the nine recorded route mismatches and the six unmapped implemented routes.
 - **Authority** — `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §7.2/§7.4 (the authority for
   canonical routes); Q-23; Q-20.
-- **Depends on** — P3-T02/T03/T04 in their tracks; executed at integration to avoid three tracks
-  moving routes at once.
+- **Depends on** — **P3-T07 (the merge)**. Executed on merged `main`, not at fork time: before the
+  merge the reconstructed route files exist only on the track branches. This also avoids three
+  tracks moving routes at once.
 - **Files/systems** — `app/(portals)/**`; **`proxy.ts`** — its `PORTAL_PREFIXES` and route matcher
   hardcode the paths being moved, and it is **layer 1 of 2 of server-side portal authorization**
   (there is no `middleware.ts`, and the two may never coexist); **`scripts/physical-test/
@@ -2231,8 +2680,15 @@ at all, and **no screen is marked visually aligned**.
 - **Tests/proofs** — Post-merge full static suite after each merge.
 - **Commit** — One merge commit per track.
 - **Rollback** — §11 R-3.
-- **Operator gate** — NO.
-- **Stop** — An acceptance that does not survive the merge.
+- **Operator gate** — **PARTIAL. Merging and conflict resolution: NO.** ⚠️ **Worktree DELETION and
+  the anchor TAG that must precede it: YES — Class B.** `CLAUDE.md` §12's carve-out covers
+  `git worktree add` **only** — *"creating or deleting a worktree is otherwise an Operator
+  decision"* — and `CLAUDE.md` §12 separately bars an unauthorized `tag`. Obtain both in one instruction, ideally
+  the same one that grants G-11. **Leaving the worktrees in place until the gate is granted is the safe
+  default — but PHASE 3 EXIT and §7.2 item 6 both require removal, so this gate must be obtained
+  before the phase closes, not skipped.**
+- **Stop** — An acceptance that does not survive the merge; or deletion/tagging without that
+  authorization.
 
 ---
 
@@ -2277,9 +2733,13 @@ at all, and **no screen is marked visually aligned**.
   scope (separately governed)` rather than manufacturing a verdict.** Each other pack is `PASS` or
   an explicitly ruled deviation. Persona sign-off recorded.
 - **Tests/proofs** — The sweep record; `/reference/` SHA re-verification.
-- **Commit** — `docs(ui): visual acceptance sweep`.
+- **Commit** — `docs(ui): visual acceptance sweep PASS (Operator Accepted outstanding)`.
 - **Rollback** — n/a.
-- **Operator gate** — **YES** (visual acceptance is Operator-accepted, per pack).
+- **Operator gate** — **G-13 · CLASS B.** Record the evidence-backed `PASS` per pack; **the
+  Operator's per-pack `Accepted` is a genuine task-specific acceptance and no standing authorization
+  satisfies it.** It must be granted before any pack's visual verdict is cited as submission
+  evidence, and while pending it blocks the Phase 3 boundary. **Never write an acceptance record on
+  the Operator's behalf.**
 - **Stop** — Any deviation without a ruling.
 
 ---
@@ -2295,7 +2755,8 @@ every branch preserved.
 
 **Nature:** the last fully local gate. Nothing hosted may begin until this passes.
 
-**Entry gate:** Operator authorization; Phase 3 exit. **Validation is a global mutex (S5).**
+**PHASE 4 ENTRY** — Phase 3 exit; authorization to execute Phase 4 (explicit, or in-range under
+§7.6). **Validation is a global mutex (S5).**
 
 ---
 
@@ -2373,13 +2834,16 @@ every branch preserved.
   authorization, evidence privacy, parent no-rating projection.
 - **Negative controls** — N-11 (canonical database byte-identical before and after), N-12 (no
   residue), N-15 (real participant adapter, not fixture), N-10 (no external provider call possible
-  from the served process) must all still hold.
+  from the served process) must all still hold. **N-10 is discharged by §7.4a S-1's selector
+  overwrite — record the read-back proof, not the intention.**
 - **Acceptance** — 29+ lines, no `FAIL`, no silent default, carve-outs declared in both the ledger
   **and** the summary.
 - **Tests/proofs** — The C4 ledger plus screenshots.
 - **Commit** — `test(c4): governed lifecycle re-proof under OD-4 and the new transport`.
 - **Rollback** — n/a (proof run).
-- **Operator gate** — **YES** (acceptance).
+- **Operator gate** — **G-14 · CLASS B.** Record `PASS` on the 29+ ledger; **the Operator's
+  `Accepted` on the C4 re-proof is task-specific and is not satisfiable by a standing
+  authorization.** Pending until granted.
 - **Stop** — Any ledger line `FAIL`; any deviation not declared.
 
 ---
@@ -2415,7 +2879,9 @@ every branch preserved.
 
 **P4-T07 — Route, access-control and projection census**
 
-- **Steps** — `integrated-route-security.mjs` against a served origin (**currently `NOT_RUN`**);
+- **Steps** — ⚠️ **Serve under §7.4a** — this is the task §7.4a exists for: this suite explicitly
+  requires a build made **without** fixture mode, which is exactly the billable configuration.
+  Then: `integrated-route-security.mjs` against that served origin (**currently `NOT_RUN`**);
   `three-role-browser-smoke.mjs`; `sign-out-terminates-session.mjs`;
   `portal-navigation-active-state.mjs`; per-role projection diff. **Acceptance:** every guarded
   route guarded at all four layers; unauthenticated and unauthorized remain byte-identical
@@ -2428,8 +2894,12 @@ every branch preserved.
 - **Steps** — Two independent read-only reviewers instructed to falsify: (1) product/governance/UI;
   (2) technical/security/execution. Remediate every valid Critical/High. **Record the persona
   sign-offs (`CLAUDE.md` §3).** Update `STATUS.md` and `BUILD_NOTES.md`. **Acceptance:** all matrix
-  rows owned by Phase 4 are `PASS`; persona sign-offs recorded; both reviews closed. **Commit:** `chore(checkpoint): local acceptance`. **Operator gate:** **YES** (phase
-  exit — and the gate for everything hosted). **Stop:** any unresolved Critical/High.
+  rows owned by Phase 4 are `PASS`; persona sign-offs recorded; both reviews closed. **Report every
+  outstanding Operator `Accepted` (G-13 per-pack, G-14) as still outstanding.** **Commit:** `chore(checkpoint): local acceptance PASS (Operator Accepted outstanding)`. **Operator gate:** **YES** (phase
+  exit). ⚠️ **G-15 · CLASS B/C — a HARD STOP that no standing local authorization can satisfy**,
+  because it is simultaneously the terminus of the eligible local range (Phases 0–4) and the gate
+  for **everything hosted**. Even under a `Plan Phases 0–4` grant, **stop here and return to the
+  Operator.** **Stop:** any unresolved Critical/High.
 
 ---
 
@@ -2440,8 +2910,14 @@ new contracts. **This is the precondition for every remaining phase.**
 
 ### PHASE 5 — BOUNDED REAL-PROVIDER RE-PROOF (G-6)
 
-**Nature:** a real, paid, external call. **The only phase whose entry gate must be re-obtained
-immediately before execution** — a prior authorization never carries forward.
+**PHASE 5 ENTRY** — Operator authorization; **Phase 4 exit (G-15)**; and **G-16 obtained
+immediately before P5-T02 itself**, separately from phase entry.
+
+**Nature:** ⚠️ **NOT a local-only phase.** It runs on local application code and local
+infrastructure, but its core task **makes real, paid, external OpenAI requests** — so it sits
+outside every standing local execution authorization by construction (§7.6-A, §7.6-C item 6).
+**The entry gate must be re-obtained immediately before execution** — a prior authorization never
+carries forward, not from an earlier G-16, not from a phase range, not from a configured key.
 
 ---
 
@@ -2460,7 +2936,7 @@ immediately before execution** — a prior authorization never carries forward.
 - **Objective** — Re-prove G-6 against the **final** OD-4 AI contract, the **final** draft-storage
   transport, and the final provider integration.
 - **Authority** — Lock §18.5 (*"acceptance is closed to the docker transport only — must be
-  re-proven against the replacement channel"*); `CLAUDE.md` §14.7 (OD-4 reopens G-6); §12 gate 5.
+  re-proven against the replacement channel"*); `CLAUDE.md` §14.7 (OD-4 reopens G-6); §7.4 condition 5 and `CLAUDE.md` §12's spending bullet.
 - **Depends on** — P4-T08; P2-T10.
 - ⚠️ **Scope limit that must be declared, not discovered.** The ratified transport is *"a dedicated
   minimally-privileged login role over **a direct pooled connection**"* (PA-OD-9), and Lock §18.2
@@ -2475,8 +2951,11 @@ immediately before execution** — a prior authorization never carries forward.
   `--activate-real-provider` — the byte-exact flag; no `=1`, `=true` or `=yes` variant is accepted.
   3) Requires an **interactive TTY**; there is no non-interactive path, not an environment
   variable, not a piped answer, not a CI runner. 4) Confirm each call at the visible per-call
-  prompt. 5) **Exactly two live billable requests**; the confirmation explicitly covers both
-  attempts of the bounded retry so a confirmation can never silently become three. 6) Compute G-6
+  prompt. 5) **Two confirmed generations, each covering UP TO TWO real requests** — the harness's own
+  wording is *"at minimum 2 and at most 4 real, billable requests in total, never more."* **State
+  that RANGE to the Operator, never a single number.** Each confirmation covers both attempts of
+  `requestDraftCore`'s bounded retry, so a confirmation can never silently become a third call for
+  that report. 6) Compute G-6
   **only** from the sixteen ledger conditions.
 - **Negative controls** — The trip-wire refuses any host that is neither loopback nor the single
   allowed host, and records refusals. `LLM_API_KEY` is inherited from the shell and **never** read
@@ -2495,6 +2974,7 @@ immediately before execution** — a prior authorization never carries forward.
 
 **P5-T03 — Evidence and scope declaration**
 
+- **Depends on** — P5-T02.
 - **Steps** — Record the ledger and **declare the scope honestly**: these are *"sixteen G-6
   **evidence** conditions"*, not sixteen real-provider conditions — at least four are structural or
   static rather than runtime provider tests, and conditions 9 and 13 are structural. **Acceptance:**
@@ -2503,12 +2983,20 @@ immediately before execution** — a prior authorization never carries forward.
 
 ---
 
+**PHASE 5 EXIT** — P5-T01 pre-flight clean with zero outward calls · **P5-T02 `PASS` on all 16 G-6
+conditions**, both drafts reaching `draft_ready` through the new governed transport, with
+`report_store_draft`'s ACL literally unchanged and grounding unbypassable · P5-T03's honest scope
+declaration recorded, including the **pooler leg declared `NOT-RUN` and assigned to P6-T07b**.
+
+---
+
 ### PHASE 6 — HOSTED SUPABASE
 
 **Nature:** the first time anything leaves this machine. **Operator/credential gate.** Getting the
 region wrong means **re-provisioning, not reconfiguring** — it is one-shot at project creation.
 
-**Entry gate:** Operator authorization **plus** credentials. Phase 4 exit and Phase 5 complete.
+**PHASE 6 ENTRY** — Operator authorization (**G-17**) **plus** credentials; **Phase 4 exit (G-15)**;
+and **Phase 5 exit as defined immediately above** — not a reduced reading of it.
 
 ---
 
@@ -2653,12 +3141,18 @@ draft channel proven, management bootstrapped, and three role identities usable.
 
 ### PHASE 7 — VERCEL DEPLOYMENT
 
+**PHASE 7 ENTRY** — Operator authorization; **Phase 6 exit** — a hosted project in the recorded
+region, all migrations applied forward-only with the posture re-proven from the live hosted
+catalogue, auth hardened, private Storage governed, the draft channel proven (G-AI), management
+bootstrapped, and three role identities usable.
+
 **Nature:** the first public deployment. **Public-exposure gate.**
 
 ---
 
 **P7-T01 — Deployment configuration**
 
+- **Depends on** — Phase 6 exit.
 - **Steps** — `next.config.ts` is currently an **empty scaffold** — add security headers and CSP,
   `poweredByHeader: false`. Set `export const runtime = "nodejs"` explicitly on **any route
   touching the draft transport** (never Edge). Set `maxDuration` to cover the 60-second provider
@@ -2717,7 +3211,8 @@ AI feature functional in the deployed system.
 human usability research** — the two must never be conflated, and neither may be reported as the
 other (Lock §26.4, absolute).
 
-**Entry gate:** Operator authorization; Phase 7 exit.
+**PHASE 8 ENTRY** — Operator authorization; **Phase 7 exit** — a publicly accessible deployment
+with all three roles signing in on the hosted origin.
 
 ---
 
@@ -2823,8 +3318,16 @@ three roles, with every isolation and privacy control demonstrated firing.
 browser-test, integration-test or synthetic-fixture evidence substitutes for a single real
 participant.** Currently **zero human usability evidence exists** in this workspace.
 
-**Entry gate:** Operator authorization **and** participants. The recruitment gate was armed at
-P0-T07 because this is the longest-lead item in the project and is gated on nothing.
+**PHASE 9 ENTRY** — Operator authorization (**G-21**); **Phase 8 exit**; and the P0-T07 recruitment
+request already **issued** to the Operator.
+
+> ⚠️ **Participants are NOT an entry condition — they are P9-T01's OUTPUT, and P9-T01 is the first
+> task inside this phase.** Requiring them to enter the phase that produces them would be circular,
+> the same shape as the P3-T00 defect. What must be true to enter is that Phase 8 is done and the
+> Operator is ready to proceed with human subjects.
+
+The recruitment gate was armed at P0-T07 because this is the longest-lead item in the project and is
+gated on nothing — **arming it neither enters this phase nor discharges it**.
 
 ---
 
@@ -2884,7 +3387,7 @@ P0-T07 because this is the longest-lead item in the project and is gated on noth
   **demonstrate the improved prototype**. The brief requires **"improvements made based on testing
   documented"** and the presentation rubric grades **Testing & Iteration** on evidence of
   refinement — so testing without a visible improvement leg scores as minimal.
-- **Negative controls** — A remediation that changes governed behaviour is a §12 stop-and-ask, not
+- **Negative controls** — A remediation that changes governed behaviour is a `CLAUDE.md` §12 stop-and-ask, not
   a usability fix.
 - **Acceptance** — A traceable line from finding → change → redeployed system.
 - **Commit** — Per remediation.
@@ -2920,7 +3423,10 @@ made as a result** — with no document implying human subjects where there were
 deployment gap** — the Design Workbook / Final Report and its supporting research artefacts do not
 exist in this workspace at all.
 
-**Entry gate:** Operator authorization; Phases 8 and 9 complete.
+**PHASE 10 ENTRY** — Operator authorization; **Phase 8 exit AND Phase 9 exit**. ⚠️ **Phase 9
+completion is mandatory** — the brief requires usability testing *and documented improvements made
+as a result*, and P10-T04/T08 consume P9's findings register and remediation trace. Arming
+recruitment at P0-T07 does not discharge it.
 
 ---
 
@@ -3073,7 +3579,7 @@ exist in this workspace at all.
   the flow and the AI feature** — recorded as *"the most operationally significant requirement in
   either PDF for an agent-built codebase"*, and previously omitted.
 - **Negative controls** — *"The AI feature responds"* is a **real billable call** on the deployed
-  build (no fixture path, gate G-19). Rehearsal repetitions cost money.
+  build (no fixture path, **Phase A gate G-19**). Rehearsal repetitions cost money.
 - **Acceptance** — A rehearsed, working demonstration.
 - **Operator gate** — **YES — PAID (G-16e)** for each AI-feature rehearsal/demo call; NO for the
   rest. **Stop:** any broken flow on the public URL.
@@ -3118,13 +3624,20 @@ Every meaningful checkpoint records, in `STATUS.md` (replacing) and `BUILD_NOTES
 4. **working-tree state** — clean, or every dirty path classified;
 5. **completed acceptance gates**, each `PASS`/`FAIL`/`NOT-RUN` with its evidence pointer;
 6. **pending gates**;
-7. **blockers**, in the §15.5 schema, with blast radius recorded as *neither passing nor failing*;
+7. **blockers**, in the `CLAUDE.md` §15.5 schema, with blast radius recorded as *neither passing nor failing*;
 8. the **next exact task**, by ID;
 9. **whether hosted, provider and human actions are currently authorized** — and that a prior
    authorization does **not** carry forward;
 10. **starting HEAD → ending HEAD**, migration/schema changes (or an explicit "none"), reviewer
     findings and their remediation, Operator decisions received, environment changes, and
-    cleanup/rollback state (whether any partial mutation occurred).
+    cleanup/rollback state (whether any partial mutation occurred);
+11. **any `STANDING_LOCAL_EXECUTION_AUTHORIZATION` in force** — its **named range**, its date and
+    its granting instruction. **An unrecorded standing authorization does not exist** (§7.6-A), and
+    a session that cannot find the range recorded must not assume one;
+12. **every outstanding Operator `Accepted`** that a `PASS` did not and cannot produce — per-pack
+    visual (G-13), C4 (G-14), and any other **Class B** gate reached during the run;
+13. once resolved, the **`P3_ROLE_TRACK_BASELINE` SHA** and the three worktree branches forked from
+    it, so a resuming session can verify the fork point rather than trust it.
 
 **Never record** an API key, password, service-role key, authorization header, connection string,
 other secret, real participant data, or raw private AI content. Verdicts, counts, routes and public
@@ -3145,11 +3658,17 @@ checksums only. **Never paste a subagent transcript. Subagents never write proje
    project created with no record, a deployment live with no entry, an email sent, a push landed.
 4. **If recorded state and actual state disagree, pause and reconcile before doing any work.**
    Existence governs facts. Never continue from stale status.
-5. Confirm the current phase is still authorized. **Authorization is per phase and does not carry
-   forward across a session boundary for hosted, provider, human or push actions.**
+5. Confirm the current phase is still authorized — either by an explicit phase authorization, or by
+   a recorded `STANDING_LOCAL_EXECUTION_AUTHORIZATION` that passes **all four** §7.6-D resume
+   conditions (range still recorded · state agrees with the records · current task inside the range
+   · no hard gate pending). If any fails, **the standing authorization is not in force this
+   session** — report and ask. **Authorization never carries forward across a session boundary for
+   hosted, provider, human, public, push or submission actions.**
 6. Resume at the recorded next task ID, or at the start of the interrupted task if its acceptance
-   is `NOT-RUN`. ⚠️ **Carve-out — never auto-resume a task whose Operator gate is PAID, HOSTED,
-   PUBLIC, HUMAN or PUSH.** For those, an acceptance of `NOT-RUN` means the side effect may
+   is `NOT-RUN`. ⚠️ **Carve-out — never auto-resume a task that is PAID, HOSTED, PUBLIC, HUMAN, PUSH or
+   SUBMISSION, or an interrupted DESTRUCTIVE one. Key this off CAPABILITY, not off the recorded
+   gate class** — a task recorded `Operator gate — NO` that can still reach an external host, a
+   paid provider, a credential or a destructive command is equally non-auto-resumable. For those, an acceptance of `NOT-RUN` means the side effect may
    *already have happened* without being recorded, and §7.4 condition 13 makes re-attempting a
    failed billable, hosted, destructive or production-facing operation a stop-and-ask. Establish
    what actually happened externally, report it, and **re-obtain the gate** — a blind rerun spends
@@ -3172,52 +3691,73 @@ PASS · SUPERSEDED`. **Code existing is not work being complete.** Only the Oper
 > draft channel). Those are always written **"Phase A G-nn"**, "**G-SG**" or "**G-AI**" in this
 > document. A bare `G-nn` always means this table.
 
-| Gate | Where | Nature |
+**Every gate carries a CLASS, so a fresh session can tell at a glance what will actually make it
+return to the Operator during an authorized local run:**
+
+| Class | Meaning | Behaviour under an in-range `STANDING_LOCAL_EXECUTION_AUTHORIZATION` (§7.6) |
 |---|---|---|
-| G-00 | Authorize this plan | Entry |
-| **G-00a** | **P0-T04** | **Bounded annotate-never-delete instruction for the run** (`CLAUDE.md` §12) |
-| G-01 | P0-T06 | Baseline tag / off-machine copy |
-| G-02 | P0-T07 | **Human participant recruitment** (armed early) |
-| G-03 | P0-T08 | External-input answers |
-| G-04 | P0-T09 | `report_source_map` · `session_logs` · attendance visual disposition |
-| G-05 | P0-T10 | Seven evidence pre-rulings, incl. **audit-registry amendment** |
-| **G-05a** | **P1-T02** | **OD-4 §5.1 content-hash envelope ruling** (confirm Q-6's V2-parallel disposition) |
-| G-06 | P1-T09 | Grounding rule-4 rule set ratification |
-| G-07 | P1-T11 | Phase 1 exit |
-| G-08 | P2-T07 | Bootstrap design — the `CLAUDE.md:163` vs §5.7 resolution |
-| G-09 | P2-T09 | Captcha and SMTP provider selection |
-| G-10 | P2-T14 | Phase 2 exit |
-| G-11 | P3-T01 | Worktree creation confirmation |
-| G-12 | P3-T06 | Route-compatibility execution |
-| G-13 | P3-T09 | Per-pack visual acceptance |
-| G-14 | P4-T04 | C4 re-proof acceptance |
-| G-15 | P4-T08 | **Phase 4 exit — the gate for everything hosted** |
-| G-16 | P5-T02 | **PAID provider invocation — immediately before, never inherited** |
-| **G-16b** | **P6-T07b** | **PAID** — the G-6 pooled-transport leg |
-| **G-16c** | **P7-T04** | **PAID** — the "AI feature functional hosted" verification call |
-| **G-16d** | **P8-T02** | **PAID** — the hosted UAT AI-draft request |
-| **G-16e** | **P10-T10** | **PAID** — each AI-feature rehearsal and demonstration call |
-| **G-16f** | **P8-T03** | **PAID** — the second report's AI draft (the return-to-trainer leg needs one) |
-| **G-16g** | **P9-T03** | **PAID** — participant sessions exercising the AI feature. **The largest uncontrolled spend surface in the plan**: participants × drafts. Budget and authorize a call ceiling before the first session |
-| **G-16h** | **P10-T06** | **PAID** — AI-feature calls made while recording the video |
-| G-17 | P6-T01…T10 | **Hosted provisioning and credentials** (each sub-gate) |
-| G-18 | P7-T02 | Production secrets |
-| G-19 | P7-T03 | **First public deployment** |
-| G-20 | P8-T06 | UAT acceptance |
-| G-21 | P9-T01 / T03 | **Human subjects** |
-| G-22 | P9-T05 | Governance-touching remediation |
-| G-23 | P10-T05 / T06 | External publication |
-| G-24 | P10-T07 | Integrity-scan acceptance |
-| G-25 | P10-T09 | **Remote and push** |
-| G-26 | P10-T11 | **Final submission** |
+| **A — LOCAL PROGRESSION** | A routine local phase-entry/exit control, or an action `CLAUDE.md` §12 already carves out. No external side effect, no new decision, **no acceptance**. | **Satisfiable in-range** by meeting all ten §7.6-B conditions. Claude records `PASS` and continues. |
+| **B — OPERATOR DECISION** | A genuine, task-specific decision, ruling or formal acceptance that only the Operator can make. | **Not satisfiable by any standing authorization. Blocks its task until answered.** |
+| **C — HARD EXTERNAL** | Leaves the machine, spends money, involves a human subject, or publishes. | **Never inherited, by anything, ever** — not by a range, not by an earlier grant, not across a session boundary. Per-invocation where marked. |
+
+| Gate | Where | Class | Nature |
+|---|---|---|---|
+| G-00 | Authorize this plan | **B** | Entry authorization. May itself carry a `STANDING_LOCAL_EXECUTION_AUTHORIZATION` range |
+| **G-00a** | **P0-T04** | **B** | **Bounded annotate-never-delete instruction for the run** (`CLAUDE.md` §12). Never inherited from a range unless the granting instruction names it explicitly |
+| G-01 | P0-T06 | **B / C** | Baseline tag (**B** — tag creation is an Operator decision; `CLAUDE.md` §12 bars an unauthorized `tag`) **and off-machine copy (C — it leaves the machine)** |
+| G-02 | P0-T07 | **C** | **Human participant recruitment** (armed early; arming ≠ executing Phase 9) |
+| G-03 | P0-T08 | **B** | External-input answers |
+| G-04 | P0-T09 | **B** | `report_source_map` · `session_logs` · attendance visual disposition · notification scope — **hard until answered** |
+| G-05 | P0-T10 | **B** | Seven evidence pre-rulings, incl. the **audit-registry amendment** — **hard until answered** |
+| **G-05a** | **P1-T02** | **B** | **OD-4 §5.1 content-hash envelope ruling** (confirm Q-6's V2-parallel disposition) — **hard until answered** |
+| G-06 | P1-T09 | **B** | Grounding rule-4 rule set ratification — **hard until answered** |
+| **G-07** | **P1-T11** | **A** | **Phase 1 exit** — routine local progression |
+| G-08 | P2-T07 | **B** | Bootstrap design — the `CLAUDE.md:163` vs §5.7 authority resolution |
+| G-09 | P2-T09 | **B** | Captcha and SMTP provider selection (external services) |
+| **G-10** | **P2-T14** | **A** | **Phase 2 exit** — routine local progression |
+| **G-11** | **P3-T01** | **A** | Worktree creation — this plan requires it; confirm and proceed in-range |
+| G-12 | P3-T06 | **B** | Route-compatibility execution — a ratified Amendment 005 stop-and-ask |
+| **G-12a** | **P3-T07** | **B** | **Worktree DELETION and its anchor TAG.** `CLAUDE.md` §12's carve-out covers `git worktree add` **only** — *"creating or deleting a worktree is otherwise an Operator decision"* — and §12 separately bars an unauthorized `tag`. Merging itself is ungated |
+| G-13 | P3-T09 | **B** | **Per-pack visual acceptance — a task-specific Operator acceptance.** Claude records the evidence-backed `PASS`; the Operator grants `Accepted`. **Pending until granted, and it blocks the Phase 3 boundary under §7.6-B condition 9** |
+| G-14 | P4-T04 | **B** | **C4 re-proof acceptance** — task-specific. Claude records `PASS` on the 29+ ledger; the Operator grants `Accepted`. **Pending until granted** |
+| **G-15** | **P4-T08** | **B / C** | **Phase 4 exit — the terminus of the eligible local range AND the gate for everything hosted. A HARD STOP even under a Phases 0–4 standing authorization**, because crossing it leaves the authorized range |
+| G-16 | P5-T02 | **C** | **PAID provider invocation — per invocation, immediately before, never inherited** |
+| **G-16b** | **P6-T07b** | **C** | **PAID** — the G-6 pooled-transport leg |
+| **G-16c** | **P7-T04** | **C** | **PAID** — the "AI feature functional hosted" verification call |
+| **G-16d** | **P8-T02** | **C** | **PAID** — the hosted UAT AI-draft request |
+| **G-16e** | **P10-T10** | **C** | **PAID** — each AI-feature rehearsal and demonstration call |
+| **G-16f** | **P8-T03** | **C** | **PAID** — the second report's AI draft (the return-to-trainer leg needs one) |
+| **G-16g** | **P9-T03** | **C** | **PAID** — participant sessions exercising the AI feature. **The largest uncontrolled spend surface in the plan**: participants × drafts. Budget and authorize a call ceiling before the first session |
+| **G-16h** | **P10-T06** | **C** | **PAID** — AI-feature calls made while recording the video |
+| G-17 | P6-T01…T10 | **C** | **Hosted provisioning and credentials** (each sub-gate independently) |
+| G-18 | P7-T02 | **C** | Production secrets |
+| G-19 | P7-T03 | **C** | **First public deployment** |
+| G-20 | P8-T06 | **B** | UAT acceptance (Operator `Accepted`, hosted phase) |
+| G-21 | P9-T01 / T03 | **C** | **Human subjects** |
+| G-22 | P9-T05 | **B** | Governance-touching remediation |
+| G-23 | P10-T05 / T06 | **C** | External publication |
+| G-24 | P10-T07 | **B** | Integrity-scan acceptance — **hard precondition on the push** |
+| G-25 | P10-T09 | **C** | **Remote and push** |
+| G-26 | P10-T11 | **C** | **Final submission** |
+
+**Count: 37 gates — 3 Class A · 16 Class B · 16 Class C · 2 B/C (G-01, G-15).** There are **no
+A/B hybrids**; a gate is either satisfiable in-range or it is not.
+
+Under a `Plan Phases 0–4` standing authorization, **the gates that will actually stop an autonomous
+run are:** G-00a · G-01 · G-02 (the moment anything touches recruitment) · G-03 · G-04 · G-05 ·
+G-05a · G-06 · G-08 · G-09 · G-12 · **G-12a** · **G-13** · **G-14** · and **G-15 at the range
+terminus**.
+Everything Class C is beyond the range by construction. **Only G-07, G-10 and G-11 are crossed
+autonomously.**
 
 Plus the 14 standing stop conditions in §7.4 — and, through condition 11's note, the **full**
 `CLAUDE.md` §12 enumeration — all of which apply **inside** any phase.
 
-⚠️ **On the paid gates specifically: G-16 through G-16e exist because the deployed build has no
-fixture path.** The participant action constructs the real provider unconditionally (gate G-19,
-*"there is no switch to flip"*). **Every hosted exercise of the AI feature costs money**, including
-ones that look like validation or rehearsal. Authorization is **per invocation and never
+⚠️ **On the paid gates specifically: G-16 through G-16h — all eight — exist because the build has
+no fixture path.** The participant action constructs the real provider unconditionally (Phase A gate **G-19**,
+*"there is no switch to flip"* — not this table's G-19). **Every hosted exercise of the AI feature
+costs money**, including ones that look like validation or rehearsal — and so does **a locally
+served build that has not satisfied §7.4a**. Authorization is **per invocation and never
 inherited** — not from an earlier gate, not from being inside an authorized phase, not from a
 configured API key. *A key is a capability, not an authorization.*
 
@@ -3307,6 +3847,7 @@ satisfied by inspection alone**, and each needs a **failing** case as well as a 
 | **AI contract** | B | P1-T08/T09 (L), **P5-T02** (real) | grounding runs before any persistence |
 | **G-6 real provider** | **B** | **P5-T02** (local direct connection) **+ P6-T07b** (hosted pooled transport) | P5-T02 declares the pooler leg `NOT-RUN` (`[db.pooler] enabled = false` locally; the channel role does not exist until P6-T07). **P7-T04 is a validation task and carries no G-6 evidence** |
 | **Administration & invitations** | B | P2-T07a / P2-T07b (L), **P8-T01/T03 (H)** | A-024 steps 2–6 and 11; without these the hosted UAT scenario cannot be created by any permitted means |
+| **Management read & statistics** | L | **P2-T07c** (contracts), **P3-T04** (surfaces) | Class Health Summary and Management Insight are **mandated by `CLAUDE.md` §6 and UNDRAWN in `/reference/`** — a reference-driven build omits them and a reference-driven sweep passes. **No LLM on either.** Plus the administrative reads packs 12/14/17/18/20–27 consume |
 | **C4 governed lifecycle** | L | **P4-T04** | reopened by OD-4; re-proof with screenshots |
 | **Role access** | B | P4-T07, P8-T05 | four enforcement layers |
 | **Parent projection** | B | **P3-T05a**, P4-T05, P8-T05 | proved at the projection/RPC layer, never the DOM. P3-T05 owns only the UI half |
@@ -3379,7 +3920,9 @@ hold, each with positive evidence.
 7. The draft-storage transport is hosted-capable with `report_store_draft` at **zero client
    EXECUTE**, verified by a `proacl`-text assertion proven to fire.
 8. All three role UIs are reconstructed against the current `/reference/` authority, with every
-   governed omission recorded as `EXPECTED`.
+   governed omission recorded as `EXPECTED` — **and the two `CLAUDE.md` §6 panels that `/reference/`
+   does NOT draw (Class Health Summary, Management Insight, plus "Students Needing Follow-up") are
+   built to their literal ratified tables, with no LLM involved.**
 9. **Q-27's five acceptance criteria are all discharged.**
 
 **Local acceptance**
@@ -3459,11 +4002,17 @@ gap papered over is a failure.**
 2. Verify branch, HEAD, tree, worktrees, remotes, tags, and local/hosted service state **against
    reality**.
 3. If they disagree with the records, **stop and reconcile** (§9.3).
-4. Find the recorded next task ID in `STATUS.md`. Confirm its phase is currently authorized.
-5. Check §7.4: does the task hit a stop condition? If so, stop and ask.
+4. Find the recorded next task ID in `STATUS.md`. Confirm its phase is authorized — explicitly, or
+   by a recorded `STANDING_LOCAL_EXECUTION_AUTHORIZATION` passing all four §7.6-D conditions.
+5. Check §7.4 **and §7.4a**: does the task hit a stop condition, and does it serve the app or drive
+   a browser? Check §10: what **class** is its gate?
+   **A** → continue in-range. **B** → stop and ask. **C** → stop and ask, every time.
 6. Execute. Record per §9.2. Commit per §7.5.
 7. **Never** push, provision, deploy, spend, or test with humans without a gate in §10 being
    opened for **that specific action, at that time**.
+
+**The one-line rule:** *inside a recorded local range, a `PASS` lets you continue; outside it, or at
+any Class B or Class C gate, you stop — and you never write `Accepted` for the Operator.*
 
 ---
 
