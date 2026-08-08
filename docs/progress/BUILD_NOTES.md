@@ -2146,3 +2146,49 @@ Its two substantive assertions **pass**: all 12 migrations apply cleanly and in 
 **Decisions.** None made by this session. Phase-0 exit and Phase-1 continuation were both instructed by the Operator; F-P0-3 is escalated rather than decided.
 
 **Next permitted action.** **Plan Phase 1 — OD-4 CONTRACT FOUNDATION**, autonomously through the dependency graph from **P1-T01**, stopping at **G-06 / P1-T09**, which is a genuine Operator ratification gate and must not be pre-decided.
+
+---
+
+## 2026-08-09 — PLAN PHASE 1 STARTED · P1-T01 COMPLETE (OD-4 change-surface census)
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan **Phase 1 — OD-4 CONTRACT FOUNDATION**, task **P1-T01**. **Read-only census. Nothing was modified.**
+**Branch / worktree.** `main`, single writer, no worktrees (as P1 requires). **Starting HEAD** `9c15be2` → this entry's commit.
+**Migration or schema changes.** **NONE.** P1-T01 is read-only by definition.
+
+**Entry conditions verified before starting.** Phase 0 exit ✅ · Phase 1 authorization ✅ (granted 2026-08-08, its clean-exit condition now satisfied, reaffirmed 2026-08-09) · **the separate OD-4 Phase-B authorization `CLAUDE.md` §12 requires** ✅ (granted explicitly, not inferred from the range grant — §7.6-A is satisfied, not bypassed).
+
+**Census method — reproducible by command**, per the acceptance criterion:
+
+```
+git grep -o -I -E "todays_strength|todaysStrength|next_focus|nextFocus|\
+practice_suggestion|practiceSuggestion|session_takeaway|sessionTakeaway" -- ':!*.md'
+git grep -o -I -E "Today's Strength|Next Focus|Practice Suggestion|Session Takeaway" -- ':!*.md'
+```
+
+**Result: 598 identifier occurrences + 18 English-label occurrences = 616**, across **38 non-`.md` tracked files**. The acceptance criterion warns that *"a materially smaller result means the census is wrong"* — this is **larger** than the recorded ≈474 floor. **The test-file leg matches the plan's recorded figure EXACTLY — 227 occurrences across 16 test files** — which independently validates that this census uses the same methodology the plan recorded.
+
+**Per-band classification.**
+
+| Band | Occ. | Files | Principal sites |
+|---|---|---|---|
+| **SQL storage + function signatures + bodies** | **168** | 5 migrations | `20260805090500_step_7i_report_lifecycle.sql` **148** (columns, the eight RPC signatures, both hash serializers) · `20260807113000_management_submitted_list.sql` 8 · `20260806190000_report_context_resolver.sql` 4 · `20260806103000_management_correction_tracking.sql` 4 · `20260803034500_step_7e_governed_core.sql` 4 (the original `report_versions` columns) |
+| **Generated types** | **44** | 1 | `server/db/database.types.ts` — ⚠️ **regenerate only; hand-editing is a `CLAUDE.md` §12 stop-and-ask (ADR-8)** |
+| **Server application** | **106** | 9 | `ai-drafting/provider.ts` 28 (AI structured-output schema + prompt) · `report-workflow/core.ts` 20 · `report-workflow/trainer-projections.ts` 12 · `parent-view/projections.ts` 12 · `management-view/projections.ts` 12 · `ai-drafting/trusted-store.ts` 8 · `ai-drafting/request-draft-core.ts` 8 · `integration-adapter/adapter-dtos.ts` 4 · **`ai-drafting/grounding.ts` 2** |
+| **Frontend contracts / UI / fixture prose** | **53 + 14 labels** | 7 | `lib/frontend/fixtures/physical-test-fixture.ts` 29 (fixture prose) · `features/trainer/report-panel-config.ts` 4+4 · `trainer-report-review.tsx` 4+4 · `trainer-draft-generation.tsx` 4+3 · `management-report-review.tsx` 4+3 · `parent-canonical-report.tsx` 4 · `lib/frontend/contracts/physical-test.ts` 4 |
+| **Tests and proofs** | **227 + 4 labels** | 16 | `step-7i/lifecycle-canonical.sql` 72 · `integration/run-integration.mjs` 44 · `physical-test/activate-g6.mjs` 24 · `prove-governed-lifecycle.mjs` 14 · `g6-harness/run-negative-controls.mjs` 9 · then 8× and 4× across `static-scan`, `run-concurrency`, `failure-safety`, `ct-suite.sql`, `trainer-browser-smoke`, `ma-suite.sql`, `c2-suite.sql`, `ct-static`, `run-management-approved`, `g14-isolation-seed.sql`, `fixture-lifecycle.assertions.ts`, `three-role-browser-smoke.mjs` |
+
+**Fail-closed vs fail-open separation** (plan step 3 — the distinction that decides how much of this migration is self-policing):
+
+- **FAIL-CLOSED — these break loudly and cannot be missed.** SQL columns and the eight RPC signatures (Postgres refuses on a missing column); `database.types.ts` and every TypeScript contract, mapping and DTO (`tsc` errors); SQL function bodies referencing dropped columns.
+- **FAIL-OPEN — these go SILENTLY VACUOUS and are the real risk.** Chief among them: **`grounding.ts` rule 4 at lines 208–212**, which reads `panels.todaysStrength` and pushes *"presents a needs_support dimension without support framing"*. The AI structured-output schema and system prompt in `provider.ts` (a key mismatch degrades to absent panels rather than an error). Test rating/label arrays keyed by string — **this exact class has already caused a silent failure in this project**: the Amendment 006 reconciliation found integration Part 1 rating arrays still carrying superseded labels, so `POLARITY_BANDS[rating]` was `undefined` and the polarity rule **silently skipped while reporting green** (`CLAUDE.md` §4 non-negotiable 1). **P1-T04 exists precisely to re-derive these nine fail-open guards and prove each one FIRES**, and that task is where they get discharged — not here.
+
+**⚠️ Recorded and deliberately NOT acted on.** `grounding.ts:208-212` is the site the OD-4 ruling expressly warns about: retargeting rule 4 at `overview` **by rename** is prohibited, because `Overview` may legitimately carry developmental context and a rename would **false-reject valid drafts**. Its re-derivation is **P1-T09 / G-06**, a genuine Operator ratification gate. **This census records the site and its current behaviour. It does not propose, prejudge or pre-decide the replacement.**
+
+**Acceptance.** ✅ Met — complete, classified, reproducible by command, and larger than the recorded surface.
+
+**Blockers.** None opened. **F-P0-3 remains OPEN** (the `verify-fresh-apply` EOL artefact), owner OPERATOR, **non-blocking here** — but the plan names that script as a proof at **P1-T02**, so it should be settled before P1-T02 completes.
+
+**Decisions.** None. P1-T01 produces evidence only.
+
+**Next permitted action.** **P1-T02 — design migration M13** (design artefact only, no DDL applied), then P1-T03 writes and applies it. ⚠️ **Stopping here deliberately:** P1-T03 authors and APPLIES a real schema migration, and P1-T04–T08 then regenerate types and migrate every contract above. That is a large, mutating sequence which must not be begun without enough working room to finish, verify and roll back cleanly — starting it and stopping mid-way is the one outcome worse than not starting. **The inventory above is the complete input P1-T02 needs**, so the next session resumes at P1-T02 with no re-derivation. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**
