@@ -43,9 +43,12 @@ import { asFailure, type ResourceState } from "./resource-state";
  * `screen.md` §1). That move is a separately-authorized route-migration checkpoint, so NO route
  * is created, moved, renamed or redirected here.
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/07-trainer-grade-student/reference.png` (node `784:679`) ->
- * node-specific Figma -> existing implementation. Figma never bypasses governance: where the
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Trainer - Grade Student/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/07-trainer-grade-student/reference.png` (node `784:679`) is an
+ * optional frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
+ * Figma never bypasses governance (A-045, preserved by A-056): where the
  * frame and a ratified rule disagree the RULE WINS, the prohibited thing is OMITTED, and the
  * divergence is RECORDED in this screen's `implementation-notes.md` and in the workstream log —
  * never silently resolved.

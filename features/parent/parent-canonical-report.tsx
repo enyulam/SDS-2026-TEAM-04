@@ -14,9 +14,11 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
 /**
  * Screen 33 — Parent Class Report (FRONTEND RECONSTRUCTION F15 / operator checkpoint F-15).
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/33-parent-class-report/reference.png` (node `627:9`) -> the
- * node-specific Figma frame -> the previous implementation. Reconstructed here as the frame's
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Parent - Class Report/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/33-parent-class-report/reference.png` (node `627:9`) is an optional
+ * frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and FINAL_MVP_AUTHORITY_LOCK.md
+ * §2.4 for the ladder and for governed deviations. Reconstructed here as the frame's
  * page title and meta line, one white report card carrying a titled header row, and a vertical
  * stack of sections — each a soft tinted icon tile, a bold section heading and one bullet of
  * narrative prose.

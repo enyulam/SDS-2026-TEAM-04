@@ -4,8 +4,11 @@
  * Final MVP shared visual foundation.
  *
  * Established at FRONTEND RECONSTRUCTION F1 from patterns repeated across the twelve frozen
- * core reference.png files. Visual authority (Amendment 005 A-045): frozen reference.png ->
- * node-specific Figma context -> existing frontend implementation.
+ * core reference.png files.
+ *
+ * Current Final MVP visual authority is UI_REFERENCE_FINAL_MVP/reference/ (Amendment 007
+ * A-056, which supersedes the A-045 ordering). See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
  *
  * The final MVP is a LIGHT design. The dark navy that remains here is a deliberate accent
  * surface that appears in the frozen references (the roster "class in session" banner and

@@ -41,9 +41,11 @@ import {
  * R-B1, which resolves the long-open decision U-A5-1 (inventory §7.3). `/trainer` is
  * preserved as a compatibility redirect onto this route; no working route was deleted.
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/05-trainer-schedule/reference.png` (node `591:9`) -> the
- * node-specific Figma frame -> the existing implementation.
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Trainer - Schedule/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/05-trainer-schedule/reference.png` (node `591:9`) is an optional
+ * frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and FINAL_MVP_AUTHORITY_LOCK.md
+ * §2.4 for the ladder and for governed deviations.
  *
  * GOVERNANCE BOUNDARIES HELD HERE:
  *

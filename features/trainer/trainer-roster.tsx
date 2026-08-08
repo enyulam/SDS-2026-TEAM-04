@@ -26,9 +26,12 @@ import { asFailure, type ResourceState } from "./resource-state";
  * point at `/trainer/schedule`, the canonical Trainer entry route created by F-04 under
  * operator ruling R-B1.
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/06-trainer-student-roster/reference.png` (node `487:9`) ->
- * node-specific Figma -> existing implementation. Figma never bypasses governance: where the
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Trainer - Student Roster/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/06-trainer-student-roster/reference.png` (node `487:9`) is an
+ * optional frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
+ * Figma never bypasses governance (A-045, preserved by A-056): where the
  * frame and a ratified rule disagree the RULE WINS, the prohibited thing is OMITTED, and the
  * divergence is RECORDED in this screen's `implementation-notes.md` — never silently resolved.
  *

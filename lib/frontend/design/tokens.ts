@@ -2,13 +2,14 @@
  * Final MVP shared design tokens.
  *
  * Derived at FRONTEND RECONSTRUCTION F1 from the patterns repeated across the twelve
- * frozen core `reference.png` files in the external UI reference pack. This module is the
- * typed mirror of the CSS custom properties declared in `app/globals.css` — the CSS is what
+ * frozen core `reference.png` files in the in-repository UI reference pack. This module is
+ * the typed mirror of the CSS custom properties declared in `app/globals.css` — the CSS is what
  * the browser renders; this module exists so shared primitives and foundation tests can
  * reference the same values without re-deriving them.
  *
- * Visual authority (Amendment 005 A-045): frozen reference.png -> node-specific Figma
- * context -> existing frontend implementation.
+ * Current Final MVP visual authority is UI_REFERENCE_FINAL_MVP/reference/ (Amendment 007
+ * A-056, which supersedes the A-045 ordering). See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
  *
  * This module declares presentation only. It carries no rating label, no lifecycle status
  * label, no permission and no route.

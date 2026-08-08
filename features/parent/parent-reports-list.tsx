@@ -14,9 +14,11 @@ import type { ParentReportListItemDto } from "@/lib/frontend/contracts/physical-
 /**
  * Screen 32 — Parent Reports list (FRONTEND RECONSTRUCTION F14 / operator checkpoint F-14).
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/32-parent-reports/reference.png` (node `533:180`) -> the
- * node-specific Figma frame -> the previous implementation. Reconstructed here as the
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Parent - Report/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/32-parent-reports/reference.png` (node `533:180`) is an optional
+ * frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and FINAL_MVP_AUTHORITY_LOCK.md
+ * §2.4 for the ladder and for governed deviations. Reconstructed here as the
  * frame's page title, "Viewing <child>" affordance, "All Reports" section heading and a
  * stack of white report rows — tinted document tile, title, meta line, right-aligned
  * primary "View" action.

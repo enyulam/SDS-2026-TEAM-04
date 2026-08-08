@@ -15,10 +15,12 @@ import type { ManagementQueueRowDto } from "@/lib/frontend/contracts/physical-te
 /**
  * Screen 29 — Management Reports queue (FRONTEND RECONSTRUCTION F11).
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/29-management-reports/reference.png` (node 527:170) -> the
- * node-specific Figma frame -> the previous implementation. Reconstructed here as the
- * frame's filter strip plus a single white card holding one report table.
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Management - Reports/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/29-management-reports/reference.png` (node 527:170) is an optional
+ * frozen duplicate, SHA-identical to it. Reconstructed here as the frame's filter strip plus
+ * a single white card holding one report table. See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
  *
  * Governance boundary — this is the whole point of this screen (CLAUDE.md §6, A-038):
  *

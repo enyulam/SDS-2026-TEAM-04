@@ -33,9 +33,13 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  * redirect" (`screen.md` §1). That move requires its own authorization, so NO route is created,
  * moved, renamed or redirected here.
  *
- * Visual authority (Amendment 005 A-045): the frozen
- * `UI_REFERENCE_FINAL_MVP/08-trainer-ai-report-generation/reference.png` (node `784:340`) ->
- * node-specific Figma -> existing implementation. FIGMA NEVER BYPASSES GOVERNANCE: where the
+ * Current Final MVP visual authority is
+ * `UI_REFERENCE_FINAL_MVP/reference/Trainer - AI Report Generation/` (Amendment 007 A-056,
+ * which supersedes the A-045 ordering). The pack-local
+ * `UI_REFERENCE_FINAL_MVP/08-trainer-ai-report-generation/reference.png` (node `784:340`) is
+ * an optional frozen duplicate, SHA-identical to it. See CLAUDE.md §7.4 and
+ * FINAL_MVP_AUTHORITY_LOCK.md §2.4 for the ladder and for governed deviations.
+ * FIGMA NEVER BYPASSES GOVERNANCE (A-045, preserved by A-056): where the
  * frame and a ratified rule disagree the RULE WINS, the prohibited thing is OMITTED or rendered
  * INERT with a visible reason, and the divergence is RECORDED in this screen's
  * `implementation-notes.md` and in the workstream log — never silently resolved.

@@ -8,6 +8,8 @@ These rules apply to **every** screen in this pack. A per-screen `screen.md` may
 
 ### 1.1 Visual authority — highest first
 
+> **Backed by a ratified amendment, not only by this file: `A-056` (Amendment 007, 2026-08-08), `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_007.md`.** A-056 supersedes **Amendment 005 A-045's three-rank visual ladder and nothing else** — A-045's functional ladder, *Figma never bypasses governance* and the frame-versus-ratified-rule rule are **expressly preserved and still binding**. The ordering below is the A-056 model. A **higher-ranked functional / product / privacy ruling may override a specific visible element** of a `/reference/` frame without invalidating the rest of the pack (canonical example: **Q-27**, Parent Dashboard).
+
 *(Reconciled 2026-08-08 by the Final UI Reference Authority Synchronization. The old rank 1 — "the folder's frozen `reference.png`" — is **superseded**: it made 24 of the 36 governed packs look as though they had no visual reference at all, when every one of them has a ratified frame in `/reference/`.)*
 
 1. **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** — the **current Final MVP visual source** for every one of the 36 governed screens. The authoritative pack→counterpart mapping is published in **`SCREEN_INDEX.md`**; resolve it from there, never by guessing a folder name.
