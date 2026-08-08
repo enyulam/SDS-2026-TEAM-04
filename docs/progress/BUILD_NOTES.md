@@ -2404,3 +2404,111 @@ The proof therefore pins **ELEVEN properties per serializer**, exactly the Opera
 **Decisions.** None ratified.
 
 **Next permitted action.** **P1-T03 — author and apply M13**, then P1-T04–T08. Re-pin `EXPECTED_SERIALIZERS` **2 → 4** in that same commit. **G-06 / P1-T09 remains a hard gate and is not pre-decided.**
+
+---
+
+## 2026-08-09 — P1-T03 VERIFIED AND CLOSED · M13 ADVERSARIALLY REVIEWED · ONE CRITICAL AND SIX HIGH REMEDIATED · FORWARD FIX M14
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 1, **P1-T03 verification only**. Bounded by explicit Operator instruction: review the already-implemented M13, remediate, re-run, close P1-T03, update continuity, checkpoint. **P1-T04 NOT STARTED.**
+**Track / workstream.** OD-4 contract foundation. **Branch / worktree.** `main`, single writer, worktrees 1, remotes 0.
+**Starting HEAD** `98e09aaf22dd10c4e835d04601cff3a85cf8b430` → this entry's checkpoint commit. **`98e09aa` was NOT amended.**
+
+### Scope reconciliation, done first
+
+The instruction's expected state matched reality exactly — HEAD `98e09aa`, clean tree, `main`, 0 remotes, 1 worktree, local Supabase up, 13 migrations applied. No divergence to reconcile. P1-T01 and P1-T02 were **not** redone and M13 was **not** re-authored, per instruction.
+
+### Migration or schema changes
+
+**One new migration: `supabase/migrations/20260809160000_od4_reopen_envelope_version_fix.sql` (M14).** SHA-256 `6d385f409d3557b14bcf1d6acb8d02ca75ef5a95c3fc38bf08f5054df07ed1aa`, 362 lines, applied locally via `supabase migration up --local`. **All 12 historical migrations byte-identical** (EOL-canonicalized; `git diff bc83d66 -- supabase/migrations/` shows additions only). **M13 byte-unchanged since `98e09aa`.**
+
+### Adversarial review — two independent read-only reviewers, then a focused re-review of the remediated state
+
+Both were told to FALSIFY, given the live database and the authority instruments, and explicitly told to treat `STATUS.md`/`BUILD_NOTES.md` and the prior session's report as **claims to check, not evidence**. Neither was told the other's findings before both round-1 reviews completed. **Every finding was then verified at source by the Main Orchestrator before being accepted or rejected — a reviewer statement was never taken as evidence.**
+
+**ROUND 1 — 1 CRITICAL, 4 HIGH accepted.**
+
+**① CRITICAL — `report_reopen_submitted` wrote a provably false provenance label.** Found independently by BOTH reviewers and by the orchestrator's own sweep. M13 re-pinned three of the **four** version-creating paths from `content_hash_version = 1` to `2`, and left the fourth writing the literal `1` while copying `v_src.content_hash` — a hash the **V2** serializer produced. The two envelopes are provably distinct (`report_content_hash_v1(...) <> report_content_hash_v2(...)` on identical input, verified live), so the row asserted V1 provenance for a digest no V1 call can yield. It was **silent**: M13's own A2 widened the CHECK from `= 1` to `IN (1, 2)`, removing the only thing that would have rejected the literal, and **no assertion anywhere in the corpus pinned the value a creating path writes**. Per the function's own comment this clone is the one version from which `needs_edit → trainer_approved` (T8) is reachable, so the mislabelled row is exactly the one that can be re-approved and re-submitted. Contradicts **G-05a item 4** ("new OD-4 report versions use `content_hash_version = 2`") and mirrors **item 7** ("no silent relabelling").
+
+**② HIGH — the missing-REVOKE check exempted two of the six guarded functions.** `static-scan.mjs` passed `serializers`, not `guarded`, to `findMissingRevokes`, so `report_store_draft` and `app_parent_reaches_student` were never checked — while the PASS message claimed all six were. M13 **DROPs and re-creates `report_store_draft`**, and a DROP destroys the stored ACL, so deleting M13's single REVOKE for it left the guard **100% green**. Demonstrated empirically against the real corpus.
+
+**③ HIGH — the same check was corpus-order-blind.** A single accumulated `revoked` boolean meant a function DROPped and re-created in a *later* migration was excused by an *earlier* file's REVOKE. DROP+CREATE is precisely the pattern §6.5 item 3 mandates for a signature change, so the most likely case was the uncovered one.
+
+**④ HIGH — `server/db/database.types.ts` not regenerated** (§6.5 item 6). See "Recorded, not fixed".
+
+**⑤ HIGH — six `static-scan` legs assert properties of superseded code.** T7I-6/-18/-20/-51/-62/-74 build `fnBodies` from `20260805090500` only; M13 replaced nine bodies. The property still **holds** — both reviewers independently diffed every pre/post body and found zero removed guards — but nothing would now catch it if it stopped holding. **Registered P1-T04 scope; not remediated here.**
+
+**ROUND 2 — focused re-review of the remediated state — 2 further HIGH, both real, both fixed.**
+
+**⑥ HIGH — `EXPECTED_CANONICAL_MIGRATIONS = 12`** in `scripts/physical-test/disposable-stack.mjs`, a migration-count census pin of exactly the class §6.5 item 4 governs. **Missed by the M13 sweep AND by the first M14 sweep**, because it is a bare symbolic constant rather than a numeric literal adjacent to the word "migration" — the greps written for the other ten pins do not surface it. Exported to **11 call sites across 6 harnesses**, 4 of them npm entry points; fails closed, so every disposable-stack run aborted. P1-T03's Acceptance says "census pins updated everywhere" in as many words.
+
+**⑦ HIGH — the corrected guard was defeated by ordinary valid SQL.** Anchoring the DROP on token adjacency missed **multi-target `DROP FUNCTION a(...), b(...)`** (valid, drops both) and **`DROP ROUTINE`** (a synonym since PostgreSQL 11) — each silently reopening the very hole ② and ③ had just closed, against the one function R-27 protects permanently. Also found: `REVOKE GRANT OPTION FOR` satisfied the REVOKE requirement while revoking no privilege.
+
+### Remediation
+
+**M13 was NOT edited.** Plan §11 **R-1** is unambiguous: *"Committed migrations are corrected by a new forward migration, never by editing an applied file."* M13 is both committed and applied, and `supabase_migrations.schema_migrations` stores each migration's `statements`, so editing an applied file would also desynchronise the ledger from the tree. The distinction the instruction asked to be resolved is therefore **resolved by existing authority — no Operator gate was required.**
+
+**M14** propagates `v_src.content_hash_version` rather than stamping a literal. This is correct for **every** source: the clone copies the source hash verbatim, so the envelope label must travel with the hash it labels; every post-OD-4 creating path stamps 2, so the practical result is always 2 (item 4); and a hypothetical V1 source stays truthfully 1 rather than being relabelled (item 7). A literal `2` would satisfy item 4 while reintroducing item 7's hazard in the opposite direction. M14's body was **mechanically derived from M13's text** by a generator that refuses to emit unless exactly one defect site exists and the only delta is the intended substitution. Signature unchanged, so `CREATE OR REPLACE` preserved the ACL and COMMENT; one DDL statement; no CASCADE; no data written; P-1 ownership guard present; a fail-closed precondition refuses a mismatched baseline. Assertions **B1–B9**, including **B4**, which replaces M13's substring constraint probe with **exact definition equality**.
+
+**Guard rebuilt to model real ACL semantics** rather than patched: first CREATE (any form) **or** last DROP = reset, `CREATE OR REPLACE` explicitly **not** a reset, with strict `(fileIndex, charOffset)` ordering; DROP matched **per statement** rather than by token adjacency; `REVOKE GRANT OPTION FOR` excluded. `findMissingRevokes` now receives `guarded`. **Ten new permanent firing cases (5c–5g5)** — every closed hole is demonstrated failing closed, plus three no-false-positive cases covering the mandated DROP+CREATE+re-emit pattern and `CREATE OR REPLACE`.
+
+**New `T7I-OD4-ENVELOPE` control in the reusable carrier** (`lifecycle-canonical.sql`). A migration's end-assertion is point-in-time and cannot certify "this cannot recur"; the recurring guarantee belongs in a CURRENT REUSABLE carrier. It is deliberately **variable-name-independent**, because M14's own B2 keys on the text `content_hash,` and therefore covers only the two paths whose hash variable ends that way — `report_store_draft` and `report_save_edit` both use `v_hash` and are invisible to it. **Proven to fire**: a planted fifth creating path using the exact `v_hash, 1` form M14's B2 cannot see triggered both legs inside a transaction that was rolled back (0 leaked objects, 36 functions after).
+
+**`prove-v1-freeze.mjs` was an ORPHAN** — nothing invoked it, not `run-canonical`, not `package.json`. The only proof covering V1's literal ACL, COMMENT and signature — the three things `verify-fresh-apply` is structurally blind to, because M13 runs on both sides of its comparison — ran solely if a human remembered to type it. It is now run by `run-canonical`.
+
+**Three false rationales corrected at source**, because a wrong justification left in place is how the next reviewer stops looking: the `proacl IS NULL = PUBLIC EXECUTE` premise (measured: `pg_default_acl` gives `postgres|public|f|{postgres=X/postgres}`, i.e. owner-only — the probe that produced "authenticated = t, anon = t" was measuring creation as `supabase_admin`; the REVOKEs remain load-bearing for the *real* reasons, which are now stated); the `EXPECTED_SERIALIZERS` claim to convert silence into loud failure (true for disappearance, **false for rename**); and a firing case labelled `TO CURRENT_USER` that tested `TO PUBLIC`. The guard's HONEST LIMITS block was extended to completeness, including that `TO CURRENT_USER`/`SESSION_USER`/`CURRENT_ROLE` are undetected and safe **only where the P-1 guard holds** — which is not corpus-wide, since `20260803034500` and `20260806160000` carry none pending P2-T13.
+
+**Stale evidence narration fixed and made underivable-from-drift.** `verify-fresh-apply.mjs` printed "all twelve migrations" and "34 functions, 12 migrations" while its pinned literal asserted 36 and 13 — the assertion was right and the line shipped into the run record was false. Those strings are now **derived from the pinned literal**. Same class fixed in `c3-static.mjs`, `ct-static.mjs`, `verify-local-fixtures.sql` and `c2-static.mjs`'s ordinal message.
+
+**Pins swept 13 → 14:** `verify-local-fixtures.sql` (count, literal version list, message), `asm-suite.sql`, `c3-static.mjs`, `ct-static.mjs`, `lifecycle-canonical.sql` (count + literal version list), `static-scan.mjs`, `verify-fresh-apply.mjs` (count + census literal `26|36|12|29|14|25|0|`), newest-filename pins in `c3-static.mjs`/`ct-static.mjs`, `c2-static.mjs` ordinal `-4 → -5`, and `disposable-stack.mjs`'s `EXPECTED_CANONICAL_MIGRATIONS`.
+
+### Automated verification — all exit 0, after remediation
+
+`tsc` **0** · `lint` **0** · `build` **0** (17 routes) · fixture verifier **0** (Section C all 7 negative tests correctly rejected, Section D no residue) · `run-canonical` **0** (canonical checksum **28 rows / `6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576`**, reproduced identically on two runs) · `run-assessment` **0** (45 T-ASM) · `run-correction-tracking` **0** · `run-concurrency` **0** · `prove-clock-hour-determinism` **0** · `prove-v1-freeze` **0** (11/11 both serializers) · `prove-od4-grant-guard` **0** (**17/17**) · `static-scan` **0** · `c2-static`/`c3-static`/`ct-static` **0** · **`verify-fresh-apply` 0** — all 14 migrations apply cleanly from an empty database, fresh census `26 tables / 36 functions / 12 enums / 29 policies / 14 migrations / 25 authenticated EXECUTE`, **42 raw transport differences / 0 canonicalized**.
+
+### Manual verification — live catalogue
+
+**14 migrations · 26 tables · 12 enums · 36 functions · 29 policies · 3 non-internal triggers.** Four OD-4 columns at attnum 20–23, all `text`, all nullable, in ruling order (attnums 5–8 are dropped tombstones — genuinely DROP+ADD, not a positional rename). **Zero** superseded panel columns anywhere. `report_versions_content_hash_version_chk` name preserved, `CHECK ((content_hash_version = ANY (ARRAY[1, 2])))`. Six owner-only functions all `{postgres=X/postgres}` with `authenticated`/`anon`/`service_role`/`authenticator` all false. `report_store_draft` REVOKE-only — **R-27 intact**. Five client RPCs `{postgres=X/postgres,authenticated=X/postgres}`. EXECUTE census **authenticated 25 · anon 0 · service_role 0 · authenticator 0 · PUBLIC 0**; **zero** functions with a NULL or PUBLIC-bearing `proacl`. No `proname` in `public` has more than one overload. All 8 REVOKEs / 5 GRANTs present and signature-qualified; 6 `DROP FUNCTION`; **no CASCADE** (the single occurrence of the word is prose in a header comment). `report_versions` = 0, `audit_events` = 0.
+
+### Failures and recovery
+
+One self-inflicted false alarm, recorded because it is the most damaging possible false positive here: a raw `sha256sum` of `git show <blob>` against the worktree reported **6 of 12 historical migrations as CHANGED**. That is pure CRLF/LF transport (the F-P0-3 phenomenon), not an edit — `git status` showed no modification and both machine immutability guards passed. The correct method is `git diff` or an EOL-canonicalized digest, both of which show **12/12 identical**. Reviewer 2 independently hit and flagged the same trap.
+
+M14's first apply **failed and rolled back cleanly** (0 rows recorded, database unchanged): `pg_catalog.position(x IN y)` is a syntax error, because the `IN` form is special grammar unavailable to a schema-qualified call under `SET search_path = ''`. Replaced with `pg_catalog.strpos(haystack, needle)`. The whole file was then dry-run inside a `BEGIN … ROLLBACK` before being applied for real.
+
+### Reviewer findings — orchestrator adjudication
+
+**Accepted and remediated:** the CRITICAL and HIGH items ①②③⑥⑦ above, plus M-1 (substring constraint probe), M-5/L2 (stale narration), M-4/M7 (false ACL rationale), M-2/M4 (mislabelled control, overstated anchor claim), L1 (orphan V1 proof), N5, N11 (recorded), N12.
+**Accepted, deferred to a named owner:** ④ (P1-T06, by explicit Operator instruction), ⑤ and MA-8 (P1-T04), `EXPECTED_SERIALIZERS` rename vacuity (P1-T05), `g14-isolation-seed.sql` and the three harnesses (P1-T10).
+**REJECTED after verification at source — one claim:** Reviewer 1's M-6 asserted `g14-isolation-seed.sql` "is owned by nobody", having checked P1-T04's nine sites only. **`FINAL_MVP_EXECUTION_PLAN.md` P1-T10 names it explicitly**, "the shared `whash` helper", alongside `activate-g6.mjs`, `prove-governed-lifecycle.mjs` and `run-integration.mjs`. The file was briefly fixed and then **reverted**, because P1-T10 depends on P1-T04/T05/T08/T09 and touching one of its sixteen files would jump the dependency chain. On re-review the reviewer checked this and **withdrew the finding**.
+
+### Decisions
+
+- **Migration immutability resolved from existing authority, not escalated.** §11 R-1 governs: forward-fix, never edit an applied file.
+- **Propagation over a literal `2`** in the reopen path, for the reasons above. Both reviewers endorsed it on re-review after attempting to falsify it.
+- **Recurring controls belong in the reusable carrier, not only in migration end-assertions.**
+- **`PASS` is recorded, not `Operator Accepted`.** No session may write the latter.
+
+### Blockers
+
+None opened. None closed. **G-06 / P1-T09 remains a hard, non-inheritable gate and was not pre-decided.**
+
+### Environment / infrastructure
+
+Local Supabase up throughout. `supabase db reset` **never used**. No hosted project, no `project-ref`, no provider call, no network egress, no push. Disposable databases created and destroyed by the suites; **0 leftover `bc_*` databases**. Frozen demo `8d4acf4abc5039c24da01be773ab1a5e4916080f`, clean, tag `demo-freeze-step14-2026-07-21` intact. PeakPalate `KEEP_IN_PLACE`, untouched.
+
+### Cleanup / rollback state
+
+No partial mutation. The one failed apply rolled back completely and was verified to have left the database unchanged before retrying.
+
+### Multi-agent synthesis
+
+Two read-only reviewers, run concurrently and kept blind to each other through round 1, then both re-invoked on the remediated state. **Contradiction resolved against a reviewer once** (M-6 ownership, above). **Convergence worth noting:** both independently found the CRITICAL defect, and the orchestrator found it independently before either reported — three separate derivations of the same fact. **Value of the second round:** it caught two HIGH items that the first round, the M13 sweep and the orchestrator's own sweep had all missed, one of which reopened a hole the first round had just closed. No subagent transcript is reproduced.
+
+### Provider / hosted / human
+
+**PROVIDER: NONE** — zero calls, nothing served, no drafting path run, no provider constructed. **HOSTED: NONE.** **HUMAN: NONE** — contacted 0, consented 0, sessions 0. **PUBLIC: NONE. PUSH: NONE. SUBMISSION: NONE.** None inheritable.
+
+### Next permitted action
+
+**P1-T04 — re-derive the nine fail-open OD-4 guards and prove each one FIRES.** **NOT STARTED.** Two of its nine sites are already evidenced above (`static-scan.mjs`'s six legs; MA-8's live-`prosrc` deny-list, fail-open now). **P1-T06 must close the `database.types.ts` regeneration**, which is an open §6.5 item 6 non-conformance deferred only by explicit Operator instruction — regenerate, never hand-edit.
