@@ -39,10 +39,10 @@ export interface StoreDraftRequest {
   readonly reportId: string;
   readonly expectedLockVersion: number;
   readonly observationLockVersion: number;
-  readonly todaysStrength: string;
-  readonly nextFocus: string;
-  readonly practiceSuggestion: string;
-  readonly sessionTakeaway: string;
+  readonly overview: string;
+  readonly strengths: string;
+  readonly areasForDevelopment: string;
+  readonly remarks: string;
 }
 
 export type StoreDraftResult =
@@ -113,10 +113,10 @@ export class LocalTrustedDraftStore implements TrustedDraftStore {
       "-v", `bc_rid=${request.reportId}`,
       "-v", `bc_lock=${String(request.expectedLockVersion)}`,
       "-v", `bc_olock=${String(request.observationLockVersion)}`,
-      "-v", `bc_p1=${request.todaysStrength}`,
-      "-v", `bc_p2=${request.nextFocus}`,
-      "-v", `bc_p3=${request.practiceSuggestion}`,
-      "-v", `bc_p4=${request.sessionTakeaway}`,
+      "-v", `bc_p1=${request.overview}`,
+      "-v", `bc_p2=${request.strengths}`,
+      "-v", `bc_p3=${request.areasForDevelopment}`,
+      "-v", `bc_p4=${request.remarks}`,
     ];
     return new Promise((resolve) => {
       const child = spawn("docker", args, { stdio: ["pipe", "pipe", "pipe"] });

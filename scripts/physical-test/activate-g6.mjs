@@ -121,6 +121,7 @@ import {
   DeterministicFixtureDraftProvider,
   OpenAiDraftProvider,
   validatePanelShape,
+  PANEL_KEYS,
 } from "@/server/modules/ai-drafting/provider.ts";
 import { requestDraftCore } from "@/server/modules/ai-drafting/request-draft-core.ts";
 import { LocalTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store.ts";
@@ -426,10 +427,10 @@ class ContradictoryProvider {
     return {
       kind: "ok",
       panels: {
-        todaysStrength: "Excellent eye contact throughout — truly outstanding and clearly mastered.",
-        nextFocus: "Keep up the flawless facial expressions.",
-        practiceSuggestion: "Nothing to practise; every skill is perfect.",
-        sessionTakeaway: "A remarkable, exceptional session with no difficulty anywhere.",
+        overview: "A remarkable, exceptional session with no difficulty anywhere.",
+        strengths: "Excellent eye contact throughout — truly outstanding and clearly mastered.",
+        areasForDevelopment: "Nothing to develop; every skill is already perfect.",
+        remarks: "Flawless facial expressions throughout, with effortless delivery.",
       },
     };
   }
@@ -550,7 +551,18 @@ function downgradeDryRunLedger(mode, ledger) {
 // Fixture-inequality and differential — pure comparison helpers,
 // unit-testable directly.
 // =====================================================================
-const PANEL_FIELDS = ["todaysStrength", "nextFocus", "practiceSuggestion", "sessionTakeaway"];
+// 🔴 P1-T08: DERIVED FROM THE SHIPPED CONTRACT, no longer a second copy.
+//
+// This was a hand-maintained duplicate of the panel key list, and it is a
+// FAIL-OPEN of the worst kind: `panelsEqual` reduces over these names, so a
+// stale list compares four `undefined === undefined` pairs and returns TRUE
+// for ANY two panel objects. The G-6 differential proof -- "two materially
+// different assessments produce two materially different drafts" -- would
+// have gone silently vacuous at the OD-4 rename while still reporting PASS.
+//
+// Importing PANEL_KEYS makes that structurally impossible: there is now one
+// definition, and the next rename cannot desynchronise it.
+const PANEL_FIELDS = [...PANEL_KEYS];
 
 export function panelsEqual(a, b) {
   return PANEL_FIELDS.every((f) => a[f] === b[f]);
@@ -1094,10 +1106,10 @@ async function main() {
       const workingA = await readWorking(trainerDb, SESSION_A);
       const workingB = await readWorking(trainerDb, SESSION_B);
       const persistedA = workingA
-        ? { todaysStrength: workingA.todays_strength, nextFocus: workingA.next_focus, practiceSuggestion: workingA.practice_suggestion, sessionTakeaway: workingA.session_takeaway }
+        ? { overview: workingA.overview, strengths: workingA.strengths, areasForDevelopment: workingA.areas_for_development, remarks: workingA.remarks }
         : null;
       const persistedB = workingB
-        ? { todaysStrength: workingB.todays_strength, nextFocus: workingB.next_focus, practiceSuggestion: workingB.practice_suggestion, sessionTakeaway: workingB.session_takeaway }
+        ? { overview: workingB.overview, strengths: workingB.strengths, areasForDevelopment: workingB.areas_for_development, remarks: workingB.remarks }
         : null;
       correspondence =
         persistedA !== null && persistedB !== null &&

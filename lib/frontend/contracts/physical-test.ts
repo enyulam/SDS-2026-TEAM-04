@@ -120,10 +120,10 @@ export type AssessmentDraftDto = {
 };
 
 export type ReportPanelsDto = {
-  readonly todaysStrength: string;
-  readonly nextFocus: string;
-  readonly practiceSuggestion: string;
-  readonly sessionTakeaway: string;
+  readonly overview: string;
+  readonly strengths: string;
+  readonly areasForDevelopment: string;
+  readonly remarks: string;
 };
 
 export type ChecklistDto = {

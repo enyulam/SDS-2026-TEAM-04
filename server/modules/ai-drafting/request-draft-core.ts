@@ -239,10 +239,10 @@ export async function requestDraftCore(
     reportId,
     expectedLockVersion: lockVersion,
     observationLockVersion,
-    todaysStrength: panels.todaysStrength,
-    nextFocus: panels.nextFocus,
-    practiceSuggestion: panels.practiceSuggestion,
-    sessionTakeaway: panels.sessionTakeaway,
+    overview: panels.overview,
+    strengths: panels.strengths,
+    areasForDevelopment: panels.areasForDevelopment,
+    remarks: panels.remarks,
   });
   if (!stored.ok) {
     if (stored.sqlState === "BC004" || stored.sqlState === "BC003") {

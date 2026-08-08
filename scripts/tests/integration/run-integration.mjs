@@ -347,16 +347,21 @@ function partGrounding() {
     } else pass("INT-G0", "every fixture rating resolves to a ratified polarity band (the grounding gate cannot fail open)");
   }
   const input = { studentDisplayName: "Fixture Student One", ratings };
+  // RE-AUTHORED AT P1-T08 for the OD-4 panel roles, not relabelled: each
+  // sentence is written for the panel it now sits in. `overview` deliberately
+  // carries BOTH a positive observation and a developmental one, because the
+  // ruling says Overview is not restricted to positive observations -- and
+  // that is the case the G-06 design must keep accepting.
   const goodPanels = {
-    todaysStrength: "The student used posture and gesture confidently and independently across today's activities.",
-    nextFocus: "Our next focus is eye contact, where frequent prompting and support will help the skill grow more consistent.",
-    practiceSuggestion: "Short daily practice with gentle guidance on facial expressions will reinforce this week's work.",
-    sessionTakeaway: "A strong session overall, with clear engagement and steady progress.",
+    overview: "The student used posture and gesture confidently and independently across today's activities. Eye contact continued to need frequent prompting and support.",
+    strengths: "The student used posture and gesture confidently and independently across today's activities.",
+    areasForDevelopment: "Eye contact needs frequent prompting and support to become more consistent, and facial expressions will benefit from gentle guidance.",
+    remarks: "A steady session overall, with clear engagement and consistent participation throughout.",
   };
 
   // 1a -- schema validation rejects malformed shapes.
   if (validatePanelShape({ ...goodPanels, extra: "x" }) !== null) fail("INT-G1", "an extra key passed schema validation");
-  else if (validatePanelShape({ ...goodPanels, nextFocus: "" }) !== null) fail("INT-G1", "an empty panel passed schema validation");
+  else if (validatePanelShape({ ...goodPanels, strengths: "" }) !== null) fail("INT-G1", "an empty panel passed schema validation");
   else if (validatePanelShape(goodPanels) === null) fail("INT-G1", "a valid shape was rejected");
   else pass("INT-G1", "structured-output schema validation accepts the valid shape and rejects malformed ones");
 
@@ -371,7 +376,7 @@ function partGrounding() {
   // POLARITY rule, so a green here can never be an attribution-rule accident.
   const contradictory = {
     ...goodPanels,
-    todaysStrength: "Excellent eye contact throughout — the student has clearly mastered holding the audience's gaze.",
+    strengths: "Excellent eye contact throughout — the student has clearly mastered holding the audience's gaze.",
   };
   const verdict = validateGrounding(contradictory, input);
   if (verdict.ok) fail("INT-G3", "achievement language about a `beginning` dimension was NOT rejected");
@@ -383,7 +388,7 @@ function partGrounding() {
   // Backend V2 to the RATIFIED vocabulary: the superseded wording ("rated
   // Emerging") certified a guarantee that no longer holds, because
   // `emerging` is no longer a value this system can assign.
-  const leaking = { ...goodPanels, sessionTakeaway: "The student is currently rated Mastering in sentence flow." };
+  const leaking = { ...goodPanels, remarks: "The student is currently rated Mastering in sentence flow." };
   const leakVerdict = validateGrounding(leaking, input);
   if (leakVerdict.ok) fail("INT-G4", "a ratified rating label was attributed to the student in parent-facing prose and was NOT rejected");
   else if (!leakVerdict.reasons.some((r) => r.includes("attributed to the student"))) {
@@ -396,15 +401,19 @@ function partGrounding() {
   // `mastering`, so neither sentence contradicts a rating either.
   const ordinary = {
     ...goodPanels,
-    todaysStrength: "Right from the beginning of the session, the student has mastered a confident, upright posture and used gesture naturally.",
-    practiceSuggestion: "The student is mastering sentence flow, so short daily practice will keep that progress steady.",
+    overview: "Right from the beginning of the session, the student has mastered a confident, upright posture and used gesture naturally.",
+    areasForDevelopment: "The student is mastering sentence flow, so short daily practice will keep that progress steady.",
   };
   const ordinaryVerdict = validateGrounding(ordinary, input);
   if (!ordinaryVerdict.ok) fail("INT-G6", `ordinary prose using the label words was rejected — a bare-word guard has regressed: ${ordinaryVerdict.reasons.join("; ")}`);
   else pass("INT-G6", "ordinary prose (\"at the beginning of the session\", \"has mastered … posture\", \"is mastering sentence flow\") remains legal");
 
-  // 1e -- a needs_support dimension presented as the strength is rejected.
-  const wrongStrength = { ...goodPanels, todaysStrength: "Eye contact was the highlight of the session." };
+  // 1e -- a needs_support dimension presented as a demonstrated strength is
+  // rejected. Under OD-4 this MUST target `strengths`: that is the panel the
+  // rule now reads, and it is the only one of the four whose role is
+  // "positive demonstrated capability". Pointing it at `overview` would test
+  // nothing, because Overview may legitimately carry developmental context.
+  const wrongStrength = { ...goodPanels, strengths: "Eye contact was the highlight of the session." };
   const strengthVerdict = validateGrounding(wrongStrength, input);
   if (strengthVerdict.ok) fail("INT-G5", "a needs_support dimension passed as the strength without support framing");
   else pass("INT-G5", "a needs_support dimension cannot be presented as the strength");
@@ -588,10 +597,10 @@ class ContradictoryProvider {
     return {
       kind: "ok",
       panels: {
-        todaysStrength: "Excellent eye contact throughout — truly outstanding and clearly mastered.",
-        nextFocus: "Keep up the flawless facial expressions.",
-        practiceSuggestion: "Nothing to practise; every skill is perfect.",
-        sessionTakeaway: "A remarkable, exceptional session with no difficulty anywhere.",
+        overview: "Excellent eye contact throughout — truly outstanding and clearly mastered.",
+        strengths: "Keep up the flawless facial expressions.",
+        areasForDevelopment: "Nothing to practise; every skill is perfect.",
+        remarks: "A remarkable, exceptional session with no difficulty anywhere.",
       },
     };
   }
@@ -739,10 +748,10 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
     reportId, expectedStatus: "draft_ready", expectedLockVersion: state.lock_version,
     expectedVersionId: state.current_version_id,
     panels: {
-      todaysStrength: state.todays_strength,
-      nextFocus: state.next_focus,
-      practiceSuggestion: state.practice_suggestion,
-      sessionTakeaway: "Edited by the trainer: steady engagement with support for eye contact ahead.",
+      overview: state.overview,
+      strengths: state.strengths,
+      areasForDevelopment: state.areas_for_development,
+      remarks: "Edited by the trainer: steady engagement with support for eye contact ahead.",
     },
   });
   if (edited.outcome !== "success") { fail("INT-L4", `saveTrainerEditCore gave ${edited.outcome}`); await destroyDisposable(); return; }
@@ -869,10 +878,10 @@ UPDATE public.centre_memberships SET status='active', deactivated_at=NULL WHERE 
     reportId, expectedLockVersion: candidate.lock_version, expectedVersionId: candidate.current_version_id,
     expectedWordingHash: candidate.wording_hash,
     panels: {
-      todaysStrength: candidate.todays_strength,
-      nextFocus: candidate.next_focus,
-      practiceSuggestion: candidate.practice_suggestion,
-      sessionTakeaway: "Polished by management for clarity: steady engagement, with supported eye-contact practice ahead.",
+      overview: candidate.overview,
+      strengths: candidate.strengths,
+      areasForDevelopment: candidate.areas_for_development,
+      remarks: "Polished by management for clarity: steady engagement, with supported eye-contact practice ahead.",
     },
   });
   if (worded.outcome !== "success") { fail("INT-L5", `managementEditWordingCore gave ${worded.outcome}`); await destroyDisposable(); return; }
@@ -904,7 +913,7 @@ SELECT count(*) FROM public.report_version_ratings a
   const mgmtEdit = await managementDb.rpc("report_save_edit", {
     p_report_id: reportId, p_expected_status: "draft_ready", p_expected_lock_version: 1,
     p_expected_version_id: candidate.current_version_id,
-    p_todays_strength: "x", p_next_focus: "x", p_practice_suggestion: "x", p_session_takeaway: "x",
+    p_overview: "x", p_strengths: "x", p_areas_for_development: "x", p_remarks: "x",
   });
   if (!mgmtAssess.error || mgmtAssess.error.code !== "BC101") fail("INT-L5", "management reached the assessment write");
   if (!mgmtEdit.error || !["BC001", "BC004", "BC003"].includes(mgmtEdit.error.code)) fail("INT-L5", "management reached the trainer save path");
@@ -969,10 +978,10 @@ SELECT count(*) FROM public.report_version_ratings a
     reportId, expectedStatus: "needs_edit", expectedLockVersion: state.lock_version,
     expectedVersionId: state.current_version_id,
     panels: {
-      todaysStrength: state.todays_strength,
-      nextFocus: "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.",
-      practiceSuggestion: state.practice_suggestion,
-      sessionTakeaway: state.session_takeaway,
+      overview: state.overview,
+      strengths: "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.",
+      areasForDevelopment: state.areas_for_development,
+      remarks: state.remarks,
     },
   });
   if (corrected.outcome !== "success" || corrected.data.status !== "draft_ready") {
@@ -1066,9 +1075,10 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
   if (!row) fail("INT-L9", "the parent cannot read the submitted canonical report");
   else {
     const keys = Object.keys(row).sort().join(",");
-    if (keys !== "next_focus,practice_suggestion,session_takeaway,submitted_at,todays_strength") {
+    // Sorted, so this list is in OD-4 ALPHABETICAL order, not panel order.
+    if (keys !== "areas_for_development,overview,remarks,strengths,submitted_at") {
       fail("INT-L9", `the canonical read carries unexpected fields: ${keys}`);
-    } else if (row.next_focus !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
+    } else if (row.strengths !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
       fail("INT-L9", "the canonical panels are not the submitted version's");
     } else pass("INT-L9", "the parent reads exactly the four submitted panels + submitted_at — nothing else exists in the shape");
   }

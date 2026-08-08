@@ -203,13 +203,44 @@ export function validateGrounding(panels: ReportPanels, input: GroundingInput): 
     }
   }
 
-  // 4 — a needs_support dimension may never be presented as the strength.
+  // 4 — a needs_support dimension may never be presented as a demonstrated
+  //     strength.
+  //
+  // ⚠️ INTERIM STATE — G-06 / P1-T09 IS AN OPEN OPERATOR GATE. The rule set
+  // for OD-4 is a DESIGN DECISION, not a rename, and it has NOT been
+  // ratified. Nothing below anticipates that decision.
+  //
+  // WHAT CHANGED HERE AND WHY IT IS NOT THE NEW RULE. This rule read the old
+  // model's single positive panel. Under OD-4 that panel's role splits four
+  // ways, and only ONE of the four is the same role: `strengths` is, by the
+  // ruling's own definition, "positive demonstrated capabilities ...
+  // supported by the trainer's governed assessment facts". Pointing the
+  // existing rule at `strengths` therefore CONTINUES it against the panel it
+  // was always about. It is the minimum that keeps the control alive.
+  //
+  // WHAT IS DELIBERATELY NOT DONE, because each is a G-06 decision:
+  //   * NOT retargeted at `overview`. Overview may legitimately carry
+  //     developmental context, so applying a positive-only prohibition there
+  //     would FALSE-REJECT correctly-grounded drafts.
+  //   * NOT extended to `areasForDevelopment`. That panel is EXPECTED to
+  //     name needs_support dimensions; extending the rule there would reject
+  //     the panel for doing its job.
+  //   * NOT extended to `remarks`. Remarks has NO ruled polarity posture.
+  //     Inventing one here would encode an unratified decision in production
+  //     code.
+  //   * The SUPPORT-FRAMING ESCAPE below is carried forward UNCHANGED and is
+  //     KNOWN-WEAK, recorded rather than silently repaired. It is evaluated
+  //     over the WHOLE PANEL, and `develop`, `practice` and `building` are
+  //     ordinary vocabulary inside a strengths narrative — so one incidental
+  //     use anywhere in the panel disarms the rule for EVERY dimension in it.
+  //     Narrowing it is a G-06 design item; changing it now would alter
+  //     rejection behaviour ahead of ratification.
   {
-    const lower = panels.todaysStrength.toLowerCase();
+    const lower = panels.strengths.toLowerCase();
     for (const [code, terms] of Object.entries(DIMENSION_TERMS) as Array<[DimensionCode, readonly string[]]>) {
       if (bandOf.get(code) !== "needs_support") continue;
       if (terms.some((t) => lower.includes(t)) && !/support|prompt|guidance|develop|practice|working on|building/.test(lower)) {
-        reasons.push(`todaysStrength presents a needs_support dimension (${code}) without support framing`);
+        reasons.push(`strengths presents a needs_support dimension (${code}) without support framing`);
       }
     }
   }

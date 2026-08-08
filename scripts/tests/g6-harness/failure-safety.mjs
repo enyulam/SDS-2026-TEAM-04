@@ -101,7 +101,7 @@ async function main() {
       ok: true,
       status: 200,
       json: async () => ({
-        choices: [{ message: { content: JSON.stringify({ todaysStrength: "", nextFocus: "x", practiceSuggestion: "x", sessionTakeaway: "x" }) } }],
+        choices: [{ message: { content: JSON.stringify({ overview: "", strengths: "x", areasForDevelopment: "x", remarks: "x" }) } }],
       }),
     });
     const outcome = await withStubFetch(stub, () => provider.generate(SAMPLE_REQUEST));
@@ -124,7 +124,7 @@ async function main() {
         choices: [{
           message: {
             content: JSON.stringify({
-              todaysStrength: "a", nextFocus: "b", practiceSuggestion: "c", sessionTakeaway: "d",
+              overview: "a", strengths: "b", areasForDevelopment: "c", remarks: "d",
             }),
           },
         }],

@@ -115,10 +115,10 @@ type FixtureState = {
 };
 
 const EMPTY_PANELS: ReportPanelsDto = {
-  todaysStrength: "",
-  nextFocus: "",
-  practiceSuggestion: "",
-  sessionTakeaway: "",
+  overview: "",
+  strengths: "",
+  areasForDevelopment: "",
+  remarks: "",
 };
 
 const EMPTY_CHECKLIST: ChecklistDto = {
@@ -294,14 +294,14 @@ const INITIAL_STATE: FixtureState = {
       versionId: "fixture-version-birch-draft-1",
       revisionNumber: 1,
       panels: {
-        todaysStrength:
+        overview:
+          "Learner Birch presented with a clear structure and a steady pace, and is now working on carrying that same control through to vocal reach at the end of each sentence.",
+        strengths:
           "Learner Birch organised each idea clearly and used a steady pace throughout the presentation.",
-        nextFocus:
-          "The next focus is building more vocal reach while keeping that clear structure.",
-        practiceSuggestion:
-          "Practise one short paragraph while aiming the final word of each sentence toward the back of the room.",
-        sessionTakeaway:
-          "A clear structure gave the presentation a confident foundation today.",
+        areasForDevelopment:
+          "Projection softened at sentence endings, so building more vocal reach while keeping that clear structure would benefit the next session.",
+        remarks:
+          "The observation was taken from the full presentation rather than a single section.",
       },
       contentHash: "fixture-internal-content-birch-draft-1",
       wordingHash: "fixture-wording-birch-draft-1",
@@ -328,14 +328,14 @@ const INITIAL_STATE: FixtureState = {
       versionId: "fixture-version-cedar-returned",
       revisionNumber: 2,
       panels: {
-        todaysStrength:
+        overview:
+          "Learner Cedar told the story with clear sequencing and a calm rhythm, and showed facial expression when prompted during the middle section.",
+        strengths:
           "Learner Cedar kept the story sequence easy to follow and spoke with a calm rhythm.",
-        nextFocus:
-          "The next focus is using facial expression consistently when the story mood changes.",
-        practiceSuggestion:
-          "Retell a short scene in front of a mirror and mark two moments where the character's emotion changes.",
-        sessionTakeaway:
-          "Clear sequencing supported the story, with expression ready for more focused practice.",
+        areasForDevelopment:
+          "Facial expression was visible with prompts rather than independently, so using it consistently when the story mood changes is the area to support next.",
+        remarks:
+          "This report was returned for correction and reflects the trainer's second observation of the session.",
       },
       contentHash: "fixture-internal-content-cedar-returned",
       wordingHash: "fixture-wording-cedar-returned",
@@ -373,14 +373,14 @@ const INITIAL_STATE: FixtureState = {
       versionId: "fixture-version-ember-approved",
       revisionNumber: 2,
       panels: {
-        todaysStrength:
+        overview:
+          "Learner Ember opened with a clear purpose and sequenced the supporting ideas well; tonal variety between those ideas is still developing.",
+        strengths:
           "Learner Ember opened with a clear purpose and kept each supporting idea easy to follow.",
-        nextFocus:
-          "The next focus is adding a little more vocal variety when moving between key ideas.",
-        practiceSuggestion:
-          "Practise the opening twice, marking one word in each sentence to emphasise with a change in tone.",
-        sessionTakeaway:
-          "A clear structure made the presentation easy to follow and ready for more vocal colour.",
+        areasForDevelopment:
+          "Adding a little more vocal variety when moving between key ideas would help each transition land.",
+        remarks:
+          "The trainer approved this version after reviewing the draft against the session observation.",
       },
       contentHash: "fixture-internal-content-ember-approved",
       wordingHash: "fixture-wording-ember-approved",
@@ -409,14 +409,14 @@ const INITIAL_STATE: FixtureState = {
       versionId: "fixture-version-fern-submitted",
       revisionNumber: 3,
       panels: {
-        todaysStrength:
+        overview:
+          "Learner Fern delivered the main message confidently from a warm opening, and the pace accelerated through the closing section.",
+        strengths:
           "Learner Fern shared the main message confidently and used a warm, welcoming opening.",
-        nextFocus:
-          "The next focus is pausing briefly before the closing idea so it lands clearly.",
-        practiceSuggestion:
-          "Read the closing paragraph aloud and add one quiet breath before the final sentence.",
-        sessionTakeaway:
-          "A confident opening and clear message gave the presentation a strong foundation.",
+        areasForDevelopment:
+          "The closing pace accelerated, so pausing briefly before the closing idea would let it land clearly.",
+        remarks:
+          "This is the canonical submitted version and is the one shown to the parent.",
       },
       contentHash: "fixture-internal-content-fern-submitted",
       wordingHash: "fixture-wording-fern-submitted",
@@ -438,14 +438,14 @@ const INITIAL_STATE: FixtureState = {
       latestSubmitted: {
         versionId: "fixture-version-fern-submitted",
         panels: {
-          todaysStrength:
+          overview:
+            "Learner Fern delivered the main message confidently from a warm opening, and the pace accelerated through the closing section.",
+          strengths:
             "Learner Fern shared the main message confidently and used a warm, welcoming opening.",
-          nextFocus:
-            "The next focus is pausing briefly before the closing idea so it lands clearly.",
-          practiceSuggestion:
-            "Read the closing paragraph aloud and add one quiet breath before the final sentence.",
-          sessionTakeaway:
-            "A confident opening and clear message gave the presentation a strong foundation.",
+          areasForDevelopment:
+            "The closing pace accelerated, so pausing briefly before the closing idea would let it land clearly.",
+          remarks:
+            "This is the canonical submitted version and is the one shown to the parent.",
         },
         submittedAt: "2026-08-05T09:30:00.000Z",
       },
@@ -523,13 +523,12 @@ function assertFixtureState(state: FixtureState): void {
 
 function buildPanels(studentDisplayName: string): ReportPanelsDto {
   return {
-    todaysStrength: `${studentDisplayName} kept the story sequence clear and used steady sentence flow throughout the presentation.`,
-    nextFocus:
-      "The next focus is building vocal projection with support, especially at the end of each main idea.",
-    practiceSuggestion:
-      "Practise one short paragraph twice: first at a comfortable volume, then again while aiming each final word toward the back of the room.",
-    sessionTakeaway:
-      "Clear sequencing provided a strong base today, with vocal reach identified as the next supported step.",
+    overview: `${studentDisplayName} sequenced the presentation clearly with steady sentence flow, and vocal projection is still developing towards the end of each main idea.`,
+    strengths: `${studentDisplayName} kept the story sequence clear and used steady sentence flow throughout the presentation.`,
+    areasForDevelopment:
+      "Building vocal projection with support, especially at the end of each main idea, would help the message carry to the whole room.",
+    remarks:
+      "This draft was generated from the trainer's saved observation for this session.",
   };
 }
 
@@ -720,7 +719,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
   ): Promise<UiActionResult<TrainerWorkingReportDto>> {
     await delay(240);
     const report = this.readState().reports[reportId];
-    if (!report || !report.panels.todaysStrength) {
+    if (!report || !report.panels.overview) {
       return { outcome: "unavailable" };
     }
     const match = findStudent(report.sessionId, report.studentId);

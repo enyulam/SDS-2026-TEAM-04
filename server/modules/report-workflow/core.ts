@@ -35,10 +35,10 @@ const PANEL_MAX = 4000;
 const REASON_MAX = 2000;
 
 export interface ReportPanels {
-  readonly todaysStrength: string;
-  readonly nextFocus: string;
-  readonly practiceSuggestion: string;
-  readonly sessionTakeaway: string;
+  readonly overview: string;
+  readonly strengths: string;
+  readonly areasForDevelopment: string;
+  readonly remarks: string;
 }
 
 function invalid(message: string, path?: string): ActionResult<never> {
@@ -105,10 +105,10 @@ export async function saveTrainerEditCore(
     p_expected_status: input.expectedStatus,
     p_expected_lock_version: input.expectedLockVersion,
     p_expected_version_id: input.expectedVersionId,
-    p_todays_strength: input.panels.todaysStrength,
-    p_next_focus: input.panels.nextFocus,
-    p_practice_suggestion: input.panels.practiceSuggestion,
-    p_session_takeaway: input.panels.sessionTakeaway,
+    p_overview: input.panels.overview,
+    p_strengths: input.panels.strengths,
+    p_areas_for_development: input.panels.areasForDevelopment,
+    p_remarks: input.panels.remarks,
     ...(input.reaffirmCorrectionRequestId !== undefined
       ? { p_reaffirm_correction_request_id: input.reaffirmCorrectionRequestId }
       : {}),
@@ -256,10 +256,10 @@ export async function managementEditWordingCore(
     p_expected_lock_version: input.expectedLockVersion,
     p_expected_version_id: input.expectedVersionId,
     p_expected_wording_hash: input.expectedWordingHash,
-    p_todays_strength: input.panels.todaysStrength,
-    p_next_focus: input.panels.nextFocus,
-    p_practice_suggestion: input.panels.practiceSuggestion,
-    p_session_takeaway: input.panels.sessionTakeaway,
+    p_overview: input.panels.overview,
+    p_strengths: input.panels.strengths,
+    p_areas_for_development: input.panels.areasForDevelopment,
+    p_remarks: input.panels.remarks,
   });
   if (error) return mapSqlErrorToResult(error.code, error.message);
   const row = firstRow<ManagementEditWordingRow>(data);

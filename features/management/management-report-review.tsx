@@ -98,13 +98,26 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *
  * FURTHER FRAME-VERSUS-GOVERNANCE DIVERGENCES (recorded, not resolved locally):
  *
- *  D1 Panel headings "Overview / Strengths / Areas to Grow / Remarks". The governed four
- *     parent-facing panels are Today's Strength / Next Focus / Practice Suggestion / Session
- *     Takeaway (spec §8; `REPORT_PANEL_CONFIG`). The frame's headings are NOT a rename of those
- *     four — "Overview" and "Remarks" have no governed counterpart — and adopting them would
- *     silently redefine what each stored field means to a parent. The frame's four-section
- *     composition, iconography, bullet treatment and order are reproduced; the governed labels
- *     are kept. This is the same D2 adjudication F-09 raised on screen 10, unchanged.
+ *  D1 ✅ RESOLVED — NO LONGER A DEVIATION (OD-4, Operator ruling 2026-08-07; implemented at
+ *     P1-T07). The governed four parent-facing panels are Overview / Strengths / Areas for
+ *     Development / Remarks (`REPORT_PANEL_CONFIG`), and the frame agrees on all four.
+ *
+ *     The struck reasoning was: the frame's headings are not a rename of the governed four,
+ *     "Overview" and "Remarks" have no governed counterpart, and adopting them would silently
+ *     redefine what each stored field means to a parent — the same D2 adjudication F-09 raised
+ *     on screen 10. It was correct when written and is preserved rather than deleted.
+ *
+ *     The adjudication has since been ISSUED AND WENT THE OTHER WAY: the Operator defined four
+ *     concepts rather than renaming four fields, and superseded the old model outright.
+ *
+ *     ONE THING THIS FRAME STILL GETS WRONG: it draws the third heading as "Areas to Grow".
+ *     That is the MINORITY VARIANT and is expressly ruled NOT canonical (Authority Lock
+ *     §15.1) — the `/reference/` tree is internally inconsistent on exactly this label. The
+ *     ratified label is "Areas for Development". Here the frame loses and the rule wins.
+ *
+ *     Management's editorial right is unchanged by OD-4: WORDING ONLY, on exactly these four
+ *     panels. OD-4 renames and re-means them; it neither widens nor narrows the A-034
+ *     allow-list, whose arity stays at exactly four.
  *  D2 The report-card subtitle "Public Speaking · Term 1, 2035 · Management copy". "Management
  *     copy" is the same per-audience artefact claim as P1 and is replaced by the governed
  *     lifecycle state. Class-module, lesson and term fields are carried by NO governed
@@ -146,10 +159,10 @@ const PANEL_PRESENTATION: Readonly<
     { readonly icon: IconName; readonly tone: "brand" | "info" | "success" | "warning" }
   >
 > = {
-  todaysStrength: { icon: "check", tone: "success" },
-  nextFocus: { icon: "chevronRight", tone: "warning" },
-  practiceSuggestion: { icon: "reports", tone: "info" },
-  sessionTakeaway: { icon: "document", tone: "brand" },
+  overview: { icon: "check", tone: "success" },
+  strengths: { icon: "chevronRight", tone: "warning" },
+  areasForDevelopment: { icon: "reports", tone: "info" },
+  remarks: { icon: "document", tone: "brand" },
 };
 
 type ActionFailure = Exclude<UiActionResult<unknown>, { outcome: "success" }>;

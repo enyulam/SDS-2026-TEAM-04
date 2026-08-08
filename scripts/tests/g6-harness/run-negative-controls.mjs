@@ -181,10 +181,10 @@ function testEvaluator() {
 // NC-PANELS -- the differential/fixture-inequality comparators themselves.
 // =====================================================================
 function testPanelComparators() {
-  const a = { todaysStrength: "a", nextFocus: "b", practiceSuggestion: "c", sessionTakeaway: "d" };
+  const a = { overview: "a", strengths: "b", areasForDevelopment: "c", remarks: "d" };
   const identical = { ...a };
-  const partiallyDifferent = { ...a, todaysStrength: "different" };
-  const whollyDifferent = { todaysStrength: "w", nextFocus: "x", practiceSuggestion: "y", sessionTakeaway: "z" };
+  const partiallyDifferent = { ...a, overview: "different" };
+  const whollyDifferent = { overview: "w", strengths: "x", areasForDevelopment: "y", remarks: "z" };
 
   if (!panelsEqual(a, identical)) fail("NC-PANELS-1", "byte-identical panels were not reported equal");
   else pass("NC-PANELS-1", "byte-identical panels are reported equal (catches an exact replay)");

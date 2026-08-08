@@ -73,10 +73,10 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
 const PANEL_PRESENTATION: Readonly<
   Record<keyof ReportPanelsDto, { readonly tone: "brand" | "info" | "success" | "warning"; readonly icon: PanelIconName }>
 > = {
-  todaysStrength: { tone: "warning", icon: "star" },
-  nextFocus: { tone: "success", icon: "arrowUp" },
-  practiceSuggestion: { tone: "brand", icon: "target" },
-  sessionTakeaway: { tone: "info", icon: "heart" },
+  overview: { tone: "warning", icon: "star" },
+  strengths: { tone: "success", icon: "arrowUp" },
+  areasForDevelopment: { tone: "brand", icon: "target" },
+  remarks: { tone: "info", icon: "heart" },
 };
 
 export function ParentCanonicalReport() {

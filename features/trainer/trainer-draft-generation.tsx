@@ -80,7 +80,7 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  *     false lifecycle claim on a Trainer working version — only management's Approve & Submit
  *     makes a version canonical and parent-visible (A-033).
  *  D2 Panel headings "Overview / Strengths / Areas to Grow / Remarks". The governed four
- *     parent-facing panels are Today's Strength / Next Focus / Practice Suggestion / Session
+ *     parent-facing panels are Overview / Strengths / Areas for Development / Session
  *     Takeaway (spec §8; `REPORT_PANEL_CONFIG`). The frame's headings are NOT a rename of those
  *     four — "Overview" and "Remarks" have no governed counterpart, and inventing a mapping
  *     would silently redefine what each stored field means to a parent. The frame's four-section
@@ -141,10 +141,10 @@ const PANEL_PRESENTATION: Readonly<
     { readonly icon: IconName; readonly tone: "brand" | "info" | "success" | "warning" }
   >
 > = {
-  todaysStrength: { icon: "check", tone: "success" },
-  nextFocus: { icon: "chevronRight", tone: "warning" },
-  practiceSuggestion: { icon: "reports", tone: "info" },
-  sessionTakeaway: { icon: "document", tone: "brand" },
+  overview: { icon: "check", tone: "success" },
+  strengths: { icon: "chevronRight", tone: "warning" },
+  areasForDevelopment: { icon: "reports", tone: "info" },
+  remarks: { icon: "document", tone: "brand" },
 };
 
 /**

@@ -47,7 +47,7 @@ const managementReview = await port.getManagementReview("report-birch");
 assert(managementReview.outcome === "success", "Management safe review must load");
 const editedPanels = {
   ...managementReview.data.panels,
-  todaysStrength: `${managementReview.data.panels.todaysStrength} The confident opening was especially clear.`,
+  overview: `${managementReview.data.panels.overview} The confident opening was especially clear.`,
 };
 const wordingEdit = await port.managementEditWording({
   reportId: "report-birch",
@@ -180,7 +180,7 @@ const canonical = await port.getCanonicalReport(
 );
 assert(canonical.outcome === "success", "Canonical Parent detail must load");
 assert(
-  canonical.data.panels.todaysStrength === editedPanels.todaysStrength,
+  canonical.data.panels.overview === editedPanels.overview,
   "Parent must receive exactly the submitted canonical wording",
 );
 

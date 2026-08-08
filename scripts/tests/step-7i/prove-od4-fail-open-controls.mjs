@@ -64,7 +64,6 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 
 const ROOT = process.cwd()

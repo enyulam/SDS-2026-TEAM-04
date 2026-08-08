@@ -93,10 +93,10 @@ export interface ManagementReviewDto {
   readonly lockVersion: number | null;
   readonly versionId: string | null;
   readonly panels: {
-    readonly todaysStrength: string;
-    readonly nextFocus: string;
-    readonly practiceSuggestion: string;
-    readonly sessionTakeaway: string;
+    readonly overview: string;
+    readonly strengths: string;
+    readonly areasForDevelopment: string;
+    readonly remarks: string;
   };
   readonly wordingHash: string | null;
   readonly submittedAt: string | null;
@@ -333,10 +333,10 @@ export async function getManagementReviewCandidateCore(
       lockVersion: row.lock_version,
       versionId: row.current_version_id,
       panels: {
-        todaysStrength: row.todays_strength ?? "",
-        nextFocus: row.next_focus ?? "",
-        practiceSuggestion: row.practice_suggestion ?? "",
-        sessionTakeaway: row.session_takeaway ?? "",
+        overview: row.overview ?? "",
+        strengths: row.strengths ?? "",
+        areasForDevelopment: row.areas_for_development ?? "",
+        remarks: row.remarks ?? "",
       },
       wordingHash: row.wording_hash,
       submittedAt: row.submitted_at,

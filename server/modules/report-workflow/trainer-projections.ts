@@ -68,10 +68,10 @@ export interface TrainerWorkingReportDto {
   readonly versionId: string;
   readonly revisionNumber: number;
   readonly panels: {
-    readonly todaysStrength: string;
-    readonly nextFocus: string;
-    readonly practiceSuggestion: string;
-    readonly sessionTakeaway: string;
+    readonly overview: string;
+    readonly strengths: string;
+    readonly areasForDevelopment: string;
+    readonly remarks: string;
   };
   /** Trainer-only (contract §5.3): the sole DTO permitted to carry it. */
   readonly contentHash: string;
@@ -311,10 +311,10 @@ export async function getTrainerWorkingReportCore(
       versionId: row.current_version_id,
       revisionNumber: row.revision_number,
       panels: {
-        todaysStrength: row.todays_strength ?? "",
-        nextFocus: row.next_focus ?? "",
-        practiceSuggestion: row.practice_suggestion ?? "",
-        sessionTakeaway: row.session_takeaway ?? "",
+        overview: row.overview ?? "",
+        strengths: row.strengths ?? "",
+        areasForDevelopment: row.areas_for_development ?? "",
+        remarks: row.remarks ?? "",
       },
       contentHash: row.content_hash ?? "",
       checklist: {

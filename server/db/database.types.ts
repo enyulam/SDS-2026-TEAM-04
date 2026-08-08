@@ -1162,6 +1162,7 @@ export type Database = {
       }
       report_versions: {
         Row: {
+          areas_for_development: string | null
           authored_by_membership_id: string | null
           authored_by_role:
             | Database["public"]["Enums"]["centre_membership_role"]
@@ -1172,46 +1173,46 @@ export type Database = {
           created_at: string
           derived_from_version_id: string | null
           id: string
-          next_focus: string | null
-          practice_suggestion: string | null
+          overview: string | null
+          remarks: string | null
           report_id: string
           revision_number: number
-          session_takeaway: string | null
+          strengths: string | null
           submitted_at: string | null
           submitted_by_membership_id: string | null
           submitted_by_role:
             | Database["public"]["Enums"]["centre_membership_role"]
             | null
-          todays_strength: string | null
           trainer_approved_source_version_id: string | null
           updated_at: string
         }
         Insert: {
+          areas_for_development?: string | null
           authored_by_membership_id?: string | null
           authored_by_role?:
             | Database["public"]["Enums"]["centre_membership_role"]
             | null
           centre_id: string
           content_hash: string
-          content_hash_version?: number
+          content_hash_version: number
           created_at?: string
           derived_from_version_id?: string | null
           id?: string
-          next_focus?: string | null
-          practice_suggestion?: string | null
+          overview?: string | null
+          remarks?: string | null
           report_id: string
           revision_number: number
-          session_takeaway?: string | null
+          strengths?: string | null
           submitted_at?: string | null
           submitted_by_membership_id?: string | null
           submitted_by_role?:
             | Database["public"]["Enums"]["centre_membership_role"]
             | null
-          todays_strength?: string | null
           trainer_approved_source_version_id?: string | null
           updated_at?: string
         }
         Update: {
+          areas_for_development?: string | null
           authored_by_membership_id?: string | null
           authored_by_role?:
             | Database["public"]["Enums"]["centre_membership_role"]
@@ -1222,17 +1223,16 @@ export type Database = {
           created_at?: string
           derived_from_version_id?: string | null
           id?: string
-          next_focus?: string | null
-          practice_suggestion?: string | null
+          overview?: string | null
+          remarks?: string | null
           report_id?: string
           revision_number?: number
-          session_takeaway?: string | null
+          strengths?: string | null
           submitted_at?: string | null
           submitted_by_membership_id?: string | null
           submitted_by_role?:
             | Database["public"]["Enums"]["centre_membership_role"]
             | null
-          todays_strength?: string | null
           trainer_approved_source_version_id?: string | null
           updated_at?: string
         }
@@ -1572,6 +1572,16 @@ export type Database = {
         }
         Returns: string
       }
+      report_content_hash_v2: {
+        Args: {
+          p_areas_for_development: string
+          p_overview: string
+          p_ratings: Database["public"]["Enums"]["competency_rating"][]
+          p_remarks: string
+          p_strengths: string
+        }
+        Returns: string
+      }
       report_create: {
         Args: {
           p_class_session_id: string
@@ -1583,27 +1593,27 @@ export type Database = {
       report_get_canonical: {
         Args: { p_class_session_id: string; p_student_id: string }
         Returns: {
-          next_focus: string
-          practice_suggestion: string
-          session_takeaway: string
+          areas_for_development: string
+          overview: string
+          remarks: string
+          strengths: string
           submitted_at: string
-          todays_strength: string
         }[]
       }
       report_get_management_review: {
         Args: { p_class_session_id: string; p_student_id: string }
         Returns: {
+          areas_for_development: string
           current_version_id: string
           lock_version: number
-          next_focus: string
           open_correction_issue_scope: Database["public"]["Enums"]["correction_issue_scope"]
           open_correction_status: Database["public"]["Enums"]["correction_request_status"]
-          practice_suggestion: string
+          overview: string
+          remarks: string
           report_id: string
-          session_takeaway: string
           status: Database["public"]["Enums"]["report_status"]
+          strengths: string
           submitted_at: string
-          todays_strength: string
           wording_hash: string
         }[]
       }
@@ -1611,25 +1621,25 @@ export type Database = {
         Args: { p_class_session_id: string; p_student_id: string }
         Returns: {
           ai_draft_reviewed: boolean
+          areas_for_development: string
           content_hash: string
           current_version_id: string
           evidence_confirmed: boolean
           latest_submitted_version_id: string
           lock_version: number
-          next_focus: string
           open_correction_dimension_code: Database["public"]["Enums"]["dimension_code"]
           open_correction_issue_scope: Database["public"]["Enums"]["correction_issue_scope"]
           open_correction_reason: string
           open_correction_request_id: string
-          practice_suggestion: string
+          overview: string
           privacy_checked: boolean
           ratings: Json
+          remarks: string
           report_id: string
           revision_number: number
-          session_takeaway: string
           status: Database["public"]["Enums"]["report_status"]
+          strengths: string
           submitted_at: string
-          todays_strength: string
         }[]
       }
       report_list_management_corrections: {
@@ -1650,6 +1660,18 @@ export type Database = {
           trainer_correction_submitted: boolean
         }[]
       }
+      report_list_management_submitted: {
+        Args: never
+        Returns: {
+          class_session_id: string
+          report_id: string
+          report_status: Database["public"]["Enums"]["report_status"]
+          session_date: string
+          student_display_name: string
+          student_id: string
+          submitted_at: string
+        }[]
+      }
       report_management_approve_and_submit: {
         Args: {
           p_expected_lock_version: number
@@ -1661,14 +1683,14 @@ export type Database = {
       }
       report_management_edit_wording: {
         Args: {
+          p_areas_for_development: string
           p_expected_lock_version: number
           p_expected_version_id: string
           p_expected_wording_hash: string
-          p_next_focus: string
-          p_practice_suggestion: string
+          p_overview: string
+          p_remarks: string
           p_report_id: string
-          p_session_takeaway: string
-          p_todays_strength: string
+          p_strengths: string
         }
         Returns: Record<string, unknown>
       }
@@ -1704,27 +1726,27 @@ export type Database = {
       }
       report_save_edit: {
         Args: {
+          p_areas_for_development: string
           p_expected_lock_version: number
           p_expected_status: Database["public"]["Enums"]["report_status"]
           p_expected_version_id: string
-          p_next_focus: string
-          p_practice_suggestion: string
+          p_overview: string
           p_reaffirm_correction_request_id?: string
+          p_remarks: string
           p_report_id: string
-          p_session_takeaway: string
-          p_todays_strength: string
+          p_strengths: string
         }
         Returns: Record<string, unknown>
       }
       report_store_draft: {
         Args: {
+          p_areas_for_development: string
           p_expected_lock_version: number
-          p_next_focus: string
           p_observation_lock_version: number
-          p_practice_suggestion: string
+          p_overview: string
+          p_remarks: string
           p_report_id: string
-          p_session_takeaway: string
-          p_todays_strength: string
+          p_strengths: string
         }
         Returns: Record<string, unknown>
       }
@@ -1755,6 +1777,15 @@ export type Database = {
           p_practice_suggestion: string
           p_session_takeaway: string
           p_todays_strength: string
+        }
+        Returns: string
+      }
+      report_wording_hash_v2: {
+        Args: {
+          p_areas_for_development: string
+          p_overview: string
+          p_remarks: string
+          p_strengths: string
         }
         Returns: string
       }

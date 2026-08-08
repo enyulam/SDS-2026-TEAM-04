@@ -47,10 +47,10 @@ export type AvailabilityState = "available" | "none_yet" | "linked_unavailable";
 
 export interface CanonicalReportDto {
   readonly panels: {
-    readonly todaysStrength: string;
-    readonly nextFocus: string;
-    readonly practiceSuggestion: string;
-    readonly sessionTakeaway: string;
+    readonly overview: string;
+    readonly strengths: string;
+    readonly areasForDevelopment: string;
+    readonly remarks: string;
   };
   readonly submittedAt: string;
 }
@@ -211,10 +211,10 @@ export async function getCanonicalReportCore(
     outcome: "success",
     data: {
       panels: {
-        todaysStrength: row.todays_strength,
-        nextFocus: row.next_focus,
-        practiceSuggestion: row.practice_suggestion,
-        sessionTakeaway: row.session_takeaway,
+        overview: row.overview,
+        strengths: row.strengths,
+        areasForDevelopment: row.areas_for_development,
+        remarks: row.remarks,
       },
       submittedAt: row.submitted_at,
     },

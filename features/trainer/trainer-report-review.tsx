@@ -79,13 +79,24 @@ import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-
  *     management's Approve & Submit makes a version canonical and parent-visible (A-033), so
  *     "Official report" would be a false claim about lifecycle state. The subtitle names the
  *     governed status instead.
- *  D2 Panel headings "Overview / Strengths / Areas for Development / Remarks". The governed
- *     four parent-facing panels are Today's Strength / Next Focus / Practice Suggestion /
- *     Session Takeaway (spec §8; `REPORT_PANEL_CONFIG`). The frame's headings are NOT a rename
- *     of those four — "Overview" and "Remarks" have no governed counterpart, and inventing a
- *     mapping would silently redefine what each stored field means to a parent. The frame's
- *     four-section composition, iconography and order are reproduced; the governed labels are
- *     kept. Recorded for operator adjudication.
+ *  D2 ✅ RESOLVED — NO LONGER A DEVIATION (OD-4, Operator ruling 2026-08-07; implemented at
+ *     P1-T07). The frame's headings "Overview / Strengths / Areas for Development / Remarks"
+ *     ARE the governed four panels. They agree.
+ *
+ *     The struck reasoning was: the frame's headings are not a rename of the governed four,
+ *     "Overview" and "Remarks" have no governed counterpart, and inventing a mapping would
+ *     silently redefine what each stored field means to a parent — recorded for operator
+ *     adjudication. THAT REASONING WAS CORRECT WHEN WRITTEN, and it is preserved here rather
+ *     than deleted because it is why the adjudication was raised at all.
+ *
+ *     The adjudication has since been ISSUED, AND IT WENT THE OTHER WAY. The Operator did not
+ *     rename four fields; the Operator DEFINED four concepts and superseded the old model
+ *     outright. Today's Strength / Next Focus / Practice Suggestion / Session Takeaway are
+ *     SUPERSEDED_BY_OD-4_FINAL_REPORT_MODEL. Nothing is silently redefined: the meanings are
+ *     written down in the ruling, M13 migrated the storage, and the AI generates these four
+ *     DIRECTLY — a relabelling shim is expressly prohibited.
+ *
+ *     The ratified third label is "Areas for Development", NOT "Areas to Grow".
  *  D3 "Class Video Evidence" with a player and recording metadata. Evidence scope AND the
  *     uploading role are UNRESOLVED (Amendment 002 A-014), `PhysicalTestPort` exposes no
  *     evidence read or upload path, and `Evidence Pending` is deliberately not a stored status
@@ -155,10 +166,10 @@ const PANEL_PRESENTATION: Readonly<
     { readonly icon: IconName; readonly tone: "brand" | "info" | "success" | "warning" }
   >
 > = {
-  todaysStrength: { icon: "check", tone: "success" },
-  nextFocus: { icon: "chevronRight", tone: "warning" },
-  practiceSuggestion: { icon: "reports", tone: "info" },
-  sessionTakeaway: { icon: "document", tone: "brand" },
+  overview: { icon: "check", tone: "success" },
+  strengths: { icon: "chevronRight", tone: "warning" },
+  areasForDevelopment: { icon: "reports", tone: "info" },
+  remarks: { icon: "document", tone: "brand" },
 };
 
 /**
