@@ -2646,3 +2646,62 @@ None opened. **G-06 / P1-T09 remains a hard, non-inheritable Operator gate and w
 ### Next permitted action
 
 **OPERATOR RATIFICATION OF THE G-06 GROUNDING RULE SET.** After that, P1-T09 implements the ruling, then P1-T09a and P1-T10.
+
+---
+
+## 2026-08-09 (same run, continued) — ADVERSARIAL REVIEW AND REMEDIATION
+
+**Two INDEPENDENT read-only reviewers**, launched concurrently and kept blind to each other, run against repository and live-database evidence and told explicitly to treat `STATUS.md`, `BUILD_NOTES.md` and the commit messages as **claims to check, not evidence**. **Every finding was verified at source before being accepted.**
+
+**Convergence worth recording.** Both reviewers independently re-found the **two fail-opens the orchestrator had already self-found and fixed** in `802ef45` (the orphaned `assertPanelAnchor`; the unhandled `RENAME COLUMN`) — three separate derivations of the same two facts, and Reviewer B classified both CRITICAL.
+
+### Accepted and FIXED
+
+**① The T7I-18 rewrite was DISPROVED as "strictly stronger" — it was strictly WEAKER on statement shape, and the comment claiming otherwise was false.** Four demonstrated bypasses: multi-column `SET (a,b) = (x,y)` assigns no `col =` token; a subquery's `WHERE` truncated the SET clause; a `WHERE` inside a **string literal** truncated it identically; and the write-once guard was tested against the **whole statement**, so `SET overview='T' WHERE rv.submitted_at = v_now AND rv.submitted_at IS NULL` satisfied both its legs. Shapes ① and ④ together were a **COMPLETE bypass** of the control protecting committed report content. Rewritten: literals blanked, split at the **top-level** `WHERE` by paren depth, both assignment forms matched, guard legs evaluated against the clause each belongs to. All four are now **permanent regression cases**.
+
+**② T7I-18's anchor was a magnitude floor (`< 12`) against an actual 15** — three columns of silent slack. Now an equality, plus a by-name presence check for the columns whose immutability is the point.
+
+**③ T7I-R22 consumed the panel derivation with NO anchor**, and the proof that claimed to cover it was actually exercising T7I-18's. Both fixed.
+
+**④ `run-integration.mjs` wrote the OLD `nextFocus` prose verbatim into `strengths`** — a relabelling shim in *shipped acceptance evidence*, placing a `needs_support` dimension in the one panel OD-4 defines as positive-demonstrated-only. It escaped notice because a trainer edit does not re-run `validateGrounding`. Moved to Areas for Development; `INT-L9` asserts there.
+
+**⑤ Panel PRESENTATION was carried over POSITIONALLY on all four surfaces** — Overview took the success tick, **Strengths rendered in the WARNING tone**, user-visible including on the parent report. Both reviewers flagged it. Re-assigned from panel meaning. The parent surface's local four-icon union was **not widened**: adding an icon is a visual-authority change, not a governance one.
+
+**⑥ TEST-ID COLLISION.** The new default control was authored as **`T7I-75`**, already taken by RPC-8's prior-approval gate — two `PASS T7I-75` lines in one run, and the documented "each ID appears exactly once" invariant became false. Renamed **`T7I-77`**. ⚠️ **A `sed` sweep touched M15 and was REVERTED IMMEDIATELY** — M15 is committed and applied and §11 R-1 is absolute. Its `COMMENT` still cites `T7I-75`, a correct point-in-time record; the pointer is recorded at T7I-77 instead of issuing a whole forward migration to fix a comment.
+
+**⑦ T7I-76's detection regexes were never exercised** (its forward scope is empty while M15 is newest) and were evadable by a **quoted identifier** or an omitted `COLUMN` keyword. Both accepted now; all four spellings are permanent firing cases.
+
+**⑧ The T-CT-13 firing proof was MISATTRIBUTED.** Its exact-array pin runs first and trips on any projection change, so the panel loop is **unreachable** for a panel violation and the proof was exercising the pin. The control is still sound — the pin is strictly stronger than a deny-list here — but the `expect` string now names the leg that fires, and the loop is documented as subordinate.
+
+**⑨ A doc comment was left half-migrated** by mechanical substitution, listing **five** panel names and still asserting the superseded adjudication one line after naming Overview as governed. Rewritten.
+
+**⑩ Ambiguous `expect` strings** (two cases shared one byte-identical string) are subject-qualified; the stale *"git for files"* claim in `run-canonical.mjs` now describes what the code does.
+
+**⑪ PRE-FLIGHT added.** The prover refuses to start from a dirty `supabase/migrations`. Its plants are restored in `finally`, which does not run on SIGKILL, so an interrupted run could leave residue the next run would treat as the clean baseline. The window cannot be closed (auto-commit DDL on a connection this process does not own) — so it is made **loud** instead.
+
+### Accepted, RECORDED, deliberately NOT fixed
+
+- **M15 assertion C5c re-imported M14's B2 predicate**, which this corpus already documents as blind to two of the four creating paths (both use `v_hash`). M15 is applied and is not edited; the property **is** correctly covered by `T7I-OD4-ENVELOPE` in the reusable carrier, which is variable-name-independent for exactly this reason.
+- **C5's regex is per-function, not per-statement.** Bounded by `NOT NULL` — the bad write fails at runtime — so it is an assertion-completeness gap, not a storage hole.
+- **The fixture provider fabricates a `"participation"` strength** when no positive dimension exists, and now writes it into two panels. Fixture-only, unreachable in the participant walkthrough (G-19).
+- **`tests/frontend/three-role-browser-smoke.mjs`** joins the P1-T10 deferred set. It was **missing** from the previous deferred list; it is now named.
+
+### G-06 PACKET EXTENDED — three further MEASURED fail-opens the design pass missed
+
+None repaired in production, because every one changes rejection behaviour:
+
+- **C6** — a **duplicated** `dimensionCode` (no invalid enum needed) leaves another code absent from the band `Map`, so rules 3 and 4 skip it. **Rule 1b must assert COVERAGE of all nine codes, not a count.**
+- **C7** — **Overview can praise a `needs_support` dimension**, because `ACHIEVEMENT_TERMS` carries *"very strong"* but not bare *"strong"*. The fix is to widen that lexicon, **not** to apply the Strengths rule to Overview — which would false-reject the legitimate developmental-context case the ruling protects.
+- **C8** — the escape word **inside** the contradicting sentence. Sentence-scoping alone does not close it; the lexicon must narrow too.
+
+The G-06 evidence probe now measures **11 cases**, of which the current implementation disagrees with the proposal in **five**.
+
+### Verification after remediation — all exit 0, serial
+
+`tsc` · `lint` · `build` (17 routes) · `static-scan` · `run-canonical` · `verify-fresh-apply` (15 migrations, 0 canonicalized differences) · `asm-static` · `run-assessment` · `c2-static` · `c3-static` · `ct-static` · `run-correction-tracking` · `run-management-approved` · `run-concurrency` · `prove-clock-hour-determinism` · `prove-v1-freeze` · `prove-od4-grant-guard` · **`prove-od4-fail-open-controls` (9/9 + 4 bypass-regression + 4 T7I-76 detection)** · **`prove-od4-anchor-existence` (9/9)** · `census-provider-constructors` · `failure-safety` · `run-negative-controls` · **`run-integration` with the REAL-PROVIDER LEG OFF**.
+
+`supabase/migrations` verified clean; no historical migration edited.
+
+### Provider / hosted / human
+
+**PROVIDER: NONE. HOSTED: NONE. PUBLIC: NONE. HUMAN: NONE. PUSH: NONE.** Reviewers were read-only and were instructed never to enable the real-provider leg; neither did.
