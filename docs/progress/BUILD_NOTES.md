@@ -2512,3 +2512,137 @@ Two read-only reviewers, run concurrently and kept blind to each other through r
 ### Next permitted action
 
 **P1-T04 — re-derive the nine fail-open OD-4 guards and prove each one FIRES.** **NOT STARTED.** Two of its nine sites are already evidenced above (`static-scan.mjs`'s six legs; MA-8's live-`prosrc` deny-list, fail-open now). **P1-T06 must close the `database.types.ts` regeneration**, which is an open §6.5 item 6 non-conformance deferred only by explicit Operator instruction — regenerate, never hand-edit.
+
+---
+
+## 2026-08-09 — M15 DEFAULT REMOVAL · P1-T04 (9/9) · P1-T05 (9/9) · P1-T06 · P1-T07 · P1-T08 · G-06 PACKET PREPARED, NOT RATIFIED
+
+**Date/time.** 2026-08-09, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 1. One Operator ruling implemented forward-only (`content_hash_version` DEFAULT), then **P1-T04 → P1-T08** executed, then the **G-06 / P1-T09 decision packet prepared and STOPPED at the gate**.
+**Track / workstream.** OD-4 contract foundation. **Branch / worktree.** `main`, single writer, worktrees **1**, remotes **0**.
+**Starting HEAD** `aec5a86eaa342b8bf33b8d7bc40ded877ecb36a8` → **ending HEAD `802ef45`**. `aec5a86` was **NOT** amended; M13 and M14 were **NOT** edited.
+
+### Scope reconciliation, done first
+
+The instruction's expected state matched reality exactly — HEAD `aec5a86`, clean tree, `main`, 0 remotes, 1 worktree, local Supabase up, 14 migrations. **No divergence to reconcile.** P1-T01/T02/T03 were **not** redone.
+
+### OPERATOR RULING IMPLEMENTED — `content_hash_version` has NO DEFAULT
+
+**M15 `20260809180000_od4_content_hash_version_no_default.sql`.** Forward-only; M13 and M14 are committed and applied and were not touched (plan §11 **R-1**), and no historical migration was edited — Step 7I's `ADD COLUMN … NOT NULL DEFAULT 1` remains a correct point-in-time record.
+
+**Proven BEFORE applying** (fail-closed precondition inside the migration, so it re-proved itself on re-apply): default exactly `1`, column `NOT NULL`, CHECK exactly the governed `1-or-2` form. **Proven AFTER:** default absent in `pg_attrdef`, in `atthasdef` **and** in `information_schema` (that third leg matters — it is the surface the type generator reads); NOT NULL retained; CHECK still exactly `CHECK ((content_hash_version = ANY (ARRAY[1, 2])))`; no stored value rewritten; **all four** version-creating paths name the column explicitly, discovered from the catalogue rather than a literal list; none stamps a literal `1`; `report_reopen_submitted` still propagates `v_src.content_hash_version`; **zero** client DML privilege and **zero** non-SELECT policy on `report_versions`; census unmoved; V1 frozen.
+
+**The operative property, demonstrated live:** an INSERT omitting the column now raises **23502 not_null_violation** instead of silently storing `1`. **No trigger synthesizes the value** — the ruled property is explicitness, not automation.
+
+**Why not `DEFAULT 2`:** it would fix the current direction and re-create the identical hazard mirrored — a legitimate V1-envelope write omitting the column would be silently relabelled `2`, which is exactly what G-05a item 7 prohibits.
+
+**Three negative controls, each demonstrated FIRING.** ① **M15 assertion C8** restores a DEFAULT inside a rolled-back subtransaction and requires the detector to raise; a mutant whose probe does *not* restore the default makes C8 fail, so C8 is not vacuous. ② **T7I-75** (`lifecycle-canonical.sql`) is the durable runtime control — a migration end-assertion is point-in-time and a *later* migration re-adding a default would never re-run it. Fired against a live restored default, passes clean once removed, and carries a **behavioural** leg (omitted write rejected 23502) so it cannot pass on catalogue shape alone. ③ **T7I-76** (`static-scan.mjs`) is the authoring-time half, scanning every migration sorting after M15; fired on **both** the `SET DEFAULT` and `ADD COLUMN … DEFAULT` forms, stayed clean on a benign later migration, and is anchor-pinned to M15 so a rename cannot silently empty its scope.
+
+**Pins re-derived, not assumed (14 → 15):** `verify-local-fixtures.sql` (count, literal version list, message), `asm-suite.sql`, `c3-static.mjs`, `ct-static.mjs`, `lifecycle-canonical.sql` (count + version list), `static-scan.mjs`, `verify-fresh-apply.mjs` (count + census literal `26|36|12|29|15|25|0|`), `disposable-stack.mjs`'s `EXPECTED_CANONICAL_MIGRATIONS`, the newest-filename pins in `c3-static.mjs`/`ct-static.mjs`, and **`c2-static.mjs`'s ORDINAL pin (`-5` → `-6`)** — which no count edit would have fixed.
+
+**One test-side write depended on the default:** `lifecycle-canonical.sql` T7I-13's decoy omitted the column and would have failed 23502 and reported the **wrong constraint**, masking the revision-uniqueness property it exists to prove. It now states the version explicitly.
+
+**One procedural event, recorded.** M15 was applied, then its prose was edited (see below), so the ledger and the tree would have disagreed. Rather than leave that, the migration was reverted **locally and precisely** (`SET DEFAULT 1` + delete its ledger row) and re-applied from the corrected file — which made its own fail-closed precondition re-prove the `DEFAULT 1` pre-state a second time. `supabase db reset` was **never** used.
+
+**The static privilege guard was NOT relaxed to accommodate M15.** It reported M15's *prose* use of the privilege keyword inside a dollar-quoted body — conservatively and **correctly**, since it cannot tell prose from an `EXECUTE` payload. The prose was reworded instead: stripping comments inside a dollar-quoted chunk would let a real one hide behind a `--` placed in a nested string literal.
+
+### P1-T04 — the nine fail-open OD-4 controls, 9/9 proven firing
+
+Nine controls named the four **superseded** panel columns literally, to prove report content does not leak and that a committed version is not mutated. M13 renamed those columns, so all nine had been green and blind — and **MA-8 was worse than inert**: it reads the LIVE `prosrc` and emitted the affirmatively false claim *"reads no version-content column"* while scanning for four names that no longer exist anywhere in the database.
+
+**Catalogue-derived, not re-literalised (Q-7).** New pure module `scripts/tests/step-7i/od4-panel-guard.mjs` replays the migration corpus (the schema source of truth, ADR-8) and derives the panel set **by subtraction** from a stable structural list. A rename is followed automatically; a new structural column fails **loud** rather than silent. **T7I-18's** forbidden set became *"every current `report_versions` column except T11's write-once submission metadata and `updated_at`"* — strictly stronger than the eleven names it replaced.
+
+**Re-derived:** T7I-18 · T7I-R22 (`static-scan.mjs`) · T-CT-S3 (`ct-static.mjs`) · T-CT-13 (`ct-suite.sql`, made catalogue-derived although its literals were already current) · MA-8 (`run-management-approved.mjs`, now reading `pg_attribute` directly).
+
+**Four of the nine live INSIDE ALREADY-APPLIED MIGRATIONS — M6, X5, S6, S8 — and were NOT edited.** Their current equivalents are the new **`T7I-OD4-BOUNDED`** block in `lifecycle-canonical.sql`, proving the three bounded governed projections neither **declare** nor **read** a narrative panel, each with its own anchor-existence leg.
+
+**Also remediated — registered P1-T03 review finding ⑤.** `static-scan.mjs` built its function-body map from `20260805090500` **alone**, so six body-level legs asserted properties of superseded text (M13 replaced eleven bodies, M14 a twelfth). The map now replays the corpus in ledger order, later definitions overwriting earlier, and handles **both** authoring styles — keying on one dollar-quote tag was itself a silent-miss risk, since the M13 bodies use the other. Two real imprecisions surfaced and were **fixed rather than suppressed**: T7I-18 scanned whole `UPDATE` statements and read a `WHERE` predicate as an assignment (now SET-clause only, which is also stricter), and T7I-62 was pulled onto the audit **implementation**, which names `target_type`/`payload_canonical` as JSONB keys rather than labels (now call-sites only, with an anchor so the exclusion cannot quietly empty the scan).
+
+**`prove-od4-fail-open-controls.mjs` — 9/9.** Three strategies chosen by where each control runs: mutate the file under test and run the **shipped** scanner; extract the **shipped** assertion block at runtime and execute it against a violation planted inside a rolled-back transaction; or plant a violating body on the canonical database and restore it from its defining migration. Nothing is re-implemented, so a control that was *disabled* rather than fixed cannot pass. Violations are built from the **live** panel names — hard-coding them inside the proof would reproduce the very defect being proven against.
+
+### P1-T05 — anchor existence, 9/9 failing closed
+
+**Exact equality was preserved everywhere.** T7I-39's result signature and T7I-51's parameter list remain exact-string comparisons — T7I-51's arity check is the machine-checkable form of the A-034 four-column management allow-list. **Nothing was softened to a LIKE, a substring or a count.** What was added is an existence **precondition** in front of them: five legs of T7I-39 were LIKE-shaped, and SQL three-valued logic (`NULL LIKE '%x%'` → NULL → `IF` does not branch) made a **deleted** function indistinguishable from a clean one, so deleting `report_get_management_review` made all of its leak checks pass.
+
+**Also closed: the serializer RENAME vacuity** the M14 review recorded as open. `EXPECTED_SERIALIZERS` is a **count**, and a count cannot see a rename — `report_content_hash_v2` → `_v3` still matches discovery, still totals four, passes silently. `assertAnchors` now names all four.
+
+Proofs: the four governed boundaries deleted in turn; an **overload** case (two same-named functions make `pg_get_function_result` ambiguous); the V2 serializer renamed; T7I-76's forward scope broken; the panel derivation emptied at its root; and a **column-rename** case (below).
+
+### TWO FAIL-OPENS FOUND IN THIS RUN'S OWN NEW GUARD, by the orchestrator's self-review before the independent reviewers reported
+
+① **`assertPanelAnchor` was an EXPORTED ORPHAN.** The module's header claimed the text derivation *"is checked against the live catalogue by `assertPanelAnchor`"* — and **nothing called it**. The claim was false, and the derivation was therefore unfalsifiable: the static scanners cannot reach the database, so a replay that silently stopped matching would yield a wrong set and every consumer would report PASS. Same orphan defect the M14 review found in `prove-v1-freeze.mjs`. It is now called from `prove-od4-fail-open-controls.mjs`, the one place holding both the derivation and a live connection, which `run-canonical` invokes.
+
+② **The derivation ignored `ALTER TABLE … RENAME COLUMN`.** Not cosmetic: OD-4 renamed four panel columns, so a rename is the most likely future event on this table. Without that branch the derivation keeps the OLD name and **no per-consumer anchor catches it** — the count is still four and none of the names is a superseded one. Green and blind. RENAME is now applied in place, preserving ordinal position; `ALTER COLUMN … SET/DROP …` is deliberately not matched. New firing proof **`anchor:column-rename`** plants a disposable rename migration and requires the derivation to *follow* it, which makes it disagree with the live catalogue, which the anchor must report.
+
+### P1-T06 — generated types regenerated (open §6.5 item 6 non-conformance CLOSED)
+
+`server/db/database.types.ts` regenerated from the live local database after all 15 migrations, **never hand-edited**, and captured **byte-faithfully** — the first capture went through a PowerShell redirect which prepended a **UTF-8 BOM the generator does not emit**, so it was re-taken through a byte-transparent shell.
+
+- **`content_hash_version` is now REQUIRED in the Insert shape** (`number`, not `number | undefined`). It was optional **only** because the column carried a database DEFAULT. This was the specific shape the Operator asked to inspect, and it came out right **without being forced** — had it stayed optional, the generator or the catalogue would have needed diagnosing, not the type.
+- **`report_list_management_submitted` is present.** It was **missing entirely** while `management-view/projections.ts` already called it — a pre-existing drift, not an OD-4 consequence. **Generated-type drift closed.**
+- The four superseded names remain in exactly **eight** places: the parameter lists of `report_content_hash_v1` and `report_wording_hash_v1`. **That is CORRECT** — V1 is frozen byte- and semantically-unchanged (G-05a items 1–2) and the generator is faithfully reporting the catalogue.
+
+**Intermediate compiler state, recorded honestly.** Immediately after regeneration `tsc` failed with **exactly 12 `TS2339` errors**, all in three projection files, all naming the four superseded fields. Those were the **planned stale consumers**, not a generated-type defect — the error messages themselves printed the correct OD-4 shapes. **No generated type was hand-edited to hide them**; they were resolved at the consumer.
+
+### P1-T07 / P1-T08 — native OD-4 contract, no relabelling shim
+
+Server, shared and frontend contracts moved to `overview · strengths · areas_for_development · remarks`, labels **Overview · Strengths · Areas for Development · Remarks**. `report-panel-config.ts` — the sole source of those labels — was **rewritten, not renamed**: its supporting copy is re-authored from the ruling, so Overview's states it is *not* positive-only and Remarks' states it is *not* a channel for unsupported claims. `trusted-store.ts`'s SQL GUCs were already positional (`bc.p1…bc.p4`) and stay that way.
+
+The stale deviation comments in `trainer-report-review.tsx` and `management-report-review.tsx` are corrected. They asserted *"Overview and Remarks have no governed counterpart"* and *"recorded for operator adjudication"* — correct **when written**, preserved rather than deleted, and now annotated: the adjudication was issued and **went the other way**. The management frame's **"Areas to Grow"** is retained as a live divergence, since that minority variant is expressly ruled **not** canonical.
+
+**AI layer is native.** `ReportPanels`, `PANEL_KEYS`, `RESPONSE_SCHEMA`, `validatePanelShape` and the deterministic fixture provider all express the four OD-4 keys **directly**. **`SYSTEM_PROMPT` was re-authored** — the substantive change: it previously taught **no panel semantics at all** (*"Return ONLY the four requested fields"*), leaning entirely on key names, which is precisely how a model infers the old model from position. It now teaches each panel's meaning explicitly, including that **Overview is not restricted to positive observations** and that **Areas for Development is expected to discuss dimensions needing support**. The fixture provider's four sentences were likewise **re-authored**; relabelling them would have baked the superseded semantics into every fixture run.
+
+**Preserved:** strict structured output, exactly four keys, `additionalProperties: false`, the key-count assertion at **4**, timeout, bounded one-retry, outcome union, redaction posture.
+
+**AI AUTHORITY, verified at source.** `AiDraftRequest` exposes only `reportId`, `observationLockVersion`, `studentDisplayName`, the nine ratings with anchor and polarity band, the two chip lists and the two delimited note fields. No rating, approval, submission, publication, attendance or report-state authority exists anywhere in the module. **EVIDENCE-MEDIA EXCLUSION:** a sweep of the whole `ai-drafting` module for evidence/media/url/bucket/object-path/attachment/filename/mime tokens returns **exactly one hit** — the phrase *"G-6 evidence contract"* in a comment about redacted call metadata. **The drafting path retains zero evidence surface.**
+
+**ROOT-CAUSE FIX found while migrating the harnesses.** `activate-g6.mjs` carried its **own hand-maintained copy** of the panel field list, and `panelsEqual` reduces over it — so a stale copy compares four `undefined === undefined` pairs and returns **TRUE for any two panel objects**. The G-6 differential proof would have gone silently vacuous at this rename while still reporting PASS. It now imports `PANEL_KEYS` from the shipped contract.
+
+**ACTIVE OLD-SEMANTIC IDENTIFIER CENSUS: ZERO in application source.** Every remaining occurrence is either the frozen V1 serializer signature in generator output, or explicitly-historical prose in a comment explaining the supersession.
+
+**Deferred and NAMED, not silently skipped** — three P1-T10 files still carry the superseded names and are **not** in this checkpoint's validation set: `scripts/physical-test/prove-governed-lifecycle.mjs`, `scripts/physical-test/g14-isolation-seed.sql`, `tests/frontend/trainer-browser-smoke.mjs`.
+
+### Automated verification — all exit 0, run SERIALLY
+
+`tsc` **0** · `lint` **0** (0 errors, 0 warnings) · `build` **0** (17 routes) · fixture verifier **0** (Section A, Section C **all 7 negative tests correctly rejected**, Section D no residue) · `static-scan` **0** · `run-canonical` **0** (canonical checksum **28 rows / `6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576`**, two byte-identical runs) · **`verify-fresh-apply` 0** — all **15** migrations apply from an empty database, fresh census **26 tables / 36 functions / 12 enums / 29 policies / 15 migrations / 25 authenticated EXECUTE**, 42 raw transport differences / **0 canonicalized** · `asm-static` **0** · `run-assessment` **0** · `c2-static` **0** · `c3-static` **0** · `ct-static` **0** (14 already-applied files byte-identical to HEAD) · `run-correction-tracking` **0** · `run-management-approved` **0** · `run-concurrency` **0** · `prove-clock-hour-determinism` **0** · `prove-v1-freeze` **0** · `prove-od4-grant-guard` **0** · **`prove-od4-fail-open-controls` 0 (9/9)** · **`prove-od4-anchor-existence` 0 (9/9)** · `census-provider-constructors` **0** · `failure-safety` **0** · `run-negative-controls` **0** · **`run-integration` 0 with the REAL-PROVIDER LEG OFF** — it printed its own confirmation that no `OpenAiDraftProvider` was constructed and no outward request was attempted.
+
+**NOT-RUN, recorded honestly:** **P1-T09a** (additive fixture expansion) and the physical-test / C4 harnesses (`prove-governed-lifecycle.mjs`, `run-f17*`, `trainer-browser-smoke.mjs`) — P1-T10 scope.
+
+### Manual verification — live catalogue
+
+**15 migrations · 26 tables · 12 enums · 36 functions · 29 policies.** `content_hash_version`: `smallint`, `NOT NULL`, `atthasdef = f`, default `<NONE>`. Envelope constraint exactly `CHECK ((content_hash_version = ANY (ARRAY[1, 2])))`. All **four** version-creating paths state the column explicitly. **Zero** client DML privileges on `report_versions`. EXECUTE census **authenticated 25 · anon 0 · service_role 0 · authenticator 0**. `report_versions` = **0**. **0 leftover `bc_*` databases.**
+
+### G-06 / P1-T09 — PACKET PREPARED, GATE NOT CROSSED
+
+`docs/plan/G06_GROUNDING_RULE_DESIGN_PACKET.md` + the read-only evidence probe `scripts/tests/g6-harness/g06-grounding-evidence.mjs`. **Nothing ratified, nothing implemented.**
+
+The **only** production change to `grounding.ts` is rule 4 now reading `panels.strengths` — the minimum that keeps the control alive, and not a design decision, because exactly one of the four panels inherits the role rule 4 was always about. It was **not** retargeted at `overview` (would false-reject legitimate developmental context), **not** extended to `areasForDevelopment` (which is expected to name needs_support dimensions), and **not** extended to `remarks` (no ruled polarity posture). Rules 1, 2, 3 and 5 were **verified** to iterate `PANEL_KEYS`, not assumed.
+
+**Two defects MEASURED, not asserted, and deliberately left unrepaired because both change rejection behaviour:**
+
+- **The support-framing escape makes rule 4 close to vacuous.** It is evaluated over the **whole panel**, and its lexicon contains ordinary Strengths vocabulary (`develop`, `practice`, `building`). Demonstrated: the exact contradiction that is otherwise rejected becomes **ACCEPTED** when one innocuous sentence containing *develop* is appended to the same panel.
+- **Rule 3 fails open on an unmapped rating.** `band === undefined` → `continue`. Demonstrated: with one rating label unmapped, a draft saying *"Excellent eye contact throughout — truly outstanding and clearly mastered"* about that dimension is **ACCEPTED**. This is the A-053 shape exactly.
+
+**Proof cases prepared:** the deliberate contradiction **REJECTS** (two forms), legitimate developmental context in **Overview** and in **Areas for Development** both **ACCEPT** (so the proposal false-rejects nothing), and a grounded Remarks case **ACCEPTS**. The Remarks polarity question is presented as an explicit **R-A / R-B / R-C** choice rather than silently invented.
+
+### Decisions
+
+- **Forward-only default removal**, never an edit to M13/M14 or any historical migration.
+- **`DEFAULT 2` rejected** — it mirrors the hazard rather than removing it.
+- **No trigger** — the ruled property is explicitness, not automation.
+- **Catalogue-derived detection over literal deny-lists**, with the text derivation cross-checked against the live catalogue.
+- **The static privilege guard was reworded around, never relaxed.**
+- **Exact-equality anchors were never weakened to reach green.**
+- **`PASS` is recorded, never `Operator Accepted`.**
+
+### Blockers
+
+None opened. **G-06 / P1-T09 remains a hard, non-inheritable Operator gate and was NOT pre-decided.**
+
+### Provider / hosted / human
+
+**PROVIDER: NONE** — zero calls, no provider constructed, no outward request attempted; the real-provider leg was off by default and no opt-in flag or environment variable was set. **HOSTED: NONE. PUBLIC: NONE. HUMAN: NONE** — contacted 0, consented 0, sessions 0. **PUSH: NONE. SUBMISSION: NONE.** None inheritable. Frozen demo `8d4acf4abc5039c24da01be773ab1a5e4916080f` clean with its tag intact; PeakPalate `KEEP_IN_PLACE`, untouched.
+
+### Next permitted action
+
+**OPERATOR RATIFICATION OF THE G-06 GROUNDING RULE SET.** After that, P1-T09 implements the ruling, then P1-T09a and P1-T10.
