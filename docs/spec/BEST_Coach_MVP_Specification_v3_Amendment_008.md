@@ -23,7 +23,7 @@ Specification v3 remains the **authoritative baseline**. Amendment 001 (**A-001 
 1. Every clause not named here remains in force, unchanged.
 2. **Amendment 008 names no clause of Amendments 001, 002, 004, 005, 006 or 007.** All of them are untouched.
 3. **Within Amendment 003, Amendment 008 names A-029's registry enumeration and nothing else.** A-025, A-026, A-027, A-028, A-030, A-031 and A-032 remain **fully active**. Within A-029 itself, only the **enumerated action list** is extended: A-029's stable account/membership attribution, its durable actor FKs, its polymorphic targets with immutable minimal snapshots, its one-event-per-governed-action rule, its generic `state_domain`/`state_from`/`state_to` shape, its **append-only correction-by-new-event** rule, its **no-redaction** rule and its **data-minimization** rule are all **preserved unchanged and remain binding**.
-4. **A-031's schema-object ceiling is NOT widened by this amendment.** A-057 adds **no table, no enum, no column and no seed row**. The registry is a `text[]` constant inside an already-shipped function.
+4. **A-031's schema-object ceiling is NOT widened by this amendment.** A-057 adds **no table, no enum, no column and no seed row**. The registry is a `text[]` constant inside already-shipped **plpgsql** function bodies. ⚠️ **It is declared TWICE in `supabase/migrations/20260804213000_step_7h_audit_chain.sql` — at lines 439 and 744 — and an implementing migration must extend BOTH.** *(Corrected 2026-08-08 after adversarial review; an earlier draft said "an already-shipped function", singular, which could have led an implementer to extend one and miss the other.)*
 5. Specification v3 and Amendments 001–007 are **never edited in place.**
 
 ### Scope statement — this amendment authorizes nothing
@@ -61,7 +61,7 @@ A-029's data-minimization rule applies in full. **An evidence audit payload carr
 
 **Nothing in A-057 relaxes the append-only chain.** `audit_events` and `audit_event_targets` remain `INSERT`-only with `UPDATE`/`DELETE` refused, the `entry_hash` chain rule is unchanged, and an evidence event commits **in the same transaction** as the governed operation it records — exactly as every other registry action does. Correction remains **a new event**; repair never mutates evidence.
 
-*(Verified against the live database on 2026-08-08 during Plan Phase 0: the append-only guarantee is enforced by trigger, not merely by grant — a `DELETE` on `audit_event_targets` is refused **even for the `postgres` owner/superuser** with `audit append-only violation: … is never permitted (design section 5.5: correction is a new event; repair never mutates evidence)`, and the `authenticated` role has no `DELETE` privilege at all. This amendment leaves that posture untouched.)*
+*(Verified against the live database on 2026-08-08 during Plan Phase 0: the append-only guarantee is enforced by trigger, not merely by grant — a `DELETE` on `audit_event_targets` is refused even for the object-owning `postgres` role — which on Supabase is `rolsuper = false`, `BYPASSRLS` (Lock §18.4), so this is a **trigger** guarantee, not a privilege one with `audit append-only violation: … is never permitted (design section 5.5: correction is a new event; repair never mutates evidence)`, and the `authenticated` role has no `DELETE` privilege at all. This amendment leaves that posture untouched.)*
 
 ---
 

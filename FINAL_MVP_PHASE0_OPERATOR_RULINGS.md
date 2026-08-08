@@ -68,7 +68,7 @@ ERROR:  audit append-only violation: DELETE on public.audit_event_targets is nev
         (design section 5.5: correction is a new event; repair never mutates evidence)
 ```
 
-**That refusal fires for the `postgres` owner/superuser**, not merely for an application role — it is trigger-enforced, not grant-enforced. The `authenticated` role has no `DELETE` privilege at all.
+**That refusal fires even for the object-owning `postgres` role — which on Supabase is `rolsuper = false`, `BYPASSRLS` (Lock §18.4), so this is a **trigger** guarantee, not a privilege one** — not merely for an application role. The `authenticated` role has no `DELETE` privilege at all. *(Wording corrected 2026-08-08 after adversarial review: an earlier draft said "superuser", which Lock §18.4 rules factually wrong — verified live, `postgres | rolsuper=false | rolbypassrls=true`. The finding is unchanged and if anything stronger: the refusal is enforced by **trigger**, so no privilege level relieves it.)*
 
 **Conclusion.** For as long as **any** audit event exists, the fixture reload is **structurally impossible**. The reload was the instrument meant to clear the residue, and the residue's audit half is precisely what blocks the reload. **This is circular and cannot be resolved inside the ruling as written.** The append-only guarantee is working exactly as designed — this is not a defect to be worked around, and `CLAUDE.md` §12's *"never work around a fail-closed refusal by weakening the thing that refused"* forbids relaxing it.
 

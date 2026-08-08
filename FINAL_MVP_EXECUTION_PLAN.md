@@ -1359,17 +1359,17 @@ that authorization (§7.6-A).
 - **Tests/proofs** — Design review by a read-only adversarial reviewer.
 - **Commit** — None.
 - **Rollback** — n/a.
-- **Operator gate** — **YES.** ⚠️ **OD-4 §5.1 (the content-hash envelope) is an OPEN Phase B
+- **Operator gate** — ~~**YES.**~~ **✅ SATISFIED 2026-08-08 — G-05a RULED; see the gate register.** The ruling is the V2-parallel disposition below, and the three stale carriers named at the end of this paragraph (**OD-4 §5.1, Lock §15.1, `CLAUDE.md` §6/§12**) were **closed on 2026-08-08** as this paragraph directed. ~~⚠️ **OD-4 §5.1 (the content-hash envelope) is an OPEN Phase B
   ruling — its own words are "Recorded, not decided"** — and `CLAUDE.md` §12 makes it a
   stop-and-ask to *"redefine **or increment** the content-hash envelope without ruling §5.1."*
   Incrementing `content_hash_version` to 2 is exactly that. The nearest disposition is cleanup
   manifest **Q-6** (`DEFERRED_TO_PHASE_B_TECHNICAL_PROOF` — V2 semantics with the four OD-4 keys,
   `_v1` bodies preserved unchanged), which was **never propagated back into OD-4 §5.1, Lock §15.1
   or `CLAUDE.md` §12**. Present Q-6 for confirmation as the §5.1 ruling, and close the three stale
-  carriers under P0-T04's bounded instruction. *(Treated identically to P1-T09, which gates the
-  other open sub-ruling from the same OD-4 §5.)*
-- **Stop** — No §5.1 ruling in hand; or any design element that would redefine V1 or grant a new
-  EXECUTE.
+  carriers under P0-T04's bounded instruction.~~ *(Treated identically to P1-T09, which gates the
+  other open sub-ruling from the same OD-4 §5 — **and P1-T09 / G-06 remains genuinely OPEN**.)*
+- **Stop** — ~~No §5.1 ruling in hand;~~ **(the §5.1 ruling IS in hand — G-05a, 2026-08-08)** or any design element that would redefine V1 or grant a new
+  EXECUTE. ⚠️ **Also stop on the G-05a premise break:** the ruling assumed no local V1 row survives; **one does** (blocker **B-P0-2**), and it must be treated as present and **never silently relabelled or mutated**.
 
 ---
 
@@ -3714,7 +3714,7 @@ return to the Operator during an authorized local run:**
 | G-03 | P0-T08 | **B** | External-input answers |
 | G-04 | P0-T09 | **B** | `report_source_map` · `session_logs` · attendance visual disposition · notification scope — **hard until answered** |
 | G-05 | P0-T10 | **B** | Seven evidence pre-rulings, incl. the **audit-registry amendment** — **hard until answered** |
-| **G-05a** | **P1-T02** | **B** | **OD-4 §5.1 content-hash envelope ruling** (confirm Q-6's V2-parallel disposition) — **hard until answered** |
+| **G-05a** | **P1-T02** | **B** | **OD-4 §5.1 content-hash envelope ruling** — ~~(confirm Q-6’s V2-parallel disposition) — **hard until answered**~~ **✅ ANSWERED 2026-08-08. CLOSED.** The Operator ruled the V2-parallel disposition: **V1 frozen byte/semantically · PARALLEL V2 serializers · new versions at `content_hash_version = 2` · CHECK widened to `1 or 2` · no backmigration · no silent relabelling of a future production V1 row · `report_store_draft` keeps zero client EXECUTE.** Carrier: `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md` |
 | G-06 | P1-T09 | **B** | Grounding rule-4 rule set ratification — **hard until answered** |
 | **G-07** | **P1-T11** | **A** | **Phase 1 exit** — routine local progression |
 | G-08 | P2-T07 | **B** | Bootstrap design — the `CLAUDE.md:163` vs §5.7 authority resolution |

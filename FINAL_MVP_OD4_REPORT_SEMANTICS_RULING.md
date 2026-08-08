@@ -170,7 +170,7 @@ Legend: **SR** = `SEMANTIC_RENAME_REQUIRED` · **SL** = `SEMANTIC_LOGIC_CHANGE_R
 
 Two items are **not** mechanical and must be ruled before implementation. Neither is ruled here.
 
-### 5.1 The content-hash envelope version — an open Phase B ruling
+### 5.1 The content-hash envelope version — ~~an open Phase B ruling~~ ✅ **RULED 2026-08-08 (G-05a)**
 
 The panel field names `todays_strength`, `next_focus`, `practice_suggestion`, `session_takeaway` are **literal bytes inside the SHA-256 preimage** of both `report_content_hash_v1` and `report_wording_hash_v1`. Renaming the columns therefore changes every hash the serializers produce, and `report_versions.content_hash_version` is pinned by `CHECK (content_hash_version = 1)`.
 
@@ -179,7 +179,7 @@ Two defensible paths exist and they are **not equivalent**:
 - **(a) Redefine V1 in place under a fail-closed zero-row guard.** Legitimate only because the table is empty, and directly precedented by A-053's zero-row-guarded rename. Keeps one serializer; keeps the CHECK at `= 1`. Risk: it makes the string `V1` mean two different envelopes across time, which is exactly the ambiguity `content_hash_version` exists to prevent.
 - **(b) Ship a V2 envelope beside V1.** Follows the path the column comment already prescribes verbatim (*"A future envelope increments this value and ships a PARALLEL serializer; committed rows are never re-serialized"*). Requires relaxing the CHECK and carrying two serializers.
 
-**Recorded, not decided.** Note that whichever is chosen, the **domain separation** between `BESTCOACH-REPORT-CONTENT-V1` and `BESTCOACH-REPORT-WORDING-V1` must be preserved, and the R-26 rule — the content hash **never** reaches management or a parent — is untouched.
+~~**Recorded, not decided.**~~ **✅ RULED 2026-08-08 by the Operator (G-05a), recorded in `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md`.** **PATH (b) IS RULED: ship a V2 envelope beside V1.** V1 serializers stay **byte/semantically unchanged** (bodies, field-name arrays, domain-separation strings, signatures, ACLs and comments are all frozen); **PARALLEL V2 serializers** are introduced for `overview` · `strengths` · `areas_for_development` · `remarks`; new OD-4 versions carry **`content_hash_version = 2`**; the `CHECK` may be widened from `= 1` to the governed equivalent allowing **`1` or `2`**; **no historical-row backmigration is required**; and **a future real production V1 row must never be silently relabelled or mutated** — that would need its own migration decision. **Path (a) — redefining V1 in place — is NOT ruled and must not be implemented.** `report_store_draft` keeps **zero** client `EXECUTE` (R-27). ⚠️ *One factual caveat recorded with the ruling: its stated premise that the local table is empty is currently **false** — one V1 row survives (blocker B-P0-2), which the widened `1 or 2` constraint already tolerates.* Note that whichever is chosen, the **domain separation** between `BESTCOACH-REPORT-CONTENT-V1` and `BESTCOACH-REPORT-WORDING-V1` must be preserved, and the R-26 rule — the content hash **never** reaches management or a parent — is untouched.
 
 ### 5.2 The grounding re-derivation for Overview
 

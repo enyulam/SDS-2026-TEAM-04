@@ -1936,3 +1936,102 @@ condition — a clean Phase-0 exit — is not met, and the Operator's own instru
 Phase 1 if the baseline remains unexpectedly red."* Once the baseline is green, Phase 1 begins at
 **P1-T01** under the authorization already granted and runs to **G-06 / P1-T09**, which must not be
 pre-decided.
+
+---
+
+## 2026-08-08 — ADVERSARIAL REVIEW OF THE PHASE-0 RULING RECORD, AND ITS REMEDIATION
+
+**Date/time.** 2026-08-08, Asia/Singapore.
+**Checkpoint / phase.** Plan Phase 0, immediately after `f177f68`. **Documentation only.**
+**Starting HEAD → ending HEAD.** `f177f685229b5671f6de1cca0edf7445e6be8197` → this entry's commit.
+**Migration or schema changes.** **NONE.**
+
+**Scope.** One read-only adversarial reviewer was run over the governance change set, instructed to
+**falsify rather than confirm**, across six named categories: fabricated authority · clause/amendment
+collision · historical rewriting · internal contradiction · scope overreach · stale enumeration. Per
+`CLAUDE.md` §14.5, **no finding was accepted because the reviewer returned it** — every material claim
+was re-verified at source before acting, and one was rejected on that basis.
+
+**Findings verified TRUE at source, and remediated.**
+
+1. **HIGH — the G-05a ruling was recorded but not propagated.** Four active carriers still told a
+   reader the content-hash envelope was undecided: `FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md` §5.1
+   (heading *"an open Phase B ruling"*, verdict *"Recorded, not decided"*), Authority Lock §15.1
+   (*"Two items there are genuine open Phase B rulings"*), `CLAUDE.md` §6 (*"the two open
+   sub-rulings"*) and `CLAUDE.md` §12 (stop-and-ask keyed to *"without ruling §5.1"*). The execution
+   plan's own **P1-T02 had explicitly instructed** closing these carriers. **This was the most
+   consequential gap in the run** — a future session reading any of them would have concluded the
+   disposition was still open. All four struck-and-annotated with the ruling and date; the
+   grounding-rule-4 sub-ruling is preserved as **still genuinely open**.
+
+2. **HIGH — the plan's gate register contradicted the ruling.** `FINAL_MVP_EXECUTION_PLAN.md:3717`
+   still read `G-05a … **hard until answered**` while the ruling instrument said it was closed — two
+   rank-2 instruments disagreeing about one live gate, in the file a resuming session reads first.
+   The register row and P1-T02's gate paragraph are now annotated **ANSWERED / CLOSED**, with the
+   G-05a premise break recorded in P1-T02's own Stop condition.
+
+3. **MEDIUM — a factual error, already ruled wrong by this project.** The record described the
+   append-only refusal as firing *"even for the `postgres` superuser"*. Lock §18.4 rules that
+   wording false — re-verified live this run: **`postgres | rolsuper=false | rolbypassrls=true`**.
+   Corrected at all four active sites to *"the object-owning `postgres` role … so this is a
+   **trigger** guarantee, not a privilege one"*. **The finding itself is unchanged and, if anything,
+   stronger:** the refusal is enforced by trigger, so no privilege level relieves it.
+
+4. **MEDIUM — annotate-never-delete applied inconsistently by this session.** Lock §29 and §31.2a had
+   their enumerations changed `001–007` → `001–008` while their parentheticals still explained only
+   the earlier 007 correction, so each annotation mis-described its own text. Both now carry the 008
+   citation, matching §2.2 where the same session did it correctly.
+
+5. **MEDIUM — Amendment 008 understated the registry's shape.** It said the registry is a `text[]`
+   constant *"inside an already-shipped function"*, singular. It is declared **twice** in
+   `20260804213000_step_7h_audit_chain.sql`, at **lines 439 and 744** — verified directly. An
+   implementer following the singular wording could extend one and miss the other. A-057.1's
+   precedence note now states both line numbers and requires **both** be extended. *(Corrected by
+   annotation inside the instrument, not by silent rewrite.)*
+
+6. **MEDIUM — `STATUS.md` mis-stated its own change set.** It claimed *"9 files"* and named 8. The
+   row now names all **10** files touched across this run's two commits, and records the correction.
+
+7. **MEDIUM (framing) — the remediation option was pre-ranked too favourably.** `STATUS.md` presented
+   the R-1 local-stack recreation as *"the leading one"* and argued it *"is not the prohibited
+   `supabase db reset`"*. That distinction is real in the plan's own R-1 text, but the reviewer's
+   point stands: **in effect it is functionally equivalent to the reset the Operator expressly
+   rejected under D-0**, and `CLAUDE.md` §12's prohibition is purpose-based, not name-based. The row
+   is now neutral, states the equivalence plainly, and leaves the ranking to the Operator.
+
+**Finding assessed and NOT accepted as written.** The reviewer reported that `STATUS.md` asserted a
+checkpoint commit and a clean tree that did not exist. **It read the working tree before the commit
+was made**; at the time it read, both claims were indeed unsupported, but by the time the finding
+arrived they were true. Only the embedded file-count error survived verification, and that is item 6
+above. Recorded here because a reviewer reading a moving tree is a real hazard worth naming, not to
+diminish an otherwise accurate review.
+
+**Finding accepted as REPORTED-ONLY, deliberately not fixed.** `CLAUDE.md:520` still reads
+*"the specification, Amendment 001, **Amendment 002**, **Amendment 003**, **Amendment 004**"* — active,
+unstruck, and now four amendments short. It is **pre-existing**, it survived both the P0-T04 sweep and
+this run, and it is **outside the bounded authority of both instructions**: the Operator authorized
+edits *"necessary ONLY to record the rulings in this message"*, and this line records none of them.
+**It is escalated for a future bounded instruction rather than fixed under an authority that does not
+cover it.**
+
+**Reviewer's LOW/precedent note, recorded not actioned.** Amendment 008's header reads
+`Status: Ratified by operator` while its provenance paragraph states the authoring session did not
+ratify it. This is **byte-for-byte the construction already accepted in Amendment 007**, so it is
+precedent rather than novelty. Flagged so the Operator knows the pattern now has two instances and can
+rule on the convention if it is not what was intended.
+
+**Automated verification.** Encoding re-verified on every touched file (Q-28): **no BOM, no mojibake**,
+Unicode round-trips. Nested-bold artefacts introduced during remediation were found and removed. No
+`.md`-external file was touched; `git status` confirms documentation only.
+
+**Blockers.** Unchanged: **B-P0-1** and **B-P0-2** remain **OPEN**, OPERATOR-ONLY.
+
+**Cleanup / rollback state.** No partial mutation. Forward `git revert` is the rollback.
+
+**Decisions.** None made. Every correction records an already-ratified or already-issued Operator
+decision, or fixes a factual error introduced by this session.
+
+**Commit.** `docs(governance): propagate the G-05a ruling and remediate adversarial-review findings`.
+
+**Next permitted action.** Unchanged — **STOP for the Operator on B-P0-2.** Plan Phase 1 remains
+authorized-but-not-started while the baseline is red.
