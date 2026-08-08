@@ -25,16 +25,15 @@ Authentication IDs sit **outside** the numbered portal sequence, so portal numbe
 
 ---
 
-## It is intentionally outside all Git repositories and worktrees
+## ✅ It lives INSIDE the main MVP repository (moved 2026-08-08)
 
-This pack lives at the **workspace level**, outside:
+This pack is at **`UI_REFERENCE_FINAL_MVP/` in the repository root** and is **git-tracked** — 343 files, committed and versioned. It moved there in the repository-boundary normalization so that active governance and UI authority sit on **one** versioned filesystem boundary (`CLAUDE.md` §9.1, Authority Lock §1.1).
 
-- the main MVP repository `SDS Project Final (BEST Coach)`;
-- the backend worktree `worktrees/backend-48h`;
-- the frontend worktree `worktrees/frontend-48h`;
-- the frozen demo repository.
+⚠️ **The statement below is HISTORICAL and must not be followed as a current path.** Both 48H worktrees were also physically removed on 2026-08-08.
 
-It is **not** committed, not tracked, and not part of any branch. Nothing in this pack changes a repository file, a branch or Git history.
+~~This pack lives at the **workspace level**, outside: the main MVP repository `SDS Project Final (BEST Coach)`; the backend worktree `worktrees/backend-48h`; the frontend worktree `worktrees/frontend-48h`; the frozen demo repository. It is **not** committed, not tracked, and not part of any branch.~~
+
+**Still true:** nothing in this pack is application source — it creates no route, component, schema or permission, and authorizes no checkpoint.
 
 ---
 
@@ -44,7 +43,7 @@ Each of the 36 folders pairs a **frozen screenshot** with **node-specific Figma 
 
 | File | Purpose |
 |---|---|
-| `reference.png` | The frozen visual reference — **exported by the operator**, exact node-specific frame |
+| `reference.png` | **Optional** frozen local *duplicate* of the current reference in `reference/<mapped pack>/` — present in 12 of 36 packs, SHA-identical, an integrity anchor. **Not the current visual authority, and not required.** ~~The frozen visual reference — exported by the operator~~ |
 | `screen.md` | Node-specific context: identity, route, scope, dependencies, precedence, acceptance checklists |
 | `implementation-notes.md` | Append-only implementation record |
 | `SCREENSHOT_REQUIRED.txt` | Export instruction with the exact Figma URL and node |

@@ -10,7 +10,7 @@
 
 ### 0.1 Authority — the ratified TWO-LADDER split
 
-Amendment 005 **A-045** is ratified and controls. It does **not** define a single flat order; it defines **two separate ladders**, and which one applies depends on the *kind* of question being asked. Consolidated below from the three instruments that state it identically — A-045 (`Amendment_005.md:139-155`, as numbered lists), `FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §0.1 (the parenthetical form used here) and `GLOBAL_UI_RULES.md` §1.1–§1.3. **The ranks and elements are identical in all three; only the closing formulation differs** (A-045: *"never quietly reconciled"*; `GLOBAL_UI_RULES` §1.3: *"never silently resolved"*):
+Amendment 005 **A-045** is ratified and controls. It does **not** define a single flat order; it defines **two separate ladders**, and which one applies depends on the *kind* of question being asked. ⚠️ **The three instruments below no longer state the VISUAL ladder identically, and the quoted ladder is the RECONCILED one, not A-045's literal text.** `FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §0.1 and `GLOBAL_UI_RULES.md` §1.1 were reconciled on 2026-08-08 to rank `reference/` first; **`Amendment_005.md` is ratified spec text and was deliberately left UNEDITED, so it still carries the original three-rank ladder.** The reconciliation is recorded in **Authority Lock §2.4**, which supersedes A-045 on this one point only. **The FUNCTIONAL ladder is unchanged and genuinely identical in all three.** *(Original wording follows.)* ~~Consolidated below from the three instruments that state it identically~~ — A-045 (`Amendment_005.md:139-155`, as numbered lists), `FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §0.1 (the parenthetical form used here) and `GLOBAL_UI_RULES.md` §1.1–§1.3. **The ranks and elements are identical in all three; only the closing formulation differs** (A-045: *"never quietly reconciled"*; `GLOBAL_UI_RULES` §1.3: *"never silently resolved"*):
 
 > **Visual authority (highest first) — reconciled 2026-08-08: (1) `UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/` · (2) the governed pack's optional frozen local `reference.png` duplicate, which never outranks (1) and whose absence is not a missing reference · (3) node-specific Figma context, only where no ratified `/reference/` asset exists · (4) existing frontend implementation.** ~~(1) frozen `reference.png` · (2) node-specific Figma context · (3) existing frontend implementation.~~
 > **Functional, security and privacy authority (highest first): (1) specification and active amendments · (2) `CLAUDE.md` · (3) lifecycle and authorization baselines · (4) ratified implementation contract · (5) Figma.**
@@ -60,7 +60,7 @@ The ratified inventory is **`docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md`**
 
 | Value | Meaning |
 |---|---|
-| **EXACT** | Pack (Markdown + frozen PNG) and implementing component both opened, and no material difference found. |
+| **EXACT** | Pack (Markdown + **the current `/reference/` frame**) and implementing component both opened, and no material difference found. ~~Markdown + frozen PNG~~ — *corrected 2026-08-08: requiring a pack-local frozen PNG made `EXACT` structurally unreachable for the 24 packs that deliberately hold none. The frame comes from `reference/<mapped pack>/`; a pack-local duplicate, where present, is the same bytes.* |
 | **MINOR RECONCILIATION** | Implemented and governance-correct; residual differences are bounded and enumerable. |
 | **MAJOR RECONCILIATION** | A route exists but diverges substantially from the pack, or a canonical route is absent while the function lives elsewhere. |
 | **MISSING** | No route or component implements it. |
@@ -349,7 +349,7 @@ These are **not** among the 36 and are counted separately. `GLOBAL_UI_RULES.md` 
 
 **Totals (25 entries):** EXACT 5 · MINOR 9 · MAJOR 0 · MISSING 8 · **UNVERIFIED 3**.
 
-> **Vocabulary note.** "EXACT" here means **no defect found against governed behaviour** — it does **not** carry the §0.4 sense used for the 36 screens, which additionally requires a frozen `reference.png` and operator visual acceptance. Shared states have no pack and no frozen reference, so the screen-level definition is structurally unsatisfiable for them. **The two senses must not be conflated, and no shared-state EXACT implies visual acceptance.**
+> **Vocabulary note.** "EXACT" here means **no defect found against governed behaviour** — it does **not** carry the §0.4 sense used for the 36 screens, which additionally requires the current `/reference/` frame and operator visual acceptance (~~a frozen pack-local `reference.png`~~ — corrected 2026-08-08: 24 packs deliberately hold no local duplicate). Shared states have no pack and no frozen reference, so the screen-level definition is structurally unsatisfiable for them. **The two senses must not be conflated, and no shared-state EXACT implies visual acceptance.**
 
 **S-1…S-4 are the highest-value shared-state work.** Their absence means an uncaught throw or an unknown portal path renders **outside the one place this project's carefully-uniform non-disclosing denial language reaches**. Any fix must not interpolate a thrown message, and must preserve SEC-11's reliance on the bare 404.
 

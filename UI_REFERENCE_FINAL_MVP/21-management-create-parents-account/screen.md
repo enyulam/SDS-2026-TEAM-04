@@ -130,7 +130,7 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 ## 9. Visual acceptance checklist
 
 - [ ] The current visual reference `UI_REFERENCE_FINAL_MVP/reference/Management - Create Parents Account/` is the exact node-specific frame, not an overview-canvas capture. **Do NOT gate acceptance on a pack-local `reference.png` — this pack deliberately holds none, and its absence is not a gap.**
-- [ ] Native frame dimensions are recorded in section 3.
+- [ ] Native frame dimensions are read from the current reference frame (section 3); **nothing needs to be recorded here, and no export is pending.**
 - [ ] Layout, spacing and visual hierarchy match the frozen reference at the reference viewport.
 - [ ] Typography, colour, radii and shadows match the approved token inventory.
 - [ ] Component composition and visible fields match the frame.
