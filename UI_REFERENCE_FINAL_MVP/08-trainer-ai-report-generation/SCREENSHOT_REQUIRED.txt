@@ -1,7 +1,20 @@
 SCREENSHOT REQUIRED - 08 Trainer AI Report Generation
 
+[STATUS CORRECTED 2026-08-08 - FINAL UI REFERENCE AUTHORITY SYNCHRONIZATION]
+
+NO EXPORT IS REQUIRED. The ratified current visual reference is:
+
+  Current visual source : UI_REFERENCE_FINAL_MVP/reference/Trainer - AI Report Generation/
+  Frame (PNG)           : UI_REFERENCE_FINAL_MVP/reference/Trainer - AI Report Generation/Trainer - AI Report Generation.png
+
+This pack ALSO holds a frozen local reference.png duplicate, SHA-256-identical
+to that frame - an integrity anchor, not a higher authority. Do NOT re-export
+from live Figma: it would only import post-freeze canvas drift.
+
+--- superseded instruction, retained as history ---
 Export the exact node-specific Figma frame for this screen and save it in this
 folder as reference.png. Do not use an overview-canvas screenshot.
+--- end superseded instruction ---
 
 Exact Figma URL : https://www.figma.com/design/sSY1TYw3jyVlZDy8V2Mu7g/SDS-dashboard?node-id=784-340&m=dev
 Figma node      : 784:340

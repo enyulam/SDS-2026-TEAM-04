@@ -45,7 +45,7 @@ This screen is part of the final MVP but is not required before the 48-hour phys
 |---|---|
 | Screenshot filename | `reference.png` |
 | Screenshot status | ✅ **CURRENT VISUAL REFERENCE EXISTS** — `UI_REFERENCE_FINAL_MVP/reference/Management - Schedule/`. **Pack-local `reference.png`: not duplicated locally** (optional integrity copy only). ~~Deferred - required for final-MVP completion after physical test~~ — *corrected 2026-08-08: that wording implied no current reference existed, which was false.* |
-| Native dimensions | Not yet known - record the native frame dimensions here when the screenshot is exported |
+| Native dimensions | Read them from the current reference frame `UI_REFERENCE_FINAL_MVP/reference/Management - Schedule/Management - Schedule.png`. ~~Not yet known - record … when the screenshot is exported~~ — *corrected 2026-08-08: no export is pending.* |
 | Export rule | **No export is required — the ratified frame already exists at `UI_REFERENCE_FINAL_MVP/reference/Management - Schedule/`.** If a future re-export is ever authorized, it must be the exact node-specific Figma frame; an overview-canvas screenshot is never acceptable. |
 
 The ratified `/reference/` frame **overrides later unreviewed live-Figma changes** for the corresponding implementation checkpoint. If the live canvas has moved on, that is a change to record in `CHANGE_LOG.md` and re-freeze — **not** a reason to drift, and **not** a reason to re-export over the ratified asset.
@@ -129,7 +129,7 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 
 ## 9. Visual acceptance checklist
 
-- [ ] `reference.png` is present and is the exact node-specific frame, not an overview-canvas capture.
+- [ ] The current visual reference `UI_REFERENCE_FINAL_MVP/reference/Management - Schedule/` is the exact node-specific frame, not an overview-canvas capture. **Do NOT gate acceptance on a pack-local `reference.png` — this pack deliberately holds none, and its absence is not a gap.**
 - [ ] Native frame dimensions are recorded in section 3.
 - [ ] Layout, spacing and visual hierarchy match the frozen reference at the reference viewport.
 - [ ] Typography, colour, radii and shadows match the approved token inventory.

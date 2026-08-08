@@ -242,7 +242,7 @@ This is the §1 lifecycle stated at screen granularity, not a second workflow. *
 **The frozen visual references live in an external UI-reference pack, not in this repository.** The pack will scaffold **all 36 folders** — `AUTH-01-trainer-login` … `AUTH-03-parent-login` and `01-trainer-dashboard` … `33-parent-class-report` — one folder per screen, each holding that screen's frozen `reference.png`.
 
 - **Only the twelve core screenshots above are required immediately.** The other 24 folders may be scaffolded empty.
-- **Visual authority is frozen `reference.png` → node-specific Figma context → existing frontend implementation** (A-045).
+- **Visual authority is `UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/` → the governed pack's optional frozen local `reference.png` duplicate → node-specific Figma context (only where no ratified asset exists) → existing frontend implementation** (A-045, **reconciled 2026-08-08** — Authority Lock §2.4 / §28.1a). ~~Visual authority is frozen `reference.png` → node-specific Figma context → existing frontend implementation~~
 - **No visual asset enters this repository without a recorded `PORT` / `REFERENCE ONLY` / `REBUILD` / `REJECT` / `NOT APPLICABLE` disposition** (A-013 discipline, carried by A-022.2). **No screenshot has been captured yet.**
 
 ### 4.4 The other 24 portal screens are post-physical-test scope

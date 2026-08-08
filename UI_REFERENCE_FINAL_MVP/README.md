@@ -49,7 +49,7 @@ Each of the 36 folders pairs a **frozen screenshot** with **node-specific Figma 
 | `implementation-notes.md` | Append-only implementation record |
 | `SCREENSHOT_REQUIRED.txt` | Export instruction with the exact Figma URL and node |
 
-**The twelve core screens now carry a frozen, validated `reference.png`; the twenty-four deferred screens have none.** All twelve were validated on 2026-08-06 and classified `PASS WITH NOTE — READY` — 0 failed, 0 missing (`CORE_SCREENSHOT_VALIDATION_REPORT.md`). No placeholder, empty or fake PNG has been created — a missing file is an honest missing file, and a fake one would silently pass a visual gate.
+**The twelve core screens carry a frozen, validated pack-local `reference.png`; the twenty-four deferred screens carry no such local duplicate.** ⚠️ **That is not the same as having no reference — all 36 have a ratified current visual source in `reference/` (2026-08-08).** ~~the twenty-four deferred screens have none~~ All twelve were validated on 2026-08-06 and classified `PASS WITH NOTE — READY` — 0 failed, 0 missing (`CORE_SCREENSHOT_VALIDATION_REPORT.md`). No placeholder, empty or fake PNG has been created — a missing file is an honest missing file, and a fake one would silently pass a visual gate.
 
 **A frozen reference is the visual *target*, not evidence a screen was built against it.** Visual acceptance remains `Not started` for all 36 screens.
 
@@ -57,7 +57,7 @@ Each of the 36 folders pairs a **frozen screenshot** with **node-specific Figma 
 
 ## Frozen screenshots override later unreviewed live-Figma changes
 
-For the corresponding implementation checkpoint, **the frozen `reference.png` is the visual authority**, ahead of the live Figma canvas.
+✅ **RECONCILED 2026-08-08.** For the corresponding implementation checkpoint, **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/` is the visual authority** (VISUAL rank 1, operator ruling PA-OD-5/5b; mapping in `SCREEN_INDEX.md`), ahead of a pack's optional frozen local `reference.png` duplicate and ahead of the live Figma canvas. ~~the frozen `reference.png` is the visual authority~~ — that ranked a file 24 of the 36 packs do not carry above the ratified frame all 36 do.
 
 If the live canvas has moved on, that is a change to **record in `CHANGE_LOG.md` and re-freeze deliberately** — never a reason to let an implementation drift toward an unreviewed frame.
 

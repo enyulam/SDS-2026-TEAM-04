@@ -28,6 +28,12 @@ Do not batch screens. Do not start a deferred screen because a core screen is bl
 
 ## The fifteen steps
 
+> ⚠️ **STEPS 1–3 ARE SUPERSEDED FOR EVERY SCREEN THAT ALREADY HAS A RATIFIED `/reference/` FRAME — which is all 36 (2026-08-08).**
+>
+> **Do not start at step 1.** The current visual source is **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** (mapping: `SCREEN_INDEX.md`), promoted to VISUAL rank 1 by operator ruling PA-OD-5/5b. **No export is required, and a live re-export must never replace a ratified asset** — it can only import post-freeze canvas drift.
+>
+> **Step 3's *"if the file is missing, stop and report"* must NOT be applied to a missing pack-local `reference.png`.** That file is an **optional frozen duplicate**, present in 12 of 36 packs. Its absence is **not** a missing reference and **not** a blocker — begin at **step 4** using `/reference/`. Steps 1–3 apply only if a future export is explicitly authorized for a screen that genuinely has no ratified frame.
+
 ### 1. The operator exports the exact Figma frame
 
 The **exact node-specific frame** for the screen, from file key `sSY1TYw3jyVlZDy8V2Mu7g` (`SDS-dashboard`), at the node recorded in `screen.md`. **An overview-canvas screenshot is not acceptable.** Export at native frame dimensions, 1×, PNG. Synthetic data only.
@@ -74,7 +80,7 @@ Captured in that folder, at that viewport, **before** any visual correction. Syn
 
 ### 12. The agent corrects visual differences
 
-Against the precedence order: frozen `reference.png` → node-specific Figma context → existing frontend implementation. Where the frame and a ratified rule disagree, **the rule wins and the discrepancy is recorded**.
+Against the precedence order (reconciled 2026-08-08): **`reference/<mapped pack>/` → the pack's optional frozen local `reference.png` duplicate → node-specific Figma context (only where no ratified asset exists) → existing frontend implementation.** ~~frozen `reference.png` → node-specific Figma context → existing frontend implementation~~ Where the frame and a ratified rule disagree, **the rule wins and the discrepancy is recorded**.
 
 ### 13. The agent saves `implementation-after.png`
 

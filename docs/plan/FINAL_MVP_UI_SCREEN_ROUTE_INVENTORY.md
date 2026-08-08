@@ -16,11 +16,14 @@ This is the **complete, canonical visual-reference inventory** for the final MVP
 
 ### 0.1 Authority precedence
 
-**Visual authority (highest first):**
+**Visual authority (highest first)** — ✅ **reconciled 2026-08-08 (Authority Lock §2.4 / §28.1a; `CLAUDE.md` §7.4):**
 
-1. Frozen `reference.png`
-2. Node-specific Figma context
-3. Existing frontend implementation
+1. **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** — the ratified current visual source for all 36 governed screens. Mapping: `UI_REFERENCE_FINAL_MVP/SCREEN_INDEX.md`
+2. The governed pack's **optional frozen local `reference.png` duplicate** — 12 of 36, SHA-identical to (1); never outranks it, and **its absence is not a missing reference**
+3. Node-specific Figma context — **only where no ratified `/reference/` asset exists**
+4. Existing frontend implementation
+
+~~1. Frozen `reference.png` · 2. Node-specific Figma context · 3. Existing frontend implementation~~ *(superseded — it ranked a file 24 of 36 packs do not hold above the ratified frame all 36 do)*
 
 **Functional, security and privacy authority (highest first):**
 

@@ -3,7 +3,7 @@
 # invariant. Only one path qualifies (audited 2026-08-08).
 #
 # Excluded by audit, not oversight:
-#   - the 119 tracked PNGs are already binary (-text) to Git, so every frozen
+#   - the 118 tracked PNGs are already binary (-text) to Git, so every frozen
 #     reference.png SHA contract is inherently safe;
 #   - supabase/migrations/*.sql are hashed against HEAD, but those suites
 #     already normalize CRLF on both sides (c3-static.mjs:29,
@@ -25,4 +25,14 @@
 # Canonical bytes (verify after any authorized edit):
 #   size    55434
 #   sha256  598c714a37ededf200881deb18e1f92d882c77f784be8c91782ec04288a0b10f
+#
+# KNOWN LIMIT on the "reproducible on a fresh Windows clone" premise, found by
+# adversarial review and PRE-EXISTING (not introduced by this rule):
+# core.longpaths is unset, and the longest tracked path is 113 chars
+#   UI_REFERENCE_FINAL_MVP/reference/Auth 04 - All Users - Forgot Password/
+#   Auth 04 - All Users - Forgot Password.html
+# so cloning into a root deeper than ~145 chars fails checkout with
+# "Filename too long" (exit 128). Clone shallow, or set core.longpaths=true.
+# Not fixed here: it is a machine/clone-side setting, not a repository byte
+# invariant, and changing it is outside a UI-authority synchronization.
 UI_REFERENCE_FINAL_MVP/UI_PACK_MANIFEST.json -text

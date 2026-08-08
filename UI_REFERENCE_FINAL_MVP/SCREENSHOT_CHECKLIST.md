@@ -4,7 +4,9 @@
 
 **Section A status: all 12 core screenshots are present and were validated on 2026-08-06** - 12 ready (0 plain `PASS — READY`, 12 `PASS WITH NOTE — READY`), 0 failed, 0 missing. See `CORE_SCREENSHOT_VALIDATION_REPORT.md` in the pack root. Section B is unchanged: no deferred screenshot has been exported or validated.
 
-For every entry: export the **exact node-specific Figma frame**, save it as `reference.png` in the named folder, and record its native dimensions in that folder's `screen.md` section 3.
+⚠️ **SUPERSEDED 2026-08-08 — do not work this checklist as an export queue.** **All 36 governed screens already have a ratified current visual reference** at `UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/` (mapping: `SCREEN_INDEX.md`), VISUAL rank 1 under operator ruling PA-OD-5/5b. **No export is outstanding for any of them.** Section B's 24 unchecked entries record only that those packs carry **no optional local duplicate** — that is not a missing reference and not a blocker. **A live re-export must never replace a ratified `/reference/` asset.**
+
+~~For every entry: export the **exact node-specific Figma frame**, save it as `reference.png` in the named folder, and record its native dimensions in that folder's `screen.md` section 3.~~ *(Retained as the procedure to follow **only** if a future export is explicitly authorized for a screen that genuinely lacks a ratified frame.)*
 
 **An overview-canvas screenshot is never acceptable. Do not create a placeholder, empty or fake PNG. Synthetic data only.**
 

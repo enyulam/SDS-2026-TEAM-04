@@ -52,11 +52,14 @@ The frontend workstream log `docs/workstreams/48H_FRONTEND_PROGRESS.md` **alread
 
 ## 2. Governing sources
 
-**Visual authority, highest first (Amendment 005 A-045):**
+**Visual authority, highest first (A-045, reconciled 2026-08-08 — Authority Lock §2.4 / §28.1a):**
 
-1. the frozen `reference.png` in this pack;
-2. node-specific Figma context;
-3. the existing frontend implementation.
+1. **`UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** — the ratified current visual source for **all 36** governed screens. Mapping: `SCREEN_INDEX.md`;
+2. the governed pack's **optional frozen local `reference.png` duplicate** — held by 12 of 36, SHA-identical to (1). It never outranks (1), and **its absence in the other 24 is not a missing reference**;
+3. node-specific Figma context — **only where no ratified `/reference/` asset exists**;
+4. the existing frontend implementation.
+
+~~1. the frozen `reference.png` in this pack; 2. node-specific Figma context; 3. the existing frontend implementation.~~ *(Superseded: it ranked a file 24 of 36 packs do not have above the ratified frame all 36 do have.)*
 
 **Functional, security and privacy authority, highest first:**
 

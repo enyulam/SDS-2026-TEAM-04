@@ -81,7 +81,9 @@ The operator's rulings issued this run are **the highest authority on the questi
 
 Amendment 005 A-045 (`…Amendment_005.md:44`, `:134-152`) ratifies **two distinct ladders**. Collapsing them is a governance error.
 
-**VISUAL authority** (highest first): 1. frozen `reference.png` → 2. node-specific Figma context → 3. existing frontend implementation.
+**VISUAL authority** (highest first) — ✅ **RECONCILED 2026-08-08, see §28.1a**: **1. `UI_REFERENCE_FINAL_MVP/reference/<mapped pack>/`** (the ratified current visual source for all 36 governed screens) → **2. the governed pack's optional frozen local `reference.png` duplicate**, held by 12 of 36 and SHA-identical to (1); it never outranks (1), and its **absence is not a missing reference** → **3.** node-specific Figma context, **only where no ratified `/reference/` asset exists** → **4.** existing frontend implementation.
+
+~~**VISUAL authority** (highest first): 1. frozen `reference.png` → 2. node-specific Figma context → 3. existing frontend implementation.~~ ⚠️ **That original A-045 wording predates the promotion of `reference/` to visual rank 1 by operator ruling PA-OD-5/5b (§28.1).** Left as written it ranks a file that **24 of the 36 governed packs do not have** above the ratified frame they all do have. **This lock — not the amendment text — is the instrument that records the reconciliation** (§2.3): `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_005.md` §A-045 is **unedited and still carries the original ladder**, and is **superseded on this point only**. Everything else in A-045 — the two-ladder separation itself, and what a frame is and is not authoritative for — **stands unchanged and is restated below**.
 
 **FUNCTIONAL / SECURITY / PRIVACY authority** (highest first): 1. specification + active amendments → 2. `CLAUDE.md` → 3. lifecycle and authorization baselines → 4. ratified implementation contract → 5. **Figma (lowest)**.
 
