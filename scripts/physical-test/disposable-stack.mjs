@@ -95,7 +95,24 @@ export const EXPECTED_CANONICAL_ROWS = 28
 // submitted-report list — and one authenticated EXECUTE grant. It creates no
 // table, enum, label, policy or row, so the fixture checksum and the 28-row
 // canonical region above are again UNMOVED.)
-export const EXPECTED_CANONICAL_MIGRATIONS = 12
+// (Moved 12 -> 14 at P1-T03, OD-4. The thirteenth migration is the OD-4
+// four-panel report contract: it replaces four report_versions columns and
+// adds EXACTLY TWO functions -- the V2 content and wording serializers, both
+// owner-only with zero client EXECUTE -- so functions go 34 -> 36 while
+// tables, enums, policies and the authenticated EXECUTE census are all
+// UNMOVED. The fourteenth is the envelope-version forward fix: a single
+// CREATE OR REPLACE that creates no object at all, so the census and the
+// 28-row canonical region above are again UNMOVED.
+//
+// ⚠️ This pin was missed by the M13 sweep AND by the first M14 sweep, and was
+// found only by adversarial review. It is a migration-count census pin of the
+// class §6.5 item 4 governs, but it is a BARE SYMBOLIC CONSTANT rather than a
+// numeric literal sitting next to the word "migration", so greps written for
+// the other ten pins do not surface it. It is exported and consumed at 11
+// call sites across 6 harnesses, 4 of which are npm entry points, and it
+// fails CLOSED -- every disposable-stack run aborts until it is re-pinned.
+// RE-PIN IT IN THE SAME COMMIT AS ANY NEW MIGRATION.)
+export const EXPECTED_CANONICAL_MIGRATIONS = 14
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 

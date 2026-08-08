@@ -22,7 +22,7 @@ const MIG_NAME = '20260806103000_management_correction_tracking.sql'
 // single-entry-point closure that removes `authenticated` EXECUTE from
 // assessment_save_observation). It is not this suite's subject; it is only
 // what "sorts last" now means.
-const NEWEST_MIG_NAME = '20260809120000_od4_report_contract.sql'
+const NEWEST_MIG_NAME = '20260809160000_od4_reopen_envelope_version_fix.sql'
 const MIG = join(MIG_DIR, MIG_NAME)
 const PROJECTIONS = join(ROOT, 'server', 'modules', 'management-view', 'projections.ts')
 
@@ -153,7 +153,7 @@ const bodyCode = code(body)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 13) fail('T-CT-S4', `${all.length} migration files exist, expected 13`)
+  if (all.length !== 14) fail('T-CT-S4', `${all.length} migration files exist, expected 14`)
   if (all[all.length - 1] !== NEWEST_MIG_NAME) fail('T-CT-S4', `the newest migration is not the last file (last is ${all[all.length - 1]})`)
   if (!all.includes(MIG_NAME)) fail('T-CT-S4', `${MIG_NAME} is missing`)
 
@@ -165,7 +165,8 @@ const bodyCode = code(body)
     const h2 = createHash('sha256').update(read(join(MIG_DIR, f))).digest('hex')
     if (h1 !== h2) fail('T-CT-S4', `${rel} differs from HEAD -- an applied migration must never be edited`)
   }
-  if (failures === before) pass('T-CT-S4', 'twelve migration files; the eleven already-applied files are byte-identical to HEAD; the newest one sorts last')
+  // Narration DERIVED from what was measured (see T-C3-S2).
+  if (failures === before) pass('T-CT-S4', `${all.length} migration files; the ${all.length - 1} already-applied files are byte-identical to HEAD; the newest one sorts last`)
 }
 
 // ---------------------------------------------------------------------

@@ -45,7 +45,7 @@ const body2 = stripComments(file2)
     fail('T7I-73', `${step7i.length} Step 7I migration files exist, expected exactly 2`)
   }
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql'))
-  if (all.length !== 13) fail('T7I-73', `${all.length} migration files exist, expected 13`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list
+  if (all.length !== 14) fail('T7I-73', `${all.length} migration files exist, expected 14`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list + the P1-T03 OD-4 report contract + the P1-T03 OD-4 reopen envelope-version forward fix
 
   // File 1 contains ONLY the ALTER TYPE statement and the P-1 guard.
   const adds1 = body1.match(/ALTER TYPE[\s\S]*?ADD VALUE/gi) || []
@@ -112,17 +112,25 @@ const body2 = stripComments(file2)
       `${v.file} [${v.kind}] hands ${v.fn} to ${v.role}: ${v.statement}`)
   }
 
-  // A serializer created without an explicit REVOKE ships client-executable,
-  // because a new postgres-owned function defaults to PUBLIC EXECUTE. No
-  // GRANT statement exists in that case, so the scan above cannot see it.
-  const missing = findMissingRevokes(files, serializers)
+  // A guarded function created (or DROPped and re-created) without an
+  // explicit REVOKE after it can ship client-executable with no GRANT
+  // statement anywhere for the scan above to find.
+  //
+  // ⚠️ This passed `serializers` until 2026-08-09, which silently exempted
+  // the two NON-serializer owner-only functions -- `report_store_draft` and
+  // `app_parent_reaches_student` -- while the PASS message below claimed
+  // all six were guarded. M13 DROPs and re-creates `report_store_draft`, so
+  // deleting its single REVOKE left this guard fully green. It now takes
+  // `guarded`, which is the same set the message names.
+  const missing = findMissingRevokes(files, guarded)
   for (const m of missing) fail('T7I-OD4-GRANT', m)
 
   if (anchorProblems.length === 0 && violations.length === 0 && missing.length === 0) {
     pass('T7I-OD4-GRANT',
       `${files.length} migration file(s) scanned; ${guarded.length} owner-only function(s) guarded `
       + `(${guarded.join(', ')}); no client GRANT, no blanket/default-privilege grant, no dynamic-SQL `
-      + 'grant, and every serializer carries an explicit REVOKE')
+      + `grant, and all ${guarded.length} carry an explicit REVOKE after their most recent `
+      + 'CREATE or DROP+CREATE')
   }
 }
 

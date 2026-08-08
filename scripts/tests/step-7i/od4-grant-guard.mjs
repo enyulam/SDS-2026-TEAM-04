@@ -59,14 +59,33 @@
 // find. That is the exact defect adversarial review caught in the P1-T02
 // design, and a grant-only guard would have shipped it green.
 //
-// HONEST LIMITS -- this is a static text scan, not a SQL parser:
+// HONEST LIMITS -- this is a static text scan, not a SQL parser. The list is
+// kept COMPLETE deliberately: an unlisted limit reads as coverage, and that is
+// how the missing-REVOKE hole survived two reviews.
 //   * role chaining (`GRANT g TO authenticated` where `g` holds the EXECUTE)
 //     is reported heuristically, not proven;
 //   * it reads `supabase/migrations/*.sql` only; other `.sql` that reaches the
 //     database is out of scope;
+//   * MATCHING IS BY NAME, NOT BY SIGNATURE. A REVOKE naming a different
+//     OVERLOAD of a guarded function discharges the missing-REVOKE
+//     requirement, even though at apply time it would raise 42883 against a
+//     signature that does not exist. Overload-precise checking needs an
+//     argument-list parser; the runtime catalogue assertions cover the live
+//     ACL, which is why this is recorded rather than approximated;
+//   * `GRANT ... TO CURRENT_USER` / `SESSION_USER` / `CURRENT_ROLE` are NOT
+//     detected. That is safe ONLY where the P-1 ownership guard holds, which
+//     makes CURRENT_USER = postgres, i.e. the owner. It is NOT yet corpus-wide:
+//     `20260803034500` and `20260806160000` carry no P-1 guard (execution plan
+//     6.5 item 2), and their remediation is deferred to P2-T13. Until then,
+//     treat those two files as outside this assurance;
+//   * `ALTER FUNCTION ... OWNER TO <client role>` is not detected, and
+//     `verify-fresh-apply` does not fingerprint `proowner` either;
+//   * a SECURITY DEFINER wrapper that calls a guarded function and is itself
+//     granted to a client role is not detected -- the wrapper's own GRANT
+//     names no guarded function;
 //   * it is a NECESSARY, not sufficient, control. The runtime catalogue
-//     assertions in M13 and in carriers 5-7 remain the authority on the live
-//     ACL. This exists to reject dangerous TEXT before it is ever applied.
+//     assertions in M13/M14 and in carriers 5-7 remain the authority on the
+//     live ACL. This exists to reject dangerous TEXT before it is ever applied.
 // =====================================================================
 
 /** Roles that must never receive EXECUTE on a guarded function. */
@@ -79,10 +98,24 @@ export const OWNER_ONLY_FUNCTIONS = ['report_store_draft', 'app_parent_reaches_s
  * Serializers expected in the corpus. DISCOVERY is automatic so V2 is guarded
  * the moment M13 creates it -- but an unpinned discovery scan would also pass
  * vacuously if the naming convention drifted and the regex stopped matching.
- * This pin converts that silence into a loud failure.
  *
- * RE-PIN IN THE SAME COMMIT that legitimately adds a serializer: 2 today,
- * 4 once M13 lands.
+ * ⚠️ SCOPE OF THIS PIN, CORRECTED 2026-08-09 by adversarial review. It
+ * converts DISAPPEARANCE into a loud failure -- proven at
+ * prove-od4-grant-guard.mjs sections 7 and 7b. It does NOT catch a RENAME:
+ * renaming report_content_hash_v2 to report_content_hash_v7 still yields four
+ * matches of SERIALIZER_DEF, so the count check passes and assertAnchors
+ * requires only the two V1 names explicitly. The previous wording ("converts
+ * that silence into a loud failure", unqualified) overstated this.
+ *
+ * The residual risk is bounded and is detection quality, not privilege: a
+ * renamed serializer is still DISCOVERED, so it is still guarded -- grants to
+ * it are still caught and the missing-REVOKE rule still applies to it. What is
+ * lost is only the announcement that the convention drifted. Closing it means
+ * naming all four in assertAnchors; that is P1-T05 (anchor-existence controls)
+ * and must not be deferred past it.
+ *
+ * RE-PIN IN THE SAME COMMIT that legitimately adds a serializer: 2 before M13,
+ * 4 from M13 onward.
  */
 export const EXPECTED_SERIALIZERS = 4
 
@@ -324,36 +357,124 @@ export function findForbiddenGrants(files, guarded) {
 /**
  * MISSING-REVOKE CHECK.
  *
- * A new postgres-owned function has `proacl IS NULL`, which is the DEFAULT
- * PUBLIC EXECUTE -- measured live: authenticated = t, anon = t. So a
- * serializer created without an explicit REVOKE is client-executable with no
- * GRANT statement anywhere to find. The grant scan is structurally blind to
- * it; this is the check that sees it.
+ * A function that is created without an explicit REVOKE can ship
+ * client-executable with NO GRANT statement anywhere in the corpus to find,
+ * so the grant scan above is structurally blind to it. This is the check
+ * that sees it. It covers EVERY guarded function, not only the serializers:
+ * `report_store_draft` and `app_parent_reaches_student` are owner-only under
+ * R-27 and A-030, and M13 DROPs and re-creates `report_store_draft`.
+ *
+ * ⚠️ CORRECTED 2026-08-09 by adversarial review, and stated precisely
+ * because the previous justification was WRONG and is quoted elsewhere.
+ * The old text claimed "a new postgres-owned function has proacl IS NULL,
+ * which is the DEFAULT PUBLIC EXECUTE -- measured live: authenticated = t,
+ * anon = t". Measured against `pg_default_acl`, that is false for the path
+ * these migrations actually take:
+ *
+ *   postgres       | public | f | {postgres=X/postgres}
+ *   supabase_admin | public | f | {postgres=X/...,anon=X/...,authenticated=X/...,service_role=X/...}
+ *
+ * `20260803034500_...:51-52` ran ALTER DEFAULT PRIVILEGES ... REVOKE ALL ON
+ * FUNCTIONS, which installed the first row. So a function created BY
+ * `postgres` in `public` -- which the P-1 ownership guard makes the only
+ * permitted path -- is stamped owner-only at creation, not NULL and not
+ * PUBLIC. The probe that produced "authenticated = t, anon = t" was
+ * measuring creation as `supabase_admin`.
+ *
+ * The REVOKE requirement stands, for the reasons that are actually true:
+ * the `supabase_admin` default ACL in `public` DOES carry anon,
+ * authenticated and service_role, so any apply path that is not `postgres`
+ * ships the function client-executable; a default ACL is remote state that
+ * a later migration or platform change can alter; and an explicit,
+ * signature-qualified REVOKE is the only form of the control that is
+ * auditable from the migration text alone.
  *
  * @returns {string[]} violation messages
  */
-export function findMissingRevokes(files, serializers) {
+export function findMissingRevokes(files, guarded) {
   const problems = []
-  for (const fn of serializers) {
-    let created = null
-    let revoked = false
-    for (const f of files) {
+  for (const fn of guarded) {
+    // ORDER MATTERS, and so does WHICH definition form is used.
+    //
+    // A bare CREATE FUNCTION makes a new object, and a DROP FUNCTION
+    // destroys the stored ACL -- both leave the function at whatever the
+    // creation default is, so both REQUIRE a fresh REVOKE after them.
+    // CREATE OR REPLACE does NOT reset the ACL, so it requires nothing.
+    //
+    // Tracking a single corpus-wide "was it ever revoked" boolean was a
+    // real defect: a serializer DROPped and re-CREATEd in a LATER migration
+    // with no REVOKE passed, because an EARLIER file's REVOKE had already
+    // set the flag. DROP + CREATE is exactly the pattern the migration
+    // protocol (6.5 item 3) expects for a signature change, so that is the
+    // case most likely to occur -- and it was the one case not covered.
+    // An ACL reset happens at TWO kinds of point:
+    //   - the FIRST definition anywhere in the corpus, in any CREATE form,
+    //     because that is when the object comes into existence and takes
+    //     the creation-time default; and
+    //   - every later DROP, because DROP destroys the stored ACL.
+    // A later CREATE OR REPLACE is neither -- it preserves the ACL, which
+    // is precisely why M14 can use it without re-emitting any grant.
+    let firstDef = null    // { i, at, file } of the first definition, any form
+    let lastDrop = null    // { i, at, file } of the last DROP FUNCTION
+    let lastRevoke = null  // { i, at } of the last REVOKE ... FROM PUBLIC naming fn
+
+    const defRe = new RegExp(
+      String.raw`CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(?:"?public"?\s*\.\s*)?"?${fn}\b`, 'gi')
+    const nameRe = new RegExp(String.raw`\b${fn}\b`, 'i')
+
+    files.forEach((f, i) => {
       const { sql } = redact(f.sql)
-      if (new RegExp(String.raw`CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(?:"?public"?\s*\.\s*)?"?${fn}\b`, 'i').test(sql)) {
-        created = created ?? f.name
+
+      let m
+      defRe.lastIndex = 0
+      while ((m = defRe.exec(sql)) !== null) {
+        if (firstDef === null) firstDef = { i, at: m.index, file: f.name }
       }
+
+      let offset = 0
       for (const raw of sql.split(';')) {
+        const at = offset
+        offset += raw.length + 1
         const stmt = raw.trim()
+
+        // DROP is matched on the STATEMENT, not on token adjacency.
+        // `DROP FUNCTION a(...), b(...)` is valid and drops BOTH, and
+        // `DROP ROUTINE` has been a synonym since PostgreSQL 11. Requiring
+        // the guarded name to sit immediately after `DROP FUNCTION` missed
+        // every target after the first and missed DROP ROUTINE entirely --
+        // either one silently reopened the exempt-function hole this
+        // function exists to close, through ordinary valid syntax.
+        if (/^DROP\s+(?:FUNCTION|ROUTINE|PROCEDURE)\b/i.test(stmt)) {
+          if (nameRe.test(stmt)) lastDrop = { i, at, file: f.name }
+          continue
+        }
+
         if (!/^REVOKE\b/i.test(stmt)) continue
-        if (!new RegExp(String.raw`\b${fn}\b`, 'i').test(stmt)) continue
-        if (/\bfrom\b[\s\S]*\bpublic\b/i.test(stmt)) revoked = true
+        // `REVOKE GRANT OPTION FOR EXECUTE ...` withdraws only the ability to
+        // re-grant; the EXECUTE privilege itself survives. It must not be
+        // allowed to discharge the requirement for a real REVOKE.
+        if (/^REVOKE\s+GRANT\s+OPTION\s+FOR\b/i.test(stmt)) continue
+        if (!nameRe.test(stmt)) continue
+        if (!/\bfrom\b[\s\S]*\bpublic\b/i.test(stmt)) continue
+        lastRevoke = { i, at }
       }
-    }
-    if (created && !revoked) {
+    })
+
+    if (!firstDef) continue
+
+    // The governing reset is whichever comes LATER in the corpus.
+    const after = (a, b) => a.i > b.i || (a.i === b.i && a.at > b.at)
+    const lastReset = (lastDrop && after(lastDrop, firstDef)) ? lastDrop : firstDef
+
+    const covered = lastRevoke !== null && after(lastRevoke, lastReset)
+
+    if (!covered) {
       problems.push(
-        `${fn} is created in ${created} but no REVOKE ... FROM PUBLIC names it. A new postgres-owned `
-        + 'function defaults to PUBLIC EXECUTE (proacl IS NULL), so it would ship client-executable. '
-        + 'Emit an explicit REVOKE ALL ... FROM PUBLIC, anon, authenticated, service_role, authenticator.',
+        `${fn} is created (or dropped and re-created) in ${lastReset.file}, but no REVOKE ... FROM `
+        + 'PUBLIC names it AFTER that point. A DROP destroys the stored ACL and a new postgres-owned '
+        + 'function takes the creation default, so it would ship without the governed owner-only ACL. '
+        + 'Emit an explicit REVOKE ALL ... FROM PUBLIC, anon, authenticated, service_role, authenticator '
+        + 'after every CREATE or DROP+CREATE of a guarded function.',
       )
     }
   }

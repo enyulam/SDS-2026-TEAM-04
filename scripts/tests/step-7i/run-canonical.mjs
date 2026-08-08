@@ -94,6 +94,21 @@ async function main() {
     fail('the OD-4 GRANT guard firing proof failed')
   }
 
+  // 1c -- the V1 SERIALIZER FREEZE proof (G-05a items 1-2).
+  // Wired in 2026-08-09 by adversarial review, for the same reason as 1b: it
+  // was an ORPHAN. Nothing invoked it -- not run-canonical, not package.json --
+  // so the only proof covering V1's literal ACL, its COMMENT and its signature
+  // ran solely when a human remembered to type it. Those three are exactly what
+  // verify-fresh-apply is structurally blind to, because M13 runs on BOTH sides
+  // of its comparison and any V1 change appears identically on each.
+  const v1Freeze = await run(process.execPath,
+    [join(ROOT, 'scripts', 'tests', 'step-7i', 'prove-v1-freeze.mjs')])
+  process.stdout.write(v1Freeze.out)
+  if (v1Freeze.code !== 0) {
+    process.stderr.write(v1Freeze.err)
+    fail('the V1 serializer freeze proof failed')
+  }
+
   // 2 -- the lifecycle suite, twice (T7I-31)
   const a = await psqlFile(SUITE)
   if (a.code !== 0) { process.stderr.write(a.err); fail('canonical suite run 1 failed'); return }

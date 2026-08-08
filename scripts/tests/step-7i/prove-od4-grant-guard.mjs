@@ -146,7 +146,21 @@ console.log(`Guarded: ${guardedFunctions(realFiles).join(', ')}\n`)
     ['B3a dynamic SQL via format()', "DO $do$ BEGIN EXECUTE format('GRANT EXECUTE ON FUNCTION %I.%I(text) TO %I','public','report_content_hash_v2','anon'); END $do$;"],
     ['B5  -- inside a string literal', "COMMENT ON FUNCTION public.report_content_hash_v2(text) IS 'OD-4 V2 -- parallel envelope'; GRANT EXECUTE ON FUNCTION public.report_content_hash_v2(text) TO authenticated;"],
     ['B8  helper function grants', "CREATE OR REPLACE FUNCTION public.apply_v2_grants() RETURNS void LANGUAGE plpgsql AS $b$ BEGIN EXECUTE 'GRANT EXECUTE ON FUNCTION public.report_content_hash_v2(text) TO authenticated'; END; $b$;"],
-    ['B9  TO CURRENT_USER', 'GRANT EXECUTE ON FUNCTION public.report_content_hash_v2(text) TO PUBLIC;'],
+    // ⚠️ RELABELLED 2026-08-09. This case was labelled "TO CURRENT_USER"
+    // while testing "TO PUBLIC" -- a control advertising a vector it had
+    // never exercised. It is a genuine TO PUBLIC case, so it keeps its
+    // place under an honest name. `TO CURRENT_USER` is deliberately NOT
+    // added as a detected form: where the P-1 ownership guard holds,
+    // CURRENT_USER is `postgres`, so granting to it is a grant to the owner
+    // rather than a client-role escalation.
+    //
+    // ⚠️ QUALIFIED at focused re-review: that reasoning is sound only WHERE
+    // the P-1 guard holds, and it is not yet corpus-wide. `20260803034500`
+    // and `20260806160000` carry no P-1 guard (execution plan 6.5 item 2,
+    // remediation deferred to P2-T13), so in those two files CURRENT_USER is
+    // not proven to be postgres. SESSION_USER and CURRENT_ROLE are equally
+    // undetected everywhere. Recorded in od4-grant-guard.mjs's HONEST LIMITS.
+    ['B9  TO PUBLIC (explicit)', 'GRANT EXECUTE ON FUNCTION public.report_content_hash_v2(text) TO PUBLIC;'],
     ['B4  role chaining', 'GRANT report_hash_reader TO authenticated;'],
   ]
   let misses = 0
@@ -172,8 +186,7 @@ console.log(`Guarded: ${guardedFunctions(realFiles).join(', ')}\n`)
     sql: `CREATE OR REPLACE FUNCTION public.report_content_hash_v9(a text) RETURNS text
   LANGUAGE plpgsql IMMUTABLE AS $f$ BEGIN RETURN a; END; $f$;\n`,
   })
-  const s = discoverSerializers(files)
-  const m = findMissingRevokes(files, s)
+  const m = findMissingRevokes(files, guardedFunctions(files))
   const g = findForbiddenGrants(files, guardedFunctions(files))
   if (m.length > 0 && g.length === 0) {
     ok('5. serializer created with NO REVOKE is caught by findMissingRevokes -- and note the GRANT scan alone reports nothing, which is exactly why this check exists')
@@ -183,10 +196,127 @@ console.log(`Guarded: ${guardedFunctions(realFiles).join(', ')}\n`)
 
   const okFiles = clone()
   okFiles.push({ name: '99999999999999_withrevoke.sql', sql: V2_DEFS })
-  if (findMissingRevokes(okFiles, discoverSerializers(okFiles)).length === 0) {
+  if (findMissingRevokes(okFiles, guardedFunctions(okFiles)).length === 0) {
     ok('5b. serializer created WITH an explicit REVOKE ... FROM PUBLIC passes')
   } else {
     bad('5b. false positive: a properly revoked serializer was reported as missing its REVOKE')
+  }
+
+  // -------------------------------------------------------------------
+  // 5c-5f ADDED 2026-08-09 after adversarial review found the check
+  // covered ONLY the serializers, and was blind to corpus ORDER. Both
+  // holes are demonstrated here, so neither can silently reopen.
+  // -------------------------------------------------------------------
+
+  // 5c. The NON-serializer owner-only functions were exempt entirely.
+  // M13 DROPs and re-creates report_store_draft, so deleting its one
+  // REVOKE previously left the whole guard green.
+  for (const fn of ['report_store_draft', 'app_parent_reaches_student']) {
+    const f = clone()
+    f.push({
+      name: `99999999999999_recreate_${fn}.sql`,
+      sql: `DROP FUNCTION public.${fn}(uuid);\nCREATE FUNCTION public.${fn}(p uuid) RETURNS boolean\n  LANGUAGE plpgsql AS $f$ BEGIN RETURN true; END; $f$;\n`,
+    })
+    const r = findMissingRevokes(f, guardedFunctions(f))
+    if (r.some((x) => x.includes(fn))) {
+      ok(`5c. ${fn} DROPped and re-created with NO REVOKE is caught (it was EXEMPT before this fix)`)
+    } else {
+      bad(`5c. BYPASS OPEN: ${fn} re-created with no REVOKE was not caught`)
+    }
+  }
+
+  // 5d. ORDER. A guarded function DROPped and re-created in a LATER
+  // migration, where an EARLIER file already carries a REVOKE for it.
+  // The old corpus-wide boolean was satisfied by that earlier REVOKE.
+  {
+    const f = clone()
+    f.push({ name: '99999999999998_defs.sql', sql: V2_DEFS })
+    f.push({
+      name: '99999999999999_later_recreate.sql',
+      sql: 'DROP FUNCTION public.report_content_hash_v2(text);\n'
+        + 'CREATE FUNCTION public.report_content_hash_v2(a text) RETURNS text\n'
+        + '  LANGUAGE plpgsql IMMUTABLE AS $f$ BEGIN RETURN a; END; $f$;\n',
+    })
+    const r = findMissingRevokes(f, guardedFunctions(f))
+    if (r.some((x) => x.includes('report_content_hash_v2'))) {
+      ok('5d. serializer DROPped and re-created in a LATER file, with an earlier REVOKE present, is caught (corpus-order blindness closed)')
+    } else {
+      bad('5d. BYPASS OPEN: a later DROP+CREATE was excused by an earlier REVOKE')
+    }
+  }
+
+  // 5e. Same shape, but the REVOKE IS re-emitted after the re-creation.
+  // Must NOT fire -- otherwise the fix would block the legitimate
+  // DROP + CREATE + re-emit pattern that 6.5 item 3 mandates.
+  {
+    const f = clone()
+    f.push({ name: '99999999999998_defs.sql', sql: V2_DEFS })
+    f.push({
+      name: '99999999999999_later_recreate_ok.sql',
+      sql: 'DROP FUNCTION public.report_content_hash_v2(text);\n'
+        + 'CREATE FUNCTION public.report_content_hash_v2(a text) RETURNS text\n'
+        + '  LANGUAGE plpgsql IMMUTABLE AS $f$ BEGIN RETURN a; END; $f$;\n'
+        + 'REVOKE ALL ON FUNCTION public.report_content_hash_v2(text)\n'
+        + '  FROM PUBLIC, anon, authenticated, service_role, authenticator;\n',
+    })
+    if (findMissingRevokes(f, guardedFunctions(f)).length === 0) {
+      ok('5e. DROP + CREATE + re-emitted REVOKE in the same file passes (no false positive on the mandated pattern)')
+    } else {
+      bad('5e. FALSE POSITIVE: the legitimate DROP + CREATE + re-emit pattern was flagged')
+    }
+  }
+
+  // 5f. CREATE OR REPLACE does NOT reset the ACL, so it must NOT require
+  // a fresh REVOKE. M14 uses exactly this form.
+  {
+    const f = clone()
+    f.push({ name: '99999999999998_defs.sql', sql: V2_DEFS })
+    f.push({
+      name: '99999999999999_replace_only.sql',
+      sql: 'CREATE OR REPLACE FUNCTION public.report_content_hash_v2(a text) RETURNS text\n'
+        + '  LANGUAGE plpgsql IMMUTABLE AS $f$ BEGIN RETURN a; END; $f$;\n',
+    })
+    if (findMissingRevokes(f, guardedFunctions(f)).length === 0) {
+      ok('5f. CREATE OR REPLACE (which preserves the ACL) does not demand a new REVOKE')
+    } else {
+      bad('5f. FALSE POSITIVE: CREATE OR REPLACE was treated as an ACL reset')
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // 5g ADDED 2026-08-09 by focused re-review. The first version of the
+  // ordering fix anchored the DROP on token adjacency, which three
+  // ordinary and entirely valid SQL spellings defeated -- each one
+  // silently reopening the hole 5c/5d had just closed.
+  // -------------------------------------------------------------------
+  {
+    const DEF = 'CREATE FUNCTION public.report_store_draft(p uuid) RETURNS void\n'
+      + '  LANGUAGE plpgsql AS $b$ BEGIN END; $b$;\n'
+    const cases = [
+      ['5g. multi-target DROP FUNCTION a(...), b(...) -- drops BOTH; only the first was seen', true,
+        'DROP FUNCTION public.report_cancel_draft(uuid,integer), '
+        + 'public.report_store_draft(uuid,integer,integer,text,text,text,text);\n' + DEF],
+      ['5g2. DROP ROUTINE (a synonym since PostgreSQL 11) was not recognised as a drop at all', true,
+        'DROP ROUTINE public.report_store_draft(uuid,integer,integer,text,text,text,text);\n' + DEF],
+      ['5g3. REVOKE GRANT OPTION FOR withdraws only the grant option, so it must NOT discharge the REVOKE', true,
+        'DROP FUNCTION public.report_store_draft(uuid);\n' + DEF
+        + 'REVOKE GRANT OPTION FOR EXECUTE ON FUNCTION public.report_store_draft(uuid) FROM PUBLIC;\n'],
+      ['5g4. a real REVOKE after the same DROP still passes (no false positive)', false,
+        'DROP FUNCTION public.report_store_draft(uuid);\n' + DEF
+        + 'REVOKE ALL ON FUNCTION public.report_store_draft(uuid)\n'
+        + '  FROM PUBLIC, anon, authenticated, service_role, authenticator;\n'],
+      ['5g5. DROP of a NON-guarded function is ignored (no false positive)', false,
+        'DROP FUNCTION public.report_cancel_draft(uuid,integer);\n'
+        + 'CREATE FUNCTION public.report_cancel_draft(p uuid) RETURNS void\n'
+        + '  LANGUAGE plpgsql AS $b$ BEGIN END; $b$;\n'],
+    ]
+    for (const [label, shouldFire, sql] of cases) {
+      const f = clone()
+      f.push({ name: '99999999999999_dropform.sql', sql })
+      const fired = findMissingRevokes(f, guardedFunctions(f)).length > 0
+      if (fired === shouldFire) ok(label)
+      else bad(`${label} -- expected ${shouldFire ? 'a firing' : 'silence'}, got ${fired ? 'a firing' : 'silence'}`)
+    }
   }
 }
 

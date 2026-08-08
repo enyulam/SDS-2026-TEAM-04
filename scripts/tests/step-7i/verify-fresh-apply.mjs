@@ -200,7 +200,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
 
   // Apply all twelve migration files in order, exactly as a reset would.
   const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (files.length !== 13) fail(`${files.length} migration files found, expected 13`)
+  if (files.length !== 14) fail(`${files.length} migration files found, expected 14`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -214,7 +214,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
     if (r.code !== 0) { fail(`migration ${version} failed on a fresh database:\n${r.err}`); return }
     console.log(`  applied ${f}`)
   }
-  pass('all twelve migrations apply cleanly, in order, from a database with no project objects')
+  pass(`all ${files.length} migrations apply cleanly, in order, from a database with no project objects`)
 
   // The ratified census, re-derived from the freshly built database.
   const census = await q(SCRATCH, `
@@ -240,10 +240,18 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   //  -- with one authenticated EXECUTE grant. No table, enum, label or
   //  policy moves, so the census goes 33 -> 34 functions, 11 -> 12
   //  migrations and 24 -> 25 authenticated EXECUTE.)
-  const expected = '26|36|12|29|13|25|0|'
+  const expected = '26|36|12|29|14|25|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
-  else pass(`fresh census: 26 tables, 34 functions, 12 enums, 29 policies, 12 migrations, 25 authenticated EXECUTE, RLS everywhere, 8 ordered labels, 1/3/9 seeds`)
+  // The narration is DERIVED from the pinned literal, never retyped. It
+  // previously read "34 functions ... 12 migrations" while `expected`
+  // asserted 36 and 13 -- the assertion was right and the evidence line
+  // shipped into the run record was false.
+  else {
+    const [t, fn, en, po, mg, ex] = expected.split('|')
+    pass(`fresh census: ${t} tables, ${fn} functions, ${en} enums, ${po} policies, ${mg} migrations, `
+      + `${ex} authenticated EXECUTE, RLS everywhere, 8 ordered labels, 1/3/9 seeds`)
+  }
 
   // Equivalence, reported in two separate registers (operator ruling F-P0-3).
   //
@@ -290,8 +298,8 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
     // databases are NOT byte-identical, and this proof does not claim they
     // are -- it claims catalogue equivalence modulo end-of-line transport.
     pass(raw.total === 0
-      ? 'the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the twelve committed migration files (raw byte-identical too)'
-      : `the canonical fixture database is CATALOGUE-EQUIVALENT to a fresh application of the twelve committed migration files, MODULO CRLF/LF TRANSPORT REPRESENTATION (${raw.total} raw text difference(s), 0 canonicalized) -- object set, signatures, attributes, ACLs, policies, RLS, triggers, columns, constraints and indexes all match exactly`)
+      ? `the canonical fixture database is CATALOGUE-IDENTICAL to a fresh application of the ${files.length} committed migration files (raw byte-identical too)`
+      : `the canonical fixture database is CATALOGUE-EQUIVALENT to a fresh application of the ${files.length} committed migration files, MODULO CRLF/LF TRANSPORT REPRESENTATION (${raw.total} raw text difference(s), 0 canonicalized) -- object set, signatures, attributes, ACLs, policies, RLS, triggers, columns, constraints and indexes all match exactly`)
   } else {
     fail('the canonical database differs from a fresh application, and the difference is NOT end-of-line representation')
     for (const l of cnl.onlyA.slice(0, 15)) console.error(`  fresh-only : ${l}`)

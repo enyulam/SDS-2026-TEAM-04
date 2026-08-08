@@ -239,10 +239,10 @@ BEGIN
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 13 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 13', v_n; END IF;
+  IF v_n <> 14 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 14', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000','20260809120000');
-  IF v_n <> 13 THEN RAISE EXCEPTION 'FAIL T7I-73: the thirteen applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000','20260809120000','20260809160000');
+  IF v_n <> 14 THEN RAISE EXCEPTION 'FAIL T7I-73: the fourteen applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -318,6 +318,59 @@ BEGIN
     JOIN pg_catalog.pg_namespace n ON n.oid=d.defaclnamespace
    WHERE pg_catalog.pg_get_userbyid(d.defaclrole)='postgres' AND n.nspname='public';
   IF v_n <> 3 THEN RAISE EXCEPTION 'FAIL T7I-2: postgres default-ACL rows in public = %, expected 3', v_n; END IF;
+
+  -- ---------------------------------------------------------------------
+  -- T7I-OD4-ENVELOPE (P1-T03) -- NO version-creating path may stamp a
+  -- hard-coded content_hash_version of 1.
+  --
+  -- WHY THIS LIVES HERE AND NOT ONLY IN A MIGRATION. M13 shipped a real
+  -- defect: three of the four creating paths were re-pinned to 2 and
+  -- report_reopen_submitted was left writing the literal 1 beside a hash the
+  -- V2 serializer produced, asserting V1 provenance for a digest no V1 call
+  -- can yield. M13's widened CHECK (1, 2) accepted it and NO assertion
+  -- anywhere pinned the value, so it shipped green. M14 fixed the code, but a
+  -- migration's end-assertion is point-in-time -- it proves the catalogue at
+  -- the moment it runs and never runs again. The recurring guarantee has to
+  -- live in a CURRENT REUSABLE carrier, which is this file.
+  --
+  -- IT IS DELIBERATELY VARIABLE-NAME-INDEPENDENT. M14's own B2 keyed on the
+  -- text 'content_hash,' and therefore covered only the two paths whose hash
+  -- variable happens to end in content_hash; report_store_draft and
+  -- report_save_edit both use v_hash and were invisible to it. This pattern
+  -- matches ANY '<token>, 1' at end of line, so it fires on v_hash, 1 /
+  -- v_content_hash, 1 / v_src.content_hash, 1 alike, while NOT matching the
+  -- revision_number literal line 'p_report_id, v_r.centre_id, 1,' (trailing
+  -- comma). Verified against all four live bodies: 0 false positives.
+  -- ---------------------------------------------------------------------
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public'
+     AND p.prosrc LIKE '%INSERT INTO public.report_versions%';
+  IF v_n <> 4 THEN
+    RAISE EXCEPTION 'FAIL T7I-OD4-ENVELOPE: % version-creating path(s), expected 4 -- the set moved, so the check below is no longer scoped to what it was written for', v_n;
+  END IF;
+
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public'
+     AND p.prosrc LIKE '%INSERT INTO public.report_versions%'
+     AND p.prosrc ~ '(?n)^\s*[^\s,]+\s*,\s*1\s*$';
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'FAIL T7I-OD4-ENVELOPE: % version-creating path(s) stamp a hard-coded content_hash_version of 1 (G-05a item 4)', v_n;
+  END IF;
+
+  -- Positive leg: the reopen clone must PROPAGATE the source envelope rather
+  -- than stamp any literal, because it copies the source hash verbatim.
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname='report_reopen_submitted'
+     AND pg_catalog.strpos(p.prosrc, 'v_src.content_hash, v_src.content_hash_version') > 0;
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'FAIL T7I-OD4-ENVELOPE: report_reopen_submitted no longer propagates v_src.content_hash_version (G-05a item 7)';
+  END IF;
 
   -- T7I-42: no evidence representation beyond the pre-existing checklist
   -- attestation names, and exactly the eight report_status labels.
