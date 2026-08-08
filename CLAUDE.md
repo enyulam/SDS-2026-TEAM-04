@@ -28,7 +28,7 @@ If a change you're about to make would let AI-generated content reach a parent v
 
 These documents govern this build. Read the specification and its ratified amendment fully before starting Phase 0, and re-read the relevant section before starting any new phase or module.
 
-**Precedence (highest first):** **explicit operator rulings** → the two canonical submission PDFs (`FINAL_SUBMISSION_BRIEF/`, never edited) → Specification v3 → ratified amendments (Amendment 001, then Amendment 002, then Amendment 003, then Amendment 004, then Amendment 005, then **Amendment 006** for the clauses each names) → **`FINAL_MVP_AUTHORITY_LOCK.md`** and the ruling instruments it indexes → this `CLAUDE.md` → Implementation Plan → the `docs/plan/` lifecycle and authorization baselines → the ratified implementation contract → **Figma Design 2 (visual/interaction reference — LOWEST on the functional ladder)**.
+**Precedence (highest first):** **explicit operator rulings** → the two canonical submission PDFs (`FINAL_SUBMISSION_BRIEF/`, never edited) → Specification v3 → ratified amendments (Amendment 001, then Amendment 002, then Amendment 003, then Amendment 004, then Amendment 005, then Amendment 006, then **Amendment 007** for the clauses each names) → **`FINAL_MVP_AUTHORITY_LOCK.md`** ~~*(struck 2026-08-08, P0-T04 under bounded Operator instruction G-00a: this line ended at "then **Amendment 006**", omitting **Amendment 007 / `A-056`**, which is ratified and is already cited as active two rows below in this same section's table and in §7.4. Enumeration currency only — no clause-level supersession is changed.)*~~ and the ruling instruments it indexes → this `CLAUDE.md` → Implementation Plan → the `docs/plan/` lifecycle and authorization baselines → the ratified implementation contract → **Figma Design 2 (visual/interaction reference — LOWEST on the functional ladder)**.
 
 ~~*(Original tail, struck 2026-08-08 and preserved per annotate-never-delete:* "→ **Figma Design 2** (visual/interaction reference) → `docs/progress/STATUS.md` → `docs/progress/BUILD_NOTES.md` → temporary migration tracker → the 48-hour physical-test contract."*)*~~ **Why it was struck:** it seated **Figma above `STATUS.md`**, contradicting Authority Lock §2.4, which puts Figma **lowest**; and it placed the **continuity records inside the functional ladder**, which they are not — `STATUS.md`, `BUILD_NOTES.md` and the migration tracker are **continuity records, not functional authority** (§15.1). The 48-hour physical-test contract remains an active procedural contract; it never held functional precedence over the baselines above it.
 
@@ -449,9 +449,15 @@ Follow spec §18, **as amended by Amendment 002 A-023 (no ORM) and A-016 (entity
                             generated Supabase database TypeScript types.
                             NO Prisma, NO Drizzle, NO general-purpose ORM (ADR-8).
 /docs
-  /spec                   → specification + ratified amendments (001, 002, 003, 004, 005, 006)
+  /spec                   → specification + ratified amendments
+                            (001, 002, 003, 004, 005, 006, 007)
                             [corrected 2026-08-08, Phase A2 S-13: 005 and 006 are
                              ratified and active — Authority Lock §2.2]
+                            [corrected again 2026-08-08, execution plan P0-T04
+                             under bounded Operator instruction G-00a: 007 (A-056)
+                             was omitted. It is ratified and active; it supersedes
+                             Amendment 005 A-045's VISUAL ladder only. Enumeration
+                             currency only — no clause-level supersession changed.]
   /plan                   → Implementation Plan + Figma Design 2 screen matrix
 ```
 

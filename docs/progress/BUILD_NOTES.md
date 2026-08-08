@@ -1636,3 +1636,164 @@ untouched · PeakPalate untouched.
 **Next permitted action.** **Await Operator authorization of gate `G-00`** — optionally carrying a
 `STANDING_LOCAL_EXECUTION_AUTHORIZATION` over a named local range such as `Plan Phases 0–4`. Without
 that range, each phase still needs its own entry instruction.
+
+---
+
+## 2026-08-08 — FINAL MVP PLAN EXECUTION BEGINS · PHASE 0 (P0-T01…T06) — VERIFICATION, RECONCILIATION, BASELINE ANCHOR
+
+**Date/time.** 2026-08-08, Asia/Singapore.
+**Checkpoint / phase.** `FINAL_MVP_EXECUTION_PLAN.md` **PHASE 0 — EXECUTION BASELINE / LOCK**.
+Tasks executed: **P0-T01, P0-T02, P0-T03, P0-T04, P0-T05, P0-T06**. P0-T07/T08 prepared for the
+Operator; **P0-T09 and P0-T10 are Class B and remain blocked pending Operator rulings.**
+⚠️ This is the **plan's** Phase 0, not `CLAUDE.md` §10's Phase 0 (plan §5.1 numbering collision).
+
+**Track / workstream.** Single-writer, `main`, no worktrees. No subagents were launched; every
+finding below was measured directly by the Main Orchestrator.
+
+**Operator decisions received.** **G-00** — execution of the plan authorized from the verified
+baseline. **`STANDING_LOCAL_EXECUTION_AUTHORIZATION`** granted over the named range
+**`Plan Phases 0 THROUGH 4`**, bounded to LOCAL execution (plan §7.6, `CLAUDE.md` §15.11).
+**G-00a** — bounded annotate-never-delete instruction **for this run**, limited to the carriers and
+corrections P0-T04 itself identifies. **G-01** — one annotated local baseline tag, verification of
+the existing preservation architecture, and a new bounded execution-baseline snapshot.
+Explicitly withheld and **not** assumed anywhere: provider spend, hosted, human, public, remote,
+push, submission.
+
+**Starting HEAD → ending HEAD.** `12eaa13c1cd8c9c78df15852c873c50e10ac1373` → this entry's
+checkpoint commit.
+
+**Migration or schema changes.** **NONE.** No migration authored, applied, edited or reverted. No
+DDL. No generated types touched. No application, test or UI-asset file changed.
+
+**Scope.**
+
+*P0-T01 — baseline verification.* Branch `main`; HEAD `12eaa13`; `git status --porcelain -uall`
+empty; **0 remotes**; **1 worktree**; **4 tags**; branches `main`, `feat/48h-backend`,
+`feat/48h-frontend`. HEAD confirmed a **descendant** of the recorded committed-plan baseline
+`f53cae2`. HEAD had advanced two commits past the plan-*authoring* baseline `dff7a69`; per the
+task's step 3 both were read rather than assumed to be drift — `f53cae2` (plan added) and `12eaa13`
+(nine bounded plan corrections), both documentation-only and both matching the prior status record.
+Every negative control passed, including the specific one that `FINAL_MVP_EXECUTION_PLAN.md` must
+**not** appear as an uncommitted change.
+
+*P0-T02 — live-catalogue re-derivation.* Docker Desktop was down; started from
+`%LOCALAPPDATA%\Programs\DockerDesktop` (not the `%ProgramFiles%` path). All nine
+`supabase_*_best-coach-mvp` containers reached healthy. **Live census: 12 migrations · 26 tables ·
+12 enums · 34 functions · 29 policies · 3 triggers · 0 views** — an **exact match** to the
+statically-derived A2 record, which is now confirmed rather than restated. `report_status` carries
+**8** ordered labels with `trainer_approved` at sort order 5.5. **`report_store_draft`'s literal
+`proacl` was READ FOR THE FIRST TIME: `{postgres=X/postgres}` — owner-only. R-27 holds.** EXECUTE
+census: `authenticated` **25**, `service_role` **0**, `anon` **0**; neither hash serializer nor
+`app_parent_reaches_student` is client-executable. RLS enabled on all 26 tables. Step 7F fixture
+intact (3 Auth identities, 25 domain rows, 13 seed rows).
+
+*P0-T03 — honest test baseline.* `tsc` 0 · `lint` 0 · `build` 0 (17 routes). **PASS 23 · FAIL 4 ·
+NOT-RUN 15 · not-a-suite 2.** The plan's warning about the historically-cited ledger was confirmed
+on both counts: **`tests/frontend/app-route-census.mjs` is not a suite** (helper module, exits 0
+unconditionally — recording it as `PASS` is the fail-open row E-3 exists to prevent), and
+**`correction-tracking/ct-static.mjs` is portable and passes** despite routine omission. The
+`@/` alias-loader was empirically confirmed as a launch prerequisite for five suites.
+✅ **`integrated-route-security.mjs` was converted from its long-standing `NOT_RUN` to `PASS`** —
+25/25 assertions, 65 HTTP responses, 17 canonical routes, no credential — against a served
+non-fixture production build.
+
+*P0-T04 — governance register reconciliation (annotate-never-delete, under G-00a).* Five stale
+sites corrected, each struck-and-preserved with its ruling and date: three Authority Lock
+enumerations (§2.2, §29 ACTIVE_AUTHORITATIVE, §31 item 2a) and two `CLAUDE.md` sites (§1 precedence
+line, §9 repo comment) that still read "Amendments 001–006" while **Amendment 007 / `A-056`** is
+ratified and cited as active elsewhere in the same files; `SCREEN_INDEX.md` still asserting ID 05
+has no implemented route and an open `U-A5-1`; and the route inventory's own §7 row still saying
+"Operator decision required" while its §7.3 had recorded the gap CLOSED since S-15 — a contradiction
+**inside one document**. `STATUS.md`'s 48H-worktree ruling block, which still said removal "was NOT
+performed" while its own Worktrees row recorded it executed, was likewise annotated. Additionally,
+Lock §11's warning that `CLAUDE.md:180` was stale and "Phase B must reconcile it" was recorded as
+**DISCHARGED** — S-06/S-07 had already done it. **No amendment text was edited; no inbound
+supersession banner was added to `Amendment_005.md`; no superseded text was deleted; no meaning was
+changed.** Verified documentation-only: six `.md` files, zero non-`.md` paths.
+
+*P0-T05 — continuity reset.* `STATUS.md`'s current-state block was **replaced, not stacked**
+(§15.2), anchored on both boundary lines before rewriting so no adjacent content moved; file EOL
+style preserved. This entry opens the execution-era log.
+
+*P0-T06 — recovery anchor (under G-01).* One annotated local tag created at the starting HEAD:
+**`final-mvp/execution-baseline-12eaa13`**. Both preservation architectures verified present, then
+a **new** snapshot `2026-08-08_EXECUTION_BASELINE_12eaa13` written to **both** — `D:` (disk 1) and
+SUTD OneDrive (disk 0) — each holding a complete-history git bundle (`git bundle verify`: *"records
+a complete history"*), a frozen-demo bundle and a manifest, **SHA-256 identical across both
+devices**. **No existing archive was overwritten.** **No secret reached either location** — verified
+by scan before the OneDrive copy; bundles carry only committed objects and `.env.local` has never
+been tracked. **0 remotes was re-raised as the dominant residual risk.**
+
+**Commands run.** `git rev-parse/status/branch/remote/worktree/tag/show/merge-base/bundle/tag -a`;
+`docker ps`; `docker exec … psql` (catalogue queries and exact row counts); `npx tsc --noEmit`;
+`npm run lint`; `npm run build`; the suite set enumerated above; `npx next start -p 3414` under the
+§7.4a guard; `sha256sum`.
+
+**Automated verification.** `tsc` **0** · `lint` **0** · `build` **0**. Suite ledger as above.
+Encoding verified after every governance write (Q-28): **no BOM**, Unicode round-trips (em dash,
+`·`, arrows), and the only `â€`-class hits are the §11 rule text *quoting* mojibake as an example —
+byte-identical in `HEAD`, therefore pre-existing and not introduced.
+
+**§7.4a serving discipline — applied and proven, not asserted.** **S-1**: `LLM_PROVIDER`,
+`LLM_MODEL` and `LLM_API_KEY` were **OVERWRITTEN, never deleted**, in the child environment with a
+literal first proven to match **neither** ratified selector read from `server/platform/llm-config.ts`,
+then **read back** and echoed. **S-2**: `BEST_COACH_RUN_REAL_PROVIDER_LEG` asserted **UNSET** by
+own-property check, with presence defined as a halt rather than an authorization. **S-3**: an
+outward-fetch trip-wire was armed in both the harness child and the served process; **it never
+fired**, and `run-integration`'s own independent trip-wire recorded `INT-PG` — zero non-loopback
+requests. **A false-green hazard was identified and closed before serving:** `getServerConfig()`
+validates the LLM selectors *and* builds the elevated Supabase client, so S-1 could in principle
+have disabled far more than drafting and made a security suite pass by breaking the app. The import
+graph was checked precisely — `server/platform/supabase/elevated.ts` is imported by **no** module,
+and `getServerConfig()` is reachable on the participant path **only** through
+`report-workflow/actions.ts`. S-1's blast radius is therefore exactly the drafting path, and the
+25/25 route-security result is trustworthy. **Real provider calls this run: ZERO.** `INT-L2b` was
+recorded SKIPPED-BY-DEFAULT and never as passed.
+
+**Failures and recovery.** Four suites FAIL, all with **one proven root cause**, recorded below as
+blocker **B-P0-1**. Nothing was "fixed" to make them green: the only available fixes are destructive
+and are Operator decisions.
+
+**Blockers opened.** **B-P0-1 — `report_versions` is not empty** · class DATA/GOVERNANCE · owner
+**OPERATOR-ONLY** · state **OPEN** · phase Plan Phase 0 · opened at **P0-T02, which names this an
+explicit STOP**. Observed: **12 residual report-family rows** (`reports` 1 at `draft_ready`,
+`lock_version` 4; `report_versions` 1, `content_hash_version` **1**, all four superseded panels
+populated; `report_version_ratings` 9; `report_version_checklist_progress` 1;
+`report_version_approvals` 0) plus 5 `audit_events`, 1 `audit_chain_heads`, 4 `audit_event_targets`,
+created **2026-08-07 06:52:32→06:52:40**. Expected: empty. The prior record's "empty" claim came
+from the **2026-08-06** Run C1 fixture reload and was true when made — it went stale the next day and
+was never re-queried, exactly the hazard E-1 predicts. The audit chain
+(`report.created` → `incomplete→observation_saved` → `observation_saved→drafting` →
+`drafting→draft_ready` → `report_version.created`) shows a draft was **generated and persisted**,
+consistent with the billed-run incident `prove-disposable-app.mjs` documents. Blast radius, recorded
+as **neither passing nor failing**: `run-canonical`, `run-correction-tracking` and
+`prove-clock-hour-determinism` fail on `report_create: a report already exists for this session and
+student`; `run-assessment` fails `T-ASM-32: 12 report row(s) exist`, and **1+1+9+1+0 = 12 exactly**,
+so the causal link is arithmetic rather than inferred. Propagation mechanism: the disposable suites
+run `CREATE DATABASE … TEMPLATE postgres`. Material consequence: **G-05a / P1-T02's premise is
+broken** — it is framed as *"redefine **pre-data** V1 vs introduce V2 in parallel"*, and the table is
+no longer pre-data. Partial mutation: **none — nothing was deleted, truncated or reset.** Deleting
+would destroy a hash-chained audit record; `audit_events` is append-only by design; and
+`supabase db reset` is absolutely prohibited (`CLAUDE.md` §12, plan E-11/R-1). Deliberately NOT done:
+any cleanup. Recommended next diagnostic: none needed — the cause is established; the open question
+is **disposition**, which is the Operator's.
+
+**Environment / infrastructure changes.** Docker Desktop started; local Supabase stack up and
+healthy. Disposable test databases (`bc_*` prefixed, never `postgres`) were created and destroyed by
+the suites themselves — verified before running that no suite drops or resets the canonical
+database. Nothing hosted was contacted.
+
+**Cleanup / rollback state.** No partial mutation anywhere. Rollback for this checkpoint is a
+forward `git revert`; the tag and the two off-machine bundles are the recovery anchors.
+
+**Decisions.** No product, governance or security decision was made or implied by this session.
+Every correction above records an **already-ratified** supersession; none creates one.
+
+**Commit.** `docs(governance): reconcile stale registers and open the execution-era continuity record`.
+
+**Next permitted action.** **STOP for the Operator at P0-T09 (G-04) and P0-T10 (G-05)** — both
+**Class B**, neither inheritable from the standing local range. A consolidated decision packet
+accompanies this entry, and also carries **B-P0-1** and the **G-05a** premise break. Phase 0 EXIT
+additionally requires Operator confirmation, and **Phase 1 additionally requires the separate OD-4
+Phase B authorization, which no range grant confers.** No `Accepted` mark has been written or
+implied by this session.
