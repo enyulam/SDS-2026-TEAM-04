@@ -77,8 +77,8 @@ DECLARE v public.report_versions; BEGIN
 CREATE FUNCTION pg_temp.whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v public.report_versions; BEGIN
   SELECT * INTO v FROM public.report_versions WHERE id = p_version;
-  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
-                                       v.practice_suggestion, v.session_takeaway);
+  RETURN public.report_wording_hash_v2(v.overview, v.strengths,
+                                       v.areas_for_development, v.remarks);
 END $$;
 
 CREATE FUNCTION pg_temp.chain_len() RETURNS bigint LANGUAGE plpgsql AS $$
@@ -239,10 +239,10 @@ BEGIN
   -- T7I-73's own property -- the two Step 7I files applied in order with the
   -- label file first -- is unchanged.)
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 12 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 12', v_n; END IF;
+  IF v_n <> 13 THEN RAISE EXCEPTION 'FAIL T7I-73: applied-migration count is %, expected 13', v_n; END IF;
   SELECT pg_catalog.count(*) INTO v_n FROM supabase_migrations.schema_migrations
-   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000');
-  IF v_n <> 12 THEN RAISE EXCEPTION 'FAIL T7I-73: the twelve applied versions are not the expected ones'; END IF;
+   WHERE version IN ('20260803034500','20260803154500','20260804213000','20260805090000','20260805090500','20260806090000','20260806103000','20260806160000','20260806190000','20260806220000','20260807090000','20260807113000','20260809120000');
+  IF v_n <> 13 THEN RAISE EXCEPTION 'FAIL T7I-73: the thirteen applied versions are not the expected ones'; END IF;
 
   -- Backend V2: the four ratified competency_rating labels and their physical
   -- sort order (A-049). RENAME VALUE preserves enumsortorder, so this proves
@@ -285,7 +285,7 @@ BEGIN
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname='public';
-  IF v_n <> 34 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 34 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A Phase 2b Management submitted-report list)', v_n; END IF;
+  IF v_n <> 36 THEN RAISE EXCEPTION 'FAIL T7I-2: public function census is %, expected 36 (28 + the 2 B2 assessment functions + the B2.1 correction-tracking read + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A Phase 2b Management submitted-report list + the 2 OD-4 V2 hash serializers)', v_n; END IF;
 
   -- All new objects owned by postgres.
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_class c
@@ -374,7 +374,8 @@ DECLARE
     'report_management_approve_and_submit','report_reopen_submitted','report_get_canonical',
     'report_get_working','report_get_management_review'];
   v_zero CONSTANT text[] := ARRAY['report_store_draft','report_content_hash_v1',
-    'report_wording_hash_v1','app_parent_reaches_student'];
+    'report_wording_hash_v1','app_parent_reaches_student',
+    'report_content_hash_v2','report_wording_hash_v2'];
   v_7g CONSTANT text[] := ARRAY['app_current_account_id','app_has_active_membership','app_is_own_membership',
     'app_is_own_active_membership','app_trainer_reaches_session','app_trainer_reaches_module'];
   v_n bigint;
@@ -425,7 +426,7 @@ BEGIN
      AND NOT pg_catalog.has_function_privilege('authenticator', p.oid, 'EXECUTE')
      AND p.proacl IS NOT NULL
      AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
-  IF v_n <> 4 THEN RAISE EXCEPTION 'FAIL T7I-4: % of the 4 zero-EXECUTE functions are truly at zero', v_n; END IF;
+  IF v_n <> 6 THEN RAISE EXCEPTION 'FAIL T7I-4: % of the 6 zero-EXECUTE functions are truly at zero', v_n; END IF;
 
   SELECT pg_catalog.count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
@@ -471,7 +472,7 @@ BEGIN
   -- PRIVILEGE -- permission denied, never an empty result.
   v := pg_temp.errcode($q$ SELECT 1 FROM public.reports $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-52: SELECT on reports as authenticated gave %, expected 42501', v; END IF;
-  v := pg_temp.errcode($q$ UPDATE public.report_versions SET todays_strength='x' $q$);
+  v := pg_temp.errcode($q$ UPDATE public.report_versions SET overview='x' $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-18: UPDATE on report_versions as authenticated gave %, expected 42501', v; END IF;
   v := pg_temp.errcode($q$ DELETE FROM public.report_version_approvals $q$);
   IF v <> '42501' THEN RAISE EXCEPTION 'FAIL T7I-18: DELETE on report_version_approvals as authenticated gave %, expected 42501', v; END IF;
@@ -516,7 +517,7 @@ BEGIN
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public' AND p.proname='report_get_canonical';
   IF v_res IS DISTINCT FROM
-     'TABLE(todays_strength text, next_focus text, practice_suggestion text, session_takeaway text, submitted_at timestamp with time zone)' THEN
+     'TABLE(overview text, strengths text, areas_for_development text, remarks text, submitted_at timestamp with time zone)' THEN
     RAISE EXCEPTION 'FAIL T7I-39: RPC-13 result is "%", expected exactly the four panels + submitted_at', v_res;
   END IF;
   IF v_res LIKE '%content_hash%' OR v_res LIKE '%revision_number%' THEN
@@ -564,7 +565,7 @@ BEGIN
    WHERE n.nspname='public' AND p.proname='report_management_edit_wording'
      AND x.md IN ('i','b','v');
   IF v_res IS DISTINCT FROM
-     'p_report_id, p_expected_lock_version, p_expected_version_id, p_expected_wording_hash, p_todays_strength, p_next_focus, p_practice_suggestion, p_session_takeaway' THEN
+     'p_report_id, p_expected_lock_version, p_expected_version_id, p_expected_wording_hash, p_overview, p_strengths, p_areas_for_development, p_remarks' THEN
     RAISE EXCEPTION 'FAIL T7I-51: RPC-9 input parameters are "%", expected exactly the four panels plus the four expectation values', v_res;
   END IF;
   IF v_res LIKE '%rating%' OR v_res LIKE '%dimension%' OR v_res LIKE '%observation%'
@@ -1416,8 +1417,8 @@ BEGIN
   SELECT pg_catalog.max(rv.revision_number) INTO v_maxrev
     FROM public.report_versions rv WHERE rv.report_id=v_report;
   SELECT pg_catalog.md5(pg_catalog.string_agg(
-           rv.id::text||coalesce(rv.todays_strength,'~')||coalesce(rv.next_focus,'~')||
-           coalesce(rv.practice_suggestion,'~')||coalesce(rv.session_takeaway,'~')||
+           rv.id::text||coalesce(rv.overview,'~')||coalesce(rv.strengths,'~')||
+           coalesce(rv.areas_for_development,'~')||coalesce(rv.remarks,'~')||
            rv.content_hash||rv.content_hash_version::text||rv.revision_number::text||
            coalesce(rv.derived_from_version_id::text,'~')||
            coalesce(rv.trainer_approved_source_version_id::text,'~')||
@@ -1437,8 +1438,8 @@ BEGIN
   PERFORM public.report_reopen_submitted(v_report, v_lv);
 
   SELECT pg_catalog.md5(pg_catalog.string_agg(
-           rv.id::text||coalesce(rv.todays_strength,'~')||coalesce(rv.next_focus,'~')||
-           coalesce(rv.practice_suggestion,'~')||coalesce(rv.session_takeaway,'~')||
+           rv.id::text||coalesce(rv.overview,'~')||coalesce(rv.strengths,'~')||
+           coalesce(rv.areas_for_development,'~')||coalesce(rv.remarks,'~')||
            rv.content_hash||rv.content_hash_version::text||rv.revision_number::text||
            coalesce(rv.derived_from_version_id::text,'~')||
            coalesce(rv.trainer_approved_source_version_id::text,'~')||
@@ -1488,8 +1489,8 @@ BEGIN
             'emotional_expression','sentence_flow','audience_awareness']::text[],
       rvr.dimension_code::text) AS ord
       FROM public.report_version_ratings rvr WHERE rvr.report_version_id=v_ver) x;
-  IF public.report_content_hash_v1(v_rv.todays_strength, v_rv.next_focus,
-       v_rv.practice_suggestion, v_rv.session_takeaway, v_ratings) IS DISTINCT FROM v_rv.content_hash THEN
+  IF public.report_content_hash_v2(v_rv.overview, v_rv.strengths,
+       v_rv.areas_for_development, v_rv.remarks, v_ratings) IS DISTINCT FROM v_rv.content_hash THEN
     RAISE EXCEPTION 'FAIL T7I-19: the stored content_hash does not recompute from stored content';
   END IF;
 
@@ -1845,10 +1846,10 @@ DECLARE
   v_base text;
 BEGIN
   v_base := public.report_content_hash_v1('S','F','P','T', v_nine);
-  IF public.report_content_hash_v1('S2','F','P','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: todays_strength does not affect the hash'; END IF;
-  IF public.report_content_hash_v1('S','F2','P','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: next_focus does not affect the hash'; END IF;
-  IF public.report_content_hash_v1('S','F','P2','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: practice_suggestion does not affect the hash'; END IF;
-  IF public.report_content_hash_v1('S','F','P','T2', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: session_takeaway does not affect the hash'; END IF;
+  IF public.report_content_hash_v1('S2','F','P','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: overview does not affect the hash'; END IF;
+  IF public.report_content_hash_v1('S','F2','P','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: strengths does not affect the hash'; END IF;
+  IF public.report_content_hash_v1('S','F','P2','T', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: areas_for_development does not affect the hash'; END IF;
+  IF public.report_content_hash_v1('S','F','P','T2', v_nine) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: remarks does not affect the hash'; END IF;
   IF public.report_content_hash_v1('S','F','P','T', v_alt) = v_base THEN RAISE EXCEPTION 'FAIL T7I-35: a rating change does not affect the hash'; END IF;
   -- Two independently built versions with identical panels and identical
   -- nine (dimension, rating) pairs yield BYTE-IDENTICAL hashes; identifiers,
@@ -1869,7 +1870,7 @@ BEGIN
   v_report := pg_temp.setup('T11');
   SELECT r.latest_submitted_version_id, r.lock_version INTO v_frozen, v_lv FROM public.reports r WHERE r.id=v_report;
   SELECT rv.content_hash INTO v_fhash FROM public.report_versions rv WHERE rv.id=v_frozen;
-  SELECT rv.todays_strength, rv.next_focus, rv.practice_suggestion, rv.session_takeaway,
+  SELECT rv.overview, rv.strengths, rv.areas_for_development, rv.remarks,
          rv.content_hash, rv.submitted_at, rv.submitted_by_membership_id, rv.submitted_by_role
     INTO v_before FROM public.report_versions rv WHERE rv.id=v_frozen;
   -- The submitted version here is the MANAGEMENT wording descendant, so it
@@ -1902,7 +1903,7 @@ BEGIN
 
   PERFORM public.report_update_checklist(v_report, v_lv, v_clone, true, false, false);
 
-  SELECT rv.todays_strength, rv.next_focus, rv.practice_suggestion, rv.session_takeaway,
+  SELECT rv.overview, rv.strengths, rv.areas_for_development, rv.remarks,
          rv.content_hash, rv.submitted_at, rv.submitted_by_membership_id, rv.submitted_by_role
     INTO v_after FROM public.report_versions rv WHERE rv.id=v_frozen;
   IF v_before IS DISTINCT FROM v_after THEN
@@ -1920,15 +1921,15 @@ BEGIN
   -- RPC-13 returns the FROZEN version to parent and management at every
   -- intermediate point of the correction cycle.
   PERFORM pg_temp.as_parent();
-  IF (SELECT c.todays_strength FROM public.report_get_canonical(
+  IF (SELECT c.overview FROM public.report_get_canonical(
         'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c)
-     IS DISTINCT FROM v_before.todays_strength THEN
+     IS DISTINCT FROM v_before.overview THEN
     RAISE EXCEPTION 'FAIL T7I-38: the parent does not still read the frozen canonical version';
   END IF;
   PERFORM pg_temp.as_management();
-  IF (SELECT c.todays_strength FROM public.report_get_canonical(
+  IF (SELECT c.overview FROM public.report_get_canonical(
         'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c)
-     IS DISTINCT FROM v_before.todays_strength THEN
+     IS DISTINCT FROM v_before.overview THEN
     RAISE EXCEPTION 'FAIL T7I-38: management does not still read the frozen canonical version';
   END IF;
   RAISE NOTICE 'PASS T7I-36, T7I-38';
@@ -2199,7 +2200,7 @@ BEGIN
   v_reason := 'The Body rating does not match the observation notes for this session.';
   v_report := pg_temp.setup('T7');
   SELECT r.lock_version, r.current_cycle_version_id INTO v_lv, v_ver FROM public.reports r WHERE r.id=v_report;
-  SELECT rv.todays_strength, rv.content_hash, rv.updated_at INTO v_before
+  SELECT rv.overview, rv.content_hash, rv.updated_at INTO v_before
     FROM public.report_versions rv WHERE rv.id=v_ver;
   PERFORM pg_temp.as_management();
 
@@ -2253,7 +2254,7 @@ BEGIN
   IF (SELECT r.latest_submitted_version_id FROM public.reports r WHERE r.id=v_report) IS NOT NULL THEN
     RAISE EXCEPTION 'FAIL T7I-53: the return moved latest_submitted_version_id';
   END IF;
-  SELECT rv.todays_strength, rv.content_hash, rv.updated_at INTO v_after
+  SELECT rv.overview, rv.content_hash, rv.updated_at INTO v_after
     FROM public.report_versions rv WHERE rv.id=v_ver;
   IF v_before IS DISTINCT FROM v_after THEN RAISE EXCEPTION 'FAIL T7I-53: the trainer-approved source version changed'; END IF;
 
@@ -2383,7 +2384,7 @@ BEGIN
   -- Drive a decoy version into the candidate pointer WITHOUT a trainer
   -- approval and WITHOUT a trainer-approved source.
   INSERT INTO public.report_versions (report_id, centre_id, revision_number,
-      todays_strength, next_focus, practice_suggestion, session_takeaway,
+      overview, strengths, areas_for_development, remarks,
       authored_by_membership_id, authored_by_role, content_hash, content_hash_version)
   VALUES (v_report,'b0000000-0000-4000-8000-000000000001', 99,'d1','d2','d3','d4',
           'c1000000-0000-4000-8000-000000000002','trainer', pg_catalog.repeat('f',64), 1)
@@ -2604,7 +2605,7 @@ BEGIN
   -- Second leg: the SAME current version id, but altered stored panels. CAS
   -- passes and ONLY the wording hash catches the stale render.
   v_wh := pg_temp.whash(v_ver);
-  UPDATE public.report_versions SET todays_strength = 'silently changed' WHERE id = v_ver;
+  UPDATE public.report_versions SET overview = 'silently changed' WHERE id = v_ver;
   v_e := pg_temp.errcode(pg_catalog.format(
     'SELECT public.report_management_approve_and_submit(%L,%s,%L,%L)', v_report, v_lv, v_ver, v_wh));
   IF v_e <> 'BC007' AND v_e <> 'BC008' THEN
@@ -2724,7 +2725,7 @@ DECLARE
 BEGIN
   v_report := pg_temp.setup('T11');
   SELECT r.latest_submitted_version_id, r.lock_version INTO v_first, v_lv FROM public.reports r WHERE r.id=v_report;
-  SELECT rv.todays_strength, rv.next_focus, rv.practice_suggestion, rv.session_takeaway,
+  SELECT rv.overview, rv.strengths, rv.areas_for_development, rv.remarks,
          rv.content_hash, rv.submitted_at, rv.submitted_by_membership_id, rv.submitted_by_role
     INTO v_firstrow FROM public.report_versions rv WHERE rv.id=v_first;
   SELECT pg_catalog.md5(pg_catalog.string_agg(ap.approver_role::text||ap.approved_at::text, '|' ORDER BY ap.approver_role::text))
@@ -2798,11 +2799,11 @@ BEGIN
   -- (6) The FIRST submitted version is byte-identical to its post-first-T11
   --     values -- the write-once rule holds across a SECOND publication,
   --     which no other test exercises.
-  IF (SELECT ROW(rv.todays_strength, rv.next_focus, rv.practice_suggestion, rv.session_takeaway,
+  IF (SELECT ROW(rv.overview, rv.strengths, rv.areas_for_development, rv.remarks,
                  rv.content_hash, rv.submitted_at, rv.submitted_by_membership_id, rv.submitted_by_role)
         FROM public.report_versions rv WHERE rv.id=v_first)
-     IS DISTINCT FROM ROW(v_firstrow.todays_strength, v_firstrow.next_focus, v_firstrow.practice_suggestion,
-                          v_firstrow.session_takeaway, v_firstrow.content_hash, v_firstrow.submitted_at,
+     IS DISTINCT FROM ROW(v_firstrow.overview, v_firstrow.strengths, v_firstrow.areas_for_development,
+                          v_firstrow.remarks, v_firstrow.content_hash, v_firstrow.submitted_at,
                           v_firstrow.submitted_by_membership_id, v_firstrow.submitted_by_role) THEN
     RAISE EXCEPTION 'FAIL T7I-69(6): the first submitted version changed during republication';
   END IF;
@@ -2816,12 +2817,12 @@ BEGIN
 
   -- (7) RPC-13 now returns the NEW canonical version to parent and management.
   PERFORM pg_temp.as_parent();
-  IF (SELECT c.todays_strength FROM public.report_get_canonical(
+  IF (SELECT c.overview FROM public.report_get_canonical(
         'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c) <> 'r1' THEN
     RAISE EXCEPTION 'FAIL T7I-69(7): the parent does not read the republished version';
   END IF;
   PERFORM pg_temp.as_management();
-  IF (SELECT c.todays_strength FROM public.report_get_canonical(
+  IF (SELECT c.overview FROM public.report_get_canonical(
         'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c) <> 'r1' THEN
     RAISE EXCEPTION 'FAIL T7I-69(7): management does not read the republished version';
   END IF;
@@ -3018,7 +3019,7 @@ BEGIN
   -- previous canonical version, BYTE-IDENTICAL, after a reopen and a return.
   v_report := pg_temp.setup('T11');
   PERFORM pg_temp.as_parent();
-  SELECT c.todays_strength, c.next_focus, c.practice_suggestion, c.session_takeaway, c.submitted_at
+  SELECT c.overview, c.strengths, c.areas_for_development, c.remarks, c.submitted_at
     INTO v_before FROM public.report_get_canonical(
     'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c;
 
@@ -3028,7 +3029,7 @@ BEGIN
     INTO v_st, v_lv, v_ver, v_rev FROM public.report_reopen_submitted(v_report, v_lv) x;
 
   PERFORM pg_temp.as_parent();
-  SELECT c.todays_strength, c.next_focus, c.practice_suggestion, c.session_takeaway, c.submitted_at
+  SELECT c.overview, c.strengths, c.areas_for_development, c.remarks, c.submitted_at
     INTO v_after FROM public.report_get_canonical(
     'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001') c;
   IF v_before IS DISTINCT FROM v_after THEN
@@ -3176,7 +3177,7 @@ BEGIN
     'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001');
   IF v_row.status <> 'trainer_approved' OR v_row.wording_hash IS NULL
      OR v_row.current_version_id IS NULL OR v_row.lock_version IS NULL
-     OR v_row.todays_strength IS NULL THEN
+     OR v_row.overview IS NULL THEN
     RAISE EXCEPTION 'FAIL T7I-63: the trainer_approved shape is wrong';
   END IF;
   IF v_row.wording_hash <> pg_temp.whash(v_row.current_version_id) THEN
@@ -3191,7 +3192,7 @@ BEGIN
     'c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001');
   IF v_row.status <> 'submitted' OR v_row.wording_hash IS NOT NULL
      OR v_row.current_version_id IS NOT NULL OR v_row.lock_version IS NOT NULL
-     OR v_row.submitted_at IS NULL OR v_row.todays_strength IS NULL THEN
+     OR v_row.submitted_at IS NULL OR v_row.overview IS NULL THEN
     RAISE EXCEPTION 'FAIL T7I-63: the submitted shape is wrong';
   END IF;
   RAISE NOTICE 'PASS T7I-63 (all seven statuses plus the no-report case)';

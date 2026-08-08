@@ -89,8 +89,8 @@ DECLARE n bigint; BEGIN SELECT pg_catalog.count(*) INTO n FROM public.audit_even
 CREATE FUNCTION pg_temp.whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v public.report_versions; BEGIN
   SELECT * INTO v FROM public.report_versions WHERE id = p_version;
-  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
-                                       v.practice_suggestion, v.session_takeaway);
+  RETURN public.report_wording_hash_v2(v.overview, v.strengths,
+                                       v.areas_for_development, v.remarks);
 END $$;
 
 COMMIT;
@@ -174,7 +174,7 @@ DO $t$
 DECLARE
   v_cols text[];
   v_forbidden CONSTANT text[] := ARRAY[
-    'todays_strength','next_focus','practice_suggestion','session_takeaway',
+    'overview','strengths','areas_for_development','remarks',
     'content_hash','wording_hash','revision','rating','checklist','approval',
     'attendance','evidence','notes','version_id','prompt','response','audit'];
   v_name text;

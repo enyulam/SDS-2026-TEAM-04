@@ -18,7 +18,7 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 const MIG_NAME = '20260807090000_assessment_complete_save_single_entry_point.sql'
-const NEWEST_MIG_NAME = '20260807113000_management_submitted_list.sql'
+const NEWEST_MIG_NAME = '20260809120000_od4_report_contract.sql'
 const COMPOSER_MIG = '20260806220000_assessment_complete_save_opens_report.sql'
 const ASSESSMENT_MIG = '20260806090000_assessment_governed_persistence.sql'
 
@@ -85,7 +85,7 @@ const body = code(raw)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 12) fail('T-C3-S2', `${all.length} migration files exist, expected 12`)
+  if (all.length !== 13) fail('T-C3-S2', `${all.length} migration files exist, expected 13`)
   // Run C3-A Phase 2b added the Management submitted-report list (C2C-004),
   // which sorts AFTER the single-entry-point closure. The closure is
   // therefore an ALREADY-APPLIED file and sits in the byte-identical-to-HEAD

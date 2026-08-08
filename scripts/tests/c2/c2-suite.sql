@@ -154,8 +154,8 @@ END $$;
 CREATE FUNCTION pg_temp.c2_whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v public.report_versions; BEGIN
   SELECT * INTO v FROM public.report_versions WHERE id = p_version;
-  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
-                                       v.practice_suggestion, v.session_takeaway);
+  RETURN public.report_wording_hash_v2(v.overview, v.strengths,
+                                       v.areas_for_development, v.remarks);
 END $$;
 
 -- Drive one (class session, student) pair to a named lifecycle stop THROUGH

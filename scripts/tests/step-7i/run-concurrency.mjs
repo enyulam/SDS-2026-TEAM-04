@@ -233,11 +233,11 @@ BEGIN
   IF '${stop}' = 'trainer_approved' THEN RETURN; END IF;
 
   PERFORM pg_catalog.set_config('request.jwt.claims', '${MGMT_JWT}', false);
-  v_wh := public.report_wording_hash_v1(
-    (SELECT rv.todays_strength FROM public.report_versions rv WHERE rv.id=v_ver),
-    (SELECT rv.next_focus FROM public.report_versions rv WHERE rv.id=v_ver),
-    (SELECT rv.practice_suggestion FROM public.report_versions rv WHERE rv.id=v_ver),
-    (SELECT rv.session_takeaway FROM public.report_versions rv WHERE rv.id=v_ver));
+  v_wh := public.report_wording_hash_v2(
+    (SELECT rv.overview FROM public.report_versions rv WHERE rv.id=v_ver),
+    (SELECT rv.strengths FROM public.report_versions rv WHERE rv.id=v_ver),
+    (SELECT rv.areas_for_development FROM public.report_versions rv WHERE rv.id=v_ver),
+    (SELECT rv.remarks FROM public.report_versions rv WHERE rv.id=v_ver));
   SELECT x.status, x.lock_version, x.submitted_version_id, x.submitted_at INTO v_st, v_lv, v_ver, v_at
     FROM public.report_management_approve_and_submit(v_report, v_lv, v_ver, v_wh) x;
   IF '${stop}' = 'submitted' THEN RETURN; END IF;
@@ -248,8 +248,8 @@ END $d$;`
   const row = await q(WORK_DB, `
 SELECT r.id, r.status, r.lock_version, coalesce(r.current_cycle_version_id::text,''),
        coalesce((SELECT rv.content_hash FROM public.report_versions rv WHERE rv.id=r.current_cycle_version_id),''),
-       coalesce((SELECT public.report_wording_hash_v1(rv.todays_strength, rv.next_focus,
-                        rv.practice_suggestion, rv.session_takeaway)
+       coalesce((SELECT public.report_wording_hash_v2(rv.overview, rv.strengths,
+                        rv.areas_for_development, rv.remarks)
                    FROM public.report_versions rv WHERE rv.id=r.current_cycle_version_id),'')
   FROM public.reports r WHERE r.class_session_id='${session}';`)
   const [id, status, lock, ver, hash, whash] = row.split('|')

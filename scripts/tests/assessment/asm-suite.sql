@@ -166,11 +166,11 @@ BEGIN
   -- (Reconciled again at Run C3-A Phase 1: the single-entry-point closure adds one migration file that contains exactly one REVOKE -- no function, no table, no enum, and not one DML statement.)
   -- (Moved 11 -> 12 at Run C3-A Phase 2b: C2C-004's governed Management
   -- submitted-report list is the twelfth committed migration.)
-  IF v_n <> 12 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 12', v_n; END IF;
+  IF v_n <> 13 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 13', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
   -- (Moved 33 -> 34 at Run C3-A Phase 2b: C2C-004's submitted-report list.)
-  IF v_n <> 34 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 34', v_n; END IF;
+  IF v_n <> 36 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 36', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace
    WHERE ns.nspname = 'public' AND c.relkind = 'r';
@@ -234,11 +234,12 @@ BEGIN
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'
      AND p.proname IN ('report_store_draft', 'report_content_hash_v1', 'report_wording_hash_v1',
-                       'app_parent_reaches_student', 'audit_append_event', 'audit_verify_chain',
+                       'app_parent_reaches_student', 'report_content_hash_v2', 'report_wording_hash_v2',
+                       'audit_append_event', 'audit_verify_chain',
                        'audit_canonical_json', 'audit_block_mutation')
      AND pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE');
   IF v_n <> 0 THEN RAISE EXCEPTION 'T-ASM-42: an owner-only function acquired authenticated EXECUTE'; END IF;
-  RAISE NOTICE 'PASS T-ASM-42 (23 authenticated EXECUTE; both exclusion lists unchanged)';
+  RAISE NOTICE 'PASS T-ASM-42 (authenticated EXECUTE census asserted above; exclusion lists carry the 7I six and the 7H four)';
 
   -- T-ASM-43: zero table privileges and zero policies on the three
   -- assessment tables; RLS enabled; FORCE off.

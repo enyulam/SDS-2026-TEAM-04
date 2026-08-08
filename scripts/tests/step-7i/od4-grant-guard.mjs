@@ -84,7 +84,7 @@ export const OWNER_ONLY_FUNCTIONS = ['report_store_draft', 'app_parent_reaches_s
  * RE-PIN IN THE SAME COMMIT that legitimately adds a serializer: 2 today,
  * 4 once M13 lands.
  */
-export const EXPECTED_SERIALIZERS = 2
+export const EXPECTED_SERIALIZERS = 4
 
 /** Matches a serializer definition, tolerating quotes and loose whitespace. */
 const SERIALIZER_DEF = new RegExp(

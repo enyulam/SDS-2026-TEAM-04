@@ -425,16 +425,17 @@ BEGIN
   -- one STABLE read function and one authenticated EXECUTE grant, no table,
   -- enum, label, policy or row), moving it 11 -> 12.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 12 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 12 applied migrations, found %', v_n; END IF;
+  IF v_n <> 13 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 13 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
    WHERE version IN ('20260803034500', '20260803154500', '20260804213000',
                      '20260805090000', '20260805090500', '20260806090000',
                      '20260806103000', '20260806160000', '20260806190000',
-                     '20260806220000', '20260807090000', '20260807113000');
-  IF v_n <> 12 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000, 20260807090000 and 20260807113000';
+                     '20260806220000', '20260807090000', '20260807113000',
+                     '20260809120000');
+  IF v_n <> 13 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000, 20260807090000, 20260807113000 and 20260809120000';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -449,8 +450,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 34 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 34 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver + 1 atomic complete-save composer + 1 Management submitted-report list), found %', v_n;
+  IF v_n <> 36 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 36 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver + 1 atomic complete-save composer + 1 Management submitted-report list + 2 OD-4 V2 hash serializers), found %', v_n;
   END IF;
 
   -- A35 (report-context resolver, R-22): the one governed key translation.
@@ -666,15 +667,16 @@ BEGIN
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public'
      AND p.proname IN ('report_store_draft','report_content_hash_v1',
-                       'report_wording_hash_v1','app_parent_reaches_student')
+                       'report_wording_hash_v1','app_parent_reaches_student',
+                       'report_content_hash_v2','report_wording_hash_v2')
      AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
      AND NOT has_function_privilege('anon',          p.oid, 'EXECUTE')
      AND NOT has_function_privilege('service_role',  p.oid, 'EXECUTE')
      AND NOT has_function_privilege('authenticator', p.oid, 'EXECUTE')
      AND p.proacl IS NOT NULL
      AND NOT EXISTS (SELECT 1 FROM pg_catalog.aclexplode(p.proacl) ae WHERE ae.grantee = 0);
-  IF v_n <> 4 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 4 Step 7I functions with zero client EXECUTE including PUBLIC, matched %', v_n;
+  IF v_n <> 6 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 6 Step 7I/OD-4 functions with zero client EXECUTE including PUBLIC, matched %', v_n;
   END IF;
 
   -- A35 (Step 7I): both serializers are IMMUTABLE, NOT STRICT (a NULL panel
@@ -1408,7 +1410,7 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 34 THEN
+  IF v_n <> 36 THEN
     RAISE EXCEPTION 'FAIL D5: expected the 34 Step 7G/7H/7I/assessment/correction-tracking/context-resolver/complete-save/submitted-list functions after the negative suite, found %', v_n;
   END IF;
 

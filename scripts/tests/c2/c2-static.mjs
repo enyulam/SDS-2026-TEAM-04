@@ -113,7 +113,7 @@ function bodyOf(src, startNeedle, endNeedle) {
   const index = all.indexOf(MIG_NAME)
   if (index === -1) {
     fail('T-C2-S2', `the C2-A composer migration ${MIG_NAME} is missing from the tree`)
-  } else if (index !== all.length - 3) {
+  } else if (index !== all.length - 4) {
     // (Moved to third-from-last at Run C3-A Phase 2b: C2C-004's Management
     // submitted-report list sorts after the single-entry-point closure, which
     // already sorted after the composer. The composer's own position in the

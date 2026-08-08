@@ -163,10 +163,13 @@ console.log(`Guarded: ${guardedFunctions(realFiles).join(', ')}\n`)
 // 5. MISSING REVOKE -- the hazard no GRANT scan can see.
 // ---------------------------------------------------------------------
 {
+  // A serializer name the real corpus does NOT contain. Using v2 here silently
+  // stopped testing anything the moment M13 landed, because M13 supplies a
+  // legitimate REVOKE for v2 and findMissingRevokes then correctly reported 0.
   const files = clone()
   files.push({
     name: '99999999999999_norevoke.sql',
-    sql: `CREATE OR REPLACE FUNCTION public.report_content_hash_v2(a text) RETURNS text
+    sql: `CREATE OR REPLACE FUNCTION public.report_content_hash_v9(a text) RETURNS text
   LANGUAGE plpgsql IMMUTABLE AS $f$ BEGIN RETURN a; END; $f$;\n`,
   })
   const s = discoverSerializers(files)

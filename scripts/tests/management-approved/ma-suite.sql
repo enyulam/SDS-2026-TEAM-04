@@ -72,8 +72,8 @@ $$;
 CREATE FUNCTION pg_temp.ma_whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v public.report_versions; BEGIN
   SELECT * INTO v FROM public.report_versions WHERE id = p_version;
-  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
-                                       v.practice_suggestion, v.session_takeaway);
+  RETURN public.report_wording_hash_v2(v.overview, v.strengths,
+                                       v.areas_for_development, v.remarks);
 END $$;
 
 -- The DISTINCT trainer draft text each pair is given. MA-4 searches every
