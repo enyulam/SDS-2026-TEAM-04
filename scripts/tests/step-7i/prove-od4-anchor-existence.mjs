@@ -30,7 +30,7 @@
 // Run: node scripts/tests/step-7i/prove-od4-anchor-existence.mjs
 // =====================================================================
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
@@ -203,13 +203,53 @@ proveFileAbsence({
   expect: 'derivation produced only',
 })
 
+// ---------------------------------------------------------------------
+// 9. THE DERIVATION ANCHOR ITSELF, against the single most likely future
+//    schema event here: a COLUMN RENAME.
+//
+//    OD-4 renamed four panel columns, so the next rename is not
+//    hypothetical. The first draft of od4-panel-guard.mjs did not handle
+//    ALTER TABLE ... RENAME COLUMN at all, and that omission was a
+//    FAIL-OPEN rather than a gap: the derivation would keep the OLD name,
+//    every consumer would scan for a column that no longer exists, and NO
+//    per-consumer anchor would catch it -- the count is still four and
+//    none of the names is a superseded one. Green and blind.
+//
+//    This plants a disposable migration that renames a panel column. The
+//    derivation must FOLLOW the rename, which makes it disagree with the
+//    live catalogue (where the rename is not applied), which
+//    assertPanelAnchor must report. A derivation that ignored RENAME would
+//    stay in agreement and this proof would fail.
+// ---------------------------------------------------------------------
+{
+  const id = 'anchor:column-rename'
+  const decoy = join(ROOT, 'supabase', 'migrations', '20260809999998_DISPOSABLE_rename_probe.sql')
+  try {
+    writeFileSync(decoy,
+      'ALTER TABLE public.report_versions RENAME COLUMN overview TO narrative_summary;\n')
+    const r = sh('node', ['scripts/tests/step-7i/prove-od4-fail-open-controls.mjs'])
+    const out = `${r.stdout}\n${r.stderr}`
+    if (r.status === 0) {
+      bad(id, 'the derivation anchor did NOT fire when a migration renamed a panel column -- '
+        + 'either RENAME COLUMN is unhandled (the derivation kept the old name) or the anchor is not wired in')
+    } else if (!out.includes('disagrees with the live catalogue')) {
+      bad(id, `the run failed, but not via the derivation anchor: ${out.split('\n').find((l) => l.includes('FAIL')) || '(no FAIL line)'}`)
+    } else {
+      ok(id, 'a RENAME COLUMN in the corpus is followed by the derivation and reported by the live-catalogue anchor')
+    }
+  } finally {
+    try { unlinkSync(decoy) } catch { /* already gone */ }
+  }
+  if (existsSync(decoy)) bad(id, 'the disposable rename-probe migration was NOT removed')
+}
+
 // =====================================================================
 console.log('')
-console.log(`Anchors demonstrated failing closed: ${fired} / 8`)
+console.log(`Anchors demonstrated failing closed: ${fired} / 9`)
 if (failures > 0) {
   console.error(`\nP1-T05 anchor-existence proofs: ${failures} failure(s). `
     + 'A deleted function, file or object must never produce a vacuous PASS.')
   process.exitCode = 1
 } else {
-  console.log('\nP1-T05 anchor-existence proofs: 8 / 8 anchors fail closed; exact equality preserved throughout.')
+  console.log('\nP1-T05 anchor-existence proofs: 9 / 9 anchors fail closed; exact equality preserved throughout.')
 }

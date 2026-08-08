@@ -65,6 +65,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
+import { derivePanelColumns, assertPanelAnchor } from './od4-panel-guard.mjs'
 
 const ROOT = process.cwd()
 const CONTAINER = 'supabase_db_best-coach-mvp'
@@ -289,6 +290,28 @@ if (PANELS.length !== 4) {
 }
 const PANEL = PANELS[0]
 console.log(`Live panel columns: ${PANELS.join(', ')} -- violations are built from these, not from literals.`)
+
+// ---------------------------------------------------------------------
+// THE DERIVATION ANCHOR (od4-panel-guard.assertPanelAnchor).
+//
+// The static scanners cannot reach the database, so they derive the panel
+// set by replaying the migration TEXT. That derivation is unfalsifiable on
+// its own: a regex that silently stopped matching would yield a wrong set,
+// every consumer would scan for the wrong names, and every consumer would
+// report PASS.
+//
+// This is the ONE place in the suite that holds BOTH the text derivation
+// and the live catalogue, so it is where the two are compared. Without
+// this call `assertPanelAnchor` was an EXPORTED ORPHAN and the module's
+// own header claimed a cross-check that nothing performed -- the same
+// orphan defect the M14 review found in prove-v1-freeze.mjs.
+{
+  const problems = assertPanelAnchor(derivePanelColumns(MIG_DIR), PANELS)
+  for (const p of problems) bad('0/9 derivation-anchor', p)
+  if (problems.length === 0) {
+    console.log(`Derivation anchor: the migration-text replay agrees with the live catalogue (${PANELS.length} panels).`)
+  }
+}
 console.log('')
 
 // ---------------------------------------------------------------------

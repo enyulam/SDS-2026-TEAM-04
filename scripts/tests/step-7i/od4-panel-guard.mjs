@@ -39,9 +39,12 @@
 // control to be wrong in.
 //
 // THIS IS A TEXT DERIVATION, NOT A CATALOGUE READ, so it is checked
-// against the live catalogue by `assertPanelAnchor`, called from the
-// runtime carrier. If the two ever disagree, the derivation is wrong and
-// every consumer is told loudly instead of scanning for the wrong names.
+// against the live catalogue by `assertPanelAnchor`. That check runs in
+// `prove-od4-fail-open-controls.mjs`, which is the one place in the suite
+// holding BOTH the text derivation and a live connection, and which
+// `run-canonical.mjs` invokes. If the two ever disagree, the derivation is
+// wrong and every consumer is told loudly instead of quietly scanning for
+// names that no longer exist.
 // =====================================================================
 
 import { readFileSync, readdirSync } from 'node:fs'
@@ -141,7 +144,7 @@ export function deriveReportVersionColumns(migDir) {
       }
     }
 
-    // ALTER TABLE ... report_versions ... ADD/DROP COLUMN.
+    // ALTER TABLE ... report_versions ... ADD / DROP / RENAME COLUMN.
     // Matched per ALTER statement so a statement touching a DIFFERENT table
     // can never contribute a column here.
     const alters = sql.match(
@@ -155,6 +158,27 @@ export function deriveReportVersionColumns(migDir) {
       for (const m of stmt.matchAll(
         new RegExp(String.raw`\bDROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?${IDENT}`, 'gi'))) {
         drop(m[1].toLowerCase())
+      }
+      // RENAME COLUMN, handled IN PLACE so ordinal position is preserved.
+      //
+      // ⚠️ Added after this module's first draft omitted it, which was a
+      // FAIL-OPEN and not a cosmetic gap: OD-4 renamed four columns, so a
+      // future rename is the single most likely schema event here. Without
+      // this branch the derivation keeps the OLD name and never learns the
+      // new one, every consumer scans for a column that no longer exists,
+      // and the per-consumer anchors do NOT catch it -- the count is still
+      // four and none of the names is a SUPERSEDED one. It would be green
+      // and blind, which is the exact defect this module exists to end.
+      //
+      // `ALTER COLUMN ... SET/DROP ...` is deliberately NOT matched: it
+      // changes a property, not the column set.
+      for (const m of stmt.matchAll(
+        new RegExp(String.raw`\bRENAME\s+(?:COLUMN\s+)?${IDENT}\s+TO\s+${IDENT}`, 'gi'))) {
+        const from = m[1].toLowerCase()
+        const to = m[2].toLowerCase()
+        const i = cols.indexOf(from)
+        if (i >= 0) cols[i] = to
+        else add(to)
       }
     }
   }
