@@ -39,7 +39,7 @@ These documents govern this build. Read the specification and its ratified amend
 | **`FINAL_MVP_AUTHORITY_LOCK.md`** | **WHAT THE FINAL MVP MUST BE** — the canonical Final MVP baseline. Where any other workspace document disagrees on a Final-MVP-defining question, it governs — except where a higher authority is cited inline (the PDFs, the spec and its amendments, or an explicit operator ruling). **It records decisions; it creates no requirements of its own**, which is why it sits below the spec but above this file for those questions. |
 | **`FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`** | Operator ruling (§2.3 class) — the canonical four report panels and the Phase B migration register. |
 | `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md` · `FINAL_MVP_SUBMISSION_READINESS_PLAN.md` | Reconciliation and planning instruments. **Authorize nothing.** |
-| **`FINAL_MVP_EXECUTION_PLAN.md`** *(repository root — **does not exist yet**)* | **HOW THE PROJECT PLANS TO GET THERE.** When created, it is the canonical Final MVP execution plan. Until then the nearest thing is the **NOT AUTHORIZED** Phase B track table in the Phase A reconciliation §7. |
+| **`FINAL_MVP_EXECUTION_PLAN.md`** *(repository root)* | **HOW THE PROJECT PLANS TO GET THERE.** ✅ **CREATED 2026-08-08.** It is the canonical Final MVP execution plan — 11 phases, 98 tasks, its own operator-gate register, acceptance matrix, rollback register and external-input register. **It authorizes nothing**; every phase still needs its own explicit Operator authorization. ~~*(does not exist yet — when created, it is the canonical Final MVP execution plan. Until then the nearest thing is the **NOT AUTHORIZED** Phase B track table in the Phase A reconciliation §7.)*~~ The Phase A §7 track table is now **superseded** as the de-facto plan. |
 
 ✅ **REVERSED 2026-08-08 by the repository-boundary normalization.** ~~These four files are outside every git repository and are not recoverable by `git restore` or any commit. Treat every edit to them as unbackable.~~ **They are now inside this repository and are versioned like any other tracked file** — `git status` sees edits to them, commits checkpoint them, and `git restore` recovers them. The "unbackable edit" warning is **spent and must not be acted on**. The protection that survives is unchanged: **never delete, move, rename or archive one** (Authority Lock §31.12a).
 
@@ -787,7 +787,7 @@ Do not burn time re-proving an accepted gate without cause. Reuse accepted evide
 | Layer | Canonical file | Question it answers |
 |---|---|---|
 | **AUTHORITY** | **`FINAL_MVP_AUTHORITY_LOCK.md`** (repository root) + the operator-ruling instruments it indexes | **What the Final MVP must be** |
-| **EXECUTION PLAN** | **`FINAL_MVP_EXECUTION_PLAN.md`** (repository root) — **not yet created**; until it exists, the nearest thing is the **NOT AUTHORIZED** track table at Phase A reconciliation §7 | **How the project plans to get there** |
+| **EXECUTION PLAN** | **`FINAL_MVP_EXECUTION_PLAN.md`** (repository root) — ✅ **CREATED 2026-08-08**. ~~not yet created; until it exists, the nearest thing is the **NOT AUTHORIZED** track table at Phase A reconciliation §7~~ | **How the project plans to get there** |
 | **CURRENT STATUS** | **`docs/progress/STATUS.md`** | **Where execution is now** |
 | **HISTORICAL LOG** | **`docs/progress/BUILD_NOTES.md`** | **What actually happened** |
 

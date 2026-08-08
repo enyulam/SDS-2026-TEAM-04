@@ -1351,3 +1351,147 @@ Verified **read-only**: `core.longpaths` is **unset**, longest tracked path **11
 **Also noted, no action:** the run wrote 7 files as LF where they had been CRLF in the working tree. `core.autocrlf=true` normalizes on commit and the committed blobs are LF regardless, so this is invisible in `git diff` and harmless — but it means *comment-only* is exact for the **content** of those files, not for their working-tree **bytes**. The one byte-pinned path, `UI_PACK_MANIFEST.json`, was untouched and still matches its `.gitattributes` hash.
 
 **After remediation:** comment-only re-proved **11/11 code-identical** · `tsc` 0 · `lint` 0 · `build` 0 · `git diff --check` 0 · zero surviving stale-ladder text in any source file · `core.longpaths` still unset.
+
+---
+
+## 2026-08-08 — FINAL MVP EXECUTION PLAN CREATED — PLANNING ONLY, ZERO IMPLEMENTATION
+
+**Scope.** Create `FINAL_MVP_EXECUTION_PLAN.md` at the repository root: the single operational
+roadmap from the accepted pre-execution baseline through local implementation, governed local
+acceptance, hosted Supabase, Vercel, production UAT, human usability testing and submission
+preparation. **Planning only.** No implementation begun, no hosted service provisioned, no external
+AI invoked, nothing pushed. The plan **authorizes nothing** — every phase in it still requires its
+own explicit Operator authorization.
+
+**Track / workstream.** Governance/documentation — execution-plan authoring.
+**Branch / worktree.** `main`, single worktree. No worktree created or removed.
+
+**Baseline verified before writing** (directly against `git` and the filesystem, not restated):
+branch `main` · HEAD **`dff7a693a2e5c755bb6d809a3b158385f7397605`** · working tree **CLEAN**
+(`git status --porcelain -uall` empty) · **0 remotes** · **1 worktree** · **4 tags** ·
+12 migrations · 36 governed UI packs · 37 `/reference/` packs · zero attendance write functions ·
+zero admin `INSERT` in any migration. Frozen demo `8d4acf4a…` untouched and external.
+
+**Starting HEAD → ending HEAD.** `dff7a693…` → this entry's checkpoint commit.
+**Migration or schema changes.** **NONE.**
+**Environment / infrastructure changes.** **NONE.** Local Docker stack not started; no hosted
+resource contacted; no provider call made.
+
+### Method
+
+Six parallel **read-only** analysis agents digested the governance estate and the codebase
+(`CLAUDE.md` + Authority Lock; the OD-4 ruling cross-checked against source; the Phase A/A2
+instruments plus continuity records; the submission brief and readiness plan; a full technical
+implementation-surface audit; the UI authority estate). The Main Orchestrator wrote the plan and
+**independently verified every material claim at source** before recording it (§14.5). Several
+subagent claims were checked directly, and one later reviewer claim was rejected outright.
+
+### What the plan contains
+
+**11 phases · 98 actionable tasks.** Phase 0 execution baseline/lock · 1 OD-4 contract foundation ·
+2 backend governance completion · 3 final frontend reconstruction · 4 local integration/acceptance ·
+5 bounded real-provider re-proof (G-6) · 6 hosted Supabase · 7 Vercel · 8 production UAT ·
+9 human usability testing · 10 final submission.
+
+Each task carries: objective · authority · dependencies · files/systems · owner · steps · negative
+controls · acceptance · tests/proofs · commit checkpoint · rollback · operator gate · stop
+condition. Plus: a dependency map with named serialization points, a multi-agent/worktree policy, a
+24-row acceptance matrix (LOCAL/HOSTED/BOTH plus owning phase), a 30-row operator-gate register, a
+continuity/resume model, an 11-row rollback register, a 24-row external-input register, 22 critical
+product acceptance rules, and a Definition of Done that explicitly declares what is **out** of scope
+rather than omitting it.
+
+**Mandatory carry-forwards discharged:** the five Q-27 Parent Dashboard acceptance criteria
+(Authority Lock §15.2), split across **P3-T05a** (the projection-layer data boundary, owned by the
+Main Orchestrator on `main`) and **P3-T05** (the UI half, Track P/A); and the Windows
+`core.longpaths` clone prerequisite, recorded as an **environment** prerequisite, never as
+repository governance and never applied.
+
+### Adversarial review and remediation
+
+Two independent read-only reviewers, instructed to falsify — one product/governance/UI, one
+technical/security/execution. Between them: **6 CRITICAL, 15 HIGH** plus a MEDIUM/LOW tail. All
+Critical and High findings were verified at source before remediation; **every valid one was
+remediated.** The most consequential:
+
+- 🔴 The **Authority Lock was missing from the precedence ladder** — a fresh session would have
+  ranked `CLAUDE.md` above the canonical Final MVP baseline and above every operator ruling.
+- 🔴 **The entire management-administration and invitation write layer was unplanned.** Verified:
+  zero `INSERT INTO` for nine domain entities across all 12 migrations, all 29 RLS policies
+  `FOR SELECT`, zero DML policies. Three later tasks depended on paths that do not exist. Added as
+  **P2-T07a / P2-T07b** (A-024 steps 2–6 and 11), now on the critical path.
+- 🔴 **Three billable provider calls sat behind `Operator gate: NO`.** The deployed build has no
+  fixture path (gate G-19 — *"there is no switch to flip"*), so every hosted exercise of the AI
+  feature costs money. Added the **G-16b … G-16h** paid-gate series; the widest surface is
+  participant usability sessions.
+- 🔴 **P2-T10 restated the weaker property the current transport already has.** Lock §18.2.1a
+  requires the wrapper to **resolve the report's own trainer and refuse on mismatch**, not merely
+  accept a verified subject — and the plan had accepted the *narrowed* residual while specifying
+  only the un-narrowed control. Also added the explicitly-prohibited `GRANT … TO authenticated`
+  direction and the `NOBYPASSRLS` requirement.
+- 🔴 **Profile Details would have shipped a child's date of birth, contact details and a "Trainer
+  Assistant (TA)" field to a parent surface.** Lock §15's table records all three; §15.2 states
+  expressly that Q-27 does **not** resolve them, and pack 30 records no conflict for them — so the
+  Lock's table was the only carrier, and the plan had not carried it.
+- 🔴 **P0-T04 and P1-T02 self-authorized past §12 stop-and-asks** — bounded annotate-never-delete
+  needs a per-run instruction, and incrementing the content-hash envelope needs the OD-4 §5.1
+  ruling, which is recorded as open. Both are now gated (G-00a, G-05a).
+- 🟠 **Eight rollback citations were off by one** after the §11 table was renumbered — including
+  auth hardening pointing at the generated-types procedure. All re-mapped, and a register-integrity
+  check added.
+- 🟠 **Phase 3 ownership was not disjoint.** `report-panel-config.ts` (6 importers) and
+  `resource-state.ts` (15 importers) sat inside Track T's owned glob while all three tracks import
+  them; `proxy.ts` — layer 1 of 2 of server-side portal authorization — was never mentioned.
+  Ownership is now closed-world with an explicit frozen list and a relocation step at P3-T00.
+- 🟠 **Auth hardening was sequenced after bootstrap**, inverting Lock §17.6's requirement that
+  confirmations be enabled *before* any claim flow is designed (the A-027 pre-squat hazard).
+- 🟠 **The zero-EXECUTE assertion set is eight carriers across four identifier spellings**, not the
+  four then stated. Two hard-assert `IF v_n <> 4` and fail loudly; one is the only authoring-time
+  static scan that would catch a stray V2 grant in a new migration file.
+
+A **focused re-review** was then run over the remediated document. It found **no surviving
+Critical**, confirmed the substance of every remediation (including all five Q-27 criteria, the
+R-27 boundary, the 19/6 RPC split, and roughly thirty file:line citations with **zero** wrong), and
+identified **nine HIGH propagation gaps** — the remediations had fixed tasks without updating the
+cross-cutting registers (§5.2, §6.1, §6.2, §6.5, §6.6, §10, §12, §13). All nine were reconciled,
+along with the worthwhile MEDIUMs: gate-namespace collisions with Phase A gate IDs, the Lock §23.2
+(a)/(b)/(c) network-restriction record, attendance roster initialization (default-Present is
+delivered by session creation, not by the trainer's toggle), the GC-6/GC-7 pack-to-track
+attribution, and the `c2-static.mjs` **ordinal** pin that no count update would fix.
+
+**Operator decisions received during this window.** One — the instruction to create the plan, as a
+planning-only run.
+
+**Blockers opened or closed.** None opened, none closed. The standing implementation-time blockers
+(N-4 management bootstrap, the `docker exec` draft transport, the OD-4 fail-open deny-lists) are now
+each owned by a named task rather than only recorded.
+
+### Files changed
+
+- **`FINAL_MVP_EXECUTION_PLAN.md`** — **NEW.**
+- `CLAUDE.md` — **two rows only**, annotate-never-delete. §1's source table and §15.1's four-layer
+  table each asserted the execution plan *"does not exist yet"* and routed a fresh session to the
+  superseded Phase A §7 track table; left uncorrected they would have defeated the resume protocol
+  §15.3 defines. No other line touched.
+- `docs/progress/STATUS.md` — current-state block rows replaced (phase, current track, HEAD,
+  acceptance-gate state, next authorized action, outstanding decisions).
+- `docs/progress/BUILD_NOTES.md` — this entry.
+
+### Verification
+
+`git diff --check` clean; complete diff inspected. **Expected functional/code change: ZERO** — and
+confirmed: no application source, schema, migration, test, fixture or configuration file was
+modified. No `tsc`/`lint`/`build` run was required or performed, because nothing they cover changed.
+
+**Cleanup / rollback state.** No partial mutation. Nothing to roll back; the checkpoint commit is
+revertible in one operation.
+
+**Confirmed NOT done:** zero Phase B implementation · zero application behaviour change · zero
+schema/data change · zero migration · zero provider invocation · zero hosted Supabase action · zero
+Vercel deployment · zero GitHub remote or push · frozen demo untouched · PeakPalate untouched
+(`KEEP_IN_PLACE`) · no worktree created or removed · no tag created · no Operator Git configuration
+touched.
+
+**Next permitted action.** **Await Operator authorization of gate `G-00`** — entering Phase 0 of the
+execution plan (baseline verification, live-catalogue re-derivation, register reconciliation, and
+arming the long-lead recruitment and external-input gates). Phase 0 contains no product work.
