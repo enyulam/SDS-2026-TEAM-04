@@ -1369,7 +1369,7 @@ that authorization (§7.6-A).
   carriers under P0-T04's bounded instruction.~~ *(Treated identically to P1-T09, which gates the
   other open sub-ruling from the same OD-4 §5 — **and P1-T09 / G-06 remains genuinely OPEN**.)*
 - **Stop** — ~~No §5.1 ruling in hand;~~ **(the §5.1 ruling IS in hand — G-05a, 2026-08-08)** or any design element that would redefine V1 or grant a new
-  EXECUTE. ⚠️ **Also stop on the G-05a premise break:** the ruling assumed no local V1 row survives; **one does** (blocker **B-P0-2**), and it must be treated as present and **never silently relabelled or mutated**.
+  EXECUTE. ~~⚠️ **Also stop on the G-05a premise break:** the ruling assumed no local V1 row survives; **one does** (blocker **B-P0-2**), and it must be treated as present and **never silently relabelled or mutated**.~~ *(✅ **DISCHARGED 2026-08-09.** The premise break is closed: the Operator resolved **B-P0-2** by authorizing a fresh local reconstruction (**D-0C**), which was executed, and **`report_versions` = 0** is now measured live — **no local V1 row survives**. This Stop condition no longer applies. G-05a item 7's protection for a future **real production** V1 row is untouched and remains binding.)*
 
 ---
 

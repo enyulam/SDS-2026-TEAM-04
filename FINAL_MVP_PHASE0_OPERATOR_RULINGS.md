@@ -37,7 +37,7 @@ Both copies verified **SHA-identical** by `sha256sum -c`. A credential-pattern s
 
 **Repository-safe record of what was preserved.** Row counts: `reports` 1 · `report_versions` 1 · `report_version_ratings` 9 · `report_version_checklist_progress` 1 · `report_version_approvals` 0 · `audit_events` 5 · `audit_chain_heads` 1 · `audit_event_targets` 4 · `observations` 1 · `observation_ratings` 9. Report `57a26079-a1a9-45b6-9a71-5c6522a99387` at `draft_ready`, `lock_version` 4. Version `03e930d2-0102-4a9f-9682-1c127b6212cb`, `revision_number` 1, **`content_hash_version` = 1**, all four superseded panels populated. Created 2026-08-07 06:52:32 → 06:52:40 (+00). **Audit chain verification at capture: `ok = true`, `mode = complete`, `events_checked = 5`, `head_checked = true`, no failed check** — the residue is a coherent, verifiable chain, not corruption.
 
-### D-0B — Governed fixture reload: **BLOCKED — NOT EXECUTED. NEW OPERATOR DECISION REQUIRED.**
+### D-0B — Governed fixture reload: ~~**BLOCKED — NOT EXECUTED. NEW OPERATOR DECISION REQUIRED.**~~ **✅ DECISION RECEIVED 2026-08-09 — SUPERSEDED BY D-0C BELOW. The record of the block is preserved verbatim because it is the evidence that justified the remedy.**
 
 ⚠️ **The authorized remedy cannot be executed by anyone, on any terminal.** This was proved on a disposable clone of the canonical database (`CREATE DATABASE … TEMPLATE postgres`), never against canonical, and the canonical database was verified byte-for-byte unchanged afterwards.
 
@@ -74,7 +74,31 @@ ERROR:  audit append-only violation: DELETE on public.audit_event_targets is nev
 
 **Consequences held open, deliberately:** `report_versions` remains **1**; the four suites (`run-canonical`, `run-correction-tracking`, `prove-clock-hour-determinism`, `run-assessment`) remain **FAIL**; the Phase-0 baseline is **not green**; and per the Operator's own instruction *"Do not start Phase 1 if the baseline remains unexpectedly red"*, **Plan Phase 1 has not begun.**
 
+> ⚠️ **STALE AS OF 2026-08-09 — read the paragraph above as a snapshot of 2026-08-08, not as current state.** Superseded by **D-0C**: **`report_versions` = 0** (measured live), and the four suites are **`NOT-RUN`**, not `FAIL`. **`Plan Phase 1 has not begun` is the one clause still true.** *(Marked inline because the supersession notice on this section's heading is ~35 lines above, and this paragraph reads as a current-state claim on its own. The text itself is preserved verbatim — it is the evidence that justified the remedy.)*
+
 **Nothing was deleted, truncated, reset or worked around.** The probe database was dropped after use.
+
+### D-0C — Fresh local reconstruction: **RULED 2026-08-09, and EXECUTED**
+
+**The Operator resolved B-P0-2** in the message *"RESOLVE B-P0-2 BY RECREATING THE LOCAL SUPABASE BASELINE, THEN RESUME FINAL MVP EXECUTION."* The chosen remedy is **recreate the local Supabase database/stack from a fresh local baseline** — explicitly authorized as functionally destructive to the **LOCAL synthetic** database only, on eight stated grounds (synthetic data only · already preserved in both archives · preservation is exact and restorable · no hosted project · no production data · real child data prohibited · targeted cleanup blocked by FK + append-only guarantees · permanent preservation would wrongly force OD-4 to accommodate a one-off development artefact).
+
+**D-0's final disposition is therefore `PRESERVED_THEN_FRESH_LOCAL_RECONSTRUCTION`.**
+
+⚠️ **Boundary, as ruled.** The authorization reaches **only** the local Supabase development environment for this repository. It does **not** authorize hosted destruction, production reset, any hosted action, deletion of repository or migration files, rewriting applied migration history, deletion of the D-0A archive, destructive cleanup of the frozen demo or PeakPalate, or any generic future reset. **It is ONE bounded recovery authorization and must not be converted into a reusable cleanup command or a product feature.** `supabase db reset` remained prohibited and **was not used**.
+
+**Executed 2026-08-09** via the plan's ratified **R-1** semantics, after the seven-item pre-destruction gate passed in full:
+
+1. `supabase stop --project-id best-coach-mvp --no-backup` — removed the three project-scoped data volumes (`db`, `storage`, `edge_runtime`). **`--all` was never used**, and this was verified to be the only Supabase project on the machine.
+2. `supabase start` — fresh stack; **all 12 committed migrations applied from scratch in canonical order**, every in-migration posture assertion passing. Notably `20260806160000_competency_vocabulary_rename.sql`'s fail-closed guard proved `report_versions=0, report_version_ratings=0, observation_ratings=0` **in-transaction**.
+3. **No migration file was modified to make the fresh apply work.** None needed it.
+
+**Re-derived live catalogue (measured, not restated):** 12 migrations · 26 tables · 12 enums · 34 functions · 29 policies · 3 non-internal triggers · `report_status` exactly the eight ordered labels · `report_store_draft` proacl literally `{postgres=X/postgres}` · `authenticated` EXECUTE **25** · `service_role` EXECUTE **0** · `anon` EXECUTE **0** · deterministic seed intact (1 centre · 3 class grades · 9 assessment dimensions). **`report_versions` = 0**, and **all eleven report-family and audit tables are at 0** — no residual report lifecycle of any kind.
+
+**What the destruction actually cost, recorded honestly:** the three synthetic Auth identities (`management`/`trainer`/`parent`.`fixture@example.test`), the five audit events, and the preserved residue. Local Storage held **0 buckets and 0 objects**, so nothing was lost there. Every repository file — migrations, config, source, tests, fixtures — is untouched, as are both D-0A archives, the frozen demo and PeakPalate.
+
+**B1 and B2 are structurally gone**, proved rather than assumed: the fixture loader now runs its guards, captures the local connection and **passes the clean-load preflight** (*"no fixture Auth user and no fixture domain row exists"*) before halting at the interactive password prompt. Under D-0B it could never get past its **first** step.
+
+⚠️ **This does not by itself close Phase 0.** The governed fixture reload still requires the Operator to enter the three no-echo passwords at a real terminal, and the four formerly-red suites all clone the canonical **fixture** database, so they cannot be re-run until that happens. **`B-P0-1` and `B-P0-2` are therefore recorded `RESOLVED_PENDING_FIXTURE_RELOAD`, not `CLOSED`** — the Operator's own closeout conditions the closure on *"the fresh local baseline **and all four suites** … green"*, and a `PASS` is an evidence-backed result, never an assumption.
 
 ---
 
@@ -91,7 +115,9 @@ Ratified by the Operator. **This closes G-05a / P1-T02 for the current Final MVP
 7. **A future real production V1 row, if one ever exists, must not be silently relabelled or mutated.** That would require a separate migration decision.
 8. **`report_store_draft` keeps ZERO client `EXECUTE`** (R-27, unchanged).
 
-> ⚠️ **Recorded dependency, not a reopening.** Item 6's premise — *"the governed reload restores the local development database to the intended no-report-version state"* — **is currently false**, because D-0B is blocked above. The ruling itself is **unaffected in substance**: V1 stays frozen, V2 is parallel, and the constraint widens to `1 or 2`, which **already tolerates** a surviving V1 row. What is *not yet true* is the factual claim that no V1 row exists locally. Implementation at P1-T02/P1-T03 must therefore treat the local V1 row as **present unless and until D-0B is resolved**, and must **not** silently relabel or mutate it — item 7's protection is the governing rule for it. **No part of this ruling is weakened; only its stated precondition is pending.**
+> ✅ **PREMISE SATISFIED 2026-08-09 — this dependency is DISCHARGED.** The fresh local reconstruction (**D-0C**) restored the local development database to exactly the intended no-report-version state: **`report_versions` = 0**, measured live, with every report-family and audit table at 0. **No local V1 row survives**, so item 6's premise is now true as written and **no historical-row backmigration is required**. Item 7 is **unaffected and remains binding** for any future real production V1 row. Implementation at **P1-T02/P1-T03 must no longer treat a local V1 row as present** — the instruction to do so, struck below, was correct only while D-0B was blocked.
+>
+> ~~⚠️ **Recorded dependency, not a reopening.** Item 6's premise — *"the governed reload restores the local development database to the intended no-report-version state"* — **is currently false**, because D-0B is blocked above. The ruling itself is **unaffected in substance**: V1 stays frozen, V2 is parallel, and the constraint widens to `1 or 2`, which **already tolerates** a surviving V1 row. What is *not yet true* is the factual claim that no V1 row exists locally. Implementation at P1-T02/P1-T03 must therefore treat the local V1 row as **present unless and until D-0B is resolved**, and must **not** silently relabel or mutate it — item 7's protection is the governing rule for it. **No part of this ruling is weakened; only its stated precondition is pending.**~~ *(Struck 2026-08-09: the precondition is no longer pending. Preserved per annotate-never-delete because it accurately recorded the state between 2026-08-08 and the reconstruction.)*
 
 ---
 
@@ -217,7 +243,7 @@ The Operator **authorizes recruitment/outreach preparation and scheduling now**,
 
 The Operator explicitly authorized **PLAN PHASE 1 — OD-4 CONTRACT FOUNDATION** as the separate **OD-4 Phase-B authorization** the execution plan requires. **LOCAL ONLY.** It includes the G-05a V2 ruling above. **No real provider invocation is authorized.**
 
-⚠️ **The authorization is expressly conditioned on a clean Phase-0 exit** — *"Once Phase 0 exits cleanly"*, and *"Do not start Phase 1 if the baseline remains unexpectedly red."* **The baseline is red** (four suites, D-0B blocked). **Phase 1 has therefore NOT been started.** The authorization stands and takes effect once the D-0B decision is made and the baseline is green.
+⚠️ **The authorization is expressly conditioned on a clean Phase-0 exit** — *"Once Phase 0 exits cleanly"*, and *"Do not start Phase 1 if the baseline remains unexpectedly red."* ~~**The baseline is red** (four suites, D-0B blocked).~~ **Phase 1 has therefore NOT been started.** The authorization stands and takes effect once the D-0B decision is made and the baseline is green. *(Updated 2026-08-09: **the D-0B decision HAS been made and executed** — see **D-0C**. The structural block is gone and the schema baseline is green. What remains before Phase 1 may begin is **not a decision but an action only the Operator can perform**: entering the three interactive no-echo fixture passwords, after which the four suites can be re-run. **Phase 1 remains NOT started**, exactly as the Operator's condition requires.)*
 
 **G-06 / P1-T09 (grounding rule-4 re-derivation) remains a genuine, non-inheritable design-ratification gate** and must not be pre-decided.
 
