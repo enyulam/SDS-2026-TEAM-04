@@ -14,6 +14,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
+import { derivePanelColumns, SUPERSEDED_PANEL_COLUMNS } from '../step-7i/od4-panel-guard.mjs'
 
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
@@ -132,7 +133,23 @@ const bodyCode = code(body)
     if (cols.join(',') !== expected.join(',')) {
       fail('T-CT-S3', `the declared projection is [${cols.join(', ')}]`)
     }
-    const forbidden = ['todays_strength', 'next_focus', 'practice_suggestion', 'session_takeaway',
+    // 🔴 RE-DERIVED AT P1-T04, Q-7. The four SUPERSEDED panel names were
+    // hard-coded here. M13 renamed them, so this leg would have passed a
+    // projection that declared `overview` -- the precise leak it exists to
+    // prevent. The panel half is now derived from the migration corpus (the
+    // schema source of truth, ADR-8); the rest is this projection's own
+    // bounded vocabulary and is not panel-derived.
+    const panels = derivePanelColumns(MIG_DIR)
+    if (panels.length !== 4) {
+      fail('T-CT-S3', `the panel derivation produced ${panels.length} column(s) (${panels.join(', ') || 'none'}), `
+        + 'expected the four OD-4 panels -- this leg would scan for the wrong names')
+    }
+    for (const old of SUPERSEDED_PANEL_COLUMNS) {
+      if (panels.includes(old)) {
+        fail('T-CT-S3', `the derivation still yields the superseded panel column "${old}"`)
+      }
+    }
+    const forbidden = [...panels,
       'content_hash', 'wording_hash', 'revision', 'rating', 'checklist', 'approval',
       'attendance', 'evidence', 'notes', 'version_id', 'prompt', 'response', 'audit']
     for (const f of forbidden) {

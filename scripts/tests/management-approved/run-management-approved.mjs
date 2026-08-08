@@ -156,9 +156,40 @@ SELECT regexp_replace(p.prosrc, '--[^\\n]*', '', 'g')
  WHERE n.nspname = 'public' AND p.proname = '${FN}';`)
     const others = ['incomplete', 'observation_saved', 'drafting', 'draft_ready', 'needs_edit',
       'trainer_approved', 'approved'].filter((s) => body.includes(`'${s}'`))
-    const contentColumns = ['todays_strength', 'next_focus', 'practice_suggestion',
-      'session_takeaway', 'content_hash', 'wording_hash', 'revision_number']
-      .filter((c) => body.includes(c))
+
+    // 🔴 RE-DERIVED AT P1-T04, Q-7 -- and this site was the worst of the
+    // nine, because it does not merely fail to detect: it EMITS AN
+    // AFFIRMATIVELY FALSE PASS. It reads the LIVE `prosrc`, so after M13
+    // renamed the panels it went on reporting "reads no version-content
+    // column" while scanning for four column names that no longer exist
+    // anywhere in the database.
+    //
+    // This runner holds a live connection, so the set is read STRAIGHT FROM
+    // THE CATALOGUE rather than derived from text or hard-coded. A rename,
+    // an added panel or a dropped panel is picked up with no edit here.
+    const versionCols = (await q(CANONICAL, `
+SELECT string_agg(a.attname, ',' ORDER BY a.attnum)
+  FROM pg_catalog.pg_attribute a
+ WHERE a.attrelid = 'public.report_versions'::regclass
+   AND a.attnum > 0 AND NOT a.attisdropped
+   AND a.attname NOT IN ('id','report_id','centre_id','submitted_at',
+                         'submitted_by_membership_id','submitted_by_role',
+                         'created_at','updated_at');`)).split(',').filter(Boolean)
+
+    // ANCHOR (Q-26). An empty or tiny set means the catalogue query failed
+    // or the table was renamed, and every filter below would find nothing.
+    if (versionCols.length < 8) {
+      fail('MA-8', `the live version-content column set has only ${versionCols.length} entr(ies) `
+        + `(${versionCols.join(', ') || 'none'}) -- the catalogue read is broken and this control `
+        + 'would report a vacuous PASS')
+    }
+    for (const old of ['todays_strength', 'next_focus', 'practice_suggestion', 'session_takeaway']) {
+      if (versionCols.includes(old)) {
+        fail('MA-8', `the live catalogue still carries the superseded panel column "${old}"`)
+      }
+    }
+
+    const contentColumns = [...versionCols, 'wording_hash'].filter((c) => body.includes(c))
     if (!body.includes("r.status    = 'submitted'")) {
       fail('MA-8', 'the applied body does not restrict rows to status = submitted')
     } else if (others.length > 0) {

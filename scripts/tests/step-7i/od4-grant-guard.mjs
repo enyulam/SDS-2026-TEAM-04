@@ -264,9 +264,25 @@ export function assertAnchors(serializers, expectedCount) {
     )
     return problems
   }
-  for (const required of ['report_content_hash_v1', 'report_wording_hash_v1']) {
+  // 🔴 CLOSED AT P1-T05 -- the RENAME VACUITY this module's own header
+  // recorded as open ("RE-PIN ... that is P1-T05 and must not be deferred
+  // past it").
+  //
+  // Only the two V1 names were required here, so the count check was the
+  // sole thing standing behind V2. A count check cannot see a RENAME: a V2
+  // serializer renamed to report_content_hash_v3 still matches the
+  // discovery regex, still counts 4, and passes silently -- while every
+  // downstream assertion that names V2 by its old name goes vacuous. That
+  // is the identical failure class as the nine OD-4 deny-lists.
+  //
+  // All FOUR are now named. A rename now fails LOUDLY here, naming the
+  // missing serializer, instead of being absorbed by an unchanged total.
+  for (const required of ['report_content_hash_v1', 'report_wording_hash_v1',
+                          'report_content_hash_v2', 'report_wording_hash_v2']) {
     if (!serializers.includes(required)) {
-      problems.push(`${required} was not found in any migration; it is ratified historical and must exist`)
+      problems.push(`${required} was not found in any migration. V1 is ratified historical and frozen `
+        + '(G-05a items 1-2); V2 is the native OD-4 envelope every current version-creating path '
+        + 'depends on. A rename keeps the COUNT at four and would otherwise pass silently.')
     }
   }
   if (serializers.length !== expectedCount) {

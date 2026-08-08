@@ -109,6 +109,41 @@ async function main() {
     fail('the V1 serializer freeze proof failed')
   }
 
+  // 1d -- P1-T04: the NINE fail-open OD-4 controls, each proven capable of
+  // FIRING.
+  //
+  // Wired in here for the same reason 1b and 1c are. Nine controls named the
+  // four superseded panel columns literally and went vacuous the moment M13
+  // renamed them -- one of them emitting an affirmatively FALSE PASS. Fixing
+  // the names without proving each control can still fire would leave the
+  // project in exactly the state it was already in: green, and blind.
+  //
+  // This proof mutates files and plants function bodies. It restores both
+  // and VERIFIES the restoration (git for files, a prosrc digest for the
+  // database), so a run that leaves residue fails rather than poisoning the
+  // suites below it. It therefore runs BEFORE the canonical lifecycle suite,
+  // so any residue it did leave would be caught immediately by that suite
+  // rather than at some later checkpoint.
+  const failOpen = await run(process.execPath,
+    [join(ROOT, 'scripts', 'tests', 'step-7i', 'prove-od4-fail-open-controls.mjs')])
+  process.stdout.write(failOpen.out)
+  if (failOpen.code !== 0) {
+    process.stderr.write(failOpen.err)
+    fail('the nine OD-4 fail-open control firing proofs failed')
+  }
+
+  // 1e -- P1-T05: ANCHOR EXISTENCE. Every control above answers "is there a
+  // violation?"; these answer "would you notice if the SUBJECT vanished?".
+  // Five legs of T7I-39 were LIKE-shaped, and SQL three-valued logic made a
+  // deleted function indistinguishable from a clean one.
+  const anchors = await run(process.execPath,
+    [join(ROOT, 'scripts', 'tests', 'step-7i', 'prove-od4-anchor-existence.mjs')])
+  process.stdout.write(anchors.out)
+  if (anchors.code !== 0) {
+    process.stderr.write(anchors.err)
+    fail('the anchor-existence proofs failed')
+  }
+
   // 2 -- the lifecycle suite, twice (T7I-31)
   const a = await psqlFile(SUITE)
   if (a.code !== 0) { process.stderr.write(a.err); fail('canonical suite run 1 failed'); return }

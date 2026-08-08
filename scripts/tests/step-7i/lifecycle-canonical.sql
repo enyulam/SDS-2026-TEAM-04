@@ -223,7 +223,7 @@ COMMIT;
 -- T7I-73 Enum label position and the applied-migration count
 -- T7I-42 No evidence representation
 DO $t$
-DECLARE v_n bigint; v_labels text[];
+DECLARE v_n bigint; v_labels text[]; v_panels text[]; v_fn text;
 BEGIN
   -- (Reconciled at Backend Round B2: the assessment migration is the sixth
   -- ledger row. Reconciled again at Round B2.1: the correction-tracking
@@ -371,6 +371,112 @@ BEGIN
   IF v_n <> 1 THEN
     RAISE EXCEPTION 'FAIL T7I-OD4-ENVELOPE: report_reopen_submitted no longer propagates v_src.content_hash_version (G-05a item 7)';
   END IF;
+
+  -- ---------------------------------------------------------------------
+  -- T7I-OD4-BOUNDED (P1-T04) -- the three BOUNDED GOVERNED PROJECTIONS
+  -- expose and read no report-version narrative panel.
+  --
+  -- WHY THIS BLOCK EXISTS. Four of the nine fail-open OD-4 controls live
+  -- INSIDE ALREADY-APPLIED MIGRATIONS: assertion M6 in
+  -- 20260806103000_management_correction_tracking.sql, X5 in
+  -- 20260806190000_report_context_resolver.sql, and S6 and S8 in
+  -- 20260807113000_management_submitted_list.sql. Each hard-codes the four
+  -- SUPERSEDED panel names, so each has detected nothing since M13.
+  --
+  -- THEY ARE NOT EDITED, AND MUST NOT BE. An applied migration's assertion
+  -- is a POINT-IN-TIME PROOF of the catalogue as it stood when that
+  -- migration ran; teaching it about a column that did not yet exist would
+  -- be false history, would break the fresh-apply proof, and is refused by
+  -- ct-static.mjs and c3-static.mjs with the literal message "an applied
+  -- migration must never be edited". Their inability to mention a future
+  -- object is CORRECT, not a gap.
+  --
+  -- So the CURRENT protection lives here, in the reusable carrier, and is
+  -- CATALOGUE-DERIVED (Q-7): the panel set is read from
+  -- public.report_versions, never enumerated, so it follows the next rename
+  -- with no edit. Each leg also asserts its ANCHOR EXISTS (Q-26), because
+  -- every one of these is a "count of violations = 0" shape that a deleted
+  -- or renamed function would satisfy vacuously.
+  -- ---------------------------------------------------------------------
+  SELECT pg_catalog.array_agg(a.attname ORDER BY a.attnum) INTO v_panels
+    FROM pg_catalog.pg_attribute a
+   WHERE a.attrelid = 'public.report_versions'::regclass
+     AND a.attnum > 0 AND NOT a.attisdropped
+     AND a.attname NOT IN ('id','report_id','centre_id','revision_number',
+                           'authored_by_membership_id','authored_by_role',
+                           'derived_from_version_id','submitted_at',
+                           'submitted_by_membership_id','submitted_by_role',
+                           'created_at','updated_at','content_hash',
+                           'content_hash_version','trainer_approved_source_version_id');
+
+  IF v_panels IS NULL OR pg_catalog.array_length(v_panels, 1) <> 4 THEN
+    RAISE EXCEPTION
+      'FAIL T7I-OD4-BOUNDED: the panel derivation produced %, expected exactly the four OD-4 panels. '
+      'Every leg below would otherwise scan an empty set and pass vacuously.',
+      COALESCE(v_panels::text, 'NULL');
+  END IF;
+  IF v_panels && ARRAY['todays_strength','next_focus','practice_suggestion','session_takeaway'] THEN
+    RAISE EXCEPTION 'FAIL T7I-OD4-BOUNDED: a superseded panel column still exists in report_versions: %', v_panels;
+  END IF;
+
+  FOREACH v_fn IN ARRAY ARRAY['report_list_management_corrections',
+                              'report_resolve_context',
+                              'report_list_management_submitted'] LOOP
+    -- ANCHOR: the governed boundary must EXIST. A deleted function makes
+    -- every projection and body check below trivially true.
+    SELECT pg_catalog.count(*) INTO v_n
+      FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+     WHERE n.nspname='public' AND p.proname=v_fn;
+    IF v_n <> 1 THEN
+      RAISE EXCEPTION
+        'FAIL T7I-OD4-BOUNDED: % resolves to % function(s), expected exactly 1 -- a deleted or '
+        'overloaded governed boundary must never produce a vacuous PASS', v_fn, v_n;
+    END IF;
+
+    -- (a) DECLARED PROJECTION carries no panel column. This is the current
+    --     replacement for M6 and S6.
+    SELECT pg_catalog.count(*) INTO v_n
+      FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+      CROSS JOIN LATERAL pg_catalog.unnest(COALESCE(p.proargnames, ARRAY[]::text[])) AS c(x)
+     WHERE n.nspname='public' AND p.proname=v_fn
+       AND c.x = ANY (v_panels);
+    IF v_n <> 0 THEN
+      RAISE EXCEPTION
+        'FAIL T7I-OD4-BOUNDED: % declares % report-version narrative panel column(s) in its '
+        'projection -- report content must never reach a bounded queue or resolver', v_fn, v_n;
+    END IF;
+
+    -- (b) BODY reads no panel column. This is the current replacement for
+    --     X5 and S8. Comments are stripped first: these bodies discuss the
+    --     rule in prose, and a prose mention is not a read.
+    SELECT pg_catalog.count(*) INTO v_n
+      FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+      CROSS JOIN LATERAL pg_catalog.unnest(v_panels) AS c(x)
+     WHERE n.nspname='public' AND p.proname=v_fn
+       AND pg_catalog.regexp_replace(p.prosrc, '--[^' || pg_catalog.chr(10) || ']*', '', 'g')
+           ~ ('\m' || c.x || '\M');
+    IF v_n <> 0 THEN
+      RAISE EXCEPTION
+        'FAIL T7I-OD4-BOUNDED: %''s applied body reads % narrative panel column(s)', v_fn, v_n;
+    END IF;
+
+    -- (c) BODY touches no version-content, assessment, attendance or audit
+    --     object. S8's non-panel half, re-expressed against the CURRENT
+    --     body rather than the body as it stood in 2026-08-07.
+    SELECT pg_catalog.count(*) INTO v_n
+      FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+     WHERE n.nspname='public' AND p.proname=v_fn
+       AND pg_catalog.regexp_replace(p.prosrc, '--[^' || pg_catalog.chr(10) || ']*', '', 'g') ~
+           ('(content_hash|wording_hash|public\.report_version_ratings'
+            '|public\.report_version_checklist_progress|public\.report_version_approvals'
+            '|public\.observations|public\.observation_ratings|public\.attendance'
+            '|audit_append_event|public\.audit_)');
+    IF v_n <> 0 THEN
+      RAISE EXCEPTION
+        'FAIL T7I-OD4-BOUNDED: %''s applied body reads a version-content, assessment, attendance '
+        'or audit object', v_fn;
+    END IF;
+  END LOOP;
 
   -- T7I-42: no evidence representation beyond the pre-existing checklist
   -- attestation names, and exactly the eight report_status labels.
@@ -564,8 +670,39 @@ END $t$;
 -- T7I-39  Return shapes pinned FROM THE CATALOGUE, not from a sample row --
 --         an all-NULL sample cannot prove a column absent.
 DO $t$
-DECLARE v_res text;
+DECLARE v_res text; v_fn text; v_n bigint;
 BEGIN
+  -- ---------------------------------------------------------------------
+  -- P1-T05 ANCHOR EXISTENCE (Q-26: "negative controls must assert their
+  -- anchor exists and fail closed; never a vacuous PASS").
+  --
+  -- The exact-equality legs below already fail closed: `IS DISTINCT FROM`
+  -- treats a NULL from a missing function as a mismatch and raises. But
+  -- FIVE of this block's legs are `LIKE`-shaped, and SQL three-valued logic
+  -- makes those SILENTLY VACUOUS -- `NULL LIKE '%x%'` is NULL, `IF NULL`
+  -- does not branch, so DELETING report_get_management_review or
+  -- report_get_working made every one of their leak checks pass while
+  -- proving nothing. A deleted function must never be indistinguishable
+  -- from a clean one.
+  --
+  -- Asserted here ONCE, up front, so no leg below can be reached with a
+  -- NULL in hand. Exactly one match is required: an overload would make
+  -- pg_get_function_result ambiguous and the equality legs would compare
+  -- against an arbitrary one of them.
+  -- ---------------------------------------------------------------------
+  FOREACH v_fn IN ARRAY ARRAY['report_get_canonical', 'report_get_management_review',
+                              'report_get_working', 'report_management_edit_wording'] LOOP
+    SELECT pg_catalog.count(*) INTO v_n
+      FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+     WHERE n.nspname='public' AND p.proname=v_fn;
+    IF v_n <> 1 THEN
+      RAISE EXCEPTION
+        'FAIL T7I-39/T7I-51 ANCHOR: % resolves to % function(s) in public, expected exactly 1. '
+        'A deleted or renamed governed read boundary must FAIL CLOSED, never report a vacuous PASS.',
+        v_fn, v_n;
+    END IF;
+  END LOOP;
+
   SELECT pg_catalog.pg_get_function_result(p.oid) INTO v_res
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public' AND p.proname='report_get_canonical';

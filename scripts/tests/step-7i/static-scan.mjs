@@ -16,6 +16,8 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { discoverSerializers, assertAnchors, guardedFunctions, findForbiddenGrants,
   findMissingRevokes, EXPECTED_SERIALIZERS } from './od4-grant-guard.mjs'
+import { derivePanelColumns, deriveImmutableVersionColumns,
+  SUPERSEDED_PANEL_COLUMNS } from './od4-panel-guard.mjs'
 
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
@@ -271,13 +273,43 @@ const body2 = stripComments(file2)
 }
 
 // ---------------------------------------------------------------------
-// Extract each CREATE FUNCTION body once, for the body-level scans below.
+// Extract each function's CURRENT body once, for the body-level scans
+// below.
 // ---------------------------------------------------------------------
+// 🔴 REBUILT AT P1-T04. This map was previously derived from `body2` --
+// `20260805090500_step_7i_report_lifecycle.sql` ALONE -- so every
+// body-level leg below asserted properties of SUPERSEDED text. M13
+// replaced ELEVEN function bodies and M14 a twelfth; a guard that reads
+// only the original file cannot see what the database actually runs, and
+// would keep reporting PASS however the current body changed. Adversarial
+// review found this at P1-T03 (finding 5) and registered it here.
+//
+// The corpus is now replayed in LEDGER ORDER and a later definition
+// OVERWRITES an earlier one, so what is scanned is what is applied. Both
+// authoring styles are handled: `CREATE FUNCTION` with an `AS $fn$` body
+// (Step 7E-7I) and `CREATE OR REPLACE FUNCTION` with `AS $function$`
+// (M13/M14). Keying on one tag was itself a silent-miss risk -- the
+// eleven M13 bodies use the other one.
 const fnBodies = new Map()
 {
-  const re = /^CREATE FUNCTION public\.([a-z0-9_]+)\(([\s\S]*?)^\$fn\$;/gm
-  let m
-  while ((m = re.exec(body2)) !== null) fnBodies.set(m[1], m[0])
+  const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
+  const re = /^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z0-9_]+)\s*\(/gm
+  for (const f of files) {
+    const src = readFileSync(join(MIG_DIR, f), 'utf8')
+    let m
+    re.lastIndex = 0
+    while ((m = re.exec(src)) !== null) {
+      // Find this definition's body tag, then its matching terminator, so a
+      // `$fn$` appearing inside a `$function$` body cannot end it early.
+      const tagMatch = /\bAS\s+(\$[a-z_]*\$)/i.exec(src.slice(m.index))
+      if (!tagMatch) continue
+      const tag = tagMatch[1]
+      const bodyStart = m.index + tagMatch.index + tagMatch[0].length
+      const end = src.indexOf(tag, bodyStart)
+      if (end < 0) continue
+      fnBodies.set(m[1], src.slice(m.index, end + tag.length + 1))
+    }
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -337,16 +369,55 @@ const fnBodies = new Map()
 // ---------------------------------------------------------------------
 {
   const before = failures
-  const forbiddenCols = ['todays_strength', 'next_focus', 'practice_suggestion', 'session_takeaway',
-                         'content_hash', 'content_hash_version', 'revision_number',
-                         'derived_from_version_id', 'trainer_approved_source_version_id',
-                         'authored_by_membership_id', 'authored_by_role']
+
+  // 🔴 RE-DERIVED AT P1-T04, Q-7 ("catalog-derived detection preferred").
+  //
+  // This list used to name the four SUPERSEDED panel columns literally. M13
+  // renamed them, and the assertion then passed green while detecting
+  // nothing: `UPDATE public.report_versions SET overview = ...` was invisible
+  // to it. The list also had to be maintained by hand, so it could only ever
+  // cover columns that existed when it was written.
+  //
+  // The set is now derived by SUBTRACTION from the corpus: every current
+  // report_versions column EXCEPT T11's write-once submission metadata and
+  // updated_at. That is strictly stronger than the eleven names it replaces
+  // -- it covers content_hash_version and trainer_approved_source_version_id
+  // for the same reason it covers a column added tomorrow -- and it survives
+  // the NEXT rename without an edit.
+  const forbiddenCols = deriveImmutableVersionColumns(MIG_DIR)
+
+  // ANCHOR (Q-26). A derivation that silently matched nothing would make
+  // this leg scan for zero columns and report PASS.
+  if (forbiddenCols.length < 12) {
+    fail('T7I-18', `the immutable-column derivation produced only ${forbiddenCols.length} column(s) `
+      + `(${forbiddenCols.join(', ') || 'none'}) -- report_versions has far more than that, so the `
+      + 'derivation is broken and this leg would pass vacuously')
+  }
+  for (const old of SUPERSEDED_PANEL_COLUMNS) {
+    if (forbiddenCols.includes(old)) {
+      fail('T7I-18', `the derivation still yields the superseded panel column "${old}" -- the corpus `
+        + 'replay is reading pre-OD-4 DDL as current')
+    }
+  }
+
   for (const [name, raw] of fnBodies) {
     const fn = stripComments(raw)
     const updates = [...fn.matchAll(/UPDATE\s+public\.report_versions[\s\S]*?(?=;)/gi)].map((m) => m[0])
     for (const u of updates) {
+      // Scan the SET CLAUSE ONLY. Scanning the whole statement conflates an
+      // assignment with a WHERE predicate: the governed submission write
+      // legitimately reads `WHERE rv.id = v_cand.id`, which a whole-statement
+      // `\bid\s*=` match reports as "UPDATEs report_versions.id".
+      //
+      // The old eleven-name literal list masked this -- it happened to omit
+      // every column that appears in a predicate. Deriving the set properly
+      // exposed the imprecision, so the matcher is now correct rather than
+      // accidentally quiet. It is also STRICTER: a forbidden column assigned
+      // in the SET clause is caught even when the same name appears in the
+      // WHERE clause too.
+      const setClause = (/\bSET\b([\s\S]*?)(?:\bWHERE\b|$)/i.exec(u) || [, ''])[1]
       for (const col of forbiddenCols) {
-        if (new RegExp(`\\b${col}\\s*=`).test(u)) {
+        if (new RegExp(`\\b${col}\\s*=`).test(setClause)) {
           fail('T7I-18', `${name} UPDATEs report_versions.${col} after INSERT`)
         }
       }
@@ -409,7 +480,26 @@ const fnBodies = new Map()
   const LABELS = new Set(['Report', 'Report version', 'Student', 'Class session',
                           'Observation', 'Correction request'])
   let sites = 0
+
+  // SCOPE: audit CALL SITES, never the audit IMPLEMENTATION.
+  //
+  // T7I-62's rule is that a governed RPC labels its audit targets from a
+  // fixed generic vocabulary. `audit_append_event` and its siblings are the
+  // CALLEE that defines the event schema: their bodies name `target_type`
+  // and `payload_canonical` as JSONB KEYS, not as labels, so asserting the
+  // label vocabulary against them is a category error and reports three
+  // findings that are not defects.
+  //
+  // Before P1-T04 this leg read only the Step 7I file, so the audit
+  // implementation was out of scope by ACCIDENT. Now that the corpus is
+  // complete the exclusion has to be STATED -- and it is anchored below, so
+  // excluding too much cannot quietly empty the scan.
+  const IMPLEMENTATION = /^audit_/
+  let callSiteFns = 0
+
   for (const [name, raw] of fnBodies) {
+    if (IMPLEMENTATION.test(name)) continue
+    callSiteFns += 1
     const fn = stripComments(raw)
     for (const m of fn.matchAll(/'target_label',\s*'([^']*)'/g)) {
       sites += 1
@@ -430,7 +520,11 @@ const fnBodies = new Map()
     }
   }
   if (sites === 0) fail('T7I-62', 'no audit target labels were found to scan')
-  if (failures === before) pass('T7I-62', `${sites} audit label sites, all generic constants; no reason text reaches an append`)
+  if (callSiteFns < 20) {
+    fail('T7I-62', `only ${callSiteFns} non-audit function bodies were in scope -- the implementation `
+      + 'exclusion is over-broad and this leg is scanning a fraction of the corpus')
+  }
+  if (failures === before) pass('T7I-62', `${sites} audit label sites across ${callSiteFns} call-site function bodies, all generic constants; no reason text reaches an append`)
 }
 
 // ---------------------------------------------------------------------
@@ -513,8 +607,13 @@ const fnBodies = new Map()
     //     parameter is the governed report identifier.
     const sig = /CREATE FUNCTION public\.report_resolve_context\(\s*p_report_id uuid\s*\)\s*RETURNS TABLE \(\s*class_session_id uuid,\s*student_id\s+uuid\s*\)/m.test(src)
     if (!sig) fail('T7I-R22', 'the resolver signature is not (p_report_id uuid) -> TABLE(class_session_id uuid, student_id uuid)')
-    for (const forbiddenCol of ['todays_strength', 'next_focus', 'practice_suggestion',
-                                'session_takeaway', 'content_hash', 'wording_hash',
+    // 🔴 RE-DERIVED AT P1-T04. The four superseded panel names were hard-coded
+    // here and went vacuous at the M13 rename: a resolver that projected
+    // `overview` would have passed. The panel half is now derived from the
+    // corpus; the non-panel half is the resolver's OWN bounded contract
+    // (hashes, revision, lock, centre) and is genuinely fixed vocabulary
+    // rather than a copy of the panel list.
+    for (const forbiddenCol of [...derivePanelColumns(MIG_DIR), 'content_hash', 'wording_hash',
                                 'revision_number', 'lock_version', 'centre_id']) {
       const body = src.slice(src.indexOf('CREATE FUNCTION public.report_resolve_context'))
       const header = body.slice(0, body.indexOf('AS $fn$'))

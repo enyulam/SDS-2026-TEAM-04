@@ -173,15 +173,55 @@ END $t$;
 DO $t$
 DECLARE
   v_cols text[];
-  v_forbidden CONSTANT text[] := ARRAY[
-    'overview','strengths','areas_for_development','remarks',
+  v_panels text[];
+  -- The non-panel half: this projection's OWN bounded vocabulary. Fixed
+  -- terms, not a copy of the panel list, so it is enumerated here.
+  v_forbidden text[] := ARRAY[
     'content_hash','wording_hash','revision','rating','checklist','approval',
     'attendance','evidence','notes','version_id','prompt','response','audit'];
   v_name text;
 BEGIN
+  -- 🔴 MADE CATALOGUE-DERIVED AT P1-T04 (Q-7). The four panel names were
+  -- written as literals. They were CURRENT literals -- M13 updated them --
+  -- but a hand-maintained list re-creates the identical fail-open at the
+  -- NEXT rename, which is exactly how the other eight sites went vacuous.
+  -- The panel half is now read from public.report_versions itself, so this
+  -- control follows any future rename with no edit.
+  SELECT pg_catalog.array_agg(a.attname ORDER BY a.attnum) INTO v_panels
+    FROM pg_catalog.pg_attribute a
+   WHERE a.attrelid = 'public.report_versions'::regclass
+     AND a.attnum > 0 AND NOT a.attisdropped
+     AND a.attname NOT IN ('id','report_id','centre_id','revision_number',
+                           'authored_by_membership_id','authored_by_role',
+                           'derived_from_version_id','submitted_at',
+                           'submitted_by_membership_id','submitted_by_role',
+                           'created_at','updated_at','content_hash',
+                           'content_hash_version','trainer_approved_source_version_id');
+
+  -- ANCHOR (Q-26): a derivation that returned nothing would make every
+  -- forbidden-field check below scan an empty set and PASS vacuously.
+  IF v_panels IS NULL OR pg_catalog.array_length(v_panels, 1) <> 4 THEN
+    RAISE EXCEPTION
+      'FAIL T-CT-13: the panel derivation produced %, expected exactly the four OD-4 panels -- '
+      'either a panel moved or a new structural column is being misread as a panel',
+      COALESCE(v_panels::text, 'NULL');
+  END IF;
+  IF v_panels && ARRAY['todays_strength','next_focus','practice_suggestion','session_takeaway'] THEN
+    RAISE EXCEPTION 'FAIL T-CT-13: a superseded panel column still exists in report_versions: %', v_panels;
+  END IF;
+  v_forbidden := v_panels || v_forbidden;
+
   SELECT p.proargnames INTO v_cols
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname='public' AND p.proname='report_list_management_corrections';
+
+  -- ANCHOR: a MISSING function yields NULL proargnames, and every check
+  -- below would then be vacuous. A deleted governed boundary must FAIL.
+  IF v_cols IS NULL THEN
+    RAISE EXCEPTION
+      'FAIL T-CT-13: report_list_management_corrections does not exist or declares no named '
+      'columns -- a deleted boundary must never produce a vacuous PASS';
+  END IF;
 
   IF v_cols IS DISTINCT FROM ARRAY[
        'report_id','student_id','student_display_name','class_session_id',
