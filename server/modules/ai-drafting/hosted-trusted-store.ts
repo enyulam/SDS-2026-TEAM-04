@@ -66,6 +66,7 @@ import "server-only";
  */
 
 import postgres from "postgres";
+import { emitDraftDiagnostic } from "@/server/modules/ai-drafting/draft-diagnostics";
 import type {
   StoreDraftRequest,
   StoreDraftResult,
@@ -81,6 +82,70 @@ export const HOSTED_DB_URL_VAR = "SUPABASE_DB_POOLED_URL" as const;
 
 /** SQLSTATE used when the channel itself failed rather than the RPC. */
 const CHANNEL_FAILURE = "XXCHN";
+
+/**
+ * Describe a store failure WITHOUT ever emitting the credential.
+ *
+ * The connection string embeds the database password, so nothing derived from
+ * it may be surfaced. The guard is EXACT CONTAINMENT against the live value —
+ * the same discipline the fixture loader's error renderer uses — not a regex
+ * that hopes to recognise a secret's shape.
+ *
+ * The fields chosen are PostgreSQL's own structured error fields plus the
+ * driver's socket-level ones. `detail` is deliberately EXCLUDED: it echoes row
+ * values, which on this path can include a student's name.
+ */
+function describeStoreError(error: unknown): string[] {
+  const e = (error ?? {}) as Record<string, unknown>;
+  const secret = process.env[HOSTED_DB_URL_VAR];
+  const safe = (v: unknown): string | null => {
+    if (v === undefined || v === null) return null;
+    const s = String(v);
+    if (typeof secret === "string" && secret.trim() !== "" && s.includes(secret.trim())) {
+      return "[redacted: contained the connection string]";
+    }
+    return s;
+  };
+  const parts: string[] = [];
+  for (const key of ["name", "code", "errno", "syscall", "severity", "routine", "constraint_name", "schema_name", "table_name", "where", "hint", "message"]) {
+    const v = safe(e[key]);
+    if (v !== null && v !== "") parts.push(`${key}=${v}`);
+  }
+  return parts.length > 0 ? parts : ["(the thrown value carried no readable fields)"];
+}
+
+/**
+ * READ-ONLY connectivity and privilege probe — NO write, NO provider call.
+ *
+ * It answers the two untested candidates directly from wherever it runs:
+ * whether the pooled connection is reachable at all, and what role the
+ * connection string actually carries versus what `report_store_draft`
+ * requires. It executes no RPC and mutates nothing.
+ */
+export async function probeTrustedStoreConnection(): Promise<Record<string, unknown>> {
+  let sql: postgres.Sql;
+  try {
+    sql = connection();
+  } catch (error: unknown) {
+    return { reachable: false, stage: "configuration", detail: describeStoreError(error) };
+  }
+  try {
+    const rows = await sql`
+      SELECT current_user::text                                            AS current_user_name,
+             session_user::text                                            AS session_user_name,
+             pg_catalog.has_function_privilege(
+               current_user,
+               'public.report_store_draft(uuid,integer,integer,text,text,text,text)',
+               'EXECUTE')                                                  AS can_execute_store_draft,
+             pg_catalog.has_function_privilege(
+               current_user,
+               'public.report_store_source_map(uuid,jsonb)',
+               'EXECUTE')                                                  AS can_execute_source_map`;
+    return { reachable: true, stage: "connected", ...(rows[0] ?? {}) };
+  } catch (error: unknown) {
+    return { reachable: false, stage: "query", detail: describeStoreError(error) };
+  }
+}
 
 /**
  * Lazily created, then reused across warm invocations. A serverless instance
@@ -179,8 +244,22 @@ export class HostedTrustedDraftStore implements TrustedDraftStore {
         };
       });
     } catch (error: unknown) {
-      // SQLSTATE only. The error's message could carry query text or
-      // connection detail and is never surfaced.
+      // ⚠️ SIXTH INSTANCE OF THE INVISIBLE-CAUSE PATTERN. This catch collapsed
+      // every possible failure — unreachable pooler, wrong role, missing
+      // EXECUTE, RPC raise, rolled-back source map — into ONE opaque
+      // `XXCHN`, and the caller turned that into "The operation could not be
+      // completed." A real accepted draft was generated, paid for, and lost
+      // with no record of why.
+      //
+      // The RETURNED shape is unchanged (sqlState only), so no caller
+      // behaviour moves. The diagnostic is a SIDE CHANNEL.
+      emitDraftDiagnostic({
+        reportId: request.reportId,
+        attempt: 0,
+        maxAttempts: 0,
+        result: "store_failed",
+        reasons: describeStoreError(error),
+      });
       const code = (error as { code?: unknown } | null)?.code;
       return {
         ok: false,

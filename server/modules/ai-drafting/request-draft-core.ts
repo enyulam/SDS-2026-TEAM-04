@@ -322,6 +322,18 @@ export async function requestDraftCore(
     remarks: panels.remarks,
     sourceMapJson,
   });
+  // The store step's outcome, recorded either way. Previously the ACCEPT path
+  // emitted `result: "ok"` BEFORE this call and nothing after it, so a draft
+  // that was generated, validated and paid for could vanish here without a
+  // single record. Success is emitted too: "it stored" and "it never got here"
+  // must not look identical.
+  emitDraftDiagnostic({
+    reportId,
+    attempt: 0,
+    maxAttempts: 0,
+    result: stored.ok ? "store_ok" : "store_rejected",
+    reasons: stored.ok ? [] : [`sqlState=${stored.sqlState}`],
+  });
   if (!stored.ok) {
     if (stored.sqlState === "BC004" || stored.sqlState === "BC003") {
       // A concurrent completion won. Idempotency: return the committed state

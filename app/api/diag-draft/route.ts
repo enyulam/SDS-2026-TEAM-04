@@ -30,7 +30,7 @@ import { requestDraft } from "@/server/modules/report-workflow/actions";
 import { collectDraftDiagnostics } from "@/server/modules/ai-drafting/draft-diagnostics";
 import { DRAFT_MAX_ATTEMPTS_VAR } from "@/server/modules/ai-drafting/draft-attempts";
 import { TRUSTED_TRANSPORT_VAR } from "@/server/modules/ai-drafting/trusted-store-transport";
-import { HOSTED_DB_URL_VAR } from "@/server/modules/ai-drafting/hosted-trusted-store";
+import { HOSTED_DB_URL_VAR, probeTrustedStoreConnection } from "@/server/modules/ai-drafting/hosted-trusted-store";
 
 const GATE_VAR = "BEST_COACH_DIAG_ROUTE";
 
@@ -45,13 +45,13 @@ export async function POST(request: Request) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  let body: { sessionId?: string; studentId?: string };
+  let body: { sessionId?: string; studentId?: string; probe?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "sessionId and studentId are required" }, { status: 400 });
   }
-  if (!body.sessionId || !body.studentId) {
+  if (body.probe !== "connection" && (!body.sessionId || !body.studentId)) {
     return NextResponse.json({ error: "sessionId and studentId are required" }, { status: 400 });
   }
 
@@ -78,6 +78,17 @@ export async function POST(request: Request) {
     },
     region: process.env.VERCEL_REGION ?? null,
   };
+
+  // Connection/privilege probe — NO provider call, NO write, NO spend. This
+  // exists so the two untested candidates (pooler reachability from the
+  // function's region; the role the connection string carries versus
+  // `report_store_draft`'s owner-only EXECUTE) can be settled by measurement
+  // instead of by a fit. Diagnosing by burning a billable generation is what
+  // this whole run has been trying to stop doing.
+  if (body.probe === "connection") {
+    const probe = await probeTrustedStoreConnection();
+    return NextResponse.json({ environment, probe }, { status: 200 });
+  }
 
   // The SAME action, under the caller's own session. No authority is added.
   const { value, diagnostics } = await collectDraftDiagnostics(() =>
