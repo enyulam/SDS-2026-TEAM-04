@@ -114,8 +114,10 @@ BEGIN
   SELECT x.status, x.lock_version, x.report_version_id, x.content_hash
     INTO v_st, v_lv, v_ver, v_hash
     FROM public.report_store_draft(v_rep, v_lv, v_obs_lv,
-      pg_temp.ma_draft(p_tag || '-strength'), pg_temp.ma_draft(p_tag || '-focus'),
-      pg_temp.ma_draft(p_tag || '-practice'), pg_temp.ma_draft(p_tag || '-takeaway')) x;
+      -- OD-4 panel order. Opaque per-panel tags, renamed off the superseded
+      -- four-panel model; they are not asserted anywhere outside this call.
+      pg_temp.ma_draft(p_tag || '-overview'), pg_temp.ma_draft(p_tag || '-strengths'),
+      pg_temp.ma_draft(p_tag || '-areas'), pg_temp.ma_draft(p_tag || '-remarks')) x;
   PERFORM public.report_update_checklist(v_rep, v_lv, v_ver, true, true, true);
   SELECT x.status, x.lock_version INTO v_st, v_lv
     FROM public.report_trainer_approve(v_rep, v_st, v_lv, v_ver, v_hash) x;

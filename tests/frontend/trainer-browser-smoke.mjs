@@ -1121,13 +1121,22 @@ try {
     15_000,
   );
 
-  /* D2 — the four GOVERNED panels, in order, not the frame's Overview/Strengths/Areas/Remarks. */
+  /*
+   * D2 — the four GOVERNED panels, in order.
+   *
+   * ⚠️ MIGRATED TO OD-4. This assertion, and the note that used to sit on it, were written
+   * before the OD-4 ruling and said "not the frame's Overview/Strengths/Areas/Remarks". That
+   * is now BACKWARDS: OD-4 made exactly those four the canonical governed panels, and the
+   * pre-OD-4 names it asserted are superseded. The deviation D2 originally recorded — frame
+   * headings differing from governed panels — no longer exists, because governance moved TO
+   * the frame's four. Kept as a positive assertion of the ratified order.
+   */
   const generatedPanels = await evaluate(
     `[...document.querySelectorAll('[data-report-panel]')].map((node) => node.dataset.reportPanel)`,
   );
   assert(
     JSON.stringify(generatedPanels) ===
-      JSON.stringify(["todaysStrength", "nextFocus", "practiceSuggestion", "sessionTakeaway"]),
+      JSON.stringify(["overview", "strengths", "areasForDevelopment", "remarks"]),
     `The four GOVERNED parent-facing panels must render in order; found ${generatedPanels.join(", ")}`,
   );
 
@@ -1270,7 +1279,7 @@ try {
    *
    * The load-bearing assertions are the governance rules the frozen frame cannot demonstrate,
    * because the frame draws only the already-approved end state: the four GOVERNED panels
-   * (not the frame's Overview/Strengths/Areas/Remarks headings — D2), the real three-item
+   * (post-OD-4 these ARE Overview/Strengths/Areas for Development/Remarks — D2), the real three-item
    * approve gate, the non-publishing approval copy, the inert Class Video Evidence region
    * (D3), the omitted Overall Grade (D5), and AA contrast on all four rating states.
    * ----------------------------------------------------------------------- */
@@ -1280,7 +1289,7 @@ try {
   );
   assert(
     JSON.stringify(reportPanels) ===
-      JSON.stringify(["todaysStrength", "nextFocus", "practiceSuggestion", "sessionTakeaway"]),
+      JSON.stringify(["overview", "strengths", "areasForDevelopment", "remarks"]),
     `The four GOVERNED parent-facing panels must render in order; found ${reportPanels.join(", ")}`,
   );
   assert(

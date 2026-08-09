@@ -1035,7 +1035,11 @@ BEGIN
   SELECT x.status, x.lock_version, x.report_version_id, x.revision_number, x.content_hash
     INTO v_st, v_lv, v_ver, v_rev, v_hash
     FROM public.report_store_draft(v_report, v_lv, v_olv,
-      'Draft strength panel', 'Draft next-focus panel', 'Draft practice panel', 'Draft takeaway panel') x;
+      -- OD-4 panel order. These are opaque placeholders, not prose, but they
+      -- named the SUPERSEDED four-panel model; renamed so no reader infers the
+      -- old model is still current.
+      'Draft overview panel', 'Draft strengths panel',
+      'Draft areas-for-development panel', 'Draft remarks panel') x;
   PERFORM public.report_update_checklist(v_report, v_lv, v_ver, true, true, true);
   SELECT x.status, x.lock_version INTO v_st, v_lv
     FROM public.report_trainer_approve(v_report, v_st, v_lv, v_ver, v_hash) x;

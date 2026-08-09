@@ -671,6 +671,49 @@ function countExistingFixtureRows() {
   return total
 }
 
+/**
+ * Count P1-T09a expansion rows.
+ *
+ * The expansion deliberately uses UUID prefixes DISJOINT from the ratified
+ * `cN000000-` family (e2… students, e4… modules, e5… sessions, e6…
+ * enrolments, e7… assignments, e8… attendance, e9… observations, ea…
+ * ratings) so it stays invisible to the canonical fixture checksum. That
+ * same disjointness is why the ratified FIXTURE_PROBES above cannot see it,
+ * and why this separate probe is required rather than a wider one.
+ */
+function countExpansionRows() {
+  const probes = [
+    ['students', 'e2'],
+    ['class_modules', 'e4'],
+    ['class_sessions', 'e5'],
+    ['enrolments', 'e6'],
+    ['class_session_assignments', 'e7'],
+    ['attendance', 'e8'],
+    ['observations', 'e9'],
+    ['observation_ratings', 'ea'],
+  ]
+  const unions = probes
+    .map(([table, prefix]) => `SELECT count(*) AS c FROM public.${table} WHERE id::text LIKE '${prefix}______-%'`)
+    .join(' UNION ALL ')
+
+  const args = ['exec', '-i', DB_CONTAINER, ...PSQL_PREFIX, '--tuples-only', '--no-align']
+  const result = spawnSync('docker', args, {
+    input: `SELECT sum(c) FROM (${unions}) AS expansion_probes;\n`,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    encoding: 'utf8',
+    windowsHide: true,
+    shell: false,
+  })
+  if (result.error || result.status !== 0) {
+    // Fail CLOSED. An unreadable probe must never be treated as "zero rows",
+    // because that is precisely the reading that lets the wedge through.
+    throw new SafeError('Could not run the P1-T09a expansion preflight query against the local database.')
+  }
+  const raw = (result.stdout || '').trim().split(/\r?\n/)[0].trim()
+  if (!/^\d+$/.test(raw)) return 0 // sum() over zero rows returns empty, which is a legitimate zero.
+  return Number(raw)
+}
+
 // ---------------------------------------------------------------------
 // Auth Admin operations. Supported methods only.
 // ---------------------------------------------------------------------
@@ -823,6 +866,37 @@ async function main() {
   pass('local API URL and service-role key captured into process memory only')
 
   const admin = makeAdminClient(apiUrl, serviceRoleKey)
+
+  // -------------------------------------------------------------------
+  // P1-T09a EXPANSION GUARD — runs BEFORE either path, and mutates nothing.
+  //
+  // The P1-T09a fixture expansion (scripts/fixtures/local_fixtures_expansion.sql)
+  // attaches rows to the RATIFIED trainer membership c1000000-…-002 under
+  // ON DELETE RESTRICT. local_fixtures.sql's teardown deletes exactly that
+  // membership, so a --reload with expansion rows present dies mid-teardown
+  // on a foreign-key violation.
+  //
+  // Why that is worse than an ordinary failure: this script is the ONLY way
+  // to recreate the three synthetic Auth identities, it requires three
+  // no-echo passwords that only the Operator can type (CLAUDE.md §11), and
+  // `supabase db reset` is prohibited outright. An Operator who hit this
+  // would be wedged on the one path no agent can run for them.
+  //
+  // So this fails CLOSED, before the teardown starts, and names the exact
+  // remediation command rather than leaving them to diagnose an FK error.
+  const expansionRows = countExpansionRows()
+  if (expansionRows > 0) {
+    throw new SafeError(
+      `${expansionRows} P1-T09a expansion row(s) are present. They foreign-key to the ratified ` +
+        'trainer membership under ON DELETE RESTRICT, so the fixture teardown would fail partway ' +
+        'through.\n\nRemove them first, then re-run this command:\n\n' +
+        '  docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc --username=postgres ' +
+        '--dbname=postgres -v do_expand=false -v do_expand_cleanup=true ' +
+        '< scripts/fixtures/local_fixtures_expansion.sql\n\n' +
+        'Nothing was created, deleted or modified by this run.',
+    )
+  }
+  pass('no P1-T09a expansion row is present; the fixture teardown path is unobstructed')
 
   if (reload) {
     phase('Reload — bounded teardown')

@@ -868,9 +868,12 @@ try {
     [...document.querySelectorAll('[data-testid="parent-canonical-report"] article h3')]
       .map((element) => element.textContent.trim())
   `);
+  // ⚠️ MIGRATED TO OD-4. These are the ratified canonical panel LABELS
+  // (features/trainer/report-panel-config.ts), which the parent surface renders directly.
+  // The four names previously asserted here are superseded by the OD-4 ruling.
   assert(
     JSON.stringify(parentPanelHeadings) ===
-      JSON.stringify(["Today's Strength", "Next Focus", "Practice Suggestion", "Session Takeaway"]),
+      JSON.stringify(["Overview", "Strengths", "Areas for Development", "Remarks"]),
     `Parent canonical detail did not render exactly the four governed panels: ${parentPanelHeadings.join(" | ")}`,
   );
   await assertTextAbsent(

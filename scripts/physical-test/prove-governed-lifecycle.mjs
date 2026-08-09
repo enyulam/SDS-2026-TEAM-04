@@ -748,6 +748,29 @@ END $trusted$;
 class DisposableTrustedDraftStore {
   constructor() { this.database = 'postgres' }
   storeDraft(request) {
+    // ⚠️ FAIL CLOSED ON A MISSING PANEL -- do not delete this guard.
+    //
+    // This double is a STAND-IN for the real TrustedDraftStore, and a
+    // stand-in that reads a field the real contract no longer has does not
+    // crash: `undefined` interpolates into a psql -v argument as the literal
+    // four-character string "undefined", and the suite then commits four
+    // garbage panels and goes GREEN. That is exactly what happened here --
+    // this class still read request.todaysStrength / .nextFocus /
+    // .practiceSuggestion / .sessionTakeaway, the SUPERSEDED pre-OD-4 field
+    // names, long after StoreDraftRequest moved to the four OD-4 panels. It
+    // was found by adversarial review, not by any assertion, because there
+    // was nothing here that could fail.
+    //
+    // The rename below fixes today's defect; this guard fixes the CLASS of
+    // defect, so the next contract change fails loudly instead of silently.
+    for (const key of ['overview', 'strengths', 'areasForDevelopment', 'remarks']) {
+      if (typeof request[key] !== 'string') {
+        throw new Error(
+          `DisposableTrustedDraftStore: StoreDraftRequest.${key} is ${typeof request[key]}, not a string. ` +
+          'The OD-4 panel contract changed and this double was not updated -- refusing to store a "undefined" panel.',
+        )
+      }
+    }
     const args = [
       'exec', '-i', DISPOSABLE_DB_CONTAINER, 'psql', '--no-psqlrc', '--username=postgres',
       '--dbname=postgres', '--quiet',
@@ -755,10 +778,10 @@ class DisposableTrustedDraftStore {
       '-v', `bc_rid=${request.reportId}`,
       '-v', `bc_lock=${String(request.expectedLockVersion)}`,
       '-v', `bc_olock=${String(request.observationLockVersion)}`,
-      '-v', `bc_p1=${request.todaysStrength}`,
-      '-v', `bc_p2=${request.nextFocus}`,
-      '-v', `bc_p3=${request.practiceSuggestion}`,
-      '-v', `bc_p4=${request.sessionTakeaway}`,
+      '-v', `bc_p1=${request.overview}`,
+      '-v', `bc_p2=${request.strengths}`,
+      '-v', `bc_p3=${request.areasForDevelopment}`,
+      '-v', `bc_p4=${request.remarks}`,
     ]
     return new Promise((resolvePromise) => {
       const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'] })
@@ -1462,9 +1485,19 @@ async function main() {
 
   const checklistBeforeEdit = await tickChecklist()
   await browser.navigate(`/trainer/reports/${liveReportId}/edit`)
-  await browser.waitUntil('document.querySelector(\'label[data-panel-editor="sessionTakeaway"] textarea\') !== null', 'the editor')
-  await browser.fillField('label[data-panel-editor="sessionTakeaway"] textarea',
-    'Edited by the trainer through the real editor: steady engagement, with eye contact as the agreed next focus.')
+  // OD-4 PANEL KEY, chosen by MEANING rather than by slot position. The
+  // editor emits data-panel-editor={panel.key} from REPORT_PANEL_CONFIG, so
+  // the live values are overview | strengths | areasForDevelopment | remarks.
+  // This selector previously read "sessionTakeaway" -- a SUPERSEDED pre-OD-4
+  // name that matches nothing, so waitUntil timed out at 30s and aborted the
+  // run before every leg after this point. The prose below is developmental
+  // ("eye contact as the agreed next focus"), so it belongs in
+  // areasForDevelopment; mapping it to remarks purely because remarks
+  // occupies the old fourth slot would be the positional carry-over this
+  // project already ruled is a semantic change, not a rename.
+  await browser.waitUntil('document.querySelector(\'label[data-panel-editor="areasForDevelopment"] textarea\') !== null', 'the editor')
+  await browser.fillField('label[data-panel-editor="areasForDevelopment"] textarea',
+    'Edited by the trainer through the real editor: eye contact is the agreed next focus and needs continued prompting.')
   await browser.clickText('Save changes & return to review')
   await browser.waitForPath(/^\/trainer\/reports\/[0-9a-f-]{36}\/review/, 'the review screen after the edit')
   const versionsAfterEdit = Number(dbValue(`SELECT count(*) FROM public.report_versions WHERE report_id='${liveReportId}';`))
@@ -1649,13 +1682,14 @@ async function main() {
   capture('L10_trainer_review_text', trainerReviewText.slice(0, 2000))
   capture('L10_trainer_queue_text', trainerQueueText.slice(0, 1200))
   await browser.navigate(`/trainer/reports/${liveReportId}/edit`)
-  await browser.waitUntil('document.querySelector(\'label[data-panel-editor="sessionTakeaway"] textarea\') !== null', 'the correction editor')
+  // Same OD-4 key correction as the first edit leg above, same reason.
+  await browser.waitUntil('document.querySelector(\'label[data-panel-editor="areasForDevelopment"] textarea\') !== null', 'the correction editor')
   await browser.evaluate(`(() => {
     const radio = document.querySelector('input[name="correction-mode"][value="corrected"]');
     if (radio) radio.click();
     return true;
   })()`)
-  await browser.fillField('label[data-panel-editor="sessionTakeaway"] textarea',
+  await browser.fillField('label[data-panel-editor="areasForDevelopment"] textarea',
     'Corrected after management review: eye contact remains the agreed next focus and the wording now reflects it.')
   await browser.waitUntil(
     '[...document.querySelectorAll(\'#main-content button\')].some((b) => /Create correction version|Save changes & return to review/.test(b.textContent.trim()) && !b.disabled)',

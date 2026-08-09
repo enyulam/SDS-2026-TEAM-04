@@ -149,8 +149,18 @@ BEGIN
   SELECT x.status, x.lock_version, x.report_version_id, x.revision_number, x.content_hash
     INTO v_st, v_lv, v_ver, v_rev, v_hash
     FROM public.report_store_draft(v_report, v_lv, v_obs,
-      'Spoke clearly and held eye contact', 'Vary pace when excited',
-      'Practice reading aloud for five minutes', 'A confident session') x;
+      -- OD-4 PANEL ORDER: overview, strengths, areas_for_development, remarks.
+      -- These four arguments are POSITIONAL, so the pre-OD-4 prose that used to
+      -- sit here was silently re-homed by the rename: 'Vary pace when excited'
+      -- -- a development instruction -- landed in STRENGTHS, and eye contact
+      -- (rated 'beginning' -> needs_support by the nine-rating fixture above)
+      -- was praised as a demonstrated strength. Re-derived by MEANING, and the
+      -- wording is deliberately grounding-clean so no suite seeds prose the
+      -- shipped validator would reject.
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.') x;
   IF p_stop = 'T3' THEN RETURN v_report; END IF;
 
   IF p_stop = 'T5' THEN
@@ -2930,8 +2940,10 @@ BEGIN
   -- A SILENT byte-identical save is rejected.
   v_e := pg_temp.errcode(pg_catalog.format($q$
     SELECT public.report_save_edit(%L,'needs_edit'::public.report_status,%s,%L,
-      'Spoke clearly and held eye contact','Vary pace when excited',
-      'Practice reading aloud for five minutes','A confident session') $q$, v_report, v_lv, v_ver));
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.') $q$, v_report, v_lv, v_ver));
   IF v_e <> 'BC021' THEN RAISE EXCEPTION 'FAIL T7I-71: a silent byte-identical save gave %, expected BC021', v_e; END IF;
   IF pg_temp.chain_len() <> v_chain THEN RAISE EXCEPTION 'FAIL T7I-71: the rejected save appended an event'; END IF;
   IF (SELECT pg_catalog.count(*) FROM public.report_versions WHERE report_id=v_report) <> 1 THEN
@@ -2949,15 +2961,19 @@ BEGIN
   RETURNING id INTO v_other;
   v_e := pg_temp.errcode(pg_catalog.format($q$
     SELECT public.report_save_edit(%L,'needs_edit'::public.report_status,%s,%L,
-      'Spoke clearly and held eye contact','Vary pace when excited',
-      'Practice reading aloud for five minutes','A confident session',%L) $q$, v_report, v_lv, v_ver, v_other));
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.',%L) $q$, v_report, v_lv, v_ver, v_other));
   IF v_e <> 'BC021' THEN RAISE EXCEPTION 'FAIL T7I-71: a RESOLVED reaffirmation id gave %, expected BC021', v_e; END IF;
 
   -- ...and so is one naming a request belonging to ANOTHER report.
   v_e := pg_temp.errcode(pg_catalog.format($q$
     SELECT public.report_save_edit(%L,'needs_edit'::public.report_status,%s,%L,
-      'Spoke clearly and held eye contact','Vary pace when excited',
-      'Practice reading aloud for five minutes','A confident session',%L) $q$,
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.',%L) $q$,
       v_report, v_lv, v_ver, '00000000-0000-4000-8000-000000000000'));
   IF v_e <> 'BC021' THEN RAISE EXCEPTION 'FAIL T7I-71: a foreign reaffirmation id gave %, expected BC021', v_e; END IF;
 
@@ -2967,8 +2983,10 @@ BEGIN
   SELECT x.status, x.lock_version, x.report_version_id, x.revision_number, x.content_hash
     INTO v_st, v_lv, v_newver, v_rev, v_hash
     FROM public.report_save_edit(v_report,'needs_edit',v_lv,v_ver,
-      'Spoke clearly and held eye contact','Vary pace when excited',
-      'Practice reading aloud for five minutes','A confident session', v_cr) x;
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.', v_cr) x;
   IF v_hash IS DISTINCT FROM v_srchash THEN
     RAISE EXCEPTION 'FAIL T7I-71: the reaffirmation version''s hash does not equal the source''s';
   END IF;

@@ -121,8 +121,18 @@ BEGIN
   SELECT x.status, x.lock_version, x.report_version_id, x.content_hash
     INTO v_st, v_lv, v_ver, v_hash
     FROM public.report_store_draft(v_rep, v_lv, v_obs_lv,
-      'Spoke clearly and held eye contact', 'Vary pace when excited',
-      'Practice reading aloud for five minutes', 'A confident session') x;
+      -- OD-4 PANEL ORDER: overview, strengths, areas_for_development, remarks.
+      -- These four arguments are POSITIONAL, so the pre-OD-4 prose that used to
+      -- sit here was silently re-homed by the rename: 'Vary pace when excited'
+      -- -- a development instruction -- landed in STRENGTHS, and eye contact
+      -- (rated 'beginning' -> needs_support by the nine-rating fixture above)
+      -- was praised as a demonstrated strength. Re-derived by MEANING, and the
+      -- wording is deliberately grounding-clean so no suite seeds prose the
+      -- shipped validator would reject.
+      'A steady session: clear speech and a confident stance, with eye contact still developing.',
+      'Spoke clearly and kept a confident, well-controlled posture throughout.',
+      'Eye contact needs continued prompting, and pace can run fast when excited.',
+      'Reading aloud at home for a few minutes would support the next session.') x;
   PERFORM public.report_update_checklist(v_rep, v_lv, v_ver, true, true, true);
   SELECT x.status, x.lock_version INTO v_st, v_lv
     FROM public.report_trainer_approve(v_rep, v_st, v_lv, v_ver, v_hash) x;
