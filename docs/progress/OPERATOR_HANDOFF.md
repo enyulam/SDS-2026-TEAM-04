@@ -1,100 +1,55 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
-> **DERIVED ARTIFACT.** Overwritten at every stop, never appended. Specified by
-> `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8. It **originates nothing** and is **not a fifth
-> layer of §15.1** — where this and `STATUS.md` disagree, **`STATUS.md` wins**.
+> **DERIVED ARTIFACT (§15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).** Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** and is **not a fifth layer of §15.1** — where this file and `docs/progress/STATUS.md` disagree, **`STATUS.md` wins**.
+> Generated **2026-08-10**. Contains **no credential**.
 
-**Generated:** 2026-08-09, Asia/Singapore · **Branch:** `main` · **HEAD:** `7d69244` ·
-**Tag:** `stage3-authenticated-green` · **Tree:** clean at commit · **Remotes:** 0
+## Project · phase · position
 
----
+**B.E.S.T Coach Final MVP.** Hero-execution overlay, post-Stage-3, in the deployment track. The Week-13 Final Presentation is the target; deployment is compulsory (public URL, complete end-to-end journey, **functional AI feature in the deployed system**).
 
-## 1. Where execution is
+**Position: the hero chain is COMPLETE and verified twice** — by database query and by Operator browser walkthrough of all three portals. The Operator is now **rehearsing on it**. No further surface changes are authorized.
 
-**HERO V3 STAGE 3.** `B-STAGE3-1` cleared. **The authenticated surfaces render for all three
-roles** — the first time any logged-in surface has been proven in this project.
-`build` is green. **`B-STAGE3-2` is open and needs you.**
-
-| Gate | Result |
+| | |
 |---|---|
-| `prove-stage3-authenticated` | **23 PASS · 0 FAIL · 2 NOT-RUN** |
-| `build` | **GREEN — 17 routes** (no provider selector resolved) |
-| `tsc --noEmit` | **0** |
-| Trip-wire | **zero** non-loopback peers |
+| Branch / worktree | `main` / none (`git worktree list` returns one entry) |
+| HEAD | **`a0f48b9`** |
+| Working tree | clean at handoff |
+| Demo URL | **`https://best-coach-mvp.vercel.app`** — the alias, serving `a0f48b9` |
+| Hosted DB | Supabase `zjukuffiuzkbiblmnuwl`, **ap-southeast-1 (Singapore)**, 17 migrations applied |
+| Model | `gpt-5.6-terra`, function region `iad1` |
 
-⚠️ `PASS` is an evidence verdict. **No session may write `Accepted`.**
+⚠️ **Demo ONLY on the alias.** Every deployment is `target: production` with its own immutable URL; per-deployment URLs are frozen snapshots and carry none of the recent fixes.
 
----
+## What is proven
 
-## 2. ⛔ What needs YOU — in priority order
+**The full governed lifecycle ran end to end on the deployed system** for learner **`Amelia Tan`** (`report 0381f34f-5d6c-4547-88e5-3d518562b21f`): `observation_saved → drafting → draft_ready → trainer_approved → submitted`. `report_version_approvals` holds **both** a `trainer` and a `management` row; 2 `report_versions`; the parent report renders four OD-4 panels with **no ratings** (Q-27 held).
 
-### 2.1 `B-STAGE3-2` — the canonical fixture database is no longer pristine · `OPERATOR-ONLY`
+**Real AI drafting works in the deployed system.** One call, **ACCEPT**, `reasons: []`, 1,308 tokens, persisted through the hosted trusted store (`report_versions` 1, `report_version_ratings` 9, `report_source_map` 15). **B-G06-DET-1 answered in the direction that matters:** grounding did **not** false-reject legitimate real-provider prose; both `beginning` dimensions appeared in Areas for Development, neither claimed as a strength.
 
-An earlier revision of the Stage 3 harness drove governed **mutations** through the served
-app, which talks to the **canonical** database. Measured:
+**Fallback for the stage:** report **`4876bc9f-4e58-41ab-a253-822fcb024120`** (Fixture Student One) sits at **`draft_ready`, `lock_version` 8**, deliberately untouched. If a live AI call fails on stage, continue from this already-drafted report.
 
-| | Ratified | Now |
-|---|---|---|
-| `reports` | 0 | **1** |
-| `audit_events` | 0 | **4** |
-| `audit_chain_heads` | 0 | **1** |
-| fixture attendance recorder fields | NULL | **NON-NULL** → `verify-local-fixtures.sql` **fails A19** |
+**R-27 intact throughout.** `report_store_draft` owner-only, zero client EXECUTE, no `service_role` grant, no `BYPASSRLS` — re-verified by measurement (`current_user = postgres`, function owner `postgres`, `has_function_privilege` true).
 
-**`audit_events` is append-only; its `BEFORE DELETE OR UPDATE` trigger refuses `postgres`
-too. That part is irreversible by design.** The trigger was **not** disabled and must not be.
+## Standing open items — CARRY, DO NOT FIX
 
-**Consequence, measured:** `readCanonical()` throws before reaching
-`assertCanonicalPristine`. **All six disposable-stack harnesses abort**, so the disposable
-hero E2E and **negative controls A–M were not run**.
-
-**To resolve:** the governed fixture reload, which needs **your three interactive no-echo
-passwords**. No agent may handle them.
-
-### 2.2 The deployment gate — every item is a §12 hard gate
-
-The scope correction makes a **public URL with a functional AI feature** compulsory. **None
-of it is authorized, and none is carried by the standing local authorization.** The full
-enumeration is in the deployment gate packet delivered with this handoff. Headline gates:
-**hosted Supabase provisioning (Singapore region — set at creation, unchangeable)** ·
-**spend** · **a GitHub remote and push** · **public deployment** · **provider key placement**.
-
----
-
-## 3. Open blockers
-
-| ID | State |
+| ID | Item |
 |---|---|
-| **`B-STAGE3-2`** | ⛔ **OPEN · `OPERATOR-ONLY`** — §2.1 above |
-| `B-C2-1` | **OPEN · UNDIAGNOSED**, untouched per instruction. ⚠️ **Negative control K remains NOT SATISFIED** |
-| `B-C2-2` | **RECORDED · DELIBERATELY UNFIXED** — changing the primitive could mask `B-C2-1` |
-| `B-G06-DET-1` | **OPEN · now materially relevant.** Rule 3 matched **3 of 18** formulations; real-provider prose is **untested** against the detector. ⛔ **Do not widen the lexicon** |
-| `F-STAGE3-1` | **RECORDED** — `/trainer/reports` renders the generic unavailable state, not the queue's empty state. Off the hero path |
+| `F-DEMO-1` | The draft page **auto-dispatches on mount; there is no generate button**. A demonstration problem, not a defect. Awaiting Operator ruling. |
+| `F-UI-DRIFT-1` | Deployed frontend built against an **earlier Figma iteration across multiple screens** (named instance: Coach/Internal Notes segment removed in the newer design, still in the build). **Some divergences are DATA-BOUND** — Coach Notes binds `observations.follow_up_notes`, one column on two screens, interacting with next-session continuity. **Single batched pass POST-DEMONSTRATION.** Full enumeration not done. |
+| `F-EVIDENCE-SCOPE-1` | **No parent-side video evidence placeholder.** Class video is *class* footage — other children appear — so parent-side evidence needs a **per-child scoping decision that has not been made**. The trainer-side inactive control correctly names the gap. Aligns with Authority Lock §8.1 (parent evidence projection out of Final MVP; A-001 armed-and-unactivated). Any parent evidence surface is a §12 stop-and-ask. |
+| `B-STAGE3-2` | Canonical local fixture DB dirtied by governed mutations (`audit_events` irreversible by design). **Post-demo cleanup.** |
+| `B-C2-1` | Open, undiagnosed. **Negative control K remains NOT SATISFIED.** Not to be closed. |
+| `B-C2-2` | Open, deliberately unfixed. |
+| `F-REGION-1` | Function in `iad1`, requests from Singapore, database in Singapore. Functional, cross-region. Recorded only. |
 
----
+## Consequence to be aware of (not to fix now)
 
-## 4. NOT-RUN — reasons, not excuses
+The visible provenance caption was removed from all portals; the `data-adapter-kind` **marker element is retained on Trainer and Management** because `prove-disposable-app` and `prove-governed-lifecycle` read it out of the served DOM as the G-19 real-adapter proof and fail closed without it. **The parent surface now carries no marker at all** (deliberate). Any G-19 harness leg that expected a marker on *parent* will report it missing — a known consequence of the parent-diagnostics removal, not a regression of the adapter.
 
-**Password sign-in** (Operator credential; an admin-minted session is never evidence the
-form works) · **every governed mutation leg** (belongs on the disposable stack, blocked by
-`B-STAGE3-2`) · **the Next server-action transport** (renders are GETs) · **the AI drafting
-and grounding pipeline** · **the disposable hero E2E and negative controls A–M** · **the
-three browser/C4 harnesses — the C4 repair is still UNPROVEN** · **every real-provider leg**
-· **the previously-green suites** — not re-run, not carried forward · **§3 persona
-sign-offs — still not recorded**, and no §10 phase gate may be declared met without them.
+## Discharged this session
 
----
+`T-DIAG-REMOVE` — the temporary `/api/diag-draft` route, its caller harness, and `BEST_COACH_DIAG_ROUTE` in **both** environments are all removed; verified live (framework 404, not the handler's gate string). `T7-RECLASSIFIED` — the (g) save-leg FAIL was a harness timing defect; product behaviour correct, verified by Operator walkthrough. `M2` likewise recorded PASS on Operator evidence.
 
-## 5. Submission gaps recorded, not written
+## Not done, and known
 
-**README is boilerplate** · **deployment instructions absent**. Both are submission
-requirements. Noted only, per instruction.
-
-**Setup/admin screens:** OUT OF SCOPE — VISUAL SHELL — BACKEND INTEGRATION PENDING. No fake
-writes.
-
----
-
-## 6. Next authorized action
-
-⛔ **STOPPED at the deployment gate packet.** Nothing hosted, paid, public or pushed will be
-attempted autonomously.
+README and deployment instructions are **not written**. §3 persona sign-offs are **not recorded**. Password sign-in is **NOT-RUN** everywhere — every session in every harness is **admin-minted**, which is never a sign-in proof.
