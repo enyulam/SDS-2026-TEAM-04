@@ -35,6 +35,8 @@ import "server-only";
  */
 
 /** A distinctive, greppable marker so a run can be isolated in a log stream. */
+import { AsyncLocalStorage } from "node:async_hooks";
+
 export const DRAFT_DIAG_MARKER = "BC_DRAFT_DIAG" as const;
 
 export interface DraftAttemptDiagnostic {
@@ -56,10 +58,39 @@ export interface DraftAttemptDiagnostic {
  * Emit one diagnostic record. Never throws — a diagnostics failure must never
  * take down the drafting path it is observing.
  */
+/**
+ * Per-request collector.
+ *
+ * ⚠️ stderr PROVED UNREADABLE. Two deployed runs emitted diagnostics that
+ * never appeared in any log view available to the Operator or to
+ * `vercel logs`. An instrument whose output cannot be read is not an
+ * instrument, so the records are ALSO collected in request scope and can be
+ * returned in a RESPONSE BODY by the gated diagnostic route.
+ *
+ * `AsyncLocalStorage` rather than a module-level array: a module array would
+ * bleed between concurrent requests on a warm instance, which is exactly the
+ * kind of quiet cross-contamination this project keeps finding.
+ */
+const collector = new AsyncLocalStorage<DraftAttemptDiagnostic[]>();
+
+/** Run `fn` with collection active, returning both its value and the records. */
+export async function collectDraftDiagnostics<T>(
+  fn: () => Promise<T>,
+): Promise<{ value: T; diagnostics: DraftAttemptDiagnostic[] }> {
+  const sink: DraftAttemptDiagnostic[] = [];
+  const value = await collector.run(sink, fn);
+  return { value, diagnostics: sink };
+}
+
 export function emitDraftDiagnostic(record: DraftAttemptDiagnostic): void {
   try {
-    // One line, JSON, marker-prefixed: greppable out of an interleaved
-    // serverless log stream.
+    collector.getStore()?.push(record);
+  } catch {
+    // Deliberately silent.
+  }
+  try {
+    // Kept as well as, never instead of: on a platform whose logs ARE
+    // readable this is the zero-config channel.
     process.stderr.write(`${DRAFT_DIAG_MARKER} ${JSON.stringify(record)}\n`);
   } catch {
     // Deliberately silent.
