@@ -3486,3 +3486,32 @@ The stall between "observation gathered" and "provider called" is **still undiag
 
 **Blockers/decisions:** none opened or closed. `B-C2-1`, `B-C2-2`, `B-STAGE3-2`, `F-DEMO-1`, `F-REGION-1`, `F-STAGE3-1` all carried unchanged. `T-DIAG-REMOVE` updated in `STATUS.md` to name the new path and its three removal actions.
 **Next step:** deploy the renamed route, confirm Ready, and call it.
+
+## 2026-08-10 — Hosted persistence fixed; the transport divergence that hid it
+
+**Branch:** `main` · **HEAD at entry:** `bed341d`
+
+### The jsonb transport divergence
+
+Hosted persistence failed with `BC303 report_store_source_map: entries must be a JSON array`, raised at that function's line 24. **postgres.js binds a JS string destined for `jsonb` as a JSON STRING SCALAR**, so the function received `"[{…}]"` and `jsonb_typeof` returned `string`. The fail-closed check was correct; the transport was wrong.
+
+**Why it never showed locally.** `LocalTrustedDraftStore` hands psql raw JSON text through `-v` / `:'quoted'`, which parses as an array. The hosted class's own header asserted "SEMANTIC EQUIVALENCE WITH THE LOCAL CHANNEL" and reasoned carefully about **transaction atomicity** — and **said nothing about parameter encoding**. The equivalence claim was true for the property it examined and silently false for the one that broke. psql's `-v` path masked it completely.
+
+Measured both encodings against the hosted database *before* changing anything: plain string → `string`; `sql.json(parsed)` → `array`. Fixed by binding the parsed value. No ACL change — `report_store_draft` stays owner-only, zero client EXECUTE, no `service_role` grant, no `BYPASSRLS` (R-27 intact, re-verified: `current_user = postgres`, function owner `postgres`, `has_function_privilege` true).
+
+**A second fault sat above it:** `SUPABASE_DB_POOLED_URL` held the **direct** host `db.<ref>.supabase.co`, unresolvable from the Vercel function (`ENOTFOUND`), and was set on **Production only**. Confirmed three ways — the failing hostname, an exact length match (93 = direct form; the pooler form is 119), and `vercel env ls`. Re-pointing it was necessary but **not sufficient**; treating it as the fix would have been another diagnosis-by-fit.
+
+**Result:** one call, ACCEPT, `reasons: []`, 1,308 tokens; `report_versions` 1, `report_version_ratings` 9, `report_source_map` 15, status `draft_ready`, audit chain intact.
+
+### Seventh and eighth instances of the invisible-cause pattern, both mine
+
+7. The store's `catch` collapsed unreachable pooler, wrong role, missing EXECUTE, RPC raise and rolled-back source map into one opaque `XXCHN`, and `emitDraftDiagnostic` fired `"ok"` **before** the write — so a generated, validated, paid-for draft vanished with no record. Fixed: structured PG fields plus socket fields, exact-containment redaction against the live connection string, `detail` excluded because it echoes row values including a learner's name.
+8. `app/api/_diag/draft/route.ts` never routed — `_diag` is an App Router **private folder**. `next build` succeeded and omitted it silently. Renamed to `app/api/diag-draft/route.ts` and **proven locally in both gate directions before deploying**, which is the correction that mattered more than the rename.
+
+### Harness defects found while driving the chain (g)
+
+Recorded because each produced a wrong verdict about a working system:
+
+* **A generic settle predicate was wrong twice** — first too narrow (missed "Loading Management report queue"), then too broad (any page containing "Loading" never settled). Replaced with waiting on the selectors each leg actually asserts.
+* **Clicks fired into a pending mutation** hit a disabled button and did nothing, leaving the learner marked absent; the assessment then correctly refused ("not recorded present"), and every downstream leg failed as a consequence of the harness, not the app.
+* **A vacuous assertion produced a false PASS.** The save leg's predicate `/saved|Generate|draft|Review/i` matched the page's own "REVIEW & APPROVE" heading. The database showed **0 observation ratings and no report**. Caught by measuring the database rather than trusting the leg. This is the same class as the false-CLEAN secret scan: an assertion that cannot fail is not an assertion.
