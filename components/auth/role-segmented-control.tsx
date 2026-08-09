@@ -66,10 +66,26 @@ export function RoleSegmentedControl({
                 aria-current={selected ? "page" : undefined}
                 data-role-segment={role.value}
                 data-selected={selected ? "true" : "false"}
-                className={`flex items-center justify-center rounded-[0.5625rem] px-2 py-[0.5625rem] text-center text-[0.78125rem] font-medium no-underline transition ${
+                /*
+                 * PHASE 2 — THE THREE RATIFIED FRAMES DISAGREE HERE, so this is
+                 * recorded rather than silently picked. The active segment is
+                 * weight 500 in AUTH-01 and AUTH-03 and weight 600 in AUTH-02.
+                 * That is a frame-vs-frame difference, which this plan says is
+                 * never "drift" (§3.1) — drift is BUILD vs FRAME only.
+                 *
+                 * 600 is applied, to all three, for a reason beyond the count:
+                 * Phase 1 set both states to 500 and dropped the active
+                 * segment's elevation, which left the FILL as the only thing
+                 * separating the current segment from its neighbours. Weight
+                 * restores a genuine non-colour cue (GLOBAL_UI_RULES §7), and
+                 * AUTH-02 ratifies exactly that value. One shared control keeps
+                 * one treatment: a per-role weight would encode the role into
+                 * presentation, and the role here is presentation only (A-046).
+                 */
+                className={`flex items-center justify-center rounded-[0.5625rem] px-2 py-[0.5625rem] text-center text-[0.78125rem] no-underline transition ${
                   selected
-                    ? "bg-surface text-ink-strong"
-                    : "text-neutral-on hover:text-ink-strong"
+                    ? "bg-surface font-semibold text-ink-strong"
+                    : "font-medium text-neutral-on hover:text-ink-strong"
                 }`}
               >
                 {role.label}
