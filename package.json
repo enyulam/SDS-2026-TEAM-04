@@ -30,7 +30,9 @@
     "fixtures:hosted": "node --env-file=.env.local scripts/fixtures/load-hosted-fixtures.mjs",
     "fixtures:hosted-preflight": "node --env-file=.env.local scripts/fixtures/hosted-preflight.mjs",
     "fixtures:hosted-push": "node --env-file=.env.local scripts/fixtures/hosted-db-push.mjs",
-    "fixtures:hosted-state": "node --env-file=.env.local scripts/fixtures/hosted-state-probe.mjs"
+    "fixtures:hosted-state": "node --env-file=.env.local scripts/fixtures/hosted-state-probe.mjs",
+    "hosted:setup-assessment": "node --env-file=.env.local scripts/physical-test/hosted-setup-assessment.mjs",
+    "hosted:draft": "node --env-file=.env.local scripts/physical-test/run-f-hosted-draft.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",
