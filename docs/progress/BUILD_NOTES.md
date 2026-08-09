@@ -3132,3 +3132,114 @@ The prior session's fail-closed type guard exists at `prove-governed-lifecycle.m
 - **NOT-RUN and not claimed** — the three browser/C4 harnesses · S-1 execution · `run-integration` · `build` · `verify-fresh-apply` · `run-c3-bypass` · `prove-clock-hour-determinism` · `prove-disposable-identity-linkage` · every real-provider leg · §3 persona sign-offs · the **22** deferred harnesses.
 - **PROVIDER: NO. HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.**
 - **Next permitted action** — **STAGE 1** of the v3 overlay: the governed backend for the entire chain, proven server-side with no UI.
+
+---
+
+## 2026-08-09 — HERO V3 **STAGE 1 COMPLETE**: the governed attendance write path and spec §20's `report_source_map`
+
+- **Checkpoint / phase** — Plan Phase 1, `P1-T11`, executing the **HERO V3 EXECUTION OVERLAY** Stage 1. **Starting HEAD `256e243`** · **ending HEAD** = this commit · branch `main` · worktrees **1** · tree **CLEAN** at every commit boundary.
+- **Commits, in order** — **`83d7af1`** Stage 1 implementation and proof · **`dd8daa7`** census reconciliation across nine harnesses + one real guard hit · **`4de8293`** C2-A ledger offset + the `B-C2-1` record.
+- **Authority** — the Operator's Stage 1 instruction; `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md` **G-04 items 1 and 3**; A-018, A-026, A-029, A-030, A-034, A-037, A-038; **OD-4**; **Q-27**; A-052; R-27. **Schema changes: TWO migrations** (`20260809210000`, `20260809220000`).
+- **Provider / hosted / human / public / push / submission** — **NO to all six.** Zero provider calls and **zero provider constructions**.
+
+### The Operator's confirmation question, answered before starting
+
+*"Does any Stage 1 proof construct a path capable of provider construction?"* — **YES.** `run-integration.mjs` imports `OpenAiDraftProvider` and constructs it in its `INT-L2b` leg. So **`S-2` and `S-3` applied and were both executed**: `BEST_COACH_RUN_REAL_PROVIDER_LEG` asserted **UNSET** before every invocation, the outward-call trip-wire armed for the whole run, and **`INT-PG` observed ZERO non-loopback requests**. **`S-1` did not apply** — Stage 1 serves no app and spawns no served child process, which is exactly why starting with S-1 would have spent the session on infrastructure Stage 1 does not consume.
+
+### Stage 1 was narrower than the plan listed, and the overlay is why we checked
+
+Overlay §5 says *"do not assume a thing is missing because the plan lists it."* Inventorying first showed that **eight of Stage 1's ten enumerated items were already shipped** — assessment persistence, draft transport, trainer approval, management pending read, wording-only edit, Approve & Submit, canonical submitted version, and the parent read were all live in `run-integration.mjs`'s existing lifecycle. Only **two** were genuinely net-new, and the Operator had already flagged attendance as one of them. Rebuilding the eight would have cost the session and produced nothing.
+
+### Net-new 1 — the attendance write path was the lifecycle's own missing entry condition
+
+`public.attendance` carried three SELECT policies and **no INSERT or UPDATE policy**. Under A-030's deny-by-default posture that reads as correct, but the consequence was that the table was **writable by nobody**, and the harness's hand-seeded row was what satisfied `report_create`'s BC015 gate.
+
+That mattered far beyond attendance. **Attendance is the FIRST governed write of the entire report lifecycle** — the assessment save cannot open a report for a student who is not recorded present — so the lifecycle's entry condition was a **harness artefact**, and a lifecycle whose entry condition is a fixture INSERT is not a proven lifecycle.
+
+`attendance_set_status` is now the only write path. Design points worth recording because each was a decision, not a default:
+
+- **Roster initialization and the toggle are ONE function.** A separate `attendance_initialize_roster` would have been a second client-callable write boundary repeating every predicate, and it would have emitted one `attendance.changed` event **per enrolled student** for a state nobody chose — burying the trainer's real decisions in default noise. Instead the default is materialized **lazily** by the same call that carries the trainer's intent, and **exactly one** event is emitted per action, with `state_from` NULL only when that call created the record.
+- **A-018's Present default is enforced by the COLUMN DEFAULT, not restated.** The INSERT omits `status` entirely, so the body cannot drift from the schema, and a precondition aborts the migration if the default ever changes.
+- **CAS covers existence in both directions.** `NULL` means *"I believe there is no record yet"*; a missing expectation against an existing record and a wrong expectation both get the same stale answer, as does the loser of a concurrent initialization race on `attendance_session_student_key`. There is **no force mode**.
+- **BC204 is the one governed refusal, and it is DIRECTIONAL.** A move to `absent` is refused once a version is submitted (A-026's governed correction); a move to `present` never is, because un-marking an accidental absence must not require a correction. The body issues **no DELETE** and writes to **no assessment or report table** (assertions A8/A9 pin that), so A-026's *"mid-cycle absence retains existing work but blocks progression"* holds structurally — the block comes from BC015, not from destroying anything.
+- **Management and parent are closed by the SAME predicate that authorizes the trainer**, not by a deny branch, and receive the answer a **non-existent session** gets. `attendance_recorded_by_role_pinned_chk` already refused any non-trainer recorder at DDL level, so even a future defect in the body could not attribute an attendance write to management (A-034).
+- **A confirmed no-op is authorized, answered, and NOT audited.** A-029 records governed *actions*; a confirmation is not one.
+- **The registry stays at 16.** `attendance.changed` is already E4 — no extension was needed and none was made.
+
+### Net-new 2 — `report_source_map`, and why `report_store_draft` was not touched
+
+Spec §20 marks this **[KEY]**; G-04 item 1 ruled it `REQUIRED_FOR_FINAL_MVP` with execution owner P2-T06. It has been absent from every migration until now.
+
+**No enum was created.** `output_section` is a CHECK over four literals rather than a type, because creating an enum §6.1 does not list is a **§12 stop-and-ask**, and G-04 authorizes the required *table*, not a new vocabulary type. The four literals are also not a new vocabulary at all — they are the existing four `report_versions` column names, and assertion **S8 derives both sides from the live catalogue** so neither can drift from the other.
+
+**The atomicity problem, and the design that avoided a dangerous edit.** The trace must commit with the version it describes, and PostgREST calls are separate transactions. The obvious route was to add a parameter to `report_store_draft` — which the OD-4 migration itself did one day earlier, so there was precedent. But that means `DROP` + re-`CREATE` of a ratified, byte-pinned ~350-line governed body, retyped by hand: precisely the transcription-drift hazard that has already produced defects here.
+
+Reading `trusted-store.ts` showed the better answer. The trusted channel executes a single `DO` block in one psql session — **one transaction**. A second owner-only function called inside that same block gets identical atomicity with **zero risk to the existing body**. `report_store_draft` is therefore **byte-untouched**, its signature unchanged and its **zero client EXECUTE preserved (R-27)**; assertion S13 pins all of that. A source-map failure lands in the block's handler and rolls the draft store back with it, so the map can never be silently skipped.
+
+**The trace is derived, not invented.** `deriveSourceMap` lives in `grounding.ts` and reads the **same frozen `DIMENSION_TERMS` lexicon and the same word-boundary matcher `validateGrounding` reads**. A second matcher elsewhere could drift from the one that actually validated the text, and the trace would then claim a derivation grounding never saw; sharing the matcher makes that structurally impossible. It runs only **after** grounding returns `ok`, so it never describes refused text.
+
+**A human-authored derived version inherits NO trace.** Copying the AI's trace onto prose a trainer or manager wrote would assert a derivation that did not happen. Lineage is already explicit through `derived_from_version_id`, so the draft's trace stays reachable by walking back. Zero rows is the correct answer, and `INT-SM5` asserts it.
+
+**Reads are trainer-only, and that is a data boundary.** A row names a dimension code, so A-038 bars management and Q-27 bars the parent. Every denial — wrong role, no reach, wrong centre, unauthenticated, absent report, empty trace — is the same zero rows.
+
+**One scope bound, stated rather than hidden.** Spec §20 says *"dimension/field"*. The **field half is deliberately absent**: it has no derivation from ratified anchors, and a `source_kind`/`source_field` pair populated with one value and reserved for another is the placeholder column §12 forbids. The dimension half is complete and useful alone.
+
+### The proof, and what makes it non-vacuous
+
+**`run-integration.mjs` exit 0, 49 `PASS`, 0 failures**, on a disposable clone against the real governed schema with three real local Auth sessions. **The harness's attendance INSERT was removed**, so every leg below now depends on `INT-AT1`'s governed write: if the RPC breaks, the whole lifecycle fails rather than running on a seeded row.
+
+Eleven new legs: `INT-AT1`…`AT6` (initialization with NULL `state_from` · CAS both directions · management/parent/anon/ghost **byte-identical** denial · audited no-op suppression · mid-cycle absence preserving `1/9/1` observations/ratings/reports · post-submission BC204, directional) and `INT-SM1`…`SM5` (trace **re-derived from the version's committed panels** rather than compared to a transcribed literal · derivation **demonstrated capable of yielding nothing** · trainer-only with four identical denials · BC302 write-once · derived version inheriting zero rows), plus `INT-Q27`.
+
+**`INT-Q27` is structural on purpose.** Q-27 is a data boundary at the projection layer, so the leg asserts the DTO's exact key set, that **no key anywhere** is a dimension code or mentions a rating, and that **no leaf value IS a rating label**. It deliberately does **not** scan the prose for rating words: **A-052 prohibits a bare-word rating-label regex**, because *"has mastered maintaining eye contact"* and *"at the beginning of the session"* are legal parent-facing English. A word scan would have contradicted a ratified rule while looking stricter.
+
+### Three assertions that were wrong until measured — each would have aborted a correct database
+
+Recorded because *"prefer re-derivation from the live catalogue over any transcribed shape"* earned its place three separate times in one session:
+
+1. **`proconfig` stores `search_path=""`**, with the two quote characters — not `search_path=`. The `@> ARRAY['search_path=']` form matches nothing. (Kept stricter than the house `proconfig::text LIKE '%search_path=%'` idiom, which would also accept `search_path=public`.)
+2. **`pg_get_function_identity_arguments` returns the OUT parameters too** on this cluster, and the parameter names. IN-argument identity is `oidvectortypes(proargtypes)`.
+3. **The audit registry's raw match count is 17, not 16** — `membership.bootstrap` legitimately appears twice in `audit_append_event` (once in `v_registry`, once in `v_system_only`). Only the **DISTINCT** count is 16.
+
+### Nine census pins reconciled, each with its own arithmetic — and two deliberately left alone
+
+The two migrations moved the catalogue, and nine harnesses pin it as reviewed literals. Every moved number is recorded individually in `dd8daa7`, because **a census bumped wholesale to make a suite go green is how drift becomes invisible** — this project's own history contains three instances.
+
+**`local_fixtures.sql:419`'s 25 and `local_fixtures_expansion.sql`'s 36 were checked individually and LEFT ALONE**: they are fixture **row** counts, not catalogue counts. They look exactly like two of the numbers that moved and mean something entirely different.
+
+Notably, **enums stayed at 12** and that is load-bearing, not incidental — it is the check that would fire if anyone later "tidied" the `output_section` CHECK into an enum.
+
+### One real guard hit, fixed in my file rather than in the guard
+
+`od4-grant-guard.mjs` branch (e) flagged the source-map migration for possible **dynamic-SQL privilege escalation**: it treats a dollar-quoted body that names a guarded function, contains the word `GRANT`, and mentions a client role after the word *"to"* as suspect. The `$post$` block satisfied all three **incidentally** — it named `report_store_draft` in S13, its S5b message said *"grant"*, and an unrelated comment read *"extended to … PUBLIC"*. It granted nothing.
+
+**The guard was not weakened, its expectations were not re-pinned, and the assertion was not dropped.** S13 moved into its own `DO` block containing no `GRANT` token, so branch (e) skips it at its first test. The function name is still written plainly — nothing is obfuscated to evade a scanner — and S13 now checks **all four** client roles instead of two, so the assertion came out stronger.
+
+### One stale narration corrected, not just its assertion
+
+`asm-suite.sql`'s T-ASM-40 pass line read *"8 migrations, 31 functions"* while its own assertions demanded 15 and 36. **The assertions were right and the evidence line shipped into the run record was false.** It is now derived from the live counts. This is the same defect `verify-fresh-apply` already fixed once in its own narration — the pattern is a pinned assertion drifting away from the prose that reports it.
+
+### `B-C2-1` — the bounded look, done and carried
+
+The Operator authorized one timeboxed look at whether `run-concurrency` leaves advisory lock 7301 held or a connection lingering, which would make this a harness-serialization artefact.
+
+**The hypothesis is falsified as stated, by measurement:** `run-concurrency.mjs` allocates gates **7001–7004** through `nextGate() => 7000 + (n += 1)`; **`7301` appears in exactly one file in the entire tree**, `run-c2.mjs`. The two harnesses cannot collide on it. A live `pg_locks` query also found **zero advisory locks held cluster-wide**. **No replacement cause is asserted** — the look was timeboxed and is **CARRIED**.
+
+`run-c2` then passed in full this session, T-C2-4(A) included. **That does not close a flake.** And on its earlier run the static scan **aborted before the runtime legs**, so those legs were **NOT-RUN** — neither passing nor failing, and not carried forward as either. **Hero negative control K remains NOT SATISFIED.**
+
+**`B-C2-2` — new, recorded, deliberately not fixed.** `waitGranted`'s predicate is `pg_locks WHERE locktype='advisory' AND objid=<gate> AND granted` with **no `database` filter**, and `pg_locks` is **cluster-wide**: an advisory lock with the same objid in any other database would satisfy the wait. That is a false-**green** direction, the opposite of the observed failure. Not repaired, because changing the coordination primitive while the flake is undiagnosed could mask it, and this suite is a negative control whose own soundness is now a known open question.
+
+### Verification ledger — serial, since validation is a global mutex
+
+`tsc --noEmit` **0** · `eslint .` **0** (one warning found and fixed by **deleting the now-dead constant, not suppressing it**) · `run-integration` **0 — 49 PASS** · `run-canonical` **0**, canonical DB pristine · `verify-fresh-apply` **0 — all 17 migrations apply from a STRIPPED database in canonical order, and the canonical DB is catalogue-equivalent to a fresh apply with 0 canonicalized differences** · `run-assessment` **0 (45/45)** · `run-c3-bypass` **0** · `run-correction-tracking` **0** · `run-concurrency` **0** · `run-management-approved` **0** · `prove-clock-hour-determinism` **0** · `run-exit-condition-b` **0** · `prove-od4-grant-guard` **0** · `prove-g06-grounding` **0 — 201 checks** · `run-c2` **0**.
+
+**NOT-RUN, with reasons:** `build` — a Stage 3 gate, and Stage 2 changes the frontend next, so running it now would measure a tree about to change (⚠️ it must be green before the automated-green hero checkpoint) · the three browser/C4 harnesses — still **never executed**; the C4 repair remains **unproven** · `prove-disposable-identity-linkage`'s real `signInWithPassword` leg — needs an Operator credential, deliberately left able to fail · every real-provider leg · **§3 persona sign-offs — still not recorded** · the other 22 harnesses' vacuity sweep — `NOT SWEPT — DEFERRED POST-REHEARSAL`.
+
+### One process note worth keeping
+
+`run-canonical` **refused to run** because `supabase/migrations` was dirty, saying so explicitly: *"That is residue from an interrupted run, not a baseline."* That guard did its job — it caught an uncommitted edit to an already-applied migration file and forced the commit before trusting anything downstream. The edit itself was safe (DO blocks leave no catalogue trace, and `verify-fresh-apply` re-confirmed 0 canonicalized differences afterwards), but the harness was right to refuse.
+
+### Exact next step
+
+**STAGE 2 of the overlay** — the thinnest viable UI in chain order, all three roles. **§7.4a `S-1` executes at the START of Stage 2**, where the served app first appears. Visually thin is acceptable; governance is not.
+
+**PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
