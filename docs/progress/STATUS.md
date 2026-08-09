@@ -15,6 +15,30 @@
 >
 > **Reconciled for this clone so far:** the hosted target, the guard retarget, `project_id` → `best-coach-dev`, and the entries in `BUILD_NOTES.md` dated 2026-08-10. **Everything else below is demonstration-workspace history.**
 
+> # ▶ CURRENT EXECUTION STATE — **DEVELOPMENT CLONE, `develop`**
+>
+> **This block is the CURRENT STATUS for THIS clone** (`CLAUDE.md` §15.1/§15.2). It is a **snapshot — replace it, never stack a newer entry on top of it.** The `📌` block immediately below it is the **DEMONSTRATION workspace's** state and is retained as history; where the two disagree about this clone, **this block governs and that one is not about this repository.**
+>
+> | Field | Value |
+> |---|---|
+> | **Position** | ▶ **UI RECONCILIATION — `F-UI-DRIFT-1` bucket (c). BATCH 1 COMPLETE: plan Phases 0, 1, 2 and 3.** ⚠️ Plan-phase numbering, **not** `CLAUDE.md` §10 |
+> | **Branch / worktree / tree** | `develop` / none / **clean at handoff**. Resolve HEAD with `git rev-parse HEAD` |
+> | **Commits, one per phase boundary** | `3010b63` Phase 0 · `ea5d32b` Phase 1 · `02218ba` Phase 2 · `71953fa` Phase 3, then this continuity commit |
+> | **Ahead of `origin/develop`** | **9 commits, NONE pushed.** No remote write of any kind |
+> | **▶ NEXT AUTHORIZED ACTION** | ⛔ **STOP. Phase 4 (`05` Trainer Schedule) is NOT authorized.** The Operator authorized Phases 0–3 only, to run consecutively without an intervening acceptance, then stop |
+> | **Authorization in force** | The Operator's Batch 1 instruction, **widened** to Phases 0–3. It supersedes plan §5.1's Batch 1 = Phase 0 alone (an explicit Operator ruling outranks a procedural planning artefact, `CLAUDE.md` §1). **It carries NO hosted, paid, public, human, push or submission authority** (§15.11) |
+> | **Outstanding Operator `Accepted`** | **Phases 0–3 are `PASS`, this session's evidence verdict. NONE is `Accepted`** — `Accepted` is Operator-set only (§15.6) and no session has written or implied one |
+> | **`TRUE-DRIFT` resolved** | **25** — Phase 0: 10 · Phase 1: 14 · Phase 2: 1 · Phase 3: **0** (comparison run; nothing left to change) |
+> | **`REGISTERED-OMISSION` preserved** | **12, ZERO CHANGED.** Reported as a **separate list**, never merged into the count above |
+> | **`NEW-QUESTION` / `INCOMPLETE`** | **none / none** |
+> | **Route census** | **17**, unchanged at every phase boundary, enumerated from `app/**/page.tsx` |
+> | **Governed surfaces** | **NONE touched** — no schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route. `components/layout/portal-navigation.ts` not modified |
+> | **Suites run, with exit codes** | `tsc` **0** · `eslint` **0** · `build` **0** · `portal-navigation-active-state` **0** (6/6) · `post-login-destinations` **0** (5/5) · `sign-out-terminates-session` **0** (4/4) · `authentication-browser-smoke` **0** (12 checks, three roles) · SC 1.4.3 **9/9** ≥ 4.5:1 on the rendered DOM |
+> | **⛔ NOT-RUN, not carried forward as green** | **The rail's own rendered capture** — the portal layouts run `requirePortalAccess`, so it needs a session and therefore a database; `.env.local` here configures the **hosted** dev project only, which is a §12 stop-and-ask this batch does not carry, and the local stack still carries the demonstration `project_id`. Also NOT-RUN: every disposable-stack harness, every real-provider leg, password sign-in, and `design-foundation.assertions.ts` (no runner — pre-existing). **`NOT-RUN` is not `PASS`** |
+> | **Database** | **NONE written.** `sign-out-terminates-session` READ the local canonical stack and reported its counts **unchanged**. The frozen `zjukuffiuzkbiblmnuwl` was **never contacted** |
+> | **Evidence** | `docs/plan/UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md` · `docs/plan/UI_RECONCILIATION_PHASES_1_3_AUTH_ADJUDICATION.md` · before/after captures in `docs/progress/ui-reconciliation/` |
+> | **Carried, unresolved** | Academy wordmark + tagline = **recorded asset dependency, NOT drift** · `Sign out` vs the frame's `Logout` = recorded `TRUE-DRIFT` left unapplied (two accepted proofs pin the string) · identity-row/page-title baseline = out of Phase 0's owned paths · `Remember me` native checkbox radius. Plus every pre-existing item: `F-S6-REVIEW-1`, `F-DEMO-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1`, `F-STAGE3-1`, `project_id` fallout — **all untouched** |
+
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 >
 > **This file is the canonical CURRENT STATUS snapshot** (`CLAUDE.md` §15.1). **It is a snapshot, not a chronicle — maintain the block below by REPLACING it, never by stacking a newer entry above an older one** (§15.2). Chronology belongs in `BUILD_NOTES.md`, which is the canonical historical log. **Neither file is functional authority**; `FINAL_MVP_AUTHORITY_LOCK.md` (repository root) is the Final MVP baseline, and a progress record must never be the sole authority for a product decision.

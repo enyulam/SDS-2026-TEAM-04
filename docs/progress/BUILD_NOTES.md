@@ -3725,3 +3725,56 @@ The frozen demonstration project `zjukuffiuzkbiblmnuwl` was **never contacted** 
 **Blockers opened or closed:** `F-S6-REVIEW-1` **opened** (functional, out of scope, not to be fixed by the reconciliation plan). The §6 ruling dependency **closed**. `F-DEMO-1`, `F-UI-DRIFT-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1` carried untouched.
 **Cleanup / rollback state:** no partial mutation.
 **Next permitted action:** **NONE without Operator authorization.** The Operator will authorize **Batch 1 — Phase 0 only** in a fresh session, which reads `OPERATOR_HANDOFF.md`, `STATUS.md` and the plan from disk. **No phase has been started.**
+
+---
+
+## 2026-08-10 — UI RECONCILIATION BATCH 1: PLAN PHASES 0, 1, 2 AND 3
+
+**Track / workstream:** `F-UI-DRIFT-1` bucket (c), `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` (v3).
+**Branch / worktree:** `develop` / none. **Starting HEAD `af7e69e` → ending HEAD `71953fac5a01cf3c9432c411635bc1a421483a61`.**
+**Operator decision received:** Batch 1 **widened** to Phases 0, 1, 2 and 3, to run consecutively **without an intervening acceptance**, committing at every phase boundary and stopping before Phase 4. That supersedes plan §5.1's Batch 1 = Phase 0 alone (an explicit Operator ruling outranks a procedural planning artefact, `CLAUDE.md` §1).
+
+### Scope
+
+Phase 0 shared chrome (rail, brand mark, token scale) and Phases 1–3, the authentication trio on one shared component. Presentation only.
+
+### Outcome — the two lists, never merged (plan §6.5)
+
+**`TRUE-DRIFT` RESOLVED — 25.** Phase 0: 10 (rail padding/border/gaps, nav item metrics, weight as a non-colour active cue, brand lockup, rail footer identity block removed, content-column rhythm). Phase 1: 14 (column rhythm, type scale across seven elements, segment track gutter and fill, credential-control geometry, checkbox size, submit geometry, footer alignment, backdrop discs). Phase 2: 1 (current-segment weight). Phase 3: **0** — a measured result, not a skipped phase.
+
+**`REGISTERED-OMISSION` PRESERVED — 8 + 4, ZERO CHANGED.** Auth: presentation-only role query · `Remember me` disabled with no `name` (the frame's CHECKED pink state deliberately not copied) · `Forgot password?` inert · one closed two-valued failure message · uncontrolled password · the governance note as a required addition · no logo/tagline asset invented · brand mark non-interactive. Chrome: rail items unchanged (deferred screens stay unbuilt) · the four contrast divergences · the G-19 `data-adapter-kind` marker · the `data-session-user` flag.
+
+**`NEW-QUESTION`: none.** **`INCOMPLETE`: none.**
+
+### Findings this run — each caught by measurement, not inspection
+
+1. **The `.form-field` cascade trap, recurring.** Three utilities on the credential controls were generated, matched, and silently lost to an **unlayered** `.form-field` rule; the control still computed 10px/12px/14px. Same class as F-01b. Fixed narrowly as `.form-field.auth-field`; `.form-field` was **not** moved into a layer. Only visible because the build side is a measurement of the rendered DOM.
+2. **My own comment broke an accepted proof.** A comment placed between the glyph and the `Sign out` label failed `sign-out-terminates-session.mjs` S-1, which pins `/>` → `Sign out` → `<` inside the form. Moved above the glyph; 4/4 restored. The suite working as designed.
+3. **The capture harness's trip-wire failed twice, on itself.** First it sampled **after** stopping the server, so a recycled Windows PID attributed foreign connections to the served tree. Corrected to a **live** tree, it then read a genuine non-zero — localised by remote **port** (never an address) to one transient `443/ESTABLISHED` peer held only while a browser drove the page, i.e. the Next **dev overlay's** update check; the same routes served to a non-browser client measured zero, and **no Postgres or pooler port appeared in any sample**. Removed at source by serving the **production build**. Every capture run since: **ZERO** non-loopback peers.
+4. **The three ratified frames disagree** on the current segment's weight (500/600/500). Recorded, not silently picked — plan §3.1 says drift is BUILD vs FRAME only. 600 applied to all three; reasoning in the adjudication §4.
+5. **Three build colours were already failing SC 1.4.3** at ~3.07:1 (description, governance note, footer note). Deepened to `neutral-on`; **no token VALUE redefined.** All nine measured pairs now clear AA.
+
+### Automated verification, with exit codes
+
+`tsc --noEmit` **0** · `eslint .` **0** · `next build` **0**, route census **17** unchanged at every phase boundary · `portal-navigation-active-state` **0** (6/6) · `post-login-destinations` **0** (5/5) · `sign-out-terminates-session` **0** (4/4) · `authentication-browser-smoke` **0** (12 checks, all three roles) · SC 1.4.3 **9/9** pairs ≥ 4.5:1, measured on the rendered DOM.
+
+**Three suites previously recorded `NOT_RUN` for want of a runner now RUN**, via `--experimental-strip-types` plus the existing alias loader: `portal-navigation-active-state`, `post-login-destinations`, `sign-out-terminates-session`. `design-foundation.assertions.ts` **remains NOT-RUN** — its relative extensionless import still does not resolve; its Phase 0-relevant invariant was measured directly instead.
+
+### NOT-RUN, with reasons
+
+**The rail's own rendered capture.** The rail renders only inside the portal layouts, which run `requirePortalAccess` before any child renders — that needs a real session and therefore a reachable governed database. `.env.local` in this clone configures the **hosted** dev project only, so driving an authenticated surface would be a §12 stop-and-ask this batch does not carry; the local Docker stack still carries the **demonstration** `project_id`, and `B-STAGE3-2` plus the `project_id` fallout are both carry-do-not-fix. **`NOT-RUN` is not `PASS`** — see the adjudication §6. Every harness needing the disposable stack, every real-provider leg, and password sign-in were likewise not run and are **not** carried forward as green.
+
+### Isolation
+
+The frozen demonstration project `zjukuffiuzkbiblmnuwl` was **never contacted** — confirmed by reading `.env.local` for that ref without printing any value, and by the trip-wire. **No database was written.** `sign-out-terminates-session` read the local canonical stack and reported its counts **unchanged** (`reports|versions|version_ratings|corrections|observations|ratings|events|heads|auth|migrations = 1|0|0|0|2|18|4|1|3|17`). `main` untouched; **nothing pushed**; no remote added; no worktree created; no `supabase` command run; no migration, schema, RPC, server action, DTO, projection, grant, policy or audit action touched.
+
+### Files changed
+
+`components/layout/portal-shell.tsx` · `components/brand/brand-mark.tsx` · `components/auth/auth-shell.tsx` · `components/auth/role-segmented-control.tsx` · `components/auth/credential-fields.tsx` · `features/auth/login-presentation.tsx` · `app/globals.css` · `scripts/ui-reconciliation/capture-login.mjs` (new) · `docs/plan/UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md` (new) · `docs/plan/UI_RECONCILIATION_PHASES_1_3_AUTH_ADJUDICATION.md` (new) · `docs/progress/ui-reconciliation/{before,after}/` (new captures) · `STATUS.md` · `OPERATOR_HANDOFF.md` · this log. **`components/layout/portal-navigation.ts` was NOT modified.**
+
+**Commits, one per phase boundary:** `3010b63` Phase 0 · `ea5d32b` Phase 1 · `02218ba` Phase 2 · `71953fa` Phase 3.
+
+**Migration or schema changes:** none. **Reviewer findings:** no independent adversarial reviewer was run for this batch; the three suites above served as the mechanical check. **Blockers opened or closed:** none opened, none closed; `F-UI-DRIFT-1` bucket (c) advanced from *not started* to **Phases 0–3 complete**. `F-S6-REVIEW-1`, `F-DEMO-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1`, `F-STAGE3-1` and the `project_id` fallout all carried untouched.
+**Environment changes:** none persisted. Servers were started and stopped on loopback ports 3000/3422 only.
+**Cleanup / rollback state:** no partial mutation. Scratch diagnostic copies under `.tmp-diag/` were created and **removed**.
+**Next permitted action:** **STOP — Phase 4 is NOT authorized.** `PASS` here is this session's evidence verdict; **`Accepted` is Operator-set only** and no acceptance has been written or implied.
