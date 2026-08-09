@@ -239,6 +239,18 @@ function runSqlFile(dbUrl, relativePath, psqlVars = {}) {
 
 async function main() {
   const reload = process.argv.includes('--reload')
+  /**
+   * Run ONLY the committed verifier against the hosted project.
+   *
+   * Exists because the first hosted run loaded the 25 baseline rows and then
+   * died on the expansion step, leaving the fixture LOADED BUT UNVERIFIED. The
+   * only thing outstanding was the verification, and re-running the whole
+   * loader to reach it would have demanded `--reload` (whose teardown DELETES)
+   * and a needless re-typing of three passwords.
+   *
+   * It prompts for nothing and writes nothing.
+   */
+  const verifyOnly = process.argv.includes('--verify-only')
 
   phase('Target guards — every one runs BEFORE anything is created')
   const apiUrl = assertHostedApiUrl(requireVar(VAR_URL))
@@ -271,8 +283,31 @@ async function main() {
     const [{ count: existing }] = await sql`
       SELECT count(*)::int AS count FROM public.accounts
        WHERE id = 'c0000000-0000-4000-8000-000000000001'::uuid`
+
+    if (verifyOnly) {
+      phase('Verification ONLY — the committed verifier, unmodified. No prompt, no write.')
+      if (existing === 0) throw new SafeError('No fixture rows are present; there is nothing to verify.')
+      await runSqlFile(dbUrl, 'verify-local-fixtures.sql')
+      pass('every fixture assertion passed on the hosted project')
+      const [c] = await sql`
+        SELECT (SELECT count(*)::int FROM public.accounts) AS accounts,
+               (SELECT count(*)::int FROM public.students) AS students,
+               (SELECT count(*)::int FROM public.observations) AS observations,
+               (SELECT count(*)::int FROM public.observation_ratings) AS ratings,
+               (SELECT count(*)::int FROM public.reports) AS reports,
+               (SELECT count(*)::int FROM public.audit_events) AS audit_events`
+      phase('Census')
+      say(`  accounts=${c.accounts} students=${c.students} observations=${c.observations} ` +
+        `observation_ratings=${c.ratings} reports=${c.reports} audit_events=${c.audit_events}`)
+      say('\nHOSTED FIXTURES VERIFIED. Nothing was written and no password was requested.')
+      return
+    }
+
     if (existing > 0 && !reload) {
-      throw new SafeError('Fixture rows already exist. Re-run with --reload to tear down and reload.')
+      throw new SafeError(
+        'Fixture rows already exist. Use --verify-only to verify them without writing, ' +
+          'or --reload to tear down and reload (which DELETES the Auth identities).',
+      )
     }
 
     phase('Passwords — interactive, no-echo, no alternative source')
@@ -336,8 +371,30 @@ async function main() {
     phase('Domain fixtures')
     await runSqlFile(dbUrl, 'local_fixtures.sql', { do_cleanup: 'false', do_load: 'true' })
     pass('Step 7F baseline loaded (25 domain rows)')
-    await runSqlFile(dbUrl, 'local_fixtures_expansion.sql')
-    pass('P1-T09a additive expansion loaded')
+
+    // ⚠️ THE P1-T09a EXPANSION IS DELIBERATELY NOT LOADED HERE.
+    //
+    // An earlier version of this loader loaded it and failed on the fixture's
+    // own mode guard, which demands `-v do_expand=true`. The right response
+    // was NOT to pass that variable: it was to notice that THE LOCAL LOADER
+    // NEVER LOADS THE EXPANSION EITHER. `load-local-fixtures.mjs` only COUNTS
+    // expansion rows and REFUSES `--reload` while any are present; the
+    // expansion is applied by the operator as a separate, explicit psql
+    // invocation. This loader had invented a step its local counterpart does
+    // not have, and wiring in `do_expand` would have entrenched the invention.
+    //
+    // It is also not needed for the hero chain, which runs entirely on the
+    // BASELINE `c`-family rows — the chain's own session and student ids are
+    // `c5000000-…` and `c2000000-…`. The expansion adds the disjoint
+    // `e`-family: a second trainer, further modules and students, a second
+    // parent, and a SECOND class session. Only the session-to-session
+    // previous-focus continuity proof genuinely requires it.
+    //
+    // To add it deliberately, as a separate operator step:
+    //   docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc \
+    //     --dbname "<hosted url>" -v do_expand=true -v do_expand_cleanup=false \
+    //     < scripts/fixtures/local_fixtures_expansion.sql
+    info('P1-T09a expansion NOT loaded — the local loader does not load it either, and the hero chain does not need it')
 
     phase('Verification — the committed verifier, unmodified')
     await runSqlFile(dbUrl, 'verify-local-fixtures.sql')
