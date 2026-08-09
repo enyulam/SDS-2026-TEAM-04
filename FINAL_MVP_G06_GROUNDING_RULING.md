@@ -488,3 +488,71 @@ with a cost · public deployment or public tunnel · human recruitment or testin
 · adding a remote · push · final submission · `supabase db reset` · any
 history-touching git operation · a Critical/High finding that invalidates the
 plan being executed.
+
+## H-8 — Operator handoff artifact at every stop
+
+**Ratified 2026-08-09 by bounded Operator instruction.** Process only. It
+creates no product rule, no governance control and no acceptance standard.
+
+⚠️ **Numbering note, recorded rather than silently resolved:** the ratifying
+instruction asked for `H-7`. **`H-7` already exists** — *"What this
+resequencing can never carry"*, the non-inheritable gates list — so this
+section is **H-8**. No existing section was displaced or renumbered. The
+Operator accepted this correction before it was written.
+
+**The obligation.** At every stop — all three permitted endings (**A** the
+complete local hero path is verified · **B** a non-inheritable hard Operator
+gate is encountered · **C** remaining context is insufficient to safely begin
+and finish the next security-critical operation) **and at any checkpoint where
+control is handed back** — the session also writes
+**`docs/progress/OPERATOR_HANDOFF.md`**, **OVERWRITTEN, never appended**.
+
+**Authority, and why this is not a competing tracker.** `CLAUDE.md` §15.8
+already provides for a consultation handoff generated *"on demand from the
+canonical records"*, for the stated purpose of letting an external consultant
+understand the problem *"without the Operator manually reconstructing previous
+sessions"*. §15.8's default — no permanent handoff file **per consultation** —
+is displaced by its own *"unless there is a concrete reason"* clause: manual
+transcription between runs has already delivered a false premise about
+repository state into a run (the v2 delta of 2026-08-09 had to supersede a
+stale expected-HEAD block and a stale worktree block). **One file overwritten
+in place is not a file per consultation, and it cannot accumulate a superseded
+"current" claim** — which is the §15.2 failure mode that once had `STATUS.md`
+asserting three current states at once.
+
+**STRICTLY DERIVED — this is the binding constraint, not a preamble.** Every
+line must be reproduced or mechanically reduced from `STATUS.md`,
+`BUILD_NOTES.md`, the stop report, `git`, or the live database. The artifact
+**originates nothing**: no fact not already recorded elsewhere, no new field,
+no judgement, no recommendation. ⚠️ **If a fact belongs in the handoff but is
+not yet in a canonical record, it is written to the canonical record FIRST and
+derived from there.** The moment anything is recorded here first, this becomes
+a tracker and `CLAUDE.md` §15.1 prohibits it.
+
+**Mandatory header**, verbatim in substance: **NOT A TRACKER · NOT AUTHORITY ·
+DERIVED · where this and `STATUS.md` disagree, `STATUS.md` wins and this file
+is stale.**
+
+**Required content**, biased toward what an outside reader cannot infer:
+HEAD · branch · tree state · remotes · tags · worktrees · migrations on disk
+vs applied · current phase and task with acceptance steps done vs outstanding ·
+**which ending fired and why** · **suites that RAN this session with exit
+codes, listed SEPARATELY from NOT-RUN with reasons — never merged, never
+carried forward from a prior session** · open gates, open undiagnosed items,
+open unratified decisions · anything recorded-not-fixed **and the clause
+preventing the fix** · **claims made by an earlier session in this run that are
+NOT proven by execution** · **assertion-vacuity sweep status per harness** ·
+the exact next permitted action and its prerequisites.
+
+**Size: aim under ~120 lines. Past that it has become a tracker.**
+
+**Never** a credential, a secret, real personal data, or raw private AI
+content. `CLAUDE.md` §15.4's redaction-by-construction discipline applies.
+
+⚠️ **Scope — the Operator has ruled that this obligation SURVIVES beyond Plan
+Phase 4.** H-1 scopes this ruling to Plan Phases 0–4, and this section is the
+one express exception: the need it serves does not end at Phase 4. The
+scope-correct permanent home is **`CLAUDE.md` §15.8**, which already carries
+the field list and the carve-out this rests on; a pointer is recorded there by
+the ratified annotate-never-delete method under the same bounded instruction.
+**That pointer does not restate this section — H-8 remains the specification.**

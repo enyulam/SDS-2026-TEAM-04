@@ -3032,3 +3032,49 @@ Both by the ratified annotate-never-delete method (strike · preserve inline · 
 - **PROVIDER: NO** — zero calls, zero provider constructions, nothing served, no browser, no outward request. **HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.**
 - **NOT-RUN and not claimed** — the three browser/C4 harnesses (still repaired-but-never-executed), `prove-disposable-identity-linkage.mjs`, every real-provider leg, `build`, `verify-fresh-apply`, `run-c3-bypass`, `run-concurrency`, `prove-clock-hour-determinism`, the remaining SQL suites, and the **§3 persona sign-offs**.
 - **Next permitted action** — the browser/C4 ledger under §7.4a **S-1/S-2/S-3**, per the resume checkpoint in `STATUS.md`.
+
+
+---
+
+## 2026-08-09 — H-8 ratified · OPERATOR_HANDOFF.md created · `B-FIXGATE-1` disposition resolved · ending C
+
+- **Checkpoint / phase** — Plan Phase 1, **`P1-T11` still IN PROGRESS**. **Starting HEAD** `f8a40b9`. **Migration / schema changes — NONE.**
+- **Authority** — a bounded Operator instruction approving the proposed handoff artifact with four corrections, and directing that the vacuity sweep NOT be started in this session.
+
+### A contradiction of mine, corrected by the Operator
+
+My previous stop report declared **ending C** and then offered to execute a vacuity sweep that I had myself said would change several of that report's fields. Both could not hold. The Operator resolved it: the ending stands, the sweep belongs to a session with the context to finish it, and **no S-1 or browser work was begun**. Recorded because the error was in the stop report itself, which is the artifact the Operator relies on most.
+
+### `B-FIXGATE-1` — the fixture/gate item was missing from the handoff. Disposition: **RESOLVED**.
+
+The Operator caught that *"the fixture provider emits a draft its own grounding gate REFUSES"* appeared **nowhere** in the proposed handoff. Determined from evidence rather than recollection, and written to `STATUS.md` **first**, then derived — which is exactly what H-8 requires.
+
+**Closed by two commits:** `P1-T09` (**`37c4dd1`**) removed the fabricated `"participation"` strength fallback under `G06-8`; `P1-T11 part 1` (**`9fe4a5b`**) moved the support marker into the **same clause** as the dimension it frames, which was the real defect — `G06-6`'s escape is dimension-local, so a marker in a neighbouring clause does not attach to the claim.
+
+⚠️ **Why this is complete rather than sampled**, which is the part that makes "resolved" defensible: the provider has **exactly TWO output branches**, both keyed on `best.polarityBand === "positive"` (`provider.ts:330`, `:335`); `areasForDevelopment` and `remarks` are unconditional. **Both branches were executed and ACCEPTED** across the nine item-1 distributions, and eight are permanently asserted in `prove-g06-grounding.mjs` section F. It is therefore neither an open item nor an unproven claim.
+
+### H-8 — the handoff obligation, and why it is not a competing tracker
+
+The instruction asked for `H-7`. **`H-7` already exists** — *"What this resequencing can never carry"*, the non-inheritable gates list — so this is **H-8**, and nothing was displaced or renumbered. The Operator accepted the correction before it was written.
+
+The §15.1 objection that defeated an earlier `RESUME.md` proposal does not reach this, and **`CLAUDE.md` §15.8 is the citation I should have given at that time**: it already provides for a consultation handoff generated *"on demand from the canonical records"*, for the express purpose of briefing an external consultant *"without the Operator manually reconstructing previous sessions"*. Its default — no permanent handoff file **per consultation** — is displaced by its own *"unless there is a concrete reason"* clause, and the concrete reason is documented: manual transcription already delivered a false premise about repository state into this very run (the v2 delta had to supersede a stale expected-HEAD block and a stale worktree block). **One file overwritten in place is not a file per consultation**, and it cannot accumulate a superseded "current" claim — the §15.2 failure mode that once had `STATUS.md` asserting three current states at once.
+
+The binding constraint is written into H-8: **strictly derived, originates nothing**, and if a fact belongs in the handoff but is not yet in a canonical record it goes to the canonical record **first**. The moment anything is recorded there first it becomes a tracker and §15.1 bites.
+
+**Scope: the Operator ruled the obligation SURVIVES beyond Plan Phase 4**, making H-8 the one express exception to H-1's Phases 0–4 scope.
+
+### `docs/progress/OPERATOR_HANDOFF.md` — seeded, 124 lines
+
+Derived from `STATUS.md`, `BUILD_NOTES.md`, `git` and the live database. Ending **C** recorded with its reason. Suites that RAN with exit codes are listed **separately** from NOT-RUN with reasons, and nothing is carried forward from a prior session. §7 records that **all three browser/C4 harnesses are NOT-RUN** and that **the C4 repair is UNPROVEN** — verified by static selector agreement only, with no leg executed. First draft came in at 128 lines, over H-8's own ~120 threshold; trimmed to 124, including removal of a §6 row that duplicated §8.
+
+### Carried forward, not acted on (Operator instruction)
+
+- **`B-G06-DET-1` reclassified.** At 3 of 18 matched this is a **measured detector-coverage finding, not a residual** — my earlier framing understated it and is withdrawn. It stays **OPEN and UNRATIFIED**; the lexicon is not to be widened and no fix is to be proposed. The Operator will rule before the demonstration rehearsal. The precondition is recorded verbatim: *"rule 3 cannot be relied on for real-provider drafts; 15 of 18 measured positive formulations about a `needs_support` dimension are unmatched."* ⚠️ **The bound that contains it — the fixture emits none of that vocabulary — expires the moment a real provider is enabled.**
+- **The vacuity sweep must be SCOPED before it is started.** One harness swept, **24 of 25 not swept**; the inventory was enumerated this session so the next can scope without re-deriving it. A partial sweep is worse than none.
+
+### Automated verification — RAN this session
+
+`npx tsc --noEmit` **0** · `npx eslint .` **0**. Q-28 encoding verified via Node on all edited files: **0 BOMs**, no mojibake, Unicode round-trips.
+
+- **PROVIDER: NO. HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.** No serve, no browser, no S-1, no migration, schema, RPC, grant or audit-registry change.
+- **Ending: C.** Next permitted action is in `OPERATOR_HANDOFF.md` §9 and `STATUS.md`.
