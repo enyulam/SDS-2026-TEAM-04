@@ -82,6 +82,18 @@ export type RosterEntryDto = {
   readonly studentId: string;
   readonly displayName: string;
   readonly attendanceState: "present" | "absent";
+  /**
+   * Whether an `attendance` ROW exists for this (session, student) pair.
+   *
+   * `attendanceState` is the EFFECTIVE status and already folds in A-018's
+   * Present default; this reports whether that default has actually been
+   * MATERIALIZED. The two are different committed states and the governed
+   * compare-and-set distinguishes them — `expectedStatus: undefined` means "I
+   * believe no record exists", and there is no force mode — so a toggle built
+   * on `attendanceState` alone would send the wrong expectation for every
+   * learner whose row has not been written yet.
+   */
+  readonly attendanceRecorded: boolean;
   readonly reportState: ReportStatus | "no_report";
   readonly reportId: string | null;
   readonly previousSessionFocus: string | null;
@@ -257,6 +269,35 @@ export type SaveObservationSuccess = {
    * TypeScript asserting a transition PostgreSQL never performed.
    */
   readonly status: ReportStatus | "no_report";
+};
+
+/**
+ * The governed Trainer Present/Absent control (A-018; G-04 item 3).
+ *
+ * ⚠️ `expectedStatus` is the caller's belief about the COMMITTED record.
+ * `undefined` means "I believe there is no record yet" — it is NOT "I don't
+ * care". Omitting it against a record that exists is answered `stale_state`,
+ * exactly as a wrong value would be. Derive it from `RosterEntryDto`:
+ * `attendanceRecorded ? attendanceState : undefined`.
+ */
+export type SetAttendanceInput = {
+  readonly sessionId: string;
+  readonly studentId: string;
+  readonly expectedStatus?: "present" | "absent";
+  readonly newStatus: "present" | "absent";
+};
+
+export type SetAttendanceSuccess = {
+  /** The status the DATABASE reports, never one asserted by the client. */
+  readonly status: "present" | "absent";
+  /** True when this call materialized A-018's Present default for the pair. */
+  readonly initialized: boolean;
+  /**
+   * False when the call was a confirmed no-op — authorized, answered and
+   * deliberately unaudited, because A-029 records governed ACTIONS and a
+   * no-op is not one. A surface must not report "saved" on `success` alone.
+   */
+  readonly changed: boolean;
 };
 
 export type RequestDraftInput = {

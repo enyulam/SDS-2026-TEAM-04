@@ -77,9 +77,47 @@ export interface AdapterRosterEntryDto {
   readonly studentId: string;
   readonly displayName: string;
   readonly attendanceState: "present" | "absent";
+  /**
+   * Whether an `attendance` row exists. `attendanceState` is the EFFECTIVE
+   * status including A-018's lazily-materialized Present default; this says
+   * whether that default has actually been written. The governed CAS needs
+   * the distinction and there is no force mode — see the same field on
+   * `server/modules/report-workflow/trainer-projections.ts`.
+   */
+  readonly attendanceRecorded: boolean;
   readonly reportState: AdapterReportStatus | "no_report";
   readonly reportId: string | null;
   readonly previousSessionFocus: string | null;
+}
+
+/**
+ * The governed Trainer Present/Absent control (A-018; Operator ruling G-04
+ * item 3 — a GOVERNED FUNCTIONAL INSERTION on the existing roster surface,
+ * not a new screen).
+ *
+ * `expectedStatus` is the caller's belief about the COMMITTED record and
+ * `undefined` means "I believe no record exists yet". It is not optional in
+ * the "leave it out if you don't care" sense: omitting it against a record
+ * that exists is answered `stale_state`, exactly as a wrong value would be.
+ */
+export interface AdapterSetAttendanceInput {
+  readonly sessionId: string;
+  readonly studentId: string;
+  readonly expectedStatus?: "present" | "absent";
+  readonly newStatus: "present" | "absent";
+}
+
+export interface AdapterSetAttendanceSuccess {
+  /** The status the DATABASE reports, never one asserted client-side. */
+  readonly status: "present" | "absent";
+  /** True when this call materialized A-018's Present default for the pair. */
+  readonly initialized: boolean;
+  /**
+   * False when the call was a confirmed no-op — authorized, answered and
+   * deliberately NOT audited, because A-029 records governed ACTIONS and a
+   * no-op is not one. A surface must not report "saved" on `success` alone.
+   */
+  readonly changed: boolean;
 }
 
 export interface AdapterDimensionDto {

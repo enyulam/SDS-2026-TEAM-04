@@ -1,7 +1,10 @@
 /**
  * F16-C — the REAL participant `PhysicalTestPort`.
  *
- * WHAT IT IS. A thin, non-deciding client-side binding of the 23 port members
+ * WHAT IT IS. A thin, non-deciding client-side binding of the 24 port members
+ * (23 until Stage 2 added `setAttendance`, A-018's governed Present/Absent
+ * write — the lifecycle's first governed write, which no surface had ever
+ * exercised)
  * onto the governed Server Actions in
  * `server/modules/integration-adapter/participant-actions.ts`. It holds no
  * state, no cache, no fallback data and no simulation. Every member either
@@ -62,6 +65,8 @@ import type {
   SaveTrainerEditInput,
   SaveTrainerEditSuccess,
   SessionUserDto,
+  SetAttendanceInput,
+  SetAttendanceSuccess,
   TrainerApproveInput,
   TrainerApproveSuccess,
   TrainerSessionSummaryDto,
@@ -96,6 +101,7 @@ import {
   adapterRequestDraft,
   adapterSaveObservation,
   adapterSaveTrainerEdit,
+  adapterSetAttendance,
   adapterTrainerApprove,
   adapterUpdateTrainerChecklist,
 } from "@/server/modules/integration-adapter/participant-actions";
@@ -215,6 +221,17 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     },
 
     // ---- writes ------------------------------------------------------
+    /**
+     * A-018's Present/Absent control — the lifecycle's FIRST governed write.
+     * `expectedStatus` is forwarded exactly as the surface derived it; this
+     * binding neither supplies a default for it nor retries on `stale_state`,
+     * because either would be a force mode the governed RPC deliberately does
+     * not offer.
+     */
+    setAttendance(input: SetAttendanceInput): Promise<UiActionResult<SetAttendanceSuccess>> {
+      return guard(() => adapterSetAttendance(input));
+    },
+
     saveObservation(input: SaveObservationInput): Promise<UiActionResult<SaveObservationSuccess>> {
       return guard(() =>
         adapterSaveObservation({

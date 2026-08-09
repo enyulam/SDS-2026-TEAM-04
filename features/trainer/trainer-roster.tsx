@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 import { Avatar, initialsFrom } from "@/components/ui/avatar";
+import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -12,6 +13,7 @@ import type {
   RosterEntryDto,
   TrainerSessionSummaryDto,
 } from "@/lib/frontend/contracts/physical-test";
+import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-runtime-context";
 import { asFailure, type ResourceState } from "./resource-state";
 
@@ -38,9 +40,26 @@ import { asFailure, type ResourceState } from "./resource-state";
  * GOVERNANCE BOUNDARIES HELD HERE:
  *
  *  - ATTENDANCE (A-018, `CLAUDE.md` §6). Attendance is resolved SERVER-SIDE and arrives on the
- *    governed roster projection. Nothing here computes, infers or toggles it, and no enrolment
+ *    governed roster projection. Nothing here computes or infers it, and no enrolment
  *    eligibility is computed client-side. Present-by-default is the server's initialization
  *    rule, not a default this component manufactures when a field is missing.
+ *
+ *    STAGE 2 ADDED THE TRAINER'S TOGGLE, and only the toggle. A-018 gives the trainer the
+ *    right to mark an individual learner Absent, and until Stage 2 no surface exercised it —
+ *    `attendance` carried three SELECT policies and no INSERT/UPDATE policy at all, so the
+ *    table was writable by nobody and the lifecycle's first governed write was being satisfied
+ *    by a hand-seeded harness row. The control here DECIDES NOTHING: it sends a
+ *    compare-and-set to `attendance_set_status`, the one governed write path, and renders the
+ *    status THE DATABASE REPORTS BACK. It never assumes its own write succeeded, never retries
+ *    a refusal, and never re-derives authorization — management (A-034 forbids management
+ *    touching attendance) and parent are closed server-side by the same predicate that
+ *    authorizes the trainer.
+ *
+ *    THE EXPECTED-STATE ARGUMENT IS DERIVED, NOT ASSUMED. `expectedStatus` is omitted exactly
+ *    when the projection reports `attendanceRecorded: false` — "no row exists yet" — because
+ *    A-018's Present default is materialized lazily and "no record" is a different committed
+ *    state from "record says present". There is no force mode: a stale expectation is refused
+ *    and surfaced, never papered over with a re-read-and-retry.
  *  - ABSENCE EXPOSES NOTHING. `resolveAction` gates on attendance BEFORE it ever looks at a
  *    report status, so an absent learner's card offers no assessment path and no report path —
  *    not a link, not a route, not a status pill. Absence must never create or expose a
@@ -147,6 +166,10 @@ export function TrainerRoster() {
   const [state, setState] = useState<ResourceState<RosterView>>({ kind: "loading" });
   const [attendanceFilter, setAttendanceFilter] = useState<AttendanceFilter>("all");
   const [sortMode, setSortMode] = useState<SortMode>("name");
+  /** The learner whose governed attendance write is in flight, if any. */
+  const [attendanceBusy, setAttendanceBusy] = useState<string | null>(null);
+  /** The last governed attendance refusal, surfaced verbatim rather than retried. */
+  const [attendanceRefusal, setAttendanceRefusal] = useState<UiActionResult<never> | null>(null);
   const filterId = useId();
   const sortId = useId();
   const lessonPlanNoteId = useId();
@@ -181,6 +204,61 @@ export function TrainerRoster() {
     () => (state.kind === "ready" ? state.data.roster : []),
     [state],
   );
+
+  /**
+   * A-018's governed Present/Absent toggle.
+   *
+   * The whole of the governance lives on the other side of `setAttendance`.
+   * What this function is responsible for is narrower and worth stating,
+   * because each part is a place a surface can quietly lie:
+   *
+   *  1. the expected state is DERIVED from what the projection actually
+   *     reported — `undefined` when no row exists yet — never defaulted;
+   *  2. the rendered result is the status THE DATABASE REPORTED, never the
+   *     status this function asked for. An optimistic update would show a
+   *     learner as absent on a call the database refused;
+   *  3. a refusal is SURFACED, never retried. Re-reading and re-sending on
+   *     `stale_state` would be a force mode reintroduced client-side, and the
+   *     governed RPC deliberately offers none;
+   *  4. `changed: false` is a confirmed no-op — authorized, answered and
+   *     deliberately unaudited — so it must not be reported as "saved".
+   */
+  async function toggleAttendance(entry: RosterEntryDto): Promise<void> {
+    if (attendanceBusy !== null) return;
+    setAttendanceBusy(entry.studentId);
+    setAttendanceRefusal(null);
+
+    const result = await port.setAttendance({
+      sessionId,
+      studentId: entry.studentId,
+      /* Omitted exactly when the projection says no record exists yet. */
+      ...(entry.attendanceRecorded ? { expectedStatus: entry.attendanceState } : {}),
+      newStatus: entry.attendanceState === "absent" ? "present" : "absent",
+    });
+
+    setAttendanceBusy(null);
+    if (result.outcome !== "success") {
+      setAttendanceRefusal(result);
+      return;
+    }
+
+    const committed = result.data.status;
+    setState((previous) =>
+      previous.kind === "ready"
+        ? {
+            kind: "ready",
+            data: {
+              ...previous.data,
+              roster: previous.data.roster.map((item) =>
+                item.studentId === entry.studentId
+                  ? { ...item, attendanceState: committed, attendanceRecorded: true }
+                  : item,
+              ),
+            },
+          }
+        : previous,
+    );
+  }
 
   /* Filter and sort NARROW the governed projection; neither can widen it. */
   const visible = useMemo(() => {
@@ -358,6 +436,20 @@ export function TrainerRoster() {
       </section>
 
       <section aria-labelledby="roster-heading" className="grid gap-4">
+        {attendanceRefusal !== null && (
+          /*
+           * A governed refusal, stated and left standing. There is deliberately
+           * no "try again" control: the refusals this write produces are
+           * `stale_state` (this roster no longer describes the committed
+           * record) and the non-disclosing authorization outcomes, and a retry
+           * affordance on either would invite the trainer to do the one thing
+           * the governed RPC refuses to do for them. Reloading the roster is
+           * the honest recovery, and it is what the message asks for.
+           */
+          <FeedbackBanner title="Attendance was not changed" tone="error">
+            {attendanceRefusalMessage(attendanceRefusal)}
+          </FeedbackBanner>
+        )}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2
             id="roster-heading"
@@ -437,7 +529,16 @@ export function TrainerRoster() {
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {visible.map((entry) => (
               <li key={entry.studentId}>
-                <RosterCard entry={entry} sessionId={sessionId} />
+                <RosterCard
+                  entry={entry}
+                  sessionId={sessionId}
+                  busy={attendanceBusy === entry.studentId}
+                  /* Any in-flight governed write disables every other toggle:
+                     one write at a time keeps each card's expected state the
+                     one the projection actually reported. */
+                  disabled={attendanceBusy !== null && attendanceBusy !== entry.studentId}
+                  onToggleAttendance={toggleAttendance}
+                />
               </li>
             ))}
           </ul>
@@ -445,6 +546,30 @@ export function TrainerRoster() {
       </section>
     </div>
   );
+}
+
+/**
+ * The message for a refused attendance write.
+ *
+ * `unauthorized` and `unavailable` are the governed NON-DISCLOSING outcomes and
+ * are deliberately given ONE shared sentence: the server answers "you may not"
+ * and "there is no such pair" identically on purpose, and a surface that split
+ * them back apart would rebuild the existence oracle the RPC exists to prevent.
+ */
+function attendanceRefusalMessage(result: UiActionResult<never>): string {
+  switch (result.outcome) {
+    case "stale_state":
+    case "validation":
+    case "retryable_failure":
+    case "unexpected_failure":
+      return result.message;
+    case "generation_failure":
+      return result.message;
+    case "unauthenticated":
+      return "Your session has ended. Sign in again to continue.";
+    default:
+      return "Attendance for this learner is not available to change.";
+  }
 }
 
 /**
@@ -463,9 +588,15 @@ function StripLabel({ children }: { readonly children: string }) {
 function RosterCard({
   entry,
   sessionId,
+  busy,
+  disabled,
+  onToggleAttendance,
 }: {
   readonly entry: RosterEntryDto;
   readonly sessionId: string;
+  readonly busy: boolean;
+  readonly disabled: boolean;
+  readonly onToggleAttendance: (entry: RosterEntryDto) => void | Promise<void>;
 }) {
   const absent = entry.attendanceState === "absent";
   const action = resolveAction(sessionId, entry);
@@ -538,6 +669,29 @@ function RosterCard({
 
       <div className="mt-auto pt-5">
         <RosterAction action={action} displayName={entry.displayName} />
+        {/*
+         * A-018's governed control. Placed BELOW the assessment action because
+         * marking a learner absent removes that action — the trainer should
+         * meet the consequence after the thing it affects, not before it.
+         *
+         * The label states the DESTINATION state, not the current one, so the
+         * control never reads as a status display the trainer might mistake
+         * for the governed value rendered at the top of the card.
+         */}
+        <button
+          type="button"
+          data-attendance-toggle={entry.studentId}
+          onClick={() => void onToggleAttendance(entry)}
+          disabled={busy || disabled}
+          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-control border border-hairline px-3 py-2 text-small font-bold text-ink transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Icon name={absent ? "check" : "close"} size={13} />
+          {busy
+            ? "Saving…"
+            : absent
+              ? `Mark ${entry.displayName} present`
+              : `Mark ${entry.displayName} absent`}
+        </button>
       </div>
     </article>
   );

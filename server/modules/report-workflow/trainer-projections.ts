@@ -44,6 +44,26 @@ export interface RosterEntryDto {
   readonly studentId: string;
   readonly displayName: string;
   readonly attendanceState: "present" | "absent";
+  /**
+   * Whether an `attendance` ROW actually exists for this (session, student).
+   *
+   * A-018 materializes the Present default LAZILY — by the column default, on
+   * the first governed write — so "no row yet" and "row says present" are two
+   * different committed states that this projection had been rendering
+   * IDENTICALLY as `attendanceState: "present"`. That is an unmeasured value
+   * presented as a measured one, and it is not merely cosmetic: the governed
+   * write `attendance_set_status` is a compare-and-set whose `expectedStatus`
+   * distinguishes exactly these two cases (`undefined` = "I believe there is
+   * no record"), and there is NO FORCE MODE. A trainer toggling a learner
+   * whose row does not exist yet would have sent `expected: "present"` and
+   * been answered `stale_state`, with nothing on the surface able to explain
+   * why.
+   *
+   * `attendanceState` keeps its meaning — the EFFECTIVE status, default
+   * included — so every existing reader is unchanged. This field carries the
+   * distinction the CAS needs, and nothing else.
+   */
+  readonly attendanceRecorded: boolean;
   readonly reportState: ReportStatus | "no_report";
   readonly reportId: string | null;
   readonly previousSessionFocus: string | null;
@@ -248,10 +268,16 @@ export async function getSessionRosterCore(
         previousFocus = priorObservation.data.followUpNotes || null;
       }
     }
+    const attendanceRow = attendanceOf.get(student.studentId);
     out.push({
       studentId: student.studentId,
       displayName: student.displayName,
-      attendanceState: attendanceOf.get(student.studentId) === "absent" ? "absent" : "present",
+      // EFFECTIVE status: an absent row is absent, everything else — including
+      // a row that does not exist yet — presents as A-018's Present default.
+      attendanceState: attendanceRow === "absent" ? "absent" : "present",
+      // ...and whether that default was materialized or merely implied. See
+      // the field's declaration for why the two must not be conflated.
+      attendanceRecorded: attendanceRow !== undefined,
       reportState: state ? state.status : "no_report",
       reportId: state ? state.report_id : null,
       previousSessionFocus: previousFocus,

@@ -22,6 +22,8 @@ import type {
   SaveTrainerEditInput,
   SaveTrainerEditSuccess,
   SessionUserDto,
+  SetAttendanceInput,
+  SetAttendanceSuccess,
   TrainerApproveInput,
   TrainerApproveSuccess,
   TrainerSessionSummaryDto,
@@ -108,6 +110,17 @@ export interface PhysicalTestPort {
     studentId: string,
   ): Promise<UiActionResult<CanonicalReportDto>>;
 
+  /**
+   * A-018's governed Trainer Present/Absent control, and the FIRST governed
+   * write of the whole report lifecycle. It was absent from this port until
+   * Stage 2: `attendance` carried three SELECT policies and no INSERT/UPDATE
+   * policy, so the table was writable by nobody and the lifecycle's entry
+   * condition was being satisfied by a hand-seeded harness row rather than by
+   * a governed write.
+   */
+  setAttendance(
+    input: SetAttendanceInput,
+  ): Promise<UiActionResult<SetAttendanceSuccess>>;
   saveObservation(
     input: SaveObservationInput,
   ): Promise<UiActionResult<SaveObservationSuccess>>;

@@ -74,6 +74,7 @@ import {
   saveObservationCore,
   type TrainerObservationDto,
 } from "@/server/modules/observation/core";
+import { setAttendanceStatusCore } from "@/server/modules/attendance/core";
 import {
   managementApproveAndSubmitCore,
   managementEditWordingCore,
@@ -112,6 +113,8 @@ import type {
   AdapterSaveTrainerEditInput,
   AdapterSaveTrainerEditSuccess,
   AdapterSessionUserDto,
+  AdapterSetAttendanceInput,
+  AdapterSetAttendanceSuccess,
   AdapterTrainerApproveInput,
   AdapterTrainerApproveSuccess,
   AdapterTrainerSessionSummaryDto,
@@ -697,6 +700,55 @@ export async function adapterGetCanonicalReport(
 // ---------------------------------------------------------------------
 // writes
 // ---------------------------------------------------------------------
+
+/**
+ * The governed Trainer Present/Absent control (A-018, A-026).
+ *
+ * NOTHING IS DECIDED HERE. `attendance_set_status` is the ONE write path and
+ * it owns every gate: the actor must be the single active `trainer`
+ * membership in the SESSION'S OWN centre with live session reach re-derived
+ * per call — so management (A-034 forbids management touching attendance) and
+ * parent are closed by the SAME predicate that authorizes the trainer, and
+ * receive the same non-disclosing answer; A-018's Present default is
+ * materialized by the COLUMN DEFAULT; `attendance.changed` (registry E4 — the
+ * Step 7H registry is NOT extended) is appended in the same transaction; and
+ * A-026's governed refusal of a move to `absent` once a version is submitted
+ * is enforced there.
+ *
+ * ⚠️ This action deliberately takes the (session, student) PAIR rather than a
+ * report id. The three report-keyed reads resolve their pair server-side
+ * because a client-supplied pair could let a caller couple a report it may
+ * read with a session it may not. Attendance is not report-keyed at all — it
+ * exists BEFORE any report does, and is the lifecycle's first governed write —
+ * so there is no report id to resolve from. The pair is safe to accept
+ * because it is authorization INPUT, not authorization EVIDENCE: the RPC
+ * re-derives the caller's reach to that exact session on every call and
+ * answers a caller who names a pair outside it identically to one naming a
+ * pair that does not exist.
+ */
+export async function adapterSetAttendance(
+  input: AdapterSetAttendanceInput,
+): Promise<ActionResult<AdapterSetAttendanceSuccess>> {
+  const client = await createRequestSupabaseClient();
+  const result = await setAttendanceStatusCore(client, {
+    sessionId: input.sessionId,
+    studentId: input.studentId,
+    ...(input.expectedStatus !== undefined ? { expectedStatus: input.expectedStatus } : {}),
+    newStatus: input.newStatus,
+  });
+  if (result.outcome !== "success") return result;
+  // `attendanceId` is deliberately DROPPED rather than forwarded: the surface
+  // has no use for it, and a governed row identifier is not something a
+  // participant path hands to the client for free.
+  return {
+    outcome: "success",
+    data: {
+      status: result.data.status,
+      initialized: result.data.initialized,
+      changed: result.data.changed,
+    },
+  };
+}
 
 export async function adapterSaveObservation(
   input: AdapterSaveObservationInput,

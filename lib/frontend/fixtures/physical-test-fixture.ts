@@ -31,6 +31,8 @@ import {
   type SaveTrainerEditSuccess,
   type SessionUserDto,
   type SessionRole,
+  type SetAttendanceInput,
+  type SetAttendanceSuccess,
   type TrainerApproveInput,
   type TrainerApproveSuccess,
   type TrainerSessionSummaryDto,
@@ -542,13 +544,35 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
 
   private memoryState = clone(INITIAL_STATE);
 
+  /**
+   * Attendance overrides, keyed `sessionId|studentId`.
+   *
+   * DELIBERATELY NOT PERSISTED to `sessionStorage` and deliberately outside
+   * `FixtureState`: adding a field there would bump `schemaVersion` and widen
+   * `assertFixtureState`, and the persisted schema is not worth churning for a
+   * surface that exists to exercise the toggle's CAS handling.
+   *
+   * ⚠️ This models the compare-and-set SHAPE — including its `stale_state`
+   * refusal — and nothing else. It is NOT a governed write: it appends no
+   * audit event, enforces no A-026 submitted-report refusal, and re-derives no
+   * authorization. Fixture mode is unreachable unless the BUILD set
+   * `NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE=1`, and no participant path can reach
+   * it, so no hero-path claim ever rests on this.
+   */
+  private readonly attendanceOverrides = new Map<string, "present" | "absent">();
+
   constructor(private readonly sessionRole: SessionRole = "trainer") {}
 
   reset(): void {
     this.memoryState = clone(INITIAL_STATE);
+    this.attendanceOverrides.clear();
     if (typeof window !== "undefined") {
       window.sessionStorage.removeItem(STORAGE_KEY);
     }
+  }
+
+  private attendanceOf(sessionId: string, student: FixtureStudent): "present" | "absent" {
+    return this.attendanceOverrides.get(`${sessionId}|${student.studentId}`) ?? student.attendanceState;
   }
 
   private readState(): FixtureState {
@@ -642,13 +666,46 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       data: session.students.map((student) => ({
         studentId: student.studentId,
         displayName: student.displayName,
-        attendanceState: student.attendanceState,
+        attendanceState: this.attendanceOf(sessionId, student),
+        // Every fixture learner is declared with an EXPLICIT attendance state,
+        // so in this runtime the record always exists. The real projection
+        // derives this from whether an `attendance` row is actually present.
+        attendanceRecorded: true,
         reportState: student.reportId
           ? (state.reports[student.reportId]?.status ?? "no_report")
           : "no_report",
         reportId: student.reportId,
         previousSessionFocus: student.previousSessionFocus,
       })),
+    };
+  }
+
+  /**
+   * The CAS SHAPE of A-018's Present/Absent control. See
+   * `attendanceOverrides` for what this deliberately does not model.
+   */
+  async setAttendance(
+    input: SetAttendanceInput,
+  ): Promise<UiActionResult<SetAttendanceSuccess>> {
+    await delay(160);
+    const session = SESSIONS.find((item) => item.sessionId === input.sessionId);
+    const student = session?.students.find((item) => item.studentId === input.studentId);
+    if (!session || !student) return { outcome: "unavailable" };
+
+    const current = this.attendanceOf(input.sessionId, student);
+    // A fixture learner's record ALWAYS exists, so a caller asserting "no
+    // record yet" is as stale as one asserting the wrong value. Both are
+    // refused; there is no force mode here either.
+    if (input.expectedStatus !== current) {
+      return {
+        outcome: "stale_state",
+        message: "Attendance changed since this roster was loaded. Reload to continue.",
+      };
+    }
+    this.attendanceOverrides.set(`${input.sessionId}|${input.studentId}`, input.newStatus);
+    return {
+      outcome: "success",
+      data: { status: input.newStatus, initialized: false, changed: input.newStatus !== current },
     };
   }
 
