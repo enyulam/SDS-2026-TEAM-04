@@ -22,45 +22,28 @@
 // =====================================================================
 
 import postgres from 'postgres'
+import {
+  TargetRefused,
+  assertHostedDbUrl,
+  requireVar,
+  resolveHostedProjectRef,
+} from './hosted-target-guard.mjs'
 
-const HOSTED_PROJECT_REF = 'zjukuffiuzkbiblmnuwl'
 const VAR_DB = 'BEST_COACH_HOSTED_DB_URL'
 
-class SafeError extends Error {}
+const SafeError = TargetRefused
 
 const say = (m) => process.stdout.write(`${m}\n`)
 const phase = (m) => say(`\n[ ${m} ]`)
 
-function requireHostedDbUrl() {
-  const raw = process.env[VAR_DB]
-  if (typeof raw !== 'string' || raw.trim() === '') {
-    throw new SafeError(`${VAR_DB} must be present and non-blank in .env.local.`)
-  }
-  const value = raw.trim()
-  let url
-  try {
-    url = new URL(value)
-  } catch {
-    throw new SafeError(`${VAR_DB} is not a valid connection URL.`)
-  }
-  if (!/^postgres(ql)?:$/.test(url.protocol)) throw new SafeError(`${VAR_DB} must be a postgres:// string.`)
-  if (/^(127\.|localhost|\[?::1\]?)/.test(url.hostname)) {
-    throw new SafeError(`${VAR_DB} points at LOOPBACK. Refused.`)
-  }
-  const inUser = decodeURIComponent(url.username).includes(HOSTED_PROJECT_REF)
-  const inHost = url.hostname.includes(HOSTED_PROJECT_REF)
-  if (!inUser && !inHost) {
-    throw new SafeError(
-      `REFUSED: ${VAR_DB} does not carry the pinned project ref "${HOSTED_PROJECT_REF}". Nothing was read.`,
-    )
-  }
-  return { value, port: url.port || '5432', where: inUser ? 'username' : 'host' }
-}
-
 async function main() {
   phase('Target guard')
-  const db = requireHostedDbUrl()
-  say(`  PASS  the connection carries the pinned ref "${HOSTED_PROJECT_REF}" in its ${db.where}`)
+  const ref = resolveHostedProjectRef()
+  const value = requireVar(VAR_DB)
+  const checked = assertHostedDbUrl(value, ref, VAR_DB)
+  const db = { value, port: checked.port, where: checked.where }
+  say(`  PASS  the frozen demonstration project is denied unconditionally`)
+  say(`  PASS  the connection carries the expected ref "${ref}" in its ${db.where}`)
   say(`  ....  port ${db.port}${db.port === '6543' ? '  ⚠️ TRANSACTION pooler — migrations need SESSION (5432)' : ''}`)
 
   const sql = postgres(db.value, {

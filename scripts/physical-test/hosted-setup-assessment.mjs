@@ -25,8 +25,21 @@
 // =====================================================================
 
 import { createClient } from '@supabase/supabase-js'
+import {
+  TargetRefused,
+  assertHostedApiUrl,
+  resolveHostedProjectRef,
+} from '../fixtures/hosted-target-guard.mjs'
 
-const REF = 'zjukuffiuzkbiblmnuwl'
+let REF
+try {
+  REF = resolveHostedProjectRef()
+} catch (error) {
+  if (!(error instanceof TargetRefused)) throw error
+  console.error(`REFUSED: ${error.message}`)
+  process.exit(1)
+}
+
 const SESSION_ID = 'c5000000-0000-4000-8000-000000000001'
 const STUDENT_ID = 'c2000000-0000-4000-8000-000000000001'
 const TRAINER_SUB = 'd0000000-0000-4000-8000-000000000002'
@@ -67,8 +80,13 @@ for (const [name, v] of [
     process.exit(1)
   }
 }
-if (!url.includes(REF)) {
-  console.error(`REFUSED: the API URL does not carry the pinned ref ${REF}.`)
+// Full guard: denies the frozen demonstration project unconditionally, then
+// requires the API URL to be exactly the expected project's origin.
+try {
+  assertHostedApiUrl(url, REF, 'BEST_COACH_HOSTED_SUPABASE_URL')
+} catch (error) {
+  if (!(error instanceof TargetRefused)) throw error
+  console.error(`REFUSED: ${error.message}`)
   process.exit(1)
 }
 if (!publishable.startsWith('sb_publishable_') && !publishable.startsWith('eyJ')) {

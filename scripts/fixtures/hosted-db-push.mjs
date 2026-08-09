@@ -26,34 +26,23 @@
 // =====================================================================
 
 import { spawn } from 'node:child_process'
+import {
+  TargetRefused,
+  assertHostedDbUrl,
+  requireVar,
+  resolveHostedProjectRef,
+} from './hosted-target-guard.mjs'
 
-const HOSTED_PROJECT_REF = 'zjukuffiuzkbiblmnuwl'
 const VAR_DB = 'BEST_COACH_HOSTED_DB_URL'
 
-const raw = process.env[VAR_DB]
-if (typeof raw !== 'string' || raw.trim() === '') {
-  process.stderr.write(`REFUSED: ${VAR_DB} must be present and non-blank in .env.local.\n`)
-  process.exit(1)
-}
-
+let HOSTED_PROJECT_REF
 let url
 try {
-  url = new URL(raw.trim())
-} catch {
-  process.stderr.write(`REFUSED: ${VAR_DB} is not a valid connection URL.\n`)
-  process.exit(1)
-}
-
-if (/^(127\.|localhost|\[?::1\]?)/.test(url.hostname)) {
-  process.stderr.write(`REFUSED: ${VAR_DB} points at LOOPBACK.\n`)
-  process.exit(1)
-}
-const inUser = decodeURIComponent(url.username).includes(HOSTED_PROJECT_REF)
-const inHost = url.hostname.includes(HOSTED_PROJECT_REF)
-if (!inUser && !inHost) {
-  process.stderr.write(
-    `REFUSED: ${VAR_DB} does not carry the pinned project ref "${HOSTED_PROJECT_REF}". Nothing was pushed.\n`,
-  )
+  HOSTED_PROJECT_REF = resolveHostedProjectRef()
+  url = assertHostedDbUrl(requireVar(VAR_DB), HOSTED_PROJECT_REF, VAR_DB).url
+} catch (error) {
+  if (!(error instanceof TargetRefused)) throw error
+  process.stderr.write(`REFUSED: ${error.message}\n`)
   process.exit(1)
 }
 
@@ -83,7 +72,7 @@ try {
 const args = [cliEntry, 'db', 'push', '--db-url', url.toString(), ...passthrough]
 
 process.stdout.write(
-  `[ pushing to the pinned project ${HOSTED_PROJECT_REF} on port ${url.port || '5432'} ` +
+  `[ pushing to the expected project ${HOSTED_PROJECT_REF} on port ${url.port || '5432'} ` +
     `${passthrough.includes('--dry-run') ? '(DRY RUN — nothing will be applied)' : '(LIVE)'} ]\n`,
 )
 

@@ -48,15 +48,36 @@ import { fileURLToPath } from 'node:url'
 import postgres from 'postgres'
 import { createClient } from '@supabase/supabase-js'
 import { promptForSecrets, SecretPromptError } from './secret-prompt.mjs'
+import {
+  TargetRefused,
+  assertHostedApiUrl,
+  assertHostedDbUrl,
+  requireVar,
+  resolveHostedProjectRef,
+} from './hosted-target-guard.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(HERE, '..', '..')
 
 /**
- * ⚠️ THE PINNED HOSTED PROJECT. Operator-supplied, 2026-08-09. Every target
- * must carry this exact ref or the run aborts before creating anything.
+ * ⚠️ THE EXPECTED HOSTED PROJECT, resolved from the environment and guarded by
+ * `hosted-target-guard.mjs`: the frozen demonstration project is denied
+ * unconditionally, and a missing or malformed ref REFUSES rather than defaults.
+ * Every target — the API URL and the database connection string — must carry
+ * the resolved ref or the run aborts before creating anything.
  */
-const HOSTED_PROJECT_REF = 'zjukuffiuzkbiblmnuwl'
+// Resolved at module load so nothing else in this file can run first. The
+// refusal is rendered here rather than thrown, because a top-level throw
+// escapes main()'s handler and would surface a stack trace instead of the
+// refusal — correct behaviour, unreadable presentation.
+let HOSTED_PROJECT_REF
+try {
+  HOSTED_PROJECT_REF = resolveHostedProjectRef()
+} catch (error) {
+  if (!(error instanceof TargetRefused)) throw error
+  process.stderr.write(`\nREFUSED: ${error.message}\n`)
+  process.exit(1)
+}
 
 /** Local-only variables. NEVER committed, NEVER `NEXT_PUBLIC_`, NEVER printed. */
 const VAR_URL = 'BEST_COACH_HOSTED_SUPABASE_URL'
@@ -64,10 +85,26 @@ const VAR_SECRET = 'BEST_COACH_HOSTED_SECRET_KEY'
 const VAR_DB = 'BEST_COACH_HOSTED_DB_URL'
 
 /**
- * The local Supabase container, used ONLY as a psql HOST. It is a transport,
- * never a target: every --dbname URI below points at the HOSTED database.
+ * THE psql TRANSPORT. psql is needed because the ratified fixture files use
+ * psql CLIENT-SIDE directives (`\set`, `\if`/`\else`/`\endif`) that the server
+ * has never heard of — see `runSqlFile` below. It is a transport, never a
+ * target: every --dbname URI points at the HOSTED database.
+ *
+ * DEFAULT: a THROWAWAY container (`docker run --rm`). It borrows no existing
+ * stack, so it cannot disturb one. This matters when another workspace's local
+ * Supabase project is running on the same machine — the previous behaviour
+ * (`docker exec` into a fixed container name) reached into whichever stack
+ * happened to own that name, which is a cross-workspace dependency nothing
+ * here actually needs.
+ *
+ * OPT-IN: set BEST_COACH_PSQL_CONTAINER to `docker exec` into a named running
+ * container instead. Useful where outbound networking is only available from
+ * inside an existing stack.
+ *
+ * The image major version must match the hosted server (17.x).
  */
-const PSQL_CONTAINER = 'supabase_db_best-coach-mvp'
+const PSQL_CONTAINER = process.env.BEST_COACH_PSQL_CONTAINER?.trim() || null
+const PSQL_IMAGE = process.env.BEST_COACH_PSQL_IMAGE?.trim() || 'public.ecr.aws/supabase/postgres:17.6.1.143'
 
 /** The ratified Step 7F identities — synthetic, deterministic, unchanged. */
 const IDENTITIES = [
@@ -76,7 +113,7 @@ const IDENTITIES = [
   { key: 'parent', label: 'Parent', email: 'parent.fixture@example.test', authId: 'd0000000-0000-4000-8000-000000000003' },
 ]
 
-class SafeError extends Error {}
+class SafeError extends TargetRefused {}
 
 const say = (m) => process.stdout.write(`${m}\n`)
 const phase = (m) => say(`\n[ ${m} ]`)
@@ -84,72 +121,9 @@ const pass = (m) => say(`  PASS  ${m}`)
 const info = (m) => say(`  ....  ${m}`)
 
 // ---------------------------------------------------------------------
-// Target guards. Every one runs BEFORE anything is created.
+// Target guards live in `hosted-target-guard.mjs` and are imported above.
+// Every one runs BEFORE anything is created.
 // ---------------------------------------------------------------------
-
-function requireVar(name) {
-  const raw = process.env[name]
-  if (typeof raw !== 'string' || raw.trim() === '') {
-    throw new SafeError(
-      `${name} must be present and non-blank. Set it in .env.local (never committed, never NEXT_PUBLIC_).`,
-    )
-  }
-  return raw.trim()
-}
-
-/** The API URL must be `https://<ref>.supabase.co`, and must not be loopback. */
-function assertHostedApiUrl(raw) {
-  let url
-  try {
-    url = new URL(raw)
-  } catch {
-    throw new SafeError(`${VAR_URL} is not a valid URL.`)
-  }
-  if (url.protocol !== 'https:') throw new SafeError(`${VAR_URL} must be https.`)
-  if (/^(127\.|localhost|\[?::1\]?)/.test(url.hostname)) {
-    throw new SafeError(
-      `${VAR_URL} points at LOOPBACK. The local database has its own loader; this one refuses it.`,
-    )
-  }
-  const expected = `${HOSTED_PROJECT_REF}.supabase.co`
-  if (url.hostname !== expected) {
-    throw new SafeError(
-      `REFUSED: ${VAR_URL} resolves to "${url.hostname}", not the pinned project "${expected}". Nothing was created.`,
-    )
-  }
-  return url.origin
-}
-
-/**
- * The connection string must carry the pinned ref. Supabase pooled strings
- * carry it in the USERNAME (`postgres.<ref>`); direct strings carry it in the
- * HOST (`db.<ref>.supabase.co`). Both forms are accepted, anything else is not.
- *
- * The string itself is never printed — only the decision.
- */
-function assertHostedDbUrl(raw) {
-  let url
-  try {
-    url = new URL(raw)
-  } catch {
-    throw new SafeError(`${VAR_DB} is not a valid connection URL.`)
-  }
-  if (!/^postgres(ql)?:$/.test(url.protocol)) {
-    throw new SafeError(`${VAR_DB} must be a postgres:// connection string.`)
-  }
-  if (/^(127\.|localhost|\[?::1\]?)/.test(url.hostname)) {
-    throw new SafeError(`${VAR_DB} points at LOOPBACK. Refused — the local database has its own loader.`)
-  }
-  const inUser = decodeURIComponent(url.username).includes(HOSTED_PROJECT_REF)
-  const inHost = url.hostname.includes(HOSTED_PROJECT_REF)
-  if (!inUser && !inHost) {
-    throw new SafeError(
-      `REFUSED: ${VAR_DB} does not carry the pinned project ref "${HOSTED_PROJECT_REF}" ` +
-        'in either its username or its host. Nothing was created.',
-    )
-  }
-  return { pooled: url.port === '6543', where: inUser ? 'username' : 'host' }
-}
 
 // ---------------------------------------------------------------------
 // SQL channel
@@ -185,17 +159,16 @@ function connect(dbUrl) {
  * fixture whose exact execution semantics are part of what was accepted — a
  * divergence risk with no upside.
  *
- * Instead the file runs through the SAME psql it was written for. The local
- * Supabase container ships psql 17.6 (matching the hosted server's 17.6) and
- * can reach the hosted pooler outbound — verified — so the container is used
- * purely as a psql HOST. It is a transport, not a target: the `--dbname` URI
- * points at the HOSTED database throughout, and the local database is never
- * read or written by this path.
+ * Instead the file runs through the SAME psql it was written for, supplied by
+ * a container whose psql major version matches the hosted server's 17.x. It is
+ * a transport, not a target: the `--dbname` URI points at the HOSTED database
+ * throughout, and no local database is ever read or written by this path.
  *
- * ⚠️ CONSEQUENCE, STATED PLAINLY: this loader now requires the local Docker
- * container to be running, because that is where psql lives. It is an
- * operator-run local tool, so that is acceptable — but it is a real
- * prerequisite, not an implementation detail.
+ * ⚠️ CONSEQUENCE, STATED PLAINLY: this loader requires DOCKER to be running,
+ * because that is where psql lives. It is an operator-run local tool, so that
+ * is acceptable — but it is a real prerequisite, not an implementation detail.
+ * By default it starts a THROWAWAY container and borrows no existing stack, so
+ * a local Supabase project does NOT need to be up.
  *
  * The connection URI is passed as an ARGV ELEMENT with `shell: false`, so no
  * shell ever parses the password. SQL arrives on stdin exactly as the local
@@ -203,7 +176,11 @@ function connect(dbUrl) {
  */
 function runSqlFile(dbUrl, relativePath, psqlVars = {}) {
   const text = readFileSync(join(REPO_ROOT, 'scripts', 'fixtures', relativePath), 'utf8')
-  const args = ['exec', '-i', PSQL_CONTAINER, 'psql', '--no-psqlrc', '--quiet', '--dbname', dbUrl]
+  // Either transport passes the connection URI as an ARGV ELEMENT with
+  // shell:false, so no shell ever parses the password.
+  const args = PSQL_CONTAINER
+    ? ['exec', '-i', PSQL_CONTAINER, 'psql', '--no-psqlrc', '--quiet', '--dbname', dbUrl]
+    : ['run', '--rm', '-i', PSQL_IMAGE, 'psql', '--no-psqlrc', '--quiet', '--dbname', dbUrl]
   for (const [name, value] of Object.entries(psqlVars)) {
     if (!/^[a-z_]+$/.test(name) || !/^(true|false)$/.test(value)) {
       throw new SafeError(`refusing to pass a non-boolean psql variable: ${name}`)
@@ -220,7 +197,15 @@ function runSqlFile(dbUrl, relativePath, psqlVars = {}) {
     child.stderr.on('data', (d) => {
       err += d
     })
-    child.on('error', () => rejectRun(new SafeError('could not start psql — is the local Docker container running?')))
+    child.on('error', () =>
+      rejectRun(
+        new SafeError(
+          PSQL_CONTAINER
+            ? `could not start psql — is the container "${PSQL_CONTAINER}" running?`
+            : `could not start psql — is Docker running, and is the image "${PSQL_IMAGE}" available?`,
+        ),
+      ),
+    )
     child.on('close', (code) => {
       if (code === 0) return resolveRun(out)
       // psql's stderr carries the SQLSTATE, the message and the line number.
@@ -253,12 +238,18 @@ async function main() {
   const verifyOnly = process.argv.includes('--verify-only')
 
   phase('Target guards — every one runs BEFORE anything is created')
-  const apiUrl = assertHostedApiUrl(requireVar(VAR_URL))
+  const apiUrl = assertHostedApiUrl(requireVar(VAR_URL), HOSTED_PROJECT_REF, VAR_URL)
   const secretKey = requireVar(VAR_SECRET)
   const dbUrl = requireVar(VAR_DB)
-  const db = assertHostedDbUrl(dbUrl)
-  pass(`API target is the pinned project ${HOSTED_PROJECT_REF}.supabase.co`)
-  pass(`database target carries the pinned ref in its ${db.where}`)
+  const db = assertHostedDbUrl(dbUrl, HOSTED_PROJECT_REF, VAR_DB)
+  pass('the frozen demonstration project is denied unconditionally')
+  pass(`API target is the expected project ${HOSTED_PROJECT_REF}.supabase.co`)
+  pass(`database target carries the expected ref in its ${db.where}`)
+  info(
+    PSQL_CONTAINER
+      ? `psql transport: docker exec into "${PSQL_CONTAINER}" (a transport, never a target)`
+      : `psql transport: throwaway container from "${PSQL_IMAGE}" — no existing stack is touched`,
+  )
   if (db.pooled) {
     info('the connection is the TRANSACTION pooler (6543); fixture DML is fine on it')
   }
@@ -391,7 +382,7 @@ async function main() {
     // previous-focus continuity proof genuinely requires it.
     //
     // To add it deliberately, as a separate operator step:
-    //   docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc \
+    //   docker run --rm -i public.ecr.aws/supabase/postgres:17.6.1.143 psql --no-psqlrc \
     //     --dbname "<hosted url>" -v do_expand=true -v do_expand_cleanup=false \
     //     < scripts/fixtures/local_fixtures_expansion.sql
     info('P1-T09a expansion NOT loaded — the local loader does not load it either, and the hero chain does not need it')
@@ -453,7 +444,9 @@ function renderFailure(error) {
     return secrets.some((s) => text.includes(s)) ? '[REDACTED — contained a credential]' : text
   }
 
-  if (error instanceof SafeError || error instanceof SecretPromptError) {
+  // SafeError extends TargetRefused, so this covers both the local refusals
+  // and every refusal raised by the shared target guard.
+  if (error instanceof TargetRefused || error instanceof SecretPromptError) {
     return `REFUSED / FAILED: ${error.message}`
   }
 

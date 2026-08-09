@@ -20,8 +20,13 @@
 // =====================================================================
 
 import postgres from 'postgres'
+import {
+  TargetRefused,
+  assertHostedDbUrl,
+  requireVar,
+  resolveHostedProjectRef,
+} from './hosted-target-guard.mjs'
 
-const HOSTED_PROJECT_REF = 'zjukuffiuzkbiblmnuwl'
 const VAR_DB = 'BEST_COACH_HOSTED_DB_URL'
 
 /** The ratified fixture probes: one representative fixed UUID per table. */
@@ -47,21 +52,18 @@ const SEED_TABLES = ['centres', 'class_grades', 'assessment_dimensions']
 const say = (m) => process.stdout.write(`${m}\n`)
 const phase = (m) => say(`\n[ ${m} ]`)
 
-const raw = process.env[VAR_DB]
-if (typeof raw !== 'string' || raw.trim() === '') {
-  process.stderr.write(`${VAR_DB} must be present in .env.local.\n`)
-  process.exit(1)
-}
-const url = new URL(raw.trim())
-if (
-  !decodeURIComponent(url.username).includes(HOSTED_PROJECT_REF) &&
-  !url.hostname.includes(HOSTED_PROJECT_REF)
-) {
-  process.stderr.write(`REFUSED: ${VAR_DB} does not carry the pinned ref "${HOSTED_PROJECT_REF}".\n`)
+let raw
+try {
+  const ref = resolveHostedProjectRef()
+  raw = requireVar(VAR_DB)
+  assertHostedDbUrl(raw, ref, VAR_DB)
+} catch (error) {
+  if (!(error instanceof TargetRefused)) throw error
+  process.stderr.write(`REFUSED: ${error.message}\n`)
   process.exit(1)
 }
 
-const sql = postgres(raw.trim(), { prepare: false, max: 1, onnotice: () => {}, connect_timeout: 20 })
+const sql = postgres(raw, { prepare: false, max: 1, onnotice: () => {}, connect_timeout: 20 })
 
 try {
   phase('Auth identities (were CREATED before the failure — are they still there?)')
