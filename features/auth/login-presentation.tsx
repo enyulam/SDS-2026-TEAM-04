@@ -112,9 +112,13 @@ export function LoginPresentation() {
         aria-labelledby="login-heading"
         aria-label={`Sign in — ${active.label} portal presentation`}
         data-role-presentation={activeRole}
-        className="mt-10"
+        /*
+         * PHASE 1 — the export sets a 25px gap between the brand slot and the
+         * form column; the build carried 40px.
+         */
+        className="mt-[1.5625rem]"
       >
-        <p id="signin-as-label" className="text-small font-bold text-ink-strong">
+        <p id="signin-as-label" className="text-[0.78125rem] font-semibold text-ink-strong">
           Sign in as
         </p>
         <RoleSegmentedControl activeRole={activeRole} labelId="signin-as-label" />
@@ -137,9 +141,16 @@ export function LoginPresentation() {
           <PasswordField describedBy="auth-governance-note" />
           <CredentialOptionsRow />
 
+          {/*
+            NOT IN THE FRAME, AND IT STAYS. The governance note is a required
+            addition (A-046): the frame draws a role selector with no statement
+            of what selecting a role does, and a login screen must not imply
+            that choosing a role grants it. Its colour is `neutral-on` for the
+            SC 1.4.3 reason recorded on `AuthHeading`.
+          */}
           <p
             id="auth-governance-note"
-            className="mt-4 rounded-field bg-surface-muted px-3.5 py-2.5 text-small leading-5 text-ink-muted"
+            className="mt-[1.125rem] rounded-[0.6875rem] bg-surface-muted px-3.5 py-2.5 text-[0.8125rem] leading-5 text-neutral-on"
           >
             <strong className="block font-bold text-ink-strong">
               Role selection is presentation only
@@ -154,17 +165,28 @@ export function LoginPresentation() {
             <p
               role="alert"
               data-auth-error="true"
-              className="mt-4 rounded-field bg-danger-soft px-3.5 py-2.5 text-small leading-5 text-danger-on"
+              className="mt-[1.125rem] rounded-[0.6875rem] bg-danger-soft px-3.5 py-2.5 text-[0.8125rem] leading-5 text-danger-on"
             >
               {SIGN_IN_FAILURE_MESSAGE}
             </p>
           )}
 
+          {/*
+            PHASE 1 — the frame's action is 15px vertical padding, an 11px
+            radius and a 14.5px/600 label; the build had 14px/20px padding, a
+            10px radius and 14px/700.
+
+            THE FILL IS NOT THE FRAME'S AND MUST NOT BE CHANGED TO IT. The
+            frame paints `#EC4B96`, on which a white label measures 3.492:1 —
+            below SC 1.4.3. `brand-700` measures 4.517:1, and
+            `design-foundation.assertions.ts` holds "white label on the primary
+            action fill >= 4.5:1" as a standing invariant.
+          */}
           <button
             type="submit"
             data-auth-submit="sign-in"
             disabled={pending}
-            className="mt-4 flex min-h-13 w-full items-center justify-center rounded-field bg-brand-700 px-5 py-3.5 text-body font-bold text-white shadow-raised transition hover:bg-brand-800 disabled:opacity-70"
+            className="mt-[1.125rem] flex min-h-13 w-full items-center justify-center rounded-[0.6875rem] bg-brand-700 px-5 py-[0.9375rem] text-[0.90625rem] font-semibold text-white shadow-raised transition hover:bg-brand-800 disabled:opacity-70"
           >
             {pending ? "Signing in…" : "Sign in"}
           </button>

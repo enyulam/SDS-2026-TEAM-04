@@ -271,6 +271,31 @@ a {
   color: #a6aec0;
 }
 
+/*
+ * The authentication credential controls' own geometry, measured off the three
+ * frozen login frames: 14px x 15px padding, an 11px radius and a VISIBLE
+ * hairline (`.form-field` declares the border as transparent, so this colours
+ * an existing border rather than adding one — the control's box does not move).
+ *
+ * ⚠️ WHY THIS IS A RULE HERE AND NOT THREE UTILITIES ON THE INPUT.
+ * `.form-field` above is UNLAYERED, and `@import "tailwindcss"` emits its
+ * utilities into `@layer utilities`. An unlayered rule outranks every rule in
+ * every layer, so `rounded-[…]`, `px-[…]` and `py-[…]` written on a
+ * `.form-field` element are generated, matched, and silently lose the cascade.
+ * That was measured, not assumed: with the utilities in place the rendered
+ * control still computed 10px/12px/14px — the frame's own values applied
+ * everywhere else on the surface and only here did nothing.
+ *
+ * This is the same cascade trap recorded at F-01b, which is why the fix stays
+ * narrow: `.form-field` is not moved into a layer, because that would change
+ * the cascade for every consumer across the application at once.
+ */
+.form-field.auth-field {
+  border-radius: 0.6875rem;
+  border-color: var(--color-line);
+  padding: 0.875rem 0.9375rem;
+}
+
 /* ---------------------------------------------------------------------------
  * Loading presentation
  * ------------------------------------------------------------------------- */

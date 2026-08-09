@@ -289,6 +289,7 @@ const PROBE = String.raw`
     rememberMe: styleOf(checkbox, BOX),
     rememberMeDisabled: checkbox ? checkbox.disabled : null,
     rememberMeHasName: checkbox ? checkbox.hasAttribute('name') : null,
+    rememberMeClass: checkbox ? checkbox.className : null,
     forgotPassword: (function () {
       var nodes = Array.prototype.slice.call(document.querySelectorAll('span,a'));
       var el = nodes.filter(function (n) { return /Forgot password\?/.test(n.textContent || ''); }).pop();

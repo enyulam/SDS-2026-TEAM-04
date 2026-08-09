@@ -41,8 +41,16 @@ export function EmailField({
 }) {
   const id = useId();
   return (
-    <div className="mt-5">
-      <label htmlFor={id} className="block text-small font-bold text-ink-strong">
+    /*
+     * PHASE 1 — the column's rhythm is a uniform 18px in the export; the build
+     * used 20px here and 16px below. Label 12.5px/600 (was 13px/700), and the
+     * control itself takes the frame's 15px x 14px padding, 11px radius and
+     * VISIBLE hairline: `.form-field` declares `border: 1px solid transparent`,
+     * so `border-line` colours the existing border rather than adding one and
+     * the control's box size does not move.
+     */
+    <div className="mt-[1.125rem]">
+      <label htmlFor={id} className="block text-[0.78125rem] font-semibold text-ink-strong">
         Email
       </label>
       <input
@@ -54,11 +62,21 @@ export function EmailField({
         disabled={disabled}
         required={!disabled}
         aria-describedby={describedBy}
-        className="form-field mt-2 min-h-12"
+        className={`${AUTH_FIELD} mt-2`}
       />
     </div>
   );
 }
+
+/**
+ * The frame's credential-control shape, shared by both fields so the two can
+ * never drift apart. `form-field` supplies the fill, focus ring and disabled
+ * treatment; `auth-field` carries the frames' measured geometry.
+ *
+ * The geometry is a CSS rule rather than utilities on purpose — `.form-field`
+ * is unlayered and would outrank them. See `app/globals.css`.
+ */
+const AUTH_FIELD = "form-field auth-field min-h-12";
 
 export function PasswordField({
   disabled = false,
@@ -71,8 +89,8 @@ export function PasswordField({
   const [revealed, setRevealed] = useState(false);
 
   return (
-    <div className="mt-4">
-      <label htmlFor={id} className="block text-small font-bold text-ink-strong">
+    <div className="mt-[1.125rem]">
+      <label htmlFor={id} className="block text-[0.78125rem] font-semibold text-ink-strong">
         Password
       </label>
       <div className="relative mt-2">
@@ -87,7 +105,7 @@ export function PasswordField({
           disabled={disabled}
           required={!disabled}
           aria-describedby={describedBy}
-          className="form-field min-h-12 pr-12"
+          className={`${AUTH_FIELD} pr-12`}
         />
         <button
           type="button"
@@ -156,18 +174,33 @@ export function CredentialOptionsRow({
 }) {
   const id = useId();
   return (
-    <div className="mt-4 flex items-center justify-between gap-3">
+    /*
+     * PHASE 1 — 18px above (the column rhythm), an 18px checkbox at a 5px
+     * radius, and a 12.5px/500 label; the build had 16px spacing, a 16px
+     * square checkbox and a 13px label.
+     *
+     * ⛔ WHAT WAS DELIBERATELY NOT COPIED. The frame draws this checkbox
+     * CHECKED and filled pink, and draws "Forgot password?" as live brand-pink
+     * link text. Both are REGISTERED OMISSIONS and neither may be reinstated:
+     * `Remember me` is a disabled control with no `name` that is never
+     * submitted, and `Forgot password?` is inert because no recovery route is
+     * authorized. Painting either to look active would claim a behaviour that
+     * does not exist — the exact thing A-045 forbids — so they keep their
+     * unavailable treatment and their screen-reader notes, and only their
+     * GEOMETRY is reconciled.
+     */
+    <div className="mt-[1.125rem] flex items-center justify-between gap-3">
       <span className="flex items-center gap-2">
         <input
           id={id}
           type="checkbox"
           disabled={disabled}
           // No `name`: this control contributes nothing to the submitted form.
-          className="size-4 shrink-0 accent-[#d6357a]"
+          className="size-[1.125rem] shrink-0 rounded-[0.3125rem] accent-[#d6357a]"
         />
         <label
           htmlFor={id}
-          className="text-small text-ink"
+          className="text-[0.78125rem] font-medium text-neutral-on"
           title={
             disabled
               ? "Session length is managed by the approved Supabase session. This option is not available."
@@ -181,13 +214,13 @@ export function CredentialOptionsRow({
       {recoveryHref ? (
         <a
           href={recoveryHref}
-          className="text-small font-bold text-brand-800 no-underline hover:underline"
+          className="text-[0.78125rem] font-semibold text-brand-800 no-underline hover:underline"
         >
           Forgot password?
         </a>
       ) : (
         <span
-          className="text-small font-bold text-ink-subtle"
+          className="text-[0.78125rem] font-semibold text-neutral-on"
           title="Password recovery is not available here. Contact your school administrator."
         >
           Forgot password?
