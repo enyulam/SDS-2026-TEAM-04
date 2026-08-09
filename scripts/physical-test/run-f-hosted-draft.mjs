@@ -169,29 +169,24 @@ try {
   console.log(controls)
 
   if (!GO) {
-    console.log('\nDUMP-ONLY. Nothing was clicked. No provider call was made.')
+    console.log('\n⚠️ DUMP-ONLY IS NOT COST-FREE HERE: this page AUTO-DISPATCHES on mount.')
+    console.log('There is no generate button, so navigation alone triggers the server action.')
   } else {
-    const clicked = await evaluate(`(() => {
-      const re = /generate|draft/i;
-      const btns = [...document.querySelectorAll('button')].filter(b => re.test(b.innerText||'') && !b.disabled);
-      if (btns.length !== 1) return 'AMBIGUOUS:' + btns.length + ':' + btns.map(b=>(b.innerText||'').trim()).join('|');
-      btns[0].click();
-      return 'CLICKED:' + (btns[0].innerText||'').trim();
-    })()`)
-    console.log(`\nclick result: ${clicked}`)
-    if (String(clicked).startsWith('CLICKED')) {
-      console.log('waiting for the deployed system to answer (up to 120s)...')
-      const end = Date.now() + 120_000
-      let after = ''
-      while (Date.now() < end) {
-        await sleep(2000)
-        after = (await evaluate('document.body ? document.body.innerText : ""')) ?? ''
-        if (/Overview|rejected|unavailable|not configured|failed|Strengths/i.test(after)) break
-      }
-      console.log('\n--- text after the draft attempt ---')
-      console.log(after.replace(/\s+/g, ' ').slice(0, 1500))
+    // No button exists — the action was dispatched by the page on mount, at
+    // navigation. So this waits for a TERMINAL state rather than clicking.
+    console.log('\nauto-dispatched on mount; waiting up to 180s for a terminal state...')
+    const end = Date.now() + 180_000
+    let after = text
+    while (Date.now() < end) {
+      await sleep(2500)
+      after = (await evaluate('document.body ? document.body.innerText : ""')) ?? ''
+      if (/rejected|unavailable|not configured|could not|failed|Review four-panel/i.test(after)) break
+      if (/Overview[\s\S]*Strengths[\s\S]*Areas for Development/i.test(after)) break
     }
+    console.log('\n--- terminal text ---')
+    console.log(after.replace(/\s+/g, ' ').slice(0, 2000))
   }
+
 } finally {
   try {
     ws?.close()

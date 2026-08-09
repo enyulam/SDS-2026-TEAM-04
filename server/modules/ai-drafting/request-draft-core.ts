@@ -32,7 +32,7 @@ import {
 } from "@/server/modules/framework/dimensions";
 import { getTrainerObservationCore, type TrainerObservationDto } from "@/server/modules/observation/core";
 import type { AiDraftProvider, AiDraftRequest, ReportPanels } from "@/server/modules/ai-drafting/provider";
-import { resolveMaxDraftAttempts } from "@/server/modules/ai-drafting/draft-attempts";
+import { resolveMaxDraftAttempts, DRAFT_MAX_ATTEMPTS_VAR } from "@/server/modules/ai-drafting/draft-attempts";
 import { emitDraftDiagnostic } from "@/server/modules/ai-drafting/draft-diagnostics";
 import { validateGrounding, deriveSourceMap } from "@/server/modules/ai-drafting/grounding";
 import type { TrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
@@ -188,7 +188,34 @@ export async function requestDraftCore(
   let maxAttempts: number;
   try {
     maxAttempts = resolveMaxDraftAttempts();
-  } catch {
+  } catch (attemptsError: unknown) {
+    // ⚠️ THIS CATCH WAS SILENT, AND I INTRODUCED IT IN THE SAME COMMIT THAT
+    // ADDED THE DIAGNOSTICS. It sits EXACTLY between the gather (the student
+    // read on line 179) and the provider loop below, and its signature is
+    // precisely what was observed in the deployed run: HTTP 200, gather
+    // complete, NO outbound provider call, NO further state transition, and
+    // NOTHING emitted. Fourth instance in this run of "a fail-closed path
+    // whose cause is invisible".
+    //
+    // The raw value is reported because it is a COUNT, not a credential —
+    // and the whole failure mode here is a value that LOOKS right (a "1"
+    // carrying a trailing newline or space reads identically in a dashboard
+    // but is not the string "1").
+    const raw = process.env[DRAFT_MAX_ATTEMPTS_VAR];
+    emitDraftDiagnostic({
+      reportId,
+      attempt: 0,
+      maxAttempts: 0,
+      result: "attempt_cap_unparseable",
+      reasons: [
+        attemptsError instanceof Error ? attemptsError.message : "unknown attempt-cap failure",
+        `${DRAFT_MAX_ATTEMPTS_VAR} present=${raw !== undefined}` +
+          (raw === undefined
+            ? ""
+            : ` length=${raw.length} trimmedEqualsOne=${raw.trim() === "1"} json=${JSON.stringify(raw)}`),
+      ],
+      ratings: saved.ratings.map((r) => ({ dimensionCode: r.dimensionCode, rating: r.rating })),
+    });
     return {
       outcome: "generation_failure",
       retryable: false,
