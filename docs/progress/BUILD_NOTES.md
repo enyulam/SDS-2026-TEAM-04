@@ -3566,3 +3566,95 @@ Seeding synthetic demonstration rows into the already-provisioned hosted databas
 
 **Blockers/decisions:** none opened or closed. `F-DEMO-1`, `F-UI-DRIFT-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1` all carried untouched, per instruction.
 **Next step:** none authorized. The build is frozen for the Week-13 demonstration.
+
+---
+
+## 2026-08-10 — DEV CLONE STOOD UP: hosted target guard retargeted, `project_id` de-collided
+
+**Track / workstream:** development-clone bring-up (a separate clone; the demonstration workspace and its hosted project are frozen and were not touched).
+**Branch / worktree:** `develop` / none. **Starting HEAD** `5eb84bc` → **ending HEAD** `29ba601`.
+**Environment:** new hosted Supabase dev project, `ap-southeast-1` (Singapore), session pooler 5432. Dependencies installed from the lockfile (`npm ci`, exit 0) — the clone had no `node_modules`.
+
+### Scope
+
+Stand this clone up against a NEW hosted dev project: prove the project empty, apply the 17 migrations, load fixtures. Then two Operator-approved corrections found during that work.
+
+### What was measured, not assumed
+
+- **Pre-migration:** 0 public tables / views / functions / enums / policies, 0 `auth.users`, and `supabase_migrations.schema_migrations` **absent** — an untouched project.
+- **Post-migration census:** **17 migrations · 27 tables · 39 functions · 12 enums · 29 policies**; RLS enabled on **27/27** tables; **27 `authenticated` EXECUTE, 0 `anon`, 0 `service_role`, 0 `PUBLIC`**; **13 deterministic seed rows** (1 centre + 3 class grades + 9 assessment dimensions); `competency_rating` = `beginning, developing, mastering, mastered` (A-049); the eight A-036 `report_status` values; `class_grade_code` unchanged.
+- The CLI emitted a `pgdelta-target-ca.crt` **ENOENT** after *"Finished supabase db push"*. That is the **post-push catalog caching step, not a migration outcome** — which is precisely why the census, and not the exit code, is the evidence here.
+- **Fixtures** (loaded by the Operator at an interactive no-echo TTY, per §11): committed verifier green; **accounts=3, students=1, observations=1, reports=0, audit_events=0**.
+
+### Correction 1 — the pinned-ref guard was pinned to the FROZEN project
+
+Five hosted tools each hard-coded the frozen demonstration project ref as a literal in their own source. The effect was refusal-of-everything-else, so it could not itself cause contact with the frozen project — but it blocked all hosted tooling in this clone, and the protection was a single string one edit away from pointing anywhere at all.
+
+**Approved by the Operator and applied:** the target became configuration; the prohibition became code.
+
+- New `scripts/fixtures/hosted-target-guard.mjs` — one implementation, five call sites, so it cannot drift between them.
+- `BEST_COACH_HOSTED_PROJECT_REF` is **required**; absent / blank / malformed **refuses**. There is no default.
+- The frozen ref is denied **unconditionally**, before every other decision, against the resolved ref **and** every supplied URL, **case-insensitively** (DNS is case-insensitive, so a case variant reaches the same project). **No flag, environment variable or argument reaches that deny.**
+- The frozen ref now appears **exactly once in executable code** — that constant. Verified by `git grep` over `scripts/ server/ app/ lib/ tests/`.
+- Transport hardening, in the same change: the hosted fixture loader's psql channel defaulted to `docker exec` into **another workspace's running container**. It now defaults to a **throwaway `docker run --rm`** container, so no existing stack is a dependency. `BEST_COACH_PSQL_CONTAINER` re-enables the old path; `BEST_COACH_PSQL_IMAGE` overrides the image.
+
+### Correction 2 — `project_id` collided with the demonstration workspace's local stack
+
+`supabase/config.toml` carried `project_id = "best-coach-mvp"`, identical to the running local stack belonging to the demonstration workspace. A `supabase start` / `stop` / `db reset` issued from this clone would have acted on **that** stack. Renamed to **`best-coach-dev`** on Operator instruction.
+
+### ⚠️ CARRIED, DELIBERATELY NOT FIXED — `project_id` fallout (Operator instruction: a coherent follow-up, not a side effect)
+
+**Three hard assertions on the old `project_id` now REFUSE in this clone.** Statically identified; **not executed** (the local loader prompts for passwords):
+
+| file | line |
+|---|---|
+| `scripts/fixtures/load-local-fixtures.mjs` | 164 |
+| `scripts/physical-test/disposable-stack.mjs` | 671 (also gates the four `prove-disposable-*` harnesses) |
+| `scripts/physical-test/run-f17.mjs` | 456 |
+
+**~25 further references hard-code the CONTAINER NAME `supabase_db_best-coach-mvp`**, including production code at **`server/modules/ai-drafting/trusted-store.ts:34`** — already recorded elsewhere in this log as the `docker exec` draft transport sitting on the live participant path. Half-fixing the assertions while leaving the container names would be worse than leaving both. **No part of this was changed.**
+
+### ⚠️ SEVENTH INSTANCE OF THE FALSE-PREDICATE CLASS — found in this run's own harness
+
+The first pass of the deny proof asserted that the output **CONTAINED** the strings `"REFUSED"` or `"HARD DENY"`. It reported **3 FAILURES that were in fact correct refusals** — they had exited nonzero without contact, but worded the refusal differently (*"refusing rather than guessing"*, *"is malformed"*). The dangerous direction is the other one: **it would have reported SUCCESS for a tool that printed "REFUSED" and then connected anyway.** It tested the wording of a message, not the behaviour of a guard.
+
+Recorded as the **seventh** instance at the Operator's count. Prior instances evidenced in this log and `STATUS.md` — *the tally is the Operator's; the list below is what this entry can cite, not a re-derivation of their six*:
+
+1. Amendment 006 integration Part 1 — superseded labels made `POLARITY_BANDS[rating]` `undefined`, so the polarity rule **silently skipped**; INT-G3/INT-G5 printed PASS while exercising nothing (a fail-open against §4 non-negotiable 1).
+2. Stage 3 Tier 1 asserted `"Reports"` and **passed against the SIDEBAR** of a page whose body read *"This item isn't available"* — a nav word matches every page in the portal.
+3. The T7 save leg's predicate `/saved|Generate|draft|Review/i` matched the page's **own "REVIEW & APPROVE" heading**, so the leg could not fail.
+4. `assertPanelAnchor` was an **exported orphan** — the module header claimed it checked the live catalogue, and **nothing called it**.
+5. `activate-g6.mjs` held a **hand-maintained copy** of the panel field list; `panelsEqual` reduced over it, so a stale copy returned TRUE for **any** two panel objects.
+6. `EXPECTED_SERIALIZERS` was a **count**, and a count cannot see a rename — `_v2` → `_v3` still totals four and passes silently.
+
+**Fix — the predicate is now behavioural**, in the committed harness `scripts/fixtures/prove-hosted-target-guard.mjs`:
+
+> **REFUSED == nonzero exit AND no server contact.**
+
+Both halves are required. A nonzero exit alone could mean the tool reached the database and failed afterwards; absence of contact alone could mean it did nothing and exited 0. Contact is detected by markers that each tool emits **only after a successful round trip**.
+
+**Non-vacuity is proven, not assumed.** Control E runs the **real dev target** and **requires the contact detector to FIRE**; if it does not, the whole harness fails, because at that point *"no contact"* would be indistinguishable from *"the detector is broken"*. The detector fired (`Identity of the server actually reached`, `Catalogue census`, `PostgreSQL 1`).
+
+### Automated verification, with exit codes
+
+`npm ci` **0** · `tsc --noEmit` **0** · `eslint .` **0** · `node --check` on all six touched scripts **OK** · `prove-hosted-target-guard` **0 — 16 PASS / 0 FAIL** (5 frozen-ref-by-env + 5 smuggled-into-target + 2 case-variant + 3 fail-closed + 1 non-vacuity) · `hosted-db-push --dry-run` **0** (*"Remote database is up to date"*).
+
+**Manual verification.** The loader run with stdin closed reached the password prompt and aborted — *"An interactive terminal is required"* — creating nothing; `hosted-state-probe` then confirmed 0 auth identities, 0 fixture rows and governed state all zero. **No password was requested, accepted, printed or persisted at any point, in either direction.**
+
+### Isolation
+
+The frozen demonstration project `zjukuffiuzkbiblmnuwl` was **never contacted**. Every connection used the dev target, verified before each run. `main` untouched; **nothing pushed**; `supabase db reset` never run; the demonstration workspace's local stack was never started, stopped or reset, and after the transport change it is no longer a dependency of this repository.
+
+### Files changed
+
+`scripts/fixtures/hosted-target-guard.mjs` (new) · `scripts/fixtures/prove-hosted-target-guard.mjs` (new) · `scripts/fixtures/hosted-preflight.mjs` · `scripts/fixtures/hosted-db-push.mjs` · `scripts/fixtures/hosted-state-probe.mjs` · `scripts/fixtures/load-hosted-fixtures.mjs` · `scripts/physical-test/hosted-setup-assessment.mjs` · `supabase/config.toml` · `package.json` (one script entry) · this log.
+**Migration or schema changes:** **none authored.** The 17 existing migrations were APPLIED to a new empty project; no migration file was created, edited or deleted.
+
+### Operator decisions received
+
+Guard retarget **approved as proposed**, with the explicit condition that **no path may re-enable the frozen ref** · `project_id` rename **instructed** · the `project_id` fallout **explicitly carried, not fixed** · commit to `develop`, **no push, `main` untouched** · fixture passwords supplied by the Operator at their own terminal.
+
+**Blockers opened or closed:** none. `F-DEMO-1`, `F-UI-DRIFT-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1` all carried untouched.
+**Cleanup / rollback state:** no partial mutation. Three temporary runners used during bring-up were deleted before the commit; the tree is clean apart from the recorded changes.
+**Commit:** `29ba601` (guard retarget + `project_id`). This log entry and the proof harness follow separately.
+**Next permitted action:** enumerate `F-UI-DRIFT-1`, read-only, changing no code.
