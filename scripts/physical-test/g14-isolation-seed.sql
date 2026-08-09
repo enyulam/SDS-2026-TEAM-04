@@ -80,11 +80,24 @@ CREATE FUNCTION pg_temp.g14_nine() RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
            {"dimension_code":"audience_awareness","rating":"mastering"}]'::jsonb
 $$;
 
+-- MIGRATED TO OD-4 at P1-T10.
+--
+-- This read the four SUPERSEDED panel columns and therefore raised 42703
+-- (undefined_column) from the moment M13 replaced them by DROP+ADD. It was
+-- recorded as broken and carried forward; this is the repair.
+--
+-- ⚠️ THE SERIALIZER CHANGES TOO, AND THAT IS THE POINT — it is NOT a
+-- column rename. `report_wording_hash_v1` is FROZEN by G-05a and still
+-- takes the four superseded parameter names; feeding OD-4 panels into it
+-- would compute a hash under the V1 domain separation and label V2 data
+-- with a V1 envelope, which is exactly the false-provenance defect the
+-- M13 review caught once already. The V2 serializer is the correct
+-- counterpart, and V1 is left untouched.
 CREATE FUNCTION pg_temp.g14_whash(p_version uuid) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v public.report_versions; BEGIN
   SELECT * INTO v FROM public.report_versions WHERE id = p_version;
-  RETURN public.report_wording_hash_v1(v.todays_strength, v.next_focus,
-                                       v.practice_suggestion, v.session_takeaway);
+  RETURN public.report_wording_hash_v2(v.overview, v.strengths,
+                                       v.areas_for_development, v.remarks);
 END $$;
 
 -- Drive one (session, student) pair from nothing to `submitted`, through

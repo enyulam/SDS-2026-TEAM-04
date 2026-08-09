@@ -1763,9 +1763,17 @@ async function main() {
   await browser.waitUntil('document.querySelector(\'[data-testid="parent-canonical-report"]\') !== null', 'the parent canonical report')
   const parentText = await browser.bodyText()
   const parentPanels = await browser.evaluate('[...document.querySelectorAll(\'[data-testid="parent-canonical-report"] article\')].length')
-  const submittedTakeaway = dbValue(
-    `SELECT session_takeaway FROM public.report_versions WHERE id = (SELECT latest_submitted_version_id FROM public.reports WHERE id='${liveReportId}');`)
-  const parentShowsSubmitted = submittedTakeaway !== null && parentText.includes(submittedTakeaway.slice(0, 40))
+  // MIGRATED TO OD-4 at P1-T10. This read the SUPERSEDED `session_takeaway`
+  // column and raised 42703.
+  //
+  // ⚠️ NOT A RENAME, and the variable is renamed with it. OD-4 is a
+  // SEMANTIC change, so `session_takeaway` has no successor column and
+  // naming one would encode a false mapping. What this leg actually needs
+  // is a substantive parent-visible panel of the exact submitted version,
+  // and `overview` — the general narrative synthesis — is that panel.
+  const submittedOverview = dbValue(
+    `SELECT overview FROM public.report_versions WHERE id = (SELECT latest_submitted_version_id FROM public.reports WHERE id='${liveReportId}');`)
+  const parentShowsSubmitted = submittedOverview !== null && parentText.includes(submittedOverview.slice(0, 40))
   legFrom('L-13', parentPanels >= 4 && parentShowsSubmitted,
     `the linked parent's canonical route rendered the submitted report (${parentPanels} panel articles) and its text ` +
       'matches the exact version latest_submitted_version_id names — the version management published, not a draft',
@@ -1932,10 +1940,23 @@ async function main() {
     p_report_id: liveReportId, p_expected_lock_version: currentLock,
     p_expected_version_id: submittedVersion, p_expected_wording_hash: 'x',
   })
+  // MIGRATED TO OD-4 at P1-T10. The four parameter names below were the
+  // SUPERSEDED ones, so this call could no longer resolve — and the comment
+  // directly above records why that matters more here than almost anywhere
+  // else: a signature that does not resolve raises 42883, and an earlier
+  // version of this harness MEASURED A RESOLUTION ERROR AS A DENIAL. A
+  // stale signature would have made N-5 report the parent boundary as
+  // enforced when nothing had been tested at all.
+  //
+  // Verified against the LIVE catalogue rather than inferred:
+  //   report_save_edit(p_report_id uuid, p_expected_status report_status,
+  //     p_expected_lock_version integer, p_expected_version_id uuid,
+  //     p_overview text, p_strengths text, p_areas_for_development text,
+  //     p_remarks text, p_reaffirm_correction_request_id uuid DEFAULT NULL)
   const parentEdit = await parentDb.rpc('report_save_edit', {
     p_report_id: liveReportId, p_expected_status: 'submitted', p_expected_lock_version: currentLock,
-    p_expected_version_id: submittedVersion, p_todays_strength: 'x', p_next_focus: 'x',
-    p_practice_suggestion: 'x', p_session_takeaway: 'x',
+    p_expected_version_id: submittedVersion, p_overview: 'x', p_strengths: 'x',
+    p_areas_for_development: 'x', p_remarks: 'x',
   })
   const statusAfterParentAttempts = reportStatus()
   const parentApproveDenied = isAuthorizationDenial(parentApprove.error)
@@ -1955,15 +1976,19 @@ async function main() {
   await browser.navigate(`/parent/students/${FIXTURE_STUDENT}/sessions/${FIXTURE_SESSION}/report`)
   await browser.waitUntil('document.querySelector(\'[data-testid="parent-canonical-report"]\') !== null', 'the parent report re-read')
   const parentTextAgain = await browser.bodyText()
-  const earlierTakeaways = psqlRows(DISPOSABLE_DB_CONTAINER,
-    `SELECT session_takeaway FROM public.report_versions WHERE report_id='${liveReportId}' ` +
+  // MIGRATED TO OD-4 at P1-T10, for the same reason and on the same panel
+  // as the L-13 read above — the superseded column raised 42703, and the
+  // leak this control exists to catch is "an EARLIER version's prose
+  // reached the parent", which `overview` carries as well as any panel.
+  const earlierOverviews = psqlRows(DISPOSABLE_DB_CONTAINER,
+    `SELECT overview FROM public.report_versions WHERE report_id='${liveReportId}' ` +
     `AND id <> (SELECT latest_submitted_version_id FROM public.reports WHERE id='${liveReportId}');`)
     .map((row) => row[0]).filter((value) => typeof value === 'string' && value.length > 20)
-  const leakedEarlier = earlierTakeaways.filter((value) => parentTextAgain.includes(value.slice(0, 40)))
+  const leakedEarlier = earlierOverviews.filter((value) => parentTextAgain.includes(value.slice(0, 40)))
   controlFrom('N-6',
-    parentTextAgain.includes(submittedTakeaway.slice(0, 40)) && leakedEarlier.length === 0,
+    parentTextAgain.includes(submittedOverview.slice(0, 40)) && leakedEarlier.length === 0,
     `the parent read is byte-stable across two independent loads and exposes ONLY the submitted version: none of the ` +
-      `${earlierTakeaways.length} earlier version(s) appears in the rendered document`,
+      `${earlierOverviews.length} earlier version(s) appears in the rendered document`,
     `${leakedEarlier.length} earlier version(s) leaked into the parent view`)
 
   // N-7 — one Management Reports route, one active rail item.
