@@ -116,7 +116,44 @@ export const EXPECTED_CANONICAL_ROWS = 28
 // report_versions.content_hash_version DATABASE DEFAULT by Operator ruling:
 // it adds and drops NO object, so functions/tables/enums/policies and the
 // fixture checksum are all UNMOVED -- only the migration count changes.)
-export const EXPECTED_CANONICAL_MIGRATIONS = 15
+//
+// (Moved 15 -> 17 at STAGE 3, clearing blocker B-STAGE3-1. M16 is the
+// governed attendance write path; M17 is report_source_map. Stage 1 added
+// both and MISSED this pin -- the third time it has been missed -- so every
+// disposable-stack run had been aborting.
+//
+// ⚠️ THIS VALUE WAS DERIVED FROM A LIVE READING, NOT TRANSCRIBED. It is
+// `readCanonical().counts.appliedMigrations` measured against the running
+// canonical container, which returned 17, matching the 17 committed .sql
+// files on disk. The fixture checksum was RE-MEASURED in the same reading
+// rather than assumed unmoved by two DDL-only migrations: it came back
+// 6bdff280...c576 over 28 rows, byte-identical to the pin above. That is a
+// MEASUREMENT, not an assumption -- and see EXPECTED_CANONICAL_OBSERVATIONS
+// below for the pin in this same function where "assumed unmoved" was in
+// fact WRONG.)
+export const EXPECTED_CANONICAL_MIGRATIONS = 17
+
+/**
+ * Whole-table `public.observations` count in the ratified canonical baseline.
+ *
+ * ⚠️ 2, NOT 1. The P1-T09a additive expansion
+ * (`scripts/fixtures/local_fixtures_expansion.sql`) adds a SECOND observation
+ * in the deliberately-disjoint `e9000000-%` UUID family, so the whole-table
+ * count is 2 while the base Step 7F fixture contributes 1.
+ *
+ * This pin went stale SILENTLY and for a subtle reason worth stating, because
+ * it is the reason a checksum match is NOT evidence that a count is unmoved:
+ * the fixture checksum is PREFIX-SCOPED (`id::text LIKE 'cN000000-%'`), by
+ * explicit design, so the expansion is INVISIBLE to it. The checksum
+ * therefore still matches byte-for-byte while this count has moved 1 -> 2.
+ * A harness that trusted the checksum to cover the census would pass the
+ * checksum branch and then abort here with no obvious cause.
+ *
+ * Exported so the second consumer (`prove-disposable-app.mjs`, the A-19
+ * post-teardown residue re-read) shares ONE definition instead of repeating a
+ * bare `=== 1` literal, which is exactly how this drifted out of step.
+ */
+export const EXPECTED_CANONICAL_OBSERVATIONS = 2
 const CANONICAL_BEGIN = '<<<BEST_COACH_FIXTURE_CANONICAL_BEGIN>>>'
 const CANONICAL_END = '<<<BEST_COACH_FIXTURE_CANONICAL_END>>>'
 
@@ -569,7 +606,9 @@ export function assertCanonicalPristine(reading, when) {
   }
   if (reading.counts.auditEvents !== 0) failures.push(`audit_events=${reading.counts.auditEvents}`)
   if (reading.counts.chainHeads !== 0) failures.push(`audit_chain_heads=${reading.counts.chainHeads}`)
-  if (reading.counts.observations !== 1) failures.push(`observations=${reading.counts.observations}`)
+  if (reading.counts.observations !== EXPECTED_CANONICAL_OBSERVATIONS) {
+    failures.push(`observations=${reading.counts.observations} (expected ${EXPECTED_CANONICAL_OBSERVATIONS})`)
+  }
   if (reading.counts.authUsers !== 3) failures.push(`auth.users=${reading.counts.authUsers}`)
   if (reading.counts.appliedMigrations !== EXPECTED_CANONICAL_MIGRATIONS) {
     failures.push(`applied migrations=${reading.counts.appliedMigrations}`)
@@ -867,9 +906,9 @@ enabled = false
 }
 
 /**
- * Copy the ten committed migrations into the disposable workdir and VERIFY
- * each copy is byte-identical to its source by SHA-256. Source fidelity is
- * not a comment here: a copy that differs by one byte stops the run.
+ * Copy the committed migrations into the disposable workdir and VERIFY each
+ * copy is byte-identical to its source by SHA-256. Source fidelity is not a
+ * comment here: a copy that differs by one byte stops the run.
  */
 function copyCommittedMigrations(workdir) {
   const sourceDir = join(REPO_ROOT, 'supabase', 'migrations')
@@ -880,9 +919,35 @@ function copyCommittedMigrations(workdir) {
     .filter((name) => name.endsWith('.sql'))
     .sort()
   if (names.length !== EXPECTED_CANONICAL_MIGRATIONS) {
+    // ⚠️ THE RE-PIN INSTRUCTION LIVES IN THE FAILURE, NOT ONLY IN A COMMENT.
+    // A comment saying "re-pin this" has now been missed THREE times (M13,
+    // M14, and M16/M17), because the pin is a bare symbolic constant that
+    // greps for a numeric literal next to the word "migration" do not
+    // surface. Whoever adds migration N+1 will not read the comment -- but
+    // they CANNOT avoid reading this, because it fails closed on their very
+    // first disposable run. So it names the exact edit sites and the exact
+    // way to DERIVE the new values rather than transcribe them.
     throw new SafeError(
       `Expected ${EXPECTED_CANONICAL_MIGRATIONS} committed migrations, found ${names.length}. ` +
-        'The disposable stack replays the committed set exactly; it does not guess.',
+        'The disposable stack replays the committed set exactly; it does not guess.\n\n' +
+        'A migration was added without re-pinning the census. To clear this:\n' +
+        '  1. Bring the CANONICAL stack up, then take a LIVE reading -- do not\n' +
+        '     transcribe a number, and do not assume a DDL-only migration left\n' +
+        '     the fixture unmoved (that assumption has been wrong before):\n' +
+        '       node -e "import(process.argv[1]).then(async m => {\n' +
+        '         const r = m.readCanonical();\n' +
+        '         console.log(r.counts, r.checksum);\n' +
+        '       })" ./scripts/physical-test/disposable-stack.mjs\n' +
+        '  2. Re-pin, in scripts/physical-test/disposable-stack.mjs, EVERY field\n' +
+        '     the reading moved -- not just the migration count:\n' +
+        '       EXPECTED_CANONICAL_MIGRATIONS    (counts.appliedMigrations)\n' +
+        '       EXPECTED_CANONICAL_CHECKSUM      (checksum.sha256)\n' +
+        '       EXPECTED_CANONICAL_ROWS          (checksum.rows)\n' +
+        '       EXPECTED_CANONICAL_OBSERVATIONS  (counts.observations)\n' +
+        '     ⚠️ The checksum is PREFIX-SCOPED, so a checksum that still matches\n' +
+        '     does NOT prove the whole-table counts are unmoved. Check each one.\n' +
+        '  3. Add a dated re-pin note above the constant, recording that the\n' +
+        '     value was MEASURED and what the reading returned.',
     )
   }
 

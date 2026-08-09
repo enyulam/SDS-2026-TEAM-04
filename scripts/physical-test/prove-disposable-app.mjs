@@ -125,6 +125,7 @@ import {
   DISPOSABLE_PUBLISHED_PORTS,
   DISPOSABLE_SHADOW_PORT,
   EXPECTED_CANONICAL_MIGRATIONS,
+  EXPECTED_CANONICAL_OBSERVATIONS,
   FIXTURE_MODE_VARIABLE,
   REPO_ROOT,
   SafeError,
@@ -3128,14 +3129,18 @@ async function main() {
     readings.canonicalAfter.counts.reportVersionRatings === 0 &&
     readings.canonicalAfter.counts.auditEvents === 0 &&
     readings.canonicalAfter.counts.chainHeads === 0 &&
-    readings.canonicalAfter.counts.observations === 1 &&
+    // Shares disposable-stack.mjs's ONE definition. This was a bare `=== 1`
+    // literal and went stale when the P1-T09a expansion moved the whole-table
+    // count 1 -> 2 while the PREFIX-SCOPED checksum stayed byte-identical.
+    readings.canonicalAfter.counts.observations === EXPECTED_CANONICAL_OBSERVATIONS &&
     readings.canonicalAfter.counts.authUsers === 3
   checkFrom(
     'A-19',
     afterDiff.length === 0 && residueOk,
     `re-read independently after teardown: checksum ${readings.canonicalAfter.checksum.sha256} over ` +
       `${readings.canonicalAfter.checksum.rows} rows (unchanged); reports=0, report_versions=0, ` +
-      'report_version_ratings=0, audit_events=0, audit_chain_heads=0, observations=1, auth.users=3; the ' +
+      `report_version_ratings=0, audit_events=0, audit_chain_heads=0, ` +
+      `observations=${EXPECTED_CANONICAL_OBSERVATIONS}, auth.users=3; the ` +
       'applied-migration list and the Auth user id set are unchanged',
     afterDiff.length > 0 ? afterDiff.join(' | ') : `residue is not the ratified pristine state: ${readings.canonicalAfter.census}`,
   )
