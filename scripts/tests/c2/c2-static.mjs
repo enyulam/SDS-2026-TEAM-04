@@ -113,14 +113,21 @@ function bodyOf(src, startNeedle, endNeedle) {
   const index = all.indexOf(MIG_NAME)
   if (index === -1) {
     fail('T-C2-S2', `the C2-A composer migration ${MIG_NAME} is missing from the tree`)
-  } else if (index !== all.length - 6) {
+  } else if (index !== all.length - 8) {
     // (Moved to sixth-from-last at the M15 checkpoint: the OD-4 report
     // contract, its envelope-version forward fix and the M15
     // content_hash_version default removal all sort after C2C-004's Management
     // submitted-report list, which already sorted after the single-entry-point
     // closure, which already sorted after the composer. The composer's own
     // position in the ledger is still asserted exactly; only the offset moved.)
-    fail('T-C2-S2', `the C2-A composer is at ledger position ${index + 1} of ${all.length}; expected the sixth-from-last file`)
+    //
+    // (Moved to EIGHTH-from-last at the V3 overlay STAGE 1 pair: the governed
+    // attendance write path and report_source_map both sort after everything
+    // above. The composer's ABSOLUTE position is unchanged -- it is still the
+    // tenth file -- and asserting the offset from the END is what makes this
+    // pin move every time a migration is added, which is the intended
+    // behaviour: a new migration must be acknowledged, not absorbed.)
+    fail('T-C2-S2', `the C2-A composer is at ledger position ${index + 1} of ${all.length}; expected the eighth-from-last file`)
   } else {
     const raw = read(join(MIG_DIR, MIG_NAME))
     const body = stripSql(raw)
