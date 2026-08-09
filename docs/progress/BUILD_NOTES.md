@@ -2794,3 +2794,72 @@ Rule 3 is lexical, so it rejects a contradictory Remarks claim only when the wor
 - **Self-review finding, acted on** — bare `strong` matches by substring, so *"will grow stronger"* in Areas for Development would reject. Kept deliberately: grounding is a REJECT gate, over-rejection is recoverable through the designed failure/retry state (spec §15) while under-rejection reaches a parent, and `G06-1`'s whole posture is fail-closed. Verified the fixture provider emits no `strong`-family word, so the hero path is unaffected.
 - **Cleanup / rollback state** — no partial mutation; rollback is `git revert`.
 - **Next permitted action** — **P1-T09a**, the additive fixture expansion, which P1-T11's §10 exit condition (c) depends on.
+
+
+---
+
+## 2026-08-09 — P1-T09a: additive fixture expansion, and Phase 1 exit condition (c) DEMONSTRATED
+
+- **Checkpoint / phase** — Plan Phase 1, **P1-T09a COMPLETE (`PASS`)**, with one limb explicitly **DEFERRED, NOT DONE** (below).
+- **Track / branch / worktree** — Main Orchestrator · `main` · single worktree. **Starting HEAD** `37c4dd1`.
+- **Migration / schema changes** — **NONE.** No DDL of any kind. This is fixture data only.
+
+### What was added
+
+`scripts/fixtures/local_fixtures_expansion.sql` — **36 rows**, a separate file rather than an edit to `local_fixtures.sql`. Reason: `local_fixtures.sql` is the **ratified Step 7F minimum**, its load path is one transaction inserting exactly 25 rows with **no `ON CONFLICT` anywhere**, and its own guard asserts *"expected exactly 25 fixture domain rows"*. Editing it in place would both mutate a ratified artefact (a §12 stop-and-ask) and make the expansion unappliable to an already-loaded database without a full reload — which needs the Operator's three interactive no-echo passwords.
+
+**6 students · 2 class modules · 3 class sessions · 6 enrolments · 3 trainer assignments · 6 attendance rows · 1 observation with a real `follow_up_notes` · 9 mixed ratings.**
+
+### The design decision that made this safe: a DISJOINT UUID family
+
+The canonical fixture checksum is **prefix-scoped, not whole-table** — every branch of the digest filters on `id::text LIKE 'cN000000-%'`, or on the three reserved fixture emails. Rows outside those prefixes are invisible to it. The expansion therefore uses a disjoint `e2…`–`ea…` family.
+
+**Measured consequence, not assumed:** the canonical region re-reproduced as **28 rows / `6bdff280…ffc576`, byte-identical, on two runs after the load.** All three pinned checksums (`run-canonical.mjs:43`, `disposable-stack.mjs:88`, `run-f17.mjs:144`), both 28-row pins, `local_fixtures.sql`'s own load guard and `verify-local-fixtures.sql`'s A3/A5/A6 and D1 are **untouched**.
+
+**Exactly ONE pin moved, because it is the only UNSCOPED one:** `lifecycle-canonical.sql` T7I-28's 13-table sum, **25 → 61** (= 25 ratified + 36 expansion). The number was **derived from a run of that very assertion**, then re-run to green — never guessed, which is P1-T09a's explicit negative control. Its intent is unchanged and deliberately still strict: an exact inventory, not a `>=` or a range.
+
+### ⚠️ A LIMB THAT IS DEFERRED, NOT DELIVERED — and the wrong turn that was caught
+
+CLAUDE.md §11's shape names **"2 trainers … 2 parent accounts"**. Those two limbs are **NOT delivered**, and are recorded outstanding rather than quietly marked done.
+
+The first attempt DID deliver them, as `accounts` rows with `auth_user_id = NULL` — schema-legal (Amendment 003 A-025; `asm-suite.sql:380-384` already builds exactly such a trainer). **It was written, applied to the canonical database, measured, and then deliberately REVERTED**, because measuring showed it broke something that must not be broken:
+
+> `scripts/physical-test/disposable-stack.mjs:1278-1291` requires the stack to hold **exactly `DISPOSABLE_IDENTITIES.length` accounts** and asserts **`accountsWithoutAuthId === 0`**. Two NULL-auth accounts in the canonical fixture propagate into **every disposable clone** and fail both checks — which would have silently disarmed **`prove-disposable-identity-linkage.mjs`**.
+
+That proof is Operator-owned and credential-gated: its real `signInWithPassword` leg is **NOT-RUN in every autonomous run**, and the standing instruction is that it **stays NOT-RUN and must not be weakened or worked around**. Re-scoping its checks to tolerate extra accounts would have removed a genuine property — *"no account exists without an Auth identity"* — to make an unrelated fixture change fit. **That is the wrong trade, so the fixture change gave way instead.** The reasoning is recorded in the SQL file's header so the next session does not re-attempt it.
+
+Delivering those two limbs properly needs real Auth identities, and creating one requires the Operator's no-echo password entry. **It is Operator-gated work and is recorded as outstanding.**
+
+Consequence: all three expansion sessions are assigned to the **ratified** trainer membership — the only trainer with an Auth identity, and so the only one a governed run can act as.
+
+### Phase 1 exit condition (c) — DEMONSTRATED
+
+`scripts/tests/integration/prove-session-continuity.mjs` — **exit 0, 5/5**. CLAUDE.md §10 requires *"a session's follow-up note appears as the next session's previous focus"*, and the Execution Plan records that it *"has no other owner in this plan and requires P1-T09a's fixture"*.
+
+**Why it could not be proven before:** the ratified fixture holds ONE session and its observation's `follow_up_notes` is **NULL**. Continuity is a relationship BETWEEN two sessions, so a one-session fixture cannot exhibit it either way — a green result would have been vacuous.
+
+The proof is deliberately built so it cannot be vacuous:
+
+- **CONT-0** the note is **read back from the database**, so the expected value is derived, not hard-coded against itself.
+- **CONT-1** exact string equality on the 129-character note.
+- **CONT-3** the other 2 students in that session, who have no prior observation, carry `previousSessionFocus = null`. **A projection that broadcast one student's note across the roster would pass CONT-1 and fail here.**
+- **CONT-4** the EARLIER session carries no previous focus for anyone — continuity flows forwards only. **A symmetric implementation would pass 1–3 and fail here.**
+
+No new application code was needed: the continuity read already exists at `server/modules/report-workflow/trainer-projections.ts:244-249`. This task supplied the data that makes it observable and the proof that it works.
+
+**Authentication leg: ADMIN-MINTED SESSION — password sign-in NOT-RUN (Operator credential required).** Per `FINAL_MVP_G06_GROUNDING_RULING.md` §H-6 this proves post-authentication behaviour ONLY and is never a sign-in proof.
+
+### Automated verification — all RAN this session, serially (global test mutex)
+
+`tsc` **0** · `eslint` **0** · `run-canonical` **0** (checksum `6bdff280…ffc576` on two runs) · `verify-fresh-apply` **0** · `run-assessment` **0** · `run-correction-tracking` **0** · `run-management-approved` **0** · `run-c2` **0** · `run-c3-bypass` **0** · `run-concurrency` **0** · `prove-clock-hour-determinism` **0** · `run-integration` **0** (37 PASS, real-provider leg OFF) · `prove-g06-grounding` **0** (113 checks) · `prove-session-continuity` **0**.
+
+**NOT-RUN:** `prove-disposable-identity-linkage.mjs` (Operator credential — unchanged, and deliberately left able to pass) · every real-provider leg · every browser leg · P1-T10's deferred harnesses.
+
+### Failures and recovery — two, both caught by verifying rather than assuming
+
+1. **`DO $guard$ … :'do_expand' … $guard$`** — psql performs **no variable interpolation inside a dollar-quoted string**, so the mode guard would have reached the server verbatim and failed as a syntax error rather than guarding anything. Rewritten as psql `\if` logic and **proven by negative control**: running with neither flag set now raises loudly.
+2. **A `sed` re-pin silently replaced the T7I-28 assertion line with the literal `X`.** Caught by reading the file back after the edit — the same discipline Q-28 exists for. Restored via a precise edit with the corrected count. **Nothing was committed in the damaged state**, and the suite was re-run green afterwards.
+
+- **Also added** — `package.json` gains `test:g06-grounding` and `test:continuity`, so neither new proof becomes the kind of orphan `prove-v1-freeze.mjs` and `prove-od4-grant-guard.mjs` both were. `package.json` verified after the write by a real `JSON.parse`, with no BOM (Q-28).
+- **Cleanup / rollback state** — no partial mutation. The expansion is fully reversible in one command (`do_expand_cleanup=true`), and that path was **exercised twice** during this task, each time verified back to 0 expansion rows.
+- **Next permitted action** — **P1-T10**, the fixture and test-estate migration to OD-4.

@@ -3765,7 +3765,27 @@ BEGIN
        + (SELECT pg_catalog.count(*) FROM public.observations)
        + (SELECT pg_catalog.count(*) FROM public.observation_ratings)
     INTO v_domain;
-  IF v_domain <> 25 THEN RAISE EXCEPTION 'FAIL T7I-28: % application-domain rows, expected 25', v_domain; END IF;
+  -- RE-PINNED 25 -> 61 at P1-T09a (the additive fixture expansion).
+  --
+  -- 61 = the ratified Step 7F minimum's 25 + the expansion's 36
+  -- (scripts/fixtures/local_fixtures_expansion.sql, whose own load guard
+  -- independently asserts exactly 36). The number was DERIVED FROM A RUN
+  -- OF THIS VERY ASSERTION and then re-run to green -- never guessed,
+  -- which is P1-T09a's explicit negative control.
+  --
+  -- This is the ONLY count in the whole estate that the expansion moves,
+  -- because it is the only UNSCOPED one. Every other fixture count --
+  -- the canonical 28-row checksum region and its three pinned sha256s,
+  -- local_fixtures.sql's own load guard, and verify-local-fixtures.sql's
+  -- A3/A5/A6 and D1 -- is scoped to the `c0…`-`ca…` UUID prefixes, and
+  -- the expansion deliberately uses a DISJOINT `e2…`-`ea…` family, so all
+  -- of those remain BYTE-UNCHANGED. Measured, not assumed: the canonical
+  -- checksum re-reproduced as 28 rows / 6bdff280…ffc576 after the load.
+  --
+  -- The assertion's INTENT is unchanged and must stay this strict: the
+  -- fixture is an exact known inventory, and any drift from it fails the
+  -- suite loudly. Do not weaken this to a `>=` or a range.
+  IF v_domain <> 61 THEN RAISE EXCEPTION 'FAIL T7I-28: % application-domain rows, expected 61 (25 ratified + 36 expansion)', v_domain; END IF;
 
   IF (SELECT pg_catalog.count(*) FROM public.centres) <> 1
      OR (SELECT pg_catalog.count(*) FROM public.class_grades) <> 3
