@@ -294,18 +294,41 @@ function RolePortalShell({
             </FeedbackBanner>
           )}
           <div className="mt-6">{children}</div>
-          <footer
-            className="mt-10 border-t border-line py-5 text-small text-neutral-on"
-            data-adapter-kind={port.identity.kind}
-          >
-            Adapter: <strong>{port.identity.kind}</strong> · Participant eligible:{" "}
-            <strong>{port.identity.participantEligible ? "yes" : "no"}</strong> · Persistence:{" "}
-            <strong>
-              {port.identity.persistence === "local_supabase"
-                ? "local Supabase"
-                : "browser session only"}
-            </strong>
-          </footer>
+          {/*
+            * ⚠️ INTERNAL PROVENANCE FOOTER — STAFF SURFACES ONLY.
+            *
+            * It names the composed adapter, participant eligibility and the
+            * persistence mode. That is build/test provenance, not product
+            * information, and a PARENT must never be shown it: the parent
+            * surface is the one audience with no operational relationship to
+            * this system, and internal adapter naming on it reads as a leak
+            * even though it discloses no report data.
+            *
+            * The "local Supabase" wording is additionally STALE on a hosted
+            * deployment — `persistence` is a hardcoded constant on the real
+            * participant adapter meaning "a real Supabase database" rather
+            * than "browser session only", written when only the local stack
+            * existed. It is NOT re-derived from the environment, so it says
+            * "local" wherever it renders.
+            *
+            * Suppressed for `parent` ONLY. Trainer and Management are
+            * deliberately UNCHANGED — narrowing their provenance evidence is
+            * an Operator decision, not a tidy-up.
+            */}
+          {role === "parent" ? null : (
+            <footer
+              className="mt-10 border-t border-line py-5 text-small text-neutral-on"
+              data-adapter-kind={port.identity.kind}
+            >
+              Adapter: <strong>{port.identity.kind}</strong> · Participant eligible:{" "}
+              <strong>{port.identity.participantEligible ? "yes" : "no"}</strong> · Persistence:{" "}
+              <strong>
+                {port.identity.persistence === "local_supabase"
+                  ? "local Supabase"
+                  : "browser session only"}
+              </strong>
+            </footer>
+          )}
         </main>
       </div>
     </div>
