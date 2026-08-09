@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// TEMPORARY — paired with app/api/_diag/draft/route.ts. Removed with it (T-DIAG-REMOVE).
+// TEMPORARY — paired with app/api/diag-draft/route.ts. Removed with it (T-DIAG-REMOVE).
 // Admin-minted trainer session -> POST the gated diagnostic route -> print the body verbatim.
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
@@ -25,7 +25,7 @@ if (v.error || v.data?.user?.id !== TRAINER_SUB) { console.error('session did no
 console.log(`ADMIN-MINTED trainer session (${jar.size} cookie(s)). Password sign-in NOT-RUN.`)
 
 const cookie = [...jar.entries()].map(([n, val]) => `${n}=${val}`).join('; ')
-const res = await fetch(`${APP}/api/_diag/draft`, {
+const res = await fetch(`${APP}/api/diag-draft`, {
   method: 'POST',
   headers: { 'content-type': 'application/json', cookie },
   body: JSON.stringify({ sessionId: 'c5000000-0000-4000-8000-000000000001', studentId: 'c2000000-0000-4000-8000-000000000001' }),
