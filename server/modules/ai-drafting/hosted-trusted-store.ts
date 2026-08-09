@@ -222,11 +222,28 @@ export class HostedTrustedDraftStore implements TrustedDraftStore {
         // failure aborts the draft store with it, so the map can never be
         // silently skipped and a version can never commit with a half-written
         // trace.
+        // ⚠️ `${string}::jsonb` DOES NOT PRODUCE A JSON ARRAY over this driver.
+        // postgres.js binds a JS string destined for jsonb as a JSON STRING
+        // SCALAR, so the function received `"[{…}]"` — `jsonb_typeof` =
+        // `string` — and fail-closed check BC303 correctly rejected it.
+        //
+        // The local channel never had this problem: psql receives raw JSON
+        // TEXT through `-v`/`:'quoted'`, which parses as an array. That is a
+        // TRANSPORT divergence the "semantic equivalence" note above did not
+        // cover, and it cost a generated, validated, paid-for draft.
+        //
+        // `sql.json()` binds the PARSED value, which arrives as `array`.
+        // Measured both ways against this database before changing anything.
+        const parsedEntries: unknown = JSON.parse(request.sourceMapJson);
+        if (!Array.isArray(parsedEntries)) {
+          throw new Error("the derived source map was not an array");
+        }
+        const entriesValue = parsedEntries as Array<Record<string, string>>;
         const mapped = await tx`
           SELECT x.entries_written
             FROM public.report_store_source_map(
               ${v.report_version_id}::uuid,
-              ${request.sourceMapJson}::jsonb) AS x`;
+              ${sql.json(entriesValue)}::jsonb) AS x`;
 
         const entries = mapped[0]?.entries_written;
         if (entries === undefined || entries === null) {
