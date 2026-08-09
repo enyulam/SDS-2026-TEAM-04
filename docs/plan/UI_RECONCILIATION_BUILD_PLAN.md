@@ -66,8 +66,8 @@ These have no built surface. There is nothing to compare and nothing to reconcil
 
 | Screen | Disposition |
 |---|---|
-| **07** Trainer Grade Student | ⛔ **BLOCKED ON OPERATOR RULING.** The §6 Coach Notes / Follow-up question is unresolved. `observations.follow_up_notes` is one column surfaced on two screens; the frame omits the field and `CLAUDE.md` §6 requires it, loaded not blanked. **No phase may touch this screen until the Operator rules**, because the ruling could change what the reconciled screen is supposed to contain |
-| **10** Trainer Student Report | ⛔ **BLOCKED ON OPERATOR RULING.** Same question, same column, same reason (register entry `D7`) |
+| ~~**07** Trainer Grade Student~~ | ✅ **UNBLOCKED — Operator ruling 2026-08-10.** **Capture on 07 STAYS.** §6 is explicit and the assessment save is the column's only writer; removing it breaks the previous-focus carry-over, empties the AI prompt's `<FOLLOW_UP_NOTES>`, and voids **Phase 1 exit condition (c)**. A ratified rule speaks, so per **§0.0** the divergence is **KEPT AND CITED**: the frame lists only "Observation Notes", and the **Follow-up for Next Session field is a `REGISTERED-OMISSION`, not drift.** Now **Phase 6a** |
+| **10** Trainer Student Report | ⛔ **RECLASSIFIED 2026-08-10 — moved to §1.4 `CANNOT BE VISUALLY ACCEPTED`.** Not blocked on the §6 ruling any more; **unframed**. See §1.4 |
 | **09** Trainer Reports | **Reassigned to `F-STAGE3-1`.** Enumeration finding ④: the built surface is a returned-corrections queue gated on `?status=needs_edit`, not the frame's "All Reports" table. That is a **substitution, not drift** — a visual pass would reconcile the wrong surface. It needs a functional decision first |
 
 ### 1.4 ⚠️ CANNOT BE VISUALLY ACCEPTED — no frame exists
@@ -76,10 +76,21 @@ These have no built surface. There is nothing to compare and nothing to reconcil
 |---|---|
 | Trainer wording editor | `/trainer/reports/[reportId]/edit` |
 | Management wording-only editor | `/management/reports/[reportId]/edit` |
+| **Trainer Review & Approve** *(added 2026-08-10)* | **`/trainer/reports/[reportId]/review`** |
 
-Both are among the **eight families the Figma matrix §0.1 records as `Blocked — new design required`**. Reference `664:9` and `648:330` cover the review surfaces only. **No mockup may be fabricated to fill the gap** (`CLAUDE.md` §7.2 / §12 stop-and-ask; `GLOBAL_UI_RULES` §8). Both were deliberately restyled onto the shared foundation their siblings use and both are explicitly **not proposed as visually accepted**.
+The two editors are among the **eight families the Figma matrix §0.1 records as `Blocked — new design required`**. Reference `664:9` and `648:330` cover the review surfaces only. **No mockup may be fabricated to fill the gap** (`CLAUDE.md` §7.2 / §12 stop-and-ask; `GLOBAL_UI_RULES` §8). Both were deliberately restyled onto the shared foundation their siblings use and both are explicitly **not proposed as visually accepted**.
 
-**They are out of this plan and must stay out.** They become reconcilable only if the Operator commissions frames for them. Open route decision **OD-3** is recorded and unresolved.
+#### Why `/review` joined them — measured from the routes, not inferred
+
+**`/trainer/reports/[reportId]/review` is the ONLY trainer report detail surface.** Verified on disk 2026-08-10: the trainer portal has exactly `reports/`, `reports/[reportId]/generate`, `reports/[reportId]/review`, `reports/[reportId]/edit`, `schedule`, `sessions/[sessionId]/roster` and `sessions/[sessionId]/students/[studentId]/assess`. **There is no `reports/[reportId]` index route** — screen 10's own `screen.md` still lists *"add the canonical `[reportId]` index"* under **allowed future expansion**, so the framed completed-report view **has not been built**.
+
+The frame `reference/Trainer - Student Report/` is a **completed-report VIEW**: purpose *"view a completed Student Report… and its approval status"*, interactions *read · play video · return*. It draws **no Quality Checklist, no Approve control, no editable field** — only Back, the report, the video and a *"Report sent to management for approval"* status line.
+
+`/review` carries the **Review & Approve workflow** — the three-item version-scoped Quality Checklist, the trainer Approve action, the returned-correction state and the internal Coach Notes — **plus** the approved end state the frame depicts. It is therefore a **workflow surface the frame does not describe**, in exactly the position of the two editors: governed functionality with no frame.
+
+⚠️ **Even the framed portion is only partially reconcilable.** The frame draws **"Overall Grade: Mastering"** and a four-tile **per-dimension Performance Summary**, both already registered governance-wins omissions (`10` register `D5`, `D6`). A frame that cannot be matched on its two most prominent right-rail elements is not a reconciliation target.
+
+**All three are out of this plan and must stay out.** They become reconcilable only if the Operator commissions frames — or, for `/review`, if the canonical `[reportId]` index is built as a separate framed surface, which is **new construction and a separate authorization**. Open route decision **OD-3** is recorded and unresolved.
 
 ### 1.5 Ordering
 
@@ -151,6 +162,34 @@ Every phase below is stated in the same six parts. **A phase is not complete unt
 > This is the standing prohibition on porting generated code (`CLAUDE.md` §7.2), not a new rule — the export is admitted here for measurement only, and that admission changes nothing else.
 
 - Where a pack-local frozen `reference.png` exists it is an **integrity anchor**, SHA-identical to the `/reference/` copy; it never outranks it (A-056, `CLAUDE.md` §7.4). **Its absence is not a missing reference and is never a reason to re-export from live Figma** — a live re-export can only import post-freeze canvas drift.
+
+> ### ⭐ THE NUMBERED PACKS DO NOT HOLD OLDER DESIGNS — verified, 2026-08-10
+>
+> **A numbered pack's `reference.png` is a SHA-identical frozen DUPLICATE of its `/reference/` counterpart, never a superseded iteration.** This is what A-056 says, and it is now measured rather than assumed.
+>
+> **All 12 packs that carry a frozen duplicate are byte-identical to their `/reference/` counterpart — 12 identical, 0 different, 0 missing.** Independently, all 12 also match their `screenshotValidation.sha256` pin in `UI_PACK_MANIFEST.json` — **12/12 pin match, 0 mismatch** — so the result is corroborated by a third record rather than by one comparison.
+>
+> | Pack | `/reference/` counterpart | SHA-256 (first 16) | Pin |
+> |---|---|---|---|
+> | `05-trainer-schedule` | `Trainer - Schedule` | `d2d58b16b1ee2d68` | OK |
+> | `06-trainer-student-roster` | `Trainer - Student Roster` | `78e4b618ed154ced` | OK |
+> | `07-trainer-grade-student` | `Trainer - Grade Student` | `1df95a5bacae3c07` | OK |
+> | `08-trainer-ai-report-generation` | `Trainer - AI Report Generation` | `3160524f41fc84cd` | OK |
+> | `10-trainer-student-report` | `Trainer - Student Report` | `e64291dc80a2af73` | OK |
+> | `19-management-student-report` | `Management - Student Report` | `394d8475498602ae` | OK |
+> | `29-management-reports` | `Management - Reports` | `eddda3b14c7e3474` | OK |
+> | `32-parent-reports` | `Parent - Report` *(singular)* | `90e368c17826bb11` | OK |
+> | `33-parent-class-report` | `Parent - Class Report` | `2aaeb446065f8360` | OK |
+> | `AUTH-01-trainer-login` | `Auth 01 - Trainer - Login` | `b1ad24e4f414ece9` | OK |
+> | `AUTH-02-management-login` | `Auth 02 - Mangement - Login` *(misspelled on disk)* | `fcc3db9377a1b117` | OK |
+> | `AUTH-03-parent-login` | `Auth 03 - Parent - Login` | `fcd4d4edcebadd20` | OK |
+>
+> **Consequences a phase must not get wrong:**
+>
+> - ⛔ **Never treat a numbered pack's PNG as a previous iteration** and never "reconcile" one against the other. There is nothing between them to reconcile.
+> - **"Drift" in this plan means BUILD vs FRAME. Only that.** It never means frame-vs-frame or pack-vs-pack.
+> - Either file may be opened for the comparison; they are the same bytes. The **`/reference/` copy is the one cited**, because it is the ranked authority (A-056).
+> - The 24 packs without a duplicate are **not missing a reference** — theirs lives in `/reference/` like everyone else's.
 - **Build side:** a rendered capture of the authenticated surface with governed fixture data, taken through the existing headless-Chrome/CDP path, **after the loading state clears**. A surface still loading at budget expiry is `NOT-RUN`, never `PASS` — the two-tier discipline already ratified for Stage 3.
 - **Recorded per difference:** location, description, and a classification of **`REGISTERED-OMISSION` / `TRUE-DRIFT` / `INCOMPLETE` / `NEW-QUESTION`**. `NEW-QUESTION` is a stop-and-ask, never a judgement the phase makes about its own work.
 
@@ -197,6 +236,22 @@ Every phase below is stated in the same six parts. **A phase is not complete unt
 - **Compare:** four-column card grid and gutters; card internals (initials, name, status chip, observation line); summary-strip composition; filter/sort placement; banner geometry.
 - **MUST NOT CHANGE:** **`D1`** no **"CLASS IN SESSION"** eyebrow or live dot — it asserts a lifecycle state no governed field carries · **`D2`** no lesson number, title or room — absent from `TrainerSessionSummaryDto` · **`D3`** the focus region stays filled **only** from the governed carried-over previous-session focus, and stays labelled for what it is · **`D4`** SLIDES/attachment chips stay omitted; **"View lesson plan"** stays disabled with a reason · **`D5`** no staff identity rendered · **`D6`** **no synthetic learners** — the grid renders exactly what the governed roster projection returns (`GLOBAL_UI_RULES` §8) · **`D7`** rail belongs to Phase 0.
 - **Done / Verify:** §3.2, plus the previous-focus carry-over still visible on every present learner's card.
+
+### Phase 6a — `07` Trainer Grade Student · *unblocked 2026-08-10*
+- **Route / component:** `/trainer/sessions/[sessionId]/students/[studentId]/assess` · `features/trainer/trainer-assessment.tsx`
+- **Reference:** `reference/Trainer - Grade Student/` · frozen duplicate: **yes**
+- **Runs before Phase 6** — it is step 4 of the physical-test flow and feeds the draft screen.
+- **Compare:** the nine-row rubric block — row rhythm, the four-segment rating track, chip geometry and selected treatment; the student rail; the identity card; the Observation Notes card; the primary action; group captions; responsive stacking.
+- **MUST NOT CHANGE:**
+  - ⭐ **THE "FOLLOW-UP FOR NEXT SESSION" FIELD STAYS.** The frame lists **only** "Observation Notes"; the field is a **`REGISTERED-OMISSION`, not drift** — Operator ruling 2026-08-10. `CLAUDE.md` §6 makes it and Review & Approve's "Coach Notes (Internal Only)" **the same `observations.follow_up_notes` column**, and the governed assessment save is that column's **only writer**. Removing it would empty the roster's previous-focus carry-over, make the AI prompt's `<FOLLOW_UP_NOTES>` permanently `(none)`, and **void Phase 1 exit condition (c)** — *"a session's follow-up note appears as the next session's previous focus"* (`CLAUDE.md` §10). Its current value must stay **loaded, never blanked**. ⛔ **Do not merge it into Observation Notes** — they are separate columns and the carry-over must surface the follow-up alone.
+  - **`D1`** the nine rows render in **ratified order** — the four B.E.S.T Competency dimensions then the five Speech Linguistics Pattern dimensions — not the frame's interleaved order, and the two groups stay captioned (`CLAUDE.md` §5, spec §3).
+  - **`D2`** the **behavioural anchor** stays rendered beneath every row and inside each chip's accessible name. The frame draws none; `CLAUDE.md` §5 requires it. **A required addition, not a liberty**, and the anchor text is **verbatim** (A-050) — never reworded, re-wrapped or paraphrased.
+  - **`D4`** no **"Junior"** Class Grade (not a governed value — A-016/A-054) and no user-facing **"Student ID"**; the governed Class Grade, Class Module and session date stand instead.
+  - **`D5`** the selected-chip fills keep the **deeper ramp step**, not the frame's saturated fill — measured at **3.70 / 2.03 / 2.34 / 2.51 : 1**, all four failing SC 1.4.3. **Accessibility wins; do not restore the frame's colour.**
+  - **`D6`** no synthetic learners in the rail — the governed roster projection only.
+  - All nine dimensions stay mandatory; **no Quick mode, no four-dimension path** (A-017), and completion stays **server-validated** with the client check named as convenience only.
+- **Done:** every `TRUE-DRIFT` resolved or Operator-deferred; the Follow-up field and all five registered divergences intact.
+- **Verify:** §3.2, plus contrast re-measured on the selected chips, the anchors confirmed byte-identical to the backend, and **the carry-over re-proven end to end** — save a follow-up note here and see it appear as the next session's previous focus.
 
 ### Phase 6 — `08` Trainer AI Report Generation
 - **Route / component:** `/trainer/reports/[reportId]/generate` · `features/trainer/trainer-draft-generation.tsx`
@@ -299,7 +354,9 @@ Every phase below is stated in the same six parts. **A phase is not complete unt
 
 | Item | Blocks | Owner |
 |---|---|---|
-| **§6 Coach Notes / Follow-up ruling** | Screens **07**, **10** | ⛔ **Operator** |
+| ~~§6 Coach Notes / Follow-up ruling~~ | ~~Screens 07, 10~~ | ✅ **RESOLVED 2026-08-10.** Capture on **07** stays and is a `REGISTERED-OMISSION` (Phase 6a); **10** is unframed and moved to §1.4 |
+| **`F-S6-REVIEW-1`** — **§6 NON-CONFORMANCE, functional defect, NOT drift** | Nothing in this plan | ⛔ **Out of scope here — DO NOT FIX IN THIS PLAN** |
+| **`CLAUDE.md` §6 amendment** — bind the requirement to the Review & Approve **workflow surface** rather than a screen name | Nothing in this plan | **Operator.** Draft only, at `docs/plan/DRAFT_CLAUDE_MD_S6_FOLLOWUP_AMENDMENT.md`. **Not applied** |
 | `F-STAGE3-1` functional decision on `/trainer/reports` | Screen **09** | Operator |
 | Frames for the two editor surfaces | §1.4 | Operator — commission or leave permanently unaccepted |
 | Approved logo / tagline asset | Phase 0, Phases 1–3 | Operator — no asset exists; none may be invented |
@@ -318,6 +375,20 @@ Every phase below is stated in the same six parts. **A phase is not complete unt
 - **per phase: `TRUE-DRIFT` resolved vs `REGISTERED-OMISSION` preserved** — as two explicit lists, never a single "reconciled" count, because the whole risk is conflating them;
 - **anything classified `NEW-QUESTION`**, with the question stated plainly and what it blocks;
 - **the commit at each phase boundary**, by SHA.
+
+---
+
+### 6.6 `F-S6-REVIEW-1` — the §6 safeguard is not implemented · **functional defect, not drift**
+
+**Logged as its own item on Operator instruction, 2026-08-10. Explicitly NOT in scope for this plan and NOT to be fixed by any phase.**
+
+`CLAUDE.md` §6 requires that the Review & Approve screen **"must load the trainer's current value into that field (not render it blank) so the trainer is *editing* their earlier note after seeing the AI draft and evidence, not overwriting it unknowingly"**, and that **"whatever server action saves this field must be callable from both screens against the same column"**.
+
+**What is actually built:** on `/trainer/reports/[reportId]/review` the value is rendered as a **read-only `<p>`** ([`trainer-report-review.tsx:526`](../../features/trainer/trainer-report-review.tsx)), not a field, and **there is no save path from that screen**. The governed assessment save on screen 07 is the column's only writer.
+
+**So the edit-after-seeing-the-draft safeguard does not exist.** Its stated rationale is also self-voiding in the current build: nothing on that screen can overwrite the note, so there is nothing to overwrite unknowingly.
+
+⚠️ **This is a FUNCTIONAL non-conformance with a ratified rule, not visual drift.** A visual pass must not "resolve" it, and it is not a reason to delete the read-only display either. It needs its own decision — most likely alongside the §6 amendment draft, since the amendment may change what the requirement binds to.
 
 ---
 

@@ -501,10 +501,10 @@ export function TrainerReportReview() {
                   id={evidenceNoteId}
                   className="mx-auto mt-3 max-w-md text-small leading-6 text-ink"
                 >
-                  No class video evidence is available in this workspace. Evidence scope and the
-                  uploading role remain an unresolved governance decision, and no governed
-                  evidence record or upload path exists — so this control is inactive rather
-                  than simulated.
+                  No class video evidence is available in this workspace. Evidence capture is a
+                  required part of the final product and the Trainer is the person who will
+                  upload it, but no governed evidence record or upload path exists yet — so this
+                  control is inactive rather than simulated.
                 </p>
               </div>
             </div>

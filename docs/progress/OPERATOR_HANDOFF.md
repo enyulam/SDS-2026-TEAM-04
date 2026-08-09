@@ -1,87 +1,109 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
-> **NOT A TRACKER · NOT AUTHORITY · DERIVED** (§15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** and is **not a fifth layer of §15.1** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Generated **2026-08-10**. Contains **no credential**.
+> **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** and is **not a fifth layer of §15.1** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
+> Regenerated **2026-08-10**. Contains **no credential**.
 
-## Ending that fired
+---
 
-**Handback checkpoint** — a bounded Operator task completed. Not ending A, B or C: no gate was hit and no context limit was reached. The Operator instructed one task (seed two clean demonstration learners), then the continuity update, tag and push. All are done.
-
-## Position
-
-**The hero chain is COMPLETE, DEPLOYED and Operator-verified twice** — once by database query, once by manual browser walkthrough of all three portals on the public URL. **The build is FROZEN for the Week-13 Final Presentation.** No surface change, harness run or open-item fix is authorized.
+## ⛔ WHICH WORKSPACE IS THIS — read before anything else
 
 | | |
 |---|---|
-| Branch / worktree | `main` / none (`git worktree list` returns one entry) |
-| HEAD | see `git rev-parse HEAD` — the 2026-08-10 continuity commit, whose parent is **`5f3a543`** |
+| **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
+| **Hosted target** | **`poblcfbxxzgarclchzkx`** — Supabase, `ap-southeast-1` |
+| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace and hosted project **`zjukuffiuzkbiblmnuwl`**. **Never connect to that ref.** If any value read resolves to it — **STOP and tell the Operator** |
+| **Demonstration build** | Tagged **`hero-feature-baseline` → `a0f48b9`** in the **demonstration workspace**. Frozen |
+| ⛔ **Git** | **No push to `main`. No merge. `develop` only**, until the Operator says otherwise |
+
+⚠️ **`STATUS.md` and `BUILD_NOTES.md` came across from the demonstration workspace.** `STATUS.md` now opens with a workspace header; **everything below that header still describes the demonstration project** except the 2026-08-10 entries.
+
+---
+
+## Ending that fired
+
+**Planning stop, by instruction.** Not a gate and not a context limit. The Operator ordered plan amendments, a read-only §6 investigation, a set of follow-up tasks, then an explicit stop: *"I will authorize Batch 1 in a fresh session, which will read the handoff, `STATUS.md` and the plan from disk."*
+
+## Position
+
+| | |
+|---|---|
+| Branch / worktree | `develop` / none |
+| HEAD | resolve with `git rev-parse HEAD` — the 2026-08-10 planning commit |
 | Tree | clean at handoff |
-| Remote | **`origin` EXISTS** — `https://github.com/enyulam/best-coach-mvp.git`, private. `main` and tags pushed 2026-08-10. **The older "Remotes 0" reading in `STATUS.md` history is SPENT** |
-| **Demonstration tag** | **`hero-feature-baseline` → `a0f48b9`, annotated** |
-| Other tags | `stage3-authenticated-green` · `final-mvp/execution-baseline-12eaa13` · `final-mvp/phase-a2-complete-2026-08-08` · `final-mvp/pre-phase-a2-cleanup-2026-08-08` · `frozen/48h-backend-402b0b6` · `frozen/48h-frontend-6762b5c` |
-| Migrations | **17 on disk, 17 applied** (local, measured at Stage 3); hosted project carries 17 |
-| Demo URL | **`https://best-coach-mvp.vercel.app`** — the alias |
-| Hosted DB | Supabase `zjukuffiuzkbiblmnuwl`, **ap-southeast-1 (Singapore)** |
-| Model / region | `gpt-5.6-terra`, function region `iad1` |
+| Ahead of `origin/develop` | **5 commits, none pushed** |
+| Local database | none reached this session |
+| Hosted dev DB | **17 migrations · 27 tables · 39 functions · 12 enums · 29 policies · RLS on 27/27 · 27 `authenticated` EXECUTE, 0 `anon`/`service_role`/`PUBLIC`** |
+| Fixtures | **3 synthetic identities + 25 baseline domain rows.** ⚠️ `Amelia Tan`, `Ethan Wong`, `Priya Menon` are **demonstration-only** and appear in **no fixture SQL** — they will never exist here |
 
-⚠️ **Demo ONLY on the alias.** Every deployment is `target: production` with its own immutable URL; per-deployment URLs are frozen snapshots carrying none of the recent fixes.
+## Commits this session, oldest first
 
-## Why the tag is on `a0f48b9` and not HEAD
+| SHA | What |
+|---|---|
+| `29ba601` | Hosted target guard retargeted; `project_id` → `best-coach-dev` |
+| `83779dc` | Behavioural deny predicate + the **7th** false-predicate record |
+| `fed3ea4` | Five superseded `A-014` citations corrected; screens 30 and 11 documented |
+| `60da075` | Reconciliation plan **v2**; `STATUS.md` workspace header |
+| *(this)* | Plan **v3**; §6 draft amendment; the **8th** false-predicate instance fixed |
 
-`a0f48b9` is the newest commit containing **application code**. `5f3a543` adds **only** `docs/progress/OPERATOR_HANDOFF.md` — `git diff --stat a0f48b9 5f3a543` is one docs file — so the two are identical in everything that builds. Both demonstration-critical fixes are inside the tag: **`fcee1b6`** (parent internal provenance footer removed; temporary diag route deleted) and **`a0f48b9`** (visible provenance caption dropped; `data-adapter-kind` G-19 marker retained on Trainer and Management).
+## ▶ NEXT AUTHORIZED ACTION
 
-⚠️ **No platform-side commit SHA exists.** Every Vercel deployment on this project is a **CLI upload**: `vercel inspect --json` returns `meta: (none)` and `source: (none)`; `vercel ls` shows a Username column, not a git branch. **The deployed-commit identification rests on code equivalence plus the recorded handoff, NOT on platform metadata.**
+**NONE until the Operator authorizes BATCH 1 — Phase 0 only** (`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` §5.1).
 
-## Hosted learner state — 4 learners, and they are HOSTED-ONLY
+**No phase has been started.** Phase 0 is shared chrome — the rail, brand mark and tokens — and is a prerequisite because no screen owns them. Complete → commit → **STOP for review**. Batch 2 (Phases 1–3) needs Phase 0 **accepted** first.
 
-| Learner | ID | State |
-|---|---|---|
-| `Fixture Student One` | `c2…0001` | report `4876bc9f`, **`draft_ready`, `lock_version` 8** — second fallback |
-| `Amelia Tan` | `c2…0002` | report `0381f34f`, **`submitted`, `lock_version` 7**, two approvals, two versions — primary fallback |
-| **`Ethan Wong`** | `c2…0003` | **clean** — for the screen recording |
-| **`Priya Menon`** | `c2…0004` | **clean** — held untouched for the live demonstration |
+## Batched-UI reporting state (§6.5) — nothing to report yet
 
-Clean-start verified for both new learners: **0 attendance · 0 observations · 0 reports · 1 active enrolment · 1 parent link.** Both sit on session `c5000000-…0001` (2026-02-03, *Beginner Public Speaking — Fixture Module A*), trainer membership `c1000000-…0002`, parent membership `c1000000-…0003`.
+| Field | Value |
+|---|---|
+| Phases completed | **0** |
+| `TRUE-DRIFT` resolved | **none — no phase run** |
+| `REGISTERED-OMISSION` preserved | **none — no phase run** |
+| `NEW-QUESTION` raised | **none** |
+| Commit at phase boundary | **none** |
 
-⛔ **These learners exist ONLY in the hosted database. They appear in NO repository fixture SQL** — absent from `local_fixtures.sql`, `local_fixtures_expansion.sql` and `load-hosted-fixtures.mjs`. **`Amelia Tan` is the same kind of hosted-only row.** A fresh local fixture load reproduces **none** of this four-learner state.
+## Operator rulings received this session
 
-⛔ **Do not reset, unwind or alter either fallback.** There is no governed path back from `submitted`, and `audit_events` is append-only.
+1. **Capture on screen `07` STAYS.** The assessment save is `observations.follow_up_notes`' only writer; removal would empty the previous-focus carry-over, blank the AI prompt's follow-up context and **void Phase 1 exit condition (c)**. **Screen 07 UNBLOCKED** as **Phase 6a**, with the Follow-up field recorded as a **`REGISTERED-OMISSION`, not drift**.
+2. **Screen `10` RECLASSIFIED** to **`CANNOT BE VISUALLY ACCEPTED`** (plan §1.4). Decided from the routes: **there is no `reports/[reportId]` index route**, so `/review` is the only trainer report detail surface and it carries a workflow the frame does not describe.
+3. **§6 amendment drafted, NOT applied.** `docs/plan/DRAFT_CLAUDE_MD_S6_FOLLOWUP_AMENDMENT.md`. **Decision `D-2` — read-only / editable / absent — is OPEN and was deliberately not decided.** **`CLAUDE.md` is unmodified.**
+4. **Plan v2 accepted**; §0.0's two-defaults table named as the amendment that matters.
+5. **Premise correction accepted in full** — screen 10's frame is a completed-report VIEW, not the Review & Approve workflow.
 
-## What is proven
+## What is proven this session
 
-The full governed lifecycle ran end to end on the deployed system for `Amelia Tan`: `observation_saved → drafting → draft_ready → trainer_approved → submitted`, with both a `trainer` and a `management` row in `report_version_approvals`, and the parent report rendering four OD-4 panels with **no ratings** (Q-27 held). **Real AI drafting works in the deployed system** — one call, **ACCEPT**, `reasons: []`, 1,308 tokens, persisted through the hosted trusted store. **R-27 intact** — `report_store_draft` owner-only, zero client EXECUTE, no `service_role` grant, no `BYPASSRLS`.
+- **Numbered packs do not hold older designs.** All **12** packs with a frozen `reference.png` are **SHA-256 identical** to their `/reference/` counterpart — **12 identical · 0 different · 0 missing** — and independently **12/12 match their `UI_PACK_MANIFEST.json` pins**. **"Drift" therefore means BUILD vs FRAME only.**
+- **The hosted target guard denies the frozen project unconditionally** and the deny cannot be disabled: `npm run prove:hosted-target-guard` → **16 PASS / 0 FAIL**, including a **non-vacuity control** that requires the contact detector to fire against a real target.
+- **Zero surviving stale `A-014` citations**, verified by a **concept** sweep with a non-vacuity control (the same sweep finds the site at pre-fix `HEAD`).
 
-## Suites that RAN this session, with exit codes
+## ⚠️ EIGHTH false-predicate instance — found in my own verification
 
-**NONE.** No suite, harness, build, typecheck or lint was run — the build is frozen and running one was expressly out of scope. There is no exit code to report.
+Bucket (b) reported *"zero stale citations remaining."* **Wrong** — a sixth existed and was **user-visible** (`trainer-report-review.tsx:504-507`). The sweep grepped **the five phrasings already known**, so it could only confirm what was already found. Same class as the seventh. **Fixed this session**; recorded in `BUILD_NOTES.md`.
+
+## Suites RUN this session, with exit codes
+
+`tsc --noEmit` **0** · `eslint .` **0** · concept sweep **0 surviving** (detector proven live) · 12/12 pack hashes · 12/12 manifest pins.
 
 ## NOT-RUN this session, with reasons
 
-**Every suite**, because the build is frozen: `tsc` · `build` · `lint` · `static-scan` · `prove-stage3-authenticated` · the disposable hero E2E and negative controls A–M · the three browser/C4 harnesses · `run-integration` · `run-canonical` · `run-c2` · `prove-g06-grounding`. **None is carried forward as green.** · **Password sign-in — NOT-RUN everywhere**; every session in every harness is **admin-minted**, which is never a sign-in proof. · **Assertion-vacuity sweep — NOT RUN this session, per harness.** Prior findings stand in `BUILD_NOTES.md` (the false-PASS save leg whose predicate matched the page's own heading; the false-CLEAN secret scan).
+**`build`** — no route or component structure changed; the only code change is one user-visible string. · **Every harness** (`prove-stage3-authenticated`, the disposable hero E2E and negative controls A–M, the browser/C4 harnesses, `run-integration`, `run-canonical`, `run-c2`, `prove-g06-grounding`) — **not run and NOT carried forward as green.** · **Password sign-in — NOT-RUN**; every session in every harness is admin-minted, which is never a sign-in proof. · **No database was reached at all.**
 
-## Recorded, NOT fixed — and the clause preventing each fix
+## Open items — carried, not fixed
 
-| ID | Item | Clause holding it |
-|---|---|---|
-| `F-DEMO-1` | Draft page auto-dispatches on mount; no generate button | Awaiting Operator ruling; build frozen |
-| `F-UI-DRIFT-1` | Frontend built against an earlier Figma iteration across multiple screens; **some divergences are DATA-BOUND** (Coach Notes binds `observations.follow_up_notes`, one column on two screens) | **Single batched pass POST-DEMONSTRATION.** Full enumeration not done |
-| `F-EVIDENCE-SCOPE-1` | No parent-side video evidence placeholder | Authority Lock §8.1 — parent evidence projection **out of Final MVP**; A-001 armed-and-unactivated. Any parent evidence surface is a **§12 stop-and-ask** |
-| `B-STAGE3-2` | Canonical **local** fixture DB dirtied by governed mutations; `audit_events` irreversible by design | Reload needs the Operator's three interactive no-echo passwords. **Post-demo** |
-| `B-C2-1` | Open, **undiagnosed**. Negative control K **NOT SATISFIED** | Not to be closed |
-| `B-C2-2` | Open, deliberately unfixed | — |
-| `F-REGION-1` | Function `iad1`, requests and database in Singapore. Functional, cross-region | Recorded only |
-| `F-STAGE3-1` | `/trainer/reports` renders the generic unavailable state | Not on the hero critical path |
+| ID | Item |
+|---|---|
+| `F-S6-REVIEW-1` | **NEW.** `/review` renders the follow-up note as a **read-only `<p>` with no save path**, so §6's edit-after-seeing-the-draft safeguard **is not implemented**. **Functional defect, not drift.** Travels with `D-2` |
+| `F-UI-DRIFT-1` | Bucket (a) blocked pending `D-2`; (b) **done**; (c) is the plan, **not started** |
+| `F-DEMO-1` | Draft page auto-dispatches on mount; no generate button |
+| `F-EVIDENCE-SCOPE-1` | No parent-side evidence placeholder — **correct**; Authority Lock §8.1 rules the parent projection **out**. Any parent evidence surface is a §12 stop-and-ask |
+| `B-STAGE3-2` | Canonical **local** fixture DB dirtied; needs the Operator's three interactive no-echo passwords. **Demonstration workspace concern** |
+| `B-C2-1` · `B-C2-2` | Open, undiagnosed / deliberately unfixed. Negative control **K NOT SATISFIED** |
+| `F-REGION-1` · `F-STAGE3-1` | Recorded. `F-STAGE3-1` now also owns screen **09** |
+| **`project_id` fallout** | Three hard assertions now refuse in this clone (`load-local-fixtures.mjs:164`, `disposable-stack.mjs:671`, `run-f17.mjs:456`) and **~25 references hard-code `supabase_db_best-coach-mvp`**, including `trusted-store.ts:34`. **Carried by instruction — do not fix piecemeal** |
 
-## Claims by an earlier session in this run NOT proven by execution
+## Gates and unratified decisions
 
-- **"The alias serves `a0f48b9`."** Recorded in the previous handoff. **Not provable** — the platform holds no commit metadata for CLI uploads (above). It is consistent with, and untested; the code-equivalence argument is what makes it immaterial.
-- **`STATUS.md`'s "Remotes 0"** was stale; `origin` exists and is now pushed.
-- **The Stage-3 rows in `STATUS.md`** were true when measured and are **not** the current frontier; the position advanced through hosted deployment.
+**§3 persona sign-offs — NOT RECORDED**; no §10 phase-gate exit may be declared met. **No Operator `Accepted` mark has been written or implied by any session.** **README and deployment instructions — still not written.** `B-G06-DET-1` — rule 3's detector matched 3 of 18 formulations; ⛔ **do not widen the lexicon.**
 
-## Open gates / unratified decisions
+## Reading order for the next session
 
-**§3 persona sign-offs — NOT RECORDED**; no §10 phase-gate exit may be declared met. **No Operator `Accepted` mark** has been written or implied by any session. **README and deployment instructions — NOT WRITTEN** (submission requirements). `B-G06-DET-1` — rule 3's detector matched 3 of 18 formulations; real-provider prose did **not** false-reject in the one observed run. ⛔ **Do not widen the lexicon.**
-
-## Next permitted action
-
-**NONE.** The build is frozen and the Operator is rehearsing. Post-demonstration candidates — each needing its own explicit Operator authorization — are the `F-UI-DRIFT-1` batched pass, the `B-STAGE3-2` fixture reload, the README and deployment instructions, and the §3 persona sign-offs.
+`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md` (its workspace header first)** → recent `BUILD_NOTES.md` → **`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md`**. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).

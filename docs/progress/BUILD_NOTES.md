@@ -3658,3 +3658,70 @@ Guard retarget **approved as proposed**, with the explicit condition that **no p
 **Cleanup / rollback state:** no partial mutation. Three temporary runners used during bring-up were deleted before the commit; the tree is clean apart from the recorded changes.
 **Commit:** `29ba601` (guard retarget + `project_id`). This log entry and the proof harness follow separately.
 **Next permitted action:** enumerate `F-UI-DRIFT-1`, read-only, changing no code.
+
+---
+
+## 2026-08-10 — UI RECONCILIATION PLAN v3, the §6 investigation and its rulings, and the EIGHTH false-predicate instance
+
+**Track / workstream:** development-clone planning. **Branch:** `develop`. **Starting HEAD** `60da075` → **ending HEAD** *(this commit)*.
+**Migration or schema changes:** **none.** No migration, RPC, grant, policy, enum, table, column or audit action was created, altered or dropped. No database was written to.
+
+### Scope
+
+Bucket (c) planning for `F-UI-DRIFT-1`, a read-only investigation of the `CLAUDE.md` §6 Coach Notes question, and the Operator rulings that followed it.
+
+### ⚠️ EIGHTH INSTANCE OF THE FALSE-PREDICATE CLASS — in the verification of my own bucket (b) fix
+
+Bucket (b) corrected five superseded `A-014` citations and I reported **"zero stale citations remaining."** **That was wrong. There was a sixth, and it was USER-VISIBLE** — `features/trainer/trainer-report-review.tsx:504-507`, rendering *"Evidence scope and the uploading role remain an unresolved governance decision"* on screen 10's evidence panel.
+
+**Root cause, and it is the same shape as the seventh:** the verification sweep grepped **the five phrasings already known**, so it could only ever confirm what had already been found. A search built from the expected set cannot discover a member outside it. The seventh instance asserted on message wording instead of behaviour; this one asserted on a known-string list instead of the concept. **Both are predicates that cannot fail in the direction that matters.**
+
+**Found by:** switching from a string sweep to a **concept sweep** (`unresolved governance|remains an unresolved|uploading role|evidence scope`), which located it immediately.
+
+**Fixed:** the copy now states the ruled position — evidence capture is required, the Trainer is the uploader, the path is not built yet. Behaviour unchanged; the control remains inactive.
+
+**Verification discipline applied to the re-check, deliberately:** the first re-run piped through `sed`, which **always exits 0**, so its `|| echo "none"` branch could never fire and an empty result was indistinguishable from a broken command. Re-run with a counting predicate that can fail, **plus a non-vacuity control**: the same sweep executed against pre-fix `HEAD` returns **1 hit**, proving the sweep can detect the thing it reports as absent. Result: **0 surviving, detector proven live.**
+
+### §6 Coach Notes — investigation, read-only. No ruling made by this session.
+
+**The Operator's premise was that the newer frames removed the field. Investigation found that premise does not hold for screen 10, and the Operator accepted the correction in full.**
+
+- Spec §8/§10 define **"Review & Approve — post-class quality control"**, a *Review Workspace*.
+- **Amendment 005's ratified 36-screen inventory allocates no screen with that name** (verified against `SCREEN_INDEX.md`).
+- Screen `10`'s frame is a **completed-report VIEW** — *"view a completed Student Report… and its approval status"*, interactions *read · play video · return*, drawing no checklist, no Approve control and no editable field.
+- **So the frame's silence on coach notes is not evidence of removal; the frame depicts a different surface.**
+
+**What §6 actually requires:** BOTH capture (the B.E.S.T Form field) and a **loaded-for-editing** display on Review & Approve, saveable from both surfaces against the same column.
+
+**Downstream consumers of the COLUMN, measured:** the roster's previous-session focus (`trainer-projections.ts:264-283`) and the **AI draft prompt** (`provider.ts:153`, `<FOLLOW_UP_NOTES>`). **Consumers of the DISPLAY: none** — it is a leaf `<p>`.
+
+**Pre-existing non-conformance found and logged as `F-S6-REVIEW-1`:** on `/review` the value is a **read-only `<p>` with no save path**, so §6's edit-after-seeing-the-draft safeguard **is not implemented**, and its stated rationale is self-voiding — nothing on that screen can overwrite the note. **Functional defect, not drift. Explicitly not fixed, and out of scope for the reconciliation plan.**
+
+### Operator rulings received this session
+
+1. **CAPTURE ON SCREEN 07 STAYS.** The assessment save is the column's only writer; removing it would empty the carry-over, blank the AI prompt's follow-up context and **void Phase 1 exit condition (c)**. A ratified rule speaks, so per the plan's §0.0 the divergence is **KEPT AND CITED** — the frame lists only "Observation Notes", and the Follow-up field is a **`REGISTERED-OMISSION`, not drift**. **Screen 07 UNBLOCKED**, added as **Phase 6a**.
+2. **SCREEN 10 RECLASSIFIED.** Answered from the routes, not from intent: **there is no `reports/[reportId]` index route** — screen 10's own `screen.md` still lists the canonical index under *allowed future expansion* — so **`/review` is the only trainer report detail surface**, and it carries the workflow the frame does not describe. Moved to **§1.4 `CANNOT BE VISUALLY ACCEPTED`** beside the two editors. Noted: even the framed portion is only partially reconcilable, because the frame's **"Overall Grade"** and four-tile **Performance Summary** are already registered governance-wins omissions.
+3. **§6 amendment — DRAFT ONLY.** Written to `docs/plan/DRAFT_CLAUDE_MD_S6_FOLLOWUP_AMENDMENT.md`. Binds the requirement to the Review & Approve **workflow surface**, defined by governed behaviour rather than a screen name. **Decision `D-2` — read-only / editable / absent — is left explicitly OPEN for the Operator and was not decided.** **`CLAUDE.md` was not modified** and the draft says no session may apply it.
+4. **Numbered packs do not hold older designs — CONFIRMED BY HASH.** All **12** packs carrying a frozen `reference.png` are **SHA-256 identical** to their `/reference/` counterpart: **12 identical · 0 different · 0 missing**. Independently, all **12 match their `screenshotValidation.sha256` pin** in `UI_PACK_MANIFEST.json` — a third corroborating record rather than a single comparison. Recorded in the plan with the full hash table, together with the consequence: **"drift" means BUILD vs FRAME only**, never frame-vs-frame.
+
+### Plan amendments (v2 → v3)
+
+v2 carried Operator amendments 1–6 (bounded batches; `.png` **and** `.html` with values-never-markup; Phase 13 cut; standing intent in §0.0; logo/tagline absence is not `TRUE-DRIFT`; H-8 per-stop content). v3 adds: **Phase 6a** for screen 07 with the Follow-up field in its MUST-NOT-CHANGE block citing §6 and Phase 1 exit condition (c); screen **10** moved to §1.4 with the route evidence; the **hash-verified pack-naming block** in §3.1; **`F-S6-REVIEW-1`** logged in new §6.6; the §6 dependency row closed.
+
+### Automated verification, with exit codes
+
+`tsc --noEmit` **0** · `eslint .` **0** · concept sweep **0 surviving stale claims, detector proven non-vacuous against pre-fix HEAD** · `CLAUDE.md` **unmodified** (`git diff --stat` empty) · 12/12 pack hashes identical · 12/12 manifest pins matched.
+
+**Manual verification.** Route inventory read from disk rather than from documentation; the absence of `reports/[reportId]/page.tsx` is what settles the screen-10 question, and it was checked directly.
+
+### Isolation
+
+The frozen demonstration project `zjukuffiuzkbiblmnuwl` was **never contacted** — no database was reached at all this session. `main` untouched; **nothing pushed**; no worktree created; no `supabase` command run.
+
+### Files changed
+
+`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` (v3) · `docs/plan/DRAFT_CLAUDE_MD_S6_FOLLOWUP_AMENDMENT.md` (new, draft, applies nothing) · `features/trainer/trainer-report-review.tsx` (one user-visible copy correction) · `docs/progress/OPERATOR_HANDOFF.md` (regenerated per H-8) · this log.
+
+**Blockers opened or closed:** `F-S6-REVIEW-1` **opened** (functional, out of scope, not to be fixed by the reconciliation plan). The §6 ruling dependency **closed**. `F-DEMO-1`, `F-UI-DRIFT-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1` carried untouched.
+**Cleanup / rollback state:** no partial mutation.
+**Next permitted action:** **NONE without Operator authorization.** The Operator will authorize **Batch 1 — Phase 0 only** in a fresh session, which reads `OPERATOR_HANDOFF.md`, `STATUS.md` and the plan from disk. **No phase has been started.**
