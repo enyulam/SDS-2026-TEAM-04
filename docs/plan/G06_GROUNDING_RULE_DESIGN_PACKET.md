@@ -1,6 +1,35 @@
 # G-06 / P1-T09 — OD-4 GROUNDING RULE SET: DESIGN AND PROOF PACKET
 
-**Status: PROPOSAL. NOTHING HERE IS RATIFIED. NOTHING HERE IS IMPLEMENTED.**
+> ## ✅ RATIFIED 2026-08-09 — this packet's question has been ANSWERED
+>
+> ~~**Status: PROPOSAL. NOTHING HERE IS RATIFIED. NOTHING HERE IS IMPLEMENTED.**~~
+> **The Operator ratified the rule set on 2026-08-09. The canonical instrument is
+> `FINAL_MVP_G06_GROUNDING_RULING.md` (repository root) — read it, not this
+> header, for the binding semantics.**
+>
+> **WHAT IS NOW RATIFIED:** **rule 1b** as COVERAGE of all nine dimension codes,
+> not a count and **not satisfiable by a duplicate**, with unknown / impossible /
+> unmapped state **FAILING CLOSED** (§6, §6.1 — `G06-1`, `G06-7`) · **rule 4
+> scoped to `strengths` only** (§3.1 — `G06-2`) · **NOT inherited into
+> `overview`** (§3.2 — `G06-3`) · **NOT applied to `areasForDevelopment`**
+> (§3.3 — `G06-4`) · **`R-A` SELECTED for Remarks** — *grounded but
+> polarity-neutral*; **`R-B` and `R-C` are REJECTED** (§3.4 — `G06-5`) ·
+> **option 3b, bare `strong` added to `ACHIEVEMENT_TERMS`** (§6.2 — `G06-3`
+> directs closing C7 by widening the lexicon) · the **support-framing escape
+> re-derived sentence-local AND dimension-local with a narrowed lexicon**
+> (§5, §5.1 — `G06-6`) · and **C4, C5, C6, C7, C8 all authorized for
+> correction** (§7 — `G06-8`).
+>
+> **WHAT IS STILL NOT RATIFIED, and remains a `CLAUDE.md` §12 stop-and-ask:**
+> extending rule 4 to `developing` (§3.1 — recommendation NO stands, and is now
+> the recorded disposition) · the **inverse rule 4b** (§3.3) · narrowing
+> `DIMENSION_TERMS.audience_awareness` (§8).
+>
+> **The measured evidence below is NOT rewritten.** §1–§9 record what was true
+> **before** implementation, which is exactly what makes the post-implementation
+> re-measurement meaningful. §7's *Current* column is a **pre-ruling** reading
+> and must be read as history; re-run the probe for current behaviour. §10's
+> recommendations were **accepted** except as noted above.
 
 This packet exists so the Operator can ratify (or reject, or amend) a rule set
 on evidence. It changes no production behaviour. The only production change
