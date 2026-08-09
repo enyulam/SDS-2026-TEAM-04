@@ -3442,3 +3442,47 @@ provisioning, spend, push and public deployment are each §12 hard gates, and no
 by the standing local authorization.
 
 **PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
+
+## 2026-08-09 — Five data points on one pattern: failures that produce no error
+
+**Branch/worktree:** `main` / no worktree · **Starting HEAD:** `2fffff3` · **Ending HEAD:** recorded at the commit that carries this entry
+**Scope:** diagnosis only — recorded at Operator instruction while the detail is exact. No product rule, gate, lexicon or threshold is changed by anything in this entry.
+
+### The pattern
+
+Five distinct failures in this run share one shape: **the failing thing reported success, or reported nothing, and execution continued.** None threw. None logged. Each was found only because a downstream result was impossible. The Operator's framing is the correct one — five instances is a finding, not a run of bad luck.
+
+| # | Where | What was silently lost | How it surfaced | Origin |
+|---|---|---|---|---|
+| 1 | Pre-publication secret scan | `--all` sat after the pattern, so every history search exited `fatal:`; the `catch` treated a dead command as "no match" | Reported **CLEAN** having searched nothing | Inherited |
+| 2 | Hosted fixture loader | A `catch` rendered `an unexpected error occurred`, discarding message, code, position and failing statement | Operator refused the fix and demanded the diagnostic first | Inherited |
+| 3 | `resolveMaxDraftAttempts()` in `requestDraft`'s config `catch` | Early return with **no diagnostic**, in the very commit (`44f6410`) that added diagnostics | POST 200, no state change, no explanation | **Authored** |
+| 4 | `BC_DRAFT_DIAG` on stderr | Records emitted by two deployed runs reached no log view available to the Operator or to `vercel logs` | Instrument built to defeat invisible causes was itself invisible | Environmental |
+| 5 | `app/api/_diag/draft/route.ts` | `_diag` is an App Router **private folder**; the route was excluded from routing. `next build` **succeeded, warned nothing**, and omitted it | Deployed route returned the *framework* 404 page instead of the handler's plain `Not found` | **Authored** |
+
+**Two of the five I wrote myself**, both while building instrumentation. Defect 3 is the sharpest: a silent early return added by the same commit whose purpose was to eliminate silent early returns.
+
+### Defect 5, precisely
+
+Proven, not inferred. A full local build of the tree with the file present and git-tracked produced a 20-route manifest with **no** `/api/diag-draft` entry. The rename to `app/api/diag-draft/route.ts` (no leading underscore) then produced a working route — the build manifest proved the exclusion, the rename proved the reason.
+
+The diagnosis was only possible because the two 404s were **distinguishable**: the handler's gate returns `Not found` as `text/plain`, while an unregistered path returns the framework's HTML page. Both directions are now proven locally (gate unset → `text/plain` `Not found`; gate `enabled` → HTTP 200 JSON with the collected diagnostic). That distinction is load-bearing and must be preserved if the route is ever rebuilt.
+
+**The correction that matters more than the rename:** I never requested the route locally before deploying it. One local call would have caught this in seconds. I chose to verify an instrument in production, and the instrument's whole purpose was to be trustworthy.
+
+### Separately: a confident diagnosis on circumstantial evidence
+
+Distinct from the five above, and worth its own record because the failure mode is different.
+
+I named the attempt-cap throw as the cause of the deployed drafting stall. It **fitted the signature exactly** — a plausible mechanism, in the right code path, consistent with every observation I had: HTTP 200, no lifecycle transition, no provider call, no diagnostic. I stated it as the cause.
+
+The Operator deleted `BEST_COACH_DRAFT_MAX_ATTEMPTS` from Vercel. With the variable absent, `resolveMaxDraftAttempts()` returns the ratified default and **cannot throw**. RUN B changed nothing: report `4876bc9f` still `observation_saved`, `lock_version` 2, `report_versions` 0, `audit_events` 2, `BC_DRAFT_DIAG` absent. The named cause was falsified in a single step.
+
+**Fitting is not proving.** A hypothesis consistent with all available evidence is not thereby established, particularly when the available evidence is thin *because* a diagnostic is missing — the very condition that makes a plausible story feel conclusive. The correct report would have been "consistent with, and untested".
+
+### Consequence carried forward
+
+The stall between "observation gathered" and "provider called" is **still undiagnosed**. Confirmed dead: wrong deployment (`e5f7b0b`, then `2fffff3`, both verified via `meta.githubCommitSha`), auth failure (`getUser` succeeded), double dispatch (POST #2 is a router re-render), attempt-cap throw (falsified above). `report_request_draft` appears in neither the outbound call list nor the audit log — **not theorised past**.
+
+**Blockers/decisions:** none opened or closed. `B-C2-1`, `B-C2-2`, `B-STAGE3-2`, `F-DEMO-1`, `F-REGION-1`, `F-STAGE3-1` all carried unchanged. `T-DIAG-REMOVE` updated in `STATUS.md` to name the new path and its three removal actions.
+**Next step:** deploy the renamed route, confirm Ready, and call it.
