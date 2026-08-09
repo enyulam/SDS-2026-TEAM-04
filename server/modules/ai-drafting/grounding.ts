@@ -172,8 +172,18 @@ const SUPPORT_MARKERS = [
   "with support", "with adult support", "with teacher support",
   "with prompting", "with frequent prompting", "when prompted", "after prompting",
   "with guidance", "with encouragement", "with reminders", "with modelling", "with modeling",
-  "needs", "needed", "still needs",
+  // ⚠️ BARE `needs` AND `needed` WERE REMOVED. They were a GENERAL-PURPOSE
+  // ESCAPE, not support framing: any Strengths sentence containing the word
+  // "needs" or "needed" anywhere — including "needs no reminders", "needed no
+  // help" — disarmed rule 4 for that sentence entirely. G06-6 scopes the
+  // escape to SUPPORT FRAMING; a bare verb that routinely appears in praise is
+  // broader than what was ratified, so removing it brings the implementation
+  // back to the rule. The genuine support phrasings are retained explicitly
+  // below, and the "with …" family above already covers the common shapes.
+  "needs support", "needs continued support", "needs prompting", "needs practice",
+  "needs continued prompting", "still needs", "will need", "still needs support",
   "is working towards", "working towards", "is working toward", "working toward",
+  "is developing", "still developing", "continuing to develop", "continues to develop",
 ] as const;
 
 /**
@@ -275,13 +285,28 @@ const ATTRIBUTION_RULES: ReadonlyArray<{ readonly re: RegExp; readonly reason: s
  * ratify narrowing it, and narrowing would LOOSEN detection, the one
  * direction this ruling never authorizes. Recorded, not fixed.
  */
+/**
+ * ⚠️ EVERY DIMENSION MUST CARRY ITS OWN DISPLAY NAME. Adversarial review found
+ * that `body`, `emotion` and `speech` did not: their term lists held only
+ * indirect vocabulary, so the most explicit contradiction a draft can contain
+ * — naming the dimension outright and claiming mastery of it, "Body was
+ * mastered", "Speech was excellent" — was UNDETECTABLE and ACCEPTED, while the
+ * identical sentence about Tonality was correctly rejected. Rule 3 rejects a
+ * sentence that NAMES a non-positive dimension and claims an achievement; a
+ * lexicon that cannot recognise the dimension's own name does not implement
+ * that rule, so this is the implementation being brought up to the ratified
+ * rule rather than a change to it.
+ *
+ * The display names are matched with word boundaries (see `mentions`), so bare
+ * `speech` matches "her speech was excellent" but not "speechless".
+ */
 const DIMENSION_TERMS: Readonly<Record<DimensionCode, readonly string[]>> = {
-  body: ["posture", "gesture", "body language", "stance"],
-  emotion: ["facial expression", "facial expressions"],
-  speech: ["clarity", "structure", "clearly structured", "articulation"],
+  body: ["body", "posture", "gesture", "gestures", "body language", "stance"],
+  emotion: ["emotion", "facial expression", "facial expressions"],
+  speech: ["speech", "clarity", "structure", "clearly structured", "articulation"],
   tonality: ["tone", "tonality", "voice control", "pitch"],
   eye_contact: ["eye contact"],
-  vocal_projection: ["projection", "volume", "project the voice", "projecting"],
+  vocal_projection: ["vocal projection", "projection", "volume", "project the voice", "projecting"],
   emotional_expression: ["emotional expression", "expressiveness", "expressive delivery"],
   sentence_flow: ["sentence flow", "pacing", "fluency", "flow of sentences"],
   audience_awareness: ["audience awareness", "audience", "listeners"],
@@ -330,6 +355,22 @@ const EXPECTED_DIMENSION_CODES = 9;
 const EXPECTED_RATING_LEVELS = 4;
 const EXPECTED_ATTRIBUTION_RULES = 5;
 
+/** The four OD-4 canonical panels. Named, not counted. */
+const REQUIRED_PANEL_KEYS: readonly (keyof ReportPanels)[] = [
+  "overview",
+  "strengths",
+  "areasForDevelopment",
+  "remarks",
+];
+
+/** Amendment 006 A-051, verbatim. Checked by VALUE, not by size. */
+const RATIFIED_POLARITY_BANDS: Readonly<Record<string, PolarityBand>> = {
+  beginning: "needs_support",
+  developing: "developing",
+  mastering: "positive",
+  mastered: "positive",
+};
+
 function anchorIntegrityFailures(a: GroundingAnchors): string[] {
   const out: string[] = [];
   if (a.panelKeys.length !== EXPECTED_PANEL_KEYS) {
@@ -351,6 +392,41 @@ function anchorIntegrityFailures(a: GroundingAnchors): string[] {
   if (a.achievementTerms.length === 0) {
     out.push("grounding anchors degraded: the achievement lexicon is empty, so rule 3 could never fire");
   }
+  // ⚠️ ARITY IS NOT INTEGRITY. Adversarial review defeated every check above
+  // while satisfying all of them: DUPLICATED panel keys still counted four,
+  // and an INVERTED polarity map still counted four bands while turning every
+  // needs_support dimension into a positive one — disarming rules 3 and 4
+  // completely, silently, with the anchor guard green. The checks below assert
+  // the anchors are the RATIFIED ones, not merely the right number of things.
+  if (new Set(a.panelKeys).size !== a.panelKeys.length) {
+    out.push("grounding anchors degraded: duplicate panel keys, so at least one panel is never checked");
+  }
+  if (new Set(a.dimensionCodes).size !== a.dimensionCodes.length) {
+    out.push("grounding anchors degraded: duplicate dimension codes, so at least one dimension is never checked");
+  }
+  for (const key of REQUIRED_PANEL_KEYS) {
+    if (!a.panelKeys.includes(key)) {
+      out.push(`grounding anchors degraded: panel ${key} is absent, so no rule could read it`);
+    }
+  }
+  // A-051 is a RATIFIED map. Its VALUES are checked, not just its size: an
+  // inverted or re-pointed band silently converts a contradiction into a
+  // permitted statement.
+  for (const [rating, band] of Object.entries(RATIFIED_POLARITY_BANDS)) {
+    if (a.polarityBands[rating] !== band) {
+      out.push(
+        `grounding anchors degraded: polarity band for '${rating}' is ` +
+          `'${String(a.polarityBands[rating])}', not the ratified '${band}' (A-051)`,
+      );
+    }
+  }
+  // Rule 4's escape lexicon is load-bearing in the OPPOSITE direction to the
+  // others: emptying it does not disarm rule 4, it makes rule 4 reject
+  // legitimate support-framed prose. Either way the shipped behaviour is not
+  // the ratified behaviour, so an empty escape lexicon is a degraded anchor.
+  if (a.supportMarkers.length === 0) {
+    out.push("grounding anchors degraded: the support-framing lexicon is empty, so rule 4's ratified escape cannot apply");
+  }
   for (const code of a.dimensionCodes) {
     const terms = a.dimensionTerms[code];
     if (terms === undefined || terms.length === 0) {
@@ -365,6 +441,75 @@ function sentences(text: string): string[] {
     .split(/(?<=[.!?])\s+|\n+/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+}
+
+/**
+ * CLAUSE SPLIT — used only by rule 4's escape, to make it DIMENSION-LOCAL.
+ *
+ * G06-6 scopes the support-framing escape to the "CLAIM/SENTENCE + REFERENCED
+ * DIMENSION LOCAL". A sentence-wide escape does not implement that: adversarial
+ * review demonstrated a single support phrase about ONE dimension immunizing a
+ * contradictory claim about a DIFFERENT dimension in the same sentence
+ * ("Eye contact was a real strength, and projection is coming along with
+ * prompting"). Splitting on clause boundaries keeps the escape attached to the
+ * dimension it actually frames.
+ */
+function clauses(sentence: string): string[] {
+  return sentence
+    .split(/[,;:]|\s+(?:and|but|while|whereas|although|though)\s+/i)
+    .map((c) => c.trim())
+    .filter((c) => c.length > 0);
+}
+
+/**
+ * NORMALIZED, WORD-BOUNDARY TERM MATCHING.
+ *
+ * The lexicons were previously applied with a raw `String.includes`, which is
+ * wrong in BOTH directions and was measured failing in both by adversarial
+ * review:
+ *
+ *   FALSE REJECT — substring hits inside longer, innocent words. `strong`
+ *     matched "stronger", `highlight` matched "highlighted", `perfect` matched
+ *     "imperfect", `tone` matched "monotone". Valid parent-facing English was
+ *     being rejected, which is precisely the harm A-052 forbids the raw-label
+ *     guard from causing, applied here to the polarity lexicons.
+ *
+ *   FALSE ACCEPT — trivial orthographic variation slipped past. "eye-contact",
+ *     "eyecontact" and "eye  contact" all bypassed the `eye_contact` terms, so
+ *     a contradiction was ACCEPTED for the cost of a hyphen.
+ *
+ * Normalization folds hyphens/underscores/slashes to spaces and collapses
+ * runs of whitespace; each term is then matched with interior whitespace
+ * optional (so "eyecontact" matches) but anchored on both sides by
+ * letter boundaries (so "eyecontactless" does not).
+ */
+function normalize(text: string): string {
+  return text.toLowerCase().replace(/[-_/]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+const TERM_RE_CACHE = new Map<string, RegExp>();
+
+function termRegExp(term: string): RegExp {
+  const cached = TERM_RE_CACHE.get(term);
+  if (cached !== undefined) return cached;
+  const escaped = normalize(term)
+    .split(" ")
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("\\s*");
+  const re = new RegExp(`(?<![a-z])${escaped}(?![a-z])`, "i");
+  TERM_RE_CACHE.set(term, re);
+  return re;
+}
+
+/** True when `term` occurs in `text` as a whole word (or whole phrase). */
+function mentions(text: string, term: string): boolean {
+  if (term.trim().length === 0) return false;
+  return termRegExp(term).test(normalize(text));
+}
+
+/** True when ANY term in the lexicon occurs in `text`. */
+function mentionsAny(text: string, terms: readonly string[]): boolean {
+  return terms.some((t) => mentions(text, t));
 }
 
 /**
@@ -475,6 +620,22 @@ export function validateGrounding(
 
   const allText = anchors.panelKeys.map((k) => panelText(k)).join("\n");
 
+  // 1c — A PANEL MUST ACTUALLY SAY SOMETHING.
+  //
+  // Every rule below is a rule about PROSE, so a draft with no prose satisfied
+  // all of them and was ACCEPTED — four empty panels passed grounding cleanly,
+  // as did four panels of whitespace. Grounding is the gate that stands
+  // between generated content and a trainer's screen (CLAUDE.md §4
+  // non-negotiable 1); an empty draft reaching it means the generation step
+  // failed, and that must fail CLOSED rather than present the trainer with a
+  // blank report certified as grounded.
+  for (const key of REQUIRED_PANEL_KEYS) {
+    if (!anchors.panelKeys.includes(key)) continue;
+    if (panelText(key).trim().length === 0) {
+      reasons.push(`${String(key)} is empty, so the draft carries no grounded content for that panel`);
+    }
+  }
+
   // 2 — A-052: rating ATTRIBUTION and taxonomy disclosure never reach a
   // parent panel. Ordinary prose using the same words stays legal.
   for (const rule of anchors.attributionRules) {
@@ -496,8 +657,7 @@ export function validateGrounding(
   // immunizing explicit achievement language.
   for (const key of anchors.panelKeys) {
     for (const sentence of sentences(panelText(key))) {
-      const lower = sentence.toLowerCase();
-      const hasAchievement = anchors.achievementTerms.some((t) => lower.includes(t));
+      const hasAchievement = mentionsAny(sentence, anchors.achievementTerms);
       if (!hasAchievement) continue;
       for (const code of anchors.dimensionCodes) {
         const band = bandOf.get(code);
@@ -506,7 +666,7 @@ export function validateGrounding(
         // either way (G06-7).
         if (band === undefined || band === "positive") continue;
         const terms = anchors.dimensionTerms[code] ?? [];
-        if (terms.some((t) => lower.includes(t))) {
+        if (mentionsAny(sentence, terms)) {
           reasons.push(
             `${String(key)}: achievement language about a ${band} dimension (${code}) contradicts the trainer's rating`,
           );
@@ -530,12 +690,19 @@ export function validateGrounding(
   // another dimension elsewhere in the panel.
   if (anchors.panelKeys.includes("strengths")) {
     for (const sentence of sentences(panelText("strengths"))) {
-      const lower = sentence.toLowerCase();
-      const escaped = anchors.supportMarkers.some((m) => lower.includes(m));
       for (const code of anchors.dimensionCodes) {
         if (bandOf.get(code) !== "needs_support") continue;
         const terms = anchors.dimensionTerms[code] ?? [];
-        if (!terms.some((t) => lower.includes(t))) continue;
+        if (!mentionsAny(sentence, terms)) continue;
+        // DIMENSION-LOCAL ESCAPE (G06-6). The escape is evaluated on the
+        // CLAUSE that names THIS dimension, not on the whole sentence.
+        // Sentence-wide evaluation let one dimension's support phrase
+        // immunize a contradictory claim about a different dimension in the
+        // same sentence — a literal miss against G06-6's "CLAIM/SENTENCE +
+        // REFERENCED DIMENSION LOCAL", found by adversarial review.
+        const naming = clauses(sentence).filter((c) => mentionsAny(c, terms));
+        const scope = naming.length > 0 ? naming : [sentence];
+        const escaped = scope.every((c) => mentionsAny(c, anchors.supportMarkers));
         if (escaped) continue;
         reasons.push(`strengths presents a needs_support dimension (${code}) without support framing`);
       }

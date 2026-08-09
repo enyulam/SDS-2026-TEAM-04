@@ -367,7 +367,7 @@ for (const word of PROHIBITED_ESCAPES) {
       strengths: `Eye contact was the highlight of the session. The student is ${word} a confident stance too.`,
     },
     INPUT,
-    ["eye_contact"],
+    ["eye_contact", "without support framing"],
     "C4 shape: escape word in a SEPARATE sentence",
   );
   checkReject(
@@ -377,7 +377,7 @@ for (const word of PROHIBITED_ESCAPES) {
       strengths: `Eye contact was a highlight of the session, and the student is ${word} it further.`,
     },
     INPUT,
-    ["eye_contact"],
+    ["eye_contact", "without support framing"],
     "C8 shape: escape word INSIDE the contradicting sentence",
   );
 }
@@ -423,14 +423,14 @@ checkReject(
   "G06-P9b",
   { ...BASE, strengths: `${SUPPORT_SENTENCE_A} ${CONTRADICTION_SENTENCE_B}` },
   INPUT,
-  ["eye_contact"],
+  ["eye_contact", "without support framing"],
   "dimension A's support phrase does not immunize dimension B",
 );
 checkReject(
   "G06-P9c",
   { ...BASE, strengths: `${CONTRADICTION_SENTENCE_B} ${SUPPORT_SENTENCE_A}` },
   INPUT,
-  ["eye_contact"],
+  ["eye_contact", "without support framing"],
   "and the order does not matter",
 );
 
@@ -529,15 +529,31 @@ function mustFlipToAccept(id, panels, input, anchors, what) {
 // the only thing under test. The literal C8 sentence is unaffected and is
 // still asserted, twice, at G06-P8-same[develop*] -- it is now caught by
 // TWO independent rules instead of one, which is strictly stronger.
+// ⚠️ RE-DERIVED A SECOND TIME at the adversarial-review remediation, and again
+// because it FAILED LOUDLY rather than being quietly weakened.
+//
+// The previous case leaned on a mutated lexicon containing "develop" matching
+// inside "developing". Term matching is now WORD-BOUNDARY anchored (it had to
+// be: `strong` was matching "stronger", `tone` was matching "monotone", and
+// valid parent prose was being rejected), so "develop" no longer matches
+// "developing" and the mutation could not flip the verdict. The case had
+// stopped isolating its control for the second time.
+//
+// It now targets the control that actually changed: bare `needs`/`needed` were
+// removed from the support lexicon because they were a GENERAL-PURPOSE escape,
+// not support framing — any Strengths sentence containing "needs" anywhere,
+// including outright praise like "needs no reminders", disarmed rule 4. This
+// case proves that narrowing is load-bearing: with the superseded lexicon
+// restored, the praise is immunized again and the verdict flips to ACCEPT.
 mustFlipToAccept(
   "G06-M1",
-  { ...BASE, strengths: "Eye contact came through clearly today, and the student will keep developing it." },
+  { ...BASE, strengths: "Eye contact needs no reminders now." },
   INPUT,
   {
     ...GROUNDING_ANCHORS,
-    supportMarkers: ["support", "prompt", "guidance", "develop", "practice", "working on", "building"],
+    supportMarkers: [...GROUNDING_ANCHORS.supportMarkers, "needs", "needed"],
   },
-  "the narrowed support lexicon (restoring the superseded one)",
+  "the narrowed support lexicon (restoring bare `needs`/`needed`)",
 );
 
 // M2 -- bare `strong` in ACHIEVEMENT_TERMS is what closes C7. Remove it and
@@ -727,6 +743,193 @@ check(
   undefined,
   "...and in Remarks, which R-A leaves polarity-neutral",
 );
+
+// =====================================================================
+// SECTION A -- ADVERSARIAL-REVIEW REMEDIATION (P1-T11).
+//
+// Two independent read-only reviewers were run against the ratified rule set
+// under CLAUDE.md §14.6, instructed to falsify rather than confirm. Each case
+// below is a defect one of them DEMONSTRATED against the shipped implementation
+// and which is now closed. They are permanent so the defects cannot silently
+// return: every one of them passed this suite at the time it was found.
+//
+// ⚠️ Each is scoped to the RATIFIED rules. None adds a rule, none widens a
+// panel's polarity posture, and none narrows a ruled escape: they make the
+// implementation do what G06-1..G06-8 already say.
+// =====================================================================
+console.log("\n--- A. adversarial-review remediation ---");
+
+// A1 -- DIMENSION DISPLAY NAMES WERE UNDETECTABLE, so rule 3 could not fire.
+// body / emotion / speech carried no term matching their own name, so the most
+// explicit contradiction possible -- naming the dimension and claiming mastery
+// of it -- was ACCEPTED, while the identical sentence about tonality REJECTED.
+for (const [code, sentence] of [
+  ["body", "Body was mastered today and quite outstanding."],
+  ["emotion", "Emotion was excellent throughout the talk."],
+  ["speech", "Speech was excellent and essentially flawless."],
+]) {
+  checkReject(
+    `G06-A1[${code}]`,
+    { ...BASE, strengths: sentence },
+    { ...INPUT, ratings: RATINGS.map((r) => (r.dimensionCode === code ? { ...r, rating: "beginning" } : r)) },
+    ["contradicts the trainer's rating"],
+    "a dimension's own display name is attributable, so rule 3 can fire",
+  );
+}
+
+// A2 -- BARE `needs`/`needed` WAS A GENERAL-PURPOSE ESCAPE, not support
+// framing. Any Strengths sentence containing the word -- including outright
+// praise -- disarmed rule 4 for that sentence. G06-6 scopes the escape to
+// SUPPORT FRAMING, so this is the implementation matching the ruling.
+checkReject(
+  "G06-A2a",
+  { ...BASE, strengths: "Eye contact was outstanding and needs no reminders." },
+  INPUT,
+  ["without support framing"],
+  "praise containing 'needs' is not support framing",
+);
+checkReject(
+  "G06-A2b",
+  { ...BASE, strengths: "Eye contact was a real strength; needed no help at all." },
+  INPUT,
+  ["without support framing"],
+  "...nor is 'needed'",
+);
+
+// A3 -- THE ESCAPE WAS SENTENCE-LOCAL BUT NOT DIMENSION-LOCAL, a literal miss
+// against G06-6's "CLAIM/SENTENCE + REFERENCED DIMENSION LOCAL". One
+// dimension's support phrase immunized a contradictory claim about ANOTHER
+// dimension in the same sentence.
+checkReject(
+  "G06-A3",
+  { ...BASE, strengths: "Eye contact was a real strength, and projection is coming along with prompting." },
+  INPUT,
+  ["without support framing"],
+  "dimension B's support phrase cannot immunize a claim about dimension A",
+);
+// ...and the escape is NOT removed: genuine same-clause support framing works.
+check(
+  "G06-A3-legit",
+  "ACCEPT",
+  { ...BASE, strengths: "Eye contact is steadying with frequent prompting during group work." },
+  INPUT,
+  undefined,
+  "the escape is dimension-local, not removed",
+);
+
+// A4 -- FALSE REJECTIONS from substring matching. `strong` matched "stronger",
+// `highlight` matched "highlighted", `perfect` matched "imperfect", `tone`
+// matched "monotone". Rejecting valid parent-facing English is the exact harm
+// A-052 forbids, and G06-8 requires the rejection to track the CONTRADICTION,
+// never the vocabulary.
+for (const [word, sentence] of [
+  ["stronger", "Sentence flow grew stronger through the session."],
+  ["highlighted", "The trainer highlighted sentence flow as a positive today."],
+  ["imperfect", "Sentence flow was imperfect but improving steadily."],
+  ["monotone", "Sentence flow avoided a monotone delivery throughout."],
+]) {
+  check(
+    `G06-A4[${word}]`,
+    "ACCEPT",
+    { ...BASE, strengths: sentence },
+    INPUT,
+    undefined,
+    "an innocent longer word is not a lexicon hit",
+  );
+}
+
+// A5 -- ORTHOGRAPHIC BYPASS. A hyphen, a closed-up spelling or a double space
+// defeated the eye_contact terms entirely, so a contradiction was ACCEPTED for
+// the cost of one character.
+for (const [shape, sentence] of [
+  ["hyphen", "Eye-contact was outstanding today."],
+  ["closed", "Eyecontact was outstanding today."],
+  ["double-space", "Eye  contact was outstanding today."],
+]) {
+  checkReject(
+    `G06-A5[${shape}]`,
+    { ...BASE, strengths: sentence },
+    INPUT,
+    ["eye_contact"],
+    "normalization closes the orthographic bypass",
+  );
+}
+// ...without over-matching into a genuinely different word.
+check(
+  "G06-A5-boundary",
+  "ACCEPT",
+  { ...BASE, strengths: "Sentence flow was excellent, and eyecontactless framing helped the delivery." },
+  INPUT,
+  undefined,
+  "boundaries still prevent matching inside a longer word",
+);
+
+// A6 -- FOUR EMPTY PANELS ACCEPTED. Every rule is a rule about prose, so a
+// draft with no prose satisfied all of them and was certified as grounded.
+checkReject(
+  "G06-A6a",
+  { overview: "", strengths: "", areasForDevelopment: "", remarks: "" },
+  INPUT,
+  ["is empty"],
+  "an empty draft fails closed rather than reaching the trainer certified",
+);
+checkReject(
+  "G06-A6b",
+  { overview: "  ", strengths: "\n", areasForDevelopment: " \t", remarks: "  " },
+  INPUT,
+  ["is empty"],
+  "...and whitespace is not content",
+);
+
+// A7 -- ANCHOR INTEGRITY WAS ARITY-ONLY. Every degradation below satisfied the
+// counted guards while disarming the rules, which is the silent-green class
+// required proof 10 exists to prevent.
+{
+  // Rule 4's escape lexicon is load-bearing in the OPPOSITE direction to the
+  // others: emptying it does not disarm rule 4, it makes rule 4 reject
+  // legitimately support-framed prose. It was never checked at all.
+  const verdict = validateGrounding(BASE, INPUT, { ...GROUNDING_ANCHORS, supportMarkers: [] });
+  checks += 1;
+  if (!verdict.ok && verdict.reasons.some((r) => r.includes("support-framing lexicon is empty"))) {
+    console.log("PASS G06-A7a -- an emptied escape lexicon is caught as a degraded anchor");
+  } else {
+    failures += 1;
+    console.log("FAIL G06-A7a -- an emptied escape lexicon was not caught");
+  }
+}
+{
+  const verdict = validateGrounding(BASE, INPUT, {
+    ...GROUNDING_ANCHORS,
+    panelKeys: ["strengths", "strengths", "overview", "remarks"],
+  });
+  checks += 1;
+  if (!verdict.ok && verdict.reasons.some((r) => r.includes("duplicate panel keys"))) {
+    console.log("PASS G06-A7b -- duplicated panel keys are caught despite the count still being four");
+  } else {
+    failures += 1;
+    console.log("FAIL G06-A7b -- duplicated panel keys were not caught");
+  }
+}
+{
+  // The A-051 map INVERTED: still four bands, every needs_support dimension
+  // reclassified positive, rules 3 and 4 silently disarmed.
+  const verdict = validateGrounding(BASE, INPUT, {
+    ...GROUNDING_ANCHORS,
+    polarityBands: {
+      beginning: "positive",
+      developing: "positive",
+      mastering: "needs_support",
+      mastered: "needs_support",
+    },
+  });
+  checks += 1;
+  if (!verdict.ok && verdict.reasons.some((r) => r.includes("not the ratified"))) {
+    console.log("PASS G06-A7c -- an inverted A-051 polarity map is caught by VALUE, not by size");
+  } else {
+    failures += 1;
+    console.log("FAIL G06-A7c -- an inverted polarity map was not caught");
+  }
+}
 
 // =====================================================================
 console.log("\n---------------------------------------------------------------");

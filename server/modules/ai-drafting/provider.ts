@@ -318,10 +318,18 @@ export class DeterministicFixtureDraftProvider implements AiDraftProvider {
     // own rating supports it. Otherwise it stays honest and support-framed —
     // which is also what keeps it legal under the ratified rule 4, whose
     // escape requires an EXPLICIT support marker in the same sentence.
+    // ⚠️ THE SUPPORT FRAMING MUST SIT IN THE SAME CLAUSE AS THE DIMENSION IT
+    // FRAMES. Rule 4's escape is DIMENSION-LOCAL (G06-6), so a sentence that
+    // names a needs_support dimension in one clause and offers the support
+    // marker in another ("engaged willingly with body AND is becoming more
+    // consistent with guidance") is correctly rejected — the framing does not
+    // attach to the claim. That is what this sentence used to do, and the
+    // all-beginning distribution made the provider emit a draft its OWN gate
+    // rejected. Keep the marker adjacent to the dimension.
     const strengthsPanel =
       best.polarityBand === "positive"
         ? `${name} showed steady, confident work in ${strongest.toLowerCase()} today, applying it independently across the session's activities.`
-        : `${name} engaged willingly with ${strongest.toLowerCase()} and is becoming more consistent with guidance.`;
+        : `${name} engaged willingly with ${strongest.toLowerCase()} with guidance and encouragement, becoming more consistent as the session went on.`;
 
     const overviewPanel =
       best.polarityBand === "positive"
