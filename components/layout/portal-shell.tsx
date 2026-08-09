@@ -315,19 +315,30 @@ function RolePortalShell({
             * deliberately UNCHANGED — narrowing their provenance evidence is
             * an Operator decision, not a tidy-up.
             */}
+          {/*
+            * ⚠️ PROVENANCE MARKER — PRESENT BUT NOT VISIBLE (staff portals).
+            *
+            * The VISIBLE text is gone: it named the composed adapter and a
+            * persistence mode reading "local Supabase", which is a hardcoded
+            * adapter constant meaning "a real Supabase database" and is never
+            * re-derived from the environment. On a projector that reads as a
+            * defect even though the hosted app is demonstrably on the hosted
+            * database.
+            *
+            * ⚠️ THE ELEMENT AND ITS `data-adapter-kind` ATTRIBUTE MUST STAY.
+            * `prove-disposable-app` and `prove-governed-lifecycle` read that
+            * attribute OUT OF THE SERVED DOM as the G-19 proof that a real
+            * surface composed the real adapter, and both FAIL CLOSED when it
+            * is missing. Deleting the node would silently destroy accepted
+            * evidence to remove a caption. The adapter itself is UNTOUCHED —
+            * this is a presentation change only.
+            *
+            * The PARENT surface renders no marker at all, deliberately: a
+            * parent has no operational relationship to this system and its
+            * payload should carry no adapter naming, visible or not.
+            */}
           {role === "parent" ? null : (
-            <footer
-              className="mt-10 border-t border-line py-5 text-small text-neutral-on"
-              data-adapter-kind={port.identity.kind}
-            >
-              Adapter: <strong>{port.identity.kind}</strong> · Participant eligible:{" "}
-              <strong>{port.identity.participantEligible ? "yes" : "no"}</strong> · Persistence:{" "}
-              <strong>
-                {port.identity.persistence === "local_supabase"
-                  ? "local Supabase"
-                  : "browser session only"}
-              </strong>
-            </footer>
+            <footer hidden data-adapter-kind={port.identity.kind} />
           )}
         </main>
       </div>
