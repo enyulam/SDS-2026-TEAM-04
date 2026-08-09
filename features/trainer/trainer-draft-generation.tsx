@@ -100,9 +100,16 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  *     variant and is expressly ruled NOT canonical (Authority Lock §15.1). The ratified label is
  *     "Areas for Development". Here the frame loses and the rule wins.
  *  D3 "Class Video Evidence" with a drag-and-drop uploader ("MP4, MOV · up to 500MB each").
- *     Evidence scope AND the uploading role are UNRESOLVED (Amendment 002 A-014), the evidence
- *     schema is excluded from the Step 7E boundary, `PhysicalTestPort` exposes NO upload or
- *     evidence-read path, and `Evidence Pending` is deliberately not a stored status (A-036).
+ *     ⚠️ CITATION CORRECTED 2026-08-10. This read "Evidence scope AND the uploading role are
+ *     UNRESOLVED (Amendment 002 A-014)". That was true when written and was SUPERSEDED on
+ *     2026-08-08: evidence media IS a Final MVP requirement and the Operator — not an agent —
+ *     named the TRAINER as the uploader (`FINAL_MVP_AUTHORITY_LOCK.md` §8; `CLAUDE.md` §1.1).
+ *     A-014's prohibition on INVENTING an uploader is discharged, because one was RULED.
+ *     THE TREATMENT BELOW IS UNCHANGED, and the reason it survives is now the accurate one:
+ *     the evidence schema is excluded from the Step 7E boundary, `PhysicalTestPort` exposes NO
+ *     upload or evidence-read path, `Evidence Pending` is deliberately not a stored status
+ *     (A-036), and implementation is Phase B. So the affordance still has no governed backing —
+ *     it is unbuilt, not undecided.
  *     The region is KEPT with the frame's label and rendered INERT with a visible,
  *     programmatically associated reason — the F-04 D1 / F-11 "Send Reminder to Trainer"
  *     treatment. NO UPLOADER IS INVENTED and the frame's format/size limits are omitted rather
@@ -553,9 +560,9 @@ export function TrainerDraftGeneration() {
                   id={evidenceNoteId}
                   className="mx-auto mt-3 max-w-md text-small leading-6 text-ink"
                 >
-                  Evidence upload is inactive in this workspace. Evidence scope and the uploading
-                  role remain an unresolved governance decision, the evidence schema is outside
-                  the ratified migration boundary, and no governed upload path exists — so this
+                  Evidence upload is inactive in this workspace. Evidence capture is a required
+                  part of the final product and the Trainer is the person who will upload it, but
+                  the evidence schema and its governed upload path are not built yet — so this
                   control is inert rather than simulated.
                 </p>
               </div>

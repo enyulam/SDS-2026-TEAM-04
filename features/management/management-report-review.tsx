@@ -66,8 +66,13 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *     modifies a rating, observation, attendance record, evidence item, Trainer note or any
  *     underlying assessment fact (A-034). A rating/observation/assessment-fact issue is ALWAYS
  *     a RETURN, never a Management edit — that is the "Return assessment concern" path below.
- *  P5 "Class Video Evidence" and attendance substance. Evidence scope and the uploading role
- *     are UNRESOLVED (A-014) and no governed evidence read path exists — but even if one did,
+ *  P5 "Class Video Evidence" and attendance substance.
+ *     ⚠️ CITATION CORRECTED 2026-08-10. This read "Evidence scope and the uploading role are
+ *     UNRESOLVED (A-014)". True when written, SUPERSEDED 2026-08-08: evidence media IS a Final
+ *     MVP requirement and the Operator named the TRAINER as the uploader
+ *     (`FINAL_MVP_AUTHORITY_LOCK.md` §8) — and expressly NEVER Management (`CLAUDE.md` §1.1,
+ *     §6). ⚠️ THE OMISSION HERE DOES NOT DEPEND ON THAT CITATION AND IS UNAFFECTED BY IT: no
+ *     governed evidence read path exists — but even if one did,
  *     evidence and attendance substance are outside Management's read (A-038). Screen 10 keeps
  *     this region INERT for the Trainer; here it is OMITTED OUTRIGHT, because inert-with-reason
  *     is the treatment for an unbacked affordance, not for a prohibited one.

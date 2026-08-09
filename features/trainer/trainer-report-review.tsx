@@ -97,8 +97,12 @@ import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-
  *     DIRECTLY — a relabelling shim is expressly prohibited.
  *
  *     The ratified third label is "Areas for Development", NOT "Areas to Grow".
- *  D3 "Class Video Evidence" with a player and recording metadata. Evidence scope AND the
- *     uploading role are UNRESOLVED (Amendment 002 A-014), `PhysicalTestPort` exposes no
+ *  D3 "Class Video Evidence" with a player and recording metadata.
+ *     ⚠️ CITATION CORRECTED 2026-08-10. This read "Evidence scope AND the uploading role are
+ *     UNRESOLVED (Amendment 002 A-014)". True when written, SUPERSEDED 2026-08-08: evidence
+ *     media IS a Final MVP requirement and the Operator named the TRAINER as the uploader
+ *     (`FINAL_MVP_AUTHORITY_LOCK.md` §8; `CLAUDE.md` §1.1). The treatment is UNCHANGED and its
+ *     accurate reason is that the path is UNBUILT, not undecided: `PhysicalTestPort` exposes no
  *     evidence read or upload path, and `Evidence Pending` is deliberately not a stored status
  *     (A-036). The region is KEPT with the frame's label and rendered INERT with a visible,
  *     programmatically associated reason — the F-04 D1 / F-11 "Send Reminder to Trainer"

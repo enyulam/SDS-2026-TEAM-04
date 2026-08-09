@@ -14,6 +14,52 @@ import type {
   ParentReportListItemDto,
 } from "@/lib/frontend/contracts/physical-test";
 
+/**
+ * Screen 30 — Parent Dashboard.
+ *
+ * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Parent - Dashboard/`
+ * (Amendment 007 A-056, which supersedes the A-045 ordering). There is no pack-local
+ * `reference.png` for this screen, and its absence is NOT a missing reference and NOT a reason
+ * to re-export from live Figma (`CLAUDE.md` §7.4). Implementation status is
+ * `Partially implemented`: most of the frame is not built yet, which is INCOMPLETENESS, not
+ * drift. Documentation added 2026-08-10; behaviour was not changed.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ OPERATOR RULING Q-27 — THE NINE-DIMENSION SKILLS CARD IS `DO_NOT_IMPLEMENT`
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ *
+ * THE RATIFIED REFERENCE FRAME FOR THIS SCREEN DRAWS A CARD THIS SURFACE MUST NEVER BUILD.
+ * `reference/Parent - Dashboard/` shows **"This Term's Skills"** listing all nine B.E.S.T.
+ * dimensions with rating indicators. The COMPLETE card is absent from the Final MVP — title,
+ * all nine labels, all bars, all rating-derived visual state, and ANY replacement ratings
+ * visualization. Hiding, obscuring, emptying, collapsing, renaming or substituting it are all
+ * NON-COMPLIANCE (`FINAL_MVP_AUTHORITY_LOCK.md` §15.2; `CLAUDE.md` §6).
+ *
+ * ⚠️ ITS ABSENCE IS `EXPECTED / REQUIRED`, NEVER A VISUAL REGRESSION AND NEVER A MISSING
+ * IMPLEMENTATION. Visual acceptance must treat it as satisfied-by-omission. This note exists
+ * because a reader comparing this file against the frame would otherwise see nine missing rows
+ * and "fix" them — reintroducing the exact leak the ruling closed. Every other reconstructed
+ * surface records its governed omissions; this one previously recorded none.
+ *
+ * IT IS A DATA BOUNDARY, NOT CSS. The nine ratings must not reach a Parent session through the
+ * Dashboard UI, page state, DTOs, projections, RPC results, APIs, server actions or client
+ * payloads. FETCHING THEM AND HIDING THEM IN THE CLIENT IS A VIOLATION — the same error as
+ * "hiding an Edit button is not authorization". Accordingly this component reads only
+ * `getParentAvailability` and `listParentSubmittedReports`; neither carries a rating, and no
+ * competency-rating token is rendered anywhere on this surface in either vocabulary
+ * (A-021; A-048; A-052 forbids the bare-word regex, so the guard is structural, not lexical).
+ *
+ * LAYOUT CONSEQUENCE, ALSO RULED: Profile Details promotes upward into the vacated main-column
+ * space. NO BLANK RECTANGLE, NO INVENTED FILLER CARD.
+ *
+ * Q-27 GRANTS MANAGEMENT NOTHING and changes no Trainer or Management rating authority; it
+ * concerns Parent visibility only. OD-4's four panels are unaffected.
+ *
+ * REACHABILITY IS THE GOVERNED PROJECTION'S, NOT THIS COMPONENT'S. Parents receive only the
+ * canonical submitted version `reports.latest_submitted_version_id` names, for students
+ * reachable through a live `parent_student_links` row (A-021; A-038).
+ */
+
 type DashboardData = {
   readonly availability: AvailabilityStateDto;
   readonly reports: readonly ParentReportListItemDto[];

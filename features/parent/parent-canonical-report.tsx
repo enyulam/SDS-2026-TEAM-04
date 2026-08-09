@@ -51,8 +51,17 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
  *  4. THE "WATCH TOGETHER" EVIDENCE VIDEO. Parent evidence access is gated on ALL of: the report
  *     having reached `submitted`, the `evidence_media` consent scope, and a short-TTL,
  *     server-minted signed URL scoped to the requesting parent's `parent_student_links` row
- *     (Amendment 001 A-001; `CLAUDE.md` §6). Beyond that, evidence scope and the uploader are
- *     UNRESOLVED (Amendment 002 A-014). No such governed path exists, so the region is omitted
+ *     (Amendment 001 A-001; `CLAUDE.md` §6).
+ *     ⚠️ CITATION CORRECTED 2026-08-10. This read "Beyond that, evidence scope and the uploader
+ *     are UNRESOLVED (Amendment 002 A-014)". True when written, SUPERSEDED 2026-08-08 — and the
+ *     correction makes this omission STRONGER, not weaker. Evidence media IS a Final MVP
+ *     requirement with the TRAINER as the ruled uploader, but Authority Lock §8.1 rules the
+ *     PARENT EVIDENCE PROJECTION *OUT* of the Final MVP outright. A-001 is therefore ratified
+ *     but ARMED AND UNACTIVATED: its three gates stay binding the moment any parent evidence
+ *     surface is ever activated, and A-003/A-004's REFUSAL legs remain mandatory meanwhile.
+ *     So this region is not merely unbuilt here — it is DESCOPED, and adding any parent-facing
+ *     evidence surface is a `CLAUDE.md` §12 stop-and-ask (see also `F-EVIDENCE-SCOPE-1`).
+ *     No such governed path exists, so the region is omitted
  *     rather than faked — an affordance no governed port method backs is never invented
  *     (GLOBAL_UI_RULES §10), and no media element is rendered on this surface at all.
  *
