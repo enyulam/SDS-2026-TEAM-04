@@ -17,6 +17,7 @@
     "physical-test:f17-isolation": "node scripts/physical-test/prove-disposable-isolation.mjs",
     "physical-test:f17-app": "node scripts/physical-test/prove-disposable-app.mjs",
     "physical-test:f17-linkage": "node scripts/physical-test/prove-disposable-identity-linkage.mjs",
+    "prove:serving-discipline": "node scripts/physical-test/prove-serving-discipline.mjs",
     "test:runtime-profile": "node scripts/tests/config/run-runtime-profile.mjs",
     "test:g06-grounding": "node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/g6-harness/prove-g06-grounding.mjs",
     "test:continuity": "node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/prove-session-continuity.mjs",
