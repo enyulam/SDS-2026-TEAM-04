@@ -1,5 +1,20 @@
 # STATUS — B.E.S.T Coach MVP
 
+> # ⛔ WHICH WORKSPACE IS THIS? READ BEFORE ANYTHING ELSE
+>
+> **Added 2026-08-10 by Operator instruction.** ⚠️ **THIS FILE, `BUILD_NOTES.md` AND `OPERATOR_HANDOFF.md` ALL CAME ACROSS FROM THE DEMONSTRATION WORKSPACE AND EVERYTHING BELOW THIS HEADER STILL DESCRIBES *THAT* PROJECT'S STATE.** Do not read any row below as describing this clone until it has been reconciled. **Existence governs facts** (`CLAUDE.md` §15.3): verify against the repository before acting on anything here.
+>
+> | | |
+> |---|---|
+> | **This workspace** | **DEVELOPMENT CLONE**, on branch **`develop`**. **NOT the demonstration workspace** |
+> | **Hosted target** | **`poblcfbxxzgarclchzkx`** (Supabase, `ap-southeast-1`). 17 migrations applied; fixtures loaded |
+> | ⛔ **FROZEN AND OFF LIMITS** | The demonstration workspace and its hosted project **`zjukuffiuzkbiblmnuwl`**. **Never connect to that ref.** If any value you read resolves to it, **STOP and tell the Operator.** Every hosted tool here denies it unconditionally and the deny cannot be disabled (`scripts/fixtures/hosted-target-guard.mjs`; proof: `npm run prove:hosted-target-guard`) |
+> | **Fixtures here** | **3 synthetic Auth identities + 25 baseline domain rows ONLY.** ⚠️ **`Amelia Tan`, `Ethan Wong` and `Priya Menon` exist ONLY in the demonstration project and will NEVER appear here** — they are in no fixture SQL, so no load reproduces them. A demonstration-state row referenced below is not missing from this clone; it was never here |
+> | **Demonstration build** | Tagged **`hero-feature-baseline` → `a0f48b9`**, in the **demonstration workspace**, and **FROZEN** |
+> | ⛔ **Git** | **Nothing here may be pushed to `main` or merged before the Operator says so.** `develop` only. Local commits at coherent checkpoints are expected; **no push, no merge, no history rewriting** |
+>
+> **Reconciled for this clone so far:** the hosted target, the guard retarget, `project_id` → `best-coach-dev`, and the entries in `BUILD_NOTES.md` dated 2026-08-10. **Everything else below is demonstration-workspace history.**
+
 > Read this first at the start of every session (with the recent `BUILD_NOTES.md` entries). Update it last, at every accepted stopping point. Permanent continuity document (Amendment 001 A-008).
 >
 > **This file is the canonical CURRENT STATUS snapshot** (`CLAUDE.md` §15.1). **It is a snapshot, not a chronicle — maintain the block below by REPLACING it, never by stacking a newer entry above an older one** (§15.2). Chronology belongs in `BUILD_NOTES.md`, which is the canonical historical log. **Neither file is functional authority**; `FINAL_MVP_AUTHORITY_LOCK.md` (repository root) is the Final MVP baseline, and a progress record must never be the sole authority for a product decision.
