@@ -3319,3 +3319,126 @@ Stage 2 wrote **no** migration, table, enum, policy, grant, RPC or audit action.
 **STAGE 3 of the overlay** — hero E2E under §7.4a, then `build`, then the checkpoint tag. **Resolve `B-STAGE3-1` first**, by deriving the disposable census from a live run rather than transcribing it.
 
 **PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
+
+
+---
+
+## 2026-08-09 — HERO V3 **STAGE 3**: `B-STAGE3-1` cleared, the authenticated surfaces RENDER, and `B-STAGE3-2` opened
+
+**Branch / worktree:** `main`, single worktree.
+**Starting HEAD:** `4f94f5f` · **Ending HEAD:** `7d69244` · **Tag:** `stage3-authenticated-green`.
+**Commits:** `3c87eee` (census re-pin) → `7d69244` (Stage 3 authenticated surfaces).
+
+### Scope
+
+Stage 3 of the hero overlay, in the fixed order the Operator gave: clear `B-STAGE3-1` first
+as its own checkpoint, then drive the authenticated surfaces in chain order.
+
+### 1. `B-STAGE3-1` — cleared, and it was TWO stale pins
+
+`EXPECTED_CANONICAL_MIGRATIONS` was pinned at 15 against 17 migrations on disk. Every value
+was **derived from a live reading** through the harness's own `readCanonical()`, never
+transcribed: applied migrations **17**; fixture checksum **re-measured** at `6bdff280…c576`
+over **28 rows**, genuinely unmoved.
+
+**The second pin is the substantive finding.** `assertCanonicalPristine` also hard-coded
+`observations !== 1`, and the P1-T09a additive expansion had moved the whole-table count to
+**2**. It hid because the fixture checksum is **prefix-scoped by design**
+(`id::text LIKE 'cN000000-%'`), so the expansion's disjoint `e9000000-%` family is invisible
+to it — **the checksum still matched byte-for-byte while the count had moved.** Re-pinning
+only the migration count would have left every harness aborting on a different field.
+`prove-disposable-app.mjs` carried the same bare `=== 1` literal and now imports the single
+exported definition.
+
+The re-pin instruction was **moved out of a comment and into the failure message**, because
+the comment form has now been missed three times (M13, M14, M16/M17): the pin is a bare
+symbolic constant that greps for a numeric literal near "migration" do not surface.
+
+**Verified:** `assertCanonicalPristine` — the exact gate that was aborting — passed against
+the live canonical stack immediately after the re-pin.
+
+### 2. The authenticated surfaces — 23 PASS · 0 FAIL · 2 NOT-RUN
+
+`scripts/physical-test/prove-stage3-authenticated.mjs`. The first proof in this project that
+a logged-in surface renders. Every login leg is an **admin-minted session**
+(`generateLink` → `verifyOtp`), recorded verbatim as such; **password sign-in is NOT-RUN**
+and an admin-minted session is never evidence that the sign-in form works. Cookies are
+written by `@supabase/ssr`'s own `createServerClient` into an in-memory jar, so the transport
+is the library's rather than a guessed cookie name.
+
+**Two tiers, never conflated — because conflating them produced a false green during
+development.** An early revision asserted `"Reports"` in the fetch tier and **passed against
+the sidebar** of a page whose body read *"This item isn't available"*. A nav word matches
+every page in the portal. Every transport selector is now surface-specific, and a second
+tier drives **headless Chrome over CDP** to assert on `document.body.innerText` only after
+the loading text clears — necessary because all seven surfaces are `"use client"`, so the
+fetch tier structurally cannot prove data rendered.
+
+**What Tier 2 painted:** the trainer's own assigned sessions with real fixture modules; the
+roster with *"1 of 1 present learner assessed"*; **the mandatory nine-dimension assessment
+form (A-017) with the ratified A-049 vocabulary and A-050 anchors, "9 of 9 dimensions
+rated"**; the management queue projection; and the **parent boundary holding** — no version
+has reached `submitted`, so the canonical parent read resolves nothing and the surface
+refuses. That refusal is the correct governed outcome, not a missing screen. Q-27 is
+asserted structurally on both parent surfaces, deliberately **not** as a bare rating-word
+regex (A-052 prohibits that shape).
+
+### 3. `B-STAGE3-2` — opened, self-inflicted, and reported rather than papered over
+
+An earlier revision of the harness drove governed **mutations** through the served app. The
+served app talks to the **canonical** database, because PostgREST is bound to it. Measured
+damage: `reports` 0 → 1 · `audit_events` 0 → 4 · `audit_chain_heads` 0 → 1 · the fixture
+attendance row's `recorded_by_membership_id`/`recorded_by_role` are now non-NULL, so
+`verify-local-fixtures.sql` **fails A19**.
+
+`audit_events` is append-only and its `BEFORE DELETE OR UPDATE` trigger refuses `postgres`
+too, so **that part is irreversible by design**. The trigger was **not** disabled and must
+not be: §12 forbids working around a fail-closed refusal by weakening what refused.
+Restoration needs the governed fixture reload and the Operator's three no-echo passwords.
+
+**Blast radius, measured:** `readCanonical()` now throws *before* reaching
+`assertCanonicalPristine`, because `fixtureChecksum()` runs the failing verifier. All six
+disposable-stack harnesses abort, so **the disposable hero E2E and negative controls A–M
+were not run**.
+
+**The structural fix:** the harness is now **read-only by default**. Renders are reads.
+`--drive-mutations` defaults OFF and refuses the canonical stack outright. Mutating legs
+belong on the disposable stack — which is what `B-STAGE3-1` was gating all along. The
+correct sequencing was disposable-stack-first, and it was not followed.
+
+### 4. Build gate
+
+`tsc --noEmit` **0**. `build` **green, 17 routes**, run with the S-1 neutralising literal in
+place so no provider selector resolved. Trip-wire: **zero** non-loopback peers.
+
+### Findings recorded, not chased
+
+`F-STAGE3-1` — `/trainer/reports` renders the generic unavailable state rather than the
+returned-reports queue's own empty state. The leg asserts what the surface actually does so
+the defect stays visible. Not on the hero critical path; not chased, per *prioritise
+rendering over completeness*.
+
+### Carried untouched
+
+`B-C2-1` (open, undiagnosed — **negative control K remains NOT SATISFIED**) · `B-C2-2`
+(recorded, deliberately unfixed) · the 22 harnesses' vacuity sweep · **§3 persona sign-offs,
+still not recorded**.
+
+### Scope correction received mid-run
+
+The 48-hour event is the **Week-13 Final Presentation (40%)**, not an internal demo.
+**Deployment is compulsory**: a public URL, a complete end-to-end journey, and a **functional
+AI feature in the deployed system**. Stage 3 was unchanged by this and was finished locally
+first. The single bounded real-provider proof is expressly **not** to be run as a separate
+experiment. `B-G06-DET-1` (rule 3 matched 3 of 18 formulations) becomes **materially
+relevant**: real-provider prose has never been tested against the detector, and the lexicon
+must **not** be widened to make real output pass.
+
+### Exact next step
+
+⛔ **STOP at the deployment gate packet.** Enumerate what the Operator must supply, in order,
+to reach a public URL with a working AI feature. Attempt none of it autonomously — hosted
+provisioning, spend, push and public deployment are each §12 hard gates, and none is carried
+by the standing local authorization.
+
+**PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
