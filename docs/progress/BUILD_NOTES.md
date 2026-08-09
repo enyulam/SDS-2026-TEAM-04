@@ -3078,3 +3078,57 @@ Derived from `STATUS.md`, `BUILD_NOTES.md`, `git` and the live database. Ending 
 
 - **PROVIDER: NO. HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.** No serve, no browser, no S-1, no migration, schema, RPC, grant or audit-registry change.
 - **Ending: C.** Next permitted action is in `OPERATOR_HANDOFF.md` §9 and `STATUS.md`.
+
+
+---
+
+## 2026-08-09 — bounded vacuity sweep (cut to three) · an audit-chain fail-open closed · v3 overlay written · G-07 OPEN
+
+- **Checkpoint / phase** — Plan Phase 1, `P1-T11`. **Starting HEAD** `0e5d5eb`. **Migration / schema changes — NONE.**
+- **Authority** — three Operator instructions arriving during the run: the bounded six-harness sweep ruling, then the 48-hour cut to three, then the full-chain scope correction. Each superseded the last; all three are reconciled in `docs/plan/HERO_V3_EXECUTION_OVERLAY.md`.
+
+### The sweep found one real fail-open, and it was in the audit chain
+
+**`run-concurrency.mjs:263`** read `out === 't' || out === ''`. `bool_and(ok)` over **zero rows** returns NULL, which psql renders as the **empty string** — so **a chain that verified NOTHING was reported as verified**.
+
+Every `chainOk()` call site runs *after* `drive()` has walked governed transitions that must emit audit events, so the empty case cannot mean "nothing to check": it can only mean the events are **absent**. That is precisely the *state transition committed without its audit write* defect (`CLAUDE.md` §4 non-negotiable 2) — sitting inside **hero negative control K's own harness**.
+
+⚠️ **The repository already held the opposite doctrine and this line contradicted it:** `prove-g17-chain-controls.mjs:249` proves G-17 does **not** pass on the ratified EMPTY canonical chain. Closed **fail-closed**, the same direction as `G06-7`.
+
+**Firing proof on real data, not asserted.** Against the canonical database — which carries **0 audit events** — `bool_and(ok)` returned empty: the **OLD** predicate evaluated `true`, the **NEW** predicate evaluates `false`. The removed branch demonstrably passed an unverified chain. **`run-concurrency` then RAN and PASSED, exit 0, over 62 committed audit events**, proving the fix non-breaking and the empty branch dead in a correct run.
+
+### The three browser harnesses are structurally non-vacuous — and the reason matters
+
+Their absence assertions all iterate the rendered DOM, so a blank page yields zero offenders and passes. **They are not vacuous, because every one is gated by a preceding `waitUntil(...)` positive-presence assertion that THROWS on timeout.** Verified at every call site in `three-role-browser-smoke` (702→704, 718→737, 741+`===4`→753, 790→795, 847+"exactly one h2"→855, 873+`===4 articles`+exact panel-heading equality→889) and structurally in `trainer-browser-smoke` (**40** `waitUntil` gates guarding 12 absence assertions).
+
+That the C4 harness once **aborted** at a `waitUntil` is the same mechanism working correctly: its failure mode is **NOT-RUN**, not false green.
+
+Also checked: **shape 1 is impossible** in `assertTextAbsent` — a scalar throws (`"str".filter` is not a function) rather than passing silently. **`DIMENSION_DISPLAY_NAMES` matches the live catalogue 9/9** (transcribed, not drifted). **`RATING_TOKENS` deliberately EXCEEDS the live enum** by also carrying superseded labels — stronger than its source, not weaker, so not a shape-2 defect.
+
+### The `storeDraft` guard is real, and its scope is correct BY CONSTRUCTION
+
+The prior session's fail-closed type guard exists at `prove-governed-lifecycle.mjs:766-773`, iterates an **array**, checks `typeof !== "string"`, and throws. It covers the four OD-4 panels but **not** `authUserSub`, `reportId` or the two lock versions — **and that is correct rather than an oversight**: `bc_rid`→`::uuid` and `bc_lock`/`bc_olock`→`::integer` fail **loudly** on `"undefined"`, and `bc_sub` feeds the JWT claims and fails **closed** via authorization. The four TEXT panels were the only fields that silently accept garbage, which is exactly what the guard covers.
+
+### `B-C2-1` — a second observation, recorded and NOT diagnosed
+
+`run-c2` **FAILED, exit 1**, run solo immediately after `run-concurrency`: **`T-C2-4(A)` — "the advisory gate 7301 was never granted"**. This is a **second** order-dependent failure in a coordination-heavy suite, after the first (post-`run-canonical`).
+
+⚠️ **No cause is claimed.** The template-clone-race attribution stays **withdrawn**, and this observation is **not** offered as evidence for it — two observations of a shape are not a diagnosis. `B-C2-1` remains **OPEN · UNDIAGNOSED**, and **hero negative control K must not be reported satisfied while it is open.**
+
+### S-1 was inspected but NOT executed, and the distinction is the point
+
+`assertNeutralisingLiteralIsUnratified()` reads the ratified selectors from source and refuses to serve unless the neutralising literal is provably **not** one of them; `disposableChildEnv()` **overwrites** the three selectors and **reads them back**, never deleting them. The mechanism is correctly built. **It has still never executed.** S-2 was verified UNSET. **No serve, no browser, no S-1 execution** — the standing rule forbids beginning that chain without the context to finish overwrite → read-back → S-3 → execution → per-leg proof → review in one pass, and that context did not exist.
+
+### v3 overlay written to disk
+
+`docs/plan/HERO_V3_EXECUTION_OVERLAY.md`, derived from v2 plus both in-run scope corrections, **supersedes v2 in full**. It carries forward verbatim what is still in force (the evidence ruling, H-6 admin-minted sessions, the hero non-negotiables, hard stops, the real-provider rule, S-1…S-4, the three endings, H-8); deletes every superseded block (expected starting state, Task Zero, the G-06 ratification, the stale worktree block, the C4–C8 defect list); and records what v2 got **WRONG rather than merely stale** — principally its three parallel role tracks and "Trainer slice first" ordering, which would have built UI against an unbuilt backend, its retention of evidence step 9 against H-5, and its implicit premise that grounding suffices once a real provider is enabled (measured false: `B-G06-DET-1`, 3 of 18).
+
+**Parallelism decision recorded: SEQUENTIAL from one baseline, no role worktrees** — the ownership-manifest / three-worktree / serialized-validation / three-integration setup cost does not pay back inside 48 hours at this size, and v2 itself states parallelism is an optimization, not a correctness requirement.
+
+### Automated verification — RAN this session, with exit codes
+
+`node --check run-concurrency.mjs` **0** · **`run-concurrency` 0** (62 audit events; the sweep fix proven non-breaking) · **`run-c2` 1 — FAILED**, recorded above and not diagnosed · the `chainOk` firing proof executed against the live canonical database.
+
+- **NOT-RUN and not claimed** — the three browser/C4 harnesses · S-1 execution · `run-integration` · `build` · `verify-fresh-apply` · `run-c3-bypass` · `prove-clock-hour-determinism` · `prove-disposable-identity-linkage` · every real-provider leg · §3 persona sign-offs · the **22** deferred harnesses.
+- **PROVIDER: NO. HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.**
+- **Next permitted action** — **STAGE 1** of the v3 overlay: the governed backend for the entire chain, proven server-side with no UI.

@@ -12,7 +12,7 @@
 | Field | Value |
 |---|---|
 | Branch | `main` |
-| HEAD at stop | resolve with `git rev-parse HEAD` — this file is inside the commit. Prior checkpoint `9595048` (H-8 + this artifact) |
+| HEAD at stop | resolve with `git rev-parse HEAD` — this file is inside the commit. Prior checkpoint `0e5d5eb` |
 | Working tree | CLEAN at stop |
 | Remotes | **0** — nothing has ever been pushed |
 | Worktrees | **1** (`main`). `worktrees/` absent from disk |
@@ -50,7 +50,10 @@ browser harnesses → per-leg execution proof → review. **S-1 guards a billabl
 | `npx tsc --noEmit` | **0** |
 | `npx eslint .` | **0** (one warning found and fixed, not suppressed) |
 | `node --check prove-g06-grounding.mjs` | **0** |
-| `prove-g06-grounding.mjs` | **0** — 201 checks, 0 failures |
+| `prove-g06-grounding.mjs` | **0** — 201 checks, 0 failures (prior session) |
+| `run-concurrency.mjs` | **0** — 62 audit events; audit-chain fail-open fixed and proven non-breaking |
+| `run-c2.mjs` | **1 — FAILED**: T-C2-4(A) "advisory gate 7301 was never granted". Recorded, NOT diagnosed |
+| `chainOk` firing proof (live canonical DB) | **0** — old predicate true / new predicate false on a 0-event chain |
 
 ## 4. NOT-RUN this session, with reasons — NOT merged with §3, NOT carried forward
 
@@ -100,7 +103,9 @@ drifted hand-transcribed literal; a store committing four literal `"undefined"` 
 | Harness | Swept |
 |---|---|
 | `prove-g06-grounding.mjs` (§D, §F) | **SWEPT** — 2 vacuous shapes found and closed |
-| The other **24** `prove-*` / `run-*` harnesses | **NOT SWEPT** |
+| `run-concurrency.mjs` | **SWEPT** — 1 fail-open found and closed (audit chain) |
+| `prove-governed-lifecycle.mjs` · `three-role-browser-smoke.mjs` · `trainer-browser-smoke.mjs` | **SWEPT** — structurally non-vacuous; every absence assertion is gated by a throwing `waitUntil` |
+| The other **22** harnesses | **NOT SWEPT — DEFERRED POST-REHEARSAL** (recorded disposition, HERO-FIRST RESEQUENCING RULING) |
 
 ⛔ **Scope the sweep before starting it** — list the harnesses, estimate the work, state
 whether it fits one session; do not start one that cannot be finished. Where a transcribed
@@ -111,7 +116,7 @@ be `undefined` without failing.
 
 ## 9. Exact next permitted action
 
-**Finish `P1-T11`:** run the three browser/C4 harnesses under §7.4a.
+**STAGE 1 of `docs/plan/HERO_V3_EXECUTION_OVERLAY.md`** — the governed backend for the ENTIRE hero chain, proven server-side with no UI: attendance write path · assessment persistence · draft transport (R-27) · `report_source_map` · Trainer approval · Management pending read · wording-only edit · Approve & Submit · canonical submitted version · Parent submitted read with the Q-27 boundary at the projection layer. **EXIT:** full lifecycle proven server-side, audit chain valid, submitted version persisted, committed. Then STAGE 2 (thin UI, all three roles) and STAGE 3 (hero E2E under §7.4a, then `build`).
 
 **Prerequisites, all mandatory:** **S-1** overwrite `LLM_PROVIDER` / `LLM_MODEL` /
 `LLM_API_KEY` in every served child process with a proven-unratified literal and **read them

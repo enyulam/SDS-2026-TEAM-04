@@ -260,7 +260,26 @@ const jwt = (who) => `SET LOCAL request.jwt.claims = '${who === 'trainer' ? TRAI
 
 async function chainOk() {
   const out = await q(WORK_DB, `SELECT bool_and(ok) FROM public.audit_verify_chain(NULL, NULL, NULL);`)
-  return out === 't' || out === ''
+  // ⚠️ FAIL CLOSED. This previously read `out === 't' || out === ''`.
+  //
+  // `bool_and` over ZERO rows returns NULL, which psql renders as the EMPTY
+  // STRING -- so a chain that verified NOTHING was reported as verified. Every
+  // call site below runs AFTER `drive()` has walked governed transitions that
+  // MUST have emitted audit events, so the empty case cannot mean "nothing to
+  // check": it can only mean the events are ABSENT. That is precisely the
+  // "a state transition committed without its audit write" defect
+  // (`CLAUDE.md` §4 non-negotiable 2), and this suite is hero NEGATIVE CONTROL
+  // K -- the one that must not report a corrupt or duplicated state as clean.
+  //
+  // The doctrine already exists in this repository: `prove-g17-chain-controls`
+  // proves G-17 does NOT pass on the ratified EMPTY canonical chain. This line
+  // contradicted it. Swept and closed 2026-08-09 under the extended
+  // false-green rule (an assertion is evidence only if it can FAIL), in the
+  // same fail-closed direction as `G06-7`.
+  if (out === '') {
+    console.error('       audit_verify_chain returned NULL/empty -- it verified NOTHING (0 rows)')
+  }
+  return out === 't'
 }
 
 // ---------------------------------------------------------------------
