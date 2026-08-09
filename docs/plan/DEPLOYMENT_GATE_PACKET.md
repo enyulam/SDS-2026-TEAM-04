@@ -73,6 +73,29 @@ prepare, configure and verify around them. **Nothing open.**
 
 ---
 
+## 1.6 ▶ EXECUTION PROGRESS — updated 2026-08-09
+
+| Step | State |
+|---|---|
+| **(a) Pre-publication secret scan** | ✅ **CLEAN — 0 blockers.** 583 tracked files · all 3 live `.env.local` secrets searched by **exact containment** in the working tree **and across all 180 commits** · 6/6 credential-shape scans completed. One REVIEW item adjudicated a **true negative**: `run-runtime-profile.mjs:54` holds `sb_secret_synthetic_shape_fixture`, a synthetic shape literal commented *"Nothing here is a credential"*. ⚠️ **The first version of this scan reported CLEAN falsely** — `--all` was positioned after the pattern, every history search died with `fatal:`, and the `catch` treated that identically to "no match". The scan now distinguishes exit 1 (no match) from any other exit (**DID NOT RUN → BLOCKER**) |
+| **(b) Private repo · remote · push** | ✅ **DONE.** `https://github.com/enyulam/best-coach-mvp` · **PRIVATE, verified two ways**: the API reports `isPrivate: true`, and an **unauthenticated** request returns **404** — the second is the check that actually proves it is not publicly readable. `main` + tag `stage3-authenticated-green` pushed |
+| **(c) Vercel import + env** | 🟡 **HALF DONE.** The **fixture-mode production assertion is built and PROVEN TO FIRE** — see below. **The Vercel import itself needs your account**; the Vercel CLI is **not installed** here and installing it is a dependency decision I will not take unilaterally |
+| **(d) Apply 17 migrations to hosted Supabase** | ⛔ **BLOCKED — the hosted project does not exist.** `.env.local` still points at `http://127.0.0.1:54321`. I cannot confirm the hosted database is "empty and clean" because there is nothing to connect to |
+| **(e) Hosted fixture loader** | ⛔ **BLOCKED** on (d), and the loader still targets the local container — that adaptation is unwritten |
+| **(f) One real AI draft + grounding verdict** | ⛔ **BLOCKED** on (d)(e) |
+| **(g) Full chain through the deployed system** | ⛔ **BLOCKED** on (f) |
+
+**✅ The production fixture-mode guard — built, and PROVEN to discriminate.**
+`next.config.ts` now **fails the build** when `VERCEL_ENV=production` and
+`NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE=1`. `prove-production-fixture-guard` runs a **real
+`next build` in both directions**: fixture mode `"1"` → **REFUSED** (and the harness verifies
+the failure carries the *authored* marker, because non-zero for an unrelated reason is not a
+passing guard); fixture mode empty → **SUCCEEDED**. **2 PASS · 0 FAIL.** The positive leg is
+not optional — a guard that refuses everything would also pass the negative leg and would
+block the real deployment.
+
+---
+
 ## 2. THE ORDERED SEQUENCE
 
 Each step lists **what you do**, **what I need back**, and **the gate class**.
