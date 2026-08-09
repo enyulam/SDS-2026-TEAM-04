@@ -23,6 +23,7 @@ import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const CONTAINER = 'supabase_db_best-coach-mvp'
 const DB = 'postgres'
@@ -144,6 +145,28 @@ async function main() {
   if (anchors.code !== 0) {
     process.stderr.write(anchors.err)
     fail('the anchor-existence proofs failed')
+  }
+
+  // 1f -- P1-T09 / G-06: the RATIFIED GROUNDING RULE SET.
+  //
+  // Wired in at creation, for the reason 1b, 1c and 1d each had to be wired
+  // in retrospectively: prove-v1-freeze.mjs and prove-od4-grant-guard.mjs
+  // were both ORPHANS, invoked by nothing, so the only proofs covering their
+  // properties ran when a human remembered to type them. This proof carries
+  // the ten REQUIRED PROOFS of FINAL_MVP_G06_GROUNDING_RULING.md plus three
+  // mutation proofs that each new control is load-bearing, and it is the
+  // only thing standing between a future edit and a silently vacuous
+  // grounding gate -- the exact failure the A-053 rename already produced
+  // once. It needs the TS alias loader because it imports grounding.ts
+  // directly; it touches no database and constructs no provider.
+  const g06 = await run(process.execPath, [
+    '--import', pathToFileURL(join(ROOT, 'scripts', 'tests', 'integration', 'alias-loader.mjs')).href,
+    join(ROOT, 'scripts', 'tests', 'g6-harness', 'prove-g06-grounding.mjs'),
+  ])
+  process.stdout.write(g06.out)
+  if (g06.code !== 0) {
+    process.stderr.write(g06.err)
+    fail('the G-06 ratified grounding rule set proof failed')
   }
 
   // 2 -- the lifecycle suite, twice (T7I-31)

@@ -2733,3 +2733,64 @@ The G-06 evidence probe now measures **11 cases**, of which the current implemen
 - **Cleanup / rollback state** — no partial mutation; documentation-only commit; rollback is `git revert`.
 - **RECORDED, NOT FIXED — outside the four authorized index points.** Two `FINAL_MVP_AUTHORITY_LOCK.md` lines still assert that the grounding rule-4 re-derivation is *"the one genuine open Phase B ruling that remains"* (the §15.1-area implementation-status paragraph, and the open-decision register row). Both are now stale. They were **deliberately left unedited**: the ratifying instruction said to index the ruling *"in exactly these places and nowhere else"*, and the §2.3 entry added in this run states the closure in the same file, so a reader is not left without the correction. **Flagged for the Operator as a one-line annotation to authorize.**
 - **Next permitted action** — **P1-T09 implementation** of the ratified semantics in `server/modules/ai-drafting/grounding.ts`, followed by the ten required proofs as permanent tests, each demonstrated capable of **FIRING** against a deliberately planted regression.
+
+
+---
+
+## 2026-08-09 — P1-T09: the ratified G-06 grounding rule set, IMPLEMENTED and PROVEN
+
+- **Checkpoint / phase** — Plan Phase 1, **P1-T09 COMPLETE (`PASS`)**. The Operator gate was crossed at Task Zero (`c47e3cf`); this entry is the implementation.
+- **Track / branch / worktree** — Main Orchestrator · `main` · single worktree.
+- **Starting HEAD** — `c47e3cf`. **Migration / schema changes — NONE.** No SQL, no RPC, no grant, no enum, no audit action string. The database was read by the suites and otherwise untouched; the canonical fixture checksum is **byte-identical before and after** (`6bdff280…ffc576`).
+- **Scope** — Implement `G06-1` … `G06-8` in `server/modules/ai-drafting/grounding.ts`, discharge the ten required proofs as permanent tests, and correct the one fixture-provider correctness defect the ruling brings into scope.
+
+### What changed in the rule set
+
+- **Rule 1b — NEW (`G06-1`, `G06-7`).** `resolveBands()` replaces the bare `POLARITY_BANDS[r.rating]` lookup. It asserts **COVERAGE of all nine governed dimension codes**, rejects an **unrecognised** dimension code, rejects a **duplicated** code (naming the code left uncovered), and rejects a rating that **does not resolve to a ratified polarity band**. **Rule 1's count is retained, not replaced** — it names a different defect (wrong arity), and coverage does not imply arity when duplicates are present.
+- **Rule 3 — widened (`G06-3`).** Bare **`strong`** added to `ACHIEVEMENT_TERMS`. This is the ruling's named remedy for **C7** and is explicitly **not** applying the Strengths rule to Overview, which would have false-rejected the legitimate developmental-context case `G06-3` protects. **Rule 3 still has no escape clause and is documented in-module as never permitted to gain one** — that is what makes the narrowed rule-4 escape safe, since no escape can ever immunize explicit achievement language in any panel.
+- **Rule 4 — scoped and re-derived (`G06-2`, `G06-6`).** `strengths` only. Its support-framing escape moved from **whole-panel** to **sentence-local and dimension-attributed**, and its lexicon narrowed to **explicit support markers**. **Every one of the seven words `G06-6` names as prohibited escapes — develop, developing, building, practice, practising, improving, working on — is absent in every form**, which is the strictest reading and can only make the rule fire more often.
+- **Panel semantics (`G06-3`/`G06-4`/`G06-5`).** Rule 4 does **not** reach `overview` or `areasForDevelopment`, and **Remarks is polarity-neutral (`R-A`)** while rules 1, 1b, 2, 3 and 5 reach it in full.
+- **Anchors are now INJECTED, not closed over.** `GroundingAnchors` / `GROUNDING_ANCHORS` exist so required proof 10 can degrade an anchor and demonstrate the guard **firing**. Production callers use the default; the signature stayed backward-compatible, so `request-draft-core.ts`, `run-integration.mjs`, `activate-g6.mjs` and the evidence probe were **not** touched.
+- **Reasons are de-duplicated** now that rule 4 iterates sentences. Verified first that **no test asserts an exact reason count** — the only count use is an informational print in `INT-L2b`.
+
+### The fixture provider defect (`G06-8`, correctness class)
+
+Design packet §8.1: with every dimension at `beginning` there was no positive dimension, `strongest` fell back to the **literal `"participation"`**, and Strengths asserted *"showed steady, confident work in participation"* — passing grounding **solely because `"participation"` is not a dimension term**, i.e. by being ungrounded rather than by being correct. `"overall delivery"` was the same class on the focus side. The packet said the fallback *"should be re-derived when the rule set is ratified"*; it now is.
+
+Re-derived to rank the **real** ratings (stable sort over the ratified declaration order, so ties break by dimension ordinal and output stays deterministic), speak only about dimensions the trainer actually rated, **fail closed** to `provider_failure` if there is nothing to speak about, and drop to honest support-framed prose when **no positive dimension exists** rather than claiming independent demonstration. **Both invented literals are gone.** Verified first that **no test pins the provider's prose**.
+
+### Proofs
+
+- **NEW: `scripts/tests/g6-harness/prove-g06-grounding.mjs` — 113 checks, 0 failures, exit 0.** It is an **acceptance test** and exits non-zero on failure, deliberately distinct from the evidence probe, which stays a measurement instrument exiting 0 either way.
+  - Proofs **1–10** as the ruling enumerates them, including proof 7 run against **all nine codes individually** (a rule covering only the one dimension the other cases use cannot pass), and proof 8 run against **all seven prohibited escape words in both measured shapes** (separate sentence = C4, same sentence = C8).
+  - **Section M — mutation proofs.** Each new control is REVERTED and its case must **flip to ACCEPT**: restoring the superseded support lexicon un-closes **C8**; removing bare `strong` un-closes **C7**; removing rule 4's ability to attribute the sentence un-closes **C1**. All three flip, so none of those assertions is vacuous. *A control that has never been demonstrated failing is not evidence.*
+  - **Section F — the fixture provider grounds its own output at seven distributions**, including the two where **no positive dimension exists** (the §8.1 case). Grounding could never see the fabricated literal — that was the defect — so the literals are asserted **directly by string**, which is the load-bearing check here.
+  - **Section R — RESIDUAL, printed every run, asserted nowhere.** See below.
+- **Wired into `run-canonical.mjs` at creation** (step 1f), with `pathToFileURL` + the TS alias loader. This was deliberate: `prove-v1-freeze.mjs` and `prove-od4-grant-guard.mjs` were both **orphans** invoked by nothing, and had to be wired in retrospectively by adversarial review. **Confirmed by measurement, not assumption: 92 `G06-*` checks execute inside a `run-canonical` run.**
+- **Evidence probe updated minimally and honestly** — header records that the gate is crossed and names the acceptance test; **exactly one case expectation changed** (C3b `UNRULED` → `ACCEPT`, now ruled by `R-A`). No case, rating or panel text was edited, so every measurement remains like-for-like.
+
+### RESIDUAL — measured, recorded, deliberately NOT closed
+
+Rule 3 is lexical, so it rejects a contradictory Remarks claim only when the wording is in `ACHIEVEMENT_TERMS`. The packet's own canonical contradictory-Remarks case **C3b** (*"a real highlight worth celebrating"*) is **still ACCEPTED**, because `highlight` is not in that lexicon. `G06-3` ratified exactly **one** addition, bare `strong`; adding `highlight` is a further widening that changes rejection behaviour on a case the ruling did not name, which `CLAUDE.md` §12 makes a stop-and-ask. **This is a limit of lexical grounding, not of `R-A`** — the identical wording in `overview` is accepted for the same reason and always was, and rule 4 does not reach Remarks under any reading of `G06-5`. It prints on every run of the proof rather than living only in a document. **Closing it is a one-line change once ratified. Flagged for the Operator.**
+
+### Automated verification — all RAN this session, serially (global test mutex)
+
+| Suite | Exit |
+|---|---|
+| `tsc --noEmit` | **0** |
+| `eslint` | **0** (0 errors, 0 warnings) |
+| `npm run build` | **0** |
+| `prove-g06-grounding.mjs` | **0** — 113 checks, 0 failures |
+| `g06-grounding-evidence.mjs` | **0** — 11 cases, **0 disagreements** with the ratified set (was 5) |
+| `run-canonical.mjs` | **0** — canonical fixture checksum `6bdff280…ffc576` reproduced identically on two runs; 92 `G06-*` checks executed inside it |
+| `run-integration.mjs` | **0** — 37 PASS, 0 FAIL, **REAL-PROVIDER LEG OFF** |
+
+**Provider discipline:** `BEST_COACH_RUN_REAL_PROVIDER_LEG` verified **UNSET** before the integration run (§7.4a **S-2**). **Zero provider constructions, zero outward requests, nothing served.** The grounding function is pure, so none of the new proofs needs a database, a fixture row, a provider or a network call.
+
+**NOT-RUN, and still NOT-RUN:** P1-T09a (additive fixture expansion) · P1-T10's deferred harnesses (`g14-isolation-seed.sql`, `prove-governed-lifecycle.mjs`, `tests/frontend/three-role-browser-smoke.mjs`) · every real-provider leg · every browser leg.
+
+- **Failures and recovery** — one lint warning (`_dropped` unused in a destructuring) fixed at source rather than suppressed. No other failure.
+- **Reviewer findings** — none yet; independent adversarial review is scheduled at **P1-T11** against the whole Phase-1 surface, per `CLAUDE.md` §14.6.
+- **Self-review finding, acted on** — bare `strong` matches by substring, so *"will grow stronger"* in Areas for Development would reject. Kept deliberately: grounding is a REJECT gate, over-rejection is recoverable through the designed failure/retry state (spec §15) while under-rejection reaches a parent, and `G06-1`'s whole posture is fail-closed. Verified the fixture provider emits no `strong`-family word, so the hero path is unaffected.
+- **Cleanup / rollback state** — no partial mutation; rollback is `git revert`.
+- **Next permitted action** — **P1-T09a**, the additive fixture expansion, which P1-T11's §10 exit condition (c) depends on.

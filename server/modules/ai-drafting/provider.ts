@@ -14,7 +14,7 @@
  *   persisted. The provider never publishes and never touches the database.
  */
 
-import type { RatingLevel } from "@/server/modules/framework/dimensions";
+import type { RatingLevel, PolarityBand } from "@/server/modules/framework/dimensions";
 
 export interface AiDraftRequest {
   readonly reportId: string;
@@ -277,10 +277,57 @@ export function validatePanelShape(value: unknown): ReportPanels | null {
 export class DeterministicFixtureDraftProvider implements AiDraftProvider {
   async generate(request: AiDraftRequest): Promise<AiDraftOutcome> {
     const name = request.studentDisplayName;
-    const positive = request.ratings.filter((r) => r.polarityBand === "positive");
-    const support = request.ratings.filter((r) => r.polarityBand === "needs_support");
-    const strongest = positive[0]?.displayName ?? "participation";
-    const focus = support[0]?.displayName ?? request.ratings.find((r) => r.polarityBand === "developing")?.displayName ?? "overall delivery";
+
+    // G06-8 (correctness defect) — THE FABRICATED-STRENGTH FALLBACK IS GONE.
+    //
+    // This previously read:
+    //     const strongest = positive[0]?.displayName ?? "participation";
+    //     const focus     = support[0]?.displayName  ?? … ?? "overall delivery";
+    //
+    // With every dimension at `beginning` there is no positive dimension, so
+    // `strongest` fell back to the LITERAL "participation" and Strengths
+    // asserted "showed steady, confident work in participation" — an
+    // unsupported claim under OD-4's definition of that panel. Grounding
+    // returned ok SOLELY because "participation" is not in DIMENSION_TERMS:
+    // it passed by being UNGROUNDED rather than by being correct, which is
+    // the same silent-green shape G-06 exists to eliminate. The design
+    // packet §8.1 recorded it and said the fallback "should be re-derived
+    // when the rule set is ratified". It now is.
+    //
+    // Re-derived: rank the REAL ratings and speak only about dimensions the
+    // trainer actually rated. No literal dimension name is ever invented.
+    const BAND_RANK: Readonly<Record<PolarityBand, number>> = { positive: 0, developing: 1, needs_support: 2 };
+    // Stable sort over ratings already in ratified declaration order, so
+    // ties break by dimension ordinal and the output stays deterministic.
+    const ranked = [...request.ratings].sort((a, b) => BAND_RANK[a.polarityBand] - BAND_RANK[b.polarityBand]);
+    const best = ranked[0];
+    const worst = ranked[ranked.length - 1];
+
+    // FAIL CLOSED. A draft with nothing to speak about is a provider failure,
+    // never an invented sentence. Nine ratings are guaranteed upstream, so
+    // this is unreachable in a governed call — which is exactly why it must
+    // not silently manufacture prose if it ever becomes reachable.
+    if (best === undefined || worst === undefined) {
+      return { kind: "provider_failure", retryable: false };
+    }
+
+    const strongest = best.displayName;
+    const focus = worst.displayName;
+
+    // Strengths may claim independent demonstration ONLY when the trainer's
+    // own rating supports it. Otherwise it stays honest and support-framed —
+    // which is also what keeps it legal under the ratified rule 4, whose
+    // escape requires an EXPLICIT support marker in the same sentence.
+    const strengthsPanel =
+      best.polarityBand === "positive"
+        ? `${name} showed steady, confident work in ${strongest.toLowerCase()} today, applying it independently across the session's activities.`
+        : `${name} engaged willingly with ${strongest.toLowerCase()} and is becoming more consistent with guidance.`;
+
+    const overviewPanel =
+      best.polarityBand === "positive"
+        ? `${name} worked steadily across the session, applying ${strongest.toLowerCase()} independently while ${focus.toLowerCase()} continued to develop with support.`
+        : `${name} worked steadily across the session, with ${strongest.toLowerCase()} and ${focus.toLowerCase()} both continuing to develop with support.`;
+
     return {
       kind: "ok",
       // RE-AUTHORED AT P1-T08, not relabelled. The previous four sentences
@@ -293,8 +340,8 @@ export class DeterministicFixtureDraftProvider implements AiDraftProvider {
       // demonstrated-positive only, areasForDevelopment names the supported
       // dimension, remarks is grounded closing commentary.
       panels: {
-        overview: `${name} worked steadily across the session, applying ${strongest.toLowerCase()} independently while ${focus.toLowerCase()} continued to develop with support.`,
-        strengths: `${name} showed steady, confident work in ${strongest.toLowerCase()} today, applying it independently across the session's activities.`,
+        overview: overviewPanel,
+        strengths: strengthsPanel,
         areasForDevelopment: `${name} would benefit from continued support with ${focus.toLowerCase()}, where prompting still helps the skill become more consistent.`,
         remarks: `${name} engaged well throughout the session, and this report reflects the trainer's observation of that session only.`,
       },

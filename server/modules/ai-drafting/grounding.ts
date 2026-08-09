@@ -11,10 +11,46 @@
  *
  * Every check is deterministic — string analysis over closed lexicons and
  * the ratified framework constants. No model is consulted here.
+ *
+ * =====================================================================
+ * G-06 — RATIFIED 2026-08-09. `FINAL_MVP_G06_GROUNDING_RULING.md`.
+ * =====================================================================
+ * The rule set below is the Operator-ratified one. It is a RE-DERIVATION,
+ * never a rename — `FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md` §5.2 and
+ * CLAUDE.md §12 both prohibit the rename, and that prohibition is satisfied
+ * by design rather than waived.
+ *
+ * The four OD-4 panels are NOT symmetric, and that asymmetry is the ruling:
+ *
+ *   overview             G06-3  general synthesis; MAY carry developmental
+ *                               and mixed context. The Strengths rule is
+ *                               NOT inherited here — doing so would
+ *                               FALSE-REJECT correctly-grounded drafts.
+ *   strengths            G06-2  positive demonstrated capability. The
+ *                               polarity-contradiction rule (rule 4) lives
+ *                               here, and ONLY here.
+ *   areasForDevelopment  G06-4  EXPECTED to name non-positive dimensions.
+ *                               Rule 4 must not extend here.
+ *   remarks              G06-5  GROUNDED BUT POLARITY-NEUTRAL (packet R-A).
+ *                               No positive-only and no development-only
+ *                               posture — but rules 1, 1b, 2, 3 and 5 all
+ *                               reach it in full. It is not a free channel.
+ *
+ * "No Strengths-specific polarity rule" NEVER means "no grounding" (G06-3).
+ *
+ * EXPRESSLY NOT RATIFIED — each remains a CLAUDE.md §12 stop-and-ask, and
+ * none may be added here without a fresh ruling:
+ *   · extending rule 4 from `needs_support` to `developing` (rule 3 already
+ *     covers achievement claims about ANY non-positive dimension, in all
+ *     four panels, so the concern is discharged without it);
+ *   · the inverse "rule 4b" — a `positive` dimension presented in Areas for
+ *     Development as a deficiency. That is a NEW control, not a migration;
+ *   · narrowing `DIMENSION_TERMS.audience_awareness`'s bare `audience`. It
+ *     is a precision defect, and narrowing it would LOOSEN detection.
  */
 
 import type { RatingLevel, PolarityBand, DimensionCode } from "@/server/modules/framework/dimensions";
-import { POLARITY_BANDS } from "@/server/modules/framework/dimensions";
+import { POLARITY_BANDS, DIMENSION_CODES } from "@/server/modules/framework/dimensions";
 import type { ReportPanels } from "@/server/modules/ai-drafting/provider";
 import { PANEL_KEYS } from "@/server/modules/ai-drafting/provider";
 
@@ -41,13 +77,78 @@ export type GroundingVerdict =
  * A-052: `mastered` and `mastery` are RETAINED here deliberately. They are
  * genuine achievement language whatever the enum is called, and this rule
  * is resolved independently of the attribution rule below.
+ *
+ * G06-3 — bare `strong` is RATIFIED into this lexicon. It closes the
+ * measured C7 defect (Overview praising a `needs_support` dimension with
+ * ordinary praise, because the lexicon carried "very strong" and "strong
+ * command" but not the bare word). The ruling is explicit that C7 is closed
+ * by WIDENING THIS LEXICON and NOT by applying the Strengths rule to
+ * Overview — the latter would false-reject the legitimate
+ * developmental-context case that G06-3 protects. The longer "…strong"
+ * entries are kept even though bare `strong` subsumes them: they document
+ * the phrases this rule was built to catch, and a redundant entry costs one
+ * boolean.
+ *
+ * ⚠️ RULE 3 HAS NO ESCAPE CLAUSE, and must never be given one. That is what
+ * makes the narrowed support-framing escape below safe: an escape can only
+ * ever soften rule 4's weaker "presented as a strength" detection, and can
+ * NEVER immunize explicit achievement language about a non-positive
+ * dimension in any panel.
  */
 const ACHIEVEMENT_TERMS = [
   "excellent", "excelled", "excels", "outstanding", "exceptional", "mastered", "mastery",
   "impressive", "remarkable", "superb", "brilliant", "flawless", "perfect",
+  "strong",
   "great strength", "particularly strong", "very strong", "strong command",
   "consistently strong", "shines", "shone", "standout", "advanced level",
   "no difficulty", "with ease", "effortless",
+] as const;
+
+/**
+ * G06-6 — THE SUPPORT-FRAMING ESCAPE, RE-DERIVED.
+ *
+ * The superseded escape was `/support|prompt|guidance|develop|practice|
+ * working on|building/` evaluated over the WHOLE Strengths panel. It had two
+ * compounding defects, both MEASURED (packet §5, §5.1):
+ *
+ *   1. WHOLE-PANEL SCOPE. One escape word anywhere in the panel disarmed the
+ *      rule for EVERY dimension in it (case C4).
+ *   2. THE LEXICON WAS ORDINARY STRENGTHS VOCABULARY. `develop`, `practice`
+ *      and `building` appear naturally in legitimate positive prose, so a
+ *      model writing normal Strengths text tripped the escape most of the
+ *      time — making rule 4 close to VACUOUS. It also survived
+ *      sentence-scoping when the escape word sat INSIDE the contradicting
+ *      sentence (case C8), which is the shape a model actually emits.
+ *
+ * G06-6 requires BOTH halves fixed together, because sentence-scoping alone
+ * does not close C8:
+ *
+ *   · SCOPE is now SENTENCE-LOCAL and DIMENSION-ATTRIBUTED. The escape is
+ *     evaluated on the specific sentence that names the specific dimension,
+ *     so a support phrase about dimension A can never immunize a
+ *     contradictory positive claim about dimension B elsewhere in the panel
+ *     — which is exactly the "in the same panel" guarantee G06-6 demands.
+ *   · THE LEXICON IS NARROWED TO EXPLICIT SUPPORT MARKERS. Every one of the
+ *     seven words G06-6 names as prohibited escapes — develop, developing,
+ *     building, practice, practising, improving, working on — is ABSENT in
+ *     every form, including inside a longer phrase. This is the strictest
+ *     reading of the ruling, and it can only ever make the rule fire MORE
+ *     often, never less.
+ *
+ * HONEST LIMIT, recorded rather than hidden (packet §5): this remains a
+ * lexical heuristic and will never be complete. Within a SINGLE sentence
+ * naming two needs_support dimensions, a marker escapes both — clause-level
+ * attribution is not implemented, and G06-6 accepts "sentence-local +
+ * dimension-local" as the minimum boundary where reliable clause analysis
+ * does not already exist. It is a NECESSARY, not sufficient, control. Rule 3
+ * is the stronger of the two and is unaffected by this escape.
+ */
+const SUPPORT_MARKERS = [
+  "with support", "with adult support", "with teacher support",
+  "with prompting", "with frequent prompting", "when prompted", "after prompting",
+  "with guidance", "with encouragement", "with reminders", "with modelling", "with modeling",
+  "needs", "needed", "still needs",
+  "is working towards", "working towards", "is working toward", "working toward",
 ] as const;
 
 /**
@@ -141,6 +242,13 @@ const ATTRIBUTION_RULES: ReadonlyArray<{ readonly re: RegExp; readonly reason: s
  * Terms mapped to each dimension so a sentence can be attributed to the
  * dimensions it talks about. Closed, lowercase, matched as substrings of a
  * lowercased sentence.
+ *
+ * `audience_awareness` carrying bare `audience` is a KNOWN precision defect
+ * (packet §8): "holding the audience's gaze" is about eye contact and is
+ * also attributed here, which can produce a spurious REASON and in principle
+ * a spurious rejection. It is deliberately NOT narrowed — G-06 does not
+ * ratify narrowing it, and narrowing would LOOSEN detection, the one
+ * direction this ruling never authorizes. Recorded, not fixed.
  */
 const DIMENSION_TERMS: Readonly<Record<DimensionCode, readonly string[]>> = {
   body: ["posture", "gesture", "body language", "stance"],
@@ -154,6 +262,79 @@ const DIMENSION_TERMS: Readonly<Record<DimensionCode, readonly string[]>> = {
   audience_awareness: ["audience awareness", "audience", "listeners"],
 };
 
+/**
+ * G-06 REQUIRED PROOF 10 — "required grounding anchors disappearing: FAIL
+ * CLOSED."
+ *
+ * Every rule below is only as strong as the closed lexicon it reads. An
+ * emptied lexicon, a lost panel key or a missing dimension code would make
+ * the corresponding rule SILENTLY UNABLE TO FIRE while the suite stayed
+ * green — the exact silent-green class that already bit this project at the
+ * A-053 rename and again at the OD-4 column rename (nine guards green and
+ * blind).
+ *
+ * The anchors are therefore INJECTED rather than closed over, so a proof can
+ * degrade one and demonstrate the guard FIRING. A control that has never
+ * been demonstrated failing is not evidence (G-06 required proofs, closing
+ * paragraph). Production always uses the frozen `GROUNDING_ANCHORS`; the
+ * parameter exists so the failure mode is reachable from a test.
+ */
+export interface GroundingAnchors {
+  readonly panelKeys: readonly (keyof ReportPanels)[];
+  readonly dimensionCodes: readonly DimensionCode[];
+  readonly dimensionTerms: Readonly<Record<string, readonly string[]>>;
+  readonly achievementTerms: readonly string[];
+  readonly supportMarkers: readonly string[];
+  readonly polarityBands: Readonly<Record<string, PolarityBand>>;
+  readonly attributionRules: ReadonlyArray<{ readonly re: RegExp; readonly reason: string }>;
+}
+
+export const GROUNDING_ANCHORS: GroundingAnchors = Object.freeze({
+  panelKeys: PANEL_KEYS,
+  dimensionCodes: DIMENSION_CODES,
+  dimensionTerms: DIMENSION_TERMS,
+  achievementTerms: ACHIEVEMENT_TERMS,
+  supportMarkers: SUPPORT_MARKERS,
+  polarityBands: POLARITY_BANDS,
+  attributionRules: ATTRIBUTION_RULES,
+});
+
+/** The exact shape the anchors must have. A deviation FAILS CLOSED. */
+const EXPECTED_PANEL_KEYS = 4;
+const EXPECTED_DIMENSION_CODES = 9;
+const EXPECTED_RATING_LEVELS = 4;
+const EXPECTED_ATTRIBUTION_RULES = 5;
+
+function anchorIntegrityFailures(a: GroundingAnchors): string[] {
+  const out: string[] = [];
+  if (a.panelKeys.length !== EXPECTED_PANEL_KEYS) {
+    out.push(`grounding anchors degraded: ${a.panelKeys.length} panel keys, not ${EXPECTED_PANEL_KEYS}`);
+  }
+  if (a.dimensionCodes.length !== EXPECTED_DIMENSION_CODES) {
+    out.push(`grounding anchors degraded: ${a.dimensionCodes.length} dimension codes, not ${EXPECTED_DIMENSION_CODES}`);
+  }
+  if (Object.keys(a.polarityBands).length !== EXPECTED_RATING_LEVELS) {
+    out.push(
+      `grounding anchors degraded: ${Object.keys(a.polarityBands).length} polarity bands, not ${EXPECTED_RATING_LEVELS}`,
+    );
+  }
+  if (a.attributionRules.length !== EXPECTED_ATTRIBUTION_RULES) {
+    out.push(
+      `grounding anchors degraded: ${a.attributionRules.length} attribution rules, not ${EXPECTED_ATTRIBUTION_RULES}`,
+    );
+  }
+  if (a.achievementTerms.length === 0) {
+    out.push("grounding anchors degraded: the achievement lexicon is empty, so rule 3 could never fire");
+  }
+  for (const code of a.dimensionCodes) {
+    const terms = a.dimensionTerms[code];
+    if (terms === undefined || terms.length === 0) {
+      out.push(`grounding anchors degraded: dimension ${code} has no attribution terms, so no rule could name it`);
+    }
+  }
+  return out;
+}
+
 function sentences(text: string): string[] {
   return text
     .split(/(?<=[.!?])\s+|\n+/)
@@ -162,84 +343,175 @@ function sentences(text: string): string[] {
 }
 
 /**
+ * G06-1 / G06-7 — resolve every rating to a ratified polarity band, and
+ * assert COVERAGE of all nine governed dimension codes.
+ *
+ * This replaces a fail-OPEN that was measured twice, by two independent
+ * routes, into the same silent skip:
+ *
+ *   C5  an unmapped rating label made `POLARITY_BANDS[rating]` undefined,
+ *       and rules 3 and 4 skipped that dimension. A blatant contradiction
+ *       about it was ACCEPTED — an impossible rating bought a free pass.
+ *   C6  a merely DUPLICATED dimension code left another code ABSENT from
+ *       the band map, with NO invalid enum value anywhere and rule 1's
+ *       count of nine fully satisfied. The same contradiction was ACCEPTED.
+ *
+ * G06-1 is explicit that rule 1b must assert COVERAGE, not a count, and
+ * that a duplicate must not satisfy it. Unknown / impossible / missing-map
+ * state FAILS CLOSED: it is reported as an explicit reason, never a
+ * `continue`, a skip, an `undefined` or an ignored dimension.
+ *
+ * Rule 1's count is retained rather than replaced — it names a different
+ * defect (wrong arity) with a clearer message, and coverage does not imply
+ * arity when duplicates are present.
+ */
+function resolveBands(
+  input: GroundingInput,
+  anchors: GroundingAnchors,
+): { readonly bands: ReadonlyMap<DimensionCode, PolarityBand>; readonly problems: readonly string[] } {
+  const problems: string[] = [];
+  const bands = new Map<DimensionCode, PolarityBand>();
+  const known = new Set<string>(anchors.dimensionCodes);
+  const seen = new Set<string>();
+
+  for (const r of input.ratings) {
+    const code = r.dimensionCode as string;
+    const rating = r.rating as string;
+
+    if (!known.has(code)) {
+      problems.push(`the saved assessment carries an unrecognised dimension code (${code})`);
+      continue;
+    }
+    if (seen.has(code)) {
+      problems.push(`the saved assessment repeats dimension ${code}, so another governed dimension is unrated`);
+      continue;
+    }
+    seen.add(code);
+
+    const band = Object.prototype.hasOwnProperty.call(anchors.polarityBands, rating)
+      ? anchors.polarityBands[rating]
+      : undefined;
+    if (band === undefined) {
+      problems.push(
+        `dimension ${code} carries a rating (${rating}) that does not resolve to a ratified polarity band`,
+      );
+      continue;
+    }
+    bands.set(code as DimensionCode, band);
+  }
+
+  for (const code of anchors.dimensionCodes) {
+    if (!bands.has(code)) {
+      problems.push(`the saved assessment does not cover governed dimension ${code} with a resolvable rating`);
+    }
+  }
+
+  return { bands, problems };
+}
+
+/**
  * Validate the four panels against the saved assessment. Returns every
  * violated rule, so a rejection names all its grounds at once.
+ *
+ * `anchors` is injected ONLY so required proof 10 can degrade an anchor and
+ * demonstrate the fail-closed behaviour. Every production caller uses the
+ * default.
  */
-export function validateGrounding(panels: ReportPanels, input: GroundingInput): GroundingVerdict {
+export function validateGrounding(
+  panels: ReportPanels,
+  input: GroundingInput,
+  anchors: GroundingAnchors = GROUNDING_ANCHORS,
+): GroundingVerdict {
   const reasons: string[] = [];
+
+  // 0 — REQUIRED PROOF 10: the anchors this validation depends on must be
+  // intact. A degraded lexicon cannot silently disable a rule.
+  reasons.push(...anchorIntegrityFailures(anchors));
+
+  // The panels themselves must all be present as strings. A missing panel
+  // would otherwise read as an empty string and be trivially "grounded".
+  for (const key of anchors.panelKeys) {
+    if (typeof panels[key] !== "string") {
+      reasons.push(`panel ${String(key)} is absent from the draft, so it cannot be grounded`);
+    }
+  }
+  const panelText = (key: keyof ReportPanels): string =>
+    typeof panels[key] === "string" ? panels[key] : "";
 
   // 1 — completeness: exactly nine ratings must back the draft.
   if (input.ratings.length !== 9) {
     reasons.push(`the saved assessment carries ${input.ratings.length} ratings, not nine`);
   }
 
-  const bandOf = new Map<DimensionCode, PolarityBand>();
-  for (const r of input.ratings) bandOf.set(r.dimensionCode, POLARITY_BANDS[r.rating]);
+  // 1b — G06-1 / G06-7: COVERAGE of all nine governed dimension codes, each
+  // resolving to a ratified polarity band. FAIL CLOSED, never a silent skip.
+  const { bands: bandOf, problems } = resolveBands(input, anchors);
+  reasons.push(...problems);
 
-  const allText = PANEL_KEYS.map((k) => panels[k]).join("\n");
+  const allText = anchors.panelKeys.map((k) => panelText(k)).join("\n");
 
   // 2 — A-052: rating ATTRIBUTION and taxonomy disclosure never reach a
   // parent panel. Ordinary prose using the same words stays legal.
-  for (const rule of ATTRIBUTION_RULES) {
+  for (const rule of anchors.attributionRules) {
     if (rule.re.test(allText)) reasons.push(rule.reason);
   }
 
-  // 3 — polarity contradiction: sentence-level attribution. A sentence that
-  // names a non-positive dimension may not carry an achievement claim.
-  for (const key of PANEL_KEYS) {
-    for (const sentence of sentences(panels[key])) {
+  // 3 — POLARITY CONTRADICTION, in ALL FOUR PANELS, sentence-scoped and
+  // dimension-attributed. A sentence that names a non-positive dimension may
+  // not carry an achievement claim.
+  //
+  // G06-3/G06-4/G06-5: this is the "general grounding" that continues to
+  // govern `overview`, `areasForDevelopment` and `remarks` even though the
+  // Strengths-specific rule 4 does not reach them. Mentioning a
+  // needs_support dimension is legitimate in those panels; CLAIMING IT AS AN
+  // ACHIEVEMENT is never legitimate anywhere.
+  //
+  // ⚠️ THIS RULE HAS NO ESCAPE CLAUSE AND MUST NEVER BE GIVEN ONE. It is
+  // what stops the narrowed support-framing escape below from ever
+  // immunizing explicit achievement language.
+  for (const key of anchors.panelKeys) {
+    for (const sentence of sentences(panelText(key))) {
       const lower = sentence.toLowerCase();
-      const hasAchievement = ACHIEVEMENT_TERMS.some((t) => lower.includes(t));
+      const hasAchievement = anchors.achievementTerms.some((t) => lower.includes(t));
       if (!hasAchievement) continue;
-      for (const [code, terms] of Object.entries(DIMENSION_TERMS) as Array<[DimensionCode, readonly string[]]>) {
+      for (const code of anchors.dimensionCodes) {
         const band = bandOf.get(code);
+        // An unresolved band is NOT skipped silently: rule 1b has already
+        // recorded it as an explicit failure, so the verdict is a rejection
+        // either way (G06-7).
         if (band === undefined || band === "positive") continue;
+        const terms = anchors.dimensionTerms[code] ?? [];
         if (terms.some((t) => lower.includes(t))) {
           reasons.push(
-            `${key}: achievement language about a ${band} dimension (${code}) contradicts the trainer's rating`,
+            `${String(key)}: achievement language about a ${band} dimension (${code}) contradicts the trainer's rating`,
           );
         }
       }
     }
   }
 
-  // 4 — a needs_support dimension may never be presented as a demonstrated
-  //     strength.
+  // 4 — G06-2: a needs_support dimension may never be presented as a
+  //     demonstrated strength. STRENGTHS ONLY.
   //
-  // ⚠️ INTERIM STATE — G-06 / P1-T09 IS AN OPEN OPERATOR GATE. The rule set
-  // for OD-4 is a DESIGN DECISION, not a rename, and it has NOT been
-  // ratified. Nothing below anticipates that decision.
+  // NOT applied to `overview` (G06-3 — would false-reject legitimate
+  // developmental context), NOT to `areasForDevelopment` (G06-4 — that panel
+  // exists to name non-positive dimensions), NOT to `remarks` (G06-5 —
+  // ratified POLARITY-NEUTRAL, packet option R-A; R-B and R-C were
+  // considered and rejected, see FINAL_MVP_G06_GROUNDING_RULING.md §2).
   //
-  // WHAT CHANGED HERE AND WHY IT IS NOT THE NEW RULE. This rule read the old
-  // model's single positive panel. Under OD-4 that panel's role splits four
-  // ways, and only ONE of the four is the same role: `strengths` is, by the
-  // ruling's own definition, "positive demonstrated capabilities ...
-  // supported by the trainer's governed assessment facts". Pointing the
-  // existing rule at `strengths` therefore CONTINUES it against the panel it
-  // was always about. It is the minimum that keeps the control alive.
-  //
-  // WHAT IS DELIBERATELY NOT DONE, because each is a G-06 decision:
-  //   * NOT retargeted at `overview`. Overview may legitimately carry
-  //     developmental context, so applying a positive-only prohibition there
-  //     would FALSE-REJECT correctly-grounded drafts.
-  //   * NOT extended to `areasForDevelopment`. That panel is EXPECTED to
-  //     name needs_support dimensions; extending the rule there would reject
-  //     the panel for doing its job.
-  //   * NOT extended to `remarks`. Remarks has NO ruled polarity posture.
-  //     Inventing one here would encode an unratified decision in production
-  //     code.
-  //   * The SUPPORT-FRAMING ESCAPE below is carried forward UNCHANGED and is
-  //     KNOWN-WEAK, recorded rather than silently repaired. It is evaluated
-  //     over the WHOLE PANEL, and `develop`, `practice` and `building` are
-  //     ordinary vocabulary inside a strengths narrative — so one incidental
-  //     use anywhere in the panel disarms the rule for EVERY dimension in it.
-  //     Narrowing it is a G-06 design item; changing it now would alter
-  //     rejection behaviour ahead of ratification.
-  {
-    const lower = panels.strengths.toLowerCase();
-    for (const [code, terms] of Object.entries(DIMENSION_TERMS) as Array<[DimensionCode, readonly string[]]>) {
-      if (bandOf.get(code) !== "needs_support") continue;
-      if (terms.some((t) => lower.includes(t)) && !/support|prompt|guidance|develop|practice|working on|building/.test(lower)) {
+  // The escape is SENTENCE-LOCAL and DIMENSION-ATTRIBUTED (G06-6): it is
+  // evaluated on the sentence that names this dimension, so a support phrase
+  // about one dimension can never immunize a contradictory claim about
+  // another dimension elsewhere in the panel.
+  if (anchors.panelKeys.includes("strengths")) {
+    for (const sentence of sentences(panelText("strengths"))) {
+      const lower = sentence.toLowerCase();
+      const escaped = anchors.supportMarkers.some((m) => lower.includes(m));
+      for (const code of anchors.dimensionCodes) {
+        if (bandOf.get(code) !== "needs_support") continue;
+        const terms = anchors.dimensionTerms[code] ?? [];
+        if (!terms.some((t) => lower.includes(t))) continue;
+        if (escaped) continue;
         reasons.push(`strengths presents a needs_support dimension (${code}) without support framing`);
       }
     }
@@ -253,5 +525,5 @@ export function validateGrounding(panels: ReportPanels, input: GroundingInput): 
     reasons.push("an unresolved placeholder token appears in the prose");
   }
 
-  return reasons.length === 0 ? { ok: true } : { ok: false, reasons };
+  return reasons.length === 0 ? { ok: true } : { ok: false, reasons: [...new Set(reasons)] };
 }

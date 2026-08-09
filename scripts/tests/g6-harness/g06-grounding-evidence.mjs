@@ -6,11 +6,28 @@
 // the SHIPPED grounding implementation and reports what it ACTUALLY DOES
 // today, panel by panel, against a fixed set of synthetic drafts.
 //
-// THIS PROBE RATIFIES NOTHING AND CHANGES NOTHING. G-06 is an open Operator
-// gate. Its purpose is to replace assertion with measurement in the decision
-// packet: every behaviour claimed in
-// docs/plan/G06_GROUNDING_RULE_DESIGN_PACKET.md is produced by running this,
-// so the Operator can re-run it and check the claims rather than trust them.
+// THIS PROBE RATIFIES NOTHING AND CHANGES NOTHING. Its purpose is to replace
+// assertion with measurement in the decision packet: every behaviour claimed
+// in docs/plan/G06_GROUNDING_RULE_DESIGN_PACKET.md is produced by running
+// this, so the Operator can re-run it and check the claims rather than trust
+// them.
+//
+// ✅ UPDATED 2026-08-09 -- G-06 IS NOW RATIFIED
+// (FINAL_MVP_G06_GROUNDING_RULING.md). The gate this probe was built to
+// inform is CROSSED. Two consequences, and only two:
+//
+//   1. The ACCEPTANCE TEST is now scripts/tests/g6-harness/
+//      prove-g06-grounding.mjs, which discharges the ruling's ten required
+//      proofs, exits NON-ZERO on failure, and is run by run-canonical.mjs.
+//      THIS file remains a measurement instrument and still exits 0 either
+//      way -- it is deliberately NOT converted into a second acceptance
+//      test, because a probe that reports what the code does is worth
+//      keeping distinct from one that asserts what it must do.
+//   2. C3b's expectation was `UNRULED` and is now ruled: G06-5 selects the
+//      packet's option R-A, so ACCEPT is the ratified behaviour. That single
+//      label is the ONLY case expectation changed. No case, no rating and no
+//      panel text was edited, so every "current behaviour" line below is
+//      still a like-for-like re-measurement of the same inputs.
 //
 // The grounding function is PURE -- (panels, {ratings}) -> verdict -- so
 // these cases need no database, no fixture row and no provider. That also
@@ -80,9 +97,19 @@ const CASES = [
   },
 
   // -----------------------------------------------------------------
-  // CASE 3 -- REMARKS. Grounded commentary. NO polarity posture is ruled
-  // for this panel, so what the CURRENT implementation does here is a
-  // measurement, not an expectation.
+  // CASE 3 -- REMARKS. Grounded commentary.
+  //
+  // ✅ RULED 2026-08-09 (G06-5): Remarks is GROUNDED BUT POLARITY-NEUTRAL --
+  // the packet's option R-A. Rule 4 does not reach it; rules 1, 1b, 2, 3 and
+  // 5 do, in full. C3b's ACCEPT is therefore the RATIFIED behaviour, not an
+  // unruled measurement.
+  //
+  // ⚠️ HONEST LIMIT, and it is NOT what R-A means. C3b's wording ("a real
+  // highlight worth celebrating") is a genuine contradiction that rule 3
+  // does not catch, because `highlight` is not in ACHIEVEMENT_TERMS. G06-3
+  // ratified exactly ONE lexicon addition (bare `strong`); widening further
+  // changes rejection behaviour and is a §12 stop-and-ask. Recorded as a
+  // standing residual in prove-g06-grounding.mjs section R -- not absorbed.
   // -----------------------------------------------------------------
   {
     id: "C3a remarks / grounded neutral",
@@ -90,8 +117,8 @@ const CASES = [
     panels: { ...BASE, remarks: "This report covers the full session; the trainer observed the whole presentation." },
   },
   {
-    id: "C3b remarks / needs_support named as a positive (UNRULED)",
-    want: "UNRULED",
+    id: "C3b remarks / needs_support named as a positive (RULED R-A, 2026-08-09)",
+    want: "ACCEPT",
     panels: { ...BASE, remarks: "Eye contact was a real highlight worth celebrating at home." },
   },
 
