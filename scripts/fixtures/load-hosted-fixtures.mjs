@@ -41,6 +41,7 @@
 // EXIT: 0 loaded and verified · 1 refused, cancelled or failed.
 // =====================================================================
 
+import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -61,6 +62,12 @@ const HOSTED_PROJECT_REF = 'zjukuffiuzkbiblmnuwl'
 const VAR_URL = 'BEST_COACH_HOSTED_SUPABASE_URL'
 const VAR_SECRET = 'BEST_COACH_HOSTED_SECRET_KEY'
 const VAR_DB = 'BEST_COACH_HOSTED_DB_URL'
+
+/**
+ * The local Supabase container, used ONLY as a psql HOST. It is a transport,
+ * never a target: every --dbname URI below points at the HOSTED database.
+ */
+const PSQL_CONTAINER = 'supabase_db_best-coach-mvp'
 
 /** The ratified Step 7F identities — synthetic, deterministic, unchanged. */
 const IDENTITIES = [
@@ -160,20 +167,70 @@ function connect(dbUrl) {
 }
 
 /**
- * Run a committed fixture file as ONE multi-statement request, which is what
- * keeps its own transaction control and its `DO $$ ... $$` assertion blocks
- * behaving exactly as they do under psql locally.
+ * Run a committed fixture file through REAL psql, against the hosted database.
+ *
+ * ---------------------------------------------------------------------
+ * ⚠️ WHY NOT THE DRIVER — THIS IS THE FIRST-CONTACT FAILURE, DIAGNOSED
+ * ---------------------------------------------------------------------
+ * The first version sent the file through `postgres.js` `sql.unsafe()` and
+ * failed immediately. The cause was NOT the `DO $$ … $$` blocks or the
+ * multi-statement request: the ratified fixture is written FOR psql and uses
+ * psql CLIENT-SIDE directives — `\set ON_ERROR_STOP on`, and `\if
+ * :do_cleanup` / `\else` / `\endif` control flow. Those are interpreted by
+ * the psql client; the SERVER has never heard of `\if`, so the very first
+ * line is a syntax error.
+ *
+ * The fix is NOT to preprocess that control flow in JavaScript. Doing so
+ * would mean reimplementing psql's conditional parser against a RATIFIED
+ * fixture whose exact execution semantics are part of what was accepted — a
+ * divergence risk with no upside.
+ *
+ * Instead the file runs through the SAME psql it was written for. The local
+ * Supabase container ships psql 17.6 (matching the hosted server's 17.6) and
+ * can reach the hosted pooler outbound — verified — so the container is used
+ * purely as a psql HOST. It is a transport, not a target: the `--dbname` URI
+ * points at the HOSTED database throughout, and the local database is never
+ * read or written by this path.
+ *
+ * ⚠️ CONSEQUENCE, STATED PLAINLY: this loader now requires the local Docker
+ * container to be running, because that is where psql lives. It is an
+ * operator-run local tool, so that is acceptable — but it is a real
+ * prerequisite, not an implementation detail.
+ *
+ * The connection URI is passed as an ARGV ELEMENT with `shell: false`, so no
+ * shell ever parses the password. SQL arrives on stdin exactly as the local
+ * loader does it.
  */
-async function runSqlFile(sql, relativePath, replacements = {}) {
-  let text = readFileSync(join(REPO_ROOT, 'scripts', 'fixtures', relativePath), 'utf8')
-  // The local loader passes psql `-v` variables; postgres.js has no psql
-  // variable layer, so the two switches the fixture exposes are substituted
-  // here as literal booleans. No user or credential value is ever substituted.
-  for (const [name, value] of Object.entries(replacements)) {
-    if (!/^(true|false)$/.test(value)) throw new SafeError(`refusing to substitute a non-boolean for :${name}`)
-    text = text.split(`:'${name}'`).join(`'${value}'`).split(`:${name}`).join(value)
+function runSqlFile(dbUrl, relativePath, psqlVars = {}) {
+  const text = readFileSync(join(REPO_ROOT, 'scripts', 'fixtures', relativePath), 'utf8')
+  const args = ['exec', '-i', PSQL_CONTAINER, 'psql', '--no-psqlrc', '--quiet', '--dbname', dbUrl]
+  for (const [name, value] of Object.entries(psqlVars)) {
+    if (!/^[a-z_]+$/.test(name) || !/^(true|false)$/.test(value)) {
+      throw new SafeError(`refusing to pass a non-boolean psql variable: ${name}`)
+    }
+    args.push('-v', `${name}=${value}`)
   }
-  await sql.unsafe(text)
+  return new Promise((resolveRun, rejectRun) => {
+    const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'], shell: false })
+    let out = ''
+    let err = ''
+    child.stdout.on('data', (d) => {
+      out += d
+    })
+    child.stderr.on('data', (d) => {
+      err += d
+    })
+    child.on('error', () => rejectRun(new SafeError('could not start psql — is the local Docker container running?')))
+    child.on('close', (code) => {
+      if (code === 0) return resolveRun(out)
+      // psql's stderr carries the SQLSTATE, the message and the line number.
+      // It is committed fixture SQL, not a credential — but it is still
+      // guarded by exact containment before it is surfaced.
+      const safeErr = err.includes(dbUrl) ? '[REDACTED — contained the connection string]' : err.trim()
+      rejectRun(new SafeError(`psql exited ${code} running ${relativePath}:\n${safeErr}`))
+    })
+    child.stdin.end(text)
+  })
 }
 
 // ---------------------------------------------------------------------
@@ -225,7 +282,7 @@ async function main() {
 
     if (reload) {
       phase('Teardown')
-      await runSqlFile(sql, 'local_fixtures.sql', { do_cleanup: 'true', do_load: 'false' })
+      await runSqlFile(dbUrl, 'local_fixtures.sql', { do_cleanup: 'true', do_load: 'false' })
       pass('domain fixture rows removed')
       for (const identity of IDENTITIES) {
         const { error } = await admin.auth.admin.deleteUser(identity.authId)
@@ -236,32 +293,54 @@ async function main() {
       pass('synthetic Auth identities removed')
     }
 
-    phase('Synthetic Auth identities — created through the ADMIN API')
+    phase('Synthetic Auth identities — through the ADMIN API, IDEMPOTENT')
+    // ⚠️ CREATE-OR-UPDATE, deliberately, and NOT delete-and-recreate.
+    //
+    // The first hosted run created all three identities and then failed on the
+    // domain fixtures, so a re-run meets three identities that already exist.
+    // Making that a hard failure would force `--reload`, whose teardown DELETES
+    // Auth users — a destructive step to recover from a non-destructive fault.
+    //
+    // Setting the password on the existing row instead reaches the same end
+    // state, destroys nothing, and keeps the deterministic UUID stable, which
+    // matters because the fixture SQL writes that UUID INLINE into
+    // `accounts.auth_user_id` and then ASSERTS the link exists.
     for (const identity of IDENTITIES) {
-      const { error } = await admin.auth.admin.createUser({
-        // The caller-supplied deterministic UUID: the fixture SQL writes it
-        // INLINE into accounts.auth_user_id and then asserts the link exists.
+      const created = await admin.auth.admin.createUser({
         id: identity.authId,
         email: identity.email,
         password: secrets.get(identity.key),
         email_confirm: true,
       })
-      if (error) {
-        // The error's message could echo request detail; only the role is named.
-        throw new SafeError(`could not create the ${identity.label} identity.`)
+      if (!created.error) {
+        pass(`${identity.label} identity created (${identity.email})`)
+        continue
       }
-      pass(`${identity.label} identity created (${identity.email})`)
+      // Already present — set the password on the existing row.
+      const updated = await admin.auth.admin.updateUserById(identity.authId, {
+        email: identity.email,
+        password: secrets.get(identity.key),
+        email_confirm: true,
+      })
+      if (updated.error || updated.data?.user?.id !== identity.authId) {
+        // Neither error object is surfaced; both could echo request detail.
+        throw new SafeError(
+          `could not create or update the ${identity.label} identity. ` +
+            'It exists but could not be updated, so its password is unknown — nothing further was attempted.',
+        )
+      }
+      pass(`${identity.label} identity already existed — password set on the existing row (${identity.email})`)
     }
     secrets.clear()
 
     phase('Domain fixtures')
-    await runSqlFile(sql, 'local_fixtures.sql', { do_cleanup: 'false', do_load: 'true' })
+    await runSqlFile(dbUrl, 'local_fixtures.sql', { do_cleanup: 'false', do_load: 'true' })
     pass('Step 7F baseline loaded (25 domain rows)')
-    await runSqlFile(sql, 'local_fixtures_expansion.sql')
+    await runSqlFile(dbUrl, 'local_fixtures_expansion.sql')
     pass('P1-T09a additive expansion loaded')
 
     phase('Verification — the committed verifier, unmodified')
-    await runSqlFile(sql, 'verify-local-fixtures.sql')
+    await runSqlFile(dbUrl, 'verify-local-fixtures.sql')
     pass('every fixture assertion passed on the hosted project')
 
     const [census] = await sql`
@@ -280,12 +359,91 @@ async function main() {
   say('\nHOSTED FIXTURES LOADED. No password was written, printed or returned.')
 }
 
+/**
+ * Render a failure WITHOUT erasing its cause.
+ *
+ * ⚠️ THE FIRST VERSION OF THIS HANDLER PRINTED "an unexpected error occurred"
+ * FOR EVERY NON-AUTHORED ERROR. That was a real defect, of the same class as
+ * a check that reports CLEAN because its own query failed: it suppressed
+ * exactly the information needed to act, and turned a diagnosable SQL fault
+ * into an unanalysable one.
+ *
+ * The original reasoning — "a driver error could carry a connection string" —
+ * is true only of CONNECTION errors. A PostgreSQL *server* error carries
+ * structured fields (`code`, `position`, `where`, `detail`, `hint`) plus the
+ * statement text, and here that statement is COMMITTED FIXTURE SQL, which is
+ * public by construction.
+ *
+ * So the fields are surfaced, and the credential is excluded BY EXACT
+ * CONTAINMENT rather than by pattern-based redaction, which §11 forbids
+ * relying on: any rendered string that contains the connection string, its
+ * password, or the secret key is replaced wholesale.
+ */
+function renderFailure(error) {
+  const secrets = [process.env[VAR_DB], process.env[VAR_SECRET], process.env[VAR_URL]]
+    .filter((s) => typeof s === 'string' && s.length > 0)
+  let password = null
+  try {
+    password = decodeURIComponent(new URL(process.env[VAR_DB] ?? '').password) || null
+  } catch {
+    password = null
+  }
+  if (password) secrets.push(password)
+
+  const safe = (value) => {
+    if (value === undefined || value === null) return null
+    const text = String(value)
+    return secrets.some((s) => text.includes(s)) ? '[REDACTED — contained a credential]' : text
+  }
+
+  if (error instanceof SafeError || error instanceof SecretPromptError) {
+    return `REFUSED / FAILED: ${error.message}`
+  }
+
+  const lines = ['FAILED — the underlying cause follows, verbatim:']
+  const pg = error ?? {}
+  for (const [label, key] of [
+    ['message ', 'message'],
+    ['code    ', 'code'],
+    ['severity', 'severity_local'],
+    ['detail  ', 'detail'],
+    ['hint    ', 'hint'],
+    ['where   ', 'where'],
+    ['schema  ', 'schema_name'],
+    ['table   ', 'table_name'],
+    ['column  ', 'column_name'],
+    ['constrnt', 'constraint_name'],
+    ['position', 'position'],
+    ['file:line', 'file'],
+    ['routine ', 'routine'],
+  ]) {
+    const v = safe(pg[key])
+    if (v !== null && v !== '') lines.push(`  ${label} : ${v}`)
+  }
+
+  // The failing statement, with the exact fault position marked.
+  const query = safe(pg.query)
+  if (query) {
+    const pos = Number(pg.position)
+    if (Number.isFinite(pos) && pos > 0) {
+      const start = Math.max(0, pos - 300)
+      const end = Math.min(query.length, pos + 300)
+      lines.push(`  --- failing statement, around character ${pos} of ${query.length} ---`)
+      lines.push(query.slice(start, pos - 1))
+      lines.push(`  >>> HERE >>> ${query.slice(pos - 1, pos + 60)}`)
+      lines.push(query.slice(pos + 60, end))
+    } else {
+      lines.push('  --- failing statement (first 1200 chars) ---')
+      lines.push(query.slice(0, 1200))
+    }
+  }
+  if (lines.length === 1 && pg.stack) lines.push(safe(pg.stack) ?? '')
+  return lines.join('\n')
+}
+
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    // Only authored messages reach the operator. A driver or API error object
-    // could carry a connection string or request detail and is never surfaced.
-    const authored = error instanceof SafeError || error instanceof SecretPromptError
-    process.stderr.write(`\nREFUSED / FAILED: ${authored ? error.message : 'an unexpected error occurred.'}\n`)
+    process.stderr.write(`\n${renderFailure(error)}\n`)
     process.exit(1)
   })
