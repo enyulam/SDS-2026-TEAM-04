@@ -49,7 +49,8 @@ import {
   type RequestDraftSuccess,
 } from "@/server/modules/ai-drafting/request-draft-core";
 import { OpenAiDraftProvider } from "@/server/modules/ai-drafting/provider";
-import { LocalTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
+import { createTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store-transport";
+import type { TrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
 
 export async function saveObservation(
   input: SaveObservationInput,
@@ -80,12 +81,18 @@ export async function requestDraft(
   // deterministic fixture provider is constructed only by automated tests,
   // never here — there is no switch to flip.
   let provider: OpenAiDraftProvider;
+  let trustedStore: TrustedDraftStore;
   try {
     const config = getServerConfig();
     provider = new OpenAiDraftProvider({
       apiKey: config.llm.apiKey,
       model: config.llm.model,
     });
+    // Resolved HERE, before any provider call, so a misconfigured transport
+    // costs nothing. Deferring it to the store step would burn a billable
+    // generation and only then discover the draft cannot be persisted.
+    // It FAILS CLOSED: absent, blank or unknown throws (no default).
+    trustedStore = createTrustedDraftStore();
   } catch {
     // Misconfigured environment. The diagnostic (which names the variable,
     // never a value) stays server-side; the caller gets a neutral outcome.
@@ -100,7 +107,7 @@ export async function requestDraft(
     {
       db: client,
       provider,
-      trustedStore: new LocalTrustedDraftStore(),
+      trustedStore,
       authUserSub: userData.user.id,
       readStudentDisplayName: async (studentId: string) => {
         const { data } = await client.from("students").select("id, full_name").eq("id", studentId);

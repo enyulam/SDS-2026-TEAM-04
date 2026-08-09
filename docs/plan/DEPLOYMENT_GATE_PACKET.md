@@ -96,6 +96,93 @@ block the real deployment.
 
 ---
 
+## 1.7 ✅ TRUSTED DRAFT STORE — Operator ruling, and the implementation
+
+**The blocker.** `report_store_draft` is owner-only with **ZERO client EXECUTE** (R-27), so the
+application cannot reach it through PostgREST. `LocalTrustedDraftStore` bridges that with
+`docker exec` into a named local container — **which does not exist on Vercel**, so the AI
+feature would have failed at its last step: provider call succeeds, grounding runs, then
+persistence dies.
+
+### ✅ RULED: option 1 — a Postgres driver. Two alternatives REJECTED, and why
+
+| Rejected | Reason recorded by the Operator |
+|---|---|
+| **`service_role` EXECUTE on `report_store_draft`** | R-27 names this explicitly and **zero client EXECUTE is a hero-path non-negotiable**. `service_role` is reachable from **any** server context, so granting it **widens the exact boundary this architecture exists to demonstrate** — not 38 hours before demonstrating it |
+| **Edge Function** | A new deployment surface, a new runtime and a new auth path, **none of them built**. Wrong week |
+
+### The driver: `postgres` (postgres.js) `3.4.9`
+
+Chosen as the smallest well-maintained option that runs on Vercel's Node runtime:
+
+- **Zero transitive dependencies** — `npm ls` shows it as a leaf. `pg` pulls in five or six.
+- **Serverless-shaped**, and critically it supports **`prepare: false`**, which Supabase's
+  **transaction-mode pooler (port 6543) requires** — PgBouncer in transaction mode does not
+  support session-level prepared statements, and leaving them on yields intermittent
+  *"prepared statement already exists"* failures that read like application bugs.
+
+### What was built
+
+`HostedTrustedDraftStore` implements the **same `TrustedDraftStore` interface**.
+**`LocalTrustedDraftStore` is untouched** and remains the local implementation.
+
+**Semantic equivalence is preserved deliberately.** The local channel's `DO` block is one psql
+statement in one session, so the draft store and its spec §20 source trace commit or roll back
+**together**. The hosted channel reproduces that with an **explicit transaction** — both calls
+inside `sql.begin()` — so a source-map failure still aborts the draft store. Failure surfaces
+as the same `{ ok: false, sqlState }`. Every value is a **bound parameter**, never interpolated.
+`set_config('request.jwt.claims', …)` runs in the same transaction, so the RPC still re-derives
+every relationship rather than trusting a caller-supplied one.
+
+### ✅ PROVEN — the ACL is unchanged
+
+`npm run prove:trusted-store-acl` — **9 PASS · 0 NOT-PASS**. All four owner-only functions
+exist, are owned by `postgres`, and hold **zero non-owner EXECUTE**; `anon`, `authenticated`
+**and `service_role` all cannot execute `report_store_draft`**; no role gained `BYPASSRLS`.
+
+Two things make this a real measurement rather than a restatement:
+
+- **Existence is checked before absence.** "No grant" is trivially true of a function that
+  does not exist, so a zero-row probe is reported **UNMEASURED**, never PASS.
+- **A control leg proves the probe discriminates**: `authenticated` **can** execute
+  `report_get_canonical`. Without it, `has_function_privilege` returning `f` everywhere would
+  look identical to a correct result.
+
+⚠️ **One assertion of mine was wrong and is recorded as such.** The first version failed,
+naming `service_role` and `supabase_etl_admin` as holding `BYPASSRLS`. That is a **Supabase
+platform default this architecture explicitly designs around** — the migrations say *"NOTHING
+IS GRANTED TO `service_role`, EVER. It carries BYPASSRLS, so the ONLY control is zero
+privilege"* (D-254). No migration here contains `BYPASSRLS`, `ALTER ROLE` or `CREATE ROLE` —
+verified. The leg now pins the measured baseline and fails on any **addition**, which is the
+question that actually matters.
+
+### ✅ PROVEN — selection fails closed
+
+`npm run prove:trusted-transport-selection` — **8 PASS · 0 FAIL**. **ABSENT · BLANK · WRONG
+CASE · UPPER · UNKNOWN · PADDED all throw**; only the exact literals `local` and `hosted`
+resolve. **There is no default.** The accepting cases are part of the proof: a resolver that
+threw on everything would pass all six rejection legs while breaking the product.
+
+Selection is **not** inferred from `NODE_ENV`, for a concrete reason — a local
+`next build && next start` is *also* `production`, so that inference would pick the hosted
+transport on a machine with no connection string.
+
+The transport is resolved **before any provider call**, so a misconfiguration costs nothing;
+deferring it would burn a billable generation and only then discover the draft cannot persist.
+
+### 🔑 The two variables you set
+
+| Variable | Scope | Value |
+|---|---|---|
+| **`BEST_COACH_TRUSTED_DRAFT_TRANSPORT`** | server-only, **never `NEXT_PUBLIC_`** | **`hosted`** in Vercel (`local` here — already set in `.env.local`) |
+| **`SUPABASE_DB_POOLED_URL`** | server-only **SECRET**, **never `NEXT_PUBLIC_`** | The **POOLED** (transaction-mode, **port 6543**) string. **Not** the direct one — serverless exhausts direct connections |
+
+⚠️ `SUPABASE_DB_POOLED_URL` embeds the database password and connects as the `postgres`
+**owner**. Under a `NEXT_PUBLIC_` prefix it would hand any visitor owner-level database access.
+**That takes your Vercel Production env count from six to eight.**
+
+---
+
 ## 2. THE ORDERED SEQUENCE
 
 Each step lists **what you do**, **what I need back**, and **the gate class**.
