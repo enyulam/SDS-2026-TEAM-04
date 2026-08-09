@@ -89,6 +89,30 @@ export type GroundingVerdict =
  * the phrases this rule was built to catch, and a redundant entry costs one
  * boolean.
  *
+ * OPERATOR RULING, 2026-08-09 (second G-06 decision) — CELEBRATORY
+ * WORDING is ratified into this lexicon too: `highlight` and
+ * `worth celebrating`.
+ *
+ * This closes the C3b RESIDUAL that P1-T09 reported rather than absorbed.
+ * The design packet's canonical contradictory-Remarks case — a
+ * `needs_support` dimension called "a real highlight worth celebrating" —
+ * was still ACCEPTED after G06-1…G06-8, because rule 3 is lexical and
+ * `highlight` was not in the lexicon. That was a genuine contradiction
+ * passing, and the Operator ruled it closed by the same mechanism G06-3
+ * uses: widen the lexicon, do not give a panel a new polarity posture.
+ *
+ * `R-A` is UNAFFECTED and is not being quietly walked back. Rule 4 still
+ * does not reach Remarks; Remarks remains POLARITY-NEUTRAL. What changed
+ * is what counts as an ACHIEVEMENT CLAIM in ALL FOUR panels — which is
+ * rule 3's job, and rule 3 always reached Remarks.
+ *
+ * FALSE-REJECTION RISK IS BOUNDED, and was measured rather than asserted:
+ * rule 3 fires only when a sentence carries achievement language AND names
+ * a dimension whose own rating is non-positive. "A highlight was the
+ * confident posture" stays legal when posture is positive; it is rejected
+ * only when the trainer's own rating contradicts it — which is precisely
+ * the claim that must never reach a parent.
+ *
  * ⚠️ RULE 3 HAS NO ESCAPE CLAUSE, and must never be given one. That is what
  * makes the narrowed support-framing escape below safe: an escape can only
  * ever soften rule 4's weaker "presented as a strength" detection, and can
@@ -102,6 +126,7 @@ const ACHIEVEMENT_TERMS = [
   "great strength", "particularly strong", "very strong", "strong command",
   "consistently strong", "shines", "shone", "standout", "advanced level",
   "no difficulty", "with ease", "effortless",
+  "highlight", "worth celebrating",
 ] as const;
 
 /**

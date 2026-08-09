@@ -2883,3 +2883,42 @@ No new application code was needed: the continuity read already exists at `serve
 - **⚠️ WHAT IS NOT DONE, and why P1-T10 is NOT claimed complete** — **the two repaired harnesses were NOT RUN.** `prove-governed-lifecycle.mjs` is the C4 browser-driven proof: it needs the disposable stack, a served application and a browser, under the §7.4a **S-1/S-2/S-3** serving discipline. **A repair verified only at the catalogue level is not the same as a passing run**, and this entry does not claim otherwise. `tests/frontend/three-role-browser-smoke.mjs` needed no change (**0** superseded references) but likewise remains **NOT-RUN**. Running all of them belongs to **P1-T11**.
 - **Failures and recovery** — one, caught by re-grepping rather than trusting the edit: renaming `submittedTakeaway` / `earlierTakeaways` at their definitions left **two stale references in the N-6 assertion body** (lines 1989, 1991), which would have thrown a `ReferenceError` at runtime. Found and fixed before commit.
 - **Next permitted action** — **P1-T11**: run the full ledger including the three browser/C4 harnesses, demonstrate **§10 exit condition (b)** (an approved report recoverable from its audit trail by hash), commission **two independent adversarial reviewers instructed to falsify**, and record the **§3 persona sign-offs**.
+
+
+---
+
+## 2026-08-09 — SECOND G-06 DECISION (celebratory wording) and the two Authority Lock annotations
+
+- **Checkpoint / phase** — Plan Phase 1, still **P1-T09/T10** territory. **Starting HEAD** `2516e3e`. **Migration / schema changes — NONE.**
+- **Authority for this entry** — an explicit **bounded Operator instruction** authorizing both items I had flagged as needing a decision. It is the §12 instruction required both for a **rejection-behaviour change** and for **editing ratified authority**.
+
+### Decision 1 — `highlight` and `worth celebrating` ratified into `ACHIEVEMENT_TERMS`
+
+Closes the **C3b residual** that P1-T09 reported rather than absorbed: the design packet's own canonical contradictory-Remarks case (*"Eye contact was a real highlight worth celebrating at home"* against a `needs_support` rating) was **still ACCEPTED**, because rule 3 is lexical and `highlight` was not in the lexicon. A genuine contradiction was passing.
+
+- **Same mechanism `G06-3` already uses** — close the gap by widening the lexicon, applied to a second measured case.
+- ⚠️ **`R-A` is unaffected and was not quietly walked back.** Rule 4 still does not reach Remarks; **Remarks remains polarity-neutral**. What changed is what counts as an **achievement claim in all four panels** — rule 3's job, and rule 3 always reached Remarks. **No panel gained a polarity posture.**
+- **False-rejection risk measured, not asserted.** Rule 3 fires only when a sentence carries achievement language **and** names a dimension whose own rating is non-positive. Three new permanent proofs (`G06-R1/R2/R3`) assert that celebratory wording about a **positive** dimension stays legal in Strengths, Overview and Remarks. **The rejection tracks the contradiction, never the vocabulary.**
+- **C3b promoted from a printed residual to an asserted proof** (`G06-P5d`), plus `G06-P5e` asserting the identical wording in Overview — demonstrating this is a lexicon fix and **not** a per-panel rule. **Mutation proof `G06-M4`** removes both terms and requires C3b to go green again, so the addition is demonstrably load-bearing.
+
+### ⚠️ The mutation section did its job, and the failure is recorded rather than smoothed over
+
+Adding `highlight` made **rule 3** reject the packet's literal **C8** sentence outright. That meant reverting rule 4's support lexicon no longer flipped the verdict, so **`G06-M1` FAILED LOUDLY** — the case had stopped isolating the control it claimed to prove.
+
+**The case was RE-DERIVED, not deleted and not relaxed:** `G06-M1` now uses a sentence carrying no achievement-lexicon term, so rule 3 stays silent and rule 4's escape is the only thing under test. **The literal C8 sentence remains asserted** at `G06-P8-same[…]` and is now caught by **two independent rules instead of one** — strictly stronger. This is exactly why Section M exists: a passing assertion suite cannot tell "the rule caught it" from "something else caught it and the rule is now vacuous".
+
+### Decision 2 — the two stale Authority Lock lines annotated
+
+By the ratified **annotate-never-delete** method (strike, preserve inline, cite, date), in the **two** places named and nowhere else:
+
+- **§15.1-area implementation-status paragraph** — *"The one genuine open Phase B ruling that remains is the re-derivation of grounding rule 4…"* struck. It also records that the warned-of false rejection is **avoided by design** (rule 4 scoped to `strengths`; `overview` and `areas_for_development` do not inherit it), and that the line's own count is now spent: the 2026-08-08 "two → one" correction is superseded by **"one → zero"**.
+- **The open-decision register row** — *"with two genuine Phase B sub-rulings inside it"* struck; both are now closed (**G-05a** 2026-08-08, **G-06** 2026-08-09), so **ZERO OD-4 Phase B sub-rulings remain**.
+
+`FINAL_MVP_G06_GROUNDING_RULING.md` gains a **§5** recording decision 1 in full, because §15.7 requires an Operator ruling that changes product behaviour to reach an ACTIVE authority document, and §15.1 makes a decision that lives only in a progress log unratified. **§1's verbatim `G06-1`…`G06-8` block was NOT touched** — the new decision is a clearly separated section.
+
+### Automated verification — all RAN, serially
+
+`tsc` **0** · `eslint` **0** · `run-canonical` **0** (canonical fixture checksum **`6bdff280…ffc576`**, two runs, unchanged) · `run-integration` **0** (37 PASS, **real-provider leg OFF**) · **`prove-g06-grounding` 0 — 124 checks** (was 113; +11 from the new proofs) · `prove-session-continuity` **0** · **evidence probe 0 disagreements** (its C3b expectation was updated from `ACCEPT` to `REJECT`, the **only** case expectation changed, with the reasoning recorded in-file). Encoding re-verified via Node on all three edited authority/source files: **0 BOMs**, Unicode round-trips.
+
+- **Failures and recovery** — one, and it was the valuable kind: `G06-M1` failing loudly, described above. Caught by running the mutation section rather than assuming the lexicon change was additive-only.
+- **Next permitted action** — unchanged: **P1-T11**.

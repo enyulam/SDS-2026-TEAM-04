@@ -356,6 +356,30 @@ remains a `CLAUDE.md` §12 stop-and-ask.
 | **`DIMENSION_TERMS.audience_awareness` carrying bare `audience`** (packet §8) | **NOT narrowed.** It is a *precision* defect, not a fail-open, and it is absent from the `C4…C8` set `G06-8` names. Narrowing it would **loosen** detection, which is the one direction this ruling never authorizes. **Remains open.** |
 | **The fixture provider's fabricated `"participation"` strength** (packet §8.1) | **In scope, as a correctness defect.** The packet records that *"the fallback should be re-derived when the rule set is ratified"* — the rule set is now ratified, and the provider is on the hero path. It is repaired under `G06-8`'s *correctness defects* class, **fail-closed**: where no dimension supports a positive claim, the provider must not invent one. |
 
+---
+
+## 5. SECOND G-06 DECISION — celebratory wording, ratified 2026-08-09
+
+**Status: RATIFIED.** Issued by the Operator later the same day, on the residual that `P1-T09` reported rather than absorbed. It is recorded here because `CLAUDE.md` §15.7 requires an Operator ruling that changes product behaviour to be propagated into an ACTIVE authority document, and because a decision that lives only in a progress log is unratified by §15.1.
+
+**The residual it closes.** `G06-5` makes Remarks *grounded but polarity-neutral*, and required proof 5 demands that an unsupported or contradictory Remarks claim still be **REJECTED through general grounding**. That general mechanism is rule 3 — which is **lexical**. The design packet's own canonical contradictory-Remarks case, **`C3b`** (*"Eye contact was a real highlight worth celebrating at home"* against a `needs_support` rating), was therefore **still ACCEPTED** after `G06-1`…`G06-8`, because `highlight` was not in `ACHIEVEMENT_TERMS`. A genuine contradiction was passing.
+
+**The ruling.** `highlight` and `worth celebrating` are ratified into **`ACHIEVEMENT_TERMS`**.
+
+**What this is, and what it deliberately is NOT:**
+
+- It is the **same mechanism `G06-3` already uses** — *close the gap by WIDENING THE LEXICON* — applied to a second measured case. `G06-3` names bare `strong` for `C7`; this names celebratory wording for `C3b`.
+- **`R-A` is UNAFFECTED and is not being quietly walked back.** Rule 4 still does not reach Remarks, and Remarks remains **polarity-neutral**. What changed is what counts as an **achievement claim in all four panels** — rule 3's job, and rule 3 always reached Remarks. **No panel gained a polarity posture.**
+- It changes rejection behaviour, which is exactly why it required a ruling rather than a judgement call (`CLAUDE.md` §12).
+
+**False-rejection risk, measured rather than asserted.** Rule 3 fires only when a sentence carries achievement language **and** names a dimension whose own rating is non-positive. Celebratory wording about a **positive** dimension stays legal in every panel — permanently asserted at `G06-R1`/`R2`/`R3` in `prove-g06-grounding.mjs`. The rejection tracks the **contradiction**, never the vocabulary.
+
+**Proof obligations discharged.** `C3b` is promoted from a printed residual to an **asserted proof** (`G06-P5d`), with the identical wording also asserted in Overview (`G06-P5e`) to demonstrate this is a lexicon fix and not a per-panel rule. A **mutation proof** (`G06-M4`) removes the two terms and requires `C3b` to go green again, so the addition is demonstrably load-bearing.
+
+⚠️ **One recorded consequence, because it is instructive.** Adding `highlight` made rule 3 reject the packet's literal `C8` sentence outright, which caused the **existing mutation proof `G06-M1` to FAIL LOUDLY** — that case could no longer isolate rule 4's support-framing escape. The case was **re-derived**, not deleted and not relaxed; the literal `C8` sentence remains asserted at `G06-P8-same[…]` and is now caught by **two independent rules instead of one**. This is the mutation section doing precisely the job it exists for, and it is recorded rather than smoothed over.
+
+**Still NOT ratified**, and still `CLAUDE.md` §12 stop-and-ask: every item in §4's table above — extending rule 4 to `developing`, the inverse **rule 4b**, and narrowing `DIMENSION_TERMS.audience_awareness`. **This decision widens one lexicon and nothing else.**
+
 **No rating validation is weakened anywhere by this ruling.** Every change it
 authorizes moves in the fail-closed direction: more coverage asserted, narrower
 escapes, a wider achievement lexicon, and an unmapped state that rejects instead

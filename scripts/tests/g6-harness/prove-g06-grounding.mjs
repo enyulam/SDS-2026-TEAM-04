@@ -242,6 +242,28 @@ checkReject(
   "rule 2 (A-052 attribution) reaches Remarks",
 );
 
+// G06-P5d -- THE C3b CASE. This is the design packet's own canonical
+// contradictory-Remarks case, and it was the RESIDUAL that P1-T09 reported
+// rather than absorbed: `highlight` was not in ACHIEVEMENT_TERMS, so a
+// genuine contradiction was ACCEPTED. Closed by Operator ruling on
+// 2026-08-09 by widening the lexicon -- the same mechanism G06-3 uses,
+// NOT by giving Remarks a polarity posture. R-A is unaffected: rule 4
+// still does not reach Remarks, and this rejection comes from rule 3.
+checkReject(
+  "G06-P5d",
+  { ...BASE, remarks: "Eye contact was a real highlight worth celebrating at home." },
+  INPUT,
+  ["remarks", "eye_contact", "contradicts the trainer's rating"],
+  "C3b: celebratory wording about a needs_support dimension is now caught by rule 3",
+);
+checkReject(
+  "G06-P5e",
+  { ...BASE, overview: "Eye contact was a real highlight worth celebrating at home." },
+  INPUT,
+  ["overview", "eye_contact"],
+  "and the identical wording is caught in Overview too -- it is a lexicon fix, not a per-panel rule",
+);
+
 // =====================================================================
 // PROOF 6 -- unknown / unmapped rating: REJECT (G06-7, case C5).
 // An impossible rating must never buy a free pass through polarity
@@ -489,11 +511,27 @@ function mustFlipToAccept(id, panels, input, anchors, what) {
   }
 }
 
-// M1 -- the NARROWED support lexicon is what closes C8. Restore the
-// superseded lexicon (which contained `develop`) and C8 must go green again.
+// M1 -- the NARROWED support lexicon is what closes the C8 SHAPE (an escape
+// word inside the contradicting sentence). Restore the superseded lexicon
+// (which contained `develop`) and the case must go green again.
+//
+// ⚠️ THIS CASE WAS RE-DERIVED ON 2026-08-09, AND THE REASON IS THE WHOLE
+// POINT OF SECTION M. It originally used the packet's literal C8 sentence,
+// "Eye contact was a highlight of the session, and the student will keep
+// developing it." When `highlight` entered ACHIEVEMENT_TERMS, RULE 3 began
+// rejecting that sentence outright -- so reverting rule 4's support lexicon
+// no longer flipped the verdict, and M1 FAILED LOUDLY.
+//
+// That failure was correct and valuable: the case had stopped isolating the
+// control it claimed to prove. The fix is to re-derive the case, NOT to
+// delete the mutation proof and NOT to relax it -- a sentence carrying no
+// achievement-lexicon term, so rule 3 stays silent and rule 4's escape is
+// the only thing under test. The literal C8 sentence is unaffected and is
+// still asserted, twice, at G06-P8-same[develop*] -- it is now caught by
+// TWO independent rules instead of one, which is strictly stronger.
 mustFlipToAccept(
   "G06-M1",
-  { ...BASE, strengths: "Eye contact was a highlight of the session, and the student will keep developing it." },
+  { ...BASE, strengths: "Eye contact came through clearly today, and the student will keep developing it." },
   INPUT,
   {
     ...GROUNDING_ANCHORS,
@@ -516,6 +554,22 @@ mustFlipToAccept(
     achievementTerms: GROUNDING_ANCHORS.achievementTerms.filter((t) => t !== "strong"),
   },
   "bare `strong` in the achievement lexicon",
+);
+
+// M4 -- `highlight` in ACHIEVEMENT_TERMS is what closes C3b. Remove it and
+// the packet's canonical contradictory-Remarks case goes green again,
+// exactly as it was before the 2026-08-09 ruling.
+mustFlipToAccept(
+  "G06-M4",
+  { ...BASE, remarks: "Eye contact was a real highlight worth celebrating at home." },
+  INPUT,
+  {
+    ...GROUNDING_ANCHORS,
+    achievementTerms: GROUNDING_ANCHORS.achievementTerms.filter(
+      (t) => t !== "highlight" && t !== "worth celebrating",
+    ),
+  },
+  "the celebratory wording added to the achievement lexicon",
 );
 
 // M3 -- rule 4 is what closes C1. Remove `strengths` from the panel keys and
@@ -631,43 +685,48 @@ for (const [label, ratingOf] of DISTRIBUTIONS) {
 }
 
 // =====================================================================
-// SECTION R -- RESIDUAL. MEASURED, RECORDED, DELIBERATELY NOT CLOSED.
+// SECTION R -- WHAT THE CELEBRATORY-WORDING FIX MUST NOT BREAK.
 //
-// This section asserts NOTHING and cannot pass or fail. It exists so a
-// known, named limit is visible on every run instead of living only in a
-// document nobody opens.
+// This section was a RESIDUAL register at P1-T09: `highlight` was not in
+// ACHIEVEMENT_TERMS, the packet's canonical C3b case was still accepted,
+// and that was reported rather than absorbed. The Operator ruled it closed
+// on 2026-08-09. C3b is now an ASSERTED proof (G06-P5d/P5e above).
 //
-// THE RESIDUAL: proof 5 shows rule 3 reaching Remarks, but rule 3 is a
-// LEXICAL control, so it only rejects a contradictory Remarks claim whose
-// wording is in ACHIEVEMENT_TERMS. The design packet's own canonical
-// contradictory-Remarks case (C3b) uses "a real highlight worth
-// celebrating", and `highlight` is NOT in that lexicon -- so it is still
-// ACCEPTED under the ratified rule set.
-//
-// WHY IT WAS NOT SIMPLY FIXED: G06-3 authorizes widening the achievement
-// lexicon and names exactly one addition, bare `strong`, to close the
-// measured C7 defect. Adding `highlight` is a FURTHER widening that changes
-// rejection behaviour on a case the ruling did not name, and CLAUDE.md §12
-// makes an unratified change to rejection behaviour a stop-and-ask. Closing
-// it is a one-line change once ratified; guessing at it is not this
-// session's call.
-//
-// This is a limit of lexical grounding in general, not of R-A: the identical
-// wording in `overview` is accepted for the same reason, and always was.
-// R-A is unaffected either way -- rule 4 does not reach Remarks under any
-// reading of G06-5.
+// What survives here is the other half of that change, and it is the half
+// that is easy to get wrong: widening a rejection lexicon can FALSE-REJECT.
+// These cases exist to prove it did not. Celebratory wording about a
+// dimension whose own rating SUPPORTS it must stay legal in every panel --
+// rule 3 fires only on the CONTRADICTION, never on the vocabulary.
 // =====================================================================
-console.log("\n--- R. residual (measured, not asserted, not closed) ---");
-for (const [label, panels] of [
-  ["C3b: needs_support called a 'highlight' in Remarks", { ...BASE, remarks: "Eye contact was a real highlight worth celebrating at home." }],
-  ["the same wording in Overview, for comparison", { ...BASE, overview: "Eye contact was a real highlight worth celebrating at home." }],
-]) {
-  const v = validateGrounding(panels, INPUT);
-  console.log(`RESIDUAL ${v.ok ? "ACCEPT" : "REJECT"} -- ${label}`);
-}
-console.log("RESIDUAL: closing this needs `highlight` (and similar celebratory");
-console.log("          wording) ratified into ACHIEVEMENT_TERMS. NOT ratified by");
-console.log("          G-06, so NOT done. Reported, not silently absorbed.");
+console.log("\n--- R. the widened lexicon must not false-reject legitimate praise ---");
+
+// `body` is `mastered` and `audience_awareness` is `developing` in this
+// input, so praise about POSTURE is grounded and must pass, while the same
+// sentence shape about a non-positive dimension is what P5d/P5e reject.
+check(
+  "G06-R1",
+  "ACCEPT",
+  { ...BASE, strengths: "Posture was a real highlight of the session and is worth celebrating at home." },
+  INPUT,
+  undefined,
+  "celebratory wording about a POSITIVE dimension stays legal in Strengths",
+);
+check(
+  "G06-R2",
+  "ACCEPT",
+  { ...BASE, overview: "The confident stance was the highlight of the talk." },
+  INPUT,
+  undefined,
+  "...and in Overview",
+);
+check(
+  "G06-R3",
+  "ACCEPT",
+  { ...BASE, remarks: "A highlight worth celebrating: the gesture work has really settled." },
+  INPUT,
+  undefined,
+  "...and in Remarks, which R-A leaves polarity-neutral",
+);
 
 // =====================================================================
 console.log("\n---------------------------------------------------------------");

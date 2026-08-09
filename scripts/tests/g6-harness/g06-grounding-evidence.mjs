@@ -104,12 +104,19 @@ const CASES = [
   // 5 do, in full. C3b's ACCEPT is therefore the RATIFIED behaviour, not an
   // unruled measurement.
   //
-  // ⚠️ HONEST LIMIT, and it is NOT what R-A means. C3b's wording ("a real
-  // highlight worth celebrating") is a genuine contradiction that rule 3
-  // does not catch, because `highlight` is not in ACHIEVEMENT_TERMS. G06-3
-  // ratified exactly ONE lexicon addition (bare `strong`); widening further
-  // changes rejection behaviour and is a §12 stop-and-ask. Recorded as a
-  // standing residual in prove-g06-grounding.mjs section R -- not absorbed.
+  // ✅ THE RESIDUAL IS CLOSED (second G-06 decision, 2026-08-09). C3b's
+  // wording ("a real highlight worth celebrating") is a genuine
+  // contradiction that rule 3 originally missed, because `highlight` was
+  // not in ACHIEVEMENT_TERMS -- so this case ACCEPTED. The Operator ruled
+  // `highlight` and `worth celebrating` into that lexicon, and it now
+  // REJECTS.
+  //
+  // ⚠️ THIS DID NOT CHANGE R-A, and must not be read as having done so.
+  // Rule 4 still does not reach Remarks; Remarks is still POLARITY-NEUTRAL.
+  // What changed is what counts as an ACHIEVEMENT CLAIM in all four panels
+  // -- rule 3's job, and rule 3 always reached Remarks. The rejection here
+  // comes from rule 3, exactly as G06-5's "all ordinary grounding
+  // protections remain" requires.
   // -----------------------------------------------------------------
   {
     id: "C3a remarks / grounded neutral",
@@ -117,8 +124,8 @@ const CASES = [
     panels: { ...BASE, remarks: "This report covers the full session; the trainer observed the whole presentation." },
   },
   {
-    id: "C3b remarks / needs_support named as a positive (RULED R-A, 2026-08-09)",
-    want: "ACCEPT",
+    id: "C3b remarks / needs_support named as a positive (RULED: rejected by rule 3, 2026-08-09)",
+    want: "REJECT",
     panels: { ...BASE, remarks: "Eye contact was a real highlight worth celebrating at home." },
   },
 
