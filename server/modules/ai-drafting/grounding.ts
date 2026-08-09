@@ -719,3 +719,73 @@ export function validateGrounding(
 
   return reasons.length === 0 ? { ok: true } : { ok: false, reasons: [...new Set(reasons)] };
 }
+
+// =====================================================================
+// THE SOURCE TRACE (spec §20 `report_source_map` [KEY]; Operator ruling
+// G-04 item 1)
+// =====================================================================
+/**
+ * One asserted trace row: "panel `outputSection` draws on the trainer's
+ * assessment of dimension `dimensionCode`."
+ *
+ * `outputSection` is the OD-4 SNAKE_CASE panel name, because that is what
+ * `report_source_map.output_section` stores and what its CHECK constraint
+ * names — the four `report_versions` column names. The camelCase
+ * `ReportPanels` keys are the TypeScript shape; the conversion happens here,
+ * once, rather than at the call site.
+ */
+export interface SourceMapEntry {
+  readonly outputSection: "overview" | "strengths" | "areas_for_development" | "remarks";
+  readonly dimensionCode: DimensionCode;
+}
+
+/** The camelCase panel key -> the OD-4 stored column name. */
+const PANEL_SECTION_NAME: Readonly<Record<keyof ReportPanels, SourceMapEntry["outputSection"]>> = {
+  overview: "overview",
+  strengths: "strengths",
+  areasForDevelopment: "areas_for_development",
+  remarks: "remarks",
+};
+
+/**
+ * Derive the panel-to-dimension source trace from the ACCEPTED panels.
+ *
+ * WHY THIS LIVES HERE AND NOT IN THE CALLER. It reads `DIMENSION_TERMS` and
+ * `mentions` — the SAME frozen lexicon and the SAME word-boundary matcher
+ * `validateGrounding` uses. A second matcher elsewhere could drift from the
+ * one that actually validated the text, and the trace would then claim a
+ * derivation grounding never saw. Sharing the matcher makes that
+ * structurally impossible rather than merely unlikely.
+ *
+ * WHAT IT IS NOT. It makes no judgement, adds no vocabulary, and cannot
+ * reject anything — it is a pure function of (accepted panels, the ratified
+ * dimension codes). It is called ONLY after `validateGrounding` has returned
+ * `ok`, so it never describes text that was refused.
+ *
+ * The anchors are injected for the same reason `validateGrounding`'s are: a
+ * proof must be able to degrade the lexicon and demonstrate the derivation
+ * going empty, rather than trusting that it could.
+ *
+ * A dimension mentioned in no panel yields no row, and a panel mentioning no
+ * dimension yields no row. An EMPTY result is therefore legitimate and is
+ * NOT an error: it means the accepted prose named none of the nine
+ * dimensions in the closed lexicon's terms. The caller must not treat
+ * emptiness as failure, and must not manufacture a row to avoid it.
+ */
+export function deriveSourceMap(
+  panels: ReportPanels,
+  anchors: GroundingAnchors = GROUNDING_ANCHORS,
+): readonly SourceMapEntry[] {
+  const entries: SourceMapEntry[] = [];
+  for (const key of anchors.panelKeys) {
+    const section = PANEL_SECTION_NAME[key];
+    if (section === undefined) continue;
+    const text = typeof panels[key] === "string" ? panels[key] : "";
+    if (text.length === 0) continue;
+    for (const code of anchors.dimensionCodes) {
+      const terms = anchors.dimensionTerms[code] ?? [];
+      if (mentionsAny(text, terms)) entries.push({ outputSection: section, dimensionCode: code });
+    }
+  }
+  return entries;
+}

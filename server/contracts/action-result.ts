@@ -50,6 +50,7 @@ export function mapSqlErrorToResult(code: string | undefined, message?: string):
     // -- not found / not permitted (byte-identical by design) ------------
     case "BC001": // report: not found or not permitted
     case "BC101": // assessment: not found or not permitted
+    case "BC201": // attendance: not found or not permitted
       return { outcome: "unauthorized" };
 
     // -- authorized, nothing to show ------------------------------------
@@ -59,6 +60,7 @@ export function mapSqlErrorToResult(code: string | undefined, message?: string):
     // -- CAS / concurrency ----------------------------------------------
     case "BC003": // report stale state
     case "BC112": // observation stale state
+    case "BC203": // attendance stale state (in either direction, incl. existence)
       return { outcome: "stale_state", message: "This changed while you were working. Reload and try again." };
     case "BC014": // report duplicate
     case "BC113": // observation duplicate
@@ -79,7 +81,38 @@ export function mapSqlErrorToResult(code: string | undefined, message?: string):
       return { outcome: "validation", message: "The student is not recorded present for this session.", fields: [] };
     case "BC016":
     case "BC103":
+    case "BC202": // attendance: no active enrolment
       return { outcome: "validation", message: "No active enrolment exists for this student and module.", fields: [] };
+
+    // -- attendance: the ONE governed refusal (A-026) ---------------------
+    // Deliberately its own authored message rather than a generic staleness
+    // one: nothing has drifted and reloading changes nothing. Marking a
+    // submitted report's student absent is a governed CORRECTION, and the
+    // trainer needs to be told that, not told to reload.
+    case "BC204":
+      return {
+        outcome: "validation",
+        message:
+          "This student's report has already been submitted. Changing attendance to absent is a governed correction, not a status change.",
+        fields: [],
+      };
+    case "BC205": // attendance: no new status supplied
+      return { outcome: "validation", message: "The request was not valid.", fields: [] };
+
+    // -- source map: shape and write-once (owner-only writer) ------------
+    // These are reachable ONLY from the trusted generation-completion
+    // channel, never from a client, so they are integrity incidents rather
+    // than user-correctable validation problems. They must NOT be reported
+    // as a draft-generation failure, because the draft was already accepted
+    // by grounding when they fire.
+    case "BC301":
+    case "BC302":
+    case "BC303":
+    case "BC304":
+    case "BC305":
+    case "BC306":
+    case "BC307":
+      return { outcome: "unexpected_failure", message: "The operation could not be completed." };
     case "BC017":
     case "BC104":
       return { outcome: "validation", message: "The scheduled session start has not been reached.", fields: [] };

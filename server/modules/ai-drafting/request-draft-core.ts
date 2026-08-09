@@ -32,7 +32,7 @@ import {
 } from "@/server/modules/framework/dimensions";
 import { getTrainerObservationCore, type TrainerObservationDto } from "@/server/modules/observation/core";
 import type { AiDraftProvider, AiDraftRequest, ReportPanels } from "@/server/modules/ai-drafting/provider";
-import { validateGrounding } from "@/server/modules/ai-drafting/grounding";
+import { validateGrounding, deriveSourceMap } from "@/server/modules/ai-drafting/grounding";
 import type { TrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
 import {
   firstRow,
@@ -234,6 +234,17 @@ export async function requestDraftCore(
   }
 
   // 6 — the internal draft-storage path, reached ONLY after validation.
+  // The spec §20 source trace is derived from the ACCEPTED panels — after
+  // `validateGrounding` returned ok, never before — using the SAME frozen
+  // lexicon and matcher that validation itself read, so the trace can never
+  // claim a derivation grounding did not see. It travels with the store call
+  // and is written in that call's own transaction.
+  const sourceMapJson = JSON.stringify(
+    deriveSourceMap(panels).map((e) => ({
+      output_section: e.outputSection,
+      dimension_code: e.dimensionCode,
+    })),
+  );
   const stored = await deps.trustedStore.storeDraft({
     authUserSub: deps.authUserSub,
     reportId,
@@ -243,6 +254,7 @@ export async function requestDraftCore(
     strengths: panels.strengths,
     areasForDevelopment: panels.areasForDevelopment,
     remarks: panels.remarks,
+    sourceMapJson,
   });
   if (!stored.ok) {
     if (stored.sqlState === "BC004" || stored.sqlState === "BC003") {

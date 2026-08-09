@@ -72,6 +72,9 @@ import { validatePanelShape, DeterministicFixtureDraftProvider, OpenAiDraftProvi
 import { requestDraftCore } from "@/server/modules/ai-drafting/request-draft-core.ts";
 import { LocalTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store.ts";
 import { saveObservationCore, getTrainerObservationCore } from "@/server/modules/observation/core.ts";
+import { setAttendanceStatusCore } from "@/server/modules/attendance/core.ts";
+import { getSourceMapCore } from "@/server/modules/report-workflow/source-map-core.ts";
+import { deriveSourceMap, GROUNDING_ANCHORS } from "@/server/modules/ai-drafting/grounding.ts";
 import {
   saveTrainerEditCore, updateTrainerChecklistCore, trainerApproveCore,
   managementEditWordingCore, managementReturnToTrainerCore, managementApproveAndSubmitCore,
@@ -79,6 +82,7 @@ import {
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core.ts";
 import { listManagementCorrectionsFromRpc } from "@/server/modules/management-view/projections.ts";
 import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver.ts";
+import { getCanonicalReportCore } from "@/server/modules/parent-view/projections.ts";
 
 const ROOT = process.cwd();
 const CONTAINER = "supabase_db_best-coach-mvp";
@@ -88,7 +92,11 @@ const WORK_DB = "bc_b2";
 const CENTRE = "b0000000-0000-4000-8000-000000000001";
 const STUDENT = "c2000000-0000-4000-8000-000000000001";
 const MODULE = "c4000000-0000-4000-8000-000000000001";
-const ENROLMENT = "c6000000-0000-4000-8000-000000000001";
+// (The fixture enrolment id used to be needed for the hand-inserted
+// attendance row that INT-AT1 replaced. `attendance_set_status` RESOLVES the
+// active enrolment itself and refuses a supplied one, so this harness no
+// longer knows or passes it — which is the point: the id is the database's to
+// resolve, not the caller's to assert.)
 const TRAINER_M = "c1000000-0000-4000-8000-000000000002";
 const FIXTURE_SESSION = "c5000000-0000-4000-8000-000000000001";
 const SUB = {
@@ -615,9 +623,15 @@ async function partLifecycle() {
 INSERT INTO public.class_sessions (id, centre_id, class_module_id, session_date, starts_at, ends_at)
 VALUES ('${SESSION}','${CENTRE}','${MODULE}', (now() AT TIME ZONE 'Asia/Singapore')::date - 1, '10:00','11:00');
 INSERT INTO public.class_session_assignments (centre_id, class_session_id, trainer_membership_id)
-VALUES ('${CENTRE}','${SESSION}','${TRAINER_M}');
-INSERT INTO public.attendance (centre_id, class_session_id, class_module_id, student_id, enrolment_id, status)
-VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','present');`);
+VALUES ('${CENTRE}','${SESSION}','${TRAINER_M}');`);
+  // 🔴 THE ATTENDANCE ROW IS NO LONGER HAND-INSERTED HERE.
+  // It used to be seeded by the fixture INSERT that stood on this spot,
+  // which meant the FIRST governed write of the whole report lifecycle --
+  // report_create fails closed on a MISSING attendance row (BC015) -- was
+  // satisfied by the harness rather than by a governed action. The entry
+  // condition of every leg below is now established by the real write path
+  // in INT-AT1, so if attendance_set_status is broken the whole lifecycle
+  // fails here rather than running on a seeded row.
 
   const trainerDb = new PsqlRpc(SUB.trainer);
   const managementDb = new PsqlRpc(SUB.management);
@@ -625,6 +639,115 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
   const trustedStore = new LocalTrustedDraftStore(WORK_DB);
   const readStudentDisplayName = async () =>
     q(WORK_DB, `SELECT full_name FROM public.students WHERE id='${STUDENT}';`);
+
+  // =====================================================================
+  // THE ATTENDANCE WRITE PATH (A-018, A-026; G-04 item 3)
+  // =====================================================================
+  // NOTE ON WHAT THIS CHANNEL PROVES. PsqlRpc runs as the OWNER with
+  // request.jwt.claims set, so these legs prove the AUTHORED predicates,
+  // not the client ACL. The ACL is asserted by the migration's own A3/A4/A11
+  // and over real PostgREST in Part 2's INT-A7 idiom.
+  const attendanceEvents = async () => Number(await q(WORK_DB,
+    `SELECT count(*) FROM public.audit_events WHERE action='attendance.changed';`));
+  const attendanceRows = async () => Number(await q(WORK_DB,
+    `SELECT count(*) FROM public.attendance WHERE class_session_id='${SESSION}' AND student_id='${STUDENT}';`));
+
+  // AT1 -- no record exists. The call materializes A-018's Present default
+  // and appends exactly one event whose state_from is NULL.
+  {
+    const before = await attendanceEvents();
+    const init = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, newStatus: "present",
+    });
+    const ev = await q(WORK_DB, `
+SELECT COALESCE(e.state_domain,'-') || '|' || COALESCE(e.state_from,'NULL') || '>' || COALESCE(e.state_to,'-')
+       || '|' || (e.payload_canonical::jsonb ->> 'initialized')
+  FROM public.audit_events e
+ WHERE e.action='attendance.changed' ORDER BY e.seq_no DESC LIMIT 1;`);
+    if (init.outcome !== "success") {
+      fail("INT-AT1", `setAttendanceStatusCore gave ${init.outcome}`); await destroyDisposable(); return;
+    }
+    if (init.data.status !== "present" || init.data.initialized !== true || init.data.changed !== true) {
+      fail("INT-AT1", `the initializing call reported status=${init.data.status} initialized=${init.data.initialized} changed=${init.data.changed}`);
+    } else if ((await attendanceEvents()) - before !== 1) {
+      fail("INT-AT1", "the initializing call did not append exactly one attendance.changed event");
+    } else if (ev !== "attendance|NULL>present|true") {
+      fail("INT-AT1", `the event reads '${ev}', expected 'attendance|NULL>present|true'`);
+    } else if ((await attendanceRows()) !== 1) {
+      fail("INT-AT1", "the pair does not hold exactly one attendance record");
+    } else pass("INT-AT1", "the governed write path materialized A-018's Present default for a pair with NO record, in one action, with exactly ONE attendance.changed event whose state_from is NULL — the whole lifecycle below now rests on a governed write, not a seeded row");
+  }
+
+  // AT2 -- compare-and-set answers a drifted belief in BOTH directions,
+  // including existence, with the SAME stale answer and no side effect.
+  {
+    const before = await attendanceEvents();
+    const omitted = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, newStatus: "absent",
+    });
+    const wrong = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "absent", newStatus: "present",
+    });
+    const status = await q(WORK_DB,
+      `SELECT status FROM public.attendance WHERE class_session_id='${SESSION}' AND student_id='${STUDENT}';`);
+    if (omitted.outcome !== "stale_state") {
+      fail("INT-AT2", `omitting expectedStatus against an EXISTING record gave ${omitted.outcome}, expected stale_state`);
+    } else if (wrong.outcome !== "stale_state") {
+      fail("INT-AT2", `a wrong expectedStatus gave ${wrong.outcome}, expected stale_state`);
+    } else if (status !== "present") {
+      fail("INT-AT2", `a refused call changed the committed status to '${status}'`);
+    } else if ((await attendanceEvents()) !== before) {
+      fail("INT-AT2", "a refused call appended an audit event");
+    } else pass("INT-AT2", "CAS refuses BOTH a missing expectation against an existing record AND a wrong one, with the same stale answer, no status change and no audit event — there is no force mode");
+  }
+
+  // AT3 -- management (A-034) and parent are closed by the SAME predicate
+  // that authorizes the trainer, and their answer is byte-identical to a
+  // non-existent session's.
+  {
+    const before = await attendanceEvents();
+    const asManagement = await setAttendanceStatusCore(managementDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "absent",
+    });
+    const asParent = await setAttendanceStatusCore(parentDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "absent",
+    });
+    const asNobody = await setAttendanceStatusCore(new PsqlRpc(null), {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "absent",
+    });
+    const ghost = await setAttendanceStatusCore(trainerDb, {
+      sessionId: "aaaaaaaa-0000-4000-8000-000000000001", studentId: STUDENT, newStatus: "absent",
+    });
+    const same = JSON.stringify(asManagement) === JSON.stringify(ghost)
+              && JSON.stringify(asParent) === JSON.stringify(ghost)
+              && JSON.stringify(asNobody) === JSON.stringify(ghost);
+    const status = await q(WORK_DB,
+      `SELECT status FROM public.attendance WHERE class_session_id='${SESSION}' AND student_id='${STUDENT}';`);
+    if (asManagement.outcome !== "unauthorized") {
+      fail("INT-AT3", `MANAGEMENT reached the attendance write and got ${asManagement.outcome} (A-034 forbids management touching attendance)`);
+    } else if (asParent.outcome !== "unauthorized" || asNobody.outcome !== "unauthorized") {
+      fail("INT-AT3", `parent gave ${asParent.outcome} and unauthenticated gave ${asNobody.outcome}, expected unauthorized for both`);
+    } else if (!same) {
+      fail("INT-AT3", "a denied caller's answer differs from a non-existent session's — the error discriminates");
+    } else if (status !== "present" || (await attendanceEvents()) !== before) {
+      fail("INT-AT3", "a denied call changed the record or appended an event");
+    } else pass("INT-AT3", "management, parent and an unauthenticated caller are all refused with the answer a NON-EXISTENT session gets — byte-identical, so nothing discriminates — and no record or event moved");
+  }
+
+  // AT4 -- a confirmed no-op is authorized, answered, and NOT audited.
+  {
+    const before = await attendanceEvents();
+    const noop = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "present",
+    });
+    if (noop.outcome !== "success") {
+      fail("INT-AT4", `the no-op gave ${noop.outcome}, expected success`);
+    } else if (noop.data.changed !== false || noop.data.initialized !== false) {
+      fail("INT-AT4", `the no-op reported changed=${noop.data.changed} initialized=${noop.data.initialized}`);
+    } else if ((await attendanceEvents()) !== before) {
+      fail("INT-AT4", "the no-op appended an audit event; A-029 records governed ACTIONS and a no-op is not one");
+    } else pass("INT-AT4", "setting the status it already holds succeeds, reports changed=false, and appends NO event — the audit trail records decisions, not confirmations");
+  }
 
   // L1 -- saveObservation core (trainer): all nine, mixed, eye_contact
   // `beginning` (A-049) -- the needs_support dimension L2's contradictory
@@ -659,6 +782,45 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
     fail("INT-L1", `the shell landed at ${saved.data.reportStatus}, expected observation_saved`);
   } else {
     pass("INT-L1", "saveObservationCore persisted the nine-rating observation AND atomically opened exactly one report shell at observation_saved, returning its real id (R-C2-1)");
+  }
+
+  // AT5 -- A-026's "mid-cycle absence RETAINS EXISTING WORK but blocks
+  // progression". Real work now exists, which is what makes this leg
+  // meaningful: the trainer's observation and its nine ratings must survive
+  // being marked absent, and the block must come from the report gate rather
+  // than from anything being deleted.
+  {
+    const countWork = async () => q(WORK_DB, `
+SELECT (SELECT count(*) FROM public.observations o WHERE o.class_session_id='${SESSION}' AND o.student_id='${STUDENT}')
+    || '/' || (SELECT count(*) FROM public.observation_ratings r
+                 JOIN public.observations o ON o.id = r.observation_id
+                WHERE o.class_session_id='${SESSION}' AND o.student_id='${STUDENT}')
+    || '/' || (SELECT count(*) FROM public.reports rp WHERE rp.class_session_id='${SESSION}' AND rp.student_id='${STUDENT}');`);
+    const workBefore = await countWork();
+    const absent = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "absent",
+    });
+    const workAfter = await countWork();
+    const rows = await attendanceRows();
+    const restored = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "absent", newStatus: "present",
+    });
+    const lastTwo = await q(WORK_DB, `
+SELECT pg_catalog.string_agg(x.f || '>' || x.t, ',' ORDER BY x.s)
+  FROM (SELECT e.seq_no s, COALESCE(e.state_from,'NULL') f, COALESCE(e.state_to,'-') t
+          FROM public.audit_events e WHERE e.action='attendance.changed'
+         ORDER BY e.seq_no DESC LIMIT 2) x;`);
+    if (absent.outcome !== "success" || absent.data.status !== "absent" || absent.data.initialized !== false) {
+      fail("INT-AT5", `marking absent mid-cycle gave ${absent.outcome}`);
+    } else if (workAfter !== workBefore || workBefore !== "1/9/1") {
+      fail("INT-AT5", `the trainer's work changed across the absence: ${workBefore} -> ${workAfter} (observations/ratings/reports)`);
+    } else if (rows !== 1) {
+      fail("INT-AT5", `the toggle created a second attendance record (${rows} rows) instead of updating the one`);
+    } else if (restored.outcome !== "success" || restored.data.status !== "present") {
+      fail("INT-AT5", `restoring present gave ${restored.outcome} — un-marking an accidental absence must never need a governed correction`);
+    } else if (lastTwo !== "present>absent,absent>present") {
+      fail("INT-AT5", `the two events read '${lastTwo}', expected 'present>absent,absent>present'`);
+    } else pass("INT-AT5", "mid-cycle absence RETAINED the observation and all nine ratings and the report row (1/9/1 unchanged), updated the ONE record rather than creating a second, audited both directions, and restoring present was accepted without a governed correction");
   }
 
   // L2 -- requestDraft with a provider whose output CONTRADICTS the
@@ -738,7 +900,88 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
 
   const reportId = drafted.data.reportId;
 
-  // L4 -- trainer edit -> checklist -> approve (publishes nothing).
+  // =====================================================================
+  // THE SPEC §20 SOURCE TRACE (`report_source_map` [KEY]; G-04 item 1)
+  // =====================================================================
+  const draftVersionId = drafted.data.versionId;
+  const mapRowsFor = async (versionId) => Number(await q(WORK_DB,
+    `SELECT count(*) FROM public.report_source_map WHERE report_version_id='${versionId}';`));
+
+  // SM1 -- the trace was written in the SAME transaction as the version,
+  // and it is RE-DERIVED from the version's COMMITTED panels rather than
+  // compared against a hand-transcribed expectation.
+  {
+    const committed = await q(WORK_DB, `
+SELECT pg_catalog.json_build_object(
+         'overview', v.overview, 'strengths', v.strengths,
+         'areasForDevelopment', v.areas_for_development, 'remarks', v.remarks)::text
+  FROM public.report_versions v WHERE v.id='${draftVersionId}';`);
+    const expected = deriveSourceMap(JSON.parse(committed))
+      .map((e) => `${e.outputSection}|${e.dimensionCode}`).sort();
+    const stored = (await q(WORK_DB, `
+SELECT COALESCE(pg_catalog.string_agg(m.output_section || '|' || m.source_dimension_code, ',' ORDER BY m.output_section, m.source_dimension_code), '')
+  FROM public.report_source_map m WHERE m.report_version_id='${draftVersionId}';`))
+      .split(",").filter((s) => s.length > 0).sort();
+    if (expected.length === 0) {
+      fail("INT-SM1", "the accepted panels derive an EMPTY trace, so this leg would assert nothing — the fixture must name at least one dimension");
+    } else if (stored.length !== expected.length || stored.join(",") !== expected.join(",")) {
+      fail("INT-SM1", `the stored trace (${stored.length} row(s)) is not the trace re-derived from the committed panels (${expected.length} row(s))`);
+    } else pass("INT-SM1", `the source trace was written in the draft's OWN transaction and is byte-equal to the trace RE-DERIVED from the version's committed panels — ${stored.length} (panel, dimension) assertions, compared against the live source rather than a transcribed literal`);
+  }
+
+  // SM2 -- non-vacuity of SM1. Degrade the lexicon and prove the derivation
+  // can produce NOTHING. An assertion that has never been demonstrated
+  // capable of failing is not evidence.
+  {
+    const emptied = deriveSourceMap(
+      { overview: "x", strengths: "x", areasForDevelopment: "x", remarks: "x" },
+      { ...GROUNDING_ANCHORS, dimensionTerms: {} },
+    );
+    const noPanels = deriveSourceMap(
+      { overview: "", strengths: "", areasForDevelopment: "", remarks: "" },
+    );
+    if (emptied.length !== 0) fail("INT-SM2", "an EMPTIED dimension lexicon still derived trace rows");
+    else if (noPanels.length !== 0) fail("INT-SM2", "empty panels still derived trace rows");
+    else pass("INT-SM2", "the derivation is demonstrated CAPABLE of producing nothing — an emptied lexicon and empty panels both yield zero rows, so SM1's non-empty result is a real measurement rather than a shape that cannot fail");
+  }
+
+  // SM3 -- TRAINER-ONLY. A trace row names a DIMENSION CODE, so A-038
+  // (management) and Q-27 (parent) are both closed here, and every denial is
+  // the same zero rows a non-existent report gets.
+  {
+    const asTrainer = await getSourceMapCore(trainerDb, reportId);
+    const asManagement = await getSourceMapCore(managementDb, reportId);
+    const asParent = await getSourceMapCore(parentDb, reportId);
+    const asNobody = await getSourceMapCore(new PsqlRpc(null), reportId);
+    const ghost = await getSourceMapCore(trainerDb, "aaaaaaaa-0000-4000-8000-000000000009");
+    const denials = [asManagement, asParent, asNobody, ghost];
+    if (asTrainer.outcome !== "success" || asTrainer.data.entries.length === 0) {
+      fail("INT-SM3", `the assigned trainer got ${asTrainer.outcome} with ${asTrainer.data?.entries?.length ?? "no"} entries`);
+    } else if (asTrainer.data.versionId !== draftVersionId) {
+      fail("INT-SM3", "the trainer's trace does not name the current cycle version");
+    } else if (denials.some((d) => d.outcome !== "success" || d.data.entries.length !== 0 || d.data.versionId !== null)) {
+      fail("INT-SM3", `a non-trainer caller received trace rows: ${denials.map((d) => `${d.outcome}/${d.data?.entries?.length ?? "?"}`).join(", ")}`);
+    } else if (new Set(denials.map((d) => JSON.stringify(d))).size !== 1) {
+      fail("INT-SM3", "the four denial answers are not byte-identical to each other");
+    } else pass("INT-SM3", "the assigned trainer reads the trace for the current cycle version; MANAGEMENT (A-038), the linked PARENT (Q-27), an unauthenticated caller and a non-existent report id all receive the IDENTICAL empty answer — no dimension code reaches any of them and nothing discriminates between the four");
+  }
+
+  // SM4 -- write-once. A frozen version can never acquire a second,
+  // divergent trace. Run through the OWNER channel because the writer holds
+  // ZERO client EXECUTE.
+  {
+    const before = await mapRowsFor(draftVersionId);
+    const retry = await psql(WORK_DB,
+      `SELECT public.report_store_source_map('${draftVersionId}'::uuid, '[{"output_section":"overview","dimension_code":"body"}]'::jsonb);`,
+      { stopOnError: false });
+    const after = await mapRowsFor(draftVersionId);
+    if (!/BC302/.test(retry.err)) {
+      fail("INT-SM4", `a second source-map write did not raise BC302 (stderr: ${retry.err.slice(0, 200)})`);
+    } else if (after !== before) {
+      fail("INT-SM4", `the refused write changed the row count from ${before} to ${after}`);
+    } else pass("INT-SM4", "a second source-map write against the same version is refused BC302 and appends nothing — a frozen version's trace cannot be amended or diverged");
+  }
+
   const working = async () => {
     const r = await trainerDb.rpc("report_get_working", { p_class_session_id: SESSION, p_student_id: STUDENT });
     return Array.isArray(r.data) ? r.data[0] : null;
@@ -757,6 +1000,27 @@ VALUES ('${CENTRE}','${SESSION}','${MODULE}','${STUDENT}','${ENROLMENT}','presen
   if (edited.outcome !== "success") { fail("INT-L4", `saveTrainerEditCore gave ${edited.outcome}`); await destroyDisposable(); return; }
   state = await working();
   if (state.evidence_confirmed !== false) fail("INT-L4", "the edit did not reset the checklist");
+
+  // SM5 -- a HUMAN-AUTHORED derived version inherits NO trace. Copying the
+  // AI's trace onto prose a trainer wrote would assert a derivation that did
+  // not happen; lineage is derived_from_version_id, so the draft's trace
+  // stays reachable by walking back. Zero rows is the CORRECT answer here.
+  {
+    const editedVersionId = state.current_version_id;
+    const onEdited = await mapRowsFor(editedVersionId);
+    const onDraft = await mapRowsFor(draftVersionId);
+    const lineage = await q(WORK_DB,
+      `SELECT COALESCE(derived_from_version_id::text,'NULL') FROM public.report_versions WHERE id='${editedVersionId}';`);
+    if (editedVersionId === draftVersionId) {
+      fail("INT-SM5", "the trainer edit did not create a new version, so this leg cannot distinguish inheritance");
+    } else if (onEdited !== 0) {
+      fail("INT-SM5", `the human-authored version carries ${onEdited} trace row(s); it must carry none`);
+    } else if (onDraft === 0) {
+      fail("INT-SM5", "the draft version's trace was destroyed by the edit");
+    } else if (lineage !== draftVersionId) {
+      fail("INT-SM5", `the edited version's lineage points at ${lineage}, not the draft it descends from`);
+    } else pass("INT-SM5", `the trainer's edit created a NEW version with ZERO trace rows — no derivation is asserted for prose a human wrote — while the draft version's ${onDraft} trace rows survive intact and remain reachable through derived_from_version_id`);
+  }
   const ticked = await updateTrainerChecklistCore(trainerDb, {
     reportId, expectedLockVersion: state.lock_version, expectedVersionId: state.current_version_id,
     evidenceConfirmed: true, aiDraftReviewed: true, privacyChecked: true,
@@ -1076,6 +1340,35 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
     } else pass("INT-C5", "final submission removes the report from unresolved correction tracking; the resolved request survives as history");
   }
 
+  // AT6 -- A-026's ONE governed refusal, now that a version is SUBMITTED.
+  // Directional: absent is refused, present is not, and the refusal carries
+  // its own authored message rather than a generic "reload" — nothing has
+  // drifted and reloading changes nothing.
+  {
+    const before = await attendanceEvents();
+    const refused = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "absent",
+    });
+    const stillPresent = await setAttendanceStatusCore(trainerDb, {
+      sessionId: SESSION, studentId: STUDENT, expectedStatus: "present", newStatus: "present",
+    });
+    const status = await q(WORK_DB,
+      `SELECT status FROM public.attendance WHERE class_session_id='${SESSION}' AND student_id='${STUDENT}';`);
+    const submittedIntact = await q(WORK_DB,
+      `SELECT (latest_submitted_version_id IS NOT NULL)::text FROM public.reports WHERE id='${reportId}';`);
+    if (refused.outcome !== "validation") {
+      fail("INT-AT6", `marking a SUBMITTED report's student absent gave ${refused.outcome}, expected validation`);
+    } else if (!/governed correction/.test(refused.message)) {
+      fail("INT-AT6", `the refusal message does not name the governed correction path: '${refused.message}'`);
+    } else if (status !== "present" || submittedIntact !== "true") {
+      fail("INT-AT6", "the refused call altered the attendance record or the submitted report");
+    } else if ((await attendanceEvents()) !== before) {
+      fail("INT-AT6", "the refused call appended an audit event");
+    } else if (stillPresent.outcome !== "success") {
+      fail("INT-AT6", `the refusal is not directional — confirming present after submission gave ${stillPresent.outcome}`);
+    } else pass("INT-AT6", "after submission, moving the student to ABSENT is refused with its own authored governed-correction message, the record and the submitted report are untouched, no event is appended — and the refusal is DIRECTIONAL: confirming present is still accepted");
+  }
+
   // L8 -- the audit chain verifies end-to-end after the complete lifecycle.
   const broken = await q(WORK_DB, "SELECT count(*) FROM public.audit_verify_chain(NULL, NULL, NULL) x WHERE NOT x.ok;");
   if (broken !== "0") fail("INT-L8", `${broken} audit row(s) fail verification`);
@@ -1093,6 +1386,64 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
     } else if (row.areas_for_development !== "Our next focus is eye contact, which still needs frequent prompting and support to become consistent.") {
       fail("INT-L9", "the canonical panels are not the submitted version's");
     } else pass("INT-L9", "the parent reads exactly the four submitted panels + submitted_at — nothing else exists in the shape");
+  }
+
+  // =====================================================================
+  // Q-27 AT THE PROJECTION LAYER, not at the RPC shape
+  // =====================================================================
+  // INT-L9 above proves the RPC returns five columns. This leg proves the
+  // thing Q-27 actually rules: the nine dimension RATINGS do not reach a
+  // Parent session ANYWHERE in the governed projection's payload. The
+  // exclusion must happen at this layer, never by fetching values into a
+  // client and hiding them.
+  //
+  // ⚠️ THE TEST IS STRUCTURAL, AND DELIBERATELY NOT A BARE-WORD SCAN.
+  // A-052 expressly PROHIBITS a bare-word rating-label regex, because
+  // ordinary parent-facing English legitimately contains "has mastered
+  // maintaining eye contact" and "at the beginning of the session". So this
+  // asserts three structural properties instead: the exact key set; that no
+  // KEY anywhere is a dimension code or mentions a rating; and that no LEAF
+  // VALUE is EXACTLY a rating label. Prose containing a label is legal; a
+  // field whose value IS a label is a rating.
+  {
+    const dto = await getCanonicalReportCore(parentDb, SESSION, STUDENT);
+    const RATINGS = ["beginning", "developing", "mastering", "mastered"];
+    const DIMS = GROUNDING_ANCHORS.dimensionCodes;
+    const badKeys = [];
+    const badValues = [];
+    const walk = (node, path) => {
+      if (node === null || node === undefined) return;
+      if (Array.isArray(node)) { node.forEach((v, i) => walk(v, `${path}[${i}]`)); return; }
+      if (typeof node === "object") {
+        for (const [k, v] of Object.entries(node)) {
+          const norm = k.toLowerCase();
+          if (DIMS.includes(norm) || norm.includes("rating") || norm.includes("dimension")) {
+            badKeys.push(`${path}.${k}`);
+          }
+          walk(v, `${path}.${k}`);
+        }
+        return;
+      }
+      if (typeof node === "string" && RATINGS.includes(node.trim().toLowerCase())) {
+        badValues.push(path);
+      }
+    };
+    if (dto.outcome !== "success") {
+      fail("INT-Q27", `the linked parent's governed projection gave ${dto.outcome} for a SUBMITTED report`);
+    } else {
+      walk(dto.data, "$");
+      const topKeys = Object.keys(dto.data).sort().join(",");
+      const panelKeys = Object.keys(dto.data.panels).sort().join(",");
+      if (topKeys !== "panels,submittedAt") {
+        fail("INT-Q27", `the Parent DTO's top-level keys are '${topKeys}', expected exactly 'panels,submittedAt'`);
+      } else if (panelKeys !== "areasForDevelopment,overview,remarks,strengths") {
+        fail("INT-Q27", `the Parent DTO's panel keys are '${panelKeys}', expected exactly the four OD-4 panels`);
+      } else if (badKeys.length > 0) {
+        fail("INT-Q27", `the Parent payload carries rating-bearing key(s): ${badKeys.join(", ")}`);
+      } else if (badValues.length > 0) {
+        fail("INT-Q27", `the Parent payload carries a leaf whose value IS a rating label: ${badValues.join(", ")}`);
+      } else pass("INT-Q27", "the governed Parent projection's payload carries exactly {panels, submittedAt} with the four OD-4 panels, NO key anywhere named for a dimension or a rating, and NO leaf whose value is a rating label — the nine ratings are excluded at the PROJECTION layer, and the test is structural rather than the bare-word scan A-052 prohibits");
+    }
   }
 
   // R6 -- the SAME parent, the SAME report id, AFTER management submitted:
