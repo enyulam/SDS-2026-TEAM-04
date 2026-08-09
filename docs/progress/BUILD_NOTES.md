@@ -3243,3 +3243,79 @@ The Operator authorized one timeboxed look at whether `run-concurrency` leaves a
 **STAGE 2 of the overlay** — the thinnest viable UI in chain order, all three roles. **§7.4a `S-1` executes at the START of Stage 2**, where the served app first appears. Visually thin is acceptable; governance is not.
 
 **PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
+
+
+---
+
+## 2026-08-09 — HERO V3 **STAGE 2 COMPLETE**: S-1 proven in isolation, then the three-role UI wired to the governed backend
+
+**Checkpoint / phase.** Plan Phase 1 (`P1-T11`), HERO V3 EXECUTION OVERLAY **Stage 2**. Branch `main`, single worktree, no remote. **Starting HEAD `7e0085d`; ending HEAD `ed136d4`.** Tree clean at stop.
+
+**Scope.** (1) `S-1` proven alone, before any UI work, as instructed. (2) Stage 2's thinnest-viable UI in chain order across Trainer, Management and Parent. (3) Proof that the chain actually serves.
+
+### 1. S-1 in isolation — `48132b9`
+
+S-1 had **never executed** and it guards a **billable** surface. Its failure mode is silent: a served process that quietly resolved the operator's real `LLM_API_KEY` looks exactly like a working one until it is billed, which has happened once in this project.
+
+The discipline was extracted into a **module** — `scripts/physical-test/serving-discipline.mjs`, Node built-ins only, no disposable stack and no Docker — so *"every served child process is disciplined"* becomes a **property** rather than a habit: every serving path takes its environment from `buildServedChildEnv()`, which overwrites the three selectors (never deletes), deletes `BEST_COACH_RUN_REAL_PROVIDER_LEG`, and **refuses a caller that tries to override any of the four**.
+
+**Why the pre-existing read-back was insufficient.** `prove-disposable-app.mjs` reads its selectors back off the env **object** it just wrote. That proves the assignment executed; it proves nothing about what the served process resolves, because `next` runs `@next/env`'s `loadEnvConfig()` against this repository's own `.env.local`, which carries a real key. D-4/D-5 therefore run that loader **for real**, in a child, for both the `dev` and `start` targets.
+
+**The load-bearing legs are the negative controls.** D-6/D-7 run the same probe with the selectors **deleted**, and `@next/env` **refilled all three** from `.env.local` — the hazard measured live on this machine rather than cited from the incident report. That is what makes D-4/D-5 evidence instead of a tautology (overlay §4.6). Read out of `@next/env`'s own source, the mechanism is `typeof l[t] === "undefined"`: a `.env` key is applied only when **absent** from the child's initial environment, so **overwrite survives and deletion is silently refilled**.
+
+**Two defects found by running it, not by reviewing it.**
+
+1. The first run returned `LOADED|false` — `@next/env` is CJS assigning `module.exports` at run time, so Node's named-export detection yielded `undefined` and the loader never ran. The ledger **correctly refused to claim a demonstration**, but reported no reason and was undiagnosable. *A fail-closed check nobody can diagnose gets worked around instead of fixed.* Both module shapes are now accepted and an **authored** reason code (`LOADER_EXPORT_MISSING` / `LOADER_THREW`) is reported; the caught error's own message is still never surfaced, because `@next/env` can echo file contents in a parse failure.
+2. The existing S-3 sample counts peers for the **parent PID only**. `next` runs workers — the measured tree was **4 processes** — so an outward request from a worker was invisible to it. The trip-wire now walks the **whole process tree**, and an unreadable sample makes the entire reading **UNMEASURED** rather than silently reducing to the readable ones.
+
+`NEXT_TELEMETRY_DISABLED` is also set in the served environment: telemetry is a genuine outward request, and a trip-wire expected to fire for a benign reason is one that gets ignored.
+
+**No selector value is ever surfaced.** The probe reports a three-valued STATUS per selector; `PRESENT_DIFFERENT` — the negative control's expected reading — asserts only that a value is *not* the literal. Served stdio is ignored on all three streams, so no credential-bearing stream is rendered at all (§11).
+
+### 2. Trainer — `0c34212`
+
+**Inventory first, as instructed, and it changed the work.** ~12.6k lines of frontend already existed across `features/`, with session entry, roster, nine-dimension assessment, draft request, review, edit and approve all present and already bound to governed server actions. **Exactly one link was missing.**
+
+**The gap:** A-018 gives the Trainer the right to mark an individual learner Absent, and **no surface exercised it**. This is the frontend half of Stage 1's finding — `attendance` had three SELECT policies and no INSERT/UPDATE policy, so the lifecycle's first governed write was a harness artefact. `setAttendance` now runs through all five layers (port **23 → 24** members) plus the fixture port. The action decides nothing: every gate, the authorization re-derivation, the Present default, the `attendance.changed` append (registry E4 — **still 16**) and A-026's submitted-report refusal all live in the RPC.
+
+**A second, quieter defect found while wiring it.** The roster projection rendered a **missing** attendance row as `attendanceState: "present"` — an unmeasured value presented as a measured one. Not cosmetic: A-018 materializes the Present default **lazily**, so *"no row"* and *"row says present"* are different committed states, and `attendance_set_status` is a **CAS whose `expectedStatus` distinguishes exactly those two**, with **no force mode**. Every learner whose row had not been written would have been toggled with the wrong expectation and answered `stale_state`, with nothing on the surface able to explain why. `attendanceRecorded` now carries the distinction; `attendanceState` keeps its meaning, so every existing reader is unchanged.
+
+**What the toggle deliberately does not do:** no optimistic update (it renders the status **the database reported** — an optimistic one would show a learner absent on a call the database refused) · no retry on `stale_state` (a force mode reintroduced client-side) · `unauthorized` and `unavailable` share **one** sentence (splitting them apart in the UI rebuilds the existence oracle the RPC prevents) · one write in flight at a time.
+
+The fixture port models the CAS **shape** only, in per-instance memory, deliberately outside the persisted `FixtureState` schema, and is explicitly **not** a governed write: no audit, no A-026 refusal, no authorization.
+
+### 3. Management + Parent — `ed136d4`
+
+**No application code was written for either role.** Both were already built and bound: Management's pending list, detail, wording-only editor, return-to-trainer and Approve & Submit; Parent's dashboard, reports list and canonical submitted detail.
+
+**Governance verified rather than assumed.** Management has no control touching ratings, attendance, observations, evidence ownership or Trainer notes — `ManagementReviewDto` carries no field that could hold one, and `managementEditWording` accepts `panels` alone. The only rating-adjacent control is the **return** form's issue scope and affected dimension, and its list is populated from the **static `DIMENSION_CODES` framework constant, not from the report**: naming which dimension is disputed is not reading its value, so **A-038 holds**. **Q-27 holds** — the Parent Dashboard has no "This Term's Skills" card and no replacement visualization, and every rating/dimension mention under `features/parent/` is a comment recording a deliberate omission.
+
+**`prove-stage2-routes.mjs` was added because `tsc` and `eslint` prove the chain compiles and prove nothing about whether it serves.** 17 checks, exit 0, on a server started **through the S-1 discipline**: all 15 chain routes served (no 5xx, no 404) and every portal route **redirected an anonymous caller to `/login` server-side (307)**; `/login` answers 200 so the redirects land rather than loop. The two report-keyed families are probed with a syntactically valid id matching **no row** on purpose — a report-keyed surface must still be served for an unknown id, because the governed refusal is the server's job and a 404 there would mean the *surface* is missing.
+
+### Automated verification — run serially (validation is a global mutex)
+
+`npx tsc --noEmit` **0** · `npx eslint .` **0** · `prove-serving-discipline.mjs` **0** (10 checks) · `run-integration.mjs` **0** — the full governed lifecycle against the real database after the projection change, including `INT-AT6` (post-submission move to `absent` refused **directionally**, no event appended) and `INT-Q27` (Parent payload boundary), with `INT-PG` observing **zero** non-loopback requests · `prove-stage2-routes.mjs` **0** (17 checks). `INT-L2b` **SKIPPED BY DEFAULT, not passed**.
+
+**Failures and recovery.** Two, both recorded above (the `@next/env` CJS interop read-back, and the parent-PID-only trip-wire). A third was an **invocation** error of mine, not a regression: `run-integration.mjs` was first launched without `--import ./scripts/tests/integration/alias-loader.mjs` and exited 1 on `ERR_MODULE_NOT_FOUND`. Re-run correctly, it exits 0. Recorded so a future reader does not mistake that exit 1 for a finding.
+
+### Blocker opened
+
+**`B-STAGE3-1` — blocks Stage 3, recorded NOT fixed.** `scripts/physical-test/disposable-stack.mjs` pins `EXPECTED_CANONICAL_MIGRATIONS = 15` while **17** are on disk; its own comment says *"RE-PIN IT IN THE SAME COMMIT AS ANY NEW MIGRATION"* and Stage 1's two migrations missed it. It is exported and consumed at 11 call sites across 6 harnesses, 4 of them npm entry points, and **fails closed**, so every disposable-stack run aborts — a Stage 3 blocker, **not** a false green. Not fixed here because re-pinning needs values **derived from a live disposable run**: the fixture checksum and the 28-row canonical region must be re-measured rather than assumed unmoved, and guessing a census is the drift that has bitten this project three times.
+
+**Carried, untouched, per instruction:** `B-C2-1` (OPEN · UNDIAGNOSED; hero negative control **K** remains NOT SATISFIED), `B-C2-2` (recorded, deliberately unfixed so it cannot mask `B-C2-1`), the 22 unswept harnesses, `build`, and the §3 persona sign-offs.
+
+### Schema and provider
+
+Stage 2 wrote **no** migration, table, enum, policy, grant, RPC or audit action. Census unchanged at 17 migrations · 27 tables · 39 functions · 12 enums · 29 policies · 27 `authenticated` EXECUTE; audit registry still 16; `report_store_draft` client EXECUTE still zero (R-27). `supabase db reset` never used.
+
+**REAL PROVIDER CALLS: ZERO AUTHORIZED, ZERO MADE.** `S-2` asserted `BEST_COACH_RUN_REAL_PROVIDER_LEG` UNSET before every qualifying run; `S-1` overwrote the three selectors in every served child and read them back **through the real loader**; `S-3` measured zero non-loopback peers in every run that served or could construct a provider. No credential was requested, accepted, printed, logged or persisted, in either direction.
+
+### Commits
+
+`48132b9` S-1 in isolation → `0c34212` Trainer boundary → `ed136d4` Management + Parent boundary.
+
+### Exact next step
+
+**STAGE 3 of the overlay** — hero E2E under §7.4a, then `build`, then the checkpoint tag. **Resolve `B-STAGE3-1` first**, by deriving the disposable census from a live run rather than transcribing it.
+
+**PHASE 1 — IN PROGRESS · HERO-CRITICAL SUBSET — PASS · NON-HERO TASKS — PENDING**
