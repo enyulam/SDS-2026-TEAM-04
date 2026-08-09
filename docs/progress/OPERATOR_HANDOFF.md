@@ -30,7 +30,7 @@
 | Branch / worktree | `develop` / none |
 | HEAD | resolve with `git rev-parse HEAD` — the continuity commit following `71953fa` |
 | Tree | clean at handoff |
-| Ahead of `origin/develop` | **9 commits, NONE pushed** |
+| Ahead of `origin/develop` | **10 commits, NONE pushed** |
 | Database | **none written.** One suite READ the local canonical stack; its counts were **unchanged** |
 | Frozen project | **never contacted** |
 

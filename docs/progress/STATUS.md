@@ -24,7 +24,7 @@
 > | **Position** | ▶ **UI RECONCILIATION — `F-UI-DRIFT-1` bucket (c). BATCH 1 COMPLETE: plan Phases 0, 1, 2 and 3.** ⚠️ Plan-phase numbering, **not** `CLAUDE.md` §10 |
 > | **Branch / worktree / tree** | `develop` / none / **clean at handoff**. Resolve HEAD with `git rev-parse HEAD` |
 > | **Commits, one per phase boundary** | `3010b63` Phase 0 · `ea5d32b` Phase 1 · `02218ba` Phase 2 · `71953fa` Phase 3, then this continuity commit |
-> | **Ahead of `origin/develop`** | **9 commits, NONE pushed.** No remote write of any kind |
+> | **Ahead of `origin/develop`** | **10 commits, NONE pushed.** No remote write of any kind |
 > | **▶ NEXT AUTHORIZED ACTION** | ⛔ **STOP. Phase 4 (`05` Trainer Schedule) is NOT authorized.** The Operator authorized Phases 0–3 only, to run consecutively without an intervening acceptance, then stop |
 > | **Authorization in force** | The Operator's Batch 1 instruction, **widened** to Phases 0–3. It supersedes plan §5.1's Batch 1 = Phase 0 alone (an explicit Operator ruling outranks a procedural planning artefact, `CLAUDE.md` §1). **It carries NO hosted, paid, public, human, push or submission authority** (§15.11) |
 > | **Outstanding Operator `Accepted`** | **Phases 0–3 are `PASS`, this session's evidence verdict. NONE is `Accepted`** — `Accepted` is Operator-set only (§15.6) and no session has written or implied one |
