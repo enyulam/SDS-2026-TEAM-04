@@ -12,7 +12,7 @@
 | Field | Value |
 |---|---|
 | Branch | `main` |
-| HEAD at stop | resolve with `git rev-parse HEAD` — this file is inside the commit. Prior checkpoint `f8a40b9` |
+| HEAD at stop | resolve with `git rev-parse HEAD` — this file is inside the commit. Prior checkpoint `9595048` (H-8 + this artifact) |
 | Working tree | CLEAN at stop |
 | Remotes | **0** — nothing has ever been pushed |
 | Worktrees | **1** (`main`). `worktrees/` absent from disk |

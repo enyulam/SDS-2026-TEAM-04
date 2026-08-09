@@ -876,6 +876,12 @@ It must carry: **project (B.E.S.T Coach Final MVP) · current phase · current t
 
 It must let an external consultant understand the immediate problem **without the Operator manually reconstructing previous sessions**. **Never include a credential or secret.**
 
+> ✅ **EXTENDED 2026-08-09 under an explicit bounded Operator instruction naming this location only.** ~~The "do not create a permanent handoff file" default applies without exception.~~ **A STANDING DERIVED HANDOFF ARTIFACT NOW EXISTS at `docs/progress/OPERATOR_HANDOFF.md`**, written at every stop and **OVERWRITTEN, never appended**. It is authorized by this section's own *"unless there is a concrete reason"* clause — the concrete reason being that manual transcription between runs has already delivered a false premise about repository state into a run. **One file overwritten in place is not "a permanent handoff file for each consultation"**, which is what the default prohibits.
+>
+> **Its specification is `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8 — read it there; it is deliberately NOT restated here.** ⚠️ **The obligation SURVIVES beyond Plan Phase 4** and is the one express exception to that ruling's H-1 scope, so it does not lapse with the hero-first resequencing.
+>
+> ⚠️ **It is DERIVED, and it is NOT a fifth layer of §15.1.** It originates nothing, adds no field and makes no judgement; **where it and `STATUS.md` disagree, `STATUS.md` wins.** A fact that belongs in it but is not yet in a canonical record is written to the canonical record **first**. **The moment anything is recorded there first it becomes a tracker and §15.1 prohibits it.**
+
 ### 15.9 The intended autonomous model, once a phase is authorized
 
 > Operator authorizes a bounded phase/track → Main Orchestrator reads workspace authority and status → **verifies actual state** → decomposes → parallel subagents/worktrees where safe → implements → tests → adversarial review → remediates → acceptance gate → commits per governance → updates `STATUS.md` and `BUILD_NOTES.md` → continues to the next authorized dependent unit.
