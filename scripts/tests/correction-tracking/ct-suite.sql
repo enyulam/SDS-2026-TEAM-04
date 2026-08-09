@@ -150,7 +150,9 @@ BEGIN
   --  This census moves DOWNWARD only; a widening still fails here.)
   -- (Moved 24 -> 25 at Run C3-A Phase 2b: C2C-004's governed Management
   -- submitted-report list adds exactly one client-reachable READ.)
-  IF v_n <> 25 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 25', v_n; END IF;
+  -- (Moved 25 -> 27 at the V3 overlay STAGE 1 pair; the owner-only source-map
+  -- writer adds none.)
+  IF v_n <> 27 THEN RAISE EXCEPTION 'FAIL T-CT-19: % authenticated EXECUTE, expected 27', v_n; END IF;
 
   -- No table privilege and no policy was added to reach the correction row.
   SELECT pg_catalog.count(*) INTO v_n

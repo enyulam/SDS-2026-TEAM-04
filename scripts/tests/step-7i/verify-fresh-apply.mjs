@@ -200,7 +200,10 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
 
   // Apply all twelve migration files in order, exactly as a reset would.
   const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (files.length !== 15) fail(`${files.length} migration files found, expected 15`)
+  // Deliberately a PINNED LITERAL, not `files.length`. Comparing the count
+  // to itself would be vacuous; the pin exists so a new migration cannot
+  // enter the tree without a human acknowledging it here.
+  if (files.length !== 17) fail(`${files.length} migration files found, expected 17`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -244,7 +247,26 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   //  removal. M15 adds and drops no object, so tables, functions, enums,
   //  policies and the EXECUTE census are all UNMOVED -- only the migration
   //  count changes.)
-  const expected = '26|36|12|29|15|25|0|'
+  // (Moved 15 -> 17 migrations at the V3 overlay STAGE 1 pair. Every field
+  //  that moved is accounted for individually, because a census bumped
+  //  wholesale to make a suite go green is how drift becomes invisible:
+  //    M16 attendance_governed_write_path -- +1 function
+  //        (attendance_set_status), +1 authenticated EXECUTE. It creates NO
+  //        table, enum, label or policy, and its own A1-A12 assertions pin
+  //        that.
+  //    M17 report_source_map -- +1 TABLE (report_source_map, RLS ENABLED so
+  //        the non-RLS count stays 0), +2 functions
+  //        (report_store_source_map, report_get_source_map), +1
+  //        authenticated EXECUTE -- ONE, not two: the writer is OWNER-ONLY
+  //        with zero client EXECUTE, mirroring report_store_draft's R-27
+  //        posture, and assertion S5/S5b pins that.
+  //  So: tables 26 -> 27, functions 36 -> 39, authenticated EXECUTE
+  //  25 -> 27, migrations 15 -> 17. Enums stay 12 (M17 creates NO enum --
+  //  a CHECK over the four panel column names instead, because an enum
+  //  section 6.1 does not list is a CLAUDE.md section 12 stop-and-ask),
+  //  policies stay 29, non-RLS tables stay 0, the eight report_status
+  //  labels and the 1/3/9 seeds are untouched.)
+  const expected = '27|39|12|29|17|27|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
   // The narration is DERIVED from the pinned literal, never retyped. It

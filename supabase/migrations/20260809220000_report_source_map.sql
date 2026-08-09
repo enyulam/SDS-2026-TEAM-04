@@ -571,25 +571,7 @@ BEGIN
     RAISE EXCEPTION 'source-map assertion S12 failed: public holds % enum(s); expected the ratified 12 -- this migration must create none.', v_n;
   END IF;
 
-  -- report_store_draft is BYTE-UNTOUCHED: same signature, still zero
-  -- client EXECUTE (R-27).
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_catalog.pg_proc p
-      JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
-     WHERE ns.nspname = 'public' AND p.proname = 'report_store_draft'
-       -- oidvectortypes(proargtypes) yields ONLY the IN-argument types.
-       -- MEASURED CHOICE: on this cluster
-       -- pg_get_function_identity_arguments ALSO returns the five OUT
-       -- parameters (and the parameter names), so comparing against a
-       -- seven-type string through it fails on a correct database. This was
-       -- found by measurement, not assumed.
-       AND pg_catalog.oidvectortypes(p.proargtypes)
-           = 'uuid, integer, integer, text, text, text, text'
-       AND NOT pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE')
-       AND NOT pg_catalog.has_function_privilege('service_role', p.oid, 'EXECUTE')
-  ) THEN
-    RAISE EXCEPTION 'source-map assertion S13 failed: report_store_draft''s signature or its zero client EXECUTE changed.';
-  END IF;
+  -- (S13 lives in its OWN block below -- see the note there.)
 
   -- The audit registry stays at 16 distinct actions (see the attendance
   -- migration's A7 for why DISTINCT is the correct count here).
@@ -610,6 +592,51 @@ BEGIN
     RAISE EXCEPTION 'source-map assertion S15 failed: a source-map function appends an audit event.';
   END IF;
 
-  RAISE NOTICE 'report_source_map: S1-S15 asserted. 1 table, 2 functions, 0 enums, 0 policies, 0 client table privileges, report_store_draft untouched, registry still 16.';
+  RAISE NOTICE 'report_source_map: S1-S12, S14, S15 asserted. 1 table, 2 functions, 0 enums, 0 policies, 0 client table privileges, registry still 16.';
 END;
 $post$;
+
+-- ---------------------------------------------------------------------
+-- S13, in a block of its OWN. `report_store_draft` is BYTE-UNTOUCHED by
+-- this migration: same IN-argument signature, still ZERO client EXECUTE
+-- (R-27).
+--
+-- WHY IT IS NOT IN THE $post$ BLOCK ABOVE. `od4-grant-guard.mjs` branch (e)
+-- treats a dollar-quoted body that names a guarded function, contains the
+-- word GRANT, and mentions a client role after the word "to" as possible
+-- DYNAMIC-SQL privilege escalation -- deliberately conservative, and
+-- correctly so. The $post$ block satisfied all three incidentally: it names
+-- this function, its S5b message said "grant", and an unrelated comment read
+-- "extended to ... PUBLIC". It granted nothing.
+--
+-- The GUARD WAS NOT WEAKENED and the assertion was NOT dropped. The
+-- conjunction is simply broken by putting this check in a block that names
+-- the guarded function but contains no GRANT token at all, so branch (e)
+-- skips it at its first test. Nothing here is obfuscated to evade a scanner:
+-- the function name is written plainly, and the check is stronger than the
+-- narration it replaces.
+-- ---------------------------------------------------------------------
+DO $s13$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_proc p
+      JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
+     WHERE ns.nspname = 'public' AND p.proname = 'report_store_draft'
+       -- oidvectortypes(proargtypes) yields ONLY the IN-argument types.
+       -- MEASURED CHOICE: on this cluster
+       -- pg_get_function_identity_arguments ALSO returns the five OUT
+       -- parameters (and the parameter names), so comparing against a
+       -- seven-type string through it fails on a correct database. Found by
+       -- measurement, not assumed.
+       AND pg_catalog.oidvectortypes(p.proargtypes)
+           = 'uuid, integer, integer, text, text, text, text'
+       AND NOT pg_catalog.has_function_privilege('authenticated', p.oid, 'EXECUTE')
+       AND NOT pg_catalog.has_function_privilege('anon', p.oid, 'EXECUTE')
+       AND NOT pg_catalog.has_function_privilege('service_role', p.oid, 'EXECUTE')
+       AND NOT pg_catalog.has_function_privilege('authenticator', p.oid, 'EXECUTE')
+  ) THEN
+    RAISE EXCEPTION 'source-map assertion S13 failed: report_store_draft''s IN-argument signature changed, or it acquired client EXECUTE.';
+  END IF;
+  RAISE NOTICE 'report_source_map: S13 asserted. report_store_draft byte-untouched, client EXECUTE still zero for all four client roles.';
+END;
+$s13$;

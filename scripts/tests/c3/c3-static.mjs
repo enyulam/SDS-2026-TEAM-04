@@ -18,7 +18,8 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 const MIG_NAME = '20260807090000_assessment_complete_save_single_entry_point.sql'
-const NEWEST_MIG_NAME = '20260809180000_od4_content_hash_version_no_default.sql'
+// Moved at the V3 overlay STAGE 1 pair. `report_source_map` sorts last.
+const NEWEST_MIG_NAME = '20260809220000_report_source_map.sql'
 const COMPOSER_MIG = '20260806220000_assessment_complete_save_opens_report.sql'
 const ASSESSMENT_MIG = '20260806090000_assessment_governed_persistence.sql'
 
@@ -85,7 +86,10 @@ const body = code(raw)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 15) fail('T-C3-S2', `${all.length} migration files exist, expected 15`)
+  // Moved 15 -> 17 at the V3 overlay STAGE 1 pair (M16 the governed
+  // attendance write path, M17 report_source_map). Pinned deliberately: a new
+  // migration must be acknowledged here, not absorbed silently.
+  if (all.length !== 17) fail('T-C3-S2', `${all.length} migration files exist, expected 17`)
   // Run C3-A Phase 2b added the Management submitted-report list (C2C-004),
   // which sorts AFTER the single-entry-point closure. The closure is
   // therefore an ALREADY-APPLIED file and sits in the byte-identical-to-HEAD

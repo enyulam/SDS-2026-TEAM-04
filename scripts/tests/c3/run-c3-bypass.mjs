@@ -298,8 +298,15 @@ SELECT count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oi
     // still reachable by NO client role and the composer still holds
     // authenticated EXECUTE exclusively -- and both are asserted by the
     // posture comparison immediately above, which is the load-bearing half.)
-    else if (total !== '25') fail('T-C3-1', `${total} functions hold authenticated EXECUTE, expected 25`)
-    else pass('T-C3-1', 'assessment_save_observation is reachable by NO client role; the R-C2-1 composer holds authenticated EXECUTE exclusively; 25 functions hold authenticated EXECUTE (24 + the C2C-004 Management submitted-report list)')
+    // (Moved 25 -> 27 at the V3 overlay STAGE 1 pair: M16 adds
+    // attendance_set_status and M17 adds report_get_source_map, both
+    // client-reachable by design. M17's WRITER, report_store_source_map, adds
+    // NOTHING here -- it is owner-only with zero client EXECUTE, mirroring
+    // report_store_draft's R-27 posture, which is exactly why the count rose
+    // by two rather than three. The property under test is unchanged and the
+    // load-bearing half remains the posture comparison above.)
+    else if (total !== '27') fail('T-C3-1', `${total} functions hold authenticated EXECUTE, expected 27`)
+    else pass('T-C3-1', 'assessment_save_observation is reachable by NO client role; the R-C2-1 composer holds authenticated EXECUTE exclusively; 27 functions hold authenticated EXECUTE (25 + attendance_set_status + report_get_source_map, while the owner-only report_store_source_map WRITER adds none)')
   }
 
   // -----------------------------------------------------------------

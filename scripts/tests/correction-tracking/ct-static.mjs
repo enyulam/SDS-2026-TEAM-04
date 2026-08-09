@@ -23,7 +23,8 @@ const MIG_NAME = '20260806103000_management_correction_tracking.sql'
 // single-entry-point closure that removes `authenticated` EXECUTE from
 // assessment_save_observation). It is not this suite's subject; it is only
 // what "sorts last" now means.
-const NEWEST_MIG_NAME = '20260809180000_od4_content_hash_version_no_default.sql'
+// Moved at the V3 overlay STAGE 1 pair. `report_source_map` sorts last.
+const NEWEST_MIG_NAME = '20260809220000_report_source_map.sql'
 const MIG = join(MIG_DIR, MIG_NAME)
 const PROJECTIONS = join(ROOT, 'server', 'modules', 'management-view', 'projections.ts')
 
@@ -170,7 +171,8 @@ const bodyCode = code(body)
 {
   const before = failures
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort()
-  if (all.length !== 15) fail('T-CT-S4', `${all.length} migration files exist, expected 15`)
+  // Moved 15 -> 17 at the V3 overlay STAGE 1 pair (M16 attendance, M17 source map).
+  if (all.length !== 17) fail('T-CT-S4', `${all.length} migration files exist, expected 17`)
   if (all[all.length - 1] !== NEWEST_MIG_NAME) fail('T-CT-S4', `the newest migration is not the last file (last is ${all[all.length - 1]})`)
   if (!all.includes(MIG_NAME)) fail('T-CT-S4', `${MIG_NAME} is missing`)
 

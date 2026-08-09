@@ -302,8 +302,12 @@ BEGIN
     FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
    WHERE n.nspname = 'public' AND c.relkind = 'r';
-  IF v_n <> 26 OR v_m <> 0 THEN
-    RAISE EXCEPTION 'FAIL A32: expected 26 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
+  -- (Moved at the V3 overlay STAGE 1 pair: M16 the governed attendance
+  -- write path -- 1 function, 1 authenticated EXECUTE, no table/enum/policy;
+  -- M17 report_source_map -- 1 table (RLS enabled), 2 functions, 1
+  -- authenticated EXECUTE because its WRITER is owner-only, and NO enum.)
+  IF v_n <> 27 OR v_m <> 0 THEN
+    RAISE EXCEPTION 'FAIL A32: expected 27 public tables with RLS enabled on all; found % table(s), % without RLS', v_n, v_m;
   END IF;
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_class c
@@ -425,7 +429,11 @@ BEGIN
   -- one STABLE read function and one authenticated EXECUTE grant, no table,
   -- enum, label, policy or row), moving it 11 -> 12.
   SELECT count(*) INTO v_n FROM supabase_migrations.schema_migrations;
-  IF v_n <> 15 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 15 applied migrations, found %', v_n; END IF;
+  -- (Moved at the V3 overlay STAGE 1 pair: M16 the governed attendance
+  -- write path -- 1 function, 1 authenticated EXECUTE, no table/enum/policy;
+  -- M17 report_source_map -- 1 table (RLS enabled), 2 functions, 1
+  -- authenticated EXECUTE because its WRITER is owner-only, and NO enum.)
+  IF v_n <> 17 THEN RAISE EXCEPTION 'FAIL A34: expected exactly 17 applied migrations, found %', v_n; END IF;
 
   SELECT count(*) INTO v_n
     FROM supabase_migrations.schema_migrations
@@ -433,9 +441,10 @@ BEGIN
                      '20260805090000', '20260805090500', '20260806090000',
                      '20260806103000', '20260806160000', '20260806190000',
                      '20260806220000', '20260807090000', '20260807113000',
-                     '20260809120000', '20260809160000', '20260809180000');
-  IF v_n <> 15 THEN
-    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly 20260803034500, 20260803154500, 20260804213000, 20260805090000, 20260805090500, 20260806090000, 20260806103000, 20260806160000, 20260806190000, 20260806220000, 20260807090000, 20260807113000, 20260809120000, 20260809160000 and 20260809180000';
+                     '20260809120000', '20260809160000', '20260809180000',
+                     '20260809210000', '20260809220000');
+  IF v_n <> 17 THEN
+    RAISE EXCEPTION 'FAIL A34: the applied versions are not exactly the seventeen committed ones (20260803034500 through 20260809220000)';
   END IF;
 
   -- A35: exactly the thirty-one public project functions exist -- the six
@@ -450,8 +459,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 36 THEN
-    RAISE EXCEPTION 'FAIL A35: expected exactly 36 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver + 1 atomic complete-save composer + 1 Management submitted-report list + 2 OD-4 V2 hash serializers), found %', v_n;
+  IF v_n <> 39 THEN
+    RAISE EXCEPTION 'FAIL A35: expected exactly 39 functions in schema public (6 Step 7G + 4 Step 7H + 18 Step 7I + 2 assessment + 1 correction tracking + 1 report-context resolver + 1 atomic complete-save composer + 1 Management submitted-report list + 2 OD-4 V2 hash serializers + 1 attendance write path + 2 source map), found %', v_n;
   END IF;
 
   -- A35 (report-context resolver, R-22): the one governed key translation.
@@ -1410,8 +1419,8 @@ BEGIN
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n <> 36 THEN
-    RAISE EXCEPTION 'FAIL D5: expected the 36 Step 7G/7H/7I/assessment/correction-tracking/context-resolver/complete-save/submitted-list/OD-4 functions after the negative suite, found %', v_n;
+  IF v_n <> 39 THEN
+    RAISE EXCEPTION 'FAIL D5: expected the 39 Step 7G/7H/7I/assessment/correction-tracking/context-resolver/complete-save/submitted-list/OD-4/attendance/source-map functions after the negative suite, found %', v_n;
   END IF;
 
   SELECT count(*) INTO v_n

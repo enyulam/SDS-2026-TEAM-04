@@ -166,20 +166,38 @@ BEGIN
   -- (Reconciled again at Run C3-A Phase 1: the single-entry-point closure adds one migration file that contains exactly one REVOKE -- no function, no table, no enum, and not one DML statement.)
   -- (Moved 11 -> 12 at Run C3-A Phase 2b: C2C-004's governed Management
   -- submitted-report list is the twelfth committed migration.)
-  IF v_n <> 15 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 15', v_n; END IF;
+  -- (Moved 15 -> 17 at the V3 overlay STAGE 1 pair: M16 the governed
+  -- attendance write path, M17 report_source_map.)
+  IF v_n <> 17 THEN RAISE EXCEPTION 'T-ASM-40: % migrations, expected 17', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public';
   -- (Moved 33 -> 34 at Run C3-A Phase 2b: C2C-004's submitted-report list.)
-  IF v_n <> 36 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 36', v_n; END IF;
+  -- (Moved 36 -> 39: M16 adds attendance_set_status; M17 adds
+  -- report_store_source_map and report_get_source_map.)
+  IF v_n <> 39 THEN RAISE EXCEPTION 'T-ASM-40: % functions, expected 39', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_class c
     JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace
    WHERE ns.nspname = 'public' AND c.relkind = 'r';
-  IF v_n <> 26 THEN RAISE EXCEPTION 'T-ASM-40: % tables, expected 26', v_n; END IF;
+  -- (Moved 26 -> 27: M17 adds report_source_map. M16 adds no table.)
+  IF v_n <> 27 THEN RAISE EXCEPTION 'T-ASM-40: % tables, expected 27', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_type t
     JOIN pg_catalog.pg_namespace ns ON ns.oid = t.typnamespace
    WHERE ns.nspname = 'public' AND t.typtype = 'e';
+  -- UNCHANGED at 12, and that is load-bearing: M17 deliberately creates NO
+  -- enum (a CHECK over the four OD-4 panel column names instead), because an
+  -- enum section 6.1 does not list is a CLAUDE.md section 12 stop-and-ask.
   IF v_n <> 12 THEN RAISE EXCEPTION 'T-ASM-40: % enums, expected 12', v_n; END IF;
-  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: 8 migrations, 31 functions, 26 tables, 12 enums)';
+  -- The narration is now DERIVED from the live counts rather than retyped. It
+  -- previously read "8 migrations, 31 functions" while the assertions above
+  -- demanded 15 and 36 -- the assertions were right and the evidence line
+  -- shipped into the run record was false. Same defect class the fresh-apply
+  -- proof already fixed once.
+  SELECT count(*) INTO v_m FROM supabase_migrations.schema_migrations;
+  RAISE NOTICE 'PASS T-ASM-40 (catalogue leg: % migrations, % functions, % tables, % enums)',
+    v_m,
+    (SELECT count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace WHERE ns.nspname = 'public'),
+    (SELECT count(*) FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace WHERE ns.nspname = 'public' AND c.relkind = 'r'),
+    v_n;
 
   -- T-ASM-41: full function contracts from the catalogue.
   SELECT count(*) INTO v_n
@@ -207,7 +225,10 @@ BEGIN
   --  by which a COMPLETE nine-rating assessment could commit with no report
   --  shell. The census falls 25 -> 24 and moves DOWNWARD only.)
   -- (Moved 24 -> 25 at Run C3-A Phase 2b: C2C-004's submitted-report list.)
-  IF v_n <> 25 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 25', v_n; END IF;
+  -- (Moved 25 -> 27: attendance_set_status and report_get_source_map are
+  -- client-reachable by design; report_store_source_map is owner-only and
+  -- adds NONE, which is why this rose by two and not three.)
+  IF v_n <> 27 THEN RAISE EXCEPTION 'T-ASM-42: % authenticated EXECUTE, expected 27', v_n; END IF;
   SELECT count(*) INTO v_n FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace ns ON ns.oid = p.pronamespace
    WHERE ns.nspname = 'public'

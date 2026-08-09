@@ -47,7 +47,7 @@ const body2 = stripComments(file2)
     fail('T7I-73', `${step7i.length} Step 7I migration files exist, expected exactly 2`)
   }
   const all = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql'))
-  if (all.length !== 15) fail('T7I-73', `${all.length} migration files exist, expected 15`) // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list + the P1-T03 OD-4 report contract + the P1-T03 OD-4 reopen envelope-version forward fix + the M15 content_hash_version default removal
+  if (all.length !== 17) fail('T7I-73', `${all.length} migration files exist, expected 17`) // + the STAGE 1 attendance write path + the STAGE 1 report_source_map // 5 through Step 7I + the B2 assessment migration + the B2.1 correction-tracking migration + the B-V2-1 competency-vocabulary rename + the C2 report-context resolver + the C2-A atomic complete-save composer + the C3-A single-entry-point closure + the C3-A Phase 2b Management submitted-report list + the P1-T03 OD-4 report contract + the P1-T03 OD-4 reopen envelope-version forward fix + the M15 content_hash_version default removal
 
   // File 1 contains ONLY the ALTER TYPE statement and the P-1 guard.
   const adds1 = body1.match(/ALTER TYPE[\s\S]*?ADD VALUE/gi) || []
