@@ -25,30 +25,51 @@
 
 ---
 
-## 1. ⛔ DECISIONS I NEED FROM YOU FIRST — one of them is irreversible
+## 1. ✅ DECISIONS — ALL RULED BY THE OPERATOR, 2026-08-09
 
-**1.1 Supabase region — IRREVERSIBLE, SET AT CREATION.**
-ADR-6 pins **Singapore**. The region **cannot be changed after the project is created**;
-getting it wrong means **re-provisioning, not reconfiguring**. Confirm: *Singapore
-(`ap-southeast-1`)*.
+**1.1 Supabase region — ✅ SINGAPORE (`ap-southeast-1`) CONFIRMED**, verified in the dashboard.
+Irreversible and set at creation, so it was ruled first.
 
-**1.2 Do you accept spend?** Supabase and Vercel both have free tiers that plausibly suffice,
-but **cost is not the trigger — leaving this machine is**. The **OpenAI API key is
-definitely billable.** I need an explicit yes.
+**1.2 Spend — ✅ ACCEPTED**, capped in the OpenAI dashboard.
 
-**1.3 Which OpenAI model?** `.env.example` currently carries `LLM_MODEL=gpt-5.6-terra`, which
-I cannot verify as a real model id your key can reach. **Give me the exact model string** your
-account has access to. A wrong model id fails at the first draft request, in front of the
-audience.
+**1.3 Model id — ✅ RESOLVED, AND MY CAUTION WAS WRONG.**
+I flagged `gpt-5.6-terra` as unverifiable. **It is real.** One read-only `GET /v1/models` call
+(1 outward request, `api.openai.com` only) returned **124 model ids**, including
+`gpt-5.6-terra`, `gpt-5.6-sol`, `gpt-5.6-luna`, the `gpt-5.5`/`5.4`/`5.2`/`5.1`/`5` families,
+`gpt-4.1`, `gpt-4o`, `o1`/`o3`/`o4-mini`. **`.env.example` was correct and needs no change.**
+The credential in `.env.local` is valid.
 
-**1.4 GitHub remote.** Vercel's normal path deploys from a Git remote. There is **no remote
-today (remotes: 0)**. Confirm: create a repository, and **public or private?**
-⚠️ **Pushing this repository publishes the entire governance corpus and all build notes.**
-If that is not intended, say so — the alternative is Vercel's direct upload path.
+**✅ 1.3a ENDPOINT COMPATIBILITY — SETTLED. This was the highest-risk unknown, and it PASSED.**
 
-**1.5 Who performs the steps?** Every step below needs a browser, an account, or a credential.
-**I cannot do any of them.** I can prepare files, write config, and verify results *after* you
-act.
+I had flagged that `provider.ts` calls `/v1/chat/completions` while 5.x reasoning models are
+often driven through the Responses API. Measured, one bounded call:
+
+| | |
+|---|---|
+| Model | `gpt-5.6-terra` |
+| Endpoint | `POST /v1/chat/completions` — **exactly as `provider.ts:179` calls it** |
+| HTTP status | **200** |
+| Endpoint supported | **YES** |
+| **Structured outputs** (`response_format` json_schema, `strict: true`) | **YES — parsed and validated** |
+| `finish_reason` | `stop` |
+| Tokens | prompt 53 · completion 11 · **total 64** |
+| Outward requests | **1** (`api.openai.com` only) |
+| Fallback `gpt-5.4-mini` | **NOT RUN** — unnecessary, so no second call was made |
+
+⚠️ **The structured-outputs leg is the part that mattered.** A plain chat/completions probe
+would have proven transport and **not** structured outputs, and the drafting path needs both —
+that gap is precisely how a green here could have been false. The probe therefore sent the
+same strict `json_schema` the real call sends.
+
+⚠️ **NO GROUNDING VERDICT was derived from this.** It establishes **transport only**. The
+drafting path did not run. **`B-G06-DET-1` remains completely untested against real prose.**
+
+**1.4 Remote visibility — ✅ PRIVATE.** The governance corpus is **not** published. Vercel
+deploys from private repositories. Revisit only for Week-14 submission.
+
+**1.5 Who performs what — ✅ SETTLED.** The Operator performs every account-bound action
+(GitHub, Vercel, Supabase dashboard, and the three fixture passwords by no-echo stdin). I
+prepare, configure and verify around them. **Nothing open.**
 
 ---
 
