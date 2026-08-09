@@ -52,17 +52,42 @@ import { signOutFormAction } from "@/server/modules/identity-access/actions";
  */
 function SignOutControl({ variant }: { readonly variant: "rail" | "header" }) {
   return (
-    <form action={signOutFormAction} className={variant === "rail" ? "mt-4" : "shrink-0"}>
+    <form
+      action={signOutFormAction}
+      /*
+       * PHASE 0 — `mt-auto` moved onto the form itself. The frame ends the rail
+       * with a flex spacer and then a single row, with no divider above it and
+       * no block between it and the navigation.
+       */
+      className={variant === "rail" ? "mt-auto pt-6" : "shrink-0"}
+    >
       <button
         type="submit"
         data-testid="sign-out"
         className={
           variant === "rail"
-            ? "flex min-h-11 w-full items-center gap-3 rounded-nav px-3.5 py-2.5 text-body font-semibold text-neutral-on transition hover:bg-surface-muted hover:text-ink-strong"
+            ? "flex min-h-11 w-full items-center gap-3 rounded-nav px-3 py-2 text-[0.84375rem] font-medium text-neutral-on transition hover:bg-surface-muted hover:text-ink-strong"
             : "flex min-h-11 items-center gap-2 rounded-nav px-2.5 py-2 text-small font-semibold text-neutral-on hover:bg-surface-muted hover:text-ink-strong"
         }
       >
-        <Icon name="logout" size={18} />
+        {/*
+          ⚠️ THE VISIBLE LABEL IS "Sign out" AND MUST STAY "Sign out", AND
+          NOTHING MAY BE INSERTED BETWEEN THE GLYPH AND THE LABEL.
+
+          The frame draws "Logout". That difference is recorded as unresolved
+          TRUE-DRIFT rather than applied, because two ACCEPTED proofs pin this
+          exact string as the way they locate the production control —
+          `tests/frontend/sign-out-terminates-session.mjs` S-1, which requires
+          `/>` whitespace `Sign out` `<` INSIDE the form, and
+          `prove-disposable-app.mjs` G-22, which refuses unless the control it
+          clicked reports "Sign out". Renaming the label to match a caption
+          would silently retarget accepted evidence.
+
+          This comment sat BELOW the glyph in its first form and broke S-1 on
+          its own — the pinned pattern needs the label to follow the `/>`
+          directly. The suite caught it, which is the suite working.
+        */}
+        <Icon name="logout" size={variant === "rail" ? 20 : 18} />
         Sign out
       </button>
     </form>
@@ -156,8 +181,15 @@ function RolePortalShell({
       data-session-user={sessionSettled ? "settled" : "pending"}
       className="min-h-screen bg-canvas lg:grid lg:grid-cols-[15.625rem_minmax(0,1fr)]"
     >
-      <aside className="hidden min-h-screen border-r border-line bg-surface px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
-        <div className="px-1.5">
+      {/*
+        PHASE 0 — rail geometry measured off the `/reference/` exports, which
+        agree across the Trainer, Management and Parent frames: 250px wide
+        (already `LAYOUT_TOKENS.sidebarWidth`), 20px side padding, 28px top,
+        24px bottom, and NO right border — the frame separates the white rail
+        from the canvas by contrast alone.
+      */}
+      <aside className="hidden min-h-screen bg-surface px-5 pb-6 pt-7 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+        <div className="px-2">
           {/*
             F-01c — the brand mark is the FIRST keyboard tab stop in this shell, and this
             shell renders on all three portals. Its destination and accessible name are
@@ -183,7 +215,23 @@ function RolePortalShell({
           placeholders, muted avatars) untouched. The active link stays `text-brand-800` and
           the hover stays `text-ink-strong`; only the resting colour moves.
         */}
-        <nav aria-label={`${config.label} navigation`} className="mt-9 space-y-1.5">
+        {/*
+          PHASE 0 — item metrics from the same exports: 44px row, 12px side
+          padding, 12px radius, 12px gap, a 20px glyph and a 13.5px label. The
+          frame also carries WEIGHT as a second, non-colour cue for the current
+          item (500 resting, 600 active), which the build did not: it set 600 on
+          every row and distinguished the active one by colour alone. Weight is
+          now part of the active treatment, alongside `aria-current` and the
+          tint (GLOBAL_UI_RULES §7 — never colour alone).
+
+          The COLOURS deliberately do not match the frame and must not be
+          "fixed" to it. The frame's resting label is #8A93A6 on white (3.09:1)
+          and its active label is #EC4B96 on #FCE7F0 (2.97:1); both fail SC
+          1.4.3 for normal-size text. The build keeps `text-neutral-on` and
+          `text-brand-800`, and `tests/frontend/design-foundation.assertions.ts`
+          holds the active pair at >= 4.5:1 as a standing token invariant.
+        */}
+        <nav aria-label={`${config.label} navigation`} className="mt-8 space-y-2">
           {config.navigation.map((item) => {
             const active = isNavigationItemActive(item, pathname);
             return (
@@ -191,30 +239,31 @@ function RolePortalShell({
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-11 items-center gap-3 rounded-nav px-3.5 py-2.5 text-body font-semibold no-underline transition ${
+                className={`flex min-h-11 items-center gap-3 rounded-nav px-3 py-2 text-[0.84375rem] no-underline transition ${
                   active
-                    ? "bg-brand-100 text-brand-800"
-                    : "text-neutral-on hover:bg-surface-muted hover:text-ink-strong"
+                    ? "bg-brand-100 font-semibold text-brand-800"
+                    : "font-medium text-neutral-on hover:bg-surface-muted hover:text-ink-strong"
                 }`}
               >
-                {item.icon && <Icon name={item.icon} size={18} />}
+                {item.icon && <Icon name={item.icon} size={20} />}
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto border-t border-line pt-4">
-          <p className="px-3.5 text-micro font-bold uppercase tracking-[0.14em] text-neutral-on">
-            {config.label} workspace
-          </p>
-          <p className="mt-2 px-3.5 text-body font-bold text-ink-strong">
-            {user?.displayName ?? "Loading…"}
-          </p>
-          <p className="mt-0.5 px-3.5 text-small text-neutral-on">
-            {user?.centreDisplayName ?? "Synthetic centre"}
-          </p>
-          <SignOutControl variant="rail" />
-        </div>
+        {/*
+          PHASE 0 — the rail footer's workspace eyebrow, account name and centre
+          name are REMOVED. Every in-scope frame ends the rail with a spacer and
+          a single row, and places the signed-in identity in the top-right of
+          the content column instead — where this shell already renders it, so
+          nothing is lost, only de-duplicated. No harness reads the removed
+          block; `data-session-user` (the settled/pending flag the disposable
+          proof waits on) is on the shell root and is untouched, and the
+          "Trainer Portal" / "Management Portal" / "Parent Portal" strings that
+          `prove-stage3-authenticated.mjs` pins as Tier-1 selectors come from the
+          brand lockup above, not from here.
+        */}
+        <SignOutControl variant="rail" />
       </aside>
 
       <div className="min-w-0">
@@ -260,11 +309,16 @@ function RolePortalShell({
           <SignOutControl variant="header" />
         </header>
 
+        {/*
+          PHASE 0 — the content column's own padding and rhythm, from the same
+          exports: 28px sides, 24px top and bottom, and an 18px gap between
+          stacked blocks (previously 28px vertical padding and 20/24px gaps).
+        */}
         <main
           id="main-content"
-          className="mx-auto w-full max-w-content-max px-4 py-5 sm:px-6 sm:py-7 xl:px-7"
+          className="mx-auto w-full max-w-content-max px-4 py-5 sm:px-7 sm:py-6"
         >
-          <div className="mb-5 hidden items-center justify-end gap-3 lg:flex">
+          <div className="mb-[1.125rem] hidden items-center justify-end gap-3 lg:flex">
             <IconButtonSurface>
               <Icon name="bell" size={18} />
             </IconButtonSurface>
@@ -293,7 +347,7 @@ function RolePortalShell({
               server write, external notification, or publication occurs in this mode.
             </FeedbackBanner>
           )}
-          <div className="mt-6">{children}</div>
+          <div className="mt-[1.125rem]">{children}</div>
           {/*
             * ⚠️ INTERNAL PROVENANCE FOOTER — STAFF SURFACES ONLY.
             *

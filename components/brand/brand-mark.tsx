@@ -66,21 +66,35 @@ export function BrandMark(props: BrandMarkProps) {
   const { compact = false, portalLabel, size = "default" } = props;
   const large = size === "large";
 
+  /*
+   * PHASE 0 — the rail lockup is measured off `reference/Trainer - Schedule/`'s
+   * export, which is the same lockup in all three portal frames: a 38 x 38 tile
+   * at an 11px radius, a 10px gap, a 19px/700 wordmark and a 10.5px/500
+   * subtitle. The previous values (40px tile, 12px radius, 12px gap, 18px/800
+   * wordmark, 11px subtitle) were close but derived rather than read.
+   *
+   * `large` is UNCHANGED and deliberately so. It serves the authentication
+   * brand slot, where the frame carries the academy's own 400 x 153 raster
+   * wordmark — an asset with no recorded disposition. There is no measurable
+   * spec for the in-repo stand-in to be reconciled against, so tuning its
+   * proportions toward a frame it is not the asset for would be invention, not
+   * reconciliation. See the recorded asset dependency below.
+   */
   const content = (
     <>
       <span
         aria-hidden="true"
-        className={`grid place-items-center rounded-xl bg-brand-600 text-white shadow-raised ${
-          large ? "size-14" : "size-10"
+        className={`grid place-items-center bg-brand-600 text-white shadow-raised ${
+          large ? "size-14 rounded-xl" : "size-[2.375rem] rounded-[0.6875rem]"
         }`}
       >
-        <Icon name="cap" size={large ? 28 : 20} />
+        <Icon name="cap" size={large ? 28 : 22} />
       </span>
       {!compact && (
         <span className="leading-tight">
           <span
-            className={`block font-extrabold tracking-tight text-ink-strong ${
-              large ? "text-[1.75rem]" : "text-lg"
+            className={`block tracking-tight text-ink-strong ${
+              large ? "text-[1.75rem] font-extrabold" : "text-[1.1875rem] font-bold"
             }`}
           >
             B.E.S.T. Coach
@@ -93,8 +107,8 @@ export function BrandMark(props: BrandMarkProps) {
             captions, breadcrumbs). No token VALUE is redefined.
           */}
           <span
-            className={`block font-semibold text-neutral-on ${
-              large ? "text-body" : "text-micro"
+            className={`block text-neutral-on ${
+              large ? "text-body font-semibold" : "text-[0.65625rem] font-medium"
             }`}
           >
             {portalLabel ?? "iSpeak Academy"}
@@ -105,7 +119,7 @@ export function BrandMark(props: BrandMarkProps) {
   );
 
   const className = `inline-flex items-center no-underline ${
-    large ? "gap-4" : "gap-3"
+    large ? "gap-4" : "gap-2.5"
   } rounded-lg`;
 
   if (props.interactive === false) {

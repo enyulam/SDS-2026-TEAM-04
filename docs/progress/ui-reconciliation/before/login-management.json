@@ -1,0 +1,320 @@
+{
+  "role": "management",
+  "documentTitle": "B.E.S.T. Coach",
+  "bodyText": "B.E.S.T. Coach\niSpeak Academy\n\nSign in as\n\nTrainer\nManagement\nParent\nSign in\n\nWelcome back — enter your credentials to continue.\n\nEmail\nPassword\nShow password\nRemember me\n— not available\nForgot password?\n— not available\n\nRole selection is presentation only\nSigning in uses your own credentials and grants no authority by itself. Your access is derived on the server from your identity and your live membership, on every request. Selecting a role changes presentation only. It never authenticates or authorizes.\n\nSign in\n\nNeed access? Contact your school administrator.",
+  "pageBackground": "rgb(244, 245, 250)",
+  "column": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(51, 64, 92)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 400,
+      "h": 648.56,
+      "x": 520,
+      "y": 235.72
+    }
+  },
+  "brand": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(51, 64, 92)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "8px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 245.52,
+      "h": 56,
+      "x": 597.23,
+      "y": 139.72
+    }
+  },
+  "brandTile": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(255, 255, 255)",
+    "background-color": "rgb(236, 72, 153)",
+    "border-radius": "12px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 56,
+      "h": 56,
+      "x": 597.23,
+      "y": 139.72
+    }
+  },
+  "signInAsLabel": {
+    "font-size": "13px",
+    "font-weight": "700",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "20.15px",
+    "#rect": {
+      "w": 400,
+      "h": 20.14,
+      "x": 520,
+      "y": 235.72
+    }
+  },
+  "segmentList": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(51, 64, 92)",
+    "background-color": "rgb(241, 243, 248)",
+    "border-radius": "12px",
+    "padding-top": "4px",
+    "padding-bottom": "4px",
+    "padding-left": "4px",
+    "padding-right": "4px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 400,
+      "h": 48,
+      "x": 520,
+      "y": 265.86
+    }
+  },
+  "segmentSelected": {
+    "font-size": "14px",
+    "font-weight": "700",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgb(255, 255, 255)",
+    "border-radius": "8px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "8px",
+    "padding-right": "8px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 130.67,
+      "h": 40,
+      "x": 654.66,
+      "y": 269.86
+    }
+  },
+  "segmentUnselected": {
+    "font-size": "14px",
+    "font-weight": "700",
+    "color": "rgb(138, 147, 168)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "8px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "8px",
+    "padding-right": "8px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 130.66,
+      "h": 40,
+      "x": 524,
+      "y": 269.86
+    }
+  },
+  "heading": {
+    "font-size": "32px",
+    "font-weight": "800",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "40px",
+    "#rect": {
+      "w": 400,
+      "h": 40,
+      "x": 520,
+      "y": 341.86
+    }
+  },
+  "headingDescription": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(138, 147, 168)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "24px",
+    "#rect": {
+      "w": 400,
+      "h": 24,
+      "x": 520,
+      "y": 387.86
+    }
+  },
+  "emailLabel": {
+    "font-size": "13px",
+    "font-weight": "700",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "20.15px",
+    "#rect": {
+      "w": 400,
+      "h": 20.14,
+      "x": 520,
+      "y": 431.86
+    }
+  },
+  "emailInput": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgb(244, 245, 249)",
+    "border-radius": "10px",
+    "padding-top": "12px",
+    "padding-bottom": "12px",
+    "padding-left": "14px",
+    "padding-right": "14px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 400,
+      "h": 48,
+      "x": 520,
+      "y": 460
+    }
+  },
+  "emailPlaceholder": "management@fixture.invalid",
+  "passwordInput": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(27, 43, 75)",
+    "background-color": "rgb(244, 245, 249)",
+    "border-radius": "10px",
+    "padding-top": "12px",
+    "padding-bottom": "12px",
+    "padding-left": "14px",
+    "padding-right": "14px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 400,
+      "h": 48,
+      "x": 520,
+      "y": 552.14
+    }
+  },
+  "rememberMe": {
+    "font-size": "14px",
+    "font-weight": "400",
+    "color": "rgb(51, 64, 92)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 16,
+      "h": 16,
+      "x": 520,
+      "y": 618.2
+    }
+  },
+  "rememberMeDisabled": true,
+  "rememberMeHasName": false,
+  "forgotPassword": {
+    "tag": "SPAN",
+    "isLink": false,
+    "style": {
+      "font-size": "13px",
+      "font-weight": "700",
+      "color": "rgb(166, 174, 192)",
+      "background-color": "rgba(0, 0, 0, 0)",
+      "border-radius": "0px",
+      "padding-top": "0px",
+      "padding-bottom": "0px",
+      "padding-left": "0px",
+      "padding-right": "0px",
+      "line-height": "20.15px",
+      "#rect": {
+        "w": 109.03,
+        "h": 20.14,
+        "x": 810.97,
+        "y": 616.14
+      }
+    }
+  },
+  "governanceNote": {
+    "font-size": "13px",
+    "font-weight": "400",
+    "color": "rgb(138, 147, 168)",
+    "background-color": "rgb(244, 245, 249)",
+    "border-radius": "10px",
+    "padding-top": "10px",
+    "padding-bottom": "10px",
+    "padding-left": "14px",
+    "padding-right": "14px",
+    "line-height": "20px",
+    "#rect": {
+      "w": 400,
+      "h": 120,
+      "x": 520,
+      "y": 652.28
+    }
+  },
+  "submit": {
+    "font-size": "14px",
+    "font-weight": "700",
+    "color": "rgb(255, 255, 255)",
+    "background-color": "rgb(214, 53, 122)",
+    "border-radius": "10px",
+    "padding-top": "14px",
+    "padding-bottom": "14px",
+    "padding-left": "20px",
+    "padding-right": "20px",
+    "line-height": "21.7px",
+    "#rect": {
+      "w": 400,
+      "h": 52,
+      "x": 520,
+      "y": 788.28
+    }
+  },
+  "footerNote": {
+    "font-size": "13px",
+    "font-weight": "400",
+    "color": "rgb(138, 147, 168)",
+    "background-color": "rgba(0, 0, 0, 0)",
+    "border-radius": "0px",
+    "padding-top": "0px",
+    "padding-bottom": "0px",
+    "padding-left": "0px",
+    "padding-right": "0px",
+    "line-height": "20px",
+    "#rect": {
+      "w": 400,
+      "h": 20,
+      "x": 520,
+      "y": 864.28
+    }
+  },
+  "decorativeDiscs": 4
+}
