@@ -32,6 +32,8 @@ import {
 } from "@/server/modules/framework/dimensions";
 import { getTrainerObservationCore, type TrainerObservationDto } from "@/server/modules/observation/core";
 import type { AiDraftProvider, AiDraftRequest, ReportPanels } from "@/server/modules/ai-drafting/provider";
+import { resolveMaxDraftAttempts } from "@/server/modules/ai-drafting/draft-attempts";
+import { emitDraftDiagnostic } from "@/server/modules/ai-drafting/draft-diagnostics";
 import { validateGrounding, deriveSourceMap } from "@/server/modules/ai-drafting/grounding";
 import type { TrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
 import {
@@ -179,7 +181,24 @@ export async function requestDraftCore(
 
   let panels: ReportPanels | null = null;
   let failure: ActionResult<never> | null = null;
-  for (let attempt = 1; attempt <= 2 && panels === null; attempt += 1) {
+
+  // The ratified bound is 2 (one attempt plus one retry) and an ABSENT
+  // variable still means 2 — production behaviour is unchanged. Only a
+  // PRESENT-but-malformed value throws.
+  let maxAttempts: number;
+  try {
+    maxAttempts = resolveMaxDraftAttempts();
+  } catch {
+    return {
+      outcome: "generation_failure",
+      retryable: false,
+      message: "Draft generation is not configured on this environment.",
+    };
+  }
+
+  const diagRatings = saved.ratings.map((r) => ({ dimensionCode: r.dimensionCode, rating: r.rating }));
+
+  for (let attempt = 1; attempt <= maxAttempts && panels === null; attempt += 1) {
     const outcome = await deps.provider.generate(aiRequest);
     if (outcome.kind === "ok") {
       const verdict = validateGrounding(outcome.panels, {
@@ -189,6 +208,20 @@ export async function requestDraftCore(
           displayName: r.displayName,
           rating: r.rating,
         })),
+      });
+      // SERVER-SIDE diagnostics only. `verdict.reasons` and the panel text
+      // were previously computed and discarded, leaving a fail-closed check
+      // with no diagnosable cause. This records them and changes NO gate, NO
+      // lexicon and NO threshold — the decision below is byte-identical.
+      emitDraftDiagnostic({
+        reportId,
+        attempt,
+        maxAttempts,
+        result: verdict.ok ? "ok" : "grounding_rejected",
+        reasons: verdict.ok ? [] : verdict.reasons,
+        panels: outcome.panels as unknown as Record<string, string>,
+        ratings: diagRatings,
+        usage: (outcome.metadata?.usage ?? null) as Record<string, number> | null,
       });
       if (verdict.ok) {
         panels = outcome.panels;
@@ -200,6 +233,7 @@ export async function requestDraftCore(
         };
       }
     } else if (outcome.kind === "provider_failure") {
+      emitDraftDiagnostic({ reportId, attempt, maxAttempts, result: "provider_failure", ratings: diagRatings });
       failure = {
         outcome: "generation_failure",
         retryable: outcome.retryable,
@@ -207,6 +241,11 @@ export async function requestDraftCore(
       };
       if (!outcome.retryable) break;
     } else {
+      emitDraftDiagnostic({
+        reportId, attempt, maxAttempts, result: "malformed",
+        reasons: [outcome.kind === "schema_rejected" ? outcome.detail : String(outcome.kind)],
+        ratings: diagRatings,
+      });
       failure = {
         outcome: "generation_failure",
         retryable: true,
