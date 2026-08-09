@@ -2922,3 +2922,56 @@ By the ratified **annotate-never-delete** method (strike, preserve inline, cite,
 
 - **Failures and recovery** — one, and it was the valuable kind: `G06-M1` failing loudly, described above. Caught by running the mutation section rather than assuming the lexicon change was additive-only.
 - **Next permitted action** — unchanged: **P1-T11**.
+
+
+---
+
+## 2026-08-09 — P1-T11 part 1: the two adversarial reviews landed, and they found real defects
+
+- **Checkpoint / phase** — Plan Phase 1, **P1-T10 completed** and **P1-T11 begun**. **Starting HEAD** `0f8374b` → **ending HEAD** `9fe4a5b`, plus a continuity commit. **Migration / schema changes — NONE** (`git diff --name-only 16b7710 HEAD -- supabase/migrations/` is empty for the whole run).
+- **Authority** — `CLAUDE.md` §14.6 (a valid Critical/High must be remediated before `PASS`) and §14.5 (**never accept a subagent claim at face value**). Both reviewers were READ-ONLY and instructed to falsify rather than confirm.
+
+### Every material finding was reproduced at source before being acted on
+
+This mattered. §14.5 records that three of six subagent claims were corrected rather than accepted in the Phase A run, so nothing here was taken on the reviewer's word: reviewer 1's findings were re-run against the shipped pure function in an independent script, and reviewer 2's two Criticals were verified by reading the cited lines and the component that emits the DOM attribute.
+
+**Reviewer 1 also listed ten attacks that FAILED** — `resolveBands`/rule 1b, rule 3 having no escape, rule 4 not leaking into the other three panels, and M1/M2/M4 being genuine. That is positive evidence for those controls and is recorded as such, not discarded because it was not a finding.
+
+### The two Criticals both produced a SILENT FALSE GREEN
+
+Neither could have been caught by an assertion, which is the whole argument for adversarial review.
+
+1. **`DisposableTrustedDraftStore` was storing four `"undefined"` panels.** It still read `request.todaysStrength` / `.nextFocus` / `.practiceSuggestion` / `.sessionTakeaway` long after `StoreDraftRequest` moved to the OD-4 four. Those reads are `undefined`, and `undefined` interpolates into a `psql -v` argument as the **literal four-character string `"undefined"`** — so the suite committed four garbage panels and reported success. Retargeted, and a **fail-closed type guard** added so the *class* of defect is closed, not just today's instance.
+2. **Four dead DOM selectors aborted the harness before every leg the previous commit claimed to repair.** `label[data-panel-editor="sessionTakeaway"]` matches nothing — the editor emits `data-panel-editor={panel.key}` from `REPORT_PANEL_CONFIG`. `waitUntil` throws at 30 s. Retargeted to `areasForDevelopment`, **chosen by meaning** (the prose is developmental) rather than by inheriting the old fourth slot.
+
+⚠️ **My earlier superseded-name census was snake_case-only, which is exactly how four camelCase identifiers and a display-label array survived it.** Re-run case-insensitive and identifier-aware. The remaining hits are explanatory comments and **deny-lists that must keep the old names because they assert absence** — migrating those would have deleted five controls while looking like housekeeping.
+
+### The High wedged the one path no agent can run
+
+The P1-T09a expansion FK-attaches rows to the ratified trainer membership under `ON DELETE RESTRICT`, and `local_fixtures.sql:110-115` deletes exactly that membership — so `--reload` would have failed mid-teardown on the Operator's **credential-gated** fixture reload, which needs three no-echo passwords and cannot fall back on `supabase db reset` (prohibited outright). The loader now **fails closed before any mutation** and prints the exact remediation command.
+
+**Proven rather than asserted, in four steps:** the guard fired on 36 rows and exited 1 **without reaching the password prompt**; the documented remediation command was run **verbatim** and cleared them; the **negative control** then passed at 0 rows and execution continued to the normal preflight; and re-applying the expansion left the canonical checksum **byte-identical**.
+
+### Grounding: ten confirmed findings, all closed as "the implementation now matches the RULED rule"
+
+`F1` dimension display names were undetectable, so `"Body was mastered"` about a `beginning` dimension was ACCEPTED while the same sentence about Tonality rejected · `F2` bare `needs`/`needed` were a **general-purpose** escape, not support framing · `F3` the escape was sentence-local but **not dimension-local**, a literal miss against `G06-6` · `F5`/`F6` anchor integrity was **arity-only** (an **inverted A-051 map** still counted four bands while disarming rules 3 and 4) · `F7`/`F8`/`F9`/`F11` substring matching failed in **both** directions — `strong`→"stronger" and `tone`→"monotone" false-REJECTED valid English, while `eye-contact`/`eyecontact`/a double space false-ACCEPTED a contradiction · `F12` four **empty** panels ACCEPTED · `F4`/`F17` required proofs 8 and 9 were **vacuous**, still rejecting with rule 4 disarmed because their asserted fragment is emitted by rule 3 too.
+
+⚠️ **`R-A` was not quietly walked back.** Rule 4 still reaches `strengths` only; Remarks stays polarity-neutral. No rule was added, no panel gained a polarity posture it was not ruled, and no ruled escape was narrowed.
+
+### Two failures that were valuable, and are recorded rather than smoothed over
+
+- **`G06-M1` failed loudly for the second time.** Its mutated lexicon leaned on `"develop"` matching inside `"developing"`, which word-boundary matching correctly no longer does — so the mutation could not flip the verdict and **the case had stopped proving its control**. Re-derived to target the control that actually changed (restoring bare `needs`/`needed` must flip it to ACCEPT). Not deleted, not relaxed.
+- **`T7I-71` failed after the prose change**, because four byte-identical literals elsewhere in the suite had to track the panel values. Caught by running the suite rather than assuming the edit was local.
+- **The fixture provider was emitting a draft its OWN gate rejects** at the all-`beginning` distribution: its support framing sat in a different clause from the dimension it framed. Fixed at the provider — the rule is correct.
+
+### Positional prose — the gap I self-reported last session, now closed
+
+Four suites passed pre-OD-4 prose **positionally**, so `'Vary pace when excited'` landed in `strengths` and eye contact (rated `beginning`) was praised as demonstrated. Re-derived by meaning. **Stated honestly: the shipped validator ACCEPTS both old and new prose**, so this is a semantic-correctness fix, not a grounding-detected defect — `pace` names no term in `DIMENSION_TERMS`, which is the limited-reach issue reviewer 1 raised separately.
+
+### Automated verification — all RAN, serially (global test mutex)
+
+`tsc` **0** · `eslint` **0** · **`prove-g06-grounding` 0 — 171 checks** (113 → 124 → 171; new section A makes every confirmed finding a permanent case, each with a negative control) · **`run-canonical` 0**, canonical checksum **`6bdff280…ffc576`** reproduced identically on two runs · **`run-integration` 0**, **REAL-PROVIDER LEG OFF**, `INT-L2b` SKIPPED, and the **S-3 outward-call trip-wire observed ZERO non-loopback requests** · **`prove-session-continuity` 0** · **`run-exit-condition-b` 0 (7/7)** · evidence probe **0 disagreements** · `run-assessment` **0 (45/45)** · `run-correction-tracking` **0** · `run-management-approved` **0** · `run-c2` **0**. `BEST_COACH_RUN_REAL_PROVIDER_LEG` verified **UNSET** before the integration run (S-2).
+
+- **Recorded, NOT fixed** — `run-c2` failed **once** immediately after `run-canonical` in a batched loop, then passed on three consecutive solo runs. Consistent with the known template-clone race (`datallowconn` → `pg_terminate_backend` → `pg_sleep(1)`). Not diagnosed; **not claimed resolved**.
+- **NOT-RUN and not claimed** — the three browser/C4 harnesses (repaired and typechecked, never executed), `prove-disposable-identity-linkage.mjs`, every real-provider leg, and the **§3 persona sign-offs**.
+- **Next permitted action** — finish `P1-T11`: the browser/C4 ledger under **S-1/S-2/S-3** with the selector overwrite proven **by read-back** (never deleted — `@next/env` refills a deleted key from `.env.local`, the exact mistake behind the earlier billed run), every login leg recorded as an **ADMIN-MINTED SESSION** and never as a sign-in proof; re-run the suites not run this session; re-review the materially changed grounding work; then record the persona sign-offs.
