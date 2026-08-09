@@ -2975,3 +2975,60 @@ Four suites passed pre-OD-4 prose **positionally**, so `'Vary pace when excited'
 - **Recorded, NOT fixed** — `run-c2` failed **once** immediately after `run-canonical` in a batched loop, then passed on three consecutive solo runs. Consistent with the known template-clone race (`datallowconn` → `pg_terminate_backend` → `pg_sleep(1)`). Not diagnosed; **not claimed resolved**.
 - **NOT-RUN and not claimed** — the three browser/C4 harnesses (repaired and typechecked, never executed), `prove-disposable-identity-linkage.mjs`, every real-provider leg, and the **§3 persona sign-offs**.
 - **Next permitted action** — finish `P1-T11`: the browser/C4 ledger under **S-1/S-2/S-3** with the selector overwrite proven **by read-back** (never deleted — `@next/env` refills a deleted key from `.env.local`, the exact mistake behind the earlier billed run), every login leg recorded as an **ADMIN-MINTED SESSION** and never as a sign-in proof; re-run the suites not run this session; re-review the materially changed grounding work; then record the persona sign-offs.
+
+
+---
+
+## 2026-08-09 — ITEM 1 (fixture/gate collision) RESOLVED BY EXECUTION · detector residual registered · two bounded authority corrections
+
+- **Checkpoint / phase** — Plan Phase 1, **`P1-T11` continuing**. **Starting HEAD** `b50dded`. **Migration / schema changes — NONE.** No DDL, no migration, no schema object, no enum value, no RPC, no grant, no audit action string.
+- **Authority** — an explicit bounded Operator instruction (v2 delta) that (a) gated this run on item 1, (b) authorized exactly two annotate-never-delete corrections at named locations, and (c) directed two items be **registered open and NOT resolved**.
+
+### Item 1 — the fixture provider passes its own gate. Established by execution, not inspection.
+
+The prior session recorded that the deterministic fixture provider had once emitted a draft its own grounding gate refused. The Operator required the **current** verdict by execution, and specifically whether the widened `ACHIEVEMENT_TERMS` (`highlight` / `worth celebrating`) **false-rejects** the fixture for a learner carrying non-positive dimensions — noting that `G06-R1/R2/R3` cover **constructed** cases, not the hero fixture.
+
+**Verdict: NO to both. 9 distributions, 9 ACCEPT, 0 non-accept.** The two LIVE observations were read out of `observation_ratings` (not transcribed) and fed through `DeterministicFixtureDraftProvider` then `validateGrounding`, alongside all-`beginning` (the distribution that produced the original defect), all-`developing`, all-`mastering`, all-`mastered`, one-positive/eight-`beginning`, eight-positive/one-`beginning`, and a mixed no-positive shape.
+
+⚠️ **The reason is structural rather than fortunate, which is the part worth recording:** the fixture's output contains **ZERO hits from the entire 28-term achievement lexicon at every distribution**. Rule 3 fires only on achievement language naming a non-positive dimension, so there is nothing for the widened lexicon to reach. Widening it again would still not touch the fixture.
+
+**The probe was proven capable of firing before its ACCEPTs were believed.** A probe that only goes green is the silent-false-green shape this project has already shipped twice. Four planted regressions against the all-`beginning` output were all correctly REJECTED — C3b celebratory wording in Remarks, bare `strong` in Overview, a rule-4 contradiction in Strengths, and celebratory wording in Strengths (caught by **two** independent rules). Anchor check confirmed 28 achievement terms including both ratified celebratory entries, and the four OD-4 panel keys. **This ran with no serving discipline required: no serve, no browser, no provider call** — both functions are local and pure.
+
+### A finding fell out of it: a control named after the fixture was asserting a shape nobody had re-derived
+
+`prove-g06-grounding.mjs` section F carried a distribution labelled *"the ratified fixture shape"*. It was a **hand-transcribed literal**, and it had **drifted from the database in 2 of 9 positions** — `emotional_expression` and `audience_awareness` both read `developing`, while the live rows carry `mastering` and `mastered`. **No test was failing**, because both shapes ACCEPT — which is exactly why it survived every prior pass. A control labelled with the fixture's name while asserting a shape nobody re-derived does not prove what its label claims.
+
+Re-derived from the live catalogue, and the **second** live observation (the P1-T09a continuity expansion) added as an eighth distribution, so section F now genuinely covers the hero fixture. **The values stay literals on purpose** — this harness is pure by design (no database, no fixture row, no network) and that property is worth more than auto-derivation; the cost is a re-derivation obligation, which is now written into the file beside the query that produces it.
+
+### `B-G06-DET-1` — detector completeness, REGISTERED OPEN, and moved from prose into evidence
+
+Rule 3 is **lexical**, so its false-negative class is **open-ended**. The second G-06 decision closed the C3b **instance**; it did not and could not close the **class**. Per Operator instruction this is registered, **not resolved** — and expressly **not** by widening the lexicon again.
+
+New **section D** measures it at run time. Of 18 positive formulations about a `needs_support` dimension placed in Remarks (where `R-A` leaves rule 4 absent and only rule 3 can catch anything), **3 are caught and 15 are UNMATCHED**: "a joy to watch", "one of Ava's best skills", "nailed eye contact", "spot on", "came naturally", "needs no further work", "well above what we expect", "a pleasure to see", "second nature", "led the group", "better than anyone else's", "requires no prompting", "fully secured", "faultless", "a real credit". Each would reach a parent-facing panel.
+
+**Three hard control assertions guard the section against vacuity** — if rule 3 breaks, section D fails loudly rather than quietly reporting a larger residual. **Practical bound today:** the hero path runs on the fixture provider, which emits none of this vocabulary; this is a **real-provider** risk, and the real provider is at **ZERO AUTHORIZED**.
+
+### A defect in my own first draft, caught by reading output rather than the exit code
+
+Section D's control cases initially passed a bare string as `checkReject`'s `mustMention`. That parameter is **iterated**, so the string was walked character by character — producing 24 vacuous `names "c"` / `names "o"` assertions that all trivially passed. **Exit code 0, 225 checks, and almost nothing asserted.** Corrected to an array (`["remarks","eye_contact","contradicts"]`), which is why the count *fell* to 201 while the proof got stronger. Recorded because it is the same class of defect this section exists to catch, committed by the person writing the section.
+
+### `B-C2-1` — the `run-c2` flake: cause claim WITHDRAWN
+
+The prior entry and the STATUS row both attributed the single post-`run-canonical` failure to the known template-clone race (`datallowconn` then `pg_terminate_backend` then `pg_sleep(1)`). **That attribution is withdrawn.** It was a plausible mechanism asserted **without evidence** — no diagnostic was ever run against it. It may still be the cause; nothing has shown that it is. Per Operator instruction it is now registered `OPEN · UNDIAGNOSED` and **explicitly linked to hero negative control K** (duplicate/concurrent action must not create a duplicate canonical version or corrupt state): an intermittent, order-dependent failure in a concurrency-adjacent suite is the exact shape control K exists to detect, so **K must not be reported satisfied while this is open**. Next diagnostic recorded in STATUS. *(BUILD_NOTES is append-only, so the earlier entry stands as written and is corrected forward here.)*
+
+### The two bounded §12 authority corrections
+
+Both by the ratified annotate-never-delete method (strike · preserve inline · cite · date), at the named locations and nowhere else:
+
+- **Authority Lock §19.1** — census `12 → 15` migrations, `34 → 36` functions, `9 → 11` owner-only, naming **M13** `od4_report_contract`, **M14** `od4_reopen_envelope_version_fix`, **M15** `od4_content_hash_version_no_default`, and the two V2 serializers **`report_content_hash_v2`** / **`report_wording_hash_v2`**. ⚠️ **`authenticated` EXECUTE is UNCHANGED at 25** — the V2 serializers took **zero** client EXECUTE, so **R-27 is untouched** — and tables/enums/policies are unchanged. Each figure was queried live before being written. Also recorded there: M13's `schema_migrations` row carries an empty `name`; cosmetic, **do not alter canonical DB state to tidy it**.
+- **`CLAUDE.md` §14.3a** — records that **both 48H worktree directories are absent from disk** (`git worktree list` returns only `main`; `worktrees/` does not exist), that both branches remain reachable via `frozen/48h-backend-402b0b6` / `frozen/48h-frontend-6762b5c`, and that **`CLOSED_BY_NONUSE_POLICY` is unaffected** and removal of anything further is not authorized.
+
+**Both are enumeration/state corrections only. No clause, ruling, grant, disposition or supersession is changed by either.**
+
+### Automated verification — RAN this session, with exit codes
+
+`npx tsc --noEmit` **0** · `npx eslint .` **0** (one warning found and fixed, not suppressed) · `node --check` parse OK · **`prove-g06-grounding` 0 — 201 checks, 0 failures**, section F now 8 distributions including both live observations, section D reporting 15/15 residual. **Q-28 post-write encoding verified via Node** on all three edited files: **0 BOMs**, Unicode round-trips, and the only double-encoding-lookalike hits in `CLAUDE.md` proved **byte-identical to HEAD** — they are the literal example text inside the Q-28 rule itself, not corruption.
+
+- **PROVIDER: NO** — zero calls, zero provider constructions, nothing served, no browser, no outward request. **HOSTED: NO. HUMAN: NO. PUBLIC: NO. PUSH: NO. SUBMISSION: NO.**
+- **NOT-RUN and not claimed** — the three browser/C4 harnesses (still repaired-but-never-executed), `prove-disposable-identity-linkage.mjs`, every real-provider leg, `build`, `verify-fresh-apply`, `run-c3-bypass`, `run-concurrency`, `prove-clock-hour-determinism`, the remaining SQL suites, and the **§3 persona sign-offs**.
+- **Next permitted action** — the browser/C4 ledger under §7.4a **S-1/S-2/S-3**, per the resume checkpoint in `STATUS.md`.

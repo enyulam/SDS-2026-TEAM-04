@@ -664,7 +664,33 @@ const DISTRIBUTIONS = [
   ["all mastered", () => "mastered"],
   ["mixed, one positive", (d) => (d.code === "body" ? "mastered" : "beginning")],
   ["mixed, one needs_support", (d) => (d.code === "eye_contact" ? "beginning" : "mastering")],
-  ["the ratified fixture shape", (d, i) => ["mastered", "developing", "mastering", "developing", "beginning", "beginning", "developing", "mastering", "developing"][i]],
+  // ⚠️ RE-DERIVED FROM THE LIVE DATABASE, 2026-08-09. The single entry that
+  // used to sit here was labelled "the ratified fixture shape" but was a
+  // HAND-TRANSCRIBED literal, and it had DRIFTED: positions 7 and 9
+  // (emotional_expression, audience_awareness) both read `developing`, while
+  // the live `observation_ratings` rows carry `mastering` and `mastered`.
+  // Both shapes happen to ACCEPT, so nothing was failing -- which is exactly
+  // why it went unnoticed. A control labelled with the fixture's name while
+  // asserting a shape nobody re-derived does not prove what its label claims.
+  //
+  // Both live observations are now covered, read out of the database with:
+  //   select r.dimension_code, r.rating from public.observation_ratings r
+  //   join public.assessment_dimensions d on d.code = r.dimension_code
+  //   order by r.observation_id, d.sort_order;
+  // FRAMEWORK_DIMENSIONS is in that same sort_order, so index i aligns.
+  //
+  // These stay literals ON PURPOSE: this harness is PURE (no database, no
+  // fixture row, no network -- see the header), and that property is worth
+  // more than auto-derivation. The cost is that they must be re-derived
+  // whenever the fixture changes, which is what this comment is for.
+  [
+    "live fixture observation e9000000 (the ratified Step 7F shape)",
+    (d, i) => ["mastered", "developing", "mastering", "developing", "beginning", "beginning", "mastering", "developing", "mastered"][i],
+  ],
+  [
+    "live fixture observation c9000000 (the P1-T09a continuity expansion)",
+    (d, i) => ["mastering", "developing", "beginning", "mastering", "mastered", "developing", "beginning", "mastering", "mastered"][i],
+  ],
 ];
 
 for (const [label, ratingOf] of DISTRIBUTIONS) {
@@ -929,6 +955,99 @@ checkReject(
     failures += 1;
     console.log("FAIL G06-A7c -- an inverted polarity map was not caught");
   }
+}
+
+// =====================================================================
+// SECTION D -- DETECTOR COMPLETENESS: THE OPEN FALSE-NEGATIVE CLASS.
+//
+// REGISTERED OPEN BY OPERATOR INSTRUCTION, 2026-08-09. NOT RESOLVED HERE,
+// and this section must NOT be read as authorization to close it.
+//
+// Rule 3 is LEXICAL: it fires when a sentence carries a term from
+// ACHIEVEMENT_TERMS and names a dimension whose own rating is non-positive.
+// That makes its false-negative class OPEN-ENDED -- English has unbounded
+// ways to praise something. The second G-06 decision (`highlight` /
+// `worth celebrating`) closed the packet's canonical C3b INSTANCE. It did
+// not, and could not, close the CLASS.
+//
+// The Operator's instruction: "Enumerate at least three further unmatched
+// positive formulations against a needs_support dimension in the proof
+// output, so the residual is visible in evidence rather than prose."
+//
+// So the register below is MEASURED at run time, not asserted from memory.
+// Every sentence makes a positive claim about `eye_contact`, which INPUT
+// rates `beginning` -> needs_support, and every one is placed in REMARKS,
+// where R-A leaves rule 4 absent and only rule 3 (lexical) can catch it.
+//
+// WHY THIS IS NOT A FAILURE. Closing the class needs either a new ruling or
+// a non-lexical detector, and both are CLAUDE.md §12 stop-and-ask. Widening
+// the lexicon again is EXPRESSLY not the default answer. The practical
+// bound today is that the hero path runs on the DETERMINISTIC FIXTURE
+// PROVIDER, whose output contains ZERO terms from the 28-entry achievement
+// lexicon at EVERY distribution (section F) -- so none of these formulations
+// can be emitted. This residual is a REAL-PROVIDER risk, and the real
+// provider is at ZERO AUTHORIZED.
+// =====================================================================
+console.log("\n--- D. detector completeness: the OPEN false-negative class (registered, not resolved) ---");
+
+const RESIDUAL_PROBES = [
+  "Ava's eye contact was a joy to watch today.",
+  "Eye contact is clearly one of Ava's best skills.",
+  "Ava nailed eye contact in every activity.",
+  "Ava's eye contact was spot on the whole session.",
+  "Eye contact came naturally to Ava today.",
+  "Ava needs no further work on eye contact.",
+  "Ava's eye contact is well above what we expect at this stage.",
+  "Ava's eye contact was a pleasure to see.",
+  "Eye contact was second nature to Ava.",
+  "Ava led the group with her eye contact.",
+  "Ava's eye contact was better than anyone else's today.",
+  "Ava's eye contact requires no prompting at all.",
+  "Ava has fully secured eye contact.",
+  "Ava's eye contact was faultless.",
+  "Eye contact is a real credit to Ava.",
+];
+
+// The control cases. If these stop rejecting, rule 3 has broken and this
+// section is no longer measuring a residual -- it is measuring an outage.
+// These are HARD assertions; the residual probes below are not.
+for (const [id, sentence] of [
+  ["G06-D1", "Eye contact was a real highlight worth celebrating at home."],
+  ["G06-D2", "Ava's eye contact was excellent throughout."],
+  ["G06-D3", "Ava has mastered eye contact."],
+]) {
+  checkReject(
+    id,
+    { ...BASE, remarks: sentence },
+    INPUT,
+    // An ARRAY of fragments. `checkReject` iterates this, so a bare string
+    // would be walked character by character and assert almost nothing --
+    // eleven vacuous "names c" / "names o" checks instead of one real one.
+    ["remarks", "eye_contact", "contradicts"],
+    "rule 3 still catches the lexicon it DOES cover (guards this section against vacuity)",
+  );
+}
+
+let residualOpen = 0;
+let residualClosed = 0;
+for (const sentence of RESIDUAL_PROBES) {
+  checks += 1;
+  const verdict = validateGrounding({ ...BASE, remarks: sentence }, INPUT);
+  if (verdict.ok) {
+    residualOpen += 1;
+    console.log(`RESIDUAL G06-D -- NOT MATCHED: "${sentence}"`);
+  } else {
+    residualClosed += 1;
+    console.log(`RESIDUAL-CLOSED G06-D -- now caught: "${sentence}" (update this register)`);
+  }
+}
+console.log(
+  `RESIDUAL SUMMARY -- ${residualOpen} of ${RESIDUAL_PROBES.length} positive formulations about a ` +
+    `needs_support dimension are UNMATCHED by rule 3 and would reach a parent-facing panel ` +
+    `(${residualClosed} since closed).`,
+);
+if (residualOpen === 0) {
+  console.log("RESIDUAL SUMMARY -- every probe is now caught; re-derive this register with fresh probes.");
 }
 
 // =====================================================================

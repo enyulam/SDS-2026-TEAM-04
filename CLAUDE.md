@@ -742,6 +742,17 @@ Only inside an authorized implementation phase, and only with these conditions a
 
 `worktrees/backend-48h` (`feat/48h-backend` @ `402b0b6`) and `worktrees/frontend-48h` (`feat/48h-frontend` @ `6762b5c`) are **HISTORICAL / FROZEN IMPLEMENTATION ARTEFACTS.**
 
+> ✅ **CORRECTED 2026-08-09 under an explicit bounded Operator instruction naming this location only. THIS SECTION DESCRIBES BOTH WORKTREES AS EXISTING ON DISK. THEY DO NOT.**
+>
+> **Measured 2026-08-09:** `git worktree list` returns **exactly one** entry (`main`), and **neither physical directory is present** — `worktrees/` itself does not exist. Both were removed on 2026-08-08 by `git worktree remove` under explicit Operator approval, after all five preconditions plus a tag anchor were proved (see `docs/progress/STATUS.md`, Worktrees row).
+>
+> **What is unchanged, and remains absolute:**
+> - **Both branches remain fully reachable** in the main repository's shared `.git`, anchored by the tags **`frozen/48h-backend-402b0b6`** and **`frozen/48h-frontend-6762b5c`**. Nothing was lost.
+> - **`CLOSED_BY_NONUSE_POLICY` is unaffected.** Neither branch may ever be used for Final MVP implementation, and no contract, status, precedence chain or report-panel model may be taken from either. Their corpora predate the Phase A corrections and OD-4 and still describe the **superseded** report panels.
+> - **Removal of anything further is NOT authorized.** Inspection only.
+>
+> **Read the prose below as historical.** Where it says a worktree directory exists, may be inspected, or may be proposed for removal, that describes the pre-2026-08-08 layout. The prohibitions it carries are current; its description of on-disk state is not. **This is a state correction only — no rule, ruling or disposition is changed by it.**
+
 **The prohibitions — standing and absolute:**
 
 1. **Do NOT modify their `CLAUDE.md`, `STATUS.md`, or any other stale governance file inside them.** They remain protected under Authority Lock §31.11 (*"untouched, and must remain so"*).

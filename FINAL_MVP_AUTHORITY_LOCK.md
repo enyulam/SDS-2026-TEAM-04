@@ -601,9 +601,25 @@ The recorded option table priced the direct-connection family as *"Introduces a 
 
 ### 19.1 The ratified Final MVP census
 
-**12 migrations · 26 tables · 34 functions · 12 enums · 29 RLS policies · 25 `authenticated` EXECUTE · 9 owner-only functions.**
+~~**12 migrations · 26 tables · 34 functions · 12 enums · 29 RLS policies · 25 `authenticated` EXECUTE · 9 owner-only functions.**~~
 
-Verified three independent ways on 2026-08-07: the migration files on disk, the live catalogue, and the applied-migration table. **All 34 function names are distinct — there is no `CREATE OR REPLACE` and no `DROP FUNCTION` anywhere in the migration set**, so 34 is exact and not an artefact of redefinition.
+✅ **CORRECTED 2026-08-09 under an explicit bounded Operator instruction naming this location only.** The struck figures were accurate on 2026-08-07 and are preserved per annotate-never-delete. **The current live census is:**
+
+**15 migrations · 26 tables · 36 functions · 12 enums · 29 RLS policies · 25 `authenticated` EXECUTE · 11 owner-only functions.**
+
+**What moved, and why — three migrations and two functions, nothing else:**
+
+| Delta | Cause |
+|---|---|
+| migrations **12 → 15** | **M13** `20260809120000_od4_report_contract.sql` · **M14** `20260809160000_od4_reopen_envelope_version_fix.sql` · **M15** `20260809180000_od4_content_hash_version_no_default.sql` — the OD-4 report contract and its two follow-on corrections |
+| functions **34 → 36** | exactly **two**: **`report_content_hash_v2`** and **`report_wording_hash_v2`**, the PARALLEL V2 serializers required by **G-05a** (V1 frozen byte-for-byte, new versions stamped `content_hash_version = 2`, the CHECK widened to `1 or 2`) |
+| owner-only **9 → 11** | the same two functions, which took **ZERO client EXECUTE** |
+| `authenticated` EXECUTE **25 → 25** | ⚠️ **UNCHANGED, and this is the governance-relevant fact.** The V2 serializers added no client-reachable surface. **R-27 is untouched** — `report_store_draft` still holds `{postgres=X/postgres}` |
+| tables · enums · policies | **unchanged** — the OD-4 migration set added no table, enum or RLS policy |
+
+Verified against the live catalogue and `supabase_migrations.schema_migrations` on 2026-08-09 (15 files on disk = 15 applied rows). ~~All 34 function names are distinct~~ **All 36 function names remain distinct** — there is still **no `CREATE OR REPLACE` and no `DROP FUNCTION` anywhere in the migration set**, so 36 is exact and not an artefact of redefinition. **This is an enumeration correction only: no clause, ruling, grant or supersession is changed by it.**
+
+⚠️ **Recorded, not fixed (cosmetic):** M13's row in `supabase_migrations.schema_migrations` carries an **empty `name` column**. The migration is applied and verified; only the ledger label is blank. **Do not alter canonical database state to tidy this.**
 
 ### 19.2 The historical 28 — and what it is not
 
