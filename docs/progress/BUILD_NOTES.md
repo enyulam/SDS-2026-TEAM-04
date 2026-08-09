@@ -3515,3 +3515,54 @@ Recorded because each produced a wrong verdict about a working system:
 * **A generic settle predicate was wrong twice** — first too narrow (missed "Loading Management report queue"), then too broad (any page containing "Loading" never settled). Replaced with waiting on the selectors each leg actually asserts.
 * **Clicks fired into a pending mutation** hit a disabled button and did nothing, leaving the learner marked absent; the assessment then correctly refused ("not recorded present"), and every downstream leg failed as a consequence of the harness, not the app.
 * **A vacuous assertion produced a false PASS.** The save leg's predicate `/saved|Generate|draft|Review/i` matched the page's own "REVIEW & APPROVE" heading. The database showed **0 observation ratings and no report**. Caught by measuring the database rather than trusting the leg. This is the same class as the false-CLEAN secret scan: an assertion that cannot fail is not an assertion.
+
+## 2026-08-10 — Two clean demonstration learners seeded (hosted-only); `hero-feature-baseline` tagged
+
+**Branch:** `main` · **HEAD at entry:** `5f3a543` · **Track:** rehearsal stop, build frozen
+
+### Scope
+
+One bounded Operator task: seed **two clean learners** into the hosted demonstration database — one for a screen recording, one held untouched for the live demonstration — then update the continuity records and tag the deployed code. **No surface change, no harness run, no open item touched.**
+
+### What was seeded
+
+**`Ethan Wong`** (`c2000000-…-000000000003`) and **`Priya Menon`** (`c2000000-…-000000000004`), seeded exactly as `Amelia Tan` was: **three rows each** — `students`, an active `enrolments` row (`c6000000-…-0003/-0004`), and an active `parent_student_links` row (`c3000000-…-0003/-0004`) — in centre `b0000000-…0001`, module `c4000000-…0001` (*Beginner Public Speaking — Fixture Module A*), linked to the existing fixture parent membership `c1000000-…0003`. Synthetic names, no real child data (ADR-6). One transaction, id-collision guard, committed.
+
+Amelia's shape was **measured, not assumed**: her three rows were read back as JSON first, and the target tables' column definitions with them. Her attendance, observation and report were **not** part of her seed — the app created those during the chain run — which is why a clean learner is three rows and not six.
+
+**Clean-start verified per learner: `attendance` 0 · `observations` 0 · `reports` 0 · active `enrolments` 1 · `parent_student_links` 1.** Roster placement confirmed by the enrolment → session → assignment join for session `c5000000-…0001` (2026-02-03, trainer membership `c1000000-…0002`): the roster now carries four learners. **Verified in the database, not in the browser** — opening a proven surface was out of scope.
+
+### Hosted-only, and that is the fact most likely to mislead a later session
+
+**These learners exist ONLY in the hosted database. They are in no repository fixture SQL** — absent from `local_fixtures.sql`, `local_fixtures_expansion.sql` and `load-hosted-fixtures.mjs`. **`Amelia Tan` is the same kind of hosted-only row**; a grep for her name hits only the two chain drivers and the progress docs, never a fixture. A fresh local fixture load reproduces **none** of the four-learner state, and the repo's fixture family stops at `Fixture Student One` (`c2…0001`) plus the `e2…` expansion.
+
+### Governed state was not moved
+
+The three target tables carry **no triggers**, so the inserts emitted **no audit event**. Counts pinned before and re-read after: **`reports` 2→2 · `report_versions` 2→2 · `audit_events` 23→23.** Both demonstration fallbacks verified untouched: `Amelia Tan` / `0381f34f` `submitted` `lock_version` 7, and `Fixture Student One` / `4876bc9f` `draft_ready` `lock_version` 8.
+
+### The deployed-commit question, answered honestly
+
+The Operator asked which commit the alias serves, to tag the code that will actually be demonstrated. **The platform cannot answer that.** Every deployment on this project is a **CLI upload**: `vercel inspect --json` returns `meta: (none)` and `source: (none)`, and `vercel ls` shows a Username column rather than a git branch. There is **no deployment→SHA binding to read**.
+
+What *is* provable: **`git diff --stat a0f48b9 5f3a543` is one file — `docs/progress/OPERATOR_HANDOFF.md`.** No application code, no config, nothing that builds. So the served bytes are identical whichever of the two the upload was taken from, and the question is moot for the purpose it was asked. `a0f48b9` was tagged as the newest commit carrying application code. Both demonstration-critical fixes sit inside it: `fcee1b6` (parent internal provenance footer removed; temporary diag route deleted) and `a0f48b9` itself (visible provenance caption dropped, `data-adapter-kind` G-19 marker retained on Trainer and Management).
+
+**Recorded as a limitation rather than papered over:** the identification rests on code equivalence plus the handoff record, **not** on platform metadata. An earlier entry in this log confirmed deployments via `meta.githubCommitSha`; that binding is **not available for these CLI uploads**, and claiming otherwise would be diagnosis-by-fit of exactly the kind this log has already recorded twice.
+
+### Commands run
+
+Read-only hosted probes (column definitions, Amelia's rows, trigger census, per-learner governed state, pre/post counts); one seeding transaction; `git status` / `log` / `diff` / `fetch`; `vercel whoami` / `inspect` / `ls` (read-only subcommands only — never a bare `vercel` or `vercel --prod`). **No harness, no build, no migration, no `supabase db reset`.**
+
+### Verification
+
+**Automated:** none run — the build is frozen and running a suite was expressly out of scope. **Manual/measured:** the clean-start query above, the roster join, the governed-count comparison and the fallback re-read, all against the hosted catalogue.
+
+### Migration or schema changes
+
+**None.** No table, enum, column, policy, grant, RPC, function or migration. Audit registry unchanged at 16. Data-only DML in three existing tables.
+
+### Decisions
+
+Seeding synthetic demonstration rows into the already-provisioned hosted database was treated as **inside** the Operator's explicit instruction, not as a §12 hosted gate — that gate governs **provisioning, linking, spend, push and public deployment**, none of which this performed. `push` **was** separately and explicitly instructed. ADR-6 synthetic-data-only is satisfied: both names are invented.
+
+**Blockers/decisions:** none opened or closed. `F-DEMO-1`, `F-UI-DRIFT-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1` all carried untouched, per instruction.
+**Next step:** none authorized. The build is frozen for the Week-13 demonstration.
