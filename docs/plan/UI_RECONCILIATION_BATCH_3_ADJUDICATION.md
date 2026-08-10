@@ -131,10 +131,78 @@ Contrast on the new fill, computed: `text-brand-800` `#b02a63` on `brand-100` `#
 
 ---
 
+## PHASE 5 — `06` Trainer Student Roster
+
+- **Screen / route / component:** `06` · `/trainer/sessions/[sessionId]/roster` · `features/trainer/trainer-roster.tsx`
+- **Reference:** `UI_REFERENCE_FINAL_MVP/reference/Trainer - Student Roster/` — resolved from `SCREEN_INDEX.md`. Frozen duplicate present, SHA-identical (`78e4b618…`).
+
+### 5.1 `TRUE-DRIFT` RESOLVED — 22
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Breadcrumb | 11.5px / 500 | 13px / 400 | `text-[0.71875rem] font-medium` |
+| T2 | Breadcrumb → title gap | 3px | 6px | `mt-[3px]` |
+| T3 | Page title | 22px / 700 | 30px / 800 (+ inert `tracking-[-0.02em]`) | `text-[1.375rem] font-bold`, tracking removed |
+| T4 | "Back to Schedule" | 11px radius · 13.5px / 600 | 10px · 14px / 700 | `rounded-[11px] text-[0.84375rem] font-semibold` |
+| T5 | Banner radius | 18px | 20px (`rounded-panel`) | `rounded-[18px]` |
+| T6 | Banner eyebrow | 10.5px / 600 | 11px / 800 at `0.16em` | `text-[0.65625rem] font-semibold tracking-[0.1em]` |
+| T7 | Banner heading | 18px / 700 | 20px / 800 | `text-[1.125rem] font-bold` |
+| T8 | Banner sub-line | 12px / 400 | 14px | `text-[0.75rem]` |
+| T9 | Progress caption | 12px / 500 | 14px / 600 | `text-[0.75rem] font-medium` |
+| T10 | Progress bar | 240 × 7px | 384px wide × 8px | `max-w-[15rem] h-[7px]` |
+| T11 | Session strip surface | 18px/22px padding, **1.5px pink hairline** | `.card` at 20px padding, grey 1px | rebuilt as `rounded-card border-[1.5px] border-brand-200 bg-surface px-[22px] py-[18px] shadow-card` — see §5.2 |
+| T12 | Strip region labels | 10px / 600 | 11px / 800 at `0.14em` | `text-[0.625rem] font-semibold tracking-[0.06em]` |
+| T13 | Strip lesson line | 14px / 600 | 17px / 800 | `text-[0.875rem] font-semibold` |
+| T14 | Strip meta line | 11px / 400 | 13px | `text-[0.6875rem]` |
+| T15 | Focus chips | 11px/6px padding, 11px / 500 on `#FCE7F0` | 12px/6px, 13px / 600 on `brand-50` | `px-[11px] text-[0.6875rem] font-medium bg-brand-100` |
+| T16 | "View lesson plan" | **pill** (999px), 11px padding, 13px / 600 | `rounded-field`, 10px padding, 14px / 700 | `rounded-full py-[11px] text-small font-semibold` — **still disabled, D4** |
+| T17 | Roster heading | 18px / 700 | 20px / 800 | `text-[1.125rem] font-bold` |
+| T18 | Roster count | a **pill** — 4px/10px on `#F5F6FA`, 11px / 600 | bare inline text, 14px / 700 | `rounded-full bg-surface-muted px-2.5 py-1 text-[0.6875rem] font-semibold` |
+| T19 | Filter / Sort labels + controls | 12.5px / 600, 9px/14px padding | uppercase micro-caps labels; 14px / 700 controls | labels `text-small font-medium`; controls `px-3.5 py-[9px] text-[0.78125rem] font-semibold` |
+| T20 | Card grid gutter | 20px | 16px | `gap-5` |
+| T21 | Card padding / internals | 16px · attendance chip 9.5px / 600 · name 15px / 600 · focus line 12px / 500 at 17.4px | 20px · 11px / 800 at `0.1em` · 17px / 800 · 13px at 24px | `p-4` · `text-[0.59375rem] font-semibold` · `text-[0.9375rem] font-semibold` · `text-[0.75rem] font-medium leading-[1.45]` |
+| T22 | Card actions | 11px padding, 12.5px / 600 | 10px, 14px / 700 | `py-[11px] text-[0.78125rem] font-semibold` on both the inert and the live action |
+
+### 5.2 ⚠️ TWO MORE LIVE DEFECTS, ONE OF A NEW CLASS
+
+**(a) `rounded-control` and `border-hairline` are UNDEFINED TOKENS that emit nothing.** Neither exists in `@theme inline`. Tailwind generates a rule only for a class it can resolve, so both produced **no CSS at all** — the attendance toggle has been rendering **square-cornered and borderless** since it was written, while its source read as though it had a 10px radius and a hairline. They were the **only two uses in the repository**. Replaced with `rounded-field` / `border-line`.
+
+⚠️ **This is a different failure from the unlayered-cascade trap and the static audit does not catch it** — there is no competing rule; the rule simply never exists. It is caught only by grepping the **compiled stylesheet**, which is why that check is now run on every phase and why `rounded-control` / `border-hairline` are recorded as **verified MISS** rather than assumed dead.
+
+**(b) The session strip could not take the frame's pink hairline through a utility.** The frame outlines it in **1.5px `#F6C9DD`**; `.card` is an **unlayered** rule declaring the `border` **shorthand**, so `border-brand-200` on a `.card` element is emitted, matched and discarded. The strip was therefore **composed from utilities the cascade actually reaches** — `rounded-card border-[1.5px] border-brand-200 bg-surface shadow-card` — at the same radius and elevation `.card` would have given it. `.card` itself is untouched and every other consumer is unaffected.
+
+### 5.3 `REGISTERED-OMISSION` PRESERVED — 7, ZERO CHANGED
+
+| # | Preserved | Citation |
+|---|---|---|
+| D1 | **No "CLASS IN SESSION" eyebrow and no live green dot.** The frame draws both; they assert a lifecycle state no governed field carries. The label stays **"Class Session"** and only the frame's *type* was followed | plan §4 |
+| D2 | **No lesson number, lesson title or room.** The frame's "Lesson 3 · Voice & Projection" and "Studio 2" are absent from `TrainerSessionSummaryDto`; the governed module name and session date stand instead | plan §4 |
+| D3 | The focus region stays filled **only** from the governed carried-over previous-session focus and stays **labelled for what it is** | plan §4 |
+| D4 | **SLIDES / attachment chips stay omitted** (the frame draws two, with `KEY` and `PPTX` tags); **"View lesson plan" stays disabled with its reason.** Only the pill *geometry* was followed | plan §4 |
+| D5 | **No staff identity rendered** — the frame's "Trainer: Argen Maulie" line is absent | plan §4 |
+| D6 | **No synthetic learners.** The frame shows 8; the grid renders exactly what the governed roster projection returns | `GLOBAL_UI_RULES` §8 |
+| D7 | **Rail belongs to Phase 0** and was not touched | plan §2 |
+
+**Also preserved, and not re-derived here:** an **absent** learner's card still carries **no lifecycle status and no report affordance** (A-018); the attendance refusal still offers **no retry**; `unauthorized` and `unavailable` still share **one** non-disclosing sentence; and the per-student action is still resolved from **that** learner's attendance and **that** learner's report status, with no shared generic handler.
+
+**Also deliberately not followed:**
+
+- **The frame's card colours** — the focus line at `#3FBAC2` (~2.6:1) and the absent-card grey at 2.004:1 both fail SC 1.4.3. Size and weight followed, colour not.
+- **Three shared primitives**, all in `components/ui/` and all reaching out-of-plan screens: `Avatar` (frame 52px with 17px initials, build `size-12` with 14px), `StatusPill`, and `.card`'s 16px radius (frame 16px here — **already correct on this screen**). Recorded, unapplied; a `className` size or colour override on any of them would be two same-layer utilities decided by stylesheet order, which is the trap this plan keeps catching.
+
+### 5.4 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 5.5 Verification
+
+`tsc` **0** · `eslint` **0** · `next build` **0** · **route census 17**, enumerated from the build's route table · governed surfaces **none touched** · `app-route-census`, `portal-navigation-active-state`, `post-login-destinations`, `session-eligibility` all **PASS** · **emitted-CSS verification: 20/20 new utilities OK**, and `rounded-control` / `border-hairline` **confirmed MISS**, which is the positive evidence for §5.2(a) · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
 
 | Phase | Screen | Commit |
 |---|---|---|
-| 4 | `05` Trainer Schedule | *pending — recorded at the Phase 5 boundary* |
+| 4 | `05` Trainer Schedule | **`5dda019`** |
+| 5 | `06` Trainer Student Roster | *pending — recorded at the Phase 6a boundary* |

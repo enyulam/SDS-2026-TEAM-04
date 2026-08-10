@@ -364,3 +364,81 @@ shells; the absent skip-to-content link; trainer-dashboard.tsx's undefined bg-wa
 token; and the remaining unlayered app/globals.css rules recorded at F-01b - this checkpoint
 worked around the h1-h4 rule locally rather than editing an unowned file.
 ```
+
+### UI RECONCILIATION plan Phase 5 (`F-UI-DRIFT-1` bucket (c)) — 2026-08-10
+
+```
+Timestamp (Asia/Singapore):    2026-08-10
+Source branch:                 develop (DEVELOPMENT CLONE)
+Starting commit:               5dda019
+Screen ID:                     06
+Existing route audited:        Yes. /trainer/sessions/[sessionId]/roster unchanged.
+                               Route census 17, unchanged.
+Components preserved:          components/ui/{avatar,status-pill,badge,icon}.tsx byte-unchanged.
+Components replaced:           None.   Components created: None.
+DTO and port changes:          NONE.   Fixture changes: NONE.
+Backend dependencies discovered:
+                               None new. The lesson-plan / session-material dependency and the
+                               absent staff-identity and lesson-metadata fields all stand.
+Vocabulary dependencies:       None. Class Grade (A-054) rendered verbatim, still marked
+                               data-vocabulary="class-grade".
+Governance blockers:           None. NEW-QUESTION: none.
+
+SCOPE:                         Visual reconciliation ONLY against
+                               UI_REFERENCE_FINAL_MVP/reference/Trainer - Student Roster/
+                               (A-056, visual rank 1). The .html export was read for VALUES
+                               ONLY - no export markup, class name, DOM structure, absolute
+                               position or fixed pixel layout entered the component.
+
+TRUE-DRIFT RESOLVED:           22. Full table: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md
+                               Phase 5 section 5.1.
+
+REGISTERED-OMISSION PRESERVED: 7, ZERO CHANGED - D1 no CLASS IN SESSION eyebrow and no live
+                               dot, D2 no lesson number/title/room, D3 governed carried-over
+                               focus only and still labelled, D4 slides chips omitted and
+                               "View lesson plan" still disabled with its reason, D5 no staff
+                               identity, D6 no synthetic learners, D7 rail is Phase 0.
+                               Also preserved: an absent learner card carries NO lifecycle
+                               status and NO report affordance (A-018); the attendance refusal
+                               offers no retry; unauthorized and unavailable keep ONE shared
+                               non-disclosing sentence; the per-student action is still
+                               resolved per learner with no shared generic handler.
+                               Reported as a SEPARATE list from TRUE-DRIFT (plan 6.5).
+
+TWO LIVE DEFECTS FOUND AND FIXED, one of a NEW class:
+                               (a) "rounded-control" and "border-hairline" are UNDEFINED
+                                   TOKENS - neither exists in @theme inline, so Tailwind
+                                   emitted NOTHING and the attendance toggle had been
+                                   rendering square-cornered and borderless since it was
+                                   written. They were the only two uses in the repository.
+                                   The static cascade audit CANNOT catch this class - there
+                                   is no competing rule, the rule simply never exists - so it
+                                   is caught only by grepping the COMPILED stylesheet. Both
+                                   are now recorded as verified MISS.
+                               (b) The frame 1.5px PINK hairline on the session strip could
+                                   not be applied through a utility: .card is UNLAYERED and
+                                   declares the `border` SHORTHAND, so border-brand-200 on a
+                                   .card element is emitted, matched and discarded. The strip
+                                   is now composed from utilities the cascade actually
+                                   reaches. .card itself is untouched.
+
+Browser viewport:              n/a - see below.
+Before/After screenshot:       NOT CAPTURED.
+                               *** RENDERED CAPTURE IS **NOT-RUN**, WITH ITS REASON. ***
+                               Screen 06 is AUTHENTICATED; the portal layout runs
+                               requirePortalAccess, needing a session and therefore a
+                               reachable governed database, and .env.local here configures the
+                               HOSTED dev project only - a CLAUDE.md 12 stop-and-ask no
+                               current authorization carries. No capture was manufactured and
+                               no hosted or paid service was contacted. NOT-RUN is not PASS.
+Validation:                    tsc 0 - eslint 0 - build 0 - route census 17 UNCHANGED
+                               app-route-census / portal-navigation-active-state /
+                               post-login-destinations / session-eligibility  all PASS
+                               emitted-CSS verification: 20/20 new utilities OK
+                               reference.png SHA-256 78e4b618... verified UNCHANGED.
+                               No governed surface touched. No dependency added.
+Ending commit:                 recorded in docs/progress/STATUS.md and in the adjudication
+                               Commits table (filled one phase late).
+Acceptance status:             PASS is this session EVIDENCE verdict only.
+                               Accepted is OPERATOR-SET ONLY and has NOT been set.
+```

@@ -302,7 +302,7 @@ export function TrainerRoster() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-x-2 text-small text-neutral-on">
+            <ol className="flex flex-wrap items-center gap-x-2 text-[0.71875rem] font-medium text-neutral-on">
               <li>
                 <Link
                   href="/trainer/schedule"
@@ -319,13 +319,16 @@ export function TrainerRoster() {
               </li>
             </ol>
           </nav>
-          <h1 className="mt-1.5 text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
+          {/* PHASE 4/5 — `tracking-[-0.02em]` removed here and everywhere in this file:
+              `h1..h4 { letter-spacing: -0.015em }` is UNLAYERED, so the utility was
+              emitted, matched and silently discarded. See the Batch 3 adjudication §0.2. */}
+          <h1 className="mt-[3px] text-[1.375rem] font-bold text-ink-strong">
             Student Roster
           </h1>
         </div>
         <Link
           href="/trainer/schedule"
-          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-field bg-brand-100 px-4 py-2.5 text-body font-bold text-brand-800 no-underline transition hover:bg-brand-200"
+          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[11px] bg-brand-100 px-4 py-2.5 text-[0.84375rem] font-semibold text-brand-800 no-underline transition hover:bg-brand-200"
         >
           <Icon name="chevronLeft" size={16} />
           Back to Schedule
@@ -335,10 +338,14 @@ export function TrainerRoster() {
       {/* Class Session banner — the frame's dark accent surface (D1: eyebrow relabelled). */}
       <section
         aria-labelledby="class-session-heading"
-        className="rounded-panel bg-accent-ink px-6 py-5 text-white lg:flex lg:items-center lg:justify-between lg:gap-8"
+        className="rounded-[18px] bg-accent-ink px-6 py-5 text-white lg:flex lg:items-center lg:justify-between lg:gap-8"
       >
         <div className="min-w-0">
-          <p className="text-micro font-extrabold uppercase tracking-[0.16em] text-brand-200">
+          {/* D1 — the frame's eyebrow reads "CLASS IN SESSION" beside a live green dot,
+              which asserts a lifecycle state no governed field carries. The LABEL stays
+              "Class Session" and there is still no dot; only the frame's type (10.5px/600)
+              is followed. */}
+          <p className="text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-brand-200">
             Class Session
           </p>
           {/*
@@ -353,24 +360,24 @@ export function TrainerRoster() {
             * `!important` escape hatch.
             */}
           <h2 id="class-session-heading" className="mt-1.5">
-            <span className="text-section-title font-extrabold text-white">
+            <span className="text-[1.125rem] font-bold text-white">
               <span data-vocabulary="class-grade">{session.classGrade}</span>
               {" · "}
               {session.moduleName}
             </span>
           </h2>
-          <p className="mt-1 text-body text-white/80">
+          <p className="mt-1 text-[0.75rem] text-white/80">
             {formatDate(session.date)} · {session.startTime}–{session.endTime}
           </p>
         </div>
-        <div className="mt-5 w-full max-w-sm lg:mt-0">
-          <p className="text-body font-semibold text-white lg:text-right">
+        <div className="mt-5 w-full max-w-[15rem] lg:mt-0">
+          <p className="text-[0.75rem] font-medium text-white lg:text-right">
             {assessed.length} of {present.length} present{" "}
             {present.length === 1 ? "learner" : "learners"} assessed
           </p>
           <span
             aria-hidden="true"
-            className="mt-2.5 block h-2 w-full overflow-hidden rounded-full bg-white/20"
+            className="mt-2 block h-[7px] w-full overflow-hidden rounded-full bg-white/20"
           >
             <span
               className="block h-full rounded-full bg-brand-600"
@@ -383,14 +390,23 @@ export function TrainerRoster() {
       {/* Session strip — governed session facts, carried-over focus, lesson-plan dependency. */}
       <section
         aria-label="Class Session detail"
-        className="card grid gap-5 p-5 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_minmax(0,17rem)] lg:gap-6"
+        /*
+         * ⚠️ NOT `card` — deliberately. The frame gives this strip a 1.5px PINK
+         * hairline (`#F6C9DD`), and `.card` in globals.css is an UNLAYERED rule
+         * declaring the `border` shorthand: a `border-brand-200` utility written on a
+         * `.card` element is emitted, matched, and loses the cascade. The surface is
+         * therefore composed from utilities the cascade actually reaches, at the same
+         * radius and elevation `.card` would have given it. Verified in the compiled
+         * stylesheet, not inferred.
+         */
+        className="grid gap-5 rounded-card border-[1.5px] border-brand-200 bg-surface px-[22px] py-[18px] shadow-card lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_minmax(0,17rem)] lg:gap-6"
       >
         <div className="lg:border-r lg:border-line lg:pr-6">
           <StripLabel>This session</StripLabel>
-          <p className="mt-2 text-card-title font-extrabold text-ink-strong">
+          <p className="mt-1.5 text-[0.875rem] font-semibold text-ink-strong">
             {session.moduleName}
           </p>
-          <p className="mt-1 text-small text-ink">
+          <p className="mt-1 text-[0.6875rem] text-ink">
             <span data-vocabulary="class-grade">{session.classGrade}</span> ·{" "}
             {formatDate(session.date)}
           </p>
@@ -407,7 +423,7 @@ export function TrainerRoster() {
               {carriedFocus.map((focus) => (
                 <li
                   key={focus}
-                  className="rounded-full bg-brand-50 px-3 py-1.5 text-small font-semibold text-brand-800"
+                  className="rounded-full bg-brand-100 px-[11px] py-1.5 text-[0.6875rem] font-medium text-brand-800"
                 >
                   {focus}
                 </li>
@@ -423,7 +439,7 @@ export function TrainerRoster() {
             type="button"
             disabled
             aria-describedby={lessonPlanNoteId}
-            className="mt-2.5 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-between gap-2 rounded-field border border-line bg-surface-muted px-4 py-2.5 text-body font-bold text-ink-subtle"
+            className="mt-2.5 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-between gap-2 rounded-full border border-line bg-surface-muted px-4 py-[11px] text-small font-semibold text-ink-subtle"
           >
             View lesson plan
             <Icon name="chevronRight" size={16} />
@@ -453,10 +469,10 @@ export function TrainerRoster() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2
             id="roster-heading"
-            className="text-section-title font-extrabold text-ink-strong"
+            className="text-[1.125rem] font-bold text-ink-strong"
           >
             Student Roster{" "}
-            <span className="ml-1 align-middle text-body font-bold text-neutral-on">
+            <span className="ml-1 inline-flex align-middle rounded-full bg-surface-muted px-2.5 py-1 text-[0.6875rem] font-semibold text-neutral-on">
               {roster.length} total
             </span>
           </h2>
@@ -464,7 +480,7 @@ export function TrainerRoster() {
             <div>
               <label
                 htmlFor={filterId}
-                className="mb-1 block text-micro font-bold uppercase tracking-[0.14em] text-neutral-on"
+                className="mb-1 block text-small font-medium text-neutral-on"
               >
                 Filter
               </label>
@@ -474,7 +490,7 @@ export function TrainerRoster() {
                 onChange={(event) =>
                   setAttendanceFilter(event.target.value as AttendanceFilter)
                 }
-                className="min-h-11 rounded-field border border-line bg-surface px-3 py-2 text-body font-bold text-ink-strong"
+                className="min-h-11 rounded-field border border-line bg-surface px-3.5 py-[9px] text-[0.78125rem] font-semibold text-ink-strong"
               >
                 {ATTENDANCE_FILTERS.map((value) => (
                   <option key={value} value={value}>
@@ -486,7 +502,7 @@ export function TrainerRoster() {
             <div>
               <label
                 htmlFor={sortId}
-                className="mb-1 block text-micro font-bold uppercase tracking-[0.14em] text-neutral-on"
+                className="mb-1 block text-small font-medium text-neutral-on"
               >
                 Sort
               </label>
@@ -494,7 +510,7 @@ export function TrainerRoster() {
                 id={sortId}
                 value={sortMode}
                 onChange={(event) => setSortMode(event.target.value as SortMode)}
-                className="min-h-11 rounded-field border border-line bg-surface px-3 py-2 text-body font-bold text-ink-strong"
+                className="min-h-11 rounded-field border border-line bg-surface px-3.5 py-[9px] text-[0.78125rem] font-semibold text-ink-strong"
               >
                 {SORT_MODES.map((value) => (
                   <option key={value} value={value}>
@@ -526,7 +542,7 @@ export function TrainerRoster() {
             </p>
           </div>
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {visible.map((entry) => (
               <li key={entry.studentId}>
                 <RosterCard
@@ -579,7 +595,7 @@ function attendanceRefusalMessage(result: UiActionResult<never>): string {
  */
 function StripLabel({ children }: { readonly children: string }) {
   return (
-    <h2 className="text-micro font-extrabold uppercase tracking-[0.14em]">
+    <h2 className="text-[0.625rem] font-semibold uppercase tracking-[0.06em]">
       <span className="text-neutral-on">{children}</span>
     </h2>
   );
@@ -606,7 +622,7 @@ function RosterCard({
       data-roster-card={entry.studentId}
       data-attendance={entry.attendanceState}
       data-roster-action={action.kind}
-      className={`card flex h-full flex-col p-5 ${absent ? "bg-surface-subtle" : ""}`}
+      className={`card flex h-full flex-col p-4 ${absent ? "bg-surface-subtle" : ""}`}
     >
       <div className="flex items-start justify-between gap-3">
         {absent ? (
@@ -628,19 +644,19 @@ function RosterCard({
           <Avatar displayName={entry.displayName} size="large" shape="square" />
         )}
         <span
-          className={`inline-flex items-center gap-1.5 text-micro font-extrabold uppercase tracking-[0.1em] ${
+          className={`inline-flex items-center gap-1 text-[0.59375rem] font-semibold uppercase tracking-[0.04em] ${
             absent ? "text-neutral-on" : "text-success-on"
           }`}
         >
-          <Icon name={absent ? "close" : "check"} size={13} />
+          <Icon name={absent ? "close" : "check"} size={11} />
           {absent ? "Absent" : "Present"}
         </span>
       </div>
 
       {/* Colour on an inner `span` — see the banner heading note above. */}
-      <h3 className="mt-4">
+      <h3 className="mt-3">
         <span
-          className={`text-card-title font-extrabold ${
+          className={`text-[0.9375rem] font-semibold ${
             absent ? "text-neutral-on" : "text-ink-strong"
           }`}
         >
@@ -653,12 +669,14 @@ function RosterCard({
          * An absent learner's card carries NO lifecycle status and NO report affordance.
          * Absence must never create or expose a fabricated assessment or report (A-018).
          */
-        <p className="mt-1.5 text-small leading-6 text-neutral-on">
+        <p className="mt-1.5 text-[0.75rem] font-medium leading-[1.45] text-neutral-on">
           Not available for assessment today.
         </p>
       ) : (
         <>
-          <p className="mt-1.5 text-small leading-6 text-ink">
+          {/* D3 — filled ONLY from the governed carried-over previous-session focus,
+              and still labelled for what it is. Never a free-text line. */}
+          <p className="mt-1.5 text-[0.75rem] font-medium leading-[1.45] text-ink">
             {entry.previousSessionFocus ?? "No previous-session focus is recorded yet."}
           </p>
           <p className="mt-3">
@@ -667,7 +685,7 @@ function RosterCard({
         </>
       )}
 
-      <div className="mt-auto pt-5">
+      <div className="mt-auto pt-4">
         <RosterAction action={action} displayName={entry.displayName} />
         {/*
          * A-018's governed control. Placed BELOW the assessment action because
@@ -683,7 +701,15 @@ function RosterCard({
           data-attendance-toggle={entry.studentId}
           onClick={() => void onToggleAttendance(entry)}
           disabled={busy || disabled}
-          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-control border border-hairline px-3 py-2 text-small font-bold text-ink transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
+          /*
+           * ⚠️ `rounded-control` and `border-hairline` were UNDEFINED TOKENS. Neither
+           * exists in `@theme inline`, so Tailwind emitted NOTHING for either and this
+           * control had been rendering square-cornered and borderless since it was
+           * written — while the source read as though both applied. They were the only
+           * two uses in the repository. Replaced with real tokens; both are now grepped
+           * out of the compiled stylesheet rather than trusted.
+           */
+          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-field border border-line px-3 py-2 text-[0.75rem] font-semibold text-ink transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Icon name={absent ? "check" : "close"} size={13} />
           {busy
@@ -789,7 +815,7 @@ function RosterAction({
         <button
           type="button"
           disabled
-          className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-field border border-line bg-surface-muted px-4 py-2.5 text-body font-bold text-ink-subtle"
+          className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-field border border-line bg-surface-muted px-4 py-[11px] text-[0.78125rem] font-semibold text-ink-subtle"
         >
           {action.label}
           <span className="sr-only"> {displayName} — unavailable</span>
@@ -802,7 +828,7 @@ function RosterAction({
   return (
     <Link
       href={action.href}
-      className={`inline-flex min-h-11 w-full items-center justify-center rounded-field px-4 py-2.5 text-body font-bold no-underline transition ${
+      className={`inline-flex min-h-11 w-full items-center justify-center rounded-field px-4 py-[11px] text-[0.78125rem] font-semibold no-underline transition ${
         action.tone === "primary"
           ? "bg-brand-700 text-white shadow-raised hover:bg-brand-800"
           : "bg-brand-50 text-brand-800 hover:bg-brand-100"
