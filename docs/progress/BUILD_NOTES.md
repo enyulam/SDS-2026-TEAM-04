@@ -5792,3 +5792,63 @@ The per-pair `report_get_canonical` call keeps `if (error) continue;`. **That si
 ### One read deliberately not swept, recorded
 
 `session-context-projections.ts` (`getSessionContextsCore`) checks `error` and returns an **empty map** — documented fail-soft, because it is **decoration on rows whose governed content is already authorized**, and a missing class label must never remove a report management is required to review. It was never one of the fifteen. ⚠️ Recorded here so it is not mistaken for a missed site.
+
+---
+
+## 2026-08-11 — ⛔ **A CHECK THAT EXISTS, IS CORRECT, AND NEVER RUNS** — the third member of the family
+
+**The Operator reported that both wording editors failed to save. They did not.** Every save that reached the server succeeded, and the database holds all three edits as new immutable versions with correct authorship, audit events, changed content hashes and advanced pointers. ▶ **Recorded plainly, because the Operator was one step from filing a data-loss defect that does not exist.** The two trainer saves (`"test changes"`, `"trainer edit testing"`) and the one management wording save (`"management test"`, into `strengths`) are all present and all readable today.
+
+⚠️ **My first diagnosis of that walk contained a real error, and it is recorded here rather than quietly corrected.** I reported that the management wording editor *"has no status guard"* and would render an editable form for a mutation the database must reject. **It does have one** — [`participant-actions.ts:688`](../../server/modules/integration-adapter/participant-actions.ts), in the **adapter**, one layer above the component where the trainer's equivalent lives. I had measured `report_get_management_review` **directly over PostgREST**, which bypasses the adapter, and then described the result as the application's behaviour. ▶ **I measured a layer and reported it as the system.** The tell was already in front of me: my own render probe had failed its non-vacuity leg minutes earlier for exactly the same reason, and I discarded that probe without asking what else I had measured at the wrong layer. **The Operator authorized a fix for the defect I had described; the honest response was to refuse it, not to build it.**
+
+### The finding that survived
+
+`scripts/tests/integration/run-integration.mjs` — the **only** harness in this repository that exercises `saveTrainerEditCore` and `managementEditWordingCore` end to end (`INT-L4`, `INT-L5`) — **was wired to no npm script at all.** There was no command in `package.json` that could run it. It was written, reviewed, committed, and never invocable.
+
+▶ **Coverage that cannot be invoked is not coverage.** It reads as coverage in every place a human looks: the file exists, the assertions are real, the identifiers appear in a grep. Only the absence of a runner distinguishes it from a suite that passes, and nothing anywhere reports that absence.
+
+**This is the third member of a family this batch has now defined:**
+
+| | Defect | Why it read as green |
+|---|---|---|
+| 1 | **The template literal** — the module never parsed, so no check ever executed | Node's `SyntaxError` echoed the offending line, which was the success message containing `RESULT: PASS` |
+| 2 | **`prove:hero-13`** — 17 legs passed against a file `tsc` rejected with six errors | A proof that reads TEXT cannot tell you the text is REACHABLE |
+| 3 | **`run-integration.mjs`** — wired to nothing | A suite that never runs never fails |
+
+⚠️ **The common shape: the instrument's silence was indistinguishable from the instrument's success.** In each case the thing that should have screamed was the thing that said nothing.
+
+### Wiring it revealed that the documented invocation was stale on both counts
+
+The suite's own header documents `node --import ./scripts/tests/integration/alias-loader.mjs …`. That command **cannot start the suite**:
+
+1. it throws in `node_modules/server-only` — the cores now reach a `server-only` module and the run needs `--conditions=react-server`;
+2. it then **fails closed** in `local-target-guard.mjs`: *"`BEST_COACH_LOCAL_PROJECT_ID` must be present and non-blank … refusing rather than guessing which stack to act on."* — it needs `--env-file=.env.local`.
+
+▶ **The second failure is the guard working exactly as designed** and is recorded as a good outcome: it refused to guess which local stack to touch rather than reaching whichever one happened to be running. The wired script is the corrected invocation, and **`--env-file` was added only because the guard demanded it**, not by default.
+
+### The run — `npm run test:integration`
+
+**48 `PASS` · 3 `FAIL` · 3 `RECORDED` · exit code 1.** A disposable database was created, driven through the complete lifecycle (43 committed audit events) and destroyed. **`INT-PG` observed ZERO non-loopback requests for the whole run**, and `INT-L2b` (the billable real-provider leg) recorded itself **SKIPPED BY DEFAULT — not passed**, with no `OpenAiDraftProvider` constructed. **No external call was made and none was authorized.**
+
+**All three failures are suite staleness, measured — not product defects. They are reported, not fixed** (Operator instruction: *"If it fails, report; do not fix in the same turn."*).
+
+| Leg | Why it fails |
+|---|---|
+| `INT-A5` ×2 | Asserts nothing is parent-visible or management-readable **"before approval/submission"** against the **canonical** database, for the pinned pair `c5000000…`/`c2000000…`. That pair now holds report `2c4bb887` at status **`submitted`**. The assertion's precondition is gone; **the product is correct — a parent SHOULD see a submitted report** |
+| `INT-Q27` | Pins the Parent DTO's top-level keys as exactly `panels,submittedAt`. They are now `context,panels,submittedAt` — `context` was added by ratified hero Phase 2 and is pinned as correct by `prove:hero-2` leg `P2-7`. ⚠️ **The suite is stale against ratified authority, not the other way round.** `context` carries class, module, lesson and trainer — **no rating in any vocabulary**, so Q-27's actual prohibition is untouched |
+
+### ⚠️ And the suite has the family's own defect inside it
+
+[`run-integration.mjs:517`](../../scripts/tests/integration/run-integration.mjs) calls `pass("INT-A5", …)` **unconditionally**, after both `fail()` calls in the same block. **`INT-A5` prints two `FAIL` lines and then a `PASS` line for the same identifier.** Anyone scanning for `PASS` sees it pass.
+
+▶ **The verdict mechanism held anyway — the process exited 1** — which is precisely the exit-code discipline this batch ratified (plan §12 item 17: *never read a suite's stdout for its verdict*). **A suite whose own summary can print `PASS` for a leg that failed is the instrument-defect family again, one level down.** Recorded, not repaired, under the same instruction.
+
+### Phase 8 / Phase 11 — structural consistency is not an acceptance of any kind
+
+**Recorded beside the *"the delta table is a reading of a frame, not a measurement of the build"* lesson, because it is the same error one layer further on.**
+
+Phases 8 and 11 measured `trainer-report-editor.tsx` and `management-wording-editor.tsx` against their framed siblings on eleven foundation probes, found no divergence, and built nothing. That was the right result. **But structural consistency with a sibling is neither a visual acceptance nor a functional one**, and the batch recorded only the first half of that.
+
+⚠️ **`prove:hero-8` and `prove:hero-11` would pass unchanged if either editor could not save at all.** They compare shells, loading states and error panels; they never mount a form, never fire an action, and never assert that a mutation the surface offers is one the database will accept. For an unframed surface a mechanical consistency check is **the only guarantee that exists** — and it guarantees only that the surface *looks* like its sibling.
+
+▶ **Two of the three `G-1` surfaces were measured as consistent and never measured as working.** That gap was invisible for exactly as long as the one harness that could have closed it had no way to be run.
