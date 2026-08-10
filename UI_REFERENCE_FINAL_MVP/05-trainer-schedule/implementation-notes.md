@@ -219,3 +219,79 @@ Acceptance status:             READY FOR OPERATOR REVIEW. Screen 05 is PROPOSED 
                                visual acceptance as Not started for all 36 screens. Only the
                                operator marks a screen accepted.
 ```
+
+### UI RECONCILIATION plan Phase 4 (`F-UI-DRIFT-1` bucket (c)) — 2026-08-10
+
+```
+Timestamp (Asia/Singapore):    2026-08-10
+Source branch:                 develop (DEVELOPMENT CLONE)
+Starting commit:               05edd6d
+Screen ID:                     05
+Existing route audited:        Yes. /trainer/schedule unchanged. Route census 17, unchanged.
+Components preserved:          features/trainer/trainer-schedule-projection.ts (byte-unchanged),
+                               components/ui/badge.tsx (byte-unchanged).
+Components replaced:           None.
+Components created:            None.
+DTO and port changes:          NONE.
+Fixture changes:               NONE.
+Backend dependencies discovered:
+                               None new. Dependencies 1-4 of the F-04 entry stand.
+Vocabulary dependencies:       None. Screen 05 is still not rating-bearing.
+Governance blockers:           None. NEW-QUESTION: none.
+
+SCOPE:                         Visual reconciliation ONLY, against
+                               UI_REFERENCE_FINAL_MVP/reference/Trainer - Schedule/ (A-056,
+                               visual rank 1). The .html export was read for VALUES ONLY - no
+                               export markup, class name, DOM structure, absolute position or
+                               fixed pixel layout entered the component.
+
+TRUE-DRIFT RESOLVED:           19. Full table: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md
+                               Phase 4 section 4.1.
+
+REGISTERED-OMISSION PRESERVED: 8, ZERO CHANGED - D1 Add Agenda disabled with its reason,
+                               D2 "Open Class Roster" relabelling, D3 room/trainer names
+                               omitted, the TA fields unbuilt, D4 header search placement,
+                               D5 real month picker, D6 neighbouring-month contrast,
+                               D7 rail items. Reported as a SEPARATE list from TRUE-DRIFT,
+                               never merged into one count (plan 6.5).
+
+TWO PRE-EXISTING CASCADE DEFECTS FOUND AND FIXED (neither introduced here, both invisible to
+source review): the session-card <h3> "text-brand-800" was outranked by the UNLAYERED
+h1..h4 colour rule and had been rendering NAVY on every build since it was written - fixed
+narrowly as "text-brand-800!", the only important utility in the application; and
+"tracking-[-0.02em]" on the page <h1> was likewise inert and was REMOVED rather than
+restyled. See adjudication section 4.2.
+
+Browser viewport:              n/a - see below.
+Before screenshot:             NOT CAPTURED.
+After screenshot:              NOT CAPTURED.
+                               *** RENDERED CAPTURE IS **NOT-RUN**, WITH ITS REASON. ***
+                               Screen 05 is AUTHENTICATED; the portal layout runs
+                               requirePortalAccess, which needs a session and therefore a
+                               reachable governed database, and .env.local in this clone
+                               configures the HOSTED dev project only - a CLAUDE.md 12
+                               stop-and-ask that no current authorization carries. No capture
+                               was manufactured and no hosted or paid service was contacted.
+                               NOT-RUN is not PASS. Verified instead by frame-vs-source
+                               measurement, a static cascade audit, and EMITTED-CSS
+                               verification of every new value out of .next/static/chunks.
+Validation:                    tsc --noEmit                                    exit 0
+                               eslint .                                        exit 0
+                               npm run build                                   exit 0
+                                 route census 17, UNCHANGED
+                               tests/frontend/app-route-census.mjs             exit 0
+                               tests/frontend/portal-navigation-active-state   exit 0  (6/6)
+                               tests/frontend/post-login-destinations.mjs      exit 0  (5/5)
+                               tests/frontend/session-eligibility.mjs          exit 0
+                                 E-5/E-6 assert on the SessionCard branch this phase edited:
+                                 a future session still renders a disabled button with the
+                                 governed reason and NO link, and the roster Link still occurs
+                                 exactly once. C2C-010 intact, proven not asserted.
+                               reference.png SHA-256 d2d58b16... verified UNCHANGED.
+                               No governed surface touched. No dependency added.
+Ending commit:                 recorded in docs/progress/STATUS.md and in the adjudication's
+                               Commits table (filled one phase late - a commit cannot cite its
+                               own SHA).
+Acceptance status:             PASS is this session's EVIDENCE verdict only.
+                               Accepted is OPERATOR-SET ONLY and has NOT been set.
+```

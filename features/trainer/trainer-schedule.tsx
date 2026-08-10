@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -227,19 +226,25 @@ export function TrainerSchedule() {
 
   return (
     <div className="page-grid">
+      {/*
+        PHASE 4 (plan §4) — the page header carries the frame's measured type scale:
+        title 22px/700, description 12.5px/400 at a 2px gap. `tracking-[-0.02em]` was
+        REMOVED rather than restyled: `h1..h4 { letter-spacing: -0.015em }` in
+        globals.css is UNLAYERED, so a tracking utility on a heading is emitted,
+        matched and silently loses the cascade. Leaving a class that does nothing
+        reads as an applied value on review. See the Phase 4 adjudication §2.1.
+      */}
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
-            Schedule
-          </h1>
-          <p className="mt-1 text-body leading-6 text-ink">
+          <h1 className="text-[1.375rem] font-bold text-ink-strong">Schedule</h1>
+          <p className="mt-0.5 text-small leading-5 text-ink">
             Your classes, sessions and meetings
           </p>
         </div>
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-[14.375rem]">
           <label
             htmlFor={searchId}
-            className="mb-1.5 block text-micro font-bold uppercase tracking-[0.14em] text-neutral-on"
+            className="mb-1 block text-small font-medium text-neutral-on"
           >
             Search schedule
           </label>
@@ -249,12 +254,12 @@ export function TrainerSchedule() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search schedule"
-            className="min-h-11 w-full rounded-field border border-line bg-surface px-3.5 py-2.5 text-body text-ink-strong placeholder:text-neutral-on"
+            className="min-h-11 w-full rounded-[0.75rem] border border-line bg-surface px-3.5 py-2.5 text-small text-ink-strong placeholder:text-neutral-on"
           />
         </div>
       </header>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18.75rem]">
         {/* `min-w-0` keeps the wide month grid scrolling inside its own container rather
             than widening the page — GLOBAL_UI_RULES §6. */}
         <section className="card min-w-0 overflow-hidden" aria-labelledby="schedule-period">
@@ -262,13 +267,13 @@ export function TrainerSchedule() {
             <div>
               <h2
                 id="schedule-period"
-                className="text-section-title font-extrabold text-ink-strong"
+                className="text-card-title font-bold text-ink-strong"
               >
                 {periodLabel}
               </h2>
               <label
                 htmlFor={monthId}
-                className="mt-1 block text-micro font-bold uppercase tracking-[0.14em] text-neutral-on"
+                className="mt-1.5 block text-small font-medium text-neutral-on"
               >
                 Month shown
               </label>
@@ -276,7 +281,7 @@ export function TrainerSchedule() {
                 id={monthId}
                 value={focusMonthKey}
                 onChange={(event) => changeMonth(event.target.value)}
-                className="mt-1 min-h-11 rounded-field border border-line bg-surface px-3 py-2 text-body font-bold text-ink-strong"
+                className="mt-1 min-h-11 rounded-[0.75rem] border border-line bg-surface px-3 py-2 text-small font-semibold text-ink-strong"
               >
                 {monthOptions.map((monthKey) => (
                   <option key={monthKey} value={monthKey}>
@@ -290,11 +295,20 @@ export function TrainerSchedule() {
               <div
                 role="group"
                 aria-label="Schedule view"
-                className="inline-flex rounded-field bg-surface-muted p-1"
+                className="inline-flex gap-[3px] rounded-field bg-surface-muted p-[3px]"
               >
                 {SCHEDULE_VIEW_MODES.map((mode) => {
                   const active = view === mode;
                   return (
+                    /*
+                     * The frame carries the current segment on FILL ALONE — no
+                     * elevation. Dropping the elevation to match it would leave
+                     * colour as the only cue, so the frame's own 500 → 600 weight
+                     * step is what distinguishes the two states, alongside
+                     * `aria-pressed`. Same reasoning as Phases 1–3 §4: a
+                     * non-colour carrier is required (GLOBAL_UI_RULES §7,
+                     * WCAG 2.2 SC 1.4.1), and 600 is a ratified frame value.
+                     */
                     <button
                       key={mode}
                       type="button"
@@ -302,10 +316,10 @@ export function TrainerSchedule() {
                       data-selected={active ? "true" : "false"}
                       aria-pressed={active}
                       onClick={() => setView(mode)}
-                      className={`min-h-10 rounded-field px-4 py-2 text-body font-bold transition ${
+                      className={`rounded-lg px-3.5 py-[7px] text-[0.75rem] transition ${
                         active
-                          ? "bg-surface text-ink-strong shadow-raised"
-                          : "bg-transparent text-neutral-on hover:text-ink-strong"
+                          ? "bg-surface font-semibold text-ink-strong"
+                          : "bg-transparent font-medium text-neutral-on hover:text-ink-strong"
                       }`}
                     >
                       {VIEW_LABEL[mode]}
@@ -319,7 +333,7 @@ export function TrainerSchedule() {
                 type="button"
                 disabled
                 aria-describedby={agendaNoteId}
-                className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface-muted px-4 py-2.5 text-body font-bold text-ink-subtle"
+                className="inline-flex min-h-10 cursor-not-allowed items-center gap-[7px] rounded-field border border-line bg-surface-muted px-4 py-[9px] text-small font-semibold text-ink-subtle"
               >
                 <span aria-hidden="true">+</span>
                 Add Agenda
@@ -401,7 +415,7 @@ function CalendarGrid({
               key={weekday.short}
               scope="col"
               aria-label={weekday.long}
-              className="border-b border-line pb-3 text-left text-small font-bold text-neutral-on"
+              className="border-b border-line pb-1 pl-2 text-left text-micro font-semibold text-neutral-on"
             >
               {weekday.short}
             </th>
@@ -441,11 +455,12 @@ function DayCell({
 }) {
   if (!day.inFocusMonth) {
     return (
-      <div className="h-full bg-surface-muted p-2.5">
-        {/* The frame renders the borrowed neighbouring-month dates in a very light grey
-            that measures 2.043:1 on this fill. A date is text that carries meaning, so the
-            AA floor wins over the frame: hue preserved, luminance moved (A-045). */}
-        <span className="text-body font-bold text-neutral-on">{day.dayOfMonth}</span>
+      <div className="h-full bg-surface-muted p-[7px]">
+        {/* D6 — the frame renders the borrowed neighbouring-month dates in a very light
+            grey that measures 2.043:1 on this fill. A date is text that carries meaning,
+            so the AA floor wins over the frame: hue preserved, luminance moved (A-045).
+            The frame's SIZE and WEIGHT (12px/500) are followed; only its colour is not. */}
+        <span className="text-[0.75rem] font-medium text-neutral-on">{day.dayOfMonth}</span>
       </div>
     );
   }
@@ -457,7 +472,7 @@ function DayCell({
       aria-current={selected ? "date" : undefined}
       aria-label={`${formatFullDate(day.isoDate)}. ${describeDay(day)}`}
       onClick={() => onSelect(day.isoDate)}
-      className={`flex h-full w-full flex-col gap-2 p-2.5 text-left transition ${
+      className={`flex h-full w-full flex-col gap-1 p-[7px] text-left transition ${
         selected
           ? "bg-brand-50 ring-2 ring-inset ring-brand-700"
           : "bg-surface hover:bg-surface-subtle"
@@ -465,24 +480,32 @@ function DayCell({
     >
       <span
         aria-hidden="true"
-        className={`inline-flex size-7 items-center justify-center rounded-full text-body font-bold ${
+        className={`inline-flex size-[1.625rem] items-center justify-center rounded-full text-[0.78125rem] font-semibold ${
           selected ? "bg-brand-700 text-white" : "text-ink-strong"
         }`}
       >
         {day.dayOfMonth}
       </span>
-      <span className="flex w-full flex-col gap-1.5" aria-hidden="true">
+      <span className="flex w-full flex-col gap-1" aria-hidden="true">
         {day.sessions.map((session) => (
+          /*
+           * Chip type follows the frame exactly (10.5px title over a 9px time at a
+           * 7px radius). Its COLOUR does not: the frame tints each chip in the
+           * Class Grade's own hue at roughly 3:1, and these tones hold AA. The
+           * `opacity-90` the time line used to carry was dropped — the frame gives
+           * both lines one colour, and removing it raises contrast rather than
+           * lowering it.
+           */
           <span
             key={session.sessionId}
-            className={`block truncate rounded-md px-2 py-1.5 text-micro font-bold ${
+            className={`block truncate rounded-[7px] px-[7px] py-[5px] text-[0.65625rem] font-semibold ${
               CHIP_TONE[classGradeTone(session.classGrade)]
             }`}
           >
             <span className="block truncate">
               {session.classGrade} · {session.moduleName}
             </span>
-            <span className="mt-0.5 block font-semibold opacity-90">
+            <span className="mt-px block text-[0.5625rem] font-medium">
               {formatTimeRange(session.startTime, session.endTime).split(" – ")[0]}
             </span>
           </span>
@@ -526,7 +549,7 @@ function ScheduleDetails({
       <div className="flex items-start justify-between gap-3">
         <h2
           id="schedule-details-heading"
-          className="text-card-title font-bold text-ink-strong"
+          className="text-[0.9375rem] font-semibold text-ink-strong"
         >
           Schedule Details
         </h2>
@@ -549,7 +572,7 @@ function ScheduleDetails({
         </p>
       ) : (
         <>
-          <p className="mt-1 text-body font-semibold text-ink">
+          <p className="mt-1 text-small font-medium text-ink">
             {formatFullDate(day.isoDate)}
           </p>
           {day.sessions.length === 0 ? (
@@ -581,11 +604,23 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
   const presentation = SESSION_ELIGIBILITY_PRESENTATION[eligibility];
   const reasonId = `session-state-${session.sessionId}`;
   return (
-    <article className="rounded-panel bg-brand-50 p-4" data-session-eligibility={eligibility}>
+    <article
+      className="rounded-card bg-brand-100 px-4 py-[0.9375rem]"
+      data-session-eligibility={eligibility}
+    >
       <span className="flex flex-wrap items-center gap-2">
-        <Badge tone="brand" size="small">
+        {/*
+          The frame draws this as a WHITE pill on the pink card, so it is rendered
+          here rather than through `Badge`: the shared tone map has no white-on-tint
+          tone, and a `className` override would collide with `Badge`'s own
+          background utility — two utilities of equal specificity in the same layer,
+          decided by stylesheet order rather than by the class attribute. That is the
+          same "declared is not applied" trap this plan keeps catching, so it is
+          avoided rather than gambled on.
+        */}
+        <span className="inline-flex min-h-6 items-center rounded-full bg-surface px-2.5 py-1 text-[0.625rem] font-semibold text-brand-800">
           Class
-        </Badge>
+        </span>
         {/*
           COLOUR IS NOT THE ONLY CARRIER (GLOBAL_UI_RULES §7, WCAG 2.2 SC 1.4.1). The
           state is stated in WORDS ("Completed" / "In session today" / "Not started
@@ -602,24 +637,35 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
           {presentation.label}
         </span>
       </span>
-      <h3 className="mt-2.5 text-card-title font-extrabold text-brand-800">
+      {/*
+        ⚠️ `text-brand-800!` is IMPORTANT deliberately, and it is the only important
+        utility in the application. `h1..h4 { color: #1b2b4b }` in globals.css is
+        UNLAYERED, and Tailwind emits utilities into `@layer utilities`, so an
+        unlayered rule outranks every layered one: the plain `text-brand-800` this
+        heading carried before was generated, matched, and lost — the title rendered
+        NAVY while the source said pink, on every build since it was written. An
+        important declaration wins regardless of layer, and it is scoped to this one
+        element rather than by moving the heading rule into a layer, which would
+        change the cascade for every heading in the application at once.
+      */}
+      <h3 className="mt-2.5 text-[0.96875rem] font-bold text-brand-800!">
         {session.moduleName}
       </h3>
-      <dl className="mt-3 grid gap-1.5 text-body text-ink">
+      <dl className="mt-3 grid gap-2 text-[0.75rem] font-medium text-ink">
         <div className="flex gap-2">
-          <dt className="font-bold">Date</dt>
+          <dt className="font-semibold">Date</dt>
           <dd>{formatFullDate(session.date)}</dd>
         </div>
         <div className="flex gap-2">
-          <dt className="font-bold">Time</dt>
+          <dt className="font-semibold">Time</dt>
           <dd>{formatTimeRange(session.startTime, session.endTime)}</dd>
         </div>
         <div className="flex gap-2">
-          <dt className="font-bold">Class Grade</dt>
+          <dt className="font-semibold">Class Grade</dt>
           <dd data-vocabulary="class-grade">{session.classGrade}</dd>
         </div>
         <div className="flex gap-2">
-          <dt className="font-bold">Roster</dt>
+          <dt className="font-semibold">Roster</dt>
           <dd>
             {session.studentCount}{" "}
             {session.studentCount === 1 ? "learner" : "learners"}
@@ -642,7 +688,7 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
             disabled
             aria-describedby={reasonId}
             data-roster-entry="inert"
-            className="mt-4 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-field border border-line bg-surface-muted px-4 py-2.5 text-body font-bold text-ink-subtle"
+            className="mt-4 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-field border border-line bg-surface-muted px-4 py-3 text-[0.9375rem] font-semibold text-ink-subtle"
           >
             Open Class Roster
             <span className="sr-only"> for {session.moduleName}</span>
@@ -655,7 +701,7 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
         <Link
           href={`/trainer/sessions/${session.sessionId}/roster`}
           data-roster-entry="enabled"
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-field bg-surface px-4 py-2.5 text-body font-bold text-brand-800 no-underline shadow-raised transition hover:bg-brand-100"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-field border border-line-strong bg-surface px-4 py-3 text-[0.9375rem] font-semibold text-brand-800 no-underline shadow-raised transition hover:bg-brand-200"
         >
           Open Class Roster
           <span className="sr-only"> for {session.moduleName}</span>
@@ -665,9 +711,16 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
   );
 }
 
-/** Chip tints per derived state. Redundant with the label and the glyph, never alone. */
+/**
+ * Chip tints per derived state. Redundant with the label and the glyph, never alone.
+ *
+ * PHASE 4: the `brand` tint moved from `bg-brand-100` to the card's own white pill
+ * treatment because the SessionCard fill itself became `bg-brand-100` this phase —
+ * `bg-brand-100` on `bg-brand-100` is an invisible chip, and the state would then have
+ * been carried by the glyph and the label alone with no boundary at all.
+ */
 const ELIGIBILITY_CHIP: Readonly<Record<"brand" | "success" | "neutral", string>> = {
-  brand: "bg-brand-100 text-brand-800",
+  brand: "bg-surface text-brand-800",
   success: "bg-success-soft text-success-on",
   neutral: "bg-neutral-soft text-neutral-on",
 };
