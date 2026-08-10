@@ -5183,3 +5183,53 @@ The read-only `<p>` is now a real `<textarea>` with a save control. ⚠️ **The
 ### Commit / next
 
 **Next: Phase 8 (Trainer wording editor)** — foundation consistency only; **visual acceptance `NOT APPLICABLE (G-1)`**. ⚠️ **Measure at HEAD before accepting the plan's classification** (§12 item 10).
+
+---
+
+## 2026-08-11 — HERO CHAIN **PHASE 8** — Trainer wording editor: **measured, and it built nothing**
+
+**Track:** hero chain completion, plan §6.8 Phase 8. **Branch:** `develop`. **Starting HEAD:** `2fecad9`.
+
+### The finding
+
+⚠️ **The second phase this batch to build nothing, and for the same reason as Phase 5: a delta table is a READING OF A FRAME, NOT A MEASUREMENT OF THE BUILD** (§12 item 10, applied on Operator instruction to every remaining phase).
+
+The plan classified Phase 8 as *"consistency with their siblings' foundation only"*. **Measured at HEAD before accepting that**, on eleven foundation probes:
+
+```
+trainer-report-editor.tsx     vs trainer-report-review.tsx     -> same foundation on every probe
+management-wording-editor.tsx vs management-report-review.tsx  -> same foundation on every probe
+```
+
+**Both editors already sat on their siblings' foundation.** There was no divergence to close, and **none was manufactured** to make the phase look productive.
+
+### ⚠️ What the real Phase 8 gap turned out to be
+
+**Nothing enforced that consistency.** A framed screen has a reference frame to catch drift; **the three unframed surfaces have none**, so an editor could quietly acquire its own shell, its own loading state or its own error panel and **no check anywhere in this repository would notice**. `G-1`'s compensating requirement — *"the same tokens, primitives and shell"* — was a stated expectation with **no mechanism behind it**.
+
+▶ For an unframed surface, **a mechanical consistency check is the only guarantee that exists.** Its absence was the gap, not the editor.
+
+**Delivered:** `scripts/tests/hero/prove-8-unframed-foundation.mjs` (`npm run prove:hero-8`) — **14 legs, `PASS`**, no database, no transaction, no write.
+
+- `P8-1a/b` **non-vacuity** — every probe compares a boolean to a boolean, so **two empty files would agree on all nine**. The framed sibling must exhibit all 9 markers before agreement means anything (it does).
+- `P8-1c` **discrimination**, reported at its true strength rather than its most flattering: an unrelated control surface matches **7 of 9**. The set is **not vacuously universal**, but seven probes are genuinely platform-wide — ⚠️ **which is the point, not a weakness**, because G-1's requirement *is* the shared shell. `REPORT_PANEL_CONFIG` and the report port carry the separation.
+- `P8-2` the nine foundation probes, compared pairwise.
+- `P8-3` two ⛔ negative shapes: the unframed surface has **not** grown its own `<html>`/`<body>`/layout export, and **not** grown a bespoke inline error panel in place of the non-disclosing `StatePanel`.
+
+### ⛔ What this is not
+
+**It is NOT a visual acceptance and must never be reported as one.** §2.3 rules `NOT APPLICABLE (G-1)` a **disposition** — never a pass, never a gap — and a green consistency proof does not convert it into one. There is still no artefact to accept these surfaces against; that is the ruling, not a defect.
+
+### Counts
+
+No application code changed — **no route, component, DTO, RPC, migration, grant or emitted class**. Database untouched: **21 migrations · 27 tables · 42 functions · 12 enums · 29 policies**. `package.json` re-verified after the write — **BOM-less, `JSON.parse` clean, 4,135 bytes** (§11 encoding rule).
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on these authenticated surfaces. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+**Phase 11** measured identically at HEAD and likewise has nothing to build; it will **extend this harness** to the management pair rather than add a second one. Taken in plan order, after Phases 9 and 10.
+
+### Next
+
+**Phase 9 — `29` Management Reports** (Class, Trainer and Lesson columns; class filter; terms filter a `REGISTERED-OMISSION` under G-4). ⚠️ **Measure at HEAD first**, and re-check §5.5's exclusions **field by field** at exit.

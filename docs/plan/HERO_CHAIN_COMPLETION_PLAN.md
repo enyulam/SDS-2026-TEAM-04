@@ -308,6 +308,16 @@ Assigned trainer display name via `class_session_assignments → centre_membersh
 
 **Frame:** none — **G-1.** Both function today. Delta: consistency with their siblings' foundation only. Visual acceptance is **`NOT APPLICABLE (G-1)`**.
 
+> ✅ **PHASE 8 — MEASURED AT HEAD 2026-08-11, AND IT BUILT NOTHING. The second such result this batch, after Phase 5, and for the same reason: the delta above is a READING OF A FRAME, NOT A MEASUREMENT OF THE BUILD (§12 item 10).** Measured against `trainer-report-review.tsx` on eleven foundation probes, `trainer-report-editor.tsx` **already sat on its sibling's foundation on every one**. There was no divergence to close, and none was manufactured to make the phase look productive.
+>
+> **What it delivered instead is the thing `G-1` actually needs — `scripts/tests/hero/prove-8-unframed-foundation.mjs` (`npm run prove:hero-8`), 14 legs, `PASS`.** ⚠️ **Nothing enforced this consistency before.** A framed screen has a reference frame to catch drift; these three have none, so an editor could quietly acquire its own shell, loading state or error panel and **no check anywhere would notice**. For an unframed surface a mechanical consistency check is **the only guarantee that exists**, and its absence was the real Phase 8 gap.
+>
+> ⚠️ **The discrimination leg is reported at its true strength, not its most flattering.** `P8-1c` measures the probe set against a deliberately unrelated control surface, which matches **7 of 9** — so the set is **not vacuously universal**, but seven probes are genuinely platform-wide. **That is the point rather than a weakness**: G-1's requirement *is* "the same tokens, primitives and shell", so a probe shared across the platform is measuring exactly the shared thing. The two that separate (`REPORT_PANEL_CONFIG` and the report port) carry the discrimination.
+>
+> ⛔ **This is NOT a visual acceptance and must never be reported as one.** §2.3 already rules `NOT APPLICABLE (G-1)` a **disposition** — never a pass, never a gap — and a green consistency proof does not convert it into one.
+>
+> **Phase 11 covers `management-wording-editor.tsx` against `management-report-review.tsx` and measured identically at HEAD** — it too has nothing to build, and extends this same harness rather than adding a second one.
+
 ### 6.9 `29` Management Reports — **Phase 9**
 
 **Frame in full:** filter strip (`"All terms"` · `"All classes"` · `"Status"`) · `"Search students"` · table **Student · Class · Lesson · Trainer · Submitted · Status ·** action, rows reading e.g. `"Alicia Gomez"` / `"Junior · Public Speaking"` / `"4 · Speaking"` / `"Argen Maulie"` / `"12 Mar"` / `"Approved"` / `"View report"`, with a `"Needs approval"` / `"Review"` variant.
