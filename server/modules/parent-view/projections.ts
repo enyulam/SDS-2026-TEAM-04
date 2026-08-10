@@ -35,6 +35,17 @@ import type { ActionResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { firstRow, type CanonicalReportRow } from "@/server/modules/report-workflow/rpc-types";
 
+/** Row shape of `report_get_canonical_context` (hero Phase 1). */
+interface CanonicalContextRow {
+  readonly student_display_name: string;
+  readonly class_grade_label: string;
+  readonly class_module_title: string;
+  readonly session_date: string;
+  readonly lesson_number: number | null;
+  readonly lesson_title: string | null;
+  readonly trainer_display_name: string | null;
+}
+
 export interface ParentReportListItemDto {
   readonly studentId: string;
   readonly studentDisplayName: string;
@@ -45,6 +56,31 @@ export interface ParentReportListItemDto {
 
 export type AvailabilityState = "available" | "none_yet" | "linked_unavailable";
 
+/**
+ * Display context for the canonical report — hero Phase 1.
+ *
+ * ⛔ Every field here is display context the frame names and governance
+ * permits. NOTHING in this shape is a rating (Q-27, G-2), an observation, a
+ * trainer note, a draft, AI history, a content hash, a REVISION NUMBER, a
+ * lifecycle status or an audit row, and nothing discloses that a correction
+ * cycle is or was underway. Adding any of those here is a §12 stop-and-ask,
+ * and the database refuses them independently — `report_get_canonical_context`
+ * returns exactly seven columns and its own assertion H1-6 pins their names.
+ *
+ * ⚠️ `lessonNumber`, `lessonTitle` and `trainerDisplayName` are nullable, and
+ * NULL means NOT RECORDED. Render by OMITTING the element — never "Lesson 1",
+ * never "TBC", never a placeholder dash.
+ */
+export interface CanonicalReportContextDto {
+  readonly studentDisplayName: string;
+  readonly classGradeLabel: string;
+  readonly classModuleTitle: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
+}
+
 export interface CanonicalReportDto {
   readonly panels: {
     readonly overview: string;
@@ -53,6 +89,11 @@ export interface CanonicalReportDto {
     readonly remarks: string;
   };
   readonly submittedAt: string;
+  /**
+   * `null` when the context read returned nothing. The panels are the
+   * governed content and never depend on this — see `getCanonicalReportCore`.
+   */
+  readonly context: CanonicalReportContextDto | null;
 }
 
 async function listLinkedStudents(
@@ -207,6 +248,45 @@ export async function getCanonicalReportCore(
   }
   const row = firstRow<CanonicalReportRow>(data);
   if (!row) return CANONICAL_READ_DENIED;
+
+  // Display context — hero Phase 1. Read SECOND and deliberately FAIL-SOFT.
+  //
+  // ⚠️ The ordering matters and is not incidental. The canonical read above
+  // is the governance boundary; this call cannot widen it, because
+  // `report_get_canonical_context` mirrors that same gate step for step and
+  // is reached only after it has already succeeded. A caller who was refused
+  // above has already returned.
+  //
+  // Fail-soft is the correct posture HERE and nowhere else on this surface:
+  // context is presentation, and losing it must never withhold the governed
+  // narrative a parent is entitled to read. A missing context therefore
+  // renders as omitted rows — the same treatment a NULL lesson or room gets —
+  // never as a denial and never as a placeholder.
+  let context: CanonicalReportContextDto | null = null;
+  try {
+    const ctx = await client.rpc("report_get_canonical_context", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    });
+    if (!ctx.error) {
+      const c = firstRow<CanonicalContextRow>(ctx.data);
+      if (c) {
+        context = {
+          studentDisplayName: c.student_display_name,
+          classGradeLabel: c.class_grade_label,
+          classModuleTitle: c.class_module_title,
+          sessionDate: c.session_date,
+          lessonNumber: c.lesson_number ?? null,
+          lessonTitle: c.lesson_title ?? null,
+          trainerDisplayName: c.trainer_display_name ?? null,
+        };
+      }
+    }
+  } catch {
+    // Same posture: presentation context is never worth failing the read.
+    context = null;
+  }
+
   return {
     outcome: "success",
     data: {
@@ -217,6 +297,7 @@ export async function getCanonicalReportCore(
         remarks: row.remarks,
       },
       submittedAt: row.submitted_at,
+      context,
     },
   };
 }

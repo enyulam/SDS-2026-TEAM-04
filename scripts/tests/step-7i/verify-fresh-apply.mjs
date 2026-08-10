@@ -211,7 +211,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   // Deliberately a PINNED LITERAL, not `files.length`. Comparing the count
   // to itself would be vacuous; the pin exists so a new migration cannot
   // enter the tree without a human acknowledging it here.
-  if (files.length !== 19) fail(`${files.length} migration files found, expected 19`)
+  if (files.length !== 20) fail(`${files.length} migration files found, expected 20`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -293,7 +293,15 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   //  17 -> 19. Tables stay 27, enums stay 12, policies stay 29, non-RLS
   //  tables stay 0, the eight report_status labels and the 1/3/9 seeds are
   //  untouched.)
-  const expected = '27|40|12|29|19|28|0|'
+  // (Moved 19 -> 20 migrations at hero Phase 1. M20
+  //  hero_1_canonical_report_context -- +1 FUNCTION
+  //  (report_get_canonical_context), +1 authenticated EXECUTE. It creates
+  //  NO table, enum, label, policy, column or table grant, and performs no
+  //  `CREATE OR REPLACE` -- report_get_canonical (RPC-13) is byte-untouched
+  //  and its own assertion H1-7 pins that. So: functions 40 -> 41,
+  //  authenticated EXECUTE 28 -> 29, migrations 19 -> 20; everything else
+  //  unmoved.)
+  const expected = '27|41|12|29|20|29|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
   // The narration is DERIVED from the pinned literal, never retyped. It

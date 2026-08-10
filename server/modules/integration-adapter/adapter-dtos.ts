@@ -241,9 +241,25 @@ export interface AdapterParentReportListItemDto {
   readonly submittedAt: string;
 }
 
+/**
+ * Hero Phase 1 display context. ⛔ No rating (Q-27, G-2), no observation,
+ * note, draft, AI history, hash, revision number, status or audit row, and
+ * nothing disclosing a correction cycle. NULL means NOT RECORDED — omit.
+ */
+export interface AdapterCanonicalReportContextDto {
+  readonly studentDisplayName: string;
+  readonly classGradeLabel: string;
+  readonly classModuleTitle: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
+}
+
 export interface AdapterCanonicalReportDto {
   readonly panels: AdapterReportPanelsDto;
   readonly submittedAt: string;
+  readonly context: AdapterCanonicalReportContextDto | null;
 }
 
 export type AdapterAvailabilityStateDto = "available" | "none_yet" | "linked_unavailable";

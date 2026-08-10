@@ -144,6 +144,33 @@ export function ParentCanonicalReport() {
   }
 
   const received = formatDate(state.data.submittedAt);
+  const context = state.data.context;
+
+  /*
+   * Hero Phase 1. Every value below comes from the governed context read; NONE
+   * is taken from the frame's mock content (§7.2 — Figma mock data is never
+   * ported) and none is back-derived from a route parameter.
+   *
+   * ⚠️ NULL MEANS NOT RECORDED, SO THE ROW IS OMITTED. The lesson row is
+   * built from whichever of number/title is actually present and disappears
+   * entirely when neither is — never "Lesson 1", never "TBC", never a dash
+   * standing in for a value (Phase 0B, and the G-4/G-2 omission discipline).
+   */
+  const lessonLabel = context
+    ? [context.lessonNumber === null ? null : String(context.lessonNumber), context.lessonTitle]
+        .filter((part): part is string => part !== null && part.length > 0)
+        .join(" · ")
+    : "";
+  const classLabel = context ? `${context.classGradeLabel} · ${context.classModuleTitle}` : "";
+  const sessionDay = context ? formatDate(context.sessionDate) : "";
+
+  const detailRows: readonly { readonly label: string; readonly value: string }[] = context
+    ? [
+        { label: "Name", value: context.studentDisplayName },
+        { label: "Class", value: classLabel },
+        ...(lessonLabel.length > 0 ? [{ label: "Lesson", value: lessonLabel }] : []),
+      ]
+    : [];
 
   return (
     <div className="page-grid" data-testid="parent-canonical-report">
@@ -156,6 +183,13 @@ export function ParentCanonicalReport() {
       */}
       <div className="max-w-3xl">
         <PageHeading title="Class Report" />
+        {/* Frame: "Public Speaking · Wed 14 March 2035". Omitted entirely when
+            the governed context did not resolve. */}
+        {context ? (
+          <p className="mt-0.5 text-small leading-5 text-ink">
+            {context.classModuleTitle} · {sessionDay}
+          </p>
+        ) : null}
         <p className="mt-0.5 text-small leading-5 text-ink">Received {received}</p>
       </div>
 
@@ -168,8 +202,13 @@ export function ParentCanonicalReport() {
             <Icon name="document" size={20} />
           </IconTile>
           <div className="min-w-0">
-            <h2 className="text-[0.8203125rem] font-extrabold text-ink-strong">Class Report</h2>
+            {/* Frame: "Class Report — Alicia Gomez". The learner's name is the
+                governed context's, never the route's studentId. */}
+            <h2 className="text-[0.8203125rem] font-extrabold text-ink-strong">
+              {context ? `Class Report — ${context.studentDisplayName}` : "Class Report"}
+            </h2>
             <p className="mt-0.5 text-[0.703125rem] font-bold text-neutral-on">
+              {context ? `${context.classModuleTitle} · ${sessionDay} · ` : ""}
               Submitted {received} · Parent report
             </p>
           </div>
@@ -197,6 +236,55 @@ export function ParentCanonicalReport() {
             );
           })}
         </div>
+
+        {/*
+          REPORT DETAILS — hero Phase 1. The frame draws five rows: Name,
+          Class, Lesson, Term, Overall Grade. THREE ARE BUILT AND TWO ARE
+          REGISTERED OMISSIONS, each preserved with its citation:
+
+           ⛔ TERM — G-4. A display label is not worth building the substrate an
+              §8-deferred roadmap item needs; a `terms` table is precisely what
+              End-of-Term generation requires. Omitted, never faked.
+           ⛔ OVERALL GRADE — G-2, permanently excluded on all four surfaces.
+              On a Parent surface it is the caught leak in softened wording:
+              Q-27 makes the nine ratings a DATA boundary and Authority Lock
+              §15 already bars "a second panel restating per-dimension
+              ratings, even with softened wording". A single grade is the most
+              compressed possible restatement of the grid.
+
+          Also still omitted from this screen, unchanged from the F-15
+          reconstruction and re-verified this phase: the PERFORMANCE SUMMARY
+          per-dimension grid (the caught leak `CLAUDE.md` §6 names by name),
+          the prose rating attributions (A-052), and WATCH TOGETHER (G-8;
+          Authority Lock §8.1 puts the parent evidence projection out of the
+          Final MVP entirely).
+
+          ⛔ NO TRAINER ROW. G-5 PERMITS the assigned trainer's name on a
+          Parent surface — but permission is not a visible field. THIS FRAME
+          DRAWS NO TRAINER ANYWHERE (verified against the ratified
+          `reference/Parent - Class Report/` .html: zero trainer/coach/teacher
+          occurrences), and G-5's own evidence is frame `32`, not this one.
+          Rendering it here would be inventing a visible element, which §7.2
+          prohibits. The governed projection carries the field; screen `32`
+          builds it in Phase 2, where the frame actually draws it.
+        */}
+        {detailRows.length > 0 ? (
+          <div className="border-t border-line px-[26px] py-[22px]">
+            <h3 className="text-[0.703125rem] font-extrabold uppercase tracking-wide text-neutral-on">
+              Report Details
+            </h3>
+            <dl className="mt-[11px] grid gap-[9px]">
+              {detailRows.map((row) => (
+                <div key={row.label} className="flex items-baseline gap-3">
+                  <dt className="w-24 shrink-0 text-[0.703125rem] font-bold text-neutral-on">
+                    {row.label}
+                  </dt>
+                  <dd className="min-w-0 text-[0.8203125rem] text-ink">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ) : null}
       </section>
     </div>
   );

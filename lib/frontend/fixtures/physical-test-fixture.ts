@@ -4,6 +4,7 @@ import {
   RATING_LEVELS,
   type AssessmentDraftDto,
   type AssessmentRatingDto,
+  type CanonicalReportContextDto,
   type CanonicalReportDto,
   type ChecklistDto,
   type CorrectionRequestDto,
@@ -77,6 +78,14 @@ type FixtureSession = {
   readonly startTime: string;
   readonly endTime: string;
   readonly students: readonly FixtureStudent[];
+  /**
+   * Hero Phase 0B/1 context. OPTIONAL ON PURPOSE — the governed columns are
+   * nullable and NULL means NOT RECORDED, so sessions that leave these unset
+   * exercise the OMIT path, which is a real rendering case and not a gap.
+   */
+  readonly lessonNumber?: number;
+  readonly lessonTitle?: string;
+  readonly trainerName?: string;
 };
 
 type FixtureObservation = {
@@ -164,6 +173,34 @@ const MASTERED_MIXED_RATINGS: Record<DimensionCode, RatingLevel | null> = {
   audience_awareness: "developing",
 };
 
+/**
+ * Hero Phase 1 display context, assembled from the fixture's own session and
+ * student records. Returns `null` when the pair does not resolve — the same
+ * shape the governed read produces when its context call yields nothing.
+ *
+ * ⚠️ `lessonNumber`, `lessonTitle` and `trainerDisplayName` pass through as
+ * `null` where the session leaves them unset. That is NOT RECORDED and the
+ * surface omits the row; nothing is substituted.
+ */
+function fixtureReportContext(
+  sessionId: string,
+  studentId: string,
+): CanonicalReportContextDto | null {
+  const session = SESSIONS.find((item) => item.sessionId === sessionId);
+  if (!session) return null;
+  const student = session.students.find((item) => item.studentId === studentId);
+  if (!student) return null;
+  return {
+    studentDisplayName: student.displayName,
+    classGradeLabel: session.classGrade,
+    classModuleTitle: session.moduleName,
+    sessionDate: session.date,
+    lessonNumber: session.lessonNumber ?? null,
+    lessonTitle: session.lessonTitle ?? null,
+    trainerDisplayName: session.trainerName ?? null,
+  };
+}
+
 const SESSIONS: readonly FixtureSession[] = [
   {
     sessionId: "session-storytelling-lab",
@@ -172,6 +209,11 @@ const SESSIONS: readonly FixtureSession[] = [
     date: FIXTURE_DATES.eligible.date,
     startTime: FIXTURE_DATES.eligible.startTime,
     endTime: FIXTURE_DATES.eligible.endTime,
+    // Populated so the lesson strip and trainer row are actually exercised.
+    // The other sessions leave these unset, which exercises the OMIT path.
+    lessonNumber: 4,
+    lessonTitle: "Expressive Delivery",
+    trainerName: "Fixture Trainer One",
     students: [
       {
         studentId: "student-aster",
@@ -971,6 +1013,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       data: {
         panels: clone(report.latestSubmitted.panels),
         submittedAt: report.latestSubmitted.submittedAt,
+        context: fixtureReportContext(report.sessionId, report.studentId),
       },
     };
   }
@@ -1051,6 +1094,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       data: {
         panels: clone(report.latestSubmitted.panels),
         submittedAt: report.latestSubmitted.submittedAt,
+        context: fixtureReportContext(report.sessionId, report.studentId),
       },
     };
   }

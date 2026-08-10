@@ -626,7 +626,12 @@ export async function adapterGetManagementSubmittedReport(
 
   return {
     outcome: "success",
-    data: { panels: review.data.panels, submittedAt: review.data.submittedAt },
+    // ⚠️ MANAGEMENT context is NOT populated here, deliberately. This is the
+    // management submitted-report read; its context row (class, trainer,
+    // lesson on screen `19`) is hero Phase 10's deliverable and has not been
+    // authorized yet. `null` renders as omitted rows — the same treatment a
+    // NULL lesson gets — rather than as fabricated or back-derived values.
+    data: { panels: review.data.panels, submittedAt: review.data.submittedAt, context: null },
   };
 }
 

@@ -236,9 +236,31 @@ export type ParentReportListItemDto = {
   readonly submittedAt: string;
 };
 
+/**
+ * Hero Phase 1 display context for the canonical report.
+ *
+ * ⛔ Nothing here is a rating (Q-27, G-2), an observation, a trainer note, a
+ * draft, AI history, a content hash, a revision number, a lifecycle status or
+ * an audit row, and nothing discloses that a correction cycle is or was
+ * underway. The database returns exactly these seven fields.
+ *
+ * ⚠️ NULL MEANS NOT RECORDED — render by OMITTING the row. Never "Lesson 1",
+ * never "TBC", never a placeholder dash.
+ */
+export type CanonicalReportContextDto = {
+  readonly studentDisplayName: string;
+  readonly classGradeLabel: string;
+  readonly classModuleTitle: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
+};
+
 export type CanonicalReportDto = {
   readonly panels: ReportPanelsDto;
   readonly submittedAt: string;
+  readonly context: CanonicalReportContextDto | null;
 };
 
 export type AvailabilityStateDto =
