@@ -37,16 +37,25 @@ import os from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
+import { assertConfigProjectId, resolveLocalTarget } from './local-target-guard.mjs'
 
 // ---------------------------------------------------------------------
 // Ratified constants. Every value below is a fixed literal from the
 // ratified fixture baseline. Nothing here is generated at runtime.
 // ---------------------------------------------------------------------
 
-const PROJECT_ID = 'best-coach-mvp'
-const DB_CONTAINER = 'supabase_db_best-coach-mvp'
-const EXPECTED_API_PORT = 54321
-const EXPECTED_DB_PORT = 54322
+// ⚠️ THE LOCAL TARGET IS NO LONGER A LITERAL. It is resolved through
+// `local-target-guard.mjs`, which hard-denies the frozen demonstration
+// project unconditionally and then requires BEST_COACH_LOCAL_PROJECT_ID to
+// name the stack positively. Both run before any container name exists.
+//
+// This changed because the demonstration workspace's local stack is still
+// running and still owns the `best-coach-mvp` containers, so the former
+// literal no longer named this repository's database — it named the FROZEN
+// one, reachable by `docker exec` with full `postgres` rights.
+const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget()
+const EXPECTED_API_PORT = 54421
+const EXPECTED_DB_PORT = 54422
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]'])
 
 // There is deliberately no Student Auth identity: `students` carries no
@@ -160,10 +169,11 @@ function assertProjectGuards() {
 
   const toml = readConfigToml()
 
-  const projectId = tomlProjectId(toml)
-  if (projectId !== PROJECT_ID) {
-    throw new SafeError(`Unexpected project id in supabase/config.toml (expected "${PROJECT_ID}").`)
-  }
+  // Denies the frozen demonstration project first, then requires config.toml
+  // to positively carry the id the caller named. A config that has drifted to
+  // the frozen project is refused as a HARD DENY, not as a mismatch.
+  assertConfigProjectId(tomlProjectId(toml), PROJECT_ID)
+  const projectId = PROJECT_ID
 
   const apiPort = tomlSectionPort(toml, 'api')
   if (apiPort !== EXPECTED_API_PORT) {

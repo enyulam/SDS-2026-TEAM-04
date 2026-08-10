@@ -20,8 +20,12 @@
  * ---------------------------------------------------------------------------
  * There are EXACTLY TWO profiles and no others:
  *
- *   `default`         — project `best-coach-mvp`,    local API port 54321
+ *   `default`         — project `best-coach-dev`,    local API port 54421
  *   `f17-disposable`  — project `bc-f17-disposable`, local API port 55421
+ *
+ * (The `default` row was `best-coach-mvp` / 54321 until 2026-08-10. That is
+ * the DEMONSTRATION workspace's still-running stack, which this repository
+ * must never reach — see CANONICAL_LOCAL_API_PORT below.)
  *
  * The `default` profile is what EVERY existing caller gets, because it is what
  * an ABSENT profile variable resolves to. Nothing about the normal local or
@@ -98,8 +102,23 @@ export interface PublicSupabaseConfig {
 
 const LOCAL_HOSTNAMES = new Set(["127.0.0.1", "localhost", "::1"]);
 
-/** The canonical local Supabase API port — project `best-coach-mvp`. */
-const CANONICAL_LOCAL_API_PORT = "54321";
+/**
+ * The canonical local Supabase API port — this repository's own stack,
+ * project `best-coach-dev`.
+ *
+ * ⚠️ CHANGED 2026-08-10 from `54321` / project `best-coach-mvp`. This is the
+ * DEVELOPMENT CLONE, and the demonstration workspace's local stack is still
+ * running and still holds 54321. This repository's stack was moved to the
+ * 544xx block so both can run at once; the demonstration keeps 543xx and the
+ * F17 disposable profile keeps 554xx.
+ *
+ * This constant is load-bearing, not cosmetic: the map below is a CLOSED
+ * allow-list with no "any localhost port" branch, so leaving it at 54321
+ * would have done one of two things — refused this repository's own stack
+ * outright, or, far worse, authorized the application to talk to the FROZEN
+ * demonstration database.
+ */
+const CANONICAL_LOCAL_API_PORT = "54421";
 /** The F17 disposable local Supabase API port — project `bc-f17-disposable`. */
 const DISPOSABLE_LOCAL_API_PORT = "55421";
 

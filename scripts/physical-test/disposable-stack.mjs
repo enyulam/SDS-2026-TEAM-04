@@ -54,6 +54,7 @@ import net from 'node:net'
 import os from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assertConfigProjectId, resolveLocalTarget } from '../fixtures/local-target-guard.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -63,12 +64,21 @@ export const REPO_ROOT = resolve(HERE, '..', '..')
 // this module only ever asserts them, never changes them.
 // ---------------------------------------------------------------------
 
-export const CANONICAL_PROJECT_ID = 'best-coach-mvp'
-export const CANONICAL_DB_CONTAINER = 'supabase_db_best-coach-mvp'
-export const CANONICAL_API_PORT = 54321
-export const CANONICAL_DB_PORT = 54322
-export const CANONICAL_STUDIO_PORT = 54323
-export const CANONICAL_INBUCKET_PORT = 54324
+// ⚠️ "CANONICAL" MEANS *THIS REPOSITORY'S* LOCAL STACK — and since the
+// development clone took its own project id, that is no longer the stack the
+// former literals named. The demonstration workspace's stack is still running
+// under `best-coach-mvp`, so a literal here would point this harness's
+// "sacred, never modified" assertions at the FROZEN database.
+//
+// Resolved through the guard instead: hard-deny of the frozen project first,
+// then a positive pin from BEST_COACH_LOCAL_PROJECT_ID.
+const CANONICAL_TARGET = resolveLocalTarget()
+export const CANONICAL_PROJECT_ID = CANONICAL_TARGET.projectId
+export const CANONICAL_DB_CONTAINER = CANONICAL_TARGET.dbContainer
+export const CANONICAL_API_PORT = 54421
+export const CANONICAL_DB_PORT = 54422
+export const CANONICAL_STUDIO_PORT = 54423
+export const CANONICAL_INBUCKET_PORT = 54424
 
 /** Every container the canonical stack owns. None of these is ever touched. */
 export const CANONICAL_CONTAINERS = [
@@ -667,10 +677,10 @@ export function assertCanonicalConfigUntouched() {
     throw new SafeError('supabase/config.toml was not found; run this from the MVP repository.')
   }
   const toml = readFileSync(configPath, 'utf8')
-  const projectId = /^project_id\s*=\s*"([^"]+)"/m.exec(toml)?.[1] ?? null
-  if (projectId !== CANONICAL_PROJECT_ID) {
-    throw new SafeError(`supabase/config.toml no longer pins project id "${CANONICAL_PROJECT_ID}".`)
-  }
+  // Frozen-project hard deny first, then the positive pin. A config that has
+  // drifted to the demonstration project is refused as a DENY, not reported
+  // as a pin mismatch — the two mean very different things here.
+  assertConfigProjectId(/^project_id\s*=\s*"([^"]+)"/m.exec(toml)?.[1] ?? null, CANONICAL_PROJECT_ID)
   if (tomlSectionPort(toml, 'api') !== CANONICAL_API_PORT) {
     throw new SafeError(`supabase/config.toml no longer pins [api] port ${CANONICAL_API_PORT}.`)
   }

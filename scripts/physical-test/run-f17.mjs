@@ -65,16 +65,20 @@ import net from 'node:net'
 import os from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assertConfigProjectId, resolveLocalTarget } from '../fixtures/local-target-guard.mjs'
 import { createServerClient } from '@supabase/ssr'
 
 // ---------------------------------------------------------------------
 // Ratified constants. Every value here is a fixed literal.
 // ---------------------------------------------------------------------
 
-const PROJECT_ID = 'best-coach-mvp'
-const DB_CONTAINER = 'supabase_db_best-coach-mvp'
-const EXPECTED_API_PORT = 54321
-const EXPECTED_DB_PORT = 54322
+// ⚠️ Resolved through the guard, never a literal — see
+// `scripts/fixtures/local-target-guard.mjs`. The demonstration workspace's
+// stack still owns `best-coach-mvp`, so a literal here would aim this runner
+// at the FROZEN database.
+const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget()
+const EXPECTED_API_PORT = 54421
+const EXPECTED_DB_PORT = 54422
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]'])
 
 /** A dedicated application port. Never 3000 — that belongs to the operator. */
@@ -452,10 +456,9 @@ function assertProjectGuards() {
     )
   }
   const toml = readConfigToml()
-  const projectId = /^project_id\s*=\s*"([^"]+)"/m.exec(toml)?.[1] ?? null
-  if (projectId !== PROJECT_ID) {
-    throw new SafeError(`Unexpected project id in supabase/config.toml (expected "${PROJECT_ID}").`)
-  }
+  // Frozen-project hard deny first, then the positive pin.
+  assertConfigProjectId(/^project_id\s*=\s*"([^"]+)"/m.exec(toml)?.[1] ?? null, PROJECT_ID)
+  const projectId = PROJECT_ID
   const apiPort = tomlSectionPort(toml, 'api')
   if (apiPort !== EXPECTED_API_PORT) {
     throw new SafeError(`Unexpected [api] port in supabase/config.toml (expected ${EXPECTED_API_PORT}).`)
