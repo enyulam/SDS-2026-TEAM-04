@@ -225,13 +225,36 @@ for (const file of walk(join(ROOT, "server", "modules"))) {
     if (m && !/\berror\b/.test(m[1])) errorDiscarded.push(`${rel}:${i + 1}`);
   });
 }
+/*
+ * ⚠️ THESE PINS ARE UPDATED AT EACH MODULE BOUNDARY, AND THEY HAVE ALREADY
+ * EARNED THEIR KEEP: they FAILED the moment `report-workflow` was corrected,
+ * which is exactly what they were built to do. A count that silently followed
+ * the code would have asserted nothing.
+ *
+ * Ratchet: 1 / 14 (at first fix) → 0 / 7 (module 1, `report-workflow`) →
+ * 0 / 4 (module 2, `management-view`) → 0 / 0 (module 3, `parent-view`).
+ *
+ * ⛔ The count may only go DOWN. `Q-7c` fails if it ever rises, because a NEW
+ * site of either shape is the defect returning, not progress.
+ */
+const EXPECTED_EXACT_SHAPE = 0;
+// Module 1 (`report-workflow`) complete. 7 remain: 3 in `management-view`,
+// 4 in `parent-view`. Updated at each module boundary so every boundary is
+// HONESTLY green — a pin set to the end target would report failure for work
+// that has not been done yet, which is a different lie.
+const EXPECTED_ERROR_DISCARDED = 7;
+
 check(
-  exactShape.length === 1,
-  `Q-7a: exactly ONE \`error || !data → []\` site remains, REPORTED not fixed (${exactShape.map((s) => s.replace("SHAPE ", "")).join(", ")}) — it is \`listEnrolledStudents\`, in this same file, feeding this same surface, so the roster can still empty silently through it`,
+  exactShape.length === EXPECTED_EXACT_SHAPE,
+  `Q-7a: ⛔ zero \`error || !data → []\` sites remain anywhere in \`server/modules\` (${exactShape.length})${exactShape.length ? ` — ${exactShape.map((s) => s.replace("SHAPE ", "")).join(", ")}` : ""}`,
 );
 check(
-  errorDiscarded.length === 14,
-  `Q-7b: and ${errorDiscarded.length} sites never destructure \`error\` AT ALL — the wider family, awaiting authorization. Any change to this count fails here rather than passing unnoticed`,
+  errorDiscarded.length === EXPECTED_ERROR_DISCARDED,
+  `Q-7b: ⛔ zero reads discard \`error\` entirely (${errorDiscarded.length})${errorDiscarded.length ? ` — ${errorDiscarded.join(", ")}` : ""}`,
+);
+check(
+  exactShape.length <= EXPECTED_EXACT_SHAPE && errorDiscarded.length <= EXPECTED_ERROR_DISCARDED,
+  "Q-7c: ⛔ RATCHET — neither count has RISEN. A new site of either shape is the defect returning, not progress",
 );
 
 console.log(

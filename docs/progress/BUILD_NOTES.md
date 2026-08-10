@@ -5692,3 +5692,23 @@ The explanatory comment was first placed as `{/* … */}` **directly inside a `?
 `tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`prove:hero-all` 15/15 `PASS`** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
 
 **Remaining, measured:** **0** exact-shape and **0** discarded-error sites in `report-workflow`; **7 remain** — 3 in `management-view`, 4 in `parent-view` — module 2 and module 3.
+
+---
+
+## 2026-08-11 — ⚠️ **I READ THE SWEEP'S OUTPUT INSTEAD OF ITS EXIT CODE — IN THE COMMIT THAT ADDS THE EXIT-CODE DISCIPLINE**
+
+**Immediately after** committing `6910ff2`, whose message states *"NEVER DECIDE A SUITE'S VERDICT BY MATCHING ITS OUTPUT — EXIT CODE IS THE ONLY VERDICT"*, I ran:
+
+```
+npm run prove:hero-all --silent 2>&1 | tail -2 && git commit …
+```
+
+⛔ **A pipeline's exit status is the LAST command's.** `tail` succeeded, so `&&` proceeded. The sweep had printed `RESULT: FAIL -- 1 suite(s) failed`, and **the commit was made anyway.**
+
+▶ **The rule was right, the mechanism was right, and I defeated both with a pipe.** `prove-all.mjs` reported correctly and exited 1; nothing was wrong with the instrument. I put a filter between it and the decision — which is the same act as matching stdout, one layer out.
+
+⚠️ **The lesson is narrower and more useful than "be careful":** a mechanism that returns a correct exit code is only as good as the shell around it. ▶ **Never place a pipe between a verdict and the decision that consumes it.** Redirect to a file and test `$?`, which is what every check since does.
+
+**What had failed:** `prove:hero-12`'s `Q-7` count pins — **exactly as designed.** They asserted 1 exact-shape and 14 discarded sites; module 1 made it 0 and 7. ✅ **The pin fired because the counts changed, which is the entire reason it exists.** A pin that silently followed the code would have asserted nothing.
+
+**Fixed forward, not amended** (§12 forbids `amend`): `Q-7` is now a **ratchet** — `Q-7c` fails if either count RISES, since a new site of either shape is the defect returning, not progress — and the expected values are updated at **each module boundary** to the true current count. ⚠️ **Deliberately not set to the end target of 0/0**, which would report failure for work not yet done; that is a different lie, and it would make every intermediate boundary red for no reason.
