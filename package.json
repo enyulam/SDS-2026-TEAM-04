@@ -44,7 +44,9 @@
     "prove:hero-7": "node --env-file=.env.local scripts/tests/hero/prove-7-follow-up-save.mjs",
     "prove:hero-8": "node scripts/tests/hero/prove-8-unframed-foundation.mjs",
     "prove:hero-9": "node --env-file=.env.local scripts/tests/hero/prove-9-management-reports.mjs",
-    "prove:hero-10": "node scripts/tests/hero/prove-10-management-student-report.mjs"
+    "prove:hero-10": "node scripts/tests/hero/prove-10-management-student-report.mjs",
+    "prove:hero-11": "node scripts/tests/hero/prove-8-unframed-foundation.mjs",
+    "prove:hero-all": "node scripts/tests/hero/prove-all.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

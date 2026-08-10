@@ -5322,3 +5322,43 @@ Four permitted context fields rendered from their own governed fields (`P10-2`),
 ### Next
 
 **Phase 11 — Management wording editor.** Foundation consistency only; visual acceptance **`NOT APPLICABLE (G-1)`**. Measured at HEAD during Phase 8 and found already consistent; it extends the Phase 8 harness rather than adding a second one.
+
+---
+
+## 2026-08-11 — HERO CHAIN **PHASE 11** — Management wording editor, and a false green in my own instrument
+
+**Track:** hero chain completion, plan §6.8 Phase 11. **Branch:** `develop`. **Starting HEAD:** `8044d87`.
+
+### The phase itself
+
+**Nothing to build — the third such result this batch, after Phases 5 and 8.** Measured at HEAD during Phase 8, `management-wording-editor.tsx` already matched `management-report-review.tsx` on every foundation probe. It **extends the Phase 8 harness** rather than adding a second one: two harnesses asserting one property in two files is how they drift apart, and `G-1`'s requirement is one property over three surfaces. `npm run prove:hero-11` deliberately runs the same file.
+
+⛔ **The third G-1 surface, Trainer Review & Approve, is the SIBLING in the first pair, not a third row.** It has no unframed sibling to be compared against, and comparing it to itself would assert nothing.
+
+### ⚠️ THE WORST NEAR-MISS OF THIS BATCH, AND IT WAS IN MY OWN INSTRUMENT
+
+Extending the harness introduced a template literal containing **backticks** around `NOT APPLICABLE`. That is a syntax error: **the module never parsed and never ran a single check.**
+
+The regression sweep I had been using was `npm run prove:hero-$n | grep -o "RESULT: [A-Z]*"`. **Node's SyntaxError report ECHOES THE OFFENDING SOURCE LINE — and that line was the success message, containing the literal text `RESULT: PASS`.**
+
+▶ **The harness's own success string became the evidence of its success while it had never executed.** The sweep reported `hero-8 RESULT: PASS` for a file that could not be loaded.
+
+⚠️ **This is the family this project keeps meeting** — `bool_and` over zero rows, the `CANONICAL_CONTAINERS` inversion, the S-8 gate denying everyone because nothing was submitted — **but one level worse: the defect was in the MEASURING INSTRUMENT, not in the thing measured**, so it would have contaminated **every phase boundary the sweep ran at**, not one leg of one proof. It was caught only because I ran the suite alone afterwards and saw the exit code.
+
+⛔ **Never decide a suite's verdict by matching its output. A process that died before running anything can print any string it contains. Exit code is the only verdict, and a non-zero exit with no output is a FAILURE, never a pass.**
+
+**Closed with a mechanism, not a resolution:** `scripts/tests/hero/prove-all.mjs` (`npm run prove:hero-all`) runs all twelve keyed off **exit status**, and carries a self-check that additionally fails any suite exiting 0 while printing `RESULT: FAIL` — so the two signals must agree rather than either being trusted alone. Recorded as plan §12 item **17**.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · **`npm run prove:hero-all`: 12/12 `PASS`, none contradicting its own exit code** · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. No application code changed in this phase — the harness, the sweep, the plan and this log only.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on all three G-1 surfaces. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Status
+
+⛔ **`NOT APPLICABLE (G-1)` remains a ruled disposition on all three unframed surfaces — never a pass, never a gap.** A green consistency proof does not convert it into a visual acceptance.
+
+**All eleven hero-chain phases are now built and proven.** Phases 5, 8 and 11 built nothing, each on measurement rather than assumption.

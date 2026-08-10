@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // =====================================================================
-// HERO PHASE 8 -- the UNFRAMED surfaces' foundation consistency
+// HERO PHASES 8 AND 11 -- the UNFRAMED surfaces' foundation consistency
 // =====================================================================
 // ⚠️ PHASE 8 BUILT NO SURFACE, AND THAT IS THE FINDING -- the second time
 // this batch, after Phase 5. Measured at HEAD, `trainer-report-editor.tsx`
@@ -28,7 +28,8 @@
 //
 // It touches no database, opens no transaction and writes nothing.
 //
-// Run: npm run prove:hero-8
+// Run: npm run prove:hero-8 (or prove:hero-11 -- deliberately the SAME
+// harness over both pairs; see PAIRS below for why there is not a second one)
 // =====================================================================
 
 import { readFileSync } from "node:fs";
@@ -47,6 +48,26 @@ const PAIRS = [
     phase: "8",
     unframed: "features/trainer/trainer-report-editor.tsx",
     sibling: "features/trainer/trainer-report-review.tsx",
+  },
+  /*
+   * PHASE 11 EXTENDS THIS HARNESS RATHER THAN ADDING A SECOND ONE.
+   *
+   * ⚠️ Measured at HEAD during Phase 8, `management-wording-editor.tsx`
+   * already matched `management-report-review.tsx` on every foundation probe
+   * — so Phase 11, like Phase 8 and like Phase 5, had nothing to build. Two
+   * harnesses asserting the same property in two files is how they drift
+   * apart, and G-1's requirement is one property over three surfaces.
+   *
+   * ⛔ The third G-1 surface, Trainer Review & Approve, is the SIBLING in the
+   * pair above rather than a third entry. It has no unframed sibling of its
+   * own to be compared against — comparing it to itself would assert nothing.
+   * Its consistency is what the two rows here are anchored to, and it is the
+   * one that `P8-1b` requires to exhibit every marker.
+   */
+  {
+    phase: "11",
+    unframed: "features/management/management-wording-editor.tsx",
+    sibling: "features/management/management-report-review.tsx",
   },
 ];
 
@@ -134,7 +155,7 @@ for (const pair of PAIRS) {
 
 console.log(
   bad === 0
-    ? "\nRESULT: PASS — the unframed surface shares its framed sibling's foundation on every probe.\n        ⛔ This is NOT a visual acceptance. G-1 records these surfaces as `NOT APPLICABLE`,\n           which is a RULED DISPOSITION — never a pass, and never a gap."
+    ? `\nRESULT: PASS — all ${PAIRS.length} unframed surfaces share their framed siblings' foundation on every probe.\n        ⛔ This is NOT a visual acceptance. G-1 records these surfaces as "NOT APPLICABLE",\n           which is a RULED DISPOSITION — never a pass, and never a gap.`
     : `\nRESULT: FAIL — ${bad} check(s) failed.`,
 );
 process.exit(bad === 0 ? 0 : 1);
