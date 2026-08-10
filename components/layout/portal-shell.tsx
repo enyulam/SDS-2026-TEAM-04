@@ -74,9 +74,13 @@ function SignOutControl({ variant }: { readonly variant: "rail" | "header" }) {
           ⚠️ THE VISIBLE LABEL IS "Sign out" AND MUST STAY "Sign out", AND
           NOTHING MAY BE INSERTED BETWEEN THE GLYPH AND THE LABEL.
 
-          The frame draws "Logout". That difference is recorded as unresolved
-          TRUE-DRIFT rather than applied, because two ACCEPTED proofs pin this
-          exact string as the way they locate the production control —
+          ✅ OPERATOR RULING, 2026-08-10: this stays. The frame draws "Logout";
+          that difference is TRUE-DRIFT DELIBERATELY NOT APPLIED, and it is
+          RULED rather than open — a later phase must not reconcile it toward
+          the frame.
+
+          The reason, which is what the ruling endorsed: two ACCEPTED proofs pin
+          this exact string as the way they locate the production control —
           `tests/frontend/sign-out-terminates-session.mjs` S-1, which requires
           `/>` whitespace `Sign out` `<` INSIDE the form, and
           `prove-disposable-app.mjs` G-22, which refuses unless the control it

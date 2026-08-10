@@ -54,7 +54,7 @@ The rail is drawn identically in every in-scope frame. Values below are read fro
 | `sign-out-terminates-session.mjs` | **4/4 PASS** |
 | Contrast, measured per pair | §3 |
 | Login-surface rendered capture | **taken** — `docs/progress/ui-reconciliation/{before,after}/` |
-| **Rail rendered capture** | ⛔ **NOT-RUN — see §6. Not a pass, and not silently omitted.** |
+| **Rail rendered capture** | ⛔ ~~**NOT-RUN — see §6. Not a pass, and not silently omitted.**~~ ✅ **CLOSED 2026-08-10 by OPERATOR MANUAL VERIFICATION — see §6. Recorded as Operator verification, NOT as a harness pass.** |
 
 ---
 
@@ -114,7 +114,21 @@ Presentational only. No data fetched, no governed call, DTO, projection, RPC, se
 
 ---
 
-## 6. ⛔ NOT-RUN — the rail's own rendered capture
+## 6. ~~⛔ NOT-RUN~~ ✅ CLOSED BY OPERATOR MANUAL VERIFICATION — the rail's own rendered capture
+
+> ### ✅ CLOSED 2026-08-10 — OPERATOR MANUAL VERIFICATION
+>
+> **The Operator verified the rail by hand across all three portals and reports that it renders correctly on every screen.** That closes the gap this section recorded.
+>
+> ⚠️ **It is recorded as OPERATOR MANUAL VERIFICATION, and deliberately NOT as a harness pass.** The distinction is not pedantry and must survive into any later citation:
+>
+> - **No automated capture of the rail exists.** Nothing was re-run, nothing turned green, and no suite now covers this. A later session must not cite this closure as evidence that a rail regression would be *caught* — it would not be.
+> - It is a **point-in-time human observation** of the rail as built at `3010b63`, not a standing gate. It does not transfer to a later change to `portal-shell.tsx`, `portal-navigation.ts` or `brand-mark.tsx`.
+> - The **hover, focus and responsive-collapse** behaviours named below were not separately enumerated by the verification and remain unproven by machine.
+>
+> **What it does establish, and it is the thing that mattered:** the rail's rendered geometry — the one Phase 0 claim resting on source-to-token resolution rather than on a render — is confirmed correct on all three portals by the only party who could reach an authenticated surface in this clone.
+>
+> **The reasoning below is retained unedited** as the record of *why* the automated capture could not be taken. Every constraint in it still holds: the portal layouts still guard, `.env.local` still configures only the hosted project, and a future automated rail capture still needs its own authorization.
 
 Plan §2 requires *"rail capture diffed against ≥3 in-scope frames"*. **It was not taken, and Phase 0 does not claim it.**
 
@@ -135,7 +149,7 @@ Plan §2 requires *"rail capture diffed against ≥3 in-scope frames"*. **It was
 |---|---|---|
 | Academy wordmark and the *"Where Confident Leaders Are Made"* tagline | **Recorded asset dependency** | ⛔ **MUST NOT be classified `TRUE-DRIFT`** (plan §2, amendment 5). No approved asset exists; drawing a mark, setting the tagline as text, or substituting any other asset would **invent an approved asset** — a §12 stop-and-ask and a plan failure. The approved in-repo mark stands. **Operator-owned** |
 | Rail wordmark reads **`B.E.S.T. Coach`**; the frame reads **`iSpeak`** | **Same recorded asset dependency** | Not treated as drift. Plan §2 already adjudicates it — *"the approved in-repo mark stands"*. `iSpeak Academy` is the seeded centre display name (§6.1), not an approved product wordmark, and swapping the product name for it is a brand decision no phase may take |
-| Sign-out label: build **`Sign out`**, frame **`Logout`** | **`TRUE-DRIFT`, UNRESOLVED — deliberately not applied** | Two **accepted** proofs pin the exact string as the way they locate the production control (`sign-out-terminates-session.mjs` S-1; `prove-disposable-app.mjs` G-22). Renaming it would retarget accepted evidence to make a caption match. Recorded rather than silently dropped (plan §5.2 rule 8). **Operator-owned** |
+| Sign-out label: build **`Sign out`**, frame **`Logout`** | ✅ **RULED 2026-08-10 — `TRUE-DRIFT`, DELIBERATELY NOT APPLIED. CLOSED, not carried.** | **Operator ruling: the judgement recorded here stands and the label stays `Sign out`.** Reason, unchanged: two **accepted** proofs pin the exact string as the way they locate the production control — `sign-out-terminates-session.mjs` S-1 (`/>` → `Sign out` → `<` inside the form) and `prove-disposable-app.mjs` G-22 (refuses unless the control it clicked reports `Sign out`). Renaming the label would **retarget accepted evidence to make a caption match**, which is the wrong trade for a word. ⚠️ **This is a ruled divergence now, not an open item** — a later phase must not "resolve" it toward the frame, and the divergence is recorded rather than silently dropped (plan §5.2 rule 8) |
 | The identity cluster sits on its own row **above** the page title; the frame puts it on the **same baseline** as the title | **`TRUE-DRIFT`, UNRESOLVED — out of Phase 0's owned paths** | The page title is rendered by **each screen's** component, not the shell. Aligning them requires touching every screen and would collide with Phases 4–12. Bounded coverage, declared |
 | The frame's header **search field** | Not chrome | Screen-specific (Schedule); belongs to Phase 4 |
 | The `lg:hidden` mobile header | **Required addition** | The frames draw no mobile variant; responsive operability is required (persona §3.5, `GLOBAL_UI_RULES`). Retained, and it now shares the single active-item derivation |

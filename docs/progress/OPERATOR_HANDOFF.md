@@ -10,96 +10,110 @@
 | | |
 |---|---|
 | **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
-| **Hosted target (configured, NOT contacted this session)** | **`poblcfbxxzgarclchzkx`** — Supabase, `ap-southeast-1` |
+| **Hosted target (configured, NOT contacted)** | **`poblcfbxxzgarclchzkx`** — Supabase, `ap-southeast-1` |
 | ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace and hosted project **`zjukuffiuzkbiblmnuwl`**. **Never connect to that ref.** If any value read resolves to it — **STOP and tell the Operator** |
-| **Demonstration build** | Tagged **`hero-feature-baseline` → `a0f48b9`** in the **demonstration workspace**. Frozen |
-| ⛔ **Git** | **No push to `main`. No merge. `develop` only** |
+| ⛔ **Git** | **No push. No merge. No `main`. `develop` only.** Local commits at phase boundaries are expected |
 
-⚠️ **`STATUS.md` now opens with a CURRENT EXECUTION STATE block for THIS clone**, above the demonstration-workspace `📌` block. Read the clone block; the one below it is history and is not about this repository.
+⚠️ **`STATUS.md` opens with a CURRENT EXECUTION STATE block for THIS clone**, above the demonstration-workspace `📌` block. Read the clone block; everything below it is history and is not about this repository.
 
 ---
 
-## Ending that fired
+## ▶ NEXT AUTHORIZED ACTION — BATCH 3, AND IT IS AUTHORIZED NOW
 
-**Instructed stop at a phase boundary.** Not a gate and not a context limit. The Operator authorized **Batch 1 widened to Phases 0, 1, 2 and 3**, to run consecutively without an intervening acceptance, committing at every phase boundary, then: *"Then STOP — do not begin Phase 4."* All four phases are complete and committed.
+**Start plan Phase 4 and run through Phase 12, autonomously, committing at EVERY phase boundary.** No further Operator authorization is needed to begin.
+
+`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` §4 is the phase list. In order:
+
+| # | Screen | Route · component | Reference pack |
+|---|---|---|---|
+| **4** | `05` Trainer Schedule | `/trainer/schedule` · `features/trainer/trainer-schedule.tsx` | `Trainer - Schedule` |
+| **5** | `06` Trainer Student Roster | `/trainer/sessions/[sessionId]/roster` · `trainer-roster.tsx` | `Trainer - Student Roster` |
+| **6a** | `07` Trainer Grade Student | `…/students/[studentId]/assess` · `trainer-assessment.tsx` | `Trainer - Grade Student` |
+| **6** | `08` Trainer AI Report Generation | `/trainer/reports/[reportId]/generate` · `trainer-draft-generation.tsx` | `Trainer - AI Report Generation` |
+| **7** | `29` Management Reports | `/management/reports` · `management-reports-queue.tsx` | `Management - Reports` |
+| **8** | `19` Management Student Report | `/management/reports/[reportId]/review` · `management-report-review.tsx` | `Management - Student Report` |
+| **9** | `32` Parent Reports | `/parent/reports` · `parent-reports-list.tsx` | `Parent - Report` *(singular)* |
+| **10** | `33` Parent Class Report | `/parent/students/…/report` · `parent-canonical-report.tsx` | `Parent - Class Report` |
+| **11** | `30` Parent Dashboard | `/parent` · `parent-dashboard.tsx` | `Parent - Dashboard` |
+| **12** | `11` Management Dashboard | `/management` · `management-dashboard.tsx` | `Management - Dashboard` |
+
+**Phase 6a runs BEFORE Phase 6.** **Phase 13 (`01`) is CUT** — the component must not be deleted. **Out of the plan entirely:** `09`, `10`, the two wording editors and `/trainer/reports/[reportId]/review` (§1.3, §1.4), and the 20 unimplemented screens.
+
+⚠️ **Resolve every reference pack from `UI_REFERENCE_FINAL_MVP/SCREEN_INDEX.md`, never by guessing the folder name.** Three are underivable: `32` → `Parent - Report` (singular), `AUTH-02` → `Auth 02 - **Mangement** - Login` (misspelled on disk — **do not correct it**), `02` → `Trainer -  My Classes` (two spaces).
+
+### Rules that do not relax in Batch 3
+
+- **`NEW-QUESTION` is a HARD STOP.** Never a judgement a phase makes about its own work.
+- **A phase that changes a `REGISTERED-OMISSION` has FAILED — revert and report**, even if the result matches the frame better.
+- **One screen per phase, one phase at a time. Commit at every phase boundary, never mid-phase.**
+- **§0.0 governs direction:** frame wins where no ratified rule speaks; where one does, keep the divergence and cite it. The existing build is **not** a baseline to preserve.
+- **The `.html` export is a source of VALUES, not markup.** No ported markup, absolute positioning, fixed pixel layout, export class names or lifted DOM. Copying structure is a phase failure.
+- **No governed surface changes** — no schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route. **Route census must stay 17.**
+- **No logo or tagline asset may be invented** — a recorded asset dependency, never `TRUE-DRIFT`.
+- Batch 3 carries **NO hosted, paid, public, human, push or submission authority**, and every `CLAUDE.md` §12 stop-and-ask binds inside it exactly as outside.
+- `PASS` is your evidence verdict; **`Accepted` is Operator-set only.** Never write or imply one.
+
+---
 
 ## Position
 
 | | |
 |---|---|
 | Branch / worktree | `develop` / none |
-| HEAD | resolve with `git rev-parse HEAD` — the continuity commit following `71953fa` |
+| HEAD | resolve with `git rev-parse HEAD` |
 | Tree | clean at handoff |
-| Ahead of `origin/develop` | **10 commits, NONE pushed** |
-| Database | **none written.** One suite READ the local canonical stack; its counts were **unchanged** |
-| Frozen project | **never contacted** |
+| Ahead of `origin/develop` | **12 commits, NONE pushed** |
+| Database | **none written this session.** The frozen project was **never contacted** |
 
-## Commits this session, oldest first
+## ✅ BATCH 1 — ACCEPTED BY THE OPERATOR, 2026-08-10
 
-| SHA | Phase |
-|---|---|
-| `3010b63` | **Phase 0** — shared chrome baseline |
-| `ea5d32b` | **Phase 1** — `AUTH-01` Trainer Login |
-| `02218ba` | **Phase 2** — `AUTH-02` Management Login deltas |
-| `71953fa` | **Phase 3** — `AUTH-03` Parent Login + the auth-trio adjudication |
-| *(this)* | continuity: `STATUS.md`, `BUILD_NOTES.md`, this file |
+| Phase | Commit | State |
+|---|---|---|
+| **0** shared chrome baseline | **`3010b63`** | ✅ **ACCEPTED** |
+| **1** `AUTH-01` Trainer Login | **`ea5d32b`** | ✅ **ACCEPTED** |
+| **2** `AUTH-02` Management Login | **`02218ba`** | ✅ **ACCEPTED** |
+| **3** `AUTH-03` Parent Login | **`71953fa`** | ✅ **ACCEPTED** |
 
-## ▶ NEXT AUTHORIZED ACTION
+**The first `Accepted` marks in this clone.** Set by the Operator, superseding the earlier session `PASS` verdicts.
 
-⛔ **NONE. STOP.** **Phase 4 (`05` Trainer Schedule) is NOT authorized.** The Operator's instruction ended at Phase 3.
+**Result, as two lists that are never merged:** `TRUE-DRIFT` resolved **25** (10 / 14 / 1 / 0) · `REGISTERED-OMISSION` preserved **12, zero changed** · `NEW-QUESTION` **none** · `INCOMPLETE` **none** · census **17** throughout.
 
-Phases 0–3 are **`PASS`** — this session's evidence verdict. **None is `Accepted`;** `Accepted` is Operator-set only (§15.6) and **no session has written or implied one**.
+## ✅ The Phase 0 `NOT-RUN` is CLOSED — by Operator manual verification
 
-## Batched-UI reporting (plan §6.5) — the TWO LISTS, never merged
+**The Operator verified the rail by hand across all three portals; it renders correctly on every screen.**
 
-| Field | Value |
-|---|---|
-| Phases completed | **4** — 0, 1, 2, 3 |
-| **`TRUE-DRIFT` resolved** | **25** — Phase 0: **10** · Phase 1: **14** · Phase 2: **1** · Phase 3: **0** |
-| **`REGISTERED-OMISSION` preserved** | **12, ZERO CHANGED** — 8 authentication + 4 chrome |
-| `NEW-QUESTION` raised | **none** |
-| `INCOMPLETE` | **none** |
-| Commit at each phase boundary | `3010b63` · `ea5d32b` · `02218ba` · `71953fa` |
-| Route census | **17**, unchanged at every boundary |
+⚠️ **Recorded as OPERATOR MANUAL VERIFICATION, NOT as a harness pass.** **No automated capture of the rail exists** — nothing was re-run and no suite covers it, so **this must never be cited as evidence that a rail regression would be caught.** It is a point-in-time observation of the rail at `3010b63`; it does not transfer to a later change to `portal-shell.tsx`, `portal-navigation.ts` or `brand-mark.tsx`, and it does not cover hover, focus or responsive collapse.
 
-**The two lists are deliberately not reconciled into one number.** Conflating them is the failure mode the plan exists to prevent (§0.2).
+## ⚠️ THREE THINGS BATCH 3 MUST CARRY FORWARD
 
-## What was proven this session
+1. **A declared class is not evidence it applied.** `.form-field` is **UNLAYERED**; Tailwind utilities sit in `@layer utilities`, so `rounded-[…]`/`px-[…]`/`py-[…]` written on such an element are **emitted, matched, and silently lose the cascade** — the control kept computing its old geometry while every source-level check looked correct. Same class as **F-01b** and **F-01c**. Caught only because the build side is a **measurement of the rendered DOM**. **Any phase restyling a `.form-field`, `.card` or `.panel` element must verify the COMPUTED value, not the class list.** The narrow fix pattern is `.form-field.auth-field`; **do not move `.form-field` into a layer** — that changes the cascade for every consumer at once.
+2. **A comment broke a MUST-NOT-CHANGE.** An explanatory comment placed *between* the glyph and the `Sign out` label failed `sign-out-terminates-session` S-1, which pins `/>` → `Sign out` → `<` inside the form. It changed no rendered output; source review would not reliably have caught it. **A suite did.** Run the mechanical suites during a phase, not as end-of-phase ceremony.
+3. **✅ RULED — `Sign out` stays.** The frame draws `Logout`. Operator ruling 2026-08-10: **`TRUE-DRIFT`, deliberately NOT applied**, because two **accepted** proofs pin that exact string as how they locate the production control (`sign-out-terminates-session` S-1; `prove-disposable-app` G-22), and renaming would retarget accepted evidence to make a caption match. **No longer an open item — a later phase must not reconcile it toward the frame.**
 
-- **`tsc` 0 · `eslint` 0 · `build` 0 at every phase boundary**, census **17** each time.
-- **`authentication-browser-smoke` PASSED — 12 checks across all three roles**, including per-role non-disclosure, the reveal control toggling `type` only, keyboard operability, a visible focus indicator, responsive usability at 1440/1024/900/480, and zero console errors.
-- **SC 1.4.3 measured on the rendered production DOM — 9/9 pairs ≥ 4.5:1.** Three were **failing at ~3.07:1 before this batch**.
-- **Three suites previously recorded `NOT_RUN` for want of a runner now RUN and PASS** — `portal-navigation-active-state` (6/6), `post-login-destinations` (5/5), `sign-out-terminates-session` (4/4) — via `--experimental-strip-types` plus the existing alias loader.
-- **Capture isolation measured, not assumed:** ZERO non-loopback TCP peers across the served process tree on every capture run.
+## Contrast, for the record
 
-## ⚠️ Three things the measurements caught that inspection would not have
+Three authentication colours were **already failing** SC 1.4.3 at ~**3.07:1** and now measure **5.101 – 5.558:1**, by re-pointing the failing nodes at the existing darker `neutral-on`. ⚠️ **NO TOKEN VALUE WAS REDEFINED** — `--color-ink-muted` is unchanged and still serves placeholders, disabled controls and muted avatars. The frames are lighter still (2.041 – 3.492:1) and were deliberately not followed. All nine measured pairs clear AA.
 
-1. **The `.form-field` cascade trap, recurring.** Three utilities on the credential controls were generated, matched, and **silently lost** to an unlayered rule — the control still computed the old geometry. Same class as F-01b. Fixed narrowly; `.form-field` was **not** moved into a layer.
-2. **My own comment broke an accepted proof.** A comment between the glyph and the `Sign out` label failed `sign-out-terminates-session` S-1. Moved; 4/4 restored.
-3. **The capture harness's trip-wire failed twice on itself** — first sampling a dead PID, then catching the Next **dev overlay's** update check. Neither was the application and **no Postgres or pooler port appeared in any sample**. Removed at source by serving the production build.
+## How to produce build-side evidence
 
-## ⛔ NOT-RUN this session, with reasons — none carried forward as green
+`node scripts/ui-reconciliation/capture-login.mjs <before|after>` captures the **authentication** surfaces only (public, no database), serving the **production build** under the §7.4a discipline with the S-3 trip-wire armed. It writes a PNG plus a **computed-style JSON** per role to `docs/progress/ui-reconciliation/{before,after}/`.
 
-- **The rail's own rendered capture.** The portal layouts run `requirePortalAccess`, so it needs a session and therefore a reachable governed database. **`.env.local` in this clone configures the HOSTED dev project only** (verified without printing any value; the frozen ref is absent), so driving an authenticated surface is a **§12 stop-and-ask this batch does not carry**; the local Docker stack still carries the **demonstration** `project_id`, and `B-STAGE3-2` plus the `project_id` fallout are carry-do-not-fix. **`NOT-RUN` is not `PASS`.**
-- Every disposable-stack harness · every real-provider leg · **password sign-in** · `design-foundation.assertions.ts` (no runner — pre-existing condition, not introduced here).
+⚠️ **Batch 3's screens are all AUTHENTICATED, so that harness does not reach them** — the portal layouts run `requirePortalAccess`, which needs a session and therefore a reachable governed database, and `.env.local` here configures the **hosted** dev project only (a §12 stop-and-ask no current authorization carries). **Expect to record rendered captures as `NOT-RUN` with the reason, exactly as Phase 0 did** — and to verify by frame-vs-source measurement, the mechanical suites, and the build. **`NOT-RUN` is not `PASS`.** Do not manufacture a capture, and do not reach a hosted or paid service to obtain one.
 
-## Carried, unresolved — opened by this batch
+## ⛔ NOT-RUN, none carried forward as green
 
-| ID | Item |
-|---|---|
-| Asset dependency | **Academy wordmark + "Where Confident Leaders Are Made" tagline.** ⛔ **MUST NOT be classified `TRUE-DRIFT`.** No approved asset exists; none may be invented. **Operator-owned** |
-| Label | **`Sign out` vs the frame's `Logout`** — recorded `TRUE-DRIFT`, deliberately **not applied**: two accepted proofs pin the exact string. **Operator-owned** |
-| Layout | The identity row sits above the page title; the frames put it on the title's baseline. **Out of Phase 0's owned paths** — the title belongs to each screen |
-| Cosmetic | `Remember me` native checkbox corner radius — the utility is emitted but Chrome paints the native control. Size does match |
+Every disposable-stack harness · every real-provider leg · **password sign-in** · `design-foundation.assertions.ts` (no runner — pre-existing; its relative extensionless import does not resolve under Node ESM).
 
-## Carried, untouched — pre-existing
+**Suites that DO run**, via `--experimental-strip-types` plus the existing alias loader: `portal-navigation-active-state` (6/6) · `post-login-destinations` (5/5) · `sign-out-terminates-session` (4/4, needs a server on `127.0.0.1:3000` and `BEST_COACH_APP_ORIGIN`) · `authentication-browser-smoke` (12 checks, same server requirement).
 
-`F-S6-REVIEW-1` · `F-UI-DRIFT-1` (buckets (a) blocked, (b) done, **(c) Phases 0–3 complete, 4–12 not started**) · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · `B-STAGE3-2` · `B-C2-1`/`B-C2-2` · `F-REGION-1` · `F-STAGE3-1` · the `project_id` fallout.
+## Carried, untouched
+
+`F-S6-REVIEW-1` (functional, **explicitly out of this plan**) · `F-UI-DRIFT-1` buckets (a) blocked / (b) done / **(c) Phases 0–3 accepted, 4–12 authorized and not started** · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · `B-STAGE3-2` · `B-C2-1`/`B-C2-2` · `F-REGION-1` · `F-STAGE3-1` · the `project_id` fallout · the **academy asset dependency** (Operator-owned) · the identity-row/page-title baseline · the `Remember me` native checkbox radius.
 
 ## Gates and unratified decisions
 
-**§3 persona sign-offs — NOT RECORDED**; no `CLAUDE.md` §10 phase-gate exit may be declared met. **README and deployment instructions — still not written.** `B-G06-DET-1` — ⛔ **do not widen the lexicon.** Nothing here carries hosted, paid, public, human, push or submission authority.
+**§3 persona sign-offs — NOT RECORDED**; no `CLAUDE.md` §10 phase-gate exit may be declared met. **README and deployment instructions — still not written.** `B-G06-DET-1` — ⛔ **do not widen the lexicon.**
 
 ## Reading order for the next session
 
-`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md` (its workspace header, then the CURRENT EXECUTION STATE block)** → recent `BUILD_NOTES.md` → **`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md`** → the two adjudications in `docs/plan/`. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).
+`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md` (workspace header, then the CURRENT EXECUTION STATE block)** → recent `BUILD_NOTES.md` → **`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md`** → **`docs/plan/UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md`** (cite it for the rail instead of re-deriving it) → **`docs/plan/UI_RECONCILIATION_PHASES_1_3_AUTH_ADJUDICATION.md`**. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).

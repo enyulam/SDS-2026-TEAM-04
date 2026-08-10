@@ -3778,3 +3778,119 @@ The frozen demonstration project `zjukuffiuzkbiblmnuwl` was **never contacted** 
 **Environment changes:** none persisted. Servers were started and stopped on loopback ports 3000/3422 only.
 **Cleanup / rollback state:** no partial mutation. Scratch diagnostic copies under `.tmp-diag/` were created and **removed**.
 **Next permitted action:** **STOP — Phase 4 is NOT authorized.** `PASS` here is this session's evidence verdict; **`Accepted` is Operator-set only** and no acceptance has been written or implied.
+
+---
+
+## 2026-08-10 — OPERATOR ACCEPTANCE OF UI RECONCILIATION PHASES 0–3, AND FOUR RULINGS
+
+**Track / workstream:** `F-UI-DRIFT-1` bucket (c). **Branch / worktree:** `develop` / none. **Starting HEAD `e30c808` → ending HEAD `e30c8081b00f79e21126e1818785568916d0efae`.**
+**Scope:** no code behaviour changed. This entry records an Operator acceptance, an Operator verification that closes a recorded `NOT-RUN`, an Operator ruling on one carried item, and three findings the Operator directed be written down permanently.
+
+### 1. ✅ PHASES 0–3 ACCEPTED BY THE OPERATOR
+
+**The Operator has marked plan Phases 0, 1, 2 and 3 `Accepted`.** This is the first `Accepted` mark recorded in this clone.
+
+| Phase | Commit | State |
+|---|---|---|
+| **0** — shared chrome baseline | **`3010b63`** | ✅ **ACCEPTED** |
+| **1** — `AUTH-01` Trainer Login | **`ea5d32b`** | ✅ **ACCEPTED** |
+| **2** — `AUTH-02` Management Login deltas | **`02218ba`** | ✅ **ACCEPTED** |
+| **3** — `AUTH-03` Parent Login | **`71953fa`** | ✅ **ACCEPTED** |
+
+⚠️ **`Accepted` is Operator-set only (`CLAUDE.md` §15.6) and was set by the Operator, not by a session.** The preceding entry's `PASS` marks were this session's evidence verdict and were explicitly *not* acceptance; they are now superseded by a real acceptance. **No session may write, imply or fabricate an acceptance**, and nothing here changes that rule.
+
+### 2. ✅ THE PHASE 0 `NOT-RUN` IS CLOSED — BY OPERATOR MANUAL VERIFICATION, NOT BY A HARNESS
+
+The preceding entry recorded **the rail's own rendered capture as `NOT-RUN`**: the rail renders only inside the portal layouts, which run `requirePortalAccess` before any child renders, so it needs a real session and therefore a reachable governed database — and `.env.local` in this clone configures only the **hosted** dev project, which is a §12 stop-and-ask that batch did not carry.
+
+**The Operator verified the rail by hand across all three portals and reports that it renders correctly on every screen.** That closes the gap.
+
+⚠️ **It is recorded as OPERATOR MANUAL VERIFICATION and deliberately NOT as a harness pass.** The distinction must survive into any later citation:
+
+- **No automated capture of the rail exists.** Nothing was re-run and no suite now covers it. **A later session must not cite this closure as evidence that a rail regression would be caught — it would not be.**
+- It is a **point-in-time human observation** of the rail as built at `3010b63`, not a standing gate, and it does not transfer to a later change to `portal-shell.tsx`, `portal-navigation.ts` or `brand-mark.tsx`.
+- **Hover, focus and responsive collapse** were not separately enumerated and remain unproven by machine.
+
+What it does establish is the thing that mattered: the one Phase 0 claim that rested on source-to-token resolution rather than on a render is confirmed correct, by the only party who could reach an authenticated surface in this clone. Recorded in `docs/plan/UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md` §2 and §6.
+
+### 3. ⚠️ FINDING — THE UNLAYERED `.form-field`: UTILITIES GENERATED, MATCHED, AND SILENTLY LOST
+
+**Recorded permanently at the Operator's direction. This is the same class as the project's established silent-failure pattern, and it has now bitten three times.**
+
+On the authentication credential controls, `rounded-[0.6875rem]`, `px-[0.9375rem]` and `py-[0.875rem]` were written correctly on the element, **were emitted into the production CSS**, and **matched the element** — and the control still computed the **old** geometry: `10px` radius, `12px`/`14px` padding.
+
+**Cause.** `.form-field` in `app/globals.css` is an **UNLAYERED** rule. `@import "tailwindcss"` emits its utilities into `@layer utilities`. **An unlayered rule outranks every rule in every layer**, so the utilities lost the cascade while looking, by every source-level inspection, entirely correct.
+
+**Why this is the dangerous shape.** Nothing errors, nothing warns, the class is present in the DOM, and the rule is present in the stylesheet. **A declared class is not evidence that it applied** — the identical lesson recorded at **F-01b**, where unlayered `font: inherit; color: inherit` beat `text-white` on every button and produced a live 3.113:1 WCAG failure, and at **F-01c**, where `bg-warning-800` named a token family step this project does not define so Tailwind emitted no rule at all.
+
+**How it was caught.** Only because the build side of this reconciliation is a **measurement of the rendered DOM** — computed styles read out of a real browser — rather than a reading of the source. A source-level comparison would have reported the drift as resolved. **This is the argument for keeping the capture harness's computed-style probe in every later phase.**
+
+**Fix.** Narrow: `.form-field.auth-field` declared immediately after `.form-field`, same (un)layer, higher specificity. **`.form-field` was deliberately NOT moved into a layer** — that would change the cascade for every consumer across the application at once, far outside a presentation phase, and is the kind of change that trades one silent breakage for a wider one.
+
+**Standing consequence for later phases:** any screen phase that restyles a `.form-field`, `.card` or `.panel` element with utilities must **verify the computed value**, not the class list.
+
+### 4. ⚠️ FINDING — A COMMENT I WROTE BROKE A MUST-NOT-CHANGE, AND A SUITE CAUGHT IT, NOT REVIEW
+
+**Recorded permanently at the Operator's direction.**
+
+While adding a comment explaining why the sign-out label must stay `Sign out`, I placed it **between the glyph and the label**:
+
+```
+<Icon name="logout" … />
+{/* … explanation … */}
+Sign out
+```
+
+`tests/frontend/sign-out-terminates-session.mjs` **S-1 FAILED**: it pins `/>` → whitespace → `Sign out` → `<` **inside the form**, because that is how it proves the visible label belongs to *this* control rather than to some other element in the shell. `prove-disposable-app.mjs` G-22 locates the production control the same way.
+
+**The shape of the mistake is the point:**
+
+- It was **a comment**. It changed no class, no attribute, no rendered output, and no behaviour. The page looked identical.
+- It **violated a MUST-NOT-CHANGE that nobody had anticipated in that form.** The constraint was written and understood as *"do not rename the label"*; the actual constraint is *"do not rename the label **and do not insert anything between the glyph and it**"*. I was writing a comment to protect the constraint and broke it in the same edit.
+- **No amount of review of my own diff would reliably have caught it.** A reviewer reading that hunk sees a comment being added next to a label, which is unremarkable. The suite caught it in seconds.
+
+**Fixed** by moving the comment above the glyph; S-1 through S-4 all restored to PASS. The comment now states the adjacency requirement explicitly, so the next reader is warned about the trap the comment itself fell into.
+
+**Standing consequence:** the mechanical suites are not ceremony to be run at the end of a phase. Here one of them caught a defect that source review structurally could not.
+
+### 5. ✅ OPERATOR RULING — `Sign out` vs the frame's `Logout`: NOT APPLIED, and now RULED
+
+The frame draws **`Logout`**; the build renders **`Sign out`**. The preceding batch classified this **`TRUE-DRIFT`** and deliberately did **not** apply it, recording it for the Operator.
+
+**Operator ruling: that judgement stands. The label stays `Sign out` and the drift is deliberately not applied.**
+
+**Reason, endorsed by the ruling:** two **accepted** proofs pin the exact string as the mechanism by which they locate the production sign-out control — `sign-out-terminates-session.mjs` S-1 and `prove-disposable-app.mjs` G-22. Renaming the label would **retarget accepted evidence in order to make a caption match**, which is the wrong trade for a word.
+
+⚠️ **This is now a RULED divergence, not an open item.** A later phase must not "resolve" it toward the frame. Recorded in the Phase 0 adjudication §7 and in `components/layout/portal-shell.tsx` beside the control.
+
+### 6. ✅ THE THREE SC 1.4.3 CONTRAST FIXES — AND NO TOKEN WAS REDEFINED
+
+Three text colours on the authentication surfaces were **already failing** WCAG 2.2 AA SC 1.4.3 before this batch, measured on the rendered production DOM at **~3.07:1** against a 4.5:1 requirement for normal-size text:
+
+| Element | Before | After | Token move |
+|---|---|---|---|
+| Heading description | `ink-muted` **3.07:1** ❌ | **5.558:1** ✅ | → `neutral-on` |
+| Governance note | `ink-muted` **~3.07:1** ❌ | **5.101:1** ✅ | → `neutral-on` |
+| Footer help line | `ink-muted` **3.07:1** ❌ | **5.558:1** ✅ | → `neutral-on` |
+
+⚠️ **NO TOKEN VALUE WAS REDEFINED.** `--color-ink-muted` still resolves to `#8a93a8` and still serves its other consumers — placeholders, disabled controls, muted avatars — untouched. The fix **re-points the failing nodes at an existing darker token**, `neutral-on` `#5f6880`, which this codebase already uses for quiet secondary text. That is the **F-01c adjudication applied to the authentication surfaces**, not a new approach: redefining a token would have silently moved every other consumer of it.
+
+**The frames are lighter still and were deliberately not followed** — their quiet text measures **2.041 – 3.492:1**. Governance wins over the frame on accessibility, the divergence is recorded, and `design-foundation.assertions.ts` holds the primary-action pair at ≥ 4.5:1 as a standing token invariant.
+
+**All nine measured pairs on the authentication surfaces now clear AA** (4.517 – 14.059:1).
+
+### Verification for this entry
+
+`tsc --noEmit` **0** · `eslint .` **0** · `next build` **0**, route census **17** unchanged · `sign-out-terminates-session` **0 (4/4)** — re-run specifically because §4's comment sits beside the pinned string and this entry edited that comment again.
+
+### Isolation
+
+No database reached. The frozen `zjukuffiuzkbiblmnuwl` **never contacted**. `main` untouched; **nothing pushed**; no remote added; no worktree created; no `supabase` command run. No schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route touched.
+
+### Files changed
+
+`docs/plan/UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md` (§2 and §6 closure; §7 ruling) · `components/layout/portal-shell.tsx` (comment only — records the ruling beside the control) · `docs/progress/STATUS.md` · `docs/progress/OPERATOR_HANDOFF.md` (regenerated per H-8) · this log.
+
+**Blockers opened or closed:** the Phase 0 rail-capture `NOT-RUN` **closed by Operator manual verification** (§2). The `Sign out`/`Logout` item **closed by ruling** (§5). All other carried items untouched: `F-S6-REVIEW-1`, `F-DEMO-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1`, `F-STAGE3-1`, the `project_id` fallout, the academy-asset dependency, the identity-row/page-title baseline, and the native checkbox radius.
+**Cleanup / rollback state:** no partial mutation.
+**Next permitted action:** ▶ **BATCH 3 — plan Phases 4 through 12, authorized by the Operator**, run autonomously, **committing at every phase boundary**. `NEW-QUESTION` remains a hard stop; a phase that changes a `REGISTERED-OMISSION` has failed and must be reverted and reported. Nothing in that authorization carries hosted, paid, public, human, push or submission authority.
