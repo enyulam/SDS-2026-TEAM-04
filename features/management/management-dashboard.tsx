@@ -138,12 +138,22 @@ function QueueCard({
   readonly action: string;
 }) {
   return (
-    <article className="card p-5 sm:p-6">
-      <p className="text-sm font-bold text-ink-muted">{label}</p>
-      <p className="mt-2 text-4xl font-black text-navy-950">{count}</p>
+    /*
+     * The frame's KPI tile: a 12px / 500 quiet label over a 23px / 700 value.
+     *
+     * This card was still on the pre-reference LEGACY scale — `text-sm font-bold`
+     * over `text-4xl font-black text-navy-950`, at a `rounded-xl` action. None of
+     * those appears in any frame. `text-ink-muted` (#8a93a8) was additionally a
+     * LIVE 3.079:1 SC 1.4.3 failure on this fill and is re-pointed to `text-ink`,
+     * the same F-01c treatment applied elsewhere — hue preserved, luminance moved,
+     * NO token value redefined.
+     */
+    <article className="card px-5 py-[18px]">
+      <p className="text-[0.75rem] font-medium text-ink">{label}</p>
+      <p className="mt-1 text-[1.4375rem] font-bold text-ink-strong">{count}</p>
       <Link
         href={href}
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
+        className="mt-4 inline-flex min-h-11 items-center justify-center rounded-field bg-brand-700 px-4 py-2.5 text-[0.78125rem] font-semibold text-white hover:bg-brand-800"
       >
         {action}
       </Link>

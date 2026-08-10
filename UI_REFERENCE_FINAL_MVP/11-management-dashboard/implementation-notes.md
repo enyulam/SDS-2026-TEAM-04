@@ -194,3 +194,26 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+### UI RECONCILIATION plan Phase 12 — 2026-08-10
+
+Visual reconciliation only against `reference/Management - Dashboard/` (A-056).
+**4 TRUE-DRIFT resolved; 3 REGISTERED-OMISSION preserved, ZERO changed** — two separate lists
+(plan 6.5). INCOMPLETE separated from TRUE-DRIFT first: the frame draws four KPI tiles and a
+"Reports waiting for approval" list; the build renders two queue cards. The extras are
+INCOMPLETE, NOT drift, and nothing was built for them.
+
+The frame carries a B.E.S.T. RATING PER ROW ("Mastering", "Beginning"). It must not be built,
+and it was not — ZERO rating tokens and ZERO content-hash occurrences in the component. Row
+actions are still decided individually by status via the filtered queue, with no shared generic
+view handler.
+
+This screen was also still on the pre-reference LEGACY scale (third such surface in Batch 3);
+`text-ink-muted` was another LIVE 3.079:1 SC 1.4.3 failure. All legacy tokens removed from
+rendered classNames.
+
+RENDERED CAPTURE **NOT-RUN** (authenticated surface). NOT-RUN is not PASS.
+
+tsc 0 - eslint 0 - build 0 - route census 17 unchanged - emitted-CSS 4/4 - no governed surface
+touched. Full detail: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md Phase 12.
+`Accepted` is Operator-set only and has NOT been set.

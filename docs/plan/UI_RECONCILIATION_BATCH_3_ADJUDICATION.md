@@ -578,6 +578,44 @@ Confined to what is actually built.
 
 ---
 
+## PHASE 12 — `11` Management Dashboard · *non-core, `Partially implemented`*
+
+- **Screen / route / component:** `11` · `/management` · `features/management/management-dashboard.tsx`
+- **Reference:** `reference/Management - Dashboard/` · **no** frozen duplicate — not a missing reference
+
+### 12.1 `INCOMPLETE` separated from `TRUE-DRIFT`, same caution as Phase 11
+
+The frame draws **four KPI tiles** (Total Students, Assessed, Pending Approval, Approved) and a **"Reports waiting for approval" list** with per-row avatar, summary line, rating, relative timestamp and Review action. The build renders a heading, a banner and **two** queue cards.
+
+**The two extra KPI tiles and the approval list are `INCOMPLETE`, not `TRUE-DRIFT`, and nothing was built for them.** Two of the frame's tiles ("Total Students", "Assessed") have no governed Management projection behind them, and the approval list is prohibited in its framed form anyway (§12.3). **New construction is not this plan's mandate.**
+
+### 12.2 `TRUE-DRIFT` RESOLVED — 4
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title / description | 23px / 700 · 12.5px / 400 | 30px / 800 · `text-body` on `text-ink-muted` | via `PageHeading` — Phase 7 §7.1, which also closed the description's **live 3.079:1 AA failure**. ⚠️ **This frame's 23px is the one measured outlier**; the shared heading carries the 22px the other four frames agree on, and the 1px delta is recorded rather than special-cased into a per-screen override |
+| T2 | KPI card padding | 18px vertical / 20px sides | 20–24px | `px-5 py-[18px]` |
+| T3 | KPI label | 12px / 500 quiet | **legacy** `text-sm font-bold` on `text-ink-muted` — a **live 3.079:1 failure** | `text-[0.75rem] font-medium text-ink` |
+| T4 | KPI value + action | 23px / 700 | **legacy** `text-4xl font-black text-navy-950`; action `rounded-xl text-sm font-bold` | `text-[1.4375rem] font-bold text-ink-strong`; action `rounded-field text-[0.78125rem] font-semibold` |
+
+⚠️ **This screen was also still on the pre-reference LEGACY scale** — the third surface in Batch 3 found that way, after Phase 11 and the Phase 5 undefined tokens. Every legacy token is now gone from a rendered `className`.
+
+### 12.3 `REGISTERED-OMISSION` PRESERVED — 3, ZERO CHANGED
+
+| # | Preserved | Citation |
+|---|---|---|
+| 1 | ⛔ **The frame's approval list carries a B.E.S.T. Rating per row** — measured this run as *"Mastering"* on `#3FBAC2` and *"Beginning"* on `#E5533D`, beside summary lines reading *"Mastered eye contact, clear projection"* and *"Beginning on sentence flow & pace"*. **It must not be built**, and it was not: **zero** rating tokens in the component. Same adjudication R-B5 recorded for screen 19 | A-038 |
+| 2 | **No content hash on any Management surface** — verified, **zero** occurrences of `contentHash` / `content_hash` | A-038 |
+| 3 | **Row actions decided individually by status, with no shared generic view handler.** The two queue cards route to the **`?status=` filtered queue**, where Phase 7's `ROW_PRESENTATION` decides exposure per row — they expose no report content themselves | `CLAUDE.md` §6; A-038 |
+
+### 12.4 `NEW-QUESTION` — none · `INCOMPLETE` — recorded in §12.1, not built
+
+### 12.5 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 4/4 OK** · rating-token and hash sweep **0 / 0** · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -592,4 +630,5 @@ Confined to what is actually built.
 | 8 | `19` Management Student Report | **`d83823f`** |
 | 9 | `32` Parent Reports | **`6146f73`** |
 | 10 | `33` Parent Class Report | **`e5cf572`** |
-| 11 | `30` Parent Dashboard | *pending — recorded at the Phase 12 boundary* |
+| 11 | `30` Parent Dashboard | **`d37c45a`** |
+| 12 | `11` Management Dashboard | *pending — recorded in `docs/progress/STATUS.md` at the batch close* |
