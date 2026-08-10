@@ -4958,3 +4958,47 @@ The frame draws **KEY FOCUS** chips in *exactly* the visual position the roster 
 ### Commit / next
 
 **Next: Phase 5 (`07` Trainer Grade Student)** — rail bucket counts and per-learner status; all inputs already exist on `getSessionRosterCore`. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**
+
+---
+
+## 2026-08-10 — HERO CHAIN **PHASE 5** — `07` Trainer Grade Student (development clone, `develop`)
+
+**Track:** hero chain completion, plan §8 Phase 5. **Branch/worktree:** `develop` / none. **Starting HEAD:** `29836a6`.
+
+### ⚠️ PHASE 5 BUILT NO SURFACE — and that is the finding, not an omission
+
+The plan classified this screen's only delta — *"rail bucket counts and per-learner status"* — as **`NEEDS NEW PROJECTION`**. **Measured at HEAD, the rail already exists.** `ReviewApproveRail` renders the frame's four counters over the governed report states plus the Class Session's learner list, fed from `getSessionRosterCore`, with each learner's destination resolved from **that learner's own** attendance and report status rather than by one generic handler.
+
+▶ **A delta table is a READING of a frame, not a measurement of the build.** This is the third time that distinction has decided something this session, after the no-trainer-row ruling on `33` and the two mis-scoped searches below. **No surface was changed to make a phase look productive.**
+
+**The two `REGISTERED-OMISSION`s on this screen are preserved, unchanged and deliberately not "improved" toward the frame:** the frame's **"Junior" year label** and its **"Student ID 2025-113"** (D4 — the governed Class Grade, Class Module and session date stand instead), and the frame's **saturated chip fills** (all four fail SC 1.4.3).
+
+### What Phase 5 DID deliver: the thing nothing pinned
+
+⚠️ **The four buckets enumerate report states in a HAND-AUTHORED list.** Nothing checked that list against the database. If a ninth `report_status` label ever existed, **a present learner in it would be counted in NO bucket while still appearing in the list below it** — the counters and the list silently disagreeing, on the screen a trainer uses to decide who still needs assessing.
+
+`prove:hero-5` closes that. ⚠️ **It reads the label set from `pg_enum`, not from a list restated inside the test** — a test that restates the thing it measures cannot fail when the thing changes, which is the defect already recorded against the hand-authored route census.
+
+**8 labels + `no_report` = 9 states; the four buckets cover all nine, none twice, and none unknown.** It writes nothing and opens no transaction: every leg is a read.
+
+### ⚠️ P5-5 FAILED FIRST, AND THE SEARCH WAS WRONG — the second instance today
+
+`P5-5` reported **FAIL** against `entry.attendanceState === "present"` — a predicate plainly present three lines below where it looked. The extraction regex was bounded by the first `\n}\n` and had captured **only the function's parameter list**.
+
+▶ **Exactly the shape recorded this morning against the emitted-CSS check** (which reported five of five classes `NOT EMITTED` because the minifier strips leading zeros): **a negative result from a search you wrote is evidence about the search until the search is proven discriminating.**
+
+**So the fix was not merely to widen the regex.** A new leg **`P5-5b`** now asserts the extracted region **really is the rail** — it must contain both the bucket map and the rendered counter — so `P5-5a` is known to have read the counting code rather than an empty slice. ⚠️ **Without it, a mis-scoped extraction can report `FAIL` about a region it never read, or — after someone "fixes" the assertion — `PASS` about one.**
+
+### Verification
+
+- **`npm run prove:hero-5` — 8 legs, all PASS, 0 FAIL.** Two of them (`P5-1a`, `P5-1b`) are **non-vacuity** legs placed first: every other leg compares two sets, and an empty set on either side would let them all pass while measuring nothing.
+- `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · **route census 17**.
+- **No application file changed** — the only tracked changes are the new proof and its `package.json` script. No database object, no migration, no DTO, no component.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`.** `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 6 (`08` Trainer AI Report Generation)** — class context and lesson in Report Details. ⛔ **Then STOP: Phase 7 is `F-S6-REVIEW-1` and the Operator wants its plan before it runs.**
