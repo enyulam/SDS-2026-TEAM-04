@@ -5362,3 +5362,133 @@ The regression sweep I had been using was `npm run prove:hero-$n | grep -o "RESU
 ⛔ **`NOT APPLICABLE (G-1)` remains a ruled disposition on all three unframed surfaces — never a pass, never a gap.** A green consistency proof does not convert it into a visual acceptance.
 
 **All eleven hero-chain phases are now built and proven.** Phases 5, 8 and 11 built nothing, each on measurement rather than assumption.
+
+---
+
+## 2026-08-11 — ⛔ **THE MEASURING INSTRUMENT REPORTED `PASS` FOR A SUITE THAT NEVER EXECUTED**
+
+> **Operator-directed entry, 2026-08-11: *"the most important defect in this project's record."* It is recorded on its own rather than inside the Phase 11 entry, because its subject is not Phase 11 — it is every verdict this project has reported through a stdout-matching sweep.**
+
+**Track:** hero chain completion, Phase 11. **Branch:** `develop`. **Found:** 2026-08-11, during the Phase 11 regression sweep. **Closed:** same session, with a mechanism.
+
+---
+
+### What happened, mechanically
+
+Extending `scripts/tests/hero/prove-8-unframed-foundation.mjs` to cover the second unframed pair, I rewrote its final message as a **template literal** so it could interpolate `PAIRS.length`. The message's text contained **backticks** around `NOT APPLICABLE`:
+
+```js
+? `\nRESULT: PASS — all ${PAIRS.length} unframed surfaces …
+   … G-1 records these surfaces as `NOT APPLICABLE`, …`
+```
+
+Those inner backticks **terminate the template literal**. The file is a syntax error.
+
+▶ **The module never parsed. Node never created it, never imported it, never ran a single check.** Not one of the fourteen legs executed — not the non-vacuity legs, not the discrimination leg, not the nine foundation probes, not the two ⛔ negative shapes.
+
+The regression sweep in use at that moment was:
+
+```sh
+for n in …; do npm run prove:hero-$n | grep -o "RESULT: [A-Z]*"; done
+```
+
+**Node's `SyntaxError` report ECHOES THE OFFENDING SOURCE LINE.** The offending line was the success message. So the process — which had done nothing, checked nothing and exited **1** — printed to stderr a line containing the literal text:
+
+```
+RESULT: PASS — all ${PAIRS.length} unframed surfaces share their framed siblings' foundation …
+```
+
+`grep` matched it. The sweep reported **`hero-8  RESULT: PASS`**.
+
+▶ ⛔ **THE HARNESS'S OWN SUCCESS STRING BECAME THE EVIDENCE OF ITS SUCCESS, WHILE IT HAD NEVER EXECUTED.**
+
+It was caught only because I ran that one suite alone afterwards and looked at the exit code. **Nothing in the sweep would ever have caught it** — the more thoroughly the harness described its own success, the more convincing its failure looked.
+
+---
+
+### ⚠️ Why this outranks every other defect in this record
+
+This project has now met the same family several times: **an assertion passing because the object it measures does not exist.** `bool_and` over zero rows. The inverted `CANONICAL_CONTAINERS` guard. The **S-8** gate that denied everyone because nothing had been submitted, so its DENY leg passed for the wrong reason. Those were serious, and each was recorded.
+
+⛔ **This one is a level worse, and the difference is not severity — it is BLAST RADIUS.**
+
+| | Every earlier instance | This one |
+|---|---|---|
+| Where the defect lived | in the **measured object** — one gate, one guard, one fixture state | in the **MEASURING INSTRUMENT** |
+| What it could falsify | **one leg of one proof** | **every verdict the sweep ever reported** |
+| How it would be found | by the next proof that touched that object | ⛔ **by nothing** — the instrument reports success for whatever it did not run |
+
+The sweep was the mechanism `plan §12 item 14` had *just* established — *"re-run EVERY earlier proof at each phase boundary"* — and I had run it at the Phase 9 and Phase 10 boundaries. **A defect in the thing that checks everything else is not one more finding of the same kind; it silently underwrites all of them.** Had the backticks been introduced two phases earlier, three phase boundaries would each have reported twelve green suites while one was never executed, and every one of those reports would have been in the permanent record.
+
+⚠️ **The failure mode is also worse than a crash.** A suite that crashes visibly is honest. This one produced the exact string a reader looks for, in the exact format, on a line the reader has no reason to distrust.
+
+---
+
+### ⛔ The rule
+
+**NEVER DECIDE A SUITE'S VERDICT BY MATCHING ITS OUTPUT. EXIT CODE IS THE ONLY VERDICT.**
+
+A process that died before running anything **can print any string it contains** — its source, its usage text, its success message. Output is what a suite *says*; exit status is what the runtime *observed*. **A non-zero exit with no output at all is a FAILURE, never a pass.**
+
+### The closure — a mechanism, not a resolution
+
+`scripts/tests/hero/prove-all.mjs` (**`npm run prove:hero-all`**) runs all twelve hero proofs and decides each verdict from `spawnSync(...).status === 0` alone. It treats a `null` status — killed by signal — as failure rather than letting `null !== 0` be evaluated loosely.
+
+⚠️ **It also carries a self-check that keeps it honest in the other direction:** any suite that **exits 0 while printing `RESULT: FAIL`** is reported as a failure. **The two signals must agree.** Trusting exit code alone would have closed this defect while leaving its mirror image open — a harness that prints a failure and returns 0 anyway.
+
+✅ **Operator ruling, 2026-08-11: this mechanism is the right closure, and it APPLIES TO EVERY FUTURE SUITE.** Adding a new proof includes adding it to `prove-all.mjs`'s list. ▶ **A suite outside the exit-code sweep is a suite whose verdict nobody is checking.** Recorded as plan §12 item **17**.
+
+---
+
+### What it cost, stated plainly
+
+**Nothing shipped wrong.** Once the file was fixed, all fourteen legs ran and passed, and the full sweep was re-run keyed off exit status: **12/12 `PASS`, none contradicting its own exit code.** The Phase 8/11 conclusions in this log stand on that re-run, not on the sweep that lied.
+
+⚠️ **But the honest statement is that it was caught by luck of habit, not by design** — I happened to run the suite alone. The mechanism now removes the luck.
+
+---
+
+## 2026-08-11 — ✅ **HERO CHAIN PLAN CLOSED — COMPLETE.** Phases 7–11 Operator-accepted; two patterns ruled
+
+**Track:** hero chain completion. **Branch:** `develop`. **Tree:** clean.
+
+### Acceptance
+
+✅ **Operator-accepted 2026-08-11: Phases 7, 8, 9, 10 and 11** — `2fecad9` · `607023d` · `fa7df59` · `8044d87` · `a95f89d`. With Phases 0A/0B/1 and 2–6 accepted on 2026-08-10, **every phase of `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` is accepted and the plan is CLOSED — COMPLETE.**
+
+⚠️ **`PASS` was the session's evidence verdict; `Accepted` is the Operator's** (`CLAUDE.md` §14.1, §15.6). The distinction held at every boundary in this batch and is worth stating at its end.
+
+⛔ **A closed plan authorizes nothing and re-opens nothing.** No later work may cite one of its phases as authorization, and **no later phase may "complete" a surface it deliberately left alone.** Its `REGISTERED-OMISSION`s stay protected exactly as during execution: G-2's Overall Grade on four surfaces · G-4's term everywhere · G-3's KEY FOCUS chips · G-7's `Assist.` slot · G-8's evidence media · and the **absent trainer row on `33`** (plan §6.1a).
+
+### ⚠️ Carried, and NOT waived by closure
+
+- **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface. Closing a plan does not run a capture.
+- **`NOT APPLICABLE (G-1)`** on the three unframed surfaces — Trainer Review & Approve and both wording editors. It is a **ruled disposition**: never a pass, never a gap. **The green foundation-consistency proof does not convert it into a visual acceptance**, and no later reader may read the two together as one.
+
+### ✅ Two patterns ruled, both recorded in plan §12
+
+**1 — Phase 9's refusal, now §12 item 18.** ✅ *"The right instinct."* Phase 9 needed four fields that `report_get_canonical_context` returns **exactly** — and that function is gated on `latest_submitted_version_id IS NOT NULL`, which two of `29`'s three queue modes never satisfy. ⛔ **Dropping the precondition would have weakened a governed read three roles share, to solve a problem management does not have.** A narrower instrument was built instead.
+
+▶ **The half that makes it a pattern rather than a good decision:** `P9-3` asserts the original precondition is **STILL PRESENT**, so §12's *"never work around a fail-closed refusal by weakening the thing that refused"* is **checked by the suite, not promised in a comment**. **Refusing to widen is only half; the other half is leaving behind a check that fails if someone later widens it.**
+
+**2 — the omission-reason rule, now §12 item 16.** ✅ Operator-ruled as a **rule**, not an observation, and it matters more than it looks.
+
+⚠️ **A data-availability omission and a ruled omission are INDISTINGUISHABLE ON A RENDERED PAGE** — both are simply absent. The **stated reason is the only thing carrying the difference**, which makes a reason that fails to state its own permanence a defect *even when the omission itself is correct*.
+
+⛔ **"The projection carries no term field" IMPLIES THE FILTER WOULD EXIST IF THE DATA DID.** That is how a permanent refusal gets quietly reclassified as a temporary gap — and the next phase then "completes" it in good faith. **Two instances this batch, one shape:** the `29` disabled Term chip, and `19`'s Report Details note still claiming Lesson was uncarried after Phase 9 had made it carried.
+
+▶ **The rule: an omission's stated reason must say whether it ENDS WHEN DATA ARRIVES, or NEVER ENDS.** When a phase makes data available, re-read **every** omission note on that surface. Write each reason so a stranger can tell a `REGISTERED-OMISSION` from a pending dependency without consulting a ruling.
+
+### Final state of the closed plan
+
+**Eleven phases. Four built nothing** — Phases 5, 8 and 11 on measurement, and Phase 10 needed no projection because Phase 9 had already extended the one it reads. ▶ **A delta table is a reading of a frame, not a measurement of the build**, and measuring at HEAD before accepting a classification decided four phases out of eleven.
+
+**Database, final:** 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Governed rows `reports` 0 · `report_versions` 0 · `audit_events` 0. **The whole batch added exactly one function** (Phase 7's `assessment_save_follow_up_notes`) and **three nullable columns** (Phase 0B); Phases 2–6 and 8–11 added **no database object at all**.
+
+**Proofs:** `npm run prove:hero-all` — **12/12 `PASS`**, none contradicting its own exit code. `tsc` 0 · `eslint` 0 errors · `build` 0 · route census **17**.
+
+**§12 now carries eighteen disciplines**, several established by failing first. It is the part of the plan with a life after closure.
+
+### Next
+
+⛔ **STOPPED. Nothing started.** The Operator is walking the chain manually and will then send **a set of client-ratified decisions that amend ratified authority**. ⚠️ **No building of any kind until those arrive** — and amending ratified authority is a `CLAUDE.md` §12 stop-and-ask requiring its own bounded instruction naming the files and corrections, which a batch authorization never carries.
