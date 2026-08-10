@@ -33,7 +33,8 @@
     "fixtures:hosted-state": "node --env-file=.env.local scripts/fixtures/hosted-state-probe.mjs",
     "prove:hosted-target-guard": "node --env-file=.env.local scripts/fixtures/prove-hosted-target-guard.mjs",
     "hosted:setup-assessment": "node --env-file=.env.local scripts/physical-test/hosted-setup-assessment.mjs",
-    "hosted:draft": "node --env-file=.env.local scripts/physical-test/run-f-hosted-draft.mjs"
+    "hosted:draft": "node --env-file=.env.local scripts/physical-test/run-f-hosted-draft.mjs",
+    "prove:hero-0a": "node --env-file=.env.local scripts/tests/hero/prove-0a-staff-identity.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",
