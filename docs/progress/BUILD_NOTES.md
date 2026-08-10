@@ -5281,3 +5281,44 @@ It rendered as a **disabled chip** carrying an honest reconciliation-era reason:
 ### Next
 
 **Phase 10 — `19` Management Student Report**: class, trainer and lesson context in Report Details. Overall Grade omitted under **G-2 and A-038 independently**; the six R-B5 prohibitions preserved. ⚠️ Measure at HEAD first; the new shared context reader is expected to serve it, which is why it was built in `class-session` rather than in `management-view`.
+
+---
+
+## 2026-08-11 — HERO CHAIN **PHASE 10** — `19` Management Student Report: class · lesson · trainer
+
+**Track:** hero chain completion, plan §6.10 Phase 10. **Branch:** `develop`. **Starting HEAD:** `fa7df59`.
+
+### Measured at HEAD first — it added NO projection
+
+The plan classified the context delta `NEEDS NEW PROJECTION`. **Measured, `19` already narrows its learner identity out of the SAME governed queue projection `29` reads — and Phase 9 had already put class, lesson and trainer on it.** Phase 10 needed no new read, no new RPC and no new database object: only the render. *(This is exactly why the Phase 9 reader was built in `class-session` rather than `management-view` — it was expected to serve two consumers, and it did.)*
+
+**No SQL half, and the absence is stated rather than left silent:** there is no new database object to interrogate, and `prove:hero-9` already proved the read, the RLS decision and the refusal legs behind these very fields. Re-running it against a second consumer would restate an accepted result rather than establish a new one (§14.7).
+
+### ⚠️ The defect this phase found
+
+**A data-availability omission and a RULED omission look IDENTICAL on a rendered page.** `19` omitted Lesson because *"no governed Management projection carries it"* — a **data** reason, discharged by Phase 9. **`Overall Grade` and `Term` were never omitted for that reason:** G-2 and G-4 rule them out permanently, and A-038 bars a grade independently. ⛔ **The first kind of omission ends when the data arrives; the second never ends** — and leaving the discharged sentence in place would have silently reclassified a permanent refusal as a temporary gap, which the next phase would then "complete".
+
+Corrected on screen and in the file's `D2`/`P3` notes; **`P10-4b`/`P10-4c`** pin both halves. **Second instance this batch** — the `29` Term chip was the first.
+
+### Verification — `npm run prove:hero-10`, 21 legs, `PASS`
+
+Four permitted context fields rendered from their own governed fields (`P10-2`), nine ⛔ absence legs for G-2, G-4 and the six R-B5 prohibitions (`P10-3`), a discrimination leg (`P10-3b`) and `P10-3c` recording *why* `dimensionCode` is legitimately present — A-035 names which dimension a correction concerns, and it carries no rating. `P10-1` is the non-vacuity leg: comment-stripping is aggressive, and nine absence checks would all pass against an empty string.
+
+### ⚠️ Two of my matchers failed on first run — both bare-word matches
+
+- `/\btermb/` matched the screen's own sentence *refusing* term — which `P10-4c` **requires** — so the two legs **directly contradicted each other**.
+- `/audience/` matched **`audience_awareness`, the ninth B.E.S.T dimension**. That is §5's and A-054's hazard exactly, and G-06 **expressly refused** narrowing `DIMENSION_TERMS.audience_awareness`.
+
+▶ **This is the shape A-052 already prohibits for rating labels, and it generalizes: a bare-word match over a governed vocabulary rejects legitimate content — in a TEST as much as in a leak guard.** Both now match a rendered shape. Recorded as plan §12 items **15** and **16**.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · **route census 17** · **every hero proof re-run — `0a` `1` `2` `3` `4` `5` `6` `7` `8` `9` `10` all `PASS`** (the §12 item 14 discipline, applied at this boundary rather than discovered at the next) · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS** · **no new emitted class** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on this authenticated surface. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Next
+
+**Phase 11 — Management wording editor.** Foundation consistency only; visual acceptance **`NOT APPLICABLE (G-1)`**. Measured at HEAD during Phase 8 and found already consistent; it extends the Phase 8 harness rather than adding a second one.

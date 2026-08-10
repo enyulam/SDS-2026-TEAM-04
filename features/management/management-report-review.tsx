@@ -125,8 +125,16 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *     allow-list, whose arity stays at exactly four.
  *  D2 The report-card subtitle "Public Speaking · Term 1, 2035 · Management copy". "Management
  *     copy" is the same per-audience artefact claim as P1 and is replaced by the governed
- *     lifecycle state. Class-module, lesson and term fields are carried by NO governed
- *     Management projection and are omitted rather than fabricated.
+ *     lifecycle state.
+ *
+ *     ⚠️ PARTIALLY DISCHARGED AT HERO PHASE 10. This note read "class-module, lesson and term
+ *     fields are carried by NO governed Management projection and are omitted rather than
+ *     fabricated". Phase 9 made class-module and lesson genuinely carried, so the frame's
+ *     "Public Speaking" is now rendered from a governed field instead of omitted. ⛔ TERM IS
+ *     NOT DISCHARGED AND NEVER WILL BE — G-4 rules it out permanently, and a `terms` table is
+ *     the §8-deferred substrate End-of-Term generation needs. A data-availability omission and
+ *     a RULED omission look identical on the page; the first ends when the data arrives, the
+ *     second never does.
  *  D3 The frame's four section glyphs (alert circle, star, arrow, heart) are not in the approved
  *     asset set. Approved icons are reused rather than re-drawing an icon ad hoc
  *     (GLOBAL_UI_RULES §8), matching the mapping screen 10 already uses.
@@ -201,6 +209,24 @@ type PublishedView = {
   readonly report: CanonicalReportDto;
   readonly studentDisplayName: string | null;
   readonly sessionDate: string | null;
+  /**
+   * Hero chain Phase 10 — the frame's class, lesson and trainer context in
+   * Report Details.
+   *
+   * ⚠️ NARROWED OUT OF THE SAME GOVERNED QUEUE PROJECTION this screen already
+   * reads for the learner's name. Phase 9 added these fields to that
+   * projection, so Phase 10 needed NO new read, NO new projection and NO new
+   * database object — the plan classified it `NEEDS NEW PROJECTION`, and
+   * measurement at HEAD showed the projection was already there.
+   *
+   * ⛔ A miss OMITS the row rather than fabricating one, exactly as the name
+   * and session date already do.
+   */
+  readonly classGradeLabel: string | null;
+  readonly classModuleTitle: string | null;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
 };
 
 type ReviewView = {
@@ -213,6 +239,24 @@ type ReviewView = {
    */
   readonly studentDisplayName: string | null;
   readonly sessionDate: string | null;
+  /**
+   * Hero chain Phase 10 — the frame's class, lesson and trainer context in
+   * Report Details.
+   *
+   * ⚠️ NARROWED OUT OF THE SAME GOVERNED QUEUE PROJECTION this screen already
+   * reads for the learner's name. Phase 9 added these fields to that
+   * projection, so Phase 10 needed NO new read, NO new projection and NO new
+   * database object — the plan classified it `NEEDS NEW PROJECTION`, and
+   * measurement at HEAD showed the projection was already there.
+   *
+   * ⛔ A miss OMITS the row rather than fabricating one, exactly as the name
+   * and session date already do.
+   */
+  readonly classGradeLabel: string | null;
+  readonly classModuleTitle: string | null;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
 };
 
 export function ManagementReportReview() {
@@ -270,6 +314,11 @@ export function ManagementReportReview() {
           report: publishedResult.data,
           studentDisplayName: identity?.studentDisplayName ?? null,
           sessionDate: identity?.sessionDate ?? null,
+          classGradeLabel: identity?.classGradeLabel ?? null,
+          classModuleTitle: identity?.classModuleTitle ?? null,
+          lessonNumber: identity?.lessonNumber ?? null,
+          lessonTitle: identity?.lessonTitle ?? null,
+          trainerDisplayName: identity?.trainerDisplayName ?? null,
         });
         setResource({ kind: "failed", result: { outcome: "unavailable" } });
         return;
@@ -280,6 +329,11 @@ export function ManagementReportReview() {
           report: reviewResult.data,
           studentDisplayName: row?.studentDisplayName ?? null,
           sessionDate: row?.sessionDate ?? null,
+          classGradeLabel: row?.classGradeLabel ?? null,
+          classModuleTitle: row?.classModuleTitle ?? null,
+          lessonNumber: row?.lessonNumber ?? null,
+          lessonTitle: row?.lessonTitle ?? null,
+          trainerDisplayName: row?.trainerDisplayName ?? null,
         },
       });
     });
@@ -302,7 +356,16 @@ export function ManagementReportReview() {
     );
   }
 
-  const { report, studentDisplayName, sessionDate } = resource.data;
+  const {
+    report,
+    studentDisplayName,
+    sessionDate,
+    classGradeLabel,
+    classModuleTitle,
+    lessonNumber,
+    lessonTitle,
+    trainerDisplayName,
+  } = resource.data;
   const learner = studentDisplayName ?? "this learner";
 
   async function returnReport() {
@@ -448,8 +511,13 @@ export function ManagementReportReview() {
                     Class Report — {learner}
                   </span>
                 </h2>
-                {/* D2 — the frame's "Management copy" claim replaced by the governed state. */}
+                {/*
+                  D2 — the frame's "Management copy" claim replaced by the governed state, and
+                  its class-module restored at Phase 10 now that a governed field carries it.
+                  ⛔ The frame's term segment stays out: G-4, permanently.
+                */}
                 <p className="mt-0.5 text-[0.703125rem] font-bold text-neutral-on">
+                  {classModuleTitle ? `${classModuleTitle} · ` : ""}
                   {sessionDate ? `${formatDate(sessionDate)} · ` : ""}
                   Final-review candidate · awaiting your decision
                 </p>
@@ -519,22 +587,64 @@ export function ManagementReportReview() {
             </h2>
             <dl className="mt-3 divide-y divide-line text-[0.75rem]">
               {studentDisplayName && <DetailRow label="Name" value={studentDisplayName} />}
+              {/*
+                Hero chain Phase 10. Class, Lesson and Trainer are IDENTITY AND
+                SCHEDULING facts about the session — not assessment substance,
+                so A-038's bar on Management reading raw per-dimension data is
+                untouched and P2/P3 below are unaffected.
+
+                ⛔ G-4 — there is no Term row and there must never be one.
+                ⛔ G-2 — there is no grade or roll-up row either, and A-038
+                   bars it independently: computing one needs the very
+                   per-dimension ratings Management may not read.
+                ⛔ G-3 — Lesson is lesson IDENTITY. It is never lesson-plan
+                   KEY FOCUS intent, and never the governed carried-over
+                   previous-session focus.
+              */}
+              {(classGradeLabel ?? classModuleTitle) && (
+                <DetailRow
+                  label="Class"
+                  value={[classGradeLabel, classModuleTitle].filter(Boolean).join(" · ")}
+                />
+              )}
+              {(lessonNumber !== null || lessonTitle) && (
+                <DetailRow
+                  label="Lesson"
+                  value={[
+                    lessonNumber === null ? null : `Lesson ${lessonNumber}`,
+                    lessonTitle,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                />
+              )}
+              {/* G-7 — one staff slot. There is no `Assist.` row. */}
+              {trainerDisplayName && <DetailRow label="Trainer" value={trainerDisplayName} />}
               {sessionDate && <DetailRow label="Session date" value={formatDate(sessionDate)} />}
               <DetailRow label="Status" value={<StatusPill status={report.status} />} />
             </dl>
             {/*
-             * P3 / D2 — the frame's "Overall Grade", "Lesson" and "Term" rows are omitted. The
+             * P3 / D2 — the frame's "Overall Grade" and "Term" rows are omitted. The
              * omission is stated on screen rather than left as a silent gap, but it is stated
              * WITHOUT naming the prohibited row: the browser suite asserts that phrase never
              * renders on a Management surface, and an explanatory sentence is not worth
              * weakening the assertion that proves the leak stayed closed. The full reason is
              * recorded in this file's header, in `implementation-notes.md` and in the
              * workstream log, which is where operator ruling R-B5 requires it.
+             *
+             * ⚠️ THE LESSON ROW IS NO LONGER AMONG THEM, AND THE REASON MATTERS.
+             * It was omitted because no governed Management projection carried
+             * it — a DATA reason, which Phase 9 discharged. "Overall Grade" and
+             * "Term" were never omitted for that reason: G-2 and G-4 rule them
+             * out permanently, and A-038 bars a grade independently. ⛔ A
+             * data-availability omission and a RULED omission look identical on
+             * a rendered page and must never be conflated: one ends when the
+             * data arrives, the other never ends.
              */}
             <p className="mt-4 text-small leading-6 text-ink">
-              Nothing beyond the four parent-facing panels forms part of this review. Lesson and
-              term are not carried by any governed Management projection, so they are omitted
-              rather than estimated.
+              Nothing beyond the four parent-facing panels forms part of this review. A term is
+              not recorded anywhere in this product and is not shown; the assessment substance
+              behind these panels is the Trainer’s and is not part of Management’s review.
             </p>
           </section>
 
@@ -803,8 +913,19 @@ function PublishedReport({ view }: { readonly view: PublishedView }) {
           <h1 className="mt-1 text-[1.375rem] font-bold text-ink-strong">
             {learner}
           </h1>
+          {/*
+            Hero Phase 10 — the published view states the SAME governed context
+            the final-review view does, from the SAME projection. ⚠️ Stating it
+            two different ways on two management surfaces is the defect this
+            codebase already fixed once for the Class Health Summary and the
+            Management Insight (CLAUDE.md §6): one fact, one derivation.
+            ⛔ No term, no grade, no roll-up. G-4, G-2, A-038.
+          */}
           <p className="mt-0.5 text-small leading-5 text-ink">
             Published {formatSubmitted(view.report.submittedAt)}
+            {view.classModuleTitle ? ` · ${view.classModuleTitle}` : ""}
+            {view.lessonNumber === null ? "" : ` · Lesson ${view.lessonNumber}`}
+            {view.trainerDisplayName ? ` · ${view.trainerDisplayName}` : ""}
             {view.sessionDate ? ` · Class Session ${formatSessionDate(view.sessionDate)}` : ""}
           </p>
         </div>
