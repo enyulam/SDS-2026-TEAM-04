@@ -720,9 +720,27 @@ export async function adapterGetManagementReview(
   );
   if (review.outcome !== "success") return review;
 
-  // RPC-15 is STATUS-GATED and only ever yields a trainer-approved candidate
-  // (A-038). Anything else — and any missing render proof — is the same
-  // non-disclosing `unavailable` the zero-row case already produces.
+  /*
+   * RPC-15 is STATUS-GATED and only ever yields a trainer-approved candidate
+   * (A-038). Anything else — and any missing render proof — is the same
+   * non-disclosing `unavailable` the zero-row case already produces.
+   *
+   * ⛔ OPERATOR RULING, 2026-08-11 — LEAVE THIS NON-DISCLOSING. DO NOT
+   * "IMPROVE" IT.
+   *
+   * This guard is why the Management wording editor renders a StatePanel
+   * instead of an editable form once a report is `submitted`, and why that
+   * panel does NOT say "already submitted". It was proposed that naming the
+   * reason would be friendlier. **It was ruled against, deliberately:**
+   * naming it converts a deliberately INDISTINGUISHABLE outcome into a
+   * DISTINGUISHABLE one on an A-038 surface — the same answer must cover a
+   * pre-approval status, a submitted report and "no such report".
+   *
+   * ▶ **The confusion cost is small; the boundary is not.**
+   *
+   * ⚠️ A later phase reading this as a missing error message and adding one
+   * would be reopening a ruled decision, not polishing copy.
+   */
   if (review.data.status !== "trainer_approved") return { outcome: "unavailable" };
   if (review.data.lockVersion === null || review.data.versionId === null || review.data.wordingHash === null) {
     return { outcome: "unavailable" };

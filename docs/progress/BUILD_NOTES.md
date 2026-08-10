@@ -5960,3 +5960,96 @@ The five new strings were measured **in the built client chunks** (`No changes y
 6. Repeat on a `trainer_approved` report → Management **Edit wording**.
 
 **Report whichever of those three you see.** The point of this change is that all three are now distinguishable; **none of them was, an hour ago.**
+
+---
+
+## 2026-08-11 — ⛔ **A REJECTED READ REPORTED A GOVERNED CORRECTION REQUEST AS RESOLVED** — the family's worst instance
+
+Every other member of this family made a **display** claim: an empty roster, "No reports waiting", "no learner is linked to your account". Those are lies told to a screen. **This one wrote a false GOVERNANCE FACT.**
+
+```ts
+const after = await readWorking(client, sessionId, studentId);
+return {
+  outcome: "success",
+  data: {
+    // Observed, not asserted: the correction is resolved when the database
+    // stops reporting an open one.
+    correctionResolved: hadOpenCorrection && (after === null || after.open_correction_request_id === null),
+```
+
+`readWorking` returned `null` for **a rejected read and a genuine absence alike**. So when the read that was supposed to confirm the correction's state was **rejected**, `after === null` was true, and the expression evaluated to **`correctionResolved: true`**.
+
+▶ **A failed query reported that a management-issued correction request had been resolved.**
+
+### ⚠️ The comment is the worst part of it
+
+> *"Observed, not asserted: the correction is resolved when the database stops reporting an open one."*
+
+**That comment states precisely the property the code did not have.** It is not wrong about the intent — the intent is right, and it is the correct design. It is wrong about what `null` meant, and it was written by someone who had reasoned carefully about the distinction between observing and asserting and then relied on a return value that erased it.
+
+⛔ **A comment asserting a guarantee is not a guarantee.** It is, in this case, worse than no comment: a reviewer reading *"Observed, not asserted"* has been told the exact question has already been considered, and stops asking it. **The reassurance was doing the opposite of its job.**
+
+### Why this outranks the other fifteen
+
+| | Family member | What was false |
+|---|---|---|
+| | roster carry-over | a **displayed** absence of previous focus |
+| | management queue | a **displayed** "No reports waiting" |
+| | parent link read | a **displayed** "no learner linked" |
+| ⛔ | **`correctionResolved`** | **a governed lifecycle claim about a correction request A-035 requires be resolved by a real trainer act** |
+
+The first three mislead a reader who can be corrected by reloading. This one **feeds a downstream decision**: it drives the `?saved=correction` branch, so the trainer is told their correction closed the loop. **No database write was corrupted** — the correction request's real state is in the database and the governed RPCs read it correctly — but the human was told the governed workflow had advanced when the system had no idea whether it had.
+
+### How it was found — not by looking
+
+⚠️ **Nobody was looking at this line.** It surfaced because `Q-7` was widened from `→ []` to also count `→ null`, and the new leg **failed on its first run** naming three sites in a module the original sweep never covered. Two of the three were consequential; this was one.
+
+▶ **The sweep that "closed at zero" had closed at zero against the shapes it knew about.** A ratchet pinned to the defect you found does not protect you from the same defect wearing a different return value — and the only reason this was ever seen is that the pin was widened *before* anyone had a reason to think it would catch anything.
+
+### Fixed
+
+`readWorking` now returns `QueryOutcome<WorkingReportRow | null>`; the caller returns `unavailable` on `{ ok: false }` before the expression is reached, so `afterRow === null` is **only ever an observed absence** — and the comment is finally true. Four of that helper's six callers had been **safe by accident**, mapping `null` to `unavailable` for unrelated reasons.
+
+---
+
+## 2026-08-11 — ⚠️ **MEASURING THE WRONG LAYER AND REPORTING IT AS THE SYSTEM** — plus two Operator rulings, and one instrument agreeing with itself
+
+### The discipline, stated so it is reusable
+
+⛔ **PROBING AN RPC DIRECTLY AND SKIPPING THE ADAPTER IS MEASURING THE WRONG LAYER.** A `curl` to `/rest/v1/rpc/<fn>` with a role JWT exercises **PostgREST plus RLS plus the function**. It does **not** exercise the server action, the adapter, or any guard living between them — and in this codebase **guards live in all three places**.
+
+I reported that the Management wording editor *"has no status guard"* and would render an editable form for a mutation the database must reject. **It has one**, at [`participant-actions.ts:688`](../../server/modules/integration-adapter/participant-actions.ts) — in the **adapter**, one layer above where the trainer's equivalent sits. My evidence was `report_get_management_review` returning a full four-panel payload for a `submitted` report **over PostgREST**, which is true and which the adapter then rejects.
+
+⚠️ **The tell was already in front of me and I discarded it.** Minutes earlier my own rendered-surface probe had failed its non-vacuity leg — revision-1 text was absent from the HTML — because these routes deliver content through a server action *after* hydration. I correctly threw that probe away as invalid, and **did not ask what else I had measured at the wrong layer**. The RPC probe had the identical flaw and I kept its result.
+
+▶ **A discarded measurement is a warning about the method, not just about that one number.**
+
+**The rule:** a claim about what a SURFACE does must be measured through the path the surface actually uses. If the probe cannot reach the adapter, it cannot speak about the adapter — and *"the RPC returns X"* is a fact about the RPC, never about the screen.
+
+⛔ **And the consequence was not merely a wrong sentence.** The Operator, reading the report in good faith, **authorized a fix for a defect that does not exist**. The correct response was to refuse the instruction and say why, not to build a second guard that would encode a phantom defect permanently and imply the database had once been at risk. **It never was.**
+
+### ✅ OPERATOR RULING — the Management StatePanel stays NON-DISCLOSING
+
+The one genuine sub-finding was that the Management editor's StatePanel renders the non-disclosing `unavailable` and therefore never names the reason. Making it say *"already submitted"* was **ruled against**:
+
+> **Naming it converts a deliberately indistinguishable outcome into a distinguishable one on an A-038 surface. The confusion cost is small; the boundary is not.**
+
+The same answer must cover a pre-approval status, a submitted report, and "no such report". ⚠️ **Recorded at the guard itself**, not only here, because that is where a later phase would read the silence as a missing error message and "improve" it. Doing so would be **reopening a ruled decision, not polishing copy**.
+
+### ✅ OPERATOR RULING — the shared canonical database is fixed BY ISOLATION, NEVER BY DELETION
+
+`prove:hero-1/2/7/9` fail because the Operator's walkthrough created reports for the fixture pairs those suites insert into. **The report rows are not to be deleted.**
+
+> **Removing evidence to green an instrument is the wrong trade.**
+
+The shape of the isolation options was reported separately for the Operator's decision; **nothing was built.**
+
+### ⛔ `run-integration.mjs:517` — the instrument agreeing with itself
+
+`INT-A5`'s two checks are bare `if (…) fail(…)` statements with no `return`, and the `pass(…)` beneath them was **unconditional**. The leg printed **`FAIL` twice and then `PASS`**, for the same id. Anyone scanning for `PASS` read it as green.
+
+**It is the instrument-defect family one level down** — not a check that never ran, but a check that ran, failed, and **reported its own success**. ▶ **The exit code held at 1 the whole time**, which is exactly why the ratified discipline is to read the **exit code** and never the stdout.
+
+⚠️ **Measured before repairing, and the first measurement over-reported.** A static scan found **49** leg ids where a `fail()` and a `pass()` share an identifier — which reads alarming and is nearly meaningless, because most guard the `pass` behind an `if/else` chain. **In the actual run, exactly ONE id printed both**: `INT-A5`. `INT-Q27` failed in the same run and correctly printed no `PASS`, because it uses `if / else if / else pass(…)`.
+
+▶ **"Can print both" and "did print both" are different measurements, and only the second is evidence.** Fixed by guarding the `pass` on the failure count being unchanged; re-run drops `PASS` 48 → **47** with the phantom removed, exit code still 1. **The three staleness failures stay reported and unfixed**, per instruction.

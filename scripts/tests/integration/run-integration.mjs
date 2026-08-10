@@ -506,6 +506,23 @@ async function partRealAuth() {
 
   // A5 -- no parent visibility before submission; management review gated.
   {
+    /*
+     * ⛔ THIS BLOCK USED TO PRINT `FAIL` TWICE AND THEN `PASS`, FOR THE SAME
+     * LEG ID. Its two checks are bare `if (…) fail(…)` statements with no
+     * `return`, and the `pass(…)` beneath them was UNCONDITIONAL — so the
+     * summary asserted the leg held while the leg's own output said it did
+     * not. Anyone scanning for `PASS` read it as green.
+     *
+     * ⚠️ It is the instrument-defect family one level down: the SUITE
+     * agreeing with itself about a leg that failed. The exit code held at 1
+     * throughout, which is exactly why the ratified discipline is to read the
+     * EXIT CODE and never the stdout.
+     *
+     * ▶ Every OTHER leg in this file guards its `pass` with an `if/else`
+     * chain (see `INT-Q27`, which failed in the same run and correctly
+     * printed no `PASS`). This was the single divergent block, not a pattern.
+     */
+    const failuresBefore = failures;
     const canonical = await clients.parent.rpc("report_get_canonical", { p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT });
     if (canonical.error || (Array.isArray(canonical.data) && canonical.data.length !== 0)) {
       fail("INT-A5", "the parent canonical read did not return the zero-row unavailable outcome");
@@ -514,7 +531,9 @@ async function partRealAuth() {
     if (review.error || (Array.isArray(review.data) && review.data.length !== 0)) {
       fail("INT-A5", "the management review read returned content with no trainer-approved report");
     }
-    pass("INT-A5", "zero-row outcomes: nothing is parent-visible or management-readable before approval/submission");
+    if (failures === failuresBefore) {
+      pass("INT-A5", "zero-row outcomes: nothing is parent-visible or management-readable before approval/submission");
+    }
   }
 
   // A6 -- direct table access is privilege-denied under every real JWT.
