@@ -1,5 +1,25 @@
 # UI RECONCILIATION BUILD PLAN — `F-UI-DRIFT-1` bucket (c)
 
+> # ✅ CLOSED — COMPLETE. Operator decision, 2026-08-10.
+>
+> **Every phase this plan contained has run and been ACCEPTED by the Operator.**
+>
+> | Batch | Phases | Accepted commits |
+> |---|---|---|
+> | **1** | 0 · 1 · 2 · 3 | `3010b63` · `ea5d32b` · `02218ba` · `71953fa` |
+> | **3** | 4 · 5 · 6a · 6 · 7 · 8 · 9 · 10 · 11 · 12 | `5dda019` · `ca9396e` · `1c93a4f` · `85e1f35` · `7634c71` · `d83823f` · `6146f73` · `e5cf572` · `d37c45a` · `cca7526` |
+>
+> **Result, as the two lists this plan exists to keep apart — never merged:** `TRUE-DRIFT` resolved **145** (Batch 1: 25 · Batch 3: 120) · `REGISTERED-OMISSION` preserved **73, ZERO CHANGED** (Batch 1: 12 · Batch 3: 61) · `NEW-QUESTION` **none, in any phase** · route census **17** at every boundary.
+>
+> **Basis of the Batch 3 acceptance:** the Operator **walked the full chain manually**, trainer through parent, all ten screens. ⚠️ **That is OPERATOR MANUAL VERIFICATION AT THOSE COMMITS ONLY — point-in-time. It is NOT a harness pass, it does NOT cover hover, focus or responsive collapse, and it does NOT transfer to any later change.**
+>
+> ### ⚠️ TWO OPEN ITEMS SURVIVE THIS CLOSURE — carried forward on Operator instruction
+>
+> 1. **The Phase 6a RUNTIME carry-over re-proof is OWED** — save a follow-up note on screen `07`, see it as the next session's previous focus. Blocked at `CONT-A0` by **`B-STAGE3-2`** (Operator-owned). Proven **statically only**, which does not discharge it. It backs **`CLAUDE.md` §10 Phase 1 exit condition (c)**.
+> 2. **RENDERED CAPTURES REMAIN `NOT-RUN` on all ten authenticated screens** — they need a reachable governed database, a §12 stop-and-ask. The walkthrough does not substitute for them.
+>
+> **Successor plan:** `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`. It addresses a **different** problem — screens that are **functionally incomplete**, not visually drifted — and it **crosses governed surfaces this plan forbade**. Nothing below is a live instruction any more; the file is retained as the procedural record of a completed plan, and its proven disciplines are carried forward by name in the successor.
+
 > **THIS PLAN AUTHORIZES NOTHING.** It is a procedural planning artefact (`CLAUDE.md` §1). It cannot override the specification, a ratified amendment, `FINAL_MVP_AUTHORITY_LOCK.md`, an operator ruling or `CLAUDE.md`. **Work proceeds in Operator-authorized BATCHES — see §5.1**, and no batch may be started because an earlier one passed.
 >
 > Written 2026-08-10 on `develop` in the development clone. **Amended 2026-08-10 (v2) by Operator instruction — see §8.** **No phase has been started. No code was changed to produce this plan or its amendment.**

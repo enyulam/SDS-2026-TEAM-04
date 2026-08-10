@@ -4057,3 +4057,115 @@ message is part of the audit record. **Never pass one inline through a double-qu
 string when it contains backticks** — the shell will execute them. Every other commit in this
 batch used `git commit -F <file>`, which is literal, and none was affected. Use `-F` for any
 message carrying backticks, `$`, or `!`.
+
+---
+
+## 2026-08-10 — ✅ **OPERATOR ACCEPTANCE of BATCH 3 (plan Phases 4–12)**, and the reconciliation plan is **CLOSED**
+
+**Operator decision received.** *"Batch 3 walked manually — full chain, trainer through parent,
+all ten screens, nothing broken. PHASES 4-12 ACCEPTED."*
+
+### The ten accepted commits
+
+| Phase | Screen | Commit |
+|---|---|---|
+| 4 | `05` Trainer Schedule | **`5dda019`** |
+| 5 | `06` Trainer Student Roster | **`ca9396e`** |
+| 6a | `07` Trainer Grade Student | **`1c93a4f`** |
+| 6 | `08` Trainer AI Report Generation | **`85e1f35`** |
+| 7 | `29` Management Reports | **`7634c71`** |
+| 8 | `19` Management Student Report | **`d83823f`** |
+| 9 | `32` Parent Reports | **`6146f73`** |
+| 10 | `33` Parent Class Report | **`e5cf572`** |
+| 11 | `30` Parent Dashboard | **`d37c45a`** |
+| 12 | `11` Management Dashboard | **`cca7526`** |
+
+**`docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` is now COMPLETE and CLOSED.** Batch 1 (Phases 0–3)
+was accepted earlier the same day; with Batch 3 accepted, every phase the plan contained has run
+and been accepted. Phase 13 (`01`) was **cut**; `09`, `10`, the two wording editors,
+`/trainer/reports/[reportId]/review` and the 20 unimplemented screens were **never in it**.
+
+### ⚠️ WHAT THE ACCEPTANCE RESTS ON — recorded precisely, because the distinction matters
+
+The Operator's basis is a **manual walkthrough of the full chain at these commits**. Recorded as
+**OPERATOR MANUAL VERIFICATION, POINT-IN-TIME**, on the Operator's own terms:
+
+- it is **NOT a harness pass**;
+- it **does not cover hover, focus or responsive collapse**;
+- it applies **at this commit only** and **does not transfer** to any later change;
+- **the rendered captures on all ten authenticated screens remain `NOT-RUN`** and must never be
+  cited as passing, nor as evidence that a visual regression on these screens would be caught.
+
+This is the same shape as the Phase 0 rail closure and is recorded the same way deliberately.
+
+### The four pre-existing defects, and the distinction the Operator asked to be kept
+
+All four were **found during** Batch 3 and **none was introduced by it**. Each was invisible to
+source review; each is recorded here so the class is not forgotten.
+
+1. **Unlayered-rule loss (colour).** `text-brand-800` on screen 05's `<h3>` had rendered **navy on
+   every build since it was written**: `h1..h4 { color: #1b2b4b }` in `app/globals.css` is
+   **unlayered**, and an unlayered rule outranks every rule in every `@layer`, so the utility was
+   generated, matched, and silently discarded. Fixed narrowly with `text-brand-800!` — an
+   important declaration wins regardless of layer — rather than by moving the heading rule into a
+   layer, which would change the cascade for every heading at once.
+2. **⚠️ UNDEFINED TOKENS — A DISTINCT CLASS, AND THE STANDING CASCADE LESSON DOES NOT COVER IT.**
+   `rounded-control` and `border-hairline` do not exist in `@theme inline`. Tailwind generates a
+   rule only for a class it can resolve, so **no CSS was emitted at all** and screen 06's
+   attendance toggle had been rendering square-cornered and borderless while its source read as
+   though both applied. They were the **only two uses in the repository**.
+   **The difference that matters: in class (1) a rule EXISTS and LOSES; here NO RULE EVER EXISTS,
+   so there is nothing to lose to — and a static cascade audit therefore CANNOT catch it. Only
+   grepping the COMPILED STYLESHEET can.** Both are now recorded as **verified MISS** so the
+   absence is positive evidence rather than an assumption.
+   ▶ **Operator instruction: that compiled-stylesheet check KEEPS RUNNING EVERY PHASE**, in this
+   plan's successors as well. It is not a Batch 3 artefact.
+3. **A live SC 1.4.3 failure carried in a shared primitive.** `text-ink-muted` (`#8a93a8`)
+   measures **3.079:1**, below the 4.5:1 floor for normal-size text, and was live on
+   `PageHeading`'s description and two dashboard surfaces. Two earlier checkpoints had recorded it
+   and worked around it by not using the prop. Re-pointed to `text-ink`; **no token VALUE was
+   redefined** — `--color-ink-muted` is unchanged and still serves placeholders and disabled
+   controls.
+4. **Three surfaces were still on the pre-reference LEGACY scale** — `text-2xl`, `text-xl`,
+   `font-black`, `text-navy-950`, `text-sm`, `rounded-xl` — none of which appears in any frame.
+
+### ⚠️ THE SCREEN 05 NEAR-MISS — **§0.0 DOES NOT OVERRIDE SC 1.4.1**
+
+Recorded on Operator instruction, because it is the sharpest lesson of the batch and it was
+**caught before it shipped, not after**.
+
+Plan §0.0 says that where frame and build differ and no ratified rule speaks, **the frame wins**.
+Screen 05's session card was therefore moved to the frame's deeper `#FCE7F0` fill. That change,
+taken alone and mechanically, would have made the **session-eligibility chip disappear into the
+card** — `bg-brand-100` text on a `bg-brand-100` surface.
+
+That chip is **one of FOUR redundant carriers** of the derived eligibility state: the **word**
+("Completed" / "In session today" / "Not started yet"), a distinct **shape glyph**, the governed
+**reason in prose**, and the **tint**. Losing the tint silently would have reduced four carriers
+to three and eroded **WCAG 2.2 SC 1.4.1 (Use of Colour)** / `GLOBAL_UI_RULES` §7.
+
+**The rule that applies, stated plainly:** *a ratified rule DOES speak here*, so §0.0's second row
+governs — **keep the rule, keep the divergence, cite it**. §0.0's frame-wins default is scoped to
+differences **no ratified rule speaks to**; it is **never** a licence to trade away an
+accessibility guarantee for a colour match. Both the eligibility chip and the "Class" pill were
+moved to the frame's own **white-pill-on-pink** treatment, which satisfies the frame *and* keeps
+the carrier. `Badge` itself was left untouched.
+
+### Two open items CARRIED FORWARD out of the closed plan — Operator instruction, do not lose them
+
+1. **The Phase 6a RUNTIME carry-over re-proof is OWED.** Save a follow-up note on screen `07` and
+   see it appear as the next session's previous focus. Attempted at Phase 6a; reached `CONT-0`
+   (PASS) and failed at `CONT-A0` — the local Supabase stack's connection values could not be
+   captured, which is **`B-STAGE3-2`**, Operator-owned and needing three interactive no-echo
+   passwords. The chain was proven **statically only**, link by link, which is **weaker and does
+   not discharge it**. It backs **`CLAUDE.md` §10 Phase 1 exit condition (c)**.
+2. **RENDERED CAPTURES REMAIN `NOT-RUN` ON ALL TEN AUTHENTICATED SCREENS.** They need a reachable
+   governed database — a `CLAUDE.md` §12 stop-and-ask. The Operator walkthrough above is
+   point-in-time manual verification and **does not substitute for them**.
+
+### Commit / next
+
+Continuity only; no application change. **Next authorized action: write
+`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` — PLANNING ONLY, BUILD NOTHING.** That plan will cross
+governed surfaces the reconciliation plan forbade, and **every such phase needs explicit Operator
+authorization before any code is written.**

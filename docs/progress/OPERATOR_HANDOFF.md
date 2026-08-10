@@ -18,7 +18,11 @@
 
 ---
 
-## ▶ WHAT HAPPENED — BATCH 3 IS COMPLETE
+## ✅ BATCH 3 IS ACCEPTED — and the reconciliation plan is CLOSED
+
+**Operator decision, 2026-08-10:** the full chain was walked manually, trainer through parent, all ten screens, nothing broken. **Phases 4–12 ACCEPTED.** With Batch 1 already accepted, `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` is **COMPLETE and CLOSED**.
+
+⚠️ **That walkthrough is OPERATOR MANUAL VERIFICATION AT THESE COMMITS ONLY — point-in-time. NOT a harness pass. It does NOT cover hover, focus or responsive collapse, and does NOT transfer to a later change. The rendered captures below stay `NOT-RUN`.**
 
 **All ten remaining screen phases of `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` §4 ran and are committed, one commit per phase boundary, none mid-phase.** Batch 3's authorization is now **spent**.
 
@@ -44,7 +48,11 @@
 
 ## ▶ NEXT AUTHORIZED ACTION
 
-**Operator review of Batch 3.** Nothing further in this plan is authorized. `PASS` is this session's **evidence verdict**; **`Accepted` is Operator-set only and has NOT been written or implied.**
+▶ **Write `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` — PLANNING ONLY. BUILD NOTHING.**
+
+That plan addresses a **different** problem from reconciliation: screens that are **functionally incomplete**, not visually drifted. **It crosses governed surfaces the reconciliation plan forbade** — schema, projections, RPCs, server actions — so **every such phase needs explicit Operator authorization before any code is written.**
+
+**Outstanding Operator `Accepted`: none.** Batch 1 and Batch 3 are both accepted.
 
 ---
 
