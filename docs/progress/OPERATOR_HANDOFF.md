@@ -91,13 +91,17 @@ Reported first, as a separate list, then ruled. **Settled — no phase re-opens 
 
 **All LOCAL. Nothing hosted, billable or pushed. No credential ever reaches a session, a file, a log or a report.**
 
-| # | Action |
-|---|---|
-| **1** | **Start the local Supabase stack** and leave it running. Every harness calls `supabase status -o json` and aborts if it is down. **No password** |
-| **2** | ⚠️ **Decide and perform the reset path.** ⛔ **Never `supabase db reset`.** An in-place `--reload` **cannot** clear the four `audit_events` rows — the append-only trigger refuses `postgres` too, and **must not be disabled** (§12). The precedent is **your own `D-0C` ruling**: a bounded LOCAL-only fresh reconstruction re-applying all 12 migrations under **R-1** semantics. ⚠️ **No session may choose or perform this** |
-| **3** | **`npm run fixtures:local`** in your own terminal — prompts **three times, no-echo**. ⚠️ **Never paste a password in either direction; send only the exit code and the verifier verdict** |
-| **4** | **Confirm `verify-local-fixtures.sql` passes, assertion `A19` in particular.** A19 is the one that failed — it is the signal the blocker is genuinely closed |
-| **5** | ✅ *Optional, for Phase 4's roster breadth:* apply `scripts/fixtures/local_fixtures_expansion.sql`. ⚠️ **It already exists** (`P1-T09a`), is **strictly additive and independently appliable**, and supplies **the second Class Session the continuity re-proof needs**. **Apply it AFTER step 4** — the loader refuses `--reload` while expansion rows are present |
+**Run every command from the repository root, in your own terminal. Verified against the scripts themselves, not recalled.**
+
+| # | Command | What it does |
+|---|---|---|
+| **1** | `npx supabase stop --no-backup`<br>`npx supabase start` | ⚠️ **This IS step 2** — the **`D-0C` / `R-1` reconstruction**, your own ratified precedent. `--no-backup` discards the dirty volume, so the database comes back **empty and all migrations re-apply from scratch** — which is the **only** way the four `audit_events` rows go away. ⛔ **Never `supabase db reset`** (§12; it also destroys the three Auth identities). **No password.** Leave the stack running |
+| **2** | `npx supabase status` | Confirms the stack is up. ⚠️ **`CONT-A0` failed precisely because this was down** — every harness and the loader call `supabase status -o json` and abort otherwise. **Do not send me the output**; it contains local keys. Just say "up" |
+| **3** | `npm run fixtures:local` | Loads the **3 synthetic Auth identities + 25 baseline domain rows**. ⚠️ **Prompts three times, no-echo — this is where you enter the passwords.** One per identity (management, trainer, parent). ⛔ **Never paste a password into chat in either direction.** Report **only** the exit code |
+| **4** | *(the loader runs the verifier itself)* | **Confirm it reports the fixture verification passing — assertion `A19` in particular.** A19 is the one that failed. ✅ **A19 green is the signal `B-STAGE3-2` is genuinely closed** |
+| **5** | ✅ *Optional — needed for Phase 4's roster and the continuity re-proof's second session:*<br>`docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc --username=postgres --dbname=postgres -v do_expand=true -v do_expand_cleanup=false < scripts/fixtures/local_fixtures_expansion.sql` | Applies **`P1-T09a`** — 2 trainers, 2 class modules, 3–4 learners each, 2 parents, and **the second Class Session the carry-over re-proof needs**. ⚠️ **STRICTLY AFTER step 4.** Once applied, `npm run fixtures:local -- --reload` **fails closed** — the expansion rows foreign-key the ratified trainer membership under `ON DELETE RESTRICT`. **To undo it, re-run the same command with the two flags swapped** (`do_expand=false`, `do_expand_cleanup=true`) |
+
+⚠️ **Step 1 is not optional and is not `--reload`.** A plain `npm run fixtures:local -- --reload` **cannot succeed** here: `audit_events` is append-only and its `BEFORE DELETE OR UPDATE` trigger refuses **`postgres`** too. **Disabling that trigger is prohibited** — §12 forbids working around a fail-closed refusal by weakening the thing that refused.
 
 **Measured damage:** `reports` 0 → 1 · `audit_events` 0 → 4 · `audit_chain_heads` 0 → 1 · fixture attendance `recorded_by_*` non-NULL → **A19 fails**. **Blast radius:** `readCanonical()` throws before `assertCanonicalPristine`, so **all six disposable-stack harnesses abort** and every `TEMPLATE postgres` clone inherits the dirt.
 
