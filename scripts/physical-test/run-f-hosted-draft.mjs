@@ -28,8 +28,19 @@ import { join } from 'node:path'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 
-const APP = 'https://best-coach-mvp.vercel.app'
-const HOST = 'best-coach-mvp.vercel.app'
+import { resolveHostedAppHost } from '../fixtures/hosted-target-guard.mjs'
+
+// ⚠️ NOT A LITERAL. These were `best-coach-mvp.vercel.app` — the FROZEN
+// demonstration DEPLOYMENT — until the Operator ruling of 2026-08-10 denied it.
+// The hosted guard keyed only on the Supabase project ref and so never covered
+// this file; the deployment and the database are different systems reached by
+// different names.
+//
+// ⚠️ THERE IS NO DEV DEPLOYMENT AND NONE MAY BE INVENTED. Absent configuration
+// means NO TARGET, and this throws rather than falling back — the only host
+// this harness ever knew is the frozen one.
+const HOST = resolveHostedAppHost()
+const APP = `https://${HOST}`
 const DEBUG_PORT = 9422
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const TRAINER_EMAIL = 'trainer.fixture@example.test'

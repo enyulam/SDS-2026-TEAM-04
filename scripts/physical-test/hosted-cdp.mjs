@@ -17,8 +17,19 @@ import { join } from "node:path";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
-export const APP = "https://best-coach-mvp.vercel.app";
-export const HOST = "best-coach-mvp.vercel.app";
+import { resolveHostedAppHost } from "../fixtures/hosted-target-guard.mjs";
+
+// ⚠️ NOT A LITERAL. These were `best-coach-mvp.vercel.app` — the FROZEN
+// demonstration DEPLOYMENT — until the Operator ruling of 2026-08-10 denied it.
+// The hosted guard previously keyed only on the Supabase project ref, so it
+// never saw this file: the deployment and the database are different systems
+// reached by different names, and only one of them was guarded.
+//
+// ⚠️ THERE IS NO DEV DEPLOYMENT AND NONE MAY BE INVENTED. With no configured
+// host this resolves to NO TARGET and throws, which is the intended outcome —
+// a fallback would silently restore the reach the ruling removed.
+export const HOST = resolveHostedAppHost();
+export const APP = `https://${HOST}`;
 const CHROME = process.env.CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 export const IDENTITIES = {

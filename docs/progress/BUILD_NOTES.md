@@ -4581,3 +4581,54 @@ All 21 inspected files parse clean. The defects are **reachability and pre-exist
 ### Commit / next
 
 ⛔ **STOP. Plan Phase 0A is NOT authorized.** Awaiting the Operator, including a decision on the two escalated Vercel-host harnesses.
+
+---
+
+## 2026-08-10 — the inverted-protection generalisation · hosted HOST identity denied (Operator ruling)
+
+- **Track / branch / worktree:** isolation remediation · `develop` · none.
+- **Starting HEAD:** `45d6d1e`.
+- **Migration or schema changes:** **NONE.** No governed surface touched.
+- **Operator decisions received:** the sweep **accepted**; **RULING — DENY the frozen Vercel host**, with a bounded authorization to extend the guard pattern to hosted HOST identity, fail closed with no target, and **invent no dev deployment**.
+
+### 1. ⚠️ THE STANDING LESSON — two failure shapes that both read as green
+
+**(a) A guard can protect the WRONG THING and still pass.** `disposable-stack.mjs`'s `CANONICAL_CONTAINERS` is the never-touch set for teardown and the overlap set for the isolation assertions. Its ten frozen literals meant it **guarded the demonstration stack and left this clone's own containers unguarded** — and its "all canonical containers are still running" legs **passed for a coincidental reason**: the demonstration stack happens to be up. ⚠️ **A passing protection assertion is not evidence the right thing is protected.** Ask what the assertion would do if the protected object vanished; if the answer is "still pass, because something else with that name is present", the assertion is measuring the wrong object. This is the same family as the recorded lessons *a declared class is not evidence it applied* and *a cited source is not evidence the thing is there*.
+
+**(b) ⚠️ OPERATOR-FACING REMEDIATION TEXT IS MORE DANGEROUS THAN A CODE PATH — the generalisation the Operator directed be recorded.** `load-local-fixtures.mjs:903` printed a copy-paste command naming the frozen database. **No guard intercepts a human pasting a command out of an error message.** Every protection this repository has — the hard deny, the fail-closed pin, the derived container names — sits on the *program's* path to the database and is **completely absent** from the path that runs when a person reads an instruction and types it. Text that instructs a human is therefore **the least protected surface in the system**, not an incidental one, and a stale identity there outranks the same staleness in code.
+
+▶ **Binding practice: any emitted string that a human might execute — remediation hints, "run this next" guidance, error-message commands, README and runbook steps — carries the SAME identity discipline as an executable path. Interpolate the resolved value; never hardcode a stack, project, container, host or port.**
+
+**Sweep performed under that rule.** All command-shaped emitted strings across `scripts/`, `server/`, `app/`, `lib/` and `supabase/` were scanned (`docker exec|run|rm`, `psql`, `npm run`, `npx supabase`, `supabase db|start|stop|status|link`) for any hardcoded stack identity — project ids, container names, hosted refs, the Vercel host, and the three port blocks. **50 command-shaped emitted strings scanned · 0 carrying a hardcoded identity.** ⚠️ **The detector was proved discriminating rather than blind**: re-run against the pre-fix file at `5b49490` it flags `load-local-fixtures.mjs:903` and nothing else. A zero result from an unproven detector would be worth nothing.
+
+### 2. ⛔ OPERATOR RULING — the frozen Vercel deployment is DENIED
+
+**`best-coach-mvp.vercel.app` is the frozen demonstration deployment. No harness in this clone may reach it. No retarget is needed because there is no dev deployment to point at.**
+
+⚠️ **Why the existing hosted guard did not already cover this: it is a SECOND IDENTITY, not a second spelling.** `hosted-target-guard` keyed entirely on the Supabase project ref `zjukuffiuzkbiblmnuwl`. **The deployment and the database are different systems reached by different names**, so a harness driving the public URL was invisible to every hosted check — `hosted-cdp.mjs` and `run-f-hosted-draft.mjs` did exactly that, unguarded, while the hosted guard reported green.
+
+**Implemented, bounded to what was authorized:**
+
+- `FROZEN_DEMO_HOST` added to `hosted-target-guard.mjs` as a second **unconditional, non-overridable** constant, mirroring `FROZEN_DEMO_REF`.
+- `denyFrozenHost(value, what)` — **substring and case-insensitive**, running **before** any shape check, so a caller aiming at the frozen deployment is told *that* rather than that their value was well-formed.
+- `resolveHostedAppHost()` — fail-closed pin on `BEST_COACH_HOSTED_APP_HOST`. ⚠️ **Absent configuration yields NO TARGET and throws.** It does not fall back, because **the only host these two harnesses ever knew is the frozen one**, and any fallback would silently restore precisely the reach this ruling removes.
+- `hosted-cdp.mjs` and `run-f-hosted-draft.mjs` now derive `HOST`/`APP` through it. **No dev deployment was invented, and `BEST_COACH_HOSTED_APP_HOST` was deliberately NOT added to `.env.local`** — with none configured, both harnesses are inert, which is the ruled outcome.
+
+### Verification — deny proved from BOTH harnesses, four legs
+
+| Leg | Result |
+|---|---|
+| No host configured (**the real current state**) | **NO TARGET**, fail-closed refusal — both files |
+| Host set to the exact frozen deployment | **HARD DENY** — both files |
+| Obfuscation: `BEST-COACH-MVP.VERCEL.APP` · `https://…/trainer` · `x.…​.evil.test` | **HARD DENY** on all three |
+| **Positive control** — a well-formed non-frozen host | **Accepted** (`https://example.test`), so the deny is discriminating, not blanket |
+
+⚠️ **Both refusals throw at module scope, before any `spawn`, browser launch or network call** — nothing was requested, read or driven on any leg.
+
+- **Regression:** `prove:hosted-target-guard` **PASS=16 · FAIL=0** (its own detector-fires check still confirms "no contact" is a measurement, not an artefact) · `prove-local-target-guard` **31 passed · 0 failed** including the cross-copy character-identity assertion · `tsc` **0** · `eslint` **0** · `node --check` OK on all three changed files.
+- **Re-scan:** `scripts/` live frozen occurrences **17 → 14**, and all fourteen now sit in exactly four files — the two guards and their two deny-proofs. **Zero Vercel-host literals survive outside the guard.** Across the two sessions: **45 → 14**.
+- **No network, no hosted contact, no credential read.** The frozen Supabase project, the frozen local stack and the frozen deployment were **all** untouched.
+
+### Commit / next
+
+⛔ **STOP. Then Plan Phase 0A**, which the Operator will authorize next. No implementation authorization is in force at this entry's close.

@@ -43,10 +43,32 @@
  */
 const FROZEN_DEMO_REF = 'zjukuffiuzkbiblmnuwl'
 
+/**
+ * ⛔ THE FROZEN DEMONSTRATION DEPLOYMENT — PERMANENTLY OFF LIMITS.
+ *
+ * Operator ruling, 2026-08-10. A SECOND identity, not a second spelling of the
+ * one above: the deployment and the database are different systems reached by
+ * different names, and `FROZEN_DEMO_REF` never covered the public host. Two
+ * harnesses drove `best-coach-mvp.vercel.app` directly and no guard saw them,
+ * because everything hosted was keyed on the Supabase ref alone.
+ *
+ * ⚠️ THERE IS NO DEV DEPLOYMENT TO POINT AT, AND NONE MAY BE INVENTED. This
+ * constant exists to REFUSE, not to redirect. A caller with no configured host
+ * gets no target — never a default, never a fallback, never the frozen one.
+ *
+ * Not configurable. Not overridable. No bypass, allow-list or "unless" flag.
+ */
+const FROZEN_DEMO_HOST = 'best-coach-mvp.vercel.app'
+
 /** Supabase project refs are 20 lowercase alphanumeric characters. */
 const REF_SHAPE = /^[a-z0-9]{20}$/
 
+/** A bare hostname: dot-separated lowercase labels, no scheme, no path, no port. */
+const HOST_SHAPE = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
+
 export const VAR_PROJECT_REF = 'BEST_COACH_HOSTED_PROJECT_REF'
+
+export const VAR_APP_HOST = 'BEST_COACH_HOSTED_APP_HOST'
 
 export class TargetRefused extends Error {}
 
@@ -90,6 +112,55 @@ export function resolveHostedProjectRef() {
     )
   }
   return ref
+}
+
+/**
+ * Deny the frozen demonstration DEPLOYMENT anywhere in a supplied value.
+ *
+ * Substring and case-insensitive, for the same reasons as `denyFrozen`: DNS is
+ * case-insensitive, and the host must be refused whether it arrives bare, with
+ * a scheme, with a path, inside an `Origin` header or embedded in a longer
+ * string. Runs BEFORE any shape check, so a caller aiming at the frozen
+ * deployment is told THAT, not that their value was well-formed.
+ */
+export function denyFrozenHost(value, what) {
+  if (typeof value !== 'string') return
+  if (value.toLowerCase().includes(FROZEN_DEMO_HOST)) {
+    throw new TargetRefused(
+      `HARD DENY: ${what} names the FROZEN demonstration deployment ` +
+        `("${FROZEN_DEMO_HOST}"). That deployment belongs to the demonstration workspace, ` +
+        'is off limits to every tool in this repository, and this refusal cannot be disabled. ' +
+        'Nothing was requested, read or driven.',
+    )
+  }
+}
+
+/**
+ * Resolve the hosted application host from the environment. Fail closed.
+ *
+ * ⚠️ NO DEV DEPLOYMENT EXISTS. Absent configuration means NO TARGET — this
+ * throws rather than falling back, because the only host these callers ever
+ * knew is the frozen one, and a fallback would silently restore exactly the
+ * reach this guard was added to remove.
+ */
+export function resolveHostedAppHost() {
+  const raw = process.env[VAR_APP_HOST]
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    throw new TargetRefused(
+      `${VAR_APP_HOST} is not configured, so there is NO hosted application target. ` +
+        'This repository has no development deployment, and one must not be invented. ' +
+        'Refusing rather than falling back — the only host these harnesses ever named is the ' +
+        'FROZEN demonstration deployment. Nothing was requested, read or driven.',
+    )
+  }
+  const host = raw.trim()
+  denyFrozenHost(host, VAR_APP_HOST)
+  if (!HOST_SHAPE.test(host)) {
+    throw new TargetRefused(
+      `${VAR_APP_HOST} is malformed. Supply a bare hostname — no scheme, no path, no port.`,
+    )
+  }
+  return host
 }
 
 /** Reject a loopback target. The local database has its own loader and guards. */
