@@ -156,39 +156,41 @@ export function ParentCanonicalReport() {
       */}
       <div className="max-w-3xl">
         <PageHeading title="Class Report" />
-        <p className="mt-1 text-body leading-6 text-ink">Received {received}</p>
+        <p className="mt-0.5 text-small leading-5 text-ink">Received {received}</p>
       </div>
 
       <section
         className="card overflow-hidden p-0"
         aria-label="Submitted class report"
       >
-        <div className="flex items-center gap-3 border-b border-line px-5 py-4 sm:px-7 sm:py-5">
+        <div className="flex items-center gap-[11px] border-b border-line px-[26px] py-[22px]">
           <IconTile tone="brand" size="large">
             <Icon name="document" size={20} />
           </IconTile>
           <div className="min-w-0">
-            <h2 className="text-card-title font-extrabold text-ink-strong">Class Report</h2>
-            <p className="mt-0.5 text-small text-ink">Submitted {received} · Parent report</p>
+            <h2 className="text-[0.8203125rem] font-extrabold text-ink-strong">Class Report</h2>
+            <p className="mt-0.5 text-[0.703125rem] font-bold text-neutral-on">
+              Submitted {received} · Parent report
+            </p>
           </div>
         </div>
 
-        <div className="grid gap-6 px-5 py-6 sm:gap-7 sm:px-7 sm:py-7">
+        <div className="grid gap-5 px-[26px] py-6">
           {REPORT_PANEL_CONFIG.map((panel) => {
             const presentation = PANEL_PRESENTATION[panel.key];
             return (
-              <article key={panel.key} className="flex items-start gap-4">
+              <article key={panel.key} className="flex items-start gap-[11px]">
                 <IconTile tone={presentation.tone} size="medium">
                   <PanelIcon name={presentation.icon} />
                 </IconTile>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-body font-extrabold text-ink-strong">{panel.label}</h3>
-                  <div className="mt-2 flex gap-2.5">
+                  <h3 className="text-[0.8203125rem] font-extrabold text-ink-strong">{panel.label}</h3>
+                  <div className="mt-[7px] flex gap-[7px]">
                     <span
                       aria-hidden="true"
-                      className="mt-2 size-1.5 shrink-0 rounded-full bg-brand-700"
+                      className="mt-[9px] size-1.5 shrink-0 rounded-full bg-brand-700"
                     />
-                    <p className="text-body leading-7 text-ink">{state.data.panels[panel.key]}</p>
+                    <p className="text-[0.8203125rem] leading-[1.55] text-ink">{state.data.panels[panel.key]}</p>
                   </div>
                 </div>
               </article>

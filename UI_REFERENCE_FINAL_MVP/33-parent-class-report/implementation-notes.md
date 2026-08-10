@@ -209,3 +209,22 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+### UI RECONCILIATION plan Phase 10 — 2026-08-10
+
+Visual reconciliation only against `reference/Parent - Class Report/` (A-056).
+**9 TRUE-DRIFT resolved; 5 REGISTERED-OMISSION preserved, ZERO changed** — two separate lists
+(plan §6.5), and each recorded as SATISFIED BY OMISSION, never as a gap: the "Performance
+Summary" per-dimension grid stays absent (including in softened wording); no "Overall Grade";
+the frame's PROSE RATING ATTRIBUTIONS ("Assessed as Mastered in eye contact…", "currently
+assessed as Developing") are NOT ported (A-052); the "Watch Together" evidence video stays
+omitted (Authority Lock §8.1 — parent evidence projection is OUT of the Final MVP; A-001 is
+ratified but ARMED AND UNACTIVATED and any parent evidence surface is a §12 stop-and-ask); and
+the four panels render the governed submitted narrative with nothing written over it. All five
+verified comment-only — zero render.
+
+RENDERED CAPTURE **NOT-RUN** (authenticated surface; §12 stop-and-ask). NOT-RUN is not PASS.
+
+tsc 0 · eslint 0 · build 0 · route census 17 unchanged · emitted-CSS 9/9 · no governed surface
+touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 10.
+`Accepted` is Operator-set only and has NOT been set.

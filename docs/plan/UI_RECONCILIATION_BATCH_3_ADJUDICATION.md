@@ -496,6 +496,45 @@ Applied to **both** surfaces this component renders — the final-review candida
 
 ---
 
+## PHASE 10 — `33` Parent Class Report
+
+- **Screen / route / component:** `33` · `/parent/students/[studentId]/sessions/[sessionId]/report` · `features/parent/parent-canonical-report.tsx`
+- **Reference:** `reference/Parent - Class Report/` · frozen duplicate SHA-identical (`2aaeb446…`)
+
+### 10.1 `TRUE-DRIFT` RESOLVED — 9
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title | via `PageHeading` — Phase 7 §7.1 | 30px / 800 | 22px / 700 |
+| T2 | Meta line | 12.5px-class quiet, 2px gap | 14px / `leading-6`, 4px | `mt-0.5 text-small leading-5` |
+| T3 | Card header padding / gutter | 22px vertical, 26px sides, 11.25px | 16–20px / 20–28px, 12px | `px-[26px] py-[22px] gap-[11px]` |
+| T4 | Card title | 13.13px / 800 | 17px / 800 | `text-[0.8203125rem]` |
+| T5 | Card meta | 11.25px / 700 quiet | 13px, body ink | `text-[0.703125rem] font-bold text-neutral-on` |
+| T6 | Panel body padding / rhythm | 15px block, 26px sides | 20–28px | `px-[26px] py-6 gap-5` |
+| T7 | Panel gutter | 11.25px | 16px | `gap-[11px]` |
+| T8 | Panel heading | 13.13px / 800 | 14px / 800 | `text-[0.8203125rem]` |
+| T9 | Panel prose + bullet | 13.13px at 1.55, 7.5px gutter | 14px at `leading-7`, 10px | `text-[0.8203125rem] leading-[1.55] gap-[7px] mt-[9px]` |
+
+### 10.2 `REGISTERED-OMISSION` PRESERVED — 5, ZERO CHANGED · **satisfied BY OMISSION, never a gap**
+
+Plan §4 is explicit that the absence of each of these is **`EXPECTED / REQUIRED` at visual acceptance** and must be recorded as satisfied-by-omission. All five verified comment-only in the component — **zero render**.
+
+| # | Preserved | Citation |
+|---|---|---|
+| 1 | **The "Performance Summary" per-dimension grid stays ABSENT** — the already-caught leak `CLAUDE.md` §6 names by name, **including in softened wording** | `CLAUDE.md` §6; Q-27 |
+| 2 | **No "Overall Grade."** The frame's Report Details sidebar is not reconstructed | plan §4 |
+| 3 | **The frame's PROSE RATING ATTRIBUTIONS are not ported.** Its body copy reads *"Assessed as Mastered in eye contact … and Mastering in body language"*, *"currently assessed as Developing"*, *"to progress these skills to the Mastering band"* — explicit rating attribution and taxonomy disclosure | A-052 |
+| 4 | **The "Watch Together" evidence video stays OMITTED.** Authority Lock §8.1 rules the **parent evidence projection OUT of the Final MVP**; A-001 is ratified but **armed and unactivated**, and any parent evidence surface is a **§12 stop-and-ask** | Authority Lock §8.1; `F-EVIDENCE-SCOPE-1` |
+| 5 | **The four panels render the governed submitted narrative and nothing is written over it** | A-021, A-037 |
+
+### 10.3 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 10.4 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 9/9 OK** · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -508,4 +547,5 @@ Applied to **both** surfaces this component renders — the final-review candida
 | 6 | `08` Trainer AI Report Generation | **`85e1f35`** |
 | 7 | `29` Management Reports | **`7634c71`** |
 | 8 | `19` Management Student Report | **`d83823f`** |
-| 9 | `32` Parent Reports | *pending — recorded at the Phase 10 boundary* |
+| 9 | `32` Parent Reports | **`6146f73`** |
+| 10 | `33` Parent Class Report | *pending — recorded at the Phase 11 boundary* |
