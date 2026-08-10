@@ -5057,3 +5057,65 @@ Once Phase 0B/4 landed, that sentence was **false about lesson** — and, worse,
 ### Commit / next
 
 ⛔ **STOP. Phase 7 is `F-S6-REVIEW-1` (Trainer Review & Approve) and the Operator wants its plan reported BEFORE it is built.**
+
+---
+
+## 2026-08-10 — THREE STANDING LESSONS, OPERATOR-RECORDED (development clone, `develop`)
+
+**Scope.** Three lessons the Operator ruled worth generalizing out of the Phases 2–6 batch, recorded here because a progress log may record *that* a lesson was drawn but must never be its sole authority (`CLAUDE.md` §15.7). All three are propagated to `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` §12, which is what a later phase actually opens.
+
+### 1. ⚠️ **A DELTA TABLE IS A READING OF A FRAME, NOT A MEASUREMENT OF THE BUILD**
+
+**Operator-recorded as the strongest result of the batch, and it came from a phase that built nothing.** Plan §6.5 classified screen `07`'s only delta — the rail's bucket counts and per-learner status — as **`NEEDS NEW PROJECTION`**. **Measured at HEAD, the rail already existed**, fed from `getSessionRosterCore`, with each learner's destination resolved from that learner's own attendance and report status.
+
+▶ **Binding on every remaining phase: MEASURE AT HEAD BEFORE ACCEPTING THE PLAN'S CLASSIFICATION.** A plan is written by reading frames against a snapshot of the build; the build moves and the plan does not. Accepting `NEEDS NEW …` without measuring risks building a second copy of something that exists — which is worse than the gap it was meant to close.
+
+⚠️ **The converse matters just as much: do not manufacture a change to make a phase look productive.** Phase 5 delivered a proof instead — that the four hand-authored buckets **partition every status `pg_enum` actually holds**. Nothing had checked that: a ninth `report_status` label would make a present learner **vanish from the counters while still appearing in the list below them**, on the screen a trainer uses to decide who still needs assessing. **The Operator's assessment: that proof is worth more than the change would have been.**
+
+▶ **Same family as the ruling that a procedural plan cannot add a visible element the ratified frame lacks (plan §6.1a).** In both, a planning artefact was treated as authority over something it merely describes.
+
+### 2. ⚠️ **A SEARCH IS EVIDENCE ABOUT THE CODE ONLY ONCE IT IS PROVEN DISCRIMINATING** — three mis-scoped searches, one root, three directions
+
+| | Search | Reported | Truth |
+|---|---|---|---|
+| **false MISSING** | emitted-CSS grep at the authored precision | 5 of 5 classes `NOT EMITTED`, including `text-[1rem]` | all five emitted; **the minifier rewrites the value** |
+| **false FAIL** | `P5-5` region regex bounded by the first `\n}\n` | the absent-learner predicate is missing | it was three lines below; the regex had captured **only the parameter list** |
+| **false VIOLATION** | `P6-4` written `/Overall Grade/i` | an Overall Grade row is rendered | it matched the screen's **own sentence saying the grade is deliberately NOT shown** |
+
+▶ **The third is the A-052 failure exactly, in a new place:** a bare keyword match rejects legitimate prose, which is why A-052 prohibits that shape for the rating-label guard. **A screen that EXPLAINS an omission necessarily names it.**
+
+**All three now carry a leg that proves the search itself**: `P5-5b` (the extracted region really is the rail), `P6-4b` (the row matcher finds a row that IS rendered), and the CSS checker normalizes the minifier's rewrites and **prints the emitted declaration block** so a human sees what was actually found.
+
+### 3. ⚠️ **THE MINIFIER ALSO STRIPS THE LEADING ZERO — the FOURTH facet, folded into its entry**
+
+Per Operator instruction this is **folded into the third-instance entry** for *the stored representation is not the authored one*, alongside **six-decimal rounding** (`0.8203125rem` → `.820313rem`), **`search_path=""`** (the catalogue stores the quotes) and **the encrypted env envelope**.
+
+**`0.78125rem` is stored `.78125rem`**, and `.text-body{font-size:.875rem}` sits in the same stylesheet as standing evidence. ▶ **When you verify against a stored artefact, verify against ITS representation, not yours.**
+
+### 4. ✅ **THE RIGHT RESPONSE TO A FAIL-CLOSED REFUSAL — recorded as the pattern**
+
+`P4-4` read `observations.follow_up_notes` **directly** as `authenticated` and got **`permission denied for table observations`**.
+
+**The refusal was right and the leg was wrong.** `authenticated` holds **no table grant** on `observations` — deliberate deny-by-default (A-030: *privilege and policy are separate layers*) — and `getSessionRosterCore` reads the carry-over through **`assessment_get_trainer_observation`**, never the table.
+
+⚠️ **Granting `SELECT` would have weakened the thing that refused**, which `CLAUDE.md` §12 names explicitly. ▶ **The pattern: when a governed refusal blocks a proof, re-point the proof at the path the APPLICATION actually uses.** Reading through the RPC proves the boundary where it really lives, on the real read path — **strictly stronger evidence than the leg that was refused**, not a workaround for it.
+
+**Files changed:** `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` §12, this log. **Governed surfaces:** none. **Database:** untouched.
+
+---
+
+## 2026-08-10 — THE PHASE 6a CARRY-OVER PROOF, RE-RUN ON THE CODE AS IT STANDS
+
+**Operator instruction: re-run it BEFORE the new write path, because Phases 2–6 touched the roster surface after it was discharged.** §9.3 rule 1's intent is that it precede the **new write path**, not that it be run once ever.
+
+**`npm run test:continuity` — `PASS`, 5 legs, 0 failures, on HEAD `cc2b094` plus the uncommitted §6 amendment.**
+
+- `CONT-0` ⚠️ **NON-VACUITY** — the earlier session's observation carries a **non-empty** follow-up note (**129 chars**). Without this the three legs below would pass over an empty column.
+- `CONT-A0` an **ADMIN-MINTED** trainer session was established. ⚠️ **Recorded verbatim as such — it is NOT a sign-in proof**; password sign-in remains `NOT-RUN` and belongs to the Operator.
+- `CONT-1` the earlier session's follow-up note surfaces **EXACTLY** as the later session's previous focus.
+- `CONT-3` all 2 students without a prior observation carry `previousSessionFocus = null`.
+- `CONT-4` the earlier session carries no previous focus — **continuity flows forwards only**.
+
+⛔ **THIS DISCHARGES NOTHING ABOUT `F-S6-REVIEW-1`, AND `F-S6-REVIEW-1` WILL DISCHARGE NOTHING ABOUT THIS** (plan §9.3 rules 2 and 4). They touch the same column and are **different claims**: this proves a note **carries forward to the next session**; that will prove the review surface **loads it into an editable field and can save it back**. Two verdicts, recorded separately.
+
+**Database:** read-only; no governed count moved. **Commit:** with the F-S6-REVIEW-1 work.
