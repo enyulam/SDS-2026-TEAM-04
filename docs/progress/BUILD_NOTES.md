@@ -5544,3 +5544,60 @@ Also corrected: this suite's header claimed a **ROLLBACK it does not perform**, 
 ### Counts
 
 `tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`npm run prove:hero-all` 13/13 `PASS`** (prove-12 registered in the sweep per §12 item 17) · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. **`.env.local` not touched.**
+
+---
+
+## 2026-08-11 — **THE `/parent` EMPTY STATE WAS WEARING ERROR LANGUAGE**
+
+**Track:** post-hero defect fixes, fix 2 of 2. **Branch:** `develop`. **Operator-directed after diagnosis.** **Starting HEAD:** `46310b9`.
+
+### The defect
+
+`/parent` rendered **"Family view unavailable — This family view cannot be shown right now. Try again later."**
+
+Measured, the read had **SUCCEEDED**: `getParentAvailability` returned **`linked_unavailable`**, a real governed state meaning **the learner is linked and no report has been published yet**. The failure path (`StatePanel`, `state.kind === "failed"`) never ran.
+
+⚠️ **"Try again later" was the worst part — it told a parent to retry something that will never change by waiting.** What ends the wait is a **person**: management completing its final review and publishing.
+
+▶ **Third instance of the rule ratified 2026-08-11 (plan §12 item 16): an omission's stated reason must say whether it ENDS WHEN DATA ARRIVES or NEVER ENDS.** This one said **neither**, and implied the wrong one — a transient fault, when the truth is a pending governed act by another person.
+
+### ⚠️ The other branch had the same defect, and was corrected with it
+
+The same expression's `else` branch read *"When a report is ready for **your linked learner**, it will appear here."* But `none_yet` is produced by **`listLinkedStudents` returning ZERO** — ⛔ **the copy asserted the very link whose absence produced the state.** `C-4c` confirms that from the projection source rather than from my reading of it.
+
+### The replacement
+
+| State | Says |
+|---|---|
+| `linked_unavailable` | **"No report published yet"** — the learner **is** linked; a report appears once **management** has completed its final review and **published** it; **nothing is wrong and there is nothing to retry** |
+| `none_yet` | **"No learner linked to this account yet"** — **management** creates the link; once it exists, published reports appear here |
+
+**Both name the ACTOR and the EVENT that ends the wait**, so neither implies time will do it.
+
+⛔ **No governance boundary moved.** Neither string reveals whether a report exists in any pre-submitted state, nor exposes a rating, a panel or a lifecycle status (Q-27, A-038). A parent still learns only whether something has been **published** to them. `C-5` scans the user-facing strings for all four disclosure classes, with `C-5b` proving the extraction non-empty.
+
+### ⚠️ Scope collision, surfaced rather than resolved silently
+
+`/parent` renders `ParentDashboard` — **screen `30`**, which the same instruction also placed off limits. I read the explicit, verbatim-quoted copy instruction as governing over the general "don't touch 30", since that general instruction was given to stop me treating `30`'s unbuilt state as a defect, not to bar a correction the Operator ordered. **The change is confined to two strings and a comment; no layout, no card, no Q-27 surface, no portal-completion work.** Flagged in the report for correction if that reading is wrong.
+
+### ⛔ MY OWN DEFECT: THE PROOF PASSED ON A FILE THAT DID NOT COMPILE
+
+The explanatory comment was first placed as `{/* … */}` **directly inside a `? :` branch**, where JSX permits a single expression and **not** a children-position comment. **`prove:hero-13` passed all 17 legs** — the new strings were present, the old ones gone — against a file **`tsc` rejected with six errors.**
+
+▶ **A PROOF THAT READS TEXT CANNOT TELL YOU THE TEXT IS REACHABLE.** ⚠️ Same family as the template-literal defect two days of work ago, and the reason that one outranked everything: **the instrument agreed with itself while the thing under test was inert.** Recorded in the suite header rather than patched with a compile step, because adding one there would hide the general point: **a source-scan suite is never sufficient alone, and `tsc`/`build` are the gate that catches it.**
+
+⚠️ **A second, dumber defect in the same repair:** my scripted restructure wrote `s[:start] + new` and **never re-appended the tail**, truncating the file. Caught immediately by `tsc`; restored with `git checkout --` and redone with the edit tool. ▶ **A scripted edit that reassembles a file must account for every byte of it**, and the cheap guard is to re-verify length or compile immediately — not to read the diff and be satisfied.
+
+### Verification — `npm run prove:hero-13`, 17 legs, `PASS`
+
+`C-1`/`C-1b` non-vacuity (the stripped component is real and the branch under test still present) · `C-2` the three outage strings gone · `C-3a…d` the replacement names condition, link, actor+event, and no-retry · `C-4`/`C-4b`/`C-4c` the `none_yet` branch corrected and **confirmed against the projection** · `C-5` four disclosure scans with a discrimination leg.
+
+⚠️ Comments are stripped first — this file now **quotes the old copy verbatim** to explain its removal, so an unstripped scan would find the exact strings it asserts are gone. **Seventh instance of plan §12 item 13, and the first where the prose quotes the thing under test word for word.**
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`npm run prove:hero-all` 14/14 `PASS`** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. **`.env.local` not touched. Screens `11` and `30`'s layout, cards and Q-27 omission untouched.**
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on every authenticated surface — this is a source-level proof and does not change that.

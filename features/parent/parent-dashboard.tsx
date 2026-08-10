@@ -149,13 +149,43 @@ export function ParentDashboard() {
         </>
       ) : (
         <section className="card px-6 py-12 text-center" role="status">
+          {/*
+            ⚠️ BOTH BRANCHES ARE EMPTY STATES, NOT ERRORS, AND THE COPY NOW SAYS SO.
+            The failure path is `state.kind === "failed"` above, which renders
+            `StatePanel`. Reaching here means `getParentAvailability` SUCCEEDED and
+            returned a real governed state.
+
+            ⛔ The previous heading was "Family view unavailable", with a body saying
+            the view could not be shown and inviting a retry. That is OUTAGE language.
+            The actual state is: the learner IS linked, and no report has been
+            published yet. The retry invitation was the worst part — it told a parent
+            to keep retrying something that will never change by waiting.
+
+            ▶ Third instance of the rule ratified 2026-08-11 (plan §12 item 16): AN
+            OMISSION'S STATED REASON MUST SAY WHETHER IT ENDS WHEN DATA ARRIVES, OR
+            NEVER ENDS. This one said neither and implied the wrong one — a transient
+            fault, when the truth is a pending governed act by another person. Both
+            branches now name the actor and the event that ends the wait.
+
+            ⛔ NO GOVERNANCE BOUNDARY MOVES HERE. Neither string reveals whether a
+            report exists in any pre-submitted state, and neither exposes a rating, a
+            panel or a lifecycle status (Q-27, A-038). A parent still learns only what
+            a parent may learn: whether something has been PUBLISHED to them.
+
+            ⚠️ `none_yet` means NO LINKED LEARNER AT ALL — `listLinkedStudents`
+            returned zero. Its old copy said "your linked learner", asserting the very
+            link whose absence produced the state. Same defect class, same expression,
+            corrected together.
+          */}
           <h2 className="text-[1rem] font-semibold text-ink-strong">
-            {availability === "linked_unavailable" ? "Family view unavailable" : "No reports available yet"}
+            {availability === "linked_unavailable"
+              ? "No report published yet"
+              : "No learner linked to this account yet"}
           </h2>
           <p className="mx-auto mt-1 max-w-xl text-[0.75rem] leading-5 text-ink">
             {availability === "linked_unavailable"
-              ? "This family view cannot be shown right now. Try again later."
-              : "When a report is ready for your linked learner, it will appear here."}
+              ? "Your learner is linked to this account. A report appears here once your centre’s management has completed its final review and published it. Nothing is wrong and there is nothing to retry — this page will show the report when that happens."
+              : "Your centre’s management links a learner to your account. Once that link exists, any report they publish will appear here."}
           </p>
         </section>
       )}
