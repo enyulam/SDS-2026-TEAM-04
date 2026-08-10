@@ -14,6 +14,8 @@
 // Run: node scripts/fixtures/prove-local-target-guard.mjs
 // =====================================================================
 
+import { readFileSync } from 'node:fs'
+
 import {
   LocalTargetRefused,
   VAR_LOCAL_PROJECT_ID,
@@ -125,6 +127,57 @@ refuses(
   withVar('BEST-COACH-MVP', resolveLocalProjectId),
   'HARD DENY',
 )
+
+console.log('\n6. NO DRIFT between the script guard and the production guard\n')
+
+// ⚠️ THE GUARD EXISTS ONCE PER RUNTIME, AND THAT IS STATED RATHER THAN HIDDEN.
+// Scripts run under plain Node and cannot import TypeScript; the production
+// module ships inside the Next.js server bundle and must not depend on
+// `scripts/`, which is not deployed. So there are two files.
+//
+// They cannot silently diverge, because this leg reads BOTH as text and
+// asserts the two load-bearing values are character-identical. A future edit
+// that weakens one and forgets the other FAILS HERE.
+{
+  const scriptSrc = readFileSync(new URL('./local-target-guard.mjs', import.meta.url), 'utf8')
+  const prodSrc = readFileSync(new URL('../../server/platform/local-target.ts', import.meta.url), 'utf8')
+
+  const grab = (src, name, re) => {
+    const m = re.exec(src)
+    if (!m) throw new Error(`could not read ${name}`)
+    return m[1]
+  }
+  const pairs = [
+    [
+      'the frozen demonstration project id',
+      /const FROZEN_DEMO_PROJECT_ID = ["']([^"']+)["']/,
+    ],
+    ['the project-id shape pattern', /const PROJECT_ID_SHAPE = \/(.+?)\/;?\s*$/m],
+    ['the environment variable name', /VAR_LOCAL_PROJECT_ID = ["']([^"']+)["']/],
+  ]
+  for (const [label, re] of pairs) {
+    const a = grab(scriptSrc, `${label} (script)`, re)
+    const b = grab(prodSrc, `${label} (production)`, re)
+    if (a === b) {
+      console.log(`  PASS  ${label} is identical in both guards — "${a}"`)
+      passed += 1
+    } else {
+      console.log(`  FAIL  ${label} DRIFTED — script "${a}" vs production "${b}"`)
+      failed += 1
+    }
+  }
+
+  // The production guard must also still be the ONLY place production code
+  // can obtain a local container name.
+  const literal = /["'`]supabase_db_[a-z0-9]/.test(prodSrc.replace(/^\s*[/*].*$/gm, ''))
+  if (literal) {
+    console.log('  FAIL  the production guard carries a literal container name outside its comments')
+    failed += 1
+  } else {
+    console.log('  PASS  the production guard derives every container name; no literal outside comments')
+    passed += 1
+  }
+}
 
 if (saved === undefined) delete process.env[VAR_LOCAL_PROJECT_ID]
 else process.env[VAR_LOCAL_PROJECT_ID] = saved

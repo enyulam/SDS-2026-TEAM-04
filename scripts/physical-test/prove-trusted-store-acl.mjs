@@ -24,7 +24,15 @@
 
 import { spawnSync } from 'node:child_process'
 
-const CONTAINER = 'supabase_db_best-coach-mvp'
+import { resolveLocalTarget } from '../fixtures/local-target-guard.mjs'
+
+// ⚠️ NOT A LITERAL. This proof reaches a database as `postgres` to read
+// catalogue ACLs, so it is exactly the class of tool that must never be able
+// to name the frozen demonstration container. It was
+// `'supabase_db_best-coach-mvp'` until 2026-08-10 — which, once this clone
+// took its own project id, pointed this proof at the DEMONSTRATION database
+// and would have reported ITS ACLs as though they were this repository's.
+const { dbContainer: CONTAINER } = resolveLocalTarget()
 
 /** The four owner-only functions R-27 governs. */
 const OWNER_ONLY = [

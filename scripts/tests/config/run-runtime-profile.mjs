@@ -13,7 +13,7 @@
 // WHAT IT PINS. Operator ruling R-C2-5 authorizes EXACTLY TWO Supabase
 // runtime profiles and no others:
 //
-//   default        -> project best-coach-mvp,    local API port 54321
+//   default        -> this repository own stack, local API port from config.toml
 //   f17-disposable -> project bc-f17-disposable, local API port 55421
 //
 // and requires the disposable port to be acceptable ONLY when the
@@ -52,7 +52,37 @@ const pass = (id, message) => console.log(`PASS ${id}${message ? ' -- ' + messag
 
 const PUBLISHABLE = 'sb_publishable_synthetic_shape_fixture'
 const SECRET_SHAPED = 'sb_secret_synthetic_shape_fixture'
-const CANONICAL_URL = 'http://127.0.0.1:54321'
+
+// ---------------------------------------------------------------------
+// ⚠️ THE CANONICAL PORT IS READ FROM supabase/config.toml, NOT HARDCODED.
+// ---------------------------------------------------------------------
+// R-C2-5 names "local API port 54321" by number because exactly one
+// workspace existed when it was written. Operator ruling 2026-08-10: THAT
+// NUMBER IS WORKSPACE-SCOPED. The ruling's binding content is the PINNING —
+// the default profile authorizes this repository's own stack and nothing
+// else — not the digits it happened to be pinned to.
+//
+// So this suite now asserts the intent in any workspace: whatever port this
+// repository's own `supabase/config.toml` declares is the canonical one, and
+// the closed two-entry allow-list must carry exactly that port plus the
+// disposable port. A clone that moves its stack stays conformant; a module
+// that drifts away from its own stack still fails.
+//
+// This is deliberately NOT a relaxation. Reading config.toml is a TIGHTER
+// assertion than a literal was: it now fails if `public-config.ts` and the
+// stack it is supposed to reach ever disagree — a defect the hardcoded
+// number could not detect at all.
+const CANONICAL_API_PORT = (() => {
+  const toml = readFileSync(join(ROOT, 'supabase', 'config.toml'), 'utf8')
+  const api = /^\[api\]$([\s\S]*?)^\[/m.exec(toml)
+  const port = api && /^port\s*=\s*(\d{4,5})\s*$/m.exec(api[1])
+  if (!port) {
+    throw new Error('Could not read the [api] port from supabase/config.toml — refusing to guess it.')
+  }
+  return port[1]
+})()
+
+const CANONICAL_URL = `http://127.0.0.1:${CANONICAL_API_PORT}`
 const DISPOSABLE_URL = 'http://127.0.0.1:55421'
 const HOSTED_URL = 'https://syntheticprojectref.supabase.co'
 
@@ -153,7 +183,7 @@ accepts(
   { url: CANONICAL_URL, key: PUBLISHABLE },
   'local',
   CANONICAL_URL,
-  'the profile variable is ABSENT, which is the default profile: the canonical local API port 54321 is accepted exactly as before',
+  `the profile variable is ABSENT, which is the default profile: the canonical local API port ${CANONICAL_API_PORT} is accepted exactly as before`,
 )
 
 accepts(
@@ -161,7 +191,7 @@ accepts(
   { profile: 'default', url: CANONICAL_URL, key: PUBLISHABLE },
   'local',
   CANONICAL_URL,
-  'the default profile named explicitly accepts the canonical local API port 54321',
+  `the default profile named explicitly accepts the canonical local API port ${CANONICAL_API_PORT}`,
 )
 
 accepts(
@@ -211,10 +241,10 @@ rejects(
   'T-P8',
   { profile: 'f17-disposable', url: CANONICAL_URL, key: PUBLISHABLE },
   'E_PUB_PROFILE_TARGET_CANONICAL',
-  'the canonical port 54321 while the disposable profile is active — the disposable harness can never reach the canonical stack',
+  `the canonical port ${CANONICAL_API_PORT} while the disposable profile is active — the disposable harness can never reach the canonical stack`,
 )
 
-// (3) any local port other than 54321 or 55421, under EITHER profile.
+// (3) any local port other than the canonical one or 55421, under EITHER profile.
 rejects(
   'T-P9',
   { url: 'http://127.0.0.1:3000', key: PUBLISHABLE },
@@ -348,9 +378,9 @@ rejects(
 // IPv6 loopback keeps working on both profiles.
 accepts(
   'T-P36',
-  { url: 'http://[::1]:54321', key: PUBLISHABLE },
+  { url: `http://[::1]:${CANONICAL_API_PORT}`, key: PUBLISHABLE },
   'local',
-  'http://[::1]:54321',
+  `http://[::1]:${CANONICAL_API_PORT}`,
   'the IPv6 loopback spelling on the canonical port under the default profile',
 )
 accepts(
@@ -417,15 +447,27 @@ const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
   const id = 'T-P40'
   // The accepted-port set must be a closed literal pair, not a range, a
   // pattern or an environment-supplied value.
+  // The canonical entry is the port this repository's own config.toml
+  // declares — read, not assumed. The disposable entry stays a fixed literal
+  // because the disposable stack is created by this repository at a pinned
+  // port rather than declared in config.toml.
   const ports = [...code.matchAll(/["'](\d{4,5})["']/g)].map((match) => match[1])
-  const unexpected = ports.filter((port) => port !== '54321' && port !== '55421')
-  const hasBoth = ports.includes('54321') && ports.includes('55421')
+  const unexpected = ports.filter((port) => port !== CANONICAL_API_PORT && port !== '55421')
+  const hasBoth = ports.includes(CANONICAL_API_PORT) && ports.includes('55421')
   if (!hasBoth) {
-    fail(id, 'the module does not carry both authorized port literals')
+    fail(
+      id,
+      `the module does not carry both authorized port literals (expected the config.toml [api] port ` +
+        `${CANONICAL_API_PORT} and the disposable port 55421)`,
+    )
   } else if (unexpected.length > 0) {
     fail(id, `the module carries an unexpected port literal: ${[...new Set(unexpected)].join(', ')}`)
   } else {
-    pass(id, 'exactly two port literals appear in the module — 54321 and 55421 — and no other port is named')
+    pass(
+      id,
+      `exactly two port literals appear in the module — ${CANONICAL_API_PORT}, read from ` +
+        'supabase/config.toml, and 55421 — and no other port is named',
+    )
   }
 }
 

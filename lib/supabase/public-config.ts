@@ -30,8 +30,8 @@
  * The `default` profile is what EVERY existing caller gets, because it is what
  * an ABSENT profile variable resolves to. Nothing about the normal local or
  * hosted configuration is changed, widened or softened by this module: a local
- * target is still accepted on port 54321 and only 54321 unless the disposable
- * profile is explicitly active, and a hosted `https://*.supabase.co` target is
+ * target is still accepted on the canonical port and only that port unless the
+ * disposable profile is explicitly active, and a hosted `https://*.supabase.co` is
  * still accepted exactly as before.
  *
  * WHERE THE DECISION LIVES, AND WHY IT LIVES HERE.
@@ -41,7 +41,7 @@
  * the only thing that makes a variable reach a browser bundle in this
  * framework, so the profile is STRUCTURALLY unreadable in the browser: in any
  * client context the expression below evaluates to `undefined` and the profile
- * therefore resolves to `default`, which authorizes port 54321 and NOTHING
+ * therefore resolves to `default`, which authorizes the canonical port and NOTHING
  * else. The disposable port can only ever be authorized by a value present in
  * a SERVER-SIDE CHILD-PROCESS ENVIRONMENT.
  *

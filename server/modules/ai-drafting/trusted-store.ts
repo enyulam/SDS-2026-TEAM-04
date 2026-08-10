@@ -31,7 +31,24 @@
 
 import { spawn } from "node:child_process";
 
-const CONTAINER = "supabase_db_best-coach-mvp";
+import { resolveLocalTarget } from "@/server/platform/local-target";
+
+// ⚠️ NO LITERAL CONTAINER NAME. Resolved through the guard at the point of
+// use — see `server/platform/local-target.ts`.
+//
+// This line was `const CONTAINER = "supabase_db_best-coach-mvp"` until
+// 2026-08-10. That was the single most dangerous line in this clone: the
+// demonstration workspace's stack is still running and still owns those
+// containers, so once this repository took its own project id the literal
+// named the FROZEN demonstration database. A draft generated here would have
+// been `docker exec`'d into it as `postgres` and written a governed
+// `report_version` row there.
+//
+// Resolution is LAZY, inside `storeDraft`, and that is load-bearing: the
+// hosted deployment imports this module through `trusted-store-transport`
+// but never runs the docker path and has no `BEST_COACH_LOCAL_PROJECT_ID`.
+// Resolving at module scope would crash production on a variable production
+// does not need.
 
 export interface StoreDraftRequest {
   /** The VERIFIED auth user id (auth.getUser().user.id) — never client-supplied. */
@@ -133,8 +150,12 @@ export class LocalTrustedDraftStore implements TrustedDraftStore {
   }
 
   storeDraft(request: StoreDraftRequest): Promise<StoreDraftResult> {
+    // Hard-deny of the frozen demonstration project, then the fail-closed
+    // positive pin, then the DERIVED container name — all before any argv is
+    // built and long before `docker` is spawned.
+    const container = resolveLocalTarget().dbContainer;
     const args = [
-      "exec", "-i", CONTAINER, "psql", "--no-psqlrc", "--username=postgres",
+      "exec", "-i", container, "psql", "--no-psqlrc", "--username=postgres",
       `--dbname=${this.database}`, "--quiet",
       "-v", `bc_sub=${request.authUserSub}`,
       "-v", `bc_rid=${request.reportId}`,
