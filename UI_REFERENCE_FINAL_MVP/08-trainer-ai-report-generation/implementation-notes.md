@@ -400,3 +400,71 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+### UI RECONCILIATION plan Phase 6 (`F-UI-DRIFT-1` bucket (c)) — 2026-08-10
+
+```
+Timestamp (Asia/Singapore):    2026-08-10
+Source branch:                 develop (DEVELOPMENT CLONE)
+Starting commit:               1c93a4f
+Screen ID:                     08
+Existing route audited:        Yes. Route unchanged. Route census 17, unchanged.
+Components preserved:          components/ui/* byte-unchanged. REPORT_PANEL_CONFIG and every
+                               non-happy-path branch byte-unchanged in behaviour.
+Components replaced/created:   None.
+DTO and port changes:          NONE.   Fixture changes: NONE.   CSS: none.
+Vocabulary dependencies:       None new.
+Governance blockers:           NEW-QUESTION: none. INCOMPLETE: none.
+
+SCOPE:                         Visual reconciliation ONLY against
+                               UI_REFERENCE_FINAL_MVP/reference/Trainer - AI Report
+                               Generation/ (A-056). The .html export was read for VALUES ONLY.
+
+WHAT THIS FRAME LEAVES COMPARABLE:
+                               MOST OF THIS FRAME IS GOVERNANCE-BLOCKED, and that is the
+                               phase's defining fact. Its title block, its third panel heading,
+                               its Report Details rows, its four-tile Performance Summary, its
+                               whole action stack and its evidence uploader are ALL registered
+                               divergences. Only the geometry and type of the surviving regions
+                               were reconciled.
+
+TRUE-DRIFT RESOLVED:           13. Full table: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md
+                               Phase 6 section 6.2.
+
+REGISTERED-OMISSION PRESERVED: 10, ZERO CHANGED - D1 not a term report and no "Parent copy";
+                               D2 OD-4 canonical panel headings, NOT the frame's "Areas to
+                               Grow"; D3 evidence region inert with a reason and NO uploader,
+                               format or size limit invented (the Trainer IS the ruled
+                               uploader; the path is UNBUILT, not undecided); D4 no Lesson or
+                               Term rows; D5 no "Overall Grade"; D6 ALL NINE governed snapshots
+                               rather than the frame's arbitrary four; D7 no "Confirm & Submit"
+                               and no "Save as draft" - the Trainer approves and does not
+                               publish; D8/D9 rails are Phase 0; D10 the drafting, failure-and-
+                               retry, nine-rating-refusal, empty and disabled states ALL
+                               SURVIVE - no branch removed, only heading type moved.
+                               VERIFIED TWO WAYS: each divergence comment intact, AND every
+                               prohibited frame string ("Term Report", "Parent copy", "Areas to
+                               Grow", "Overall Grade", "Confirm & Submit", "Save as draft",
+                               "500MB", "MP4") grepped in the component and found ONLY inside
+                               those comments, NEVER in rendered JSX.
+                               Reported as a SEPARATE list from TRUE-DRIFT (plan 6.5).
+
+Browser viewport:              n/a - see below.
+Before/After screenshot:       NOT CAPTURED.
+                               *** RENDERED CAPTURE IS **NOT-RUN**, WITH ITS REASON. ***
+                               Screen 08 is AUTHENTICATED; reaching a governed database here is
+                               a CLAUDE.md 12 stop-and-ask no current authorization carries. No
+                               capture manufactured; no hosted or paid service contacted.
+                               NOT-RUN is not PASS.
+                               ALSO NOT CAPTURED: each non-happy-path state as its own view,
+                               which the build plan asks for. Their EXISTENCE is verified in
+                               source; their APPEARANCE is not.
+Validation:                    tsc 0 - eslint 0 - build 0 - route census 17 UNCHANGED
+                               emitted-CSS verification 14/14 OK
+                               reference.png SHA-256 3160524f... verified UNCHANGED.
+                               No governed surface touched. No dependency added.
+Ending commit:                 recorded in docs/progress/STATUS.md and in the adjudication
+                               Commits table (filled one phase late).
+Acceptance status:             PASS is this session EVIDENCE verdict only.
+                               Accepted is OPERATOR-SET ONLY and has NOT been set.
+```

@@ -286,6 +286,58 @@ Fixed with a new **`.form-field.notes-field`** modifier, mirroring the ratified 
 
 ---
 
+## PHASE 6 — `08` Trainer AI Report Generation
+
+- **Screen / route / component:** `08` · `/trainer/reports/[reportId]/generate` · `features/trainer/trainer-draft-generation.tsx`
+- **Reference:** `reference/Trainer - AI Report Generation/` · frozen duplicate SHA-identical (`3160524f…`)
+- ⚠️ **The largest register in the plan — 10 entries, read before comparing.**
+
+### 6.1 What this frame actually leaves comparable
+
+**Most of this frame is governance-blocked**, and that is the phase's defining fact rather than an inconvenience. The frame's title block, its third panel heading, its Report Details rows, its four-tile Performance Summary, its whole action stack and its evidence uploader are **all** registered divergences. What remains comparable is the **geometry and type** of the surviving regions — the draft card, the four panel blocks, the Report Details list, the nine-tile summary and the submit panel — and that is what was reconciled.
+
+### 6.2 `TRUE-DRIFT` RESOLVED — 13
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title | 22px / 700 | 30px / 800 (+ inert tracking) | `text-[1.375rem] font-bold` |
+| T2 | Breadcrumb | 11.5px / 500 | 13px | `text-[0.71875rem] font-medium` |
+| T3 | Right rail width | 300px | 336px | `20rem` |
+| T4 | Draft card header | 22px/26px padding, 11.25px gutter | 20px/24px, 14px | `px-[26px] py-[22px] gap-3` |
+| T5 | Draft card title | 13.13px / 800 | 17px / 800 | `text-[0.8203125rem]` |
+| T6 | Draft card meta | 11.25px / 700 | 13px / 600 | `text-[0.703125rem] font-bold` |
+| T7 | Panel block padding / gutter | 15px · 11.25px | 20–24px · 16px | `px-[26px] py-[15px] gap-[11px]` |
+| T8 | Panel heading | 13.13px / 800 | 14px / 800 | `text-[0.8203125rem]` |
+| T9 | Panel prose + bullet | 13.13px at 1.55, 7.5px gutter, 5.63px dot | 14px at `leading-7`, 10px gutter | `text-[0.8203125rem] leading-[1.55] gap-[7px] mt-[9px]` |
+| T10 | Panel supporting line | 11.5px-class quiet type | 13px at `leading-6` | `text-[0.71875rem] leading-5` |
+| T11 | Evidence card heading / sub | 16px / 600 · 12px / 400 | 17px / 800 · 13px | `text-[1rem] font-semibold` · `text-[0.75rem]` |
+| T12 | Report Details + Performance Summary | heading 15px / 600 · rows 12px · summary label 12px / 600 at `0.48px` · tile label and value | 17px / 800 · 14px · 11px / 800 at `0.12em` · 11px / 14px | moved to the frame's values |
+| T13 | Submit panel | 18px radius · heading 15px / 600 · body 11.5px / 400 · actions 13.5px / 12.5px at 600 | 20px · 17px / 800 · 13px · 14px / 800 | `rounded-[18px]`, `text-[0.9375rem] font-semibold`, `text-[0.71875rem]`, actions `rounded-[11px]` at 13.5px / 12.5px |
+
+### 6.3 `REGISTERED-OMISSION` PRESERVED — 10, ZERO CHANGED
+
+Verified two ways: each divergence comment is intact, **and** every prohibited frame string was grepped for in the component and found **only inside those comments — never in rendered JSX**.
+
+| # | Preserved | Citation |
+|---|---|---|
+| D1 | **Not a term report.** The frame's *"Term Report — Alicia Gomez · Public Speaking · Term 1, 2035 · Parent copy"* stays replaced by the per-session Trainer working-version framing. End-of-term **generation** is out of MVP scope, and **"Parent copy" is a false lifecycle claim** on a Trainer working version | `CLAUDE.md` §8; A-033 |
+| D2 | **Panel headings stay the OD-4 canonical four.** The frame's **"Areas to Grow"** is the minority variant and is expressly not canonical | Authority Lock §15.1 |
+| D3 | **The evidence region stays inert with a reason.** The frame draws a drag-and-drop uploader with *"MP4, MOV · up to 500MB each"* — **no uploader, format or size limit invented.** The Trainer **is** the ruled uploader; the path is **unbuilt**, not undecided | Authority Lock §8 |
+| D4 | **No Lesson or Term rows** | plan §4 |
+| D5 | **No "Overall Grade."** A headline rating is a derived assessment fact this frontend must not compute — the frame prints *"Mastering"* | plan §4 |
+| D6 | **All nine governed snapshots**, never the frame's arbitrary four (Speech / Tonality / Eye contact / Audience awareness) | A-017 |
+| D7 | **No "Confirm & Submit" and no "Save as draft."** The Trainer **approves and does not publish**; the gate is the three-item version-scoped Quality Checklist; a second save affordance would be an invented mutation | A-033, A-036 |
+| D8/D9 | **Rails belong to Phase 0** | plan §2 |
+| D10 | **The drafting, failure-and-retry, nine-rating-refusal, empty and disabled states all survive.** The frame draws none of them; they are governed behaviour. No branch was removed — only heading type inside them moved | §7.3 |
+
+### 6.4 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 6.5 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 14/14 OK** · prohibited-string sweep: `Term Report`, `Parent copy`, `Areas to Grow`, `Overall Grade`, `Confirm & Submit`, `Save as draft`, `500MB`, `MP4` — **all comment-only, zero rendered** · **rendered capture `NOT-RUN`** (§0.1). ⚠️ **Each non-happy-path state was NOT captured as its own view** — plan §4 asks for that and it needs the same authenticated render §0.1 blocks. Their **existence** is verified in source; their **appearance** is not.
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -294,4 +346,5 @@ Fixed with a new **`.form-field.notes-field`** modifier, mirroring the ratified 
 |---|---|---|
 | 4 | `05` Trainer Schedule | **`5dda019`** |
 | 5 | `06` Trainer Student Roster | **`ca9396e`** |
-| 6a | `07` Trainer Grade Student | *pending — recorded at the Phase 6 boundary* |
+| 6a | `07` Trainer Grade Student | **`1c93a4f`** |
+| 6 | `08` Trainer AI Report Generation | *pending — recorded at the Phase 7 boundary* |

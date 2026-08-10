@@ -303,7 +303,7 @@ export function TrainerDraftGeneration() {
             aria-hidden="true"
           />
           <h2 className="mt-6">
-            <span className="text-section-title font-extrabold text-ink-strong">
+            <span className="text-[1.125rem] font-bold text-ink-strong">
               {`Drafting ${state.context.studentDisplayName}'s report…`}
             </span>
           </h2>
@@ -356,7 +356,7 @@ export function TrainerDraftGeneration() {
         </FeedbackBanner>
         <section className="card p-5 sm:p-6">
           <h2>
-            <span className="text-card-title font-extrabold text-ink-strong">
+            <span className="text-[1rem] font-semibold text-ink-strong">
               Your assessment is preserved
             </span>
           </h2>
@@ -412,11 +412,11 @@ export function TrainerDraftGeneration() {
         published, and no parent has been notified.
       </FeedbackBanner>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:items-start">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] xl:items-start">
         <div className="grid gap-5">
           {/* The generated-draft card — the frame's primary surface. D1 / D2. */}
           <section className="card overflow-hidden" aria-labelledby="ai-draft-heading">
-            <div className="flex items-center gap-3.5 border-b border-line px-5 py-5 sm:px-6">
+            <div className="flex items-center gap-3 border-b border-line px-[26px] py-[22px]">
               <Avatar displayName={context.studentDisplayName} size="large" shape="square" />
               <div className="min-w-0">
                 {/*
@@ -426,12 +426,12 @@ export function TrainerDraftGeneration() {
                  * outranks every rule in `@layer utilities`.
                  */}
                 <h2 id="ai-draft-heading">
-                  <span className="text-card-title font-extrabold text-brand-800">
+                  <span className="text-[0.8203125rem] font-extrabold text-brand-800">
                     AI Draft — {context.studentDisplayName}
                   </span>
                 </h2>
                 {/* D1 — the frame's term-report and "Parent copy" framing is replaced. */}
-                <p className="mt-0.5 text-small font-semibold text-neutral-on">
+                <p className="mt-0.5 text-[0.703125rem] font-bold text-neutral-on">
                   {session && (
                     <>
                       <span data-vocabulary="class-grade">{session.classGrade}</span>
@@ -485,7 +485,7 @@ export function TrainerDraftGeneration() {
                     <article
                       key={panel.key}
                       data-report-panel={panel.key}
-                      className="flex gap-4 px-5 py-5 sm:px-6"
+                      className="flex gap-[11px] px-[26px] py-[15px]"
                     >
                       <IconTile tone={presentation.tone} size="small">
                         <Icon name={presentation.icon} size={15} />
@@ -493,7 +493,7 @@ export function TrainerDraftGeneration() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <h3>
-                            <span className="text-body font-extrabold text-ink-strong">
+                            <span className="text-[0.8203125rem] font-extrabold text-ink-strong">
                               {panel.label}
                             </span>
                           </h3>
@@ -513,15 +513,15 @@ export function TrainerDraftGeneration() {
                             Edit
                           </Link>
                         </div>
-                        <p className="mt-2 flex gap-2.5 text-body font-semibold leading-7 text-ink">
+                        <p className="mt-[7px] flex gap-[7px] text-[0.8203125rem] font-semibold leading-[1.55] text-ink">
                           {/* Decorative bullet — the frame's marker. Meaning is carried by text. */}
                           <span
                             aria-hidden="true"
-                            className="mt-2.5 block size-1.5 shrink-0 rounded-full bg-brand-600"
+                            className="mt-[9px] block size-1.5 shrink-0 rounded-full bg-brand-600"
                           />
                           <span>{report.panels[panel.key]}</span>
                         </p>
-                        <p className="mt-1.5 text-small leading-6 text-neutral-on">
+                        <p className="mt-1.5 text-[0.71875rem] leading-5 text-neutral-on">
                           {panel.supporting}
                         </p>
                       </div>
@@ -535,11 +535,11 @@ export function TrainerDraftGeneration() {
           {/* D3 — frame region kept, rendered inert. No uploader and no limits invented. */}
           <section className="card p-5 sm:p-6" aria-labelledby="class-video-evidence-heading">
             <h2 id="class-video-evidence-heading">
-              <span className="text-card-title font-extrabold text-ink-strong">
+              <span className="text-[1rem] font-semibold text-ink-strong">
                 Class Video Evidence
               </span>
             </h2>
-            <p className="mt-1 text-small text-neutral-on">
+            <p className="mt-1 text-[0.75rem] text-neutral-on">
               Recordings from this session to support the report
             </p>
             <div
@@ -551,7 +551,7 @@ export function TrainerDraftGeneration() {
                   type="button"
                   disabled
                   aria-describedby={evidenceNoteId}
-                  className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-body font-bold text-ink-subtle"
+                  className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-[0.78125rem] font-semibold text-ink-subtle"
                 >
                   Attach class recording
                   <Icon name="chevronRight" size={16} />
@@ -574,11 +574,11 @@ export function TrainerDraftGeneration() {
         <aside className="grid content-start gap-5" aria-label="Draft detail">
           <section className="card p-5" aria-labelledby="report-details-heading">
             <h2 id="report-details-heading">
-              <span className="text-card-title font-extrabold text-ink-strong">
+              <span className="text-[0.9375rem] font-semibold text-ink-strong">
                 Report Details
               </span>
             </h2>
-            <dl className="mt-3 divide-y divide-line text-body">
+            <dl className="mt-3 divide-y divide-line text-[0.75rem]">
               <DetailRow label="Name" value={context.studentDisplayName} />
               {session && (
                 <DetailRow
@@ -617,11 +617,11 @@ export function TrainerDraftGeneration() {
           {report && (
             <section className="card p-5" aria-labelledby="performance-summary-heading">
               <h2 id="performance-summary-heading">
-                <span className="text-micro font-extrabold uppercase tracking-[0.12em] text-neutral-on">
+                <span className="text-[0.75rem] font-semibold uppercase tracking-[0.04em] text-neutral-on">
                   Performance Summary
                 </span>
               </h2>
-              <p className="mt-1.5 text-small leading-6 text-ink">
+              <p className="mt-1.5 text-[0.71875rem] leading-5 text-ink">
                 The nine governed ratings this draft was grounded against. Internal assessment
                 substance — not a parent summary.
               </p>
@@ -631,12 +631,12 @@ export function TrainerDraftGeneration() {
                     key={rating.dimensionCode}
                     className={`rounded-card px-3.5 py-3 ${RATING_TILE_STYLE[rating.rating]}`}
                   >
-                    <span className="block text-micro font-bold uppercase tracking-[0.1em] text-ink">
+                    <span className="block text-[0.5625rem] font-bold uppercase tracking-[0.06em] text-ink">
                       {rating.displayName}
                     </span>
                     <span
                       data-rating-level={rating.rating}
-                      className="mt-1 block text-body font-extrabold uppercase tracking-[0.04em]"
+                      className="mt-1 block text-[0.75rem] font-extrabold uppercase tracking-[0.02em]"
                     >
                       {RATING_DISPLAY_LABELS[rating.rating]}
                     </span>
@@ -652,34 +652,34 @@ export function TrainerDraftGeneration() {
            * Checklist on the review surface, and the Trainer does not publish.
            */}
           <section
-            className="rounded-panel bg-accent-ink p-5 text-white"
+            className="rounded-[18px] bg-accent-ink p-5 text-white"
             aria-labelledby="next-step-heading"
           >
             <h2 id="next-step-heading">
-              <span className="text-card-title font-extrabold text-white">
+              <span className="text-[0.9375rem] font-semibold text-white">
                 Ready for your review
               </span>
             </h2>
-            <p className="mt-2 text-small leading-6 text-white/85">
+            <p className="mt-2 text-[0.71875rem] leading-[1.52] text-white/85">
               AI supplied wording only. You review every panel, complete the three-item Quality
               Checklist, then approve — which sends this exact version to management for the
               final quality review. You do not publish, and no parent is notified at this step.
             </p>
             <Link
               href={`/trainer/reports/${state.result.reportId}/review`}
-              className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-field bg-brand-700 px-5 py-3 text-body font-extrabold text-white no-underline transition hover:bg-brand-800"
+              className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-[11px] bg-brand-700 px-5 py-3 text-[0.84375rem] font-semibold text-white no-underline transition hover:bg-brand-800"
             >
               Review four-panel report
             </Link>
             {report && (
               <Link
                 href={`/trainer/reports/${report.reportId}/edit`}
-                className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-field border border-white/25 px-5 py-3 text-body font-bold text-white no-underline transition hover:bg-white/10"
+                className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-[11px] border border-white/25 px-5 py-3 text-[0.78125rem] font-semibold text-white no-underline transition hover:bg-white/10"
               >
                 Edit wording first
               </Link>
             )}
-            <p className="mt-4 text-small leading-6 text-white/70">
+            <p className="mt-4 text-[0.71875rem] leading-5 text-white/70">
               The validated draft is already stored as an immutable version by generation, so
               there is no separate save step here.
             </p>
@@ -702,11 +702,11 @@ function PageHeader({
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
+        <h1 className="text-[1.375rem] font-bold text-ink-strong">
           AI Report Generation
         </h1>
         <nav aria-label="Breadcrumb" className="mt-1">
-          <ol className="flex flex-wrap items-center gap-x-2 text-small text-neutral-on">
+          <ol className="flex flex-wrap items-center gap-x-2 text-[0.71875rem] font-medium text-neutral-on">
             <li>
               <Link
                 href="/trainer/schedule"
