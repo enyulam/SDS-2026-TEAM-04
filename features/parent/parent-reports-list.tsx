@@ -121,7 +121,7 @@ export function ParentReportsList() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-3xl">
           <PageHeading title="Reports" />
-          <p className="mt-1 max-w-2xl text-body leading-6 text-ink">
+          <p className="mt-0.5 max-w-2xl text-small leading-5 text-ink">
             {selectedChild
               ? `Reports you've received for ${selectedChild.displayName}.`
               : "Reports you've received for your linked learners."}
@@ -132,15 +132,15 @@ export function ParentReportsList() {
           <div className="shrink-0 rounded-card border border-line bg-surface px-4 py-2.5 shadow-raised">
             {linkedChildren.length === 1 ? (
               <>
-                <p className="block text-micro font-semibold text-ink">Viewing</p>
-                <p className="mt-0.5 text-body font-bold text-ink-strong">
+                <p className="block text-[0.59375rem] font-medium text-ink">Viewing</p>
+                <p className="mt-0.5 text-[0.78125rem] font-semibold text-ink-strong">
                   {linkedChildren[0].displayName}
                 </p>
               </>
             ) : (
               <>
                 <label
-                  className="block text-micro font-semibold text-ink"
+                  className="block text-[0.59375rem] font-medium text-ink"
                   htmlFor={childSelectId}
                 >
                   Viewing
@@ -149,7 +149,7 @@ export function ParentReportsList() {
                   id={childSelectId}
                   value={selectedStudentId}
                   onChange={(event) => setSelectedStudentId(event.target.value)}
-                  className="mt-0.5 block cursor-pointer border-0 bg-transparent p-0 text-body font-bold text-ink-strong"
+                  className="mt-0.5 block cursor-pointer border-0 bg-transparent p-0 text-[0.78125rem] font-semibold text-ink-strong"
                 >
                   <option value="all">All linked learners</option>
                   {linkedChildren.map((child) => (
@@ -177,7 +177,7 @@ export function ParentReportsList() {
         <section aria-labelledby="parent-all-reports" className="grid gap-4">
           <h2
             id="parent-all-reports"
-            className="text-section-title font-extrabold text-ink-strong"
+            className="text-[1.0625rem] font-bold text-ink-strong"
           >
             All Reports
           </h2>
@@ -185,7 +185,7 @@ export function ParentReportsList() {
           {visibleRows.map((report) => (
             <article
               key={`${report.sessionId}:${report.studentId}`}
-              className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:gap-5"
+              className="card flex flex-col gap-4 px-5 py-[18px] sm:flex-row sm:items-center sm:gap-4"
             >
               <IconTile tone="brand" size="large">
                 <Icon name="document" size={20} />
@@ -200,10 +200,10 @@ export function ParentReportsList() {
                   is titled with the governed student name — which also keeps the existing
                   three-role smoke assertion on this heading valid.
                 */}
-                <h2 className="text-card-title font-extrabold text-ink-strong">
+                <h2 className="text-[1rem] font-semibold text-ink-strong">
                   {report.studentDisplayName}
                 </h2>
-                <p className="mt-1 text-small text-ink">
+                <p className="mt-[3px] text-[0.75rem] text-ink">
                   Session {formatDate(report.sessionDate)} · Received{" "}
                   {formatDateTime(report.submittedAt)}
                 </p>
@@ -211,7 +211,7 @@ export function ParentReportsList() {
 
               <Link
                 href={`/parent/students/${report.studentId}/sessions/${report.sessionId}/report`}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-field bg-brand-700 px-5 py-2.5 text-body font-bold text-white no-underline hover:bg-brand-800"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-field bg-brand-700 px-4 py-2.5 text-[0.78125rem] font-semibold text-white no-underline hover:bg-brand-800"
               >
                 View
                 <span className="sr-only">

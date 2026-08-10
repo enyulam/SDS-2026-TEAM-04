@@ -362,3 +362,28 @@ Ending commit:                 the commit created by
 Acceptance status:             PROPOSED visually accepted — awaiting operator review.
                                Only the operator marks a screen accepted.
 ```
+
+### UI RECONCILIATION plan Phase 9 — 2026-08-10
+
+Visual reconciliation only against `reference/Parent - Report/` (SINGULAR — resolved from
+`SCREEN_INDEX.md`, never guessed). **10 TRUE-DRIFT resolved; 4 REGISTERED-OMISSION preserved,
+ZERO changed** — two separate lists (plan §6.5).
+
+⛔ The frame draws an AGGREGATE RATING CHIP ON EVERY ROW (measured this run: `Mastering` on
+`#DCF2F3`, `Developing` on `#FBF0D2`, three rows carrying one). It stays DELIBERATELY NOT
+IMPLEMENTED and was not reinstated in any form or wording — Q-27 is a DATA boundary across
+every Parent surface, not CSS. Also preserved: no per-dimension rating, observation, correction
+history, content hash, version metadata or audit internal; the child affordance stays a
+presentation control over LIVE LINKS ONLY; no lesson number or trainer name.
+
+Q-27 was SWEPT ACROSS ALL THREE Parent surfaces this run — every rating token is comment-only,
+zero render.
+
+RENDERED CAPTURE **NOT-RUN** (authenticated surface; §12 stop-and-ask). ⚠️ The projection was
+also NOT re-confirmed at runtime to return only the canonical submitted version for linked
+students — the CLIENT boundary is proven, the SERVER projection is unchanged from its accepted
+baseline and was not re-exercised. NOT-RUN is not PASS.
+
+tsc 0 · eslint 0 · build 0 · route census 17 unchanged · emitted-CSS 7/7 · no governed surface
+touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 9.
+`Accepted` is Operator-set only and has NOT been set.

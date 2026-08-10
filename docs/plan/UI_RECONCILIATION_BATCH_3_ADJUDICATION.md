@@ -457,6 +457,45 @@ Applied to **both** surfaces this component renders — the final-review candida
 
 ---
 
+## PHASE 9 — `32` Parent Reports
+
+- **Screen / route / component:** `32` · `/parent/reports` · `features/parent/parent-reports-list.tsx`
+- **Reference:** `reference/Parent - Report/` — ⚠️ **singular "Report"**, resolved from `SCREEN_INDEX.md` and never guessed from the folder name · frozen duplicate SHA-identical (`90e368c1…`)
+
+### 9.1 `TRUE-DRIFT` RESOLVED — 10
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title | via `PageHeading` — reconciled at Phase 7 §7.1 | 30px / 800 | 22px / 700 |
+| T2 | Page description | 12.5px-class quiet, 2px gap | 14px / `leading-6`, 4px | `mt-0.5 text-small leading-5` |
+| T3 | "All Reports" heading | 17px / 700 | 20px / 800 | `text-[1.0625rem] font-bold` |
+| T4 | Row card padding | 18px vertical / 20px sides | 20px uniform | `px-5 py-[18px]` |
+| T5 | Row gutter | 16px | 20px | `sm:gap-4` |
+| T6 | Row title | 16px / 600 | 17px / 800 | `text-[1rem] font-semibold` |
+| T7 | Row meta line | 12px / 400 at a 3px gap | 13px at 4px | `mt-[3px] text-[0.75rem]` |
+| T8 | "View" action | 16–17px padding, 12.5px / 600 | 20px, 14px / 700 | `px-4 text-[0.78125rem] font-semibold` |
+| T9 | "Viewing <child>" label | 9.5px / 500 quiet | 11px / 600 | `text-[0.59375rem] font-medium` |
+| T10 | "Viewing <child>" value | 12.5px / 600 | 14px / 700 | `text-[0.78125rem] font-semibold` |
+
+### 9.2 `REGISTERED-OMISSION` PRESERVED — 4, ZERO CHANGED
+
+| # | Preserved | Citation |
+|---|---|---|
+| 1 | ⛔ **The frame draws an aggregate rating chip on EVERY row** — measured this run as `Mastering` on `#DCF2F3` and `Developing` on `#FBF0D2`, three rows carrying one. **It is deliberately not implemented and was not reinstated in any form or wording.** Q-27 is a **DATA boundary across every Parent surface**, not a CSS one | Q-27; A-021, A-038, A-048 |
+| 2 | **No per-dimension rating, observation, correction history, content hash, version metadata or audit internal** | A-038 |
+| 3 | **The child affordance stays a presentation control over LIVE LINKS ONLY**, never a picker over the centre's students | A-021 |
+| 4 | **No lesson number or trainer name** — the frame's meta line reads *"Junior · Public Speaking · Lesson 4 · Argen Maulie · Received 14 Mar 2035"*; the governed parent projection carries neither field | A-038 |
+
+**Q-27 swept across ALL THREE Parent surfaces this run**, not just this one: every occurrence of `Mastering`, `Mastered`, `Beginning`, `Developing`, `ratingSnapshots`, `This Term`, `Performance Summary` and `Overall Grade` in `parent-reports-list.tsx`, `parent-canonical-report.tsx` and `parent-dashboard.tsx` is **comment-only**. Zero render.
+
+### 9.3 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 9.4 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 7/7 OK** · Q-27 sweep **clean on all three Parent surfaces** · **rendered capture `NOT-RUN`** (§0.1). ⚠️ **The projection was NOT re-confirmed at runtime** to return only the canonical submitted version for linked students — plan §4 asks for that and it needs the authenticated render §0.1 blocks. The **client** boundary is proven; the **server** projection is unchanged from its accepted baseline and was not re-exercised.
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -468,4 +507,5 @@ Applied to **both** surfaces this component renders — the final-review candida
 | 6a | `07` Trainer Grade Student | **`1c93a4f`** |
 | 6 | `08` Trainer AI Report Generation | **`85e1f35`** |
 | 7 | `29` Management Reports | **`7634c71`** |
-| 8 | `19` Management Student Report | *pending — recorded at the Phase 9 boundary* |
+| 8 | `19` Management Student Report | **`d83823f`** |
+| 9 | `32` Parent Reports | *pending — recorded at the Phase 10 boundary* |
