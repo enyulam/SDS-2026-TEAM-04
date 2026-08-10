@@ -66,6 +66,7 @@ DECLARE
   v_mgmt_mem     uuid;
   v_n            bigint;
   v_listed       bigint;
+  v_before_unlink bigint;
   v_ctx          record;
   v_pass         int := 0;
   v_fail         int := 0;
@@ -76,24 +77,14 @@ BEGIN
   -- lifecycle RPCs are proven elsewhere; what this suite needs is the
   -- STATE, so that every assertion below is about the LIST.
   -- ---------------------------------------------------------------
-  SELECT cs.id, cs.centre_id, cs.class_module_id
-    INTO v_session, v_centre, v_module
-    FROM public.class_sessions cs
-   ORDER BY cs.session_date
-   LIMIT 1;
-
-  SELECT e.student_id, e.id INTO v_student, v_enrolment
-    FROM public.enrolments e
-   WHERE e.class_module_id = v_module
-   ORDER BY e.student_id
-   LIMIT 1;
-
-  IF v_session IS NULL OR v_student IS NULL THEN
-    RAISE EXCEPTION 'P2-SETUP failed: the fixture has no session/enrolment pair to work with';
-  END IF;
-
-  SELECT o.id INTO v_obs FROM public.observations o
-   WHERE o.class_session_id = v_session AND o.student_id = v_student;
+  -- ⛔ THE PAIR IS MINTED, NOT BORROWED (Operator ruling 2026-08-11). Taking
+  -- a fixture pair with `ORDER BY … LIMIT 1` made this suite collide the
+  -- moment the Operator's own walkthrough created a report for that pair. A
+  -- session minted a statement ago cannot already have one.
+  SELECT m.centre_id, m.class_module_id, m.class_session_id, m.student_id,
+         m.enrolment_id, m.observation_id
+    INTO v_centre, v_module, v_session, v_student, v_enrolment, v_obs
+    FROM pg_temp.mint_isolated_pair('P2') m;
 
   UPDATE public.class_sessions
      SET lesson_number = 4, lesson_title = 'Expressive Delivery', room = 'Studio 2'
@@ -108,6 +99,11 @@ BEGIN
                               enrolment_id, observation_id, status, lock_version)
        VALUES (v_centre, v_session, v_module, v_student, v_enrolment, v_obs, 'submitted', 1)
     RETURNING id INTO v_report;
+
+  -- ⚠️ The governed counts WHILE the minted rows exist. The runner asserts
+  -- this DIFFERS from its own before-reading, which is what turns
+  -- "before = after" from a tautology into a measured restoration.
+  RAISE NOTICE 'DURING-COUNTS %', pg_temp.governed_counts();
 
   INSERT INTO public.report_versions (report_id, centre_id, revision_number,
                                       authored_by_membership_id, authored_by_role,
@@ -202,6 +198,27 @@ BEGIN
   -- is measured against the SAME row the permit just used, and re-walk
   -- the whole enumeration rather than one pair.
   -- ---------------------------------------------------------------
+  -- ⚠️ SCOPED TO THE MINTED LEARNER, AND THE SCOPE IS THE POINT. This
+  -- counted the parent's ENTIRE list and required it to reach zero, which
+  -- silently assumed the parent had exactly one linked learner. The Operator
+  -- walks this database manually, so that parent now also has a REAL
+  -- submitted report for a different learner — and the leg failed while the
+  -- rule it tests held perfectly. ▶ **The assertion was measuring the
+  -- fixture's shape as well as the rule.** Scoping it to `v_student` measures
+  -- exactly the `l.is_active` predicate under test and nothing else.
+  --
+  -- ⛔ NOT A WEAKENING: `v_before_unlink` re-measures the SAME scoped query
+  -- while the link is live, so the zero below is only reachable from a
+  -- non-zero. Without that, scoping down could have made the leg pass because
+  -- it now counts nothing at all.
+  PERFORM pg_temp.as_parent();
+  SELECT pg_catalog.count(*) INTO v_before_unlink
+    FROM public.parent_student_links l
+    JOIN public.enrolments e      ON e.student_id = l.student_id
+    JOIN public.class_sessions cs ON cs.class_module_id = e.class_module_id
+   CROSS JOIN LATERAL public.report_get_canonical(cs.id, l.student_id) rc
+   WHERE l.is_active AND l.student_id = v_student;
+
   UPDATE public.parent_student_links SET is_active = false, unlinked_at = pg_catalog.now()
    WHERE student_id = v_student;
   PERFORM pg_temp.as_parent();
@@ -210,13 +227,17 @@ BEGIN
     JOIN public.enrolments e      ON e.student_id = l.student_id
     JOIN public.class_sessions cs ON cs.class_module_id = e.class_module_id
    CROSS JOIN LATERAL public.report_get_canonical(cs.id, l.student_id) rc
-   WHERE l.is_active;
-  IF v_n = 0 THEN
+   WHERE l.is_active AND l.student_id = v_student;
+  IF v_before_unlink > 0 AND v_n = 0 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-4 -- with the link withdrawn the list emits NO row (was %)', v_listed;
+    RAISE NOTICE 'PASS P2-4 -- with the link withdrawn this learner emits NO row (% -> 0, whole list was %)',
+      v_before_unlink, v_listed;
+  ELSIF v_before_unlink = 0 THEN
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-4 -- VACUOUS: the scoped query listed nothing even WITH a live link, so the 0 below proves nothing';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-4 -- an unlinked parent still listed % row(s)', v_n;
+    RAISE WARNING 'FAIL P2-4 -- an unlinked parent still listed % row(s) for this learner', v_n;
   END IF;
   UPDATE public.parent_student_links SET is_active = true, unlinked_at = NULL
    WHERE student_id = v_student;

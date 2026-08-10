@@ -1,7 +1,7 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
 > **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** and is **not a fifth layer of §15.1** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md` and `BUILD_NOTES.md` — never before, or it would originate them. Contains **no credential**.
+> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md` and the plan — never before, or it would originate them. Contains **no credential**.
 
 ---
 
@@ -10,102 +10,83 @@
 | | |
 |---|---|
 | **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
-| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422**. `.env.local` now points here |
+| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422**. `.env.local` points here |
 | ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its local stack **`best-coach-mvp` on 543xx**, hosted **`zjukuffiuzkbiblmnuwl`**, and **`best-coach-mvp.vercel.app`** |
 | ⛔ **Git** | **No push. No merge. No `main`. `develop` only.** |
 | ⚠️ **Credential** | The **hosted dev** database password was exposed in a transcript on 2026-08-11 by a regex allow-list over env var names. **Operator rotating.** Cause and rule in `BUILD_NOTES.md` |
 
 ---
 
-## ✅ THE HEADLINE — THE DEFECT YOU REPORTED DOES NOT EXIST
+## ✅ WHERE THIS STOPPED
 
-**Your wording edits SAVED. All three of them.** Both trainer edits and the management wording edit are in the database as new immutable versions, with correct authorship, `report_version.created` audit events, changed content hashes and advanced pointers. The read RPCs return them today.
+**`prove:hero-all` is 17/17, verified by exit code.** The four SQL suites your manual walkthrough had broken are green again — **without deleting anything of yours.**
 
-▶ **You were one step from filing a data-loss defect against a system that lost nothing.**
-
-⚠️ Your management edit went to **`strengths`**, not `remarks` — my first comparison checked only `remarks` and wrongly reported it unchanged.
-
-⛔ **And my first diagnosis was wrong in a way worth knowing.** I reported the management editor as having **no status guard**. It has one, in the **adapter** (`participant-actions.ts:688`), one layer above where the trainer's sits. I had measured the RPC **directly over PostgREST**, bypassing that adapter, and then described the result as the application's behaviour. **I measured a layer and reported it as the system.** You authorized a fix for that non-defect; **I refused to build it** rather than encode a defect that isn't there.
+⛔ **STOPPED BY OPERATOR INSTRUCTION.** The **ratified-decisions document** comes next, **with its own bounded instruction**. ⚠️ **Do not act on the document alone** — amending ratified authority is a `CLAUDE.md` §12 stop-and-ask needing an instruction naming the exact files and corrections; **a ratified decision is the INPUT to that instruction, not the instruction.**
 
 ---
 
-## What was done — four commits, in your order
+## What the fix actually is
 
-| | Commit | |
-|---|---|---|
-| 1 | — | ⛔ **REFUSED** — premise false, both editors are guarded. See above |
-| 2 | **`ade7d45`** | `test:integration` wired and **run** |
-| 3 | **`835067f`** | the `→ null` shape closed; `Q-7` widened to three shapes |
-| 4 | **`5e37e74`** | the silent half made observable |
-| + | **`d89d52f`** | `INT-A5` no longer prints `PASS` for a leg that failed; both rulings recorded |
+`prove:hero-1/2/7/9` used to take a `(session, student)` pair with `ORDER BY … LIMIT 1` and insert a report for it — so **the suites depended on the state of a database a human uses.** A shared prelude now **MINTS** the whole subject inside the existing `ROLLBACK`: student, enrolment, session, trainer assignment, parent link, observation and nine mixed ratings.
+
+▶ **The collision is structurally impossible now** — a session minted a statement ago cannot already have a report — and the rollback-based non-mutation proof still runs **against the real database**, which is exactly what the clone would have cost.
+
+⛔ **Your three report rows are untouched and verified present** (`2c4bb887` submitted · `723a6837` submitted · `e751c809` draft_ready).
 
 ---
 
-## ⚠️ THREE THINGS THAT NEED YOUR ATTENTION
+## ⚠️ FOUR THINGS WORTH YOUR ATTENTION
 
-### 1. `prove:hero-all` is **13/17**, and your walkthrough is why
+### 1. Byte-unmoved is now a measurement, not a tautology
 
-`prove:hero-1 / 2 / 7 / 9` fail with `duplicate key … reports_session_student_key` and **0 legs executed** — they create a report for a fixture pair that **now already has one**.
+You required it still measure the canonical database and still be **capable of failing**. ⛔ `before === after` is also what a counting query that observes **nothing** returns — so a widened count that silently matched no table would have passed forever.
 
-**Measured, not assumed:** the last all-green commit `948011b` is **18:58:32 UTC**; your three reports were created at **19:37, 19:55 and 20:00 UTC**. This batch is TypeScript-only and cannot affect a SQL suite.
+Each suite now emits the **same counts mid-transaction** and the runner asserts they differ:
 
-⚠️ **Same root cause as the integration suite's `INT-A5`**, found an hour earlier by a completely different route: **the canonical dev database is shared between your manual walkthroughs and the automated suites, and a manual walk silently invalidates their preconditions.** All four rolled back cleanly — the database is byte-unmoved.
+```
+3|6|24|1|0|1|7|7|3  ->  4|7|24|1|1|2|8|8|4  ->  3|6|24|1|0|1|7|7|3
+```
 
-⛔ **I did not repair it.** The repair is deleting those report rows, and **they are your evidence and the subject of this diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. ▶ **You ruled: isolation, never deletion.** The options are in this turn's report; **nothing was built.**
+The counts were also **widened** to `students`, `enrolments` and `observations` so they cover the rows the minting creates. **Leakage was measured, not assumed:** eight runs leave every count identical and `students LIKE 'Isolated Fixture%'` returns **0**.
 
-### 2. Coverage that could not be invoked — and what it said once it could
+### 2. The schema refused three more shapes, and was right all three times
 
-`run-integration.mjs`, the **only** harness exercising both wording saves end to end, **was wired to no npm script**. It now runs: **47 `PASS` · 3 `FAIL` · exit 1**, zero non-loopback requests, the billable leg **skipped by default and recorded as skipped, never passed**.
+Ambiguous `centre_id` (an `OUT` parameter *and* a column on four of these tables — fixed by using locals throughout, which removes the **class** of error rather than the occurrence) · `pg_catalog.current_date` (a keyword, not a function) · `d.display_order` (the column is `sort_order`). ▶ **A guess about a column name is not a measurement.** Those suites already carried a sentence about three earlier refusals; **it is six for six now.**
 
-**All 3 failures are suite staleness, reported not fixed per your instruction** — `INT-A5` ×2 (same fixture-pollution cause) and `INT-Q27`, which pins a Parent DTO shape that **hero Phase 2 ratified a change to**. `context` carries class/module/lesson/trainer — **no rating in any vocabulary** — so Q-27's actual prohibition is untouched. ⛔ The suite also called `pass("INT-A5")` **unconditionally** after both `fail()`s, printing two `FAIL`s and then a `PASS` — **fixed in `d89d52f`** (`PASS` 48 → 47). ⚠️ A static scan suggested **49** ids could do this; **in the real run exactly one did**. *"Can print both" and "did print both" are different measurements.*
+### 3. `P2-4` was measuring the fixture's shape as well as the rule
 
-### 3. Widening the ratchet found three more sites than the two you named
+It counted the parent's **entire** list and required zero — silently assuming that parent had exactly one linked learner. Yours now also has a real submitted report for a different learner, so the leg failed **while the rule it tests held perfectly**. Scoped to the minted learner, **plus a live-link reading taken first** so the zero is only reachable from a non-zero.
 
-`Q-7d` failed on its first run naming three sites in `integration-adapter` nobody had listed. The worst: ⛔ **`adapterSaveTrainerEdit` reported a governed correction request as RESOLVED when the read that was supposed to confirm it had been REJECTED** — under a comment reading *"Observed, not asserted."*
+### 4. ⛔ The patch silently skipped two of the four
 
-▶ **A ratchet pinned to the defect you found does not protect you from the same defect wearing a different return value.**
-
----
-
-## ▶ HOW TO REPRODUCE THE SILENT SAVE — the walk that will settle it
-
-Your failing attempts left **no trace anywhere**, because a submit that never dispatches produces no server record at all. Two candidates remained and nothing could separate them. **I did not guess.** Three signals now make all three outcomes distinguishable:
-
-1. Open the browser console **before** navigating (`F12` → Console, `Verbose`/`debug` visible).
-2. Trainer report at `draft_ready` → **Edit**. The line beside the button should read **"No changes yet"**.
-3. Type one character. It must become **"Ready to save."** ⛔ **If it does not, that is candidate 1** — the button never enables and the click can never dispatch.
-4. Click **Save changes**. Expect `[trainer-report-editor] dispatching`, then `returned {outcome: …}`.
-5. **Console empty** → candidate 1. **Only `submit-ignored`** → candidate 2 (component not `ready`). **`dispatching` with nothing in the server log** → a third possibility neither candidate covered.
-6. Repeat on a `trainer_approved` report → Management **Edit wording**.
-
-**Report whichever of the three you see.**
+The discriminating leg was inserted by matching each runner's byte-unmoved **prose**; `prove-7` and `prove-9` word theirs differently and were **skipped** — their SQL emitted the marker and nothing read it, leaving the tautology intact. Caught by counting the marker in all four files. ▶ **Verify a bulk edit by counting the result in every target, never by trusting the patch's own report.**
 
 ---
 
-## ⛔ TWO RULINGS RECORDED, AND ONE ANSWER YOU STILL OWE
+## ⚠️ Still red, and out of this ruling's scope
 
-**StatePanel — stays non-disclosing.** Recorded **at the guard** (`participant-actions.ts:688`), not only in the log, so a later phase reading the silence as a missing error message sees that it is ruled.
+**`test:integration` stays at 47 `PASS` / 3 `FAIL`.** `INT-A5` has the **identical root cause** — it asserts *"before approval/submission"* against a pair that now holds a submitted report. **The same remedy would close it. It was not in this ruling and remains reported, not fixed.** `INT-Q27` is stale against ratified hero Phase 2 (`context` carries class/module/lesson/trainer — **no rating in any vocabulary**, so Q-27's prohibition is untouched).
 
-**Shared database — isolation, never deletion.** Your three report rows are untouched. **`prove:hero-1/2/7/9` stay red** until you choose an approach; the shapes are in this turn's report and **nothing was built**.
+---
 
 ## Position
 
 | Field | Value |
 |---|---|
-| **HEAD** | `d89d52f` on `develop` (plus this continuity commit), working tree **clean** |
+| **HEAD** | `develop`, working tree **clean** at the fixture-isolation commit plus this continuity commit |
 | **Gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · route census **17** |
-| **Proofs** | **`prove:hero-all` 13/17** — see item 1 · **`test:integration` 47 `PASS` / 3 `FAIL` / 3 `RECORDED`, exit 1** — see item 2 |
-| **Database** | **UNTOUCHED by this batch** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Your three walkthrough reports are intact |
+| **Proofs** | ✅ **`prove:hero-all` 17/17 by exit code** · ⚠️ `test:integration` 47/3/3, exit 1 — see above |
+| **Database** | **UNTOUCHED** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Your three walkthrough reports intact |
 | **Dev server** | running on **3000** against the local stack |
 
 ## ⛔ Carried
 
 - **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
-- ⚠️ **Phase 8/11 gap recorded:** structural consistency is **neither a visual nor a functional acceptance**. `prove:hero-8/11` would pass unchanged if either editor could not save at all; they passed here **only because both changed symmetrically**.
+- ⚠️ **The silent-save reproduction is still owed a walk** — three signals now separate the two candidates; steps are in `BUILD_NOTES` and unchanged.
+- ⚠️ **Phase 8/11 gap stands:** structural consistency is neither a visual nor a functional acceptance.
+- Plan §12 now carries **23 disciplines**; three added this turn, including *"can fail" and "did fail" are different measurements*.
 - **Nothing pushed. No remote write of any kind.** Screens `11` and `30` untouched.
 
 ## ▶ Next
 
-⛔ **NONE. STOPPED.** The **ratified-decisions document**, with its own bounded instruction. ⚠️ **Do not act on the document alone** — a ratified decision is the **input** to that instruction, not the instruction.
-
-**Two open items only you can settle:** whether the management `unavailable` StatePanel should name *"already submitted"* (an **A-038** disclosure decision, and I will not move that boundary unasked), and how the canonical fixture database should be shared between manual walks and automated suites.
+⛔ **NONE. STOPPED.** The ratified-decisions document, with its own bounded instruction.

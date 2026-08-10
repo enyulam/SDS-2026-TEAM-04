@@ -67,24 +67,14 @@ BEGIN
   -- needs is the STATE, and constructing it directly keeps the suite
   -- small and keeps every assertion below about the CONTEXT READ.
   -- ---------------------------------------------------------------
-  SELECT cs.id, cs.centre_id, cs.class_module_id
-    INTO v_session, v_centre, v_module
-    FROM public.class_sessions cs
-    ORDER BY cs.session_date
-    LIMIT 1;
-
-  SELECT e.student_id, e.id INTO v_student, v_enrolment
-    FROM public.enrolments e
-   WHERE e.class_module_id = v_module
-   ORDER BY e.student_id
-   LIMIT 1;
-
-  IF v_session IS NULL OR v_student IS NULL THEN
-    RAISE EXCEPTION 'P1-SETUP failed: the fixture has no session/enrolment pair to work with';
-  END IF;
-
-  SELECT o.id INTO v_obs FROM public.observations o
-   WHERE o.class_session_id = v_session AND o.student_id = v_student;
+  -- ⛔ THE PAIR IS MINTED, NOT BORROWED (Operator ruling 2026-08-11). This
+  -- suite used to take a fixture pair with `ORDER BY … LIMIT 1`, which meant
+  -- it collided the moment the Operator's own walkthrough created a report
+  -- for that pair. A session minted a statement ago cannot already have one.
+  SELECT m.centre_id, m.class_module_id, m.class_session_id, m.student_id,
+         m.enrolment_id, m.observation_id
+    INTO v_centre, v_module, v_session, v_student, v_enrolment, v_obs
+    FROM pg_temp.mint_isolated_pair('P1') m;
 
   -- Give the session lesson metadata so the Phase 0B columns are actually
   -- exercised rather than silently NULL on every leg.
@@ -127,6 +117,10 @@ BEGIN
    WHERE id = v_report;
 
   RAISE NOTICE 'P1-SETUP  -- a submitted report exists IN THIS TRANSACTION ONLY';
+  -- ⚠️ The governed counts WHILE the minted rows exist. The runner asserts
+  -- this DIFFERS from its own before-reading, which is what turns
+  -- "before = after" from a tautology into a measured restoration.
+  RAISE NOTICE 'DURING-COUNTS %', pg_temp.governed_counts();
 
   -- ---------------------------------------------------------------
   -- S-8 / P1-1 -- THE OWED PERMIT LEG. A linked parent reads context.

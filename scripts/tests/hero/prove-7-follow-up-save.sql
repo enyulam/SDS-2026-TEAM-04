@@ -70,26 +70,24 @@ BEGIN
   -- Set up: a report for a session/student pair that ALREADY has an
   -- observation, since this function never creates one.
   -- ---------------------------------------------------------------
-  SELECT o.class_session_id, o.student_id, o.id
-    INTO v_session, v_student, v_obs
-    FROM public.observations o
-    JOIN public.class_sessions cs ON cs.id = o.class_session_id
-   WHERE o.follow_up_notes IS NOT NULL
-   ORDER BY cs.session_date
-   LIMIT 1;
-  IF v_obs IS NULL THEN
-    RAISE EXCEPTION 'P7-SETUP failed: no observation with a follow-up note to work with';
-  END IF;
-
-  SELECT cs.centre_id, cs.class_module_id INTO v_centre, v_module
-    FROM public.class_sessions cs WHERE cs.id = v_session;
-  SELECT e.id INTO v_enrolment FROM public.enrolments e
-   WHERE e.class_module_id = v_module AND e.student_id = v_student AND e.is_active;
+  -- ⛔ THE PAIR IS MINTED, NOT BORROWED (Operator ruling 2026-08-11). Taking a
+  -- fixture pair with `ORDER BY … LIMIT 1` made this suite collide the moment
+  -- the Operator's own walkthrough created a report for that pair. A session
+  -- minted a statement ago cannot already have one.
+  SELECT m.centre_id, m.class_module_id, m.class_session_id, m.student_id,
+         m.enrolment_id, m.observation_id
+    INTO v_centre, v_module, v_session, v_student, v_enrolment, v_obs
+    FROM pg_temp.mint_isolated_pair('P7') m;
 
   INSERT INTO public.reports (centre_id, class_session_id, class_module_id, student_id,
                               enrolment_id, observation_id, status, lock_version)
        VALUES (v_centre, v_session, v_module, v_student, v_enrolment, v_obs, 'draft_ready', 3)
     RETURNING id INTO v_report;
+
+  -- ⚠️ The governed counts WHILE the minted rows exist. The runner asserts
+  -- this DIFFERS from its own before-reading, which is what turns
+  -- "before = after" from a tautology into a measured restoration.
+  RAISE NOTICE 'DURING-COUNTS %', pg_temp.governed_counts();
 
   SELECT o.lock_version INTO v_lock_before FROM public.observations o WHERE o.id = v_obs;
   SELECT pg_catalog.count(*) INTO v_ratings_before

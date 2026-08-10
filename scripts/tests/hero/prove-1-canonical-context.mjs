@@ -28,13 +28,20 @@ assertConfigProjectId(
 );
 
 const SUITE = join(ROOT, "scripts", "tests", "hero", "prove-1-canonical-context.sql");
+// ⛔ The pair is MINTED, not borrowed (Operator ruling 2026-08-11). The
+// prelude is CONCATENATED rather than `\i`-included: the SQL is piped to
+// psql over `docker exec -i`, so the container cannot see this repository.
+const PRELUDE = join(ROOT, "scripts", "tests", "hero", "_isolated-fixture.sql");
 
 const COUNTS = `SELECT (SELECT count(*) FROM public.reports)
   || '|' || (SELECT count(*) FROM public.report_versions)
   || '|' || (SELECT count(*) FROM public.audit_events)
   || '|' || (SELECT count(*) FROM public.audit_chain_heads)
   || '|' || (SELECT count(*) FROM public.class_sessions WHERE lesson_number IS NOT NULL)
-  || '|' || (SELECT count(*) FROM public.parent_student_links WHERE is_active);`;
+  || '|' || (SELECT count(*) FROM public.parent_student_links WHERE is_active)
+  || '|' || (SELECT count(*) FROM public.students)
+  || '|' || (SELECT count(*) FROM public.enrolments)
+  || '|' || (SELECT count(*) FROM public.observations);`;
 
 function psql(args, input) {
   return spawnSync("docker", ["exec", "-i", DB_CONTAINER, "psql", "--no-psqlrc", "-U", "postgres",
@@ -44,7 +51,8 @@ function psql(args, input) {
 const before = psql(["-c", COUNTS]).stdout.trim();
 console.log(`governed counts BEFORE: ${before}`);
 
-const run = psql([], readFileSync(SUITE, "utf8"));
+const run = psql([], `${readFileSync(PRELUDE, "utf8")}
+${readFileSync(SUITE, "utf8")}`);
 const out = `${run.stdout}\n${run.stderr}`;
 for (const line of out.split(/\r?\n/)) {
   if (/^(NOTICE|WARNING|ERROR)/.test(line.trim())) console.log(`  ${line.trim()}`);
@@ -70,6 +78,18 @@ check(fails === 0, `no failing leg (${fails} FAIL)`);
 // vacuous, and a suite that aborted after two legs would otherwise look green.
 check(passes === 7, `all SEVEN legs EXECUTED (${passes}/7) -- an unrun leg is NOT-RUN, never PASS`);
 check(before === after, `the canonical database is BYTE-UNMOVED (${before} -> ${after})`);
+/*
+ * ⛔ THE LEG THAT STOPS THE ONE ABOVE BEING A TAUTOLOGY. `before === after`
+ * is also what a counting query that observes NOTHING returns. The suite
+ * emits the SAME counts mid-transaction, while its minted rows exist; if
+ * that reading is not different, the query is blind and the byte-unmoved
+ * claim measured nothing.
+ */
+const during = (out.match(/DURING-COUNTS ([0-9|]+)/) ?? [])[1] ?? "";
+check(
+  during !== "" && during !== before,
+  `DISCRIMINATING -- the count query MOVED inside the transaction (${before} -> ${during} -> ${after}), so "unmoved" is a restoration actually measured`,
+);
 
 console.log(
   bad === 0

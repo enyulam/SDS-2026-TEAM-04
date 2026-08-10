@@ -6053,3 +6053,72 @@ The shape of the isolation options was reported separately for the Operator's de
 ⚠️ **Measured before repairing, and the first measurement over-reported.** A static scan found **49** leg ids where a `fail()` and a `pass()` share an identifier — which reads alarming and is nearly meaningless, because most guard the `pass` behind an `if/else` chain. **In the actual run, exactly ONE id printed both**: `INT-A5`. `INT-Q27` failed in the same run and correctly printed no `PASS`, because it uses `if / else if / else pass(…)`.
 
 ▶ **"Can print both" and "did print both" are different measurements, and only the second is evidence.** Fixed by guarding the `pass` on the failure count being unchanged; re-run drops `PASS` 48 → **47** with the phantom removed, exit code still 1. **The three staleness failures stay reported and unfixed**, per instruction.
+
+---
+
+## 2026-08-11 — **SELF-CONTAINED FIXTURES** — the four SQL suites stop depending on a database a human uses
+
+**Operator ruling.** `prove:hero-1/2/7/9` each took a `(class_session, student)` pair out of the fixture with `ORDER BY … LIMIT 1` and inserted a `reports` row for it. The Operator walked the app manually, the app created reports for those same pairs, and all four began failing on `reports_session_student_key` with **zero legs executed**.
+
+▶ **The suites depended on the state of a database a human uses.**
+
+Two cheaper repairs were considered and **ruled against**:
+
+| Rejected | Why |
+|---|---|
+| a **disposable clone** | ⛔ It inherits the walkthrough rows anyway — a `TEMPLATE` copy is a copy — so it fixes nothing without a normalization step. And it **destroys the byte-unmoved proof**, the strongest property these four have. It also evicts every connection to `postgres` for ~1s, mid-walk |
+| **`WHERE NOT EXISTS (… reports …)`** | Unblocks today, but makes coverage depend on **fixture headroom**. The Operator will keep walking; the headroom gets exhausted again |
+
+**Minting the pair makes the collision STRUCTURALLY IMPOSSIBLE** — a session minted a statement ago cannot already have a report — while the transaction still ends in `ROLLBACK`, so the non-mutation proof survives **against the real database**.
+
+### `_isolated-fixture.sql` — one prelude, four suites
+
+It mints a student, enrolment, class session, trainer assignment, parent link, observation and its nine mixed ratings. ⚠️ **Concatenated by each runner rather than `\i`-included**: the SQL is piped over `docker exec -i`, so the container cannot see this repository — an `\i` would have failed at run time for a reason that has nothing to do with the proof.
+
+⚠️ **Identities are resolved through `auth_user_id`, not `role … LIMIT 1`.** The suites impersonate three exact fixture identities; linking the minted learner to *"some active parent"* would pass today and **silently link the wrong parent** the moment a second parent exists — turning the permit leg into a proof about nobody.
+
+**A Class Module is still borrowed, deliberately.** It is not part of any uniqueness the suites collide on, and minting one would drag in a Class Grade: more surface, no more isolation.
+
+### ⚠️ THE SCHEMA REFUSED THREE SHAPES AGAIN, AND WAS RIGHT ALL THREE TIMES
+
+Those suites already record that *"the schema refused three earlier shapes and was right each time."* It happened again, in one sitting:
+
+1. **`column reference "centre_id" is ambiguous`** — `centre_id` is both an `OUT` parameter and a column on four of these tables, so `WHERE cm.centre_id = centre_id` is genuinely undecidable. ▶ Fixed by using **locals throughout and assigning the `OUT` parameters only at the end** — removing the *class* of error rather than the one occurrence.
+2. **`missing FROM-clause entry for table "pg_catalog"`** — `current_date` is a keyword, not a schema-qualified function.
+3. **`column d.display_order does not exist`** — the column is `sort_order`. **A guess about a column name is not a measurement**; the catalogue was read and the guess was wrong.
+
+▶ **Three refusals, three real defects in my shape. The schema's record against this project is now six for six.**
+
+### The byte-unmoved assertion is now a MEASUREMENT, not a tautology
+
+The Operator required it still measure the canonical database **and still be capable of failing**.
+
+⛔ **`before === after` is also what a counting query that observes NOTHING returns.** A widened count that silently matched no table would pass forever.
+
+Each suite now emits the **same counts mid-transaction**, while its minted rows exist, and the runner asserts `during !== before`:
+
+```
+3|6|24|1|0|1|7|7|3  ->  4|7|24|1|1|2|8|8|4  ->  3|6|24|1|0|1|7|7|3
+```
+
+▶ **The query demonstrably moves for exactly the rows the suite creates, and returns.** "Unmoved" is now a restoration that was measured, not an equality that was assumed. The counts were also **widened to `students`, `enrolments` and `observations`** — the tables the minting touches — so the non-mutation claim covers the new rows rather than ignoring them.
+
+**Leakage measured, not assumed:** all four suites run twice (eight runs) leave `7|7|3|4|1|27|4` **identical**, and `students WHERE full_name LIKE 'Isolated Fixture%'` returns **0**.
+
+### ⚠️ `P2-4` WAS MEASURING THE FIXTURE'S SHAPE AS WELL AS THE RULE
+
+With the pair minted, `P2-4` failed — and the rule it tests held perfectly. It counted the parent's **entire** list and required zero, which silently assumed **the parent had exactly one linked learner**. That parent now also has a real submitted report for a different learner, from the Operator's own walk.
+
+Scoped to the minted learner it measures exactly the `l.is_active` predicate under test. ⛔ **Not a weakening:** a new reading takes the **same scoped query while the link is live**, so the zero is only reachable from a non-zero, and a third branch fails loudly if the scoped query ever lists nothing even with the link intact. **Scoping down without that leg would have made it pass by counting nothing at all.**
+
+### ⛔ AND THE PATCH SILENTLY SKIPPED TWO OF THE FOUR
+
+The discriminating leg was applied by matching each runner's byte-unmoved line — and `prove-7` and `prove-9` word theirs differently (*"note contents included"*, *"is UNMOVED"*). **Both emitted `DURING-COUNTS` from their SQL and nothing asserted on it.** They would have reported green with the tautology intact.
+
+▶ **A bulk edit keyed to prose applies to whatever happened to share the prose.** Caught by counting the marker in all four files rather than trusting the patch's own report — which is the same discipline as everything else in this batch: *the tool's silence is not the tool's success.*
+
+### Result
+
+**`prove:hero-all` 17/17, verified by exit code.** `tsc` 0 · `eslint` 0 errors · the Operator's three report rows **untouched and verified present**.
+
+⚠️ **`test:integration`'s `INT-A5` has the identical root cause and was NOT in this ruling's scope** — it still asserts *"before approval/submission"* against a pair that now holds a submitted report. The same remedy would close it; it is not authorized and remains reported.
