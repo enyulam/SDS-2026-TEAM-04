@@ -433,3 +433,26 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+### UI RECONCILIATION plan Phase 8 — 2026-08-10
+
+Visual reconciliation only against `reference/Management - Student Report/` (A-056).
+**12 TRUE-DRIFT resolved; 12 REGISTERED-OMISSION preserved, ZERO changed** — reported as two
+separate lists (plan §6.5). Every prohibited frame element was verified ABSENT FROM RENDERED
+JSX by sweep, not by reading its comment: P1 audience toggle, P2 Performance Summary rating
+grid (`ratingSnapshots` 0; no rating token), P3 Overall Grade, P4 assessment-editing control,
+P5 evidence and attendance substance, P6 Save as draft — all comment-only. The content hash is
+never rendered; the screen holds only `wordingHash`, the domain-separated panels-only proof,
+and SENDS it as `expectedWordingHash`.
+
+⚠️ Two occurrences deliberately NOT flagged because they are governed fields, not leaks: the
+`eye_contact` dimension-NAME map and `issueScope === "rating"` both belong to the
+return-to-trainer correction request. A bare token sweep would have misread both — which is
+why the boundary is asserted structurally, never lexically (A-052).
+
+RENDERED CAPTURE **NOT-RUN** — authenticated surface; a `CLAUDE.md` §12 stop-and-ask no current
+authorization carries. None manufactured, no hosted service contacted. NOT-RUN is not PASS.
+
+tsc 0 · eslint 0 · build 0 · route census 17 unchanged · emitted-CSS 16/16 · no governed
+surface touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 8.
+`Accepted` is Operator-set only and has NOT been set.

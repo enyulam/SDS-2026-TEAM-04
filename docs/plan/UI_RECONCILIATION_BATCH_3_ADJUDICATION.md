@@ -399,6 +399,64 @@ Every earlier phase applied the frame's page title **inside its own component** 
 
 ---
 
+## PHASE 8 — `19` Management Student Report
+
+- **Screen / route / component:** `19` · `/management/reports/[reportId]/review` · `features/management/management-report-review.tsx`
+- **Reference:** `reference/Management - Student Report/` · frozen duplicate SHA-identical (`394d8475…`)
+- ⚠️ **Highest governance density in the plan — 12 entries, six of them prohibitions under operator ruling R-B5.**
+
+### 8.1 Only the surviving regions are comparable at all
+
+Six of this frame's most prominent elements are **prohibited outright**, not merely omitted: its audience toggle, its Performance Summary rating grid, its Overall Grade row, its trainer-observation and assessment-editing controls, its evidence and attendance substance, and its "Save as draft". What remains comparable is the **report card, the panel rhythm, the Report Details list and the approval panel** — and that is what was reconciled.
+
+### 8.2 `TRUE-DRIFT` RESOLVED — 12
+
+Applied to **both** surfaces this component renders — the final-review candidate **and** the published submitted view.
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title (both views) | 22px / 700 | 30px / 800 (+ inert tracking) | `text-[1.375rem] font-bold` |
+| T2 | Breadcrumb | 11.5px / 500 | 13px | `text-[0.71875rem] font-medium` |
+| T3 | "Back" control | 11px radius, 13.5px / 600 | 10px, 14px / 700 | `rounded-[11px] text-[0.84375rem] font-semibold` |
+| T4 | Published-view back link | 13px / 500-class | 14px / 700 | `text-[0.8125rem] font-semibold` |
+| T5 | Published-view description | 12.5px-class quiet | 14px / `leading-6` | `mt-0.5 text-small leading-5` |
+| T6 | Report card title | 13.13px / 800 | 17px / 800 | `text-[0.8203125rem]` |
+| T7 | Report card meta | 11.25px / 700 | 13px / 600 | `text-[0.703125rem] font-bold` |
+| T8 | Panel block padding / gutter | 15px · 11.25px | 20–24px · 16px | `px-[26px] py-[15px] gap-[11px]` |
+| T9 | Panel heading + prose | 13.13px / 800 · 13.13px at 1.55 | 14px / 800 · 14px at `leading-7` | `text-[0.8203125rem]`, `leading-[1.55] mt-[7px]` |
+| T10 | Report Details | heading 15px / 600 · rows 12px | 17px / 800 · 14px / 700 | `text-[0.9375rem] font-semibold`, `text-[0.75rem]` |
+| T11 | Approval panel | 18px radius, heading 15px / 600, body 11.5px / 400 | 20px, 17px / 800, 13px | `rounded-[18px]`, `text-[0.9375rem] font-semibold`, `text-[0.71875rem] leading-[1.52]` |
+| T12 | Approval actions | 11px radius, 13.5px / 12.5px at 600 | 10px, 14px / 700 | `rounded-[11px]`, `text-[0.84375rem]` / `text-[0.78125rem] font-semibold` |
+
+### 8.3 `REGISTERED-OMISSION` PRESERVED — 12, ZERO CHANGED
+
+**Every prohibited frame element was verified ABSENT FROM RENDERED JSX by sweep**, not by reading its comment.
+
+| # | Preserved | Sweep result | Citation |
+|---|---|---|---|
+| P1 | **No audience toggle.** The frame draws *"Report for: Parent / Management"*. There is no `kind` enum and no `audience` column — audience comes from **authorization**, never an attribute on the row | `Report for` — **comment-only** | A-028 |
+| P2 | **NO "Performance Summary" rating grid.** Management never reads raw per-dimension ratings. This is the same class of leak already caught once on a Parent surface | `Performance Summary` **comment-only** · `ratingSnapshots` **0** · `Mastered` / `Beginning` / `Developing` **0** · `Mastering` **comment-only** | A-038 |
+| P3 | **No "Overall Grade."** The frame prints *"Overall Grade: Mastering"* | `Overall Grade` — **comment-only** | plan §4 |
+| P4 | **No trainer observations, trainer notes or assessment-editing control.** An assessment-level issue is **always a return, never a Management edit** | the return dialog is the only path, and it **creates a correction request** | A-034 |
+| P5 | **Evidence and attendance substance omitted OUTRIGHT**, not merely inert — inert-with-reason is the treatment for an *unbacked* affordance, not a *prohibited* one | `evidence` / `attendance` — **comment-only** | A-038 |
+| P6 | **No "Save as draft."** No governed Management draft state exists | `Save as draft` — **comment-only** | A-036 |
+| — | **The content hash is never rendered.** This screen holds only `wordingHash` — the **domain-separated hash over the four parent-facing panels only** — and it is **sent** to the governed action as `expectedWordingHash`, never displayed. The content hash covers the panels **plus** the nine ratings, so panels + hash recovers the grid in **4⁹ = 262,144** trials | `contentHash` / `content_hash` **0**; `wordingHash` appears twice — one comment, one **send** | A-038 |
+| D1 | Canonical OD-4 panel label, not the frame's "Areas to Grow" | | Authority Lock §15.1 |
+| D2 | **No "Management copy."** The frame's *"Public Speaking · Term 1, 2035 · Management copy"* stays replaced by the governed state line | | A-033 |
+| D3 | Approved icons only | | A-013 via A-022.2 |
+| D4 | The pencil affordance stays a **link to the wording-only editor**, editing nothing in place | | A-037 |
+| D6 | The ratified approve copy stands; **no confirmation mockup invented** beyond `CLAUDE.md` §6's description | | `CLAUDE.md` §6 |
+
+⚠️ **Two occurrences deliberately NOT flagged, because they are governed fields rather than leaks:** the `eye_contact` → *"Eye Contact"* **dimension-name** map and `issueScope === "rating"` both belong to the **return-to-trainer correction request**, where Management names *which dimension* has an issue. A-038 bars Management from reading a per-dimension **rating value**; naming the dimension in a correction request is the governed path A-035/A-040 requires. **A bare token sweep would have misread both as violations** — which is exactly why the boundary is asserted structurally and not lexically (A-052).
+
+### 8.4 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 8.5 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 16/16 OK** · **explicit re-proof that zero competency-rating tokens and zero hash values reach this surface — by sweep, above** · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -409,4 +467,5 @@ Every earlier phase applied the frame's page title **inside its own component** 
 | 5 | `06` Trainer Student Roster | **`ca9396e`** |
 | 6a | `07` Trainer Grade Student | **`1c93a4f`** |
 | 6 | `08` Trainer AI Report Generation | **`85e1f35`** |
-| 7 | `29` Management Reports | *pending — recorded at the Phase 8 boundary* |
+| 7 | `29` Management Reports | **`7634c71`** |
+| 8 | `19` Management Student Report | *pending — recorded at the Phase 9 boundary* |

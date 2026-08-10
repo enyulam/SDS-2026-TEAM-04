@@ -379,11 +379,9 @@ export function ManagementReportReview() {
     <div className="page-grid" data-testid="management-safe-review">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
-            Student Report
-          </h1>
+          <h1 className="text-[1.375rem] font-bold text-ink-strong">Student Report</h1>
           <nav aria-label="Breadcrumb" className="mt-1">
-            <ol className="flex flex-wrap items-center gap-x-2 text-small text-neutral-on">
+            <ol className="flex flex-wrap items-center gap-x-2 text-[0.71875rem] font-medium text-neutral-on">
               <li>
                 <Link
                   href="/management/reports?status=trainer_approved"
@@ -404,7 +402,7 @@ export function ManagementReportReview() {
           </nav>
           <Link
             href="/management/reports?status=trainer_approved"
-            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-field bg-brand-100 px-4 py-2.5 text-body font-bold text-brand-800 no-underline transition hover:bg-brand-200"
+            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-[11px] bg-brand-100 px-4 py-2.5 text-[0.84375rem] font-semibold text-brand-800 no-underline transition hover:bg-brand-200"
           >
             <Icon name="chevronLeft" size={16} />
             Back
@@ -446,12 +444,12 @@ export function ManagementReportReview() {
                  * rule in `@layer utilities`.
                  */}
                 <h2 id="class-report-heading">
-                  <span className="text-card-title font-extrabold text-brand-800">
+                  <span className="text-[0.8203125rem] font-extrabold text-brand-800">
                     Class Report — {learner}
                   </span>
                 </h2>
                 {/* D2 — the frame's "Management copy" claim replaced by the governed state. */}
-                <p className="mt-0.5 text-small font-semibold text-neutral-on">
+                <p className="mt-0.5 text-[0.703125rem] font-bold text-neutral-on">
                   {sessionDate ? `${formatDate(sessionDate)} · ` : ""}
                   Final-review candidate · awaiting your decision
                 </p>
@@ -465,7 +463,7 @@ export function ManagementReportReview() {
                   <article
                     key={panel.key}
                     data-report-panel={panel.key}
-                    className="flex gap-4 px-5 py-5 sm:px-6"
+                    className="flex gap-[11px] px-[26px] py-[15px]"
                   >
                     <IconTile tone={presentation.tone} size="small">
                       <Icon name={presentation.icon} size={15} />
@@ -515,11 +513,11 @@ export function ManagementReportReview() {
         <aside className="grid content-start gap-5" aria-label="Report detail">
           <section className="card p-5" aria-labelledby="report-details-heading">
             <h2 id="report-details-heading">
-              <span className="text-card-title font-extrabold text-ink-strong">
+              <span className="text-[0.9375rem] font-semibold text-ink-strong">
                 Report Details
               </span>
             </h2>
-            <dl className="mt-3 divide-y divide-line text-body">
+            <dl className="mt-3 divide-y divide-line text-[0.75rem]">
               {studentDisplayName && <DetailRow label="Name" value={studentDisplayName} />}
               {sessionDate && <DetailRow label="Session date" value={formatDate(sessionDate)} />}
               <DetailRow label="Status" value={<StatusPill status={report.status} />} />
@@ -542,13 +540,13 @@ export function ManagementReportReview() {
 
           {/* The frame's dark "Ready to approve?" panel — its "Save as draft" control omitted (P6). */}
           <section
-            className="rounded-panel bg-accent-ink p-5 text-white shadow-overlay"
+            className="rounded-[18px] bg-accent-ink p-5 text-white shadow-overlay"
             aria-labelledby="final-decision-heading"
           >
             <h2 id="final-decision-heading">
-              <span className="text-card-title font-extrabold text-white">Ready to approve?</span>
+              <span className="text-[0.9375rem] font-semibold text-white">Ready to approve?</span>
             </h2>
-            <p className="mt-2 text-small leading-6 text-white/85">
+            <p className="mt-2 text-[0.71875rem] leading-[1.52] text-white/85">
               Approve &amp; Submit publishes the final report, notifies the linked parent, and
               updates the student record. It is the only action that makes this report
               parent-visible.
@@ -557,7 +555,7 @@ export function ManagementReportReview() {
               <button
                 type="button"
                 onClick={() => setDialog("submit")}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-field bg-brand-700 px-5 py-3 text-body font-bold text-white transition hover:bg-brand-800"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[11px] bg-brand-700 px-5 py-3 text-[0.84375rem] font-semibold text-white transition hover:bg-brand-800"
               >
                 <Icon name="check" size={16} />
                 Approve &amp; Submit
@@ -565,7 +563,7 @@ export function ManagementReportReview() {
               <button
                 type="button"
                 onClick={() => setDialog("return")}
-                className="inline-flex min-h-12 items-center justify-center rounded-field border border-white/35 bg-transparent px-5 py-3 text-body font-bold text-white transition hover:bg-white/10"
+                className="inline-flex min-h-12 items-center justify-center rounded-[11px] border border-white/35 bg-transparent px-5 py-3 text-[0.78125rem] font-semibold text-white transition hover:bg-white/10"
               >
                 Return assessment concern
               </button>
@@ -574,12 +572,12 @@ export function ManagementReportReview() {
                 /* Tertiary action. Kept underlined at rest: inside the dark panel it is the one
                    control with no border or fill, so the underline — not colour — is what marks
                    it as an affordance (GLOBAL_UI_RULES §7). */
-                className="inline-flex min-h-12 items-center justify-center rounded-field px-5 py-3 text-body font-bold text-white underline underline-offset-4 transition hover:bg-white/10"
+                className="inline-flex min-h-12 items-center justify-center rounded-[11px] px-5 py-3 text-[0.78125rem] font-semibold text-white underline underline-offset-4 transition hover:bg-white/10"
               >
                 Edit wording
               </Link>
             </div>
-            <p className="mt-4 text-small leading-6 text-white/85">
+            <p className="mt-4 text-[0.71875rem] leading-5 text-white/85">
               The server independently re-verifies your authorization, the Trainer approval behind
               this exact version and your wording proof before it accepts either decision.
             </p>
@@ -750,8 +748,8 @@ export function ManagementReportReview() {
 function DetailRow({ label, value }: { readonly label: string; readonly value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2.5">
-      <dt className="text-small text-neutral-on">{label}</dt>
-      <dd className="text-right text-body font-bold text-ink-strong">{value}</dd>
+      <dt className="text-[0.75rem] font-medium text-neutral-on">{label}</dt>
+      <dd className="text-right text-[0.75rem] font-semibold text-ink-strong">{value}</dd>
     </div>
   );
 }
@@ -798,14 +796,14 @@ function PublishedReport({ view }: { readonly view: PublishedView }) {
         <div className="min-w-0">
           <Link
             href="/management/reports?status=submitted"
-            className="inline-flex min-h-11 items-center gap-1 text-body font-bold text-brand-800 no-underline hover:text-brand-700"
+            className="inline-flex min-h-11 items-center gap-1 text-[0.8125rem] font-semibold text-brand-800 no-underline hover:text-brand-700"
           >
             <span aria-hidden="true">‹</span> Approved reports
           </Link>
-          <h1 className="mt-1 text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
+          <h1 className="mt-1 text-[1.375rem] font-bold text-ink-strong">
             {learner}
           </h1>
-          <p className="mt-1 text-body leading-6 text-ink">
+          <p className="mt-0.5 text-small leading-5 text-ink">
             Published {formatSubmitted(view.report.submittedAt)}
             {view.sessionDate ? ` · Class Session ${formatSessionDate(view.sessionDate)}` : ""}
           </p>
@@ -829,8 +827,8 @@ function PublishedReport({ view }: { readonly view: PublishedView }) {
                   <Icon name={presentation.icon} size={18} />
                 </IconTile>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-body font-extrabold text-ink-strong">{panel.label}</h2>
-                  <p className="mt-2 text-body leading-7 text-ink">
+                  <h2 className="text-[0.8203125rem] font-extrabold text-ink-strong">{panel.label}</h2>
+                  <p className="mt-[7px] text-[0.8203125rem] leading-[1.55] text-ink">
                     {view.report.panels[panel.key]}
                   </p>
                 </div>
