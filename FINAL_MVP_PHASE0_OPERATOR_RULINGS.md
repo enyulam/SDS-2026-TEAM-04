@@ -181,7 +181,15 @@ Management **may receive**: evidence metadata required to identify the correct o
 
 Management **may NOT**: upload evidence for the Trainer · alter, replace or delete evidence · change its learner/session/assessment association · use evidence access to expose raw nine-dimension rating data.
 
-**A-038's restriction on raw per-dimension assessment data remains fully active. Evidence review does not grant rating visibility. Parent receives NO evidence access.**
+~~**A-038's restriction on raw per-dimension assessment data remains fully active. Evidence review does not grant rating visibility.**~~ **Parent receives NO evidence access.**
+
+> ✅ **THE FIRST TWO SENTENCES ARE AMENDED — 2026-08-11, operator ruling `D-1`** (`FINAL_MVP_PORTAL_DECISIONS.md`; Authority Lock §2.3). **Management MAY view the nine per-dimension ratings, READ ONLY**, so A-038's restriction is no longer active in the Management direction. Struck and preserved per annotate-never-delete.
+> 
+> ⚠️ **BUT THE SENTENCES' LOCAL POINT SURVIVES INTACT, AND IT IS A DIFFERENT POINT.** They said *evidence review does not grant rating visibility* — i.e. **one authorization must not silently widen into another**. That reasoning is unchanged: rating visibility now comes from **`D-1`**, which ruled it directly. **It still does not come from evidence review**, and no future access grant may be read as carrying another with it.
+> 
+> ⛔ **UNCHANGED IN THIS SECTION:** management access stays **READ-ONLY** · management still may not upload, alter, replace, delete or re-associate evidence · and ⛔ **`Q-27` does not move.**
+> 
+> ⚠️ **The third sentence — `Parent receives NO evidence access` — was SUPERSEDED SEPARATELY on the same day by `D-5`**, which authorizes a per-child parent evidence projection and activates `A-001`. It is left standing above because it belongs to this section's evidence ruling rather than to `D-1`; read it together with `D-5`.
 
 ### 5. `consent_records` — **do not create**
 

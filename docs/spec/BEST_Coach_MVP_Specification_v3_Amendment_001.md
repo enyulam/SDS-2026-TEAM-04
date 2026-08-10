@@ -38,6 +38,18 @@ Precedence (highest first): **v3 → ratified amendments (this document) → `CL
 
 ## A-001 — Parent evidence access
 
+> ✅ **ACTIVATED 2026-08-11 BY OPERATOR RULING `D-5`** (`FINAL_MVP_PORTAL_DECISIONS.md`, repository root; Authority Lock §2.3). **A-001 was RATIFIED BUT ARMED AND UNACTIVATED** — Authority Lock §8.1 had ruled the parent evidence projection **OUT** of the Final MVP, so this clause's gates stood ready with nothing to gate. **`D-5` authorizes per-child video evidence with the linked Parent as one of its three audiences, so the projection is IN and these gates are LIVE.**
+>
+> ⛔ **NOTHING IN THIS CLAUSE IS WEAKENED — ACTIVATION IS NOT RELAXATION.** All the gates below apply **in full**, and `A-003`'s prohibited-path proofs and `A-004`'s both-direction Parent UAT come with them.
+>
+> **`D-5` adds four constraints on top of these gates, not instead of them:** the subject is the **individual child** whose report it is, never class footage · the ruled uploader is the **Trainer**, at assessment time · the object is tagged to **exactly one session report** and can never be moved or reused · ⛔ **there is NO download affordance for any role, including Parent.**
+>
+> ⚠️ **The retrievability limitation is stated, never denied.** Streamed video is technically retrievable by a determined user with browser tooling. The product provides no download affordance; **it does not claim technical impossibility, and no surface may say otherwise.**
+>
+> ⛔ **`Q-27` IS A DIFFERENT BOUNDARY AND DOES NOT MOVE.** `D-5` concerns evidence media; the nine per-dimension ratings still never reach a Parent session in any form.
+>
+> ⛔ **`D-5` authorizes no evidence schema, bucket, policy, grant, RPC, audit action string, migration or UI**, and **`A-014` is unchanged — the TA persona stays deferred and `centre_membership_role` is NOT extended.**
+
 Supersedes any **absolute** statement that parents can never receive evidence access (v3 §21 "parents never receive evidence URLs").
 
 **Ratified rule.** A parent may access **only their linked child's** evidence, and only when **all** of the following pass:

@@ -76,9 +76,24 @@ The frame's `06` lesson strip draws **KEY FOCUS** chips (*Vocal projection · To
 
 **Also prohibited under this ruling, for the avoidance of doubt:** the frame's **SLIDES** attachment chips and **View lesson plan** control. No storage bucket exists, and they are the same media class as `G-8`.
 
+> ✅ **QUALIFIED 2026-08-11 BY OPERATOR RULING `D-4`** (`FINAL_MVP_PORTAL_DECISIONS.md`). **KEY FOCUS chips are PERMITTED in a DISTINCT VISUAL POSITION with a DISTINCT LABEL**, as part of `D-4`'s lesson-materials feature.
+> 
+> ⛔ **THE PROHIBITION THAT MATTERED IS UNCHANGED: they must NEVER occupy, replace, or visually adjoin the governed carried-over previous-session focus line, or any surface presenting the governed focus.** ▶ **The position was always the rule, not the content** — two different things in one place is an **invisible substitution of a governed field**. **`CLAUDE.md` §10 Phase 1 exit condition (c) is what this protects.**
+> 
+> ⚠️ **SLIDES and View lesson plan:** `D-4` authorizes a lesson-materials feature in which **Management uploads and Trainer downloads** materials tagged to a **specific class session**. Anything on `06` beyond that scope remains prohibited under this ruling.
+
 ---
 
-## 4. `G-4` — TERM: ⛔ **NO**
+## 4. `G-4` — TERM: ⛔ ~~**NO**~~ ✅ **REVERSED 2026-08-11 BY `D-3`**
+
+> ✅ **REVERSED BY OPERATOR RULING `D-3`, 2026-08-11** (`FINAL_MVP_PORTAL_DECISIONS.md`; Authority Lock §2.3). **Terms are PERMITTED as scheduling structure** — sessions belong to lessons, lessons group into terms, and terms scope the calendar and schedule surfaces across all three portals. Scope is the **final MVP prototype submission**, after the demonstration.
+> 
+> ⚠️ **The refusal below was correctly reasoned for the question it was asked, and the question changed.** `G-4` refused to build a substrate **in order to render a label**; `D-3` builds it because **the calendar features genuinely need the structure**. The whole text is preserved per annotate-never-delete.
+> 
+> ⛔ **WHAT `D-3` DOES NOT DO — the deferral this ruling protected is UNCHANGED.** **End-of-term REPORT GENERATION remains out of scope** (`CLAUDE.md` §8). **Building the term entity does NOT authorize term reports**, and **Management Term Report (screen `28`) remains separately governed** (Amendment 005; `CLAUDE.md` §12). Term **evidence capture** (`term_evidence_notes`) is unaffected, as it always was.
+> 
+> ⛔ **`D-3` authorizes no table, column, migration, route or screen.** The PORTAL COMPLETION PLAN schedules it, and it needs its own explicit Operator authorization.
+
 
 **The question.** The frames show `"Term 1 · 2026"` / `"Term 1, 2035"` in Report Details on `08`, `19` and `33`, and an **"All terms"** filter on `29`. No term entity exists.
 
@@ -137,7 +152,22 @@ The frame's `06` lesson strip draws **KEY FOCUS** chips (*Vocal projection · To
 
 ---
 
-## 8. `G-8` — CLASS VIDEO EVIDENCE: ⛔ **CONFIRMED OUT, UNCHANGED**
+## 8. `G-8` — ~~CLASS VIDEO EVIDENCE: ⛔ **CONFIRMED OUT, UNCHANGED**~~ ✅ **SUPERSEDED 2026-08-11 BY `D-5`**
+
+> ✅ **SUPERSEDED BY OPERATOR RULING `D-5`, 2026-08-11** (`FINAL_MVP_PORTAL_DECISIONS.md`; Authority Lock §2.3). **Video evidence is AUTHORIZED**, with a scope narrower than the frame's and different in kind from what `G-8` refused.
+> 
+> ⚠️ **READ THE DIFFERENCE BEFORE READING THE REVERSAL.** `G-8` refused **CLASS video evidence** — the frame's uploader on `08`. **`D-5` authorizes PER-CHILD evidence**: the individual child whose report it is, **not class footage**. The subject changed, not merely the verdict.
+> 
+> **`D-5`'s ruled shape:** **Trainer** uploads at assessment time · tagged to **exactly one session report**, never moved or reused · **Management views it before Approve & Submit**, as part of the approval · removable · ⛔ **no download affordance for any role, including Parent** · visible to **Management · the authoring Trainer · the linked Parent** — the same boundary the report text already uses.
+> 
+> ⚠️ **The honest limitation is stated, not hidden:** streamed video is technically retrievable by a determined user with browser tooling. The product provides **no download affordance**; **it does not claim technical impossibility, and no surface may say otherwise.**
+> 
+> **Ground 1 survives and is now the operative number:** the frame's **500 MB** is still **never implemented** against `G-05`'s ruled **50 MiB**. **Ground 2 is discharged** — `D-5` is the authorization Amendment 008 withheld. **Ground 3's hero-slice exclusion stands as a statement about the HERO SLICE**, which is closed; `D-5` belongs to the PORTAL COMPLETION PLAN.
+> 
+> ⛔ **`A-014` IS UNCHANGED: the TA / `Assist.` persona stays deferred and `centre_membership_role` is NOT extended.** `D-5` is independent of it — the ruled uploader is the **Trainer**.
+> 
+> ⛔ **`D-5` authorizes no schema, bucket, policy, RPC, grant, audit action string, migration or UI.** It needs its own explicit Operator authorization.
+
 
 **The question.** Frame `08` draws a **Class Video Evidence** uploader reading `"MP4, MOV · up to 500MB each"`.
 

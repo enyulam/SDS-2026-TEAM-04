@@ -84,5 +84,12 @@ A-029's data-minimization rule applies in full. **An evidence audit payload carr
 - It does **not** authorize the evidence schema, bucket, policies, grants, RPCs, UI or migration.
 - It does **not** create `consent_records`, a consent scope, or any parent evidence path — the parent evidence projection is ruled **OUT** of the Final MVP (Authority Lock §8.1) and the consent instrument is ruled **not required** for the current synthetic-only build.
 - It does **not** authorize a malware/content-scanning provider, or permit a `clean` scan state to be asserted without a real scanner having inspected the object.
-- It does **not** grant Management any rating visibility. **A-038 is unchanged and absolute**: evidence review never becomes raw per-dimension assessment access.
-- It does **not** change the parent boundary in any way. **Parents receive no evidence access.**
+- ~~It does **not** grant Management any rating visibility. **A-038 is unchanged and absolute**: evidence review never becomes raw per-dimension assessment access.~~
+  > ✅ **AMENDED 2026-08-11 BY OPERATOR RULING `D-1`** (`FINAL_MVP_PORTAL_DECISIONS.md`; Authority Lock §2.3). **A-038 is no longer absolute in the Management direction: management may VIEW the nine per-dimension ratings, READ ONLY.** Struck and preserved per annotate-never-delete.
+  > ⚠️ **What this clause was really asserting is still true:** *this amendment* grants no rating visibility — **the grant comes from `D-1`, which ruled it directly**, and **evidence review still never becomes rating access**. One authorization does not widen into another.
+  > ⛔ **Management may still not EDIT a rating**, and ⛔ **`Q-27` does not move — the Parent boundary is untouched.**
+- ~~It does **not** change the parent boundary in any way. **Parents receive no evidence access.**~~
+  > ✅ **SUPERSEDED 2026-08-11 BY OPERATOR RULING `D-5`** (`FINAL_MVP_PORTAL_DECISIONS.md`). **Per-child video evidence is authorized and the linked Parent is one of its three audiences**, which **activates `A-001`** — previously *ratified but armed and unactivated*.
+  > ⛔ **`Q-27` IS A DIFFERENT BOUNDARY AND IT DOES NOT MOVE.** `D-5` concerns **evidence media**; the nine per-dimension ratings still never reach a Parent session in any form.
+  > ⚠️ **Every `A-001`/`A-003`/`A-004` safeguard applies in full** the moment evidence is implemented — the gates were always ratified, only unactivated. ⛔ **No download affordance for any role, including Parent**, and the streamed-retrievability limitation is **stated, never denied**.
+  > ⛔ **This amendment still authorizes no evidence schema, bucket, policy, grant, RPC, UI or migration** — `D-5` does not either. Both await an explicit implementation authorization.
