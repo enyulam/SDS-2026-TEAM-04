@@ -48,16 +48,39 @@
 // =====================================================================
 
 import { spawn, spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+
+import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
 
 import { getSessionRosterCore } from "@/server/modules/report-workflow/trainer-projections.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 const TRAINER_EMAIL = "trainer.fixture@example.test";
-const DB_CONTAINER = "supabase_db_best-coach-mvp";
+
+// ⚠️ NOT A LITERAL. This was `"supabase_db_best-coach-mvp"` until 2026-08-10.
+// Once this development clone took its own project id, that literal named the
+// FROZEN demonstration database — so this proof would have read the expected
+// follow-up note out of THAT database while reading the projection's actual
+// value out of THIS one, and compared them as though they were one stack.
+// A mismatch would have been reported as a continuity failure of this
+// repository's code; a coincidental match, as a pass.
+//
+// Guarded resolution: hard-denies the frozen project unconditionally, then
+// fail-closed pins on BEST_COACH_LOCAL_PROJECT_ID. Container name DERIVED.
+const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
+
+// Both halves of this proof must reach the SAME stack: the note is read by
+// `docker exec` against PROJECT_ID, while the projection is read over the API
+// that `supabase status` reports from supabase/config.toml. If those two ever
+// name different projects the comparison is meaningless, so refuse here.
+assertConfigProjectId(
+  (readFileSync(join(ROOT, "supabase", "config.toml"), "utf8").match(/^\s*project_id\s*=\s*"([^"]+)"/m) ?? [])[1] ?? "",
+  PROJECT_ID,
+);
 
 // The P1-T09a expansion's continuity pair. Fixed literals, exactly as the
 // fixture defines them.

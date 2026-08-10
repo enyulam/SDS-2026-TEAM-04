@@ -4459,3 +4459,72 @@ The ratified 25-row minimum **plus** the `P1-T09a` expansion: **2 trainers · 2 
 ### Commit / next
 
 Continuity only. **Next: the Operator authorizes Plan Phase 0A in a fresh session.** No implementation authorization is in force.
+
+---
+
+## 2026-08-10 — §12 KEY FOCUS entry · the owed Phase 6a carry-over re-proof · a LIVE frozen-database pin in the continuity harness
+
+- **Track / branch / worktree:** hero-chain preparation · `develop` · none. **Development clone, not the demonstration workspace.**
+- **Starting HEAD:** `3689f09`.
+- **Scope:** two bounded Operator instructions, executed in order — (1) add hero-chain ruling `G-3`'s KEY FOCUS prohibition to `CLAUDE.md` §12; (2) run the owed Phase 6a runtime carry-over re-proof on the code as it stands, before any Phase 0A work.
+- **Migration or schema changes:** **NONE.** No table, enum, column, RPC, grant, policy, route or audit action. Step 7H audit registry unchanged at 16.
+
+### 1. `CLAUDE.md` §12 — one entry added under a bounded Operator instruction
+
+**One insertion, zero deletions.** Placed as the last ruling-instrument bullet, before "A phase's exit condition (§10)". It prohibits building the frame's **KEY FOCUS chips** (screen `06`), adding a column for them, and rendering lesson-plan focus into the roster's carried-over previous-session focus line or any surface presenting the governed focus — plus the frame's **SLIDES** chips and **View lesson plan** control, under the same ruling.
+
+**Why §12 and not only the Authority Lock.** The Lock outranks `CLAUDE.md` for Final-MVP-defining questions and already carried all eight rulings at §11/§13/§14/§15/§19.1/§28.4. But **§14.0 makes §12 the list that binds the Main Orchestrator**, and a session about to build screen `06` reads §12 long before Lock §13. **Operator acceptance recorded the deciding reason: naming the SHARED VISUAL POSITION is what makes the trap catchable** — KEY FOCUS and the governed carried-over focus occupy the same strip, so a prohibition that did not say so would read as a style note rather than a governance boundary.
+
+⚠️ **Nothing else in `CLAUDE.md` was touched.** The lesson number/title half of `G-3` is recorded as **scope, not a migration authorization**.
+
+### 2. ⚠️ THE SIGNIFICANT FINDING — `prove-session-continuity.mjs:60` pinned the FROZEN demonstration database, and the pin RESOLVED
+
+`const DB_CONTAINER = "supabase_db_best-coach-mvp"` — the **frozen demonstration** container.
+
+**This was not latent. Both stacks are running** (`docker ps` shows `supabase_db_best-coach-dev` **and** `supabase_db_best-coach-mvp`), so the literal resolved to a live container.
+
+**The failure mode, stated exactly, because it is worse than a wrong target.** The harness reads from **two sources**: the expected follow-up note by `docker exec` against `DB_CONTAINER`, and the actual `previousSessionFocus` through the projection over the API that `supabase status` reports from `supabase/config.toml`. With the literal in place those two named **different databases**. The proof would have compared **a note from the frozen demonstration database against a projection from this clone**:
+
+- a **mismatch** would have been reported as a **continuity defect in this repository's code** — a false failure against a ratified §10 Phase 1 exit condition;
+- a **coincidental match** would have been reported as a **PASS** — a false green on a phase gate.
+
+**Split-brain, not merely mis-aimed.** A tool with one source reaches the wrong stack and usually fails loudly; a tool with two sources silently compares across them.
+
+**Same class as the two fixed earlier on 2026-08-10** (`server/modules/ai-drafting/trusted-store.ts:34`, `scripts/physical-test/prove-trusted-store-acl.mjs:27`). That sweep was scoped to `app/` `lib/` `server/` and its finding — *"the only container-name literal in production code"* — remains **accurate as stated**. `scripts/` is not production code, and the sweep did not cover it. **Further files under `scripts/` still carry the frozen literal** and are enumerated as the next bounded task.
+
+**Fix, using the ratified guard pattern and no invented path:**
+
+- `resolveLocalTarget()` from `scripts/fixtures/local-target-guard.mjs` — unconditional non-overridable HARD DENY of `best-coach-mvp`, then a fail-closed pin on `BEST_COACH_LOCAL_PROJECT_ID`; **container name DERIVED, never literal**.
+- **`assertConfigProjectId` cross-check added** so the `docker exec` half and the API half can never name different projects. This is the direct remedy for the split-brain class above, and it is **tighter than the old literal could ever be** — a hardcoded name cannot detect disagreement.
+- `--env-file=.env.local` added to the `test:continuity` npm script so the fail-closed pin resolves, matching `prove:trusted-store-acl` and `fixtures:local`.
+
+⚠️ **No product code was touched.** `getSessionRosterCore` and everything it reads are unchanged, so plan §9.3 rule 1 — *the re-proof runs on the code as it stands* — holds.
+
+### 3. The owed Phase 6a runtime carry-over re-proof — **PASS**, and NOT vacuous
+
+`npm run test:continuity` → **exit 0**, five legs, **run twice with identical output**.
+
+| Leg | Verdict |
+|---|---|
+| `CONT-0` earlier session carries a non-empty follow-up note (129 chars) | PASS |
+| `CONT-A0` **ADMIN-MINTED** trainer session established | PASS |
+| `CONT-1` the note surfaces **byte-exactly** as the later session's previous focus | PASS |
+| `CONT-3` both other learners carry `previousSessionFocus = null` | PASS |
+| `CONT-4` the earlier session carries none — continuity flows forwards only | PASS |
+
+⚠️ **Vacuity was checked rather than assumed.** `CONT-4` passes trivially on an empty roster and **the harness does not guard that**. Measured independently: earlier roster **3**, later roster **3**, both sessions in the **same module**, earlier `session_date` genuinely **before** later, one observation carrying a non-empty note. `CONT-1`'s expected value is read **from the database**, so the comparison is against the trainer's actual saved fact, not a constant.
+
+**Negative controls on the fix itself**, so it is discriminating rather than decorative: pin set to `best-coach-mvp` → **HARD DENY**; pin absent → fail-closed refusal. **Both abort before any leg and emit ZERO `PASS` lines.**
+
+**Read-only, verified after the run:** `reports` **0** · `report_versions` **0** · `audit_events` **0** · `observations` **2** — unchanged from the `B-STAGE3-2` closure baseline. **The frozen stack was never contacted and no `supabase stop` was run against any project.**
+
+- **Automated verification:** `test:continuity` **0** (×2) · `prove-local-target-guard` **31 passed · 0 failed, exit 0** (no drift between the two guard copies) · `eslint` on the changed harness **0** · `package.json` re-verified after edit — `JSON.parse` OK, **no BOM**, 27 script keys intact (Q-28).
+- **Authentication:** **ADMIN-MINTED SESSION.** Password sign-in remains **NOT-RUN** and belongs to the Operator. An admin-minted session is **never** a sign-in proof.
+- **Operator decisions received:** the §12 entry **accepted as written**; the carry-over re-proof **ACCEPTED**; the `scripts/` sweep authorized as the next bounded task, before Phase 0A.
+- **Blockers opened/closed:** none opened, none closed. `B-STAGE3-2` remains CLOSED.
+
+⚠️ **What this does NOT discharge.** It discharges **the re-proof only**. **`F-S6-REVIEW-1` remains untouched and unproven** — plan §9.3 rule 4 forbids either being reported as discharging the other. `PASS` is an evidence verdict; the Operator's **`ACCEPTED`** is recorded above as a separate act.
+
+### Commit / next
+
+**Next: sweep the remaining `scripts/` frozen literals — Operator-authorized, bounded, BEFORE Plan Phase 0A.** With both stacks running, every remaining literal is a live path to the demonstration database, and Phase 0A onward runs harnesses constantly. **Phase 0A is NOT authorized.**

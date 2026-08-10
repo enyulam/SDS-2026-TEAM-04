@@ -20,7 +20,7 @@
     "prove:serving-discipline": "node scripts/physical-test/prove-serving-discipline.mjs",
     "test:runtime-profile": "node scripts/tests/config/run-runtime-profile.mjs",
     "test:g06-grounding": "node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/g6-harness/prove-g06-grounding.mjs",
-    "test:continuity": "node --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/prove-session-continuity.mjs",
+    "test:continuity": "node --env-file=.env.local --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/integration/prove-session-continuity.mjs",
     "test:exit-condition-b": "node scripts/tests/step-7i/run-exit-condition-b.mjs",
     "prove:stage2-routes": "node scripts/physical-test/prove-stage2-routes.mjs",
     "prove:stage3-authenticated": "node --env-file=.env.local scripts/physical-test/prove-stage3-authenticated.mjs",
