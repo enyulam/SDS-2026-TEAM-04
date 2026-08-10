@@ -234,6 +234,21 @@ export interface AdapterManagementQueueRowDto {
   readonly openCorrectionScope?: AdapterIssueScope;
   readonly openCorrectionStatus?: "open" | "resolved";
   readonly openCorrectionReason?: string;
+  /**
+   * Hero chain Phase 9 — the frame's Class, Lesson and Trainer columns and its
+   * class filter. Session IDENTITY and SCHEDULING facts only.
+   *
+   * ⛔ None is a rating, observation, attendance value, evidence reference,
+   * trainer note, checklist value, content hash, revision count or AI history,
+   * so contract §5.5's exclusion list is untouched. ⛔ There is no term field
+   * and G-4 means there must never be one.
+   */
+  readonly classModuleId?: string;
+  readonly classGradeLabel?: string;
+  readonly classModuleTitle?: string;
+  readonly lessonNumber?: number;
+  readonly lessonTitle?: string;
+  readonly trainerDisplayName?: string;
   readonly submittedAt?: string;
 }
 

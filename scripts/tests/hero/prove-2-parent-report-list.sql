@@ -240,9 +240,23 @@ BEGIN
   -- ---------------------------------------------------------------
   -- P2-6 -- ⛔ the context function is UNCHANGED by Phase 2. Phase 2
   -- added no database object, so its own claim is that it added none:
-  -- still 41 functions, and still exactly 7 returned fields, so no
-  -- rating, hash, revision number, status or correction field could
-  -- have been slipped onto the list row through the shared read.
+  -- exactly 7 returned fields, so no rating, hash, revision number,
+  -- status or correction field could have been slipped onto the list row
+  -- through the shared read.
+  --
+  -- ⚠️ THE FUNCTION COUNT MOVED 41 -> 42, AND THE REASON IS NAMED HERE
+  -- RATHER THAN QUIETLY BUMPED. Phase 7 added exactly one function,
+  -- `assessment_save_follow_up_notes`, under a bounded Operator
+  -- authorization (migration `20260811090000`). This leg failed on the
+  -- first Phase 9 run because it still pinned 41 -- ⚠️ A PINNED CENSUS IN
+  -- ONE PHASE'S PROOF GOES STALE THE MOMENT A LATER PHASE LEGITIMATELY
+  -- ADDS AN OBJECT, and it should have been re-run at the Phase 7
+  -- boundary rather than discovered at the Phase 9 one.
+  --
+  -- ⛔ It is deliberately NOT relaxed to `>= 41` or dropped. A census
+  -- assertion whose number may drift for unnamed reasons asserts nothing;
+  -- the value of this leg is precisely that changing it requires someone
+  -- to write down which authorization moved it.
   -- ---------------------------------------------------------------
   SELECT pg_catalog.count(*) INTO v_n
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
@@ -251,12 +265,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 41 THEN
+  IF v_n = 1 AND v_listed = 42 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 41 functions (Phase 2 added none) and the context return set is still exactly 7';
+    RAISE NOTICE 'PASS P2-6 -- 42 functions (Phase 2 added none; Phase 7 added the one named above) and the context return set is still exactly 7';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 41) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 42) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

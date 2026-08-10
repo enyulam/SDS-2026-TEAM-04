@@ -536,6 +536,13 @@ function narrowQueueRows(
     readonly openCorrectionStatus?: "open" | "resolved";
     readonly openCorrectionReason?: string;
     readonly submittedAt?: string;
+    // Hero chain Phase 9 — session identity and scheduling context only.
+    readonly classModuleId?: string;
+    readonly classGradeLabel?: string;
+    readonly classModuleTitle?: string;
+    readonly lessonNumber?: number;
+    readonly lessonTitle?: string;
+    readonly trainerDisplayName?: string;
   }>,
   // C2C-004: the submitted-list projection legitimately reports `submitted`,
   // and nothing else does. The allow-list is passed in rather than widened
@@ -558,6 +565,21 @@ function narrowQueueRows(
         ? { openCorrectionReason: row.openCorrectionReason }
         : {}),
       ...(row.submittedAt !== undefined ? { submittedAt: row.submittedAt } : {}),
+      /*
+       * Hero chain Phase 9. ⚠️ Listed EXPLICITLY, one field at a time, like
+       * every field above: this mapper is an allow-list, so a field the
+       * projection grows later does NOT reach the client until someone names
+       * it here. That property is why the §5.5 exclusions cannot leak by
+       * accident, and spreading `...row` to save six lines would destroy it.
+       */
+      ...(row.classModuleId !== undefined ? { classModuleId: row.classModuleId } : {}),
+      ...(row.classGradeLabel !== undefined ? { classGradeLabel: row.classGradeLabel } : {}),
+      ...(row.classModuleTitle !== undefined ? { classModuleTitle: row.classModuleTitle } : {}),
+      ...(row.lessonNumber !== undefined ? { lessonNumber: row.lessonNumber } : {}),
+      ...(row.lessonTitle !== undefined ? { lessonTitle: row.lessonTitle } : {}),
+      ...(row.trainerDisplayName !== undefined
+        ? { trainerDisplayName: row.trainerDisplayName }
+        : {}),
     }));
 }
 

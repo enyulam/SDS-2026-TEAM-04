@@ -5233,3 +5233,51 @@ No application code changed — **no route, component, DTO, RPC, migration, gran
 ### Next
 
 **Phase 9 — `29` Management Reports** (Class, Trainer and Lesson columns; class filter; terms filter a `REGISTERED-OMISSION` under G-4). ⚠️ **Measure at HEAD first**, and re-check §5.5's exclusions **field by field** at exit.
+
+---
+
+## 2026-08-11 — HERO CHAIN **PHASE 9** — `29` Management Reports: Class · Lesson · Trainer · the class filter
+
+**Track:** hero chain completion, plan §6.9 Phase 9. **Branch:** `develop`. **Starting HEAD:** `607023d`.
+
+### Measured at HEAD first (§12 item 10)
+
+**No new database object was needed.** Management already holds its own Step 7G SELECT **policy and matching grant** on `class_sessions`, `class_modules`, `class_grades`, `class_session_assignments` and `trainer_profiles` — measured against the catalogue, not assumed. Context is read over the caller's own credential, as every other management projection does, and the Trainer column reuses **Phase 0A's shared identity path** so `29` carries no second copy of that join.
+
+**Built:** `server/modules/class-session/session-context-projections.ts` — a shared batch reader placed in the module that **owns** those tables (§9 rule 1), serving Phase 9 and Phase 10 · `decorateQueueRows` on all three management queue projections · six fields through the DTO → adapter → contract → fixture chain · three columns and a live class filter on the screen.
+
+### ⚠️ The decision worth recording is a REFUSAL
+
+The obvious reuse was Phase 0B's `report_get_canonical_context` — it returns exactly the four fields wanted. **It is gated on `latest_submitted_version_id IS NOT NULL`, because it describes a SUBMITTED report, and two of this screen's three queue modes hold no submitted version at all** (`trainer_approved` awaits review; `needs_edit` is a correction in flight).
+
+⛔ **The gate was NOT widened to make it fit.** `P9-2` measures the RPC returning **zero rows** for a `trainer_approved` pair — reuse was *impossible*, not merely inconvenient — and **`P9-3` measures that its submitted-version precondition is still present**. ▶ That turns `CLAUDE.md` §12's *"never work around a fail-closed refusal by weakening the thing that refused"* into a **mechanical check** rather than a promise in a comment. Dropping that precondition to serve a column heading would have weakened a governed read three roles share, to solve a problem management does not have.
+
+### ⛔ G-4 — the "All terms" filter was FOUND STANDING ON THIS SCREEN, and is gone
+
+It rendered as a **disabled chip** carrying an honest reconciliation-era reason: *"the governed Management queue projection carries no term field."* ⚠️ **That reason had become false in the way that matters — it implies the filter would exist if the data did.** G-4 ruled the opposite, permanently: a `terms` table is precisely the substrate End-of-Term generation needs (§8, spec §28), and a display label is not worth building it.
+
+▶ **`REGISTERED-OMISSION` means ruled out, preserved in the record, NEVER BUILT.** An inert chip advertising a filter that will never exist is a partial build of a ruled-out element. Removed outright. **`P9-7`** pins its absence, **`P9-7b`** proves that matcher discriminating against the Class chip, and **`P9-6`** shows G-4 holds **at the schema** too — no term table, no term column, anywhere in `public`.
+
+### Verification — `npm run prove:hero-9`, 6 SQL legs + 17 surface legs, `PASS`
+
+- ⚠️ **`P9-5` is what makes `P9-1` mean anything.** The suite runs under `SET LOCAL ROLE authenticated`; the same statement with **no identity** returns zero rows. `FORCE ROW LEVEL SECURITY` is off, so as owner every leg would have passed for the wrong reason — the `bool_and`-over-zero-rows shape this project has been bitten by three times.
+- **`P9-8`/`P9-8b`** — the class filter's options are derived from **rows the caller already received**, and it fetches nothing to populate itself. It cannot name, or be used to probe for, a class this account cannot already see. Both it and the search box **narrow an already-authorized list and can never widen one**; neither is an authorization decision. The decorator likewise runs **last**, on rows already past their own governed gate — reversing that order would put an authorization decision in TypeScript.
+- **`P9-10`** — §5.5 re-checked **field by field against the shipped contract**, not the server interface, plus a non-vacuity leg and a discrimination leg. `narrowQueueRows` remains an explicit allow-list: the six fields are named one at a time, so a field the projection grows later does not reach the client until someone names it.
+- Transaction-scoped, ending in `ROLLBACK`; the runner measures governed counts before and after — **unmoved**.
+
+### ⚠️ Two defects of my own, both recorded as plan disciplines
+
+1. **`P9-10` failed 8 of 10 legs on first run** — the DTO's own comment RECITES §5.5's exclusion list, so the scans matched the sentence promising absence instead of the fields. **FIFTH instance in this batch of one root** (`P6-4`, `H7-6`, and three earlier): **a scan over source reads the prose that documents the code.** I stripped comments from the screen and *not* from the contract. Now stripped, and recorded as plan §12 item **13**.
+2. **`prove:hero-2` FAILED on re-run** — its `P2-6` pinned **41 functions**; **Phase 7 legitimately added one** under a bounded authorization. ⚠️ **A pinned census in one phase's proof goes stale the moment a later phase adds an object**, and this surfaced at the **Phase 9** boundary rather than the Phase 7 one because I re-ran only the proofs whose surface I had touched. ⛔ **Not relaxed to `>=` and not deleted** — the value of the pin is that moving it forces someone to name the authorization that moved it, which the re-pin now does inline. Recorded as plan §12 item **14**, with the rule: **re-run EVERY earlier proof at each phase boundary.**
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · **route census 17** · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS** · **every earlier hero proof re-run: `0a`, `1`, `2`, `3`, `4`, `5`, `6`, `7` all `PASS`** · emitted CSS verified — `.min-w-\[62rem\]{min-width:62rem}` **emitted**, the replaced `44rem` **absent**, stylesheet 45,748 → **45,760** bytes. Database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on this authenticated surface. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Next
+
+**Phase 10 — `19` Management Student Report**: class, trainer and lesson context in Report Details. Overall Grade omitted under **G-2 and A-038 independently**; the six R-B5 prohibitions preserved. ⚠️ Measure at HEAD first; the new shared context reader is expected to serve it, which is why it was built in `class-session` rather than in `management-view`.

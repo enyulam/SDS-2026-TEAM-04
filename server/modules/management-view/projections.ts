@@ -37,6 +37,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
+import { getSessionContextsCore } from "@/server/modules/class-session/session-context-projections";
+import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
 import {
   firstRow,
   type CorrectionIssueScope,
@@ -78,6 +80,29 @@ export interface ManagementQueueRowDto {
    * projection, never on R-6 and never on `ManagementReviewDto`.
    */
   readonly openCorrectionReason?: string;
+  /**
+   * Hero chain Phase 9 — the frame's Class, Lesson and Trainer columns and its
+   * class filter.
+   *
+   * ⚠️ Every one of these is an IDENTITY OR SCHEDULING fact about the session,
+   * carried so management can tell one queue row from another. None is a
+   * rating, an observation, an attendance value, an evidence reference, a
+   * trainer note, a checklist value, a content hash or a revision count, so
+   * §5.5's exclusion list is untouched — re-checked field by field at this
+   * phase's exit rather than assumed.
+   *
+   * ⛔ There is no term field, and G-4 means there must never be one.
+   *
+   * All are optional: they are decoration on rows whose governed content was
+   * already authorized, and a row must never disappear because its class
+   * label could not be read.
+   */
+  readonly classModuleId?: string;
+  readonly classGradeLabel?: string;
+  readonly classModuleTitle?: string;
+  readonly lessonNumber?: number;
+  readonly lessonTitle?: string;
+  readonly trainerDisplayName?: string;
   /**
    * C2C-004 — the write-once publication timestamp of the canonical submitted
    * version, present ONLY on the submitted-list projection. It is publication
@@ -159,6 +184,52 @@ async function gatedReview(
   return firstRow<ManagementReviewRow>(data);
 }
 
+/**
+ * Hero chain Phase 9 — attach the frame's Class, Lesson and Trainer context to
+ * a queue already assembled and already authorized.
+ *
+ * ⚠️ IT RUNS LAST, AND THAT ORDERING IS THE POINT. Every row handed to it has
+ * already passed its own governed gate — the STATUS-GATED review read, the
+ * correction boundary or the submitted boundary. This function therefore
+ * decides NOTHING about who may see what; it only labels rows the caller was
+ * already entitled to. Reversing the order — filtering a queue by a class the
+ * caller can see — would put an authorization decision in TypeScript, which is
+ * exactly what this codebase does not do.
+ *
+ * ⚠️ Fail-soft on BOTH reads, deliberately. A row whose class label or trainer
+ * name cannot be read renders without them. **A missing column heading must
+ * never be able to hide a report management is required to review** — losing a
+ * row from the final-review queue is a governance failure; losing a label is a
+ * cosmetic one.
+ */
+async function decorateQueueRows(
+  client: SupabaseClient,
+  rows: readonly ManagementQueueRowDto[],
+): Promise<readonly ManagementQueueRowDto[]> {
+  if (rows.length === 0) return rows;
+  const sessionIds = rows.map((row) => row.sessionId);
+
+  const contexts = await getSessionContextsCore(client, sessionIds);
+  const staff = await getSessionStaffIdentitiesCore(client, sessionIds);
+  const staffMap = staff.outcome === "success" ? staff.data : null;
+
+  return rows.map((row) => {
+    const ctx = contexts.get(row.sessionId);
+    const trainer = staffMap?.get(row.sessionId)?.trainerDisplayName ?? null;
+    return {
+      ...row,
+      ...(ctx?.classModuleId ? { classModuleId: ctx.classModuleId } : {}),
+      ...(ctx?.classGradeLabel ? { classGradeLabel: ctx.classGradeLabel } : {}),
+      ...(ctx?.classModuleTitle ? { classModuleTitle: ctx.classModuleTitle } : {}),
+      ...(ctx?.lessonNumber === null || ctx?.lessonNumber === undefined
+        ? {}
+        : { lessonNumber: ctx.lessonNumber }),
+      ...(ctx?.lessonTitle ? { lessonTitle: ctx.lessonTitle } : {}),
+      ...(trainer ? { trainerDisplayName: trainer } : {}),
+    };
+  });
+}
+
 // ---------------------------------------------------------------------
 // R-6 — the pending-final-review queue (CP-3's resolution)
 // ---------------------------------------------------------------------
@@ -183,7 +254,7 @@ export async function listManagementPendingReviewCore(
       ...(row.open_correction_status ? { openCorrectionStatus: row.open_correction_status } : {}),
     });
   }
-  return { outcome: "success", data: out };
+  return { outcome: "success", data: await decorateQueueRows(client, out) };
 }
 
 // ---------------------------------------------------------------------
@@ -234,7 +305,9 @@ export async function listManagementCorrectionTrackingCore(
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
 
-  return listManagementCorrectionsFromRpc(client);
+  const listed = await listManagementCorrectionsFromRpc(client);
+  if (listed.outcome !== "success") return listed;
+  return { outcome: "success", data: await decorateQueueRows(client, listed.data) };
 }
 
 // ---------------------------------------------------------------------
@@ -301,7 +374,9 @@ export async function listManagementSubmittedCore(
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
 
-  return listManagementSubmittedFromRpc(client);
+  const listed = await listManagementSubmittedFromRpc(client);
+  if (listed.outcome !== "success") return listed;
+  return { outcome: "success", data: await decorateQueueRows(client, listed.data) };
 }
 
 // ---------------------------------------------------------------------

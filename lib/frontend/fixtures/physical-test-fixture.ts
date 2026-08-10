@@ -73,6 +73,16 @@ type FixtureStudent = {
 
 type FixtureSession = {
   readonly sessionId: string;
+  /**
+   * Hero Phase 9 — the STABLE identity the `29` class filter selects on.
+   *
+   * ⚠️ It is a separate field rather than the module NAME because a filter
+   * must key off identity, not a label: two modules may legitimately share a
+   * title, and a rename must not silently reassign which rows a selection
+   * matches. The governed projection uses `class_sessions.class_module_id`
+   * for exactly the same reason.
+   */
+  readonly classModuleId: string;
   readonly moduleName: string;
   readonly classGrade: "Beginner" | "Intermediate" | "Advanced";
   readonly date: string;
@@ -204,9 +214,30 @@ function fixtureReportContext(
   };
 }
 
+/**
+ * Hero Phase 9 — the fixture mirror of `decorateQueueRows`.
+ *
+ * ⚠️ It is applied to a row that has ALREADY passed the fixture's status
+ * checks, in the same order the server applies its own: context is a LABEL on
+ * an authorized row, never a condition of authorization. Fields the session
+ * leaves unset are OMITTED rather than substituted, so the surface's "—" path
+ * is genuinely exercised.
+ */
+function fixtureQueueContext(session: FixtureSession) {
+  return {
+    classModuleId: session.classModuleId,
+    classGradeLabel: session.classGrade,
+    classModuleTitle: session.moduleName,
+    ...(session.lessonNumber === undefined ? {} : { lessonNumber: session.lessonNumber }),
+    ...(session.lessonTitle ? { lessonTitle: session.lessonTitle } : {}),
+    ...(session.trainerName ? { trainerDisplayName: session.trainerName } : {}),
+  };
+}
+
 const SESSIONS: readonly FixtureSession[] = [
   {
     sessionId: "session-storytelling-lab",
+    classModuleId: "module-storytelling-foundations",
     moduleName: "Storytelling Foundations",
     classGrade: "Beginner",
     date: FIXTURE_DATES.eligible.date,
@@ -254,6 +285,7 @@ const SESSIONS: readonly FixtureSession[] = [
   },
   {
     sessionId: "session-presentation-practice",
+    classModuleId: "module-presentation-practice",
     moduleName: "Presentation Practice",
     classGrade: "Intermediate",
     date: FIXTURE_DATES.future.date,
@@ -283,6 +315,7 @@ const SESSIONS: readonly FixtureSession[] = [
   },
   {
     sessionId: "session-speech-showcase",
+    classModuleId: "module-speech-showcase",
     moduleName: "Speech Showcase",
     classGrade: "Advanced",
     date: FIXTURE_DATES.past.date,
@@ -931,6 +964,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         studentDisplayName: match.student.displayName,
         sessionDate: match.session.date,
         status: "trainer_approved",
+        ...fixtureQueueContext(match.session),
         ...(report.openCorrection
           ? {
               openCorrectionScope: report.openCorrection.issueScope,
@@ -958,6 +992,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         studentDisplayName: match.student.displayName,
         sessionDate: match.session.date,
         status: "needs_edit",
+        ...fixtureQueueContext(match.session),
         openCorrectionScope: report.openCorrection.issueScope,
         openCorrectionStatus: report.openCorrection.status,
         ...(report.openCorrection.reason
@@ -996,6 +1031,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         studentDisplayName: match.student.displayName,
         sessionDate: match.session.date,
         status: "submitted",
+        ...fixtureQueueContext(match.session),
         submittedAt: report.latestSubmitted.submittedAt,
       });
     }

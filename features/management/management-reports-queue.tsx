@@ -111,6 +111,7 @@ export function ManagementReportsQueue() {
   const mode =
     status === "needs_edit" ? "corrections" : status === "submitted" ? "approved" : "pending";
   const [query, setQuery] = useState("");
+  const [classFilter, setClassFilter] = useState("");
   const [state, setState] = useState<ResourceState<readonly ManagementQueueRowDto[]>>({
     kind: "loading",
   });
@@ -143,13 +144,42 @@ export function ManagementReportsQueue() {
     return state.data;
   }, [searchParams, state]);
 
+  /*
+   * The class filter's options are DERIVED FROM THE ROWS THIS CALLER ALREADY
+   * RECEIVED, never from a class list read separately.
+   *
+   * ⚠️ That is deliberate and it is the whole safety property: the option list
+   * cannot name a class whose reports this management account cannot already
+   * see, so the control can neither disclose the existence of an unreachable
+   * class nor be used to probe for one. A class the queue holds no row for is
+   * simply not offered.
+   */
+  const classOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const row of rows) {
+      if (!row.classModuleId) continue;
+      if (seen.has(row.classModuleId)) continue;
+      const label = [row.classGradeLabel, row.classModuleTitle].filter(Boolean).join(" · ");
+      seen.set(row.classModuleId, label || "Unnamed class");
+    }
+    return [
+      { value: "", label: "All classes" },
+      ...[...seen.entries()]
+        .map(([value, label]) => ({ value, label }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    ];
+  }, [rows]);
+
   const visibleRows = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    if (!needle) return rows;
-    return rows.filter((row) =>
-      row.studentDisplayName.toLocaleLowerCase().includes(needle),
-    );
-  }, [query, rows]);
+    return rows.filter((row) => {
+      // ⚠️ Presentation only. Both predicates NARROW an already-authorized
+      // list; neither can widen it, and neither is an authorization decision.
+      if (classFilter && row.classModuleId !== classFilter) return false;
+      if (!needle) return true;
+      return row.studentDisplayName.toLocaleLowerCase().includes(needle);
+    });
+  }, [classFilter, query, rows]);
 
   if (!acceptedStatus) {
     return (
@@ -173,6 +203,11 @@ export function ManagementReportsQueue() {
       />
     );
   }
+
+  // ⚠️ Distinguishes "your filters hid everything" from "this queue is empty".
+  // Reporting an empty queue when a filter is doing the hiding would tell
+  // management there is nothing to review when there is.
+  const narrowed = query.trim() !== "" || classFilter !== "";
 
   const caption =
     mode === "pending"
@@ -226,6 +261,9 @@ export function ManagementReportsQueue() {
             value={status}
             onChange={(next) => {
               setQuery("");
+              // The next queue holds different classes; a stale selection would
+              // silently hide every row of it.
+              setClassFilter("");
               router.push(`/management/reports?status=${next}`);
             }}
             options={[
@@ -241,21 +279,29 @@ export function ManagementReportsQueue() {
             prohibited (GLOBAL_UI_RULES §10). They render inert with a stated reason and are
             recorded as a backend dependency rather than faked client-side.
           */}
-          <FilterChip
-            id={`${searchId}-term`}
-            label="Term"
-            value=""
-            disabled
-            describedBy={scopeNoteId}
-            options={[{ value: "", label: "All terms" }]}
-          />
+          {/*
+            ⛔ G-4 — THE FRAME'S "All terms" FILTER IS NOT BUILT, AND THE INERT
+            CHIP THAT USED TO STAND HERE IS GONE WITH IT.
+
+            It was added during reconciliation with an honest reason — "the
+            projection carries no term field" — but that reason is now FALSE in
+            the way that matters: it implies the filter would exist if the data
+            did. G-4 ruled the opposite and ruled it permanently. A `terms`
+            table is the substrate End-of-Term generation needs (CLAUDE.md §8,
+            spec §28), and a display label is not worth building it. A disabled
+            chip advertising a filter that will NEVER exist is a promise this
+            product has ruled out keeping, so the element is omitted outright —
+            which is what `REGISTERED-OMISSION` means: ruled out, preserved in
+            the record, never built.
+          */}
           <FilterChip
             id={`${searchId}-class`}
             label="Class"
-            value=""
-            disabled
+            value={classFilter}
+            onChange={setClassFilter}
             describedBy={scopeNoteId}
-            options={[{ value: "", label: "All classes" }]}
+            options={classOptions}
+            disabled={classOptions.length <= 1}
           />
 
           <div className="relative w-full sm:ms-auto sm:w-[14.375rem]">
@@ -290,25 +336,28 @@ export function ManagementReportsQueue() {
           </div>
         </div>
         <p id={scopeNoteId} className="text-small text-ink">
-          Term and class filters are unavailable: the governed Management queue projection
-          carries no term or class field. Search narrows the rows already listed below and
-          reaches no other report.
+          The class filter and the search box both narrow the rows already listed below and
+          reach no other report — neither is an authorization boundary, and neither widens
+          what this queue may show. There is no term filter: no term entity exists and none
+          is planned.
         </p>
       </section>
 
       {visibleRows.length === 0 ? (
         <section className="card px-6 py-12 text-center" role="status">
           <h2 className="text-section-title font-extrabold text-ink-strong">
-            {query.trim() ? "No students match that search" : emptyTitle}
+            {narrowed ? "No reports match those filters" : emptyTitle}
           </h2>
           <p className="mt-2 text-body text-ink">
-            {query.trim() ? "Clear the search to see every report in this queue." : emptyBody}
+            {narrowed
+              ? "Clear the search and the class filter to see every report in this queue."
+              : emptyBody}
           </p>
         </section>
       ) : (
         <section className="card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[44rem] border-collapse text-left">
+            <table className="w-full min-w-[62rem] border-collapse text-left">
               <caption className="px-6 pt-4 text-left text-[0.9375rem] font-semibold text-ink-strong">
                 {caption}
                 <span className="mt-1 block text-[0.71875rem] font-normal text-ink">
@@ -322,6 +371,24 @@ export function ManagementReportsQueue() {
                     className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
                   >
                     Student
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
+                  >
+                    Class
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
+                  >
+                    Lesson
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
+                  >
+                    Trainer
                   </th>
                   <th
                     scope="col"
@@ -473,6 +540,58 @@ function RowGroup({
             </span>
           </span>
         </td>
+        {/*
+          G-4: there is no term cell here and there must never be one.
+          G-2: there is no grade, roll-up or rating cell here either — nothing
+          on this row is derived from an assessment fact (A-038 independently
+          bars management from the per-dimension ratings such a cell would need).
+        */}
+        <td className="px-6 py-[11px] text-[0.75rem] text-ink">
+          {row.classGradeLabel || row.classModuleTitle ? (
+            <>
+              {row.classGradeLabel && (
+                <span className="block font-medium text-ink-strong">{row.classGradeLabel}</span>
+              )}
+              {row.classModuleTitle && (
+                <span className="block text-[0.6875rem] text-neutral-on">
+                  {row.classModuleTitle}
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="text-neutral-on">—</span>
+          )}
+        </td>
+        {/*
+          ⛔ G-3 — lesson IDENTITY only. This cell must never render lesson-plan
+          KEY FOCUS intent, and must never be confused with the roster's
+          governed carried-over previous-session focus. Different fields,
+          different authority.
+        */}
+        <td className="px-6 py-[11px] text-[0.75rem] text-ink">
+          {row.lessonNumber === undefined && !row.lessonTitle ? (
+            <span className="text-neutral-on">—</span>
+          ) : (
+            <>
+              {row.lessonNumber !== undefined && (
+                <span className="block font-medium text-ink-strong">
+                  Lesson {row.lessonNumber}
+                </span>
+              )}
+              {row.lessonTitle && (
+                <span className="block text-[0.6875rem] text-neutral-on">{row.lessonTitle}</span>
+              )}
+            </>
+          )}
+        </td>
+        {/*
+          G-7: ONE staff slot. The database guarantees at most one active
+          assignment per session, so there is no `Assist.` cell and
+          `centre_membership_role` is not extended.
+        */}
+        <td className="px-6 py-[11px] text-[0.75rem] text-ink">
+          {row.trainerDisplayName ?? <span className="text-neutral-on">—</span>}
+        </td>
         <td className="px-6 py-[11px] text-[0.75rem] font-medium text-ink">
           {formatDate(row.sessionDate)}
           {row.submittedAt && (
@@ -509,7 +628,7 @@ function RowGroup({
       </tr>
       {correction && (
         <tr className="border-b border-line last:border-0">
-          <td colSpan={4} className="px-5 pb-4 sm:px-6">
+          <td colSpan={7} className="px-5 pb-4 sm:px-6">
             <div className="rounded-field bg-warning-soft px-4 py-3 text-small text-warning-on">
               <p className="font-extrabold">
                 {formatIssueScope(correction.openCorrectionScope)}
