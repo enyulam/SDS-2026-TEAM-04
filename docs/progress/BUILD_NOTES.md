@@ -4027,3 +4027,33 @@ contacted**.
 **`Accepted` is Operator-set only and has NOT been set or implied.** The owed items are the
 Phase 6a runtime carry-over leg (needs `B-STAGE3-2` resolved) and every rendered capture (needs a
 reachable governed database — a §12 stop-and-ask).
+
+### 2026-08-10 — CORRECTION to the commit message of `2d0ee24` (the Batch 3 continuity commit)
+
+**The FILES in `2d0ee24` are correct and complete. Only its COMMIT MESSAGE is damaged, and this
+entry repairs the record forward rather than by rewriting it.**
+
+**What happened.** That commit's message was passed inline to `git commit -m` from a shell
+double-quoted string containing backticks. Bash treated three backtick pairs as **command
+substitution**, executed them, and substituted their empty output — so three identifiers were
+silently deleted from the message and the shell emitted `command not found` for each.
+
+**The three deletions, restored here:**
+
+| Where the message reads | It should read |
+|---|---|
+| *"including that  and  are undefined tokens that emit nothing"* | *"including that **`rounded-control`** and **`border-hairline`** are undefined tokens that emit nothing"* |
+| *" is Operator-set only and has NOT been written or implied"* | *"**`Accepted`** is Operator-set only and has NOT been written or implied"* |
+
+**Why this is a forward correction and not an amend.** `CLAUDE.md` §12 names `amend` among the
+history-touching git operations that are not to be used, and records that *"the only
+history-touching operation compatible with SHA-cited evidence is a forward `git revert`"*.
+Nothing was pushed and no document had yet cited `2d0ee24`, so an amend would have been
+technically harmless — but the rule does not carve out "harmless", and correcting the log
+forward is what the append-only discipline asks for. **`2d0ee24` stands unmodified.**
+
+**Standing lesson, and it is the same class as the defects this batch already found.** A commit
+message is part of the audit record. **Never pass one inline through a double-quoted shell
+string when it contains backticks** — the shell will execute them. Every other commit in this
+batch used `git commit -F <file>`, which is literal, and none was affected. Use `-F` for any
+message carrying backticks, `$`, or `!`.
