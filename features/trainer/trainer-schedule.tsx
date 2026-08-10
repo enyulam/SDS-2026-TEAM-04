@@ -671,6 +671,40 @@ function SessionCard({ session }: { readonly session: TrainerSessionSummaryDto }
             {session.studentCount === 1 ? "learner" : "learners"}
           </dd>
         </div>
+        {/*
+          HERO PHASE 3 — the frame's "Studio 2" and "Main: Sam Ong".
+
+          The dependency recorded at checkpoint F-04 ("the frame's session
+          room/location and its Main / Assist. trainer names exist on no
+          governed field and are omitted rather than fabricated") is now
+          DISCHARGED for two of those three by G-6 and G-7. It was correctly
+          recorded at the time and deliberately not invented around — the
+          rulings closed a booked gap rather than opening new scope.
+
+          ⚠️ NULL MEANS NOT RECORDED, SO THE WHOLE ROW DISAPPEARS. Never "TBC",
+          never a dash standing in for a value. The frame renders these as bare
+          lines; they are rendered here as `<dt>`/`<dd>` pairs to match the
+          accepted structure of the four rows above, which is why the frame's
+          literal "Main:" prefix becomes the term "Main".
+
+          ⛔ NO `Assist.` ROW — G-7, a REGISTERED-OMISSION on this screen and
+          preserved. A second staff role is not a label: it means extending
+          `centre_membership_role`, an enum carrying AUTHORIZATION vocabulary,
+          and it would reintroduce the TA persona A-014 defers. The projection
+          carries one name, and there is no second field for a row to bind to.
+        */}
+        {session.room === null ? null : (
+          <div className="flex gap-2">
+            <dt className="font-semibold">Room</dt>
+            <dd>{session.room}</dd>
+          </div>
+        )}
+        {session.trainerDisplayName === null ? null : (
+          <div className="flex gap-2">
+            <dt className="font-semibold">Main</dt>
+            <dd>{session.trainerDisplayName}</dd>
+          </div>
+        )}
       </dl>
       {/*
         D2 — the frame's "Start Class" is relabelled to the governed action it performs.

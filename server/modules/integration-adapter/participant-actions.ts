@@ -289,6 +289,13 @@ export async function adapterListTrainerSessions(): Promise<
       endTime: session.endTime ?? "",
       studentCount: session.studentCount,
       countsByReportState: session.countsByReportState as Readonly<Record<string, number>>,
+      // Hero Phase 3. Carried through as NULL, not coerced to "" like the
+      // clock times above: those are a value the frame always draws, and an
+      // empty string is how this boundary already reports "no time recorded".
+      // Room and trainer are OMITTED ROWS when absent, and the renderer needs
+      // to tell "not recorded" from "recorded as empty" to omit correctly.
+      room: session.room,
+      trainerDisplayName: session.trainerDisplayName,
     })),
   };
 }

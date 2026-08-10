@@ -28,6 +28,7 @@ import {
   type WorkingReportRow,
 } from "@/server/modules/report-workflow/rpc-types";
 import { isDimensionCode, isRatingLevel } from "@/server/modules/framework/dimensions";
+import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
 
 export interface TrainerSessionSummaryDto {
   readonly sessionId: string;
@@ -38,6 +39,22 @@ export interface TrainerSessionSummaryDto {
   readonly endTime: string | null;
   readonly studentCount: number;
   readonly countsByReportState: Readonly<Partial<Record<ReportStatus | "no_report", number>>>;
+  /**
+   * Hero Phase 3 (screen `05`). Both NULLABLE, and NULL MEANS NOT RECORDED —
+   * render by OMITTING the row. Never "TBC", never a placeholder dash.
+   *
+   * ⚠️ `room` is a PLAIN DESCRIPTIVE COLUMN (G-6). It carries NO authorization
+   * meaning and must never be used to scope a query — trainer reach is proved
+   * through the live class-session assignment (ADR-4), never through a
+   * location.
+   *
+   * ⛔ `trainerDisplayName` is the single assigned trainer (`Main:`, G-7).
+   * There is NO `Assist.` field and none may be added: a second staff role
+   * means extending `centre_membership_role`, which carries authorization
+   * vocabulary, and it would reintroduce the TA persona A-014 defers.
+   */
+  readonly room: string | null;
+  readonly trainerDisplayName: string | null;
 }
 
 export interface RosterEntryDto {
@@ -129,6 +146,8 @@ interface SessionRow {
   starts_at: string | null;
   ends_at: string | null;
   class_module_id: string;
+  /** Hero Phase 0B, surfaced at Phase 3. Nullable; NULL means NOT RECORDED. */
+  room?: string | null;
 }
 
 async function listAssignedSessions(client: SupabaseClient): Promise<SessionRow[]> {
@@ -136,7 +155,7 @@ async function listAssignedSessions(client: SupabaseClient): Promise<SessionRow[
   // active assignments, so a plain select IS the assigned-session list.
   const { data, error } = await client
     .from("class_sessions")
-    .select("id, session_date, starts_at, ends_at, class_module_id")
+    .select("id, session_date, starts_at, ends_at, class_module_id, room")
     .order("session_date", { ascending: true });
   if (error || !data) return [];
   return data as SessionRow[];
@@ -185,6 +204,24 @@ export async function listTrainerSessionsCore(
   if (identity.outcome !== "success") return identity;
 
   const sessions = await listAssignedSessions(client);
+
+  /*
+   * Hero Phase 3. The assigned trainer comes from the SHARED Phase 0A read
+   * path, not from a join written here — one source of truth for staff
+   * identity across the six screens that render it, and one place an
+   * authorization decision could ever drift.
+   *
+   * ⚠️ Fail-soft, and only because of what it is: staff identity is display
+   * context on this surface. If the batch read is unavailable the schedule
+   * still renders every session the trainer is assigned to, with the `Main:`
+   * row omitted — the same treatment a NULL room gets. It must never be able
+   * to remove a session the caller's own scope already returned.
+   *
+   * ⛔ One name, never two. There is no `Assist.` slot (G-7).
+   */
+  const staff = await getSessionStaffIdentitiesCore(client, sessions.map((s) => s.id));
+  const staffById = staff.outcome === "success" ? staff.data : null;
+
   const out: TrainerSessionSummaryDto[] = [];
   for (const session of sessions) {
     const { data: modules } = await client
@@ -216,6 +253,8 @@ export async function listTrainerSessionsCore(
       endTime: session.ends_at,
       studentCount: students.length,
       countsByReportState: counts,
+      room: session.room ?? null,
+      trainerDisplayName: staffById?.get(session.id)?.trainerDisplayName ?? null,
     });
   }
   return { outcome: "success", data: out };

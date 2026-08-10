@@ -76,6 +76,22 @@ export type TrainerSessionSummaryDto = {
   readonly endTime: string;
   readonly studentCount: number;
   readonly countsByReportState: Readonly<Partial<Record<ReportStatus, number>>>;
+  /**
+   * Hero Phase 3 (screen `05` Schedule Details).
+   *
+   * ⚠️ NULL MEANS NOT RECORDED — render by OMITTING the row. Never "TBC",
+   * never a placeholder dash. (Distinct from `startTime`/`endTime`, which the
+   * adapter reports as `""` for absent — those are rows the frame always
+   * draws.)
+   *
+   * ⚠️ `room` is descriptive only (G-6): it carries no authorization meaning
+   * and must never scope a query.
+   * ⛔ `trainerDisplayName` is the single assigned trainer (`Main:`). There is
+   * NO `Assist.` field and none may be added — G-7 keeps
+   * `centre_membership_role` unextended and the TA persona deferred (A-014).
+   */
+  readonly room: string | null;
+  readonly trainerDisplayName: string | null;
 };
 
 export type RosterEntryDto = {

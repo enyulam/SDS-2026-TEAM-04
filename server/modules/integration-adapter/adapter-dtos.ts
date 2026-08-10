@@ -71,6 +71,13 @@ export interface AdapterTrainerSessionSummaryDto {
   readonly endTime: string;
   readonly studentCount: number;
   readonly countsByReportState: Readonly<Record<string, number>>;
+  /**
+   * Hero Phase 3 (screen `05`). NULL means NOT RECORDED — omit the row.
+   * ⚠️ `room` is descriptive only (G-6) and never scopes a query.
+   * ⛔ One assigned trainer (`Main:`); there is no `Assist.` field (G-7).
+   */
+  readonly room: string | null;
+  readonly trainerDisplayName: string | null;
 }
 
 export interface AdapterRosterEntryDto {

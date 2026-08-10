@@ -86,6 +86,8 @@ type FixtureSession = {
   readonly lessonNumber?: number;
   readonly lessonTitle?: string;
   readonly trainerName?: string;
+  /** Hero Phase 0B/3. Descriptive only (G-6) — it never scopes anything. */
+  readonly room?: string;
 };
 
 type FixtureObservation = {
@@ -214,6 +216,7 @@ const SESSIONS: readonly FixtureSession[] = [
     lessonNumber: 4,
     lessonTitle: "Expressive Delivery",
     trainerName: "Fixture Trainer One",
+    room: "Studio 2",
     students: [
       {
         studentId: "student-aster",
@@ -691,6 +694,10 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
           endTime: session.endTime,
           studentCount: session.students.length,
           countsByReportState: counts,
+          // Hero Phase 3. Sessions that leave these unset exercise the OMIT
+          // path, which is a real rendering case and not a gap.
+          room: session.room ?? null,
+          trainerDisplayName: session.trainerName ?? null,
         };
       }),
     };

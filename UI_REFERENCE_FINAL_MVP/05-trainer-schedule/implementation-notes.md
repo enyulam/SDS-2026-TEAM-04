@@ -295,3 +295,66 @@ Ending commit:                 recorded in docs/progress/STATUS.md and in the ad
 Acceptance status:             PASS is this session's EVIDENCE verdict only.
                                Accepted is OPERATOR-SET ONLY and has NOT been set.
 ```
+
+### HERO CHAIN plan Phase 3 — 2026-08-10 — Room and the `Main:` trainer
+
+**A FUNCTIONAL completion, not a visual reconciliation.** Schedule Details now renders the
+frame's **`Studio 2`** and **`Main: Sam Ong`** from governed fields.
+
+⚠️ **THE F-04 DEPENDENCY IS DISCHARGED — and it was a dependency, not a ruled omission.** This
+pack recorded at checkpoint **F-04** that *"the frame's session room/location ('Studio 2') and its
+Main / Assist. trainer names exist on no governed field and are omitted rather than fabricated"*.
+That was the correct treatment at the time and was deliberately not invented around. **G-6**
+(room) and **G-7** (`Main:`) closed it. **This is not an expansion of Final MVP scope** — it is a
+gap the project had already booked.
+
+⛔ **`Assist.` IS A `REGISTERED-OMISSION` AND IS PRESERVED (G-7).** A second staff role is **not a
+label**: `class_session_assignments.trainer_role` is typed `centre_membership_role`, whose values
+are `management` / `trainer` / `parent`, so an assistant slot means **extending a governed enum
+that carries authorization vocabulary** — a §12 stop-and-ask on its own — and it would reintroduce
+the **TA persona A-014 defers**. ⚠️ **It is now refused in TWO places, neither of which is the
+renderer:** the database returns **at most one** name (`P3-4`, measured, and **no session anywhere
+carries a second active assignment**), and `TrainerSessionSummaryDto` has **no second staff field
+for a row to bind to** (`P3-7c`). `centre_membership_role` is **not extended**.
+
+⚠️ **`room` CARRIES NO AUTHORIZATION MEANING (G-6), and that is asserted where it would actually be
+violated** — the policy catalogue. `P3-5` measures that `room` appears in **no** `USING` or
+`WITH CHECK` expression anywhere in `public`. Trainer reach is proved through the live class-session
+assignment (ADR-4), never through a location.
+
+**Proof — `npm run prove:hero-3`: 6 SQL legs + 3 contract legs, all PASS, 0 FAIL.**
+
+⚠️ **It runs under `SET LOCAL ROLE authenticated`, not as the owner.** `class_sessions` is owned by
+`postgres` and is not `FORCE ROW LEVEL SECURITY`, so an owner-side read would bypass RLS and prove
+nothing about what a trainer sees. **`room` was added by Phase 0B *after*
+`class_sessions_select_trainer` was written**; RLS is row-level rather than column-level, so it
+*should* be readable — but *"the policy predates the column"* is exactly the kind of assumption
+this project has been wrong about before, so it was **measured** (`P3-2`: `Studio 2` reached the
+trainer under RLS). **`P3-1` is a NON-VACUITY leg and runs first** — 4 sessions visible — because
+with none, every leg below would pass for the wrong reason (the `S-8` finding). Transaction-scoped
+ending in `ROLLBACK`; the runner measured governed counts **and the room-bearing session count**
+before and after: `0|0|0|0|4|0|4` → **unchanged**.
+
+**No database object added.** The `Main:` name comes from the **shared Phase 0A read path**, not a
+join re-derived in the schedule projection — one source of truth for staff identity across the six
+screens that render it, and one place an authorization decision could drift. The batch read is
+**fail-soft**: if it is unavailable the schedule still lists every assigned session with the
+`Main:` row omitted, because staff identity is display context here and must never remove a session
+the caller's own scope returned.
+
+⚠️ **NULL MEANS NOT RECORDED — the whole row disappears.** Never "TBC", never a dash. The frame
+draws these as bare lines; they render as `<dt>`/`<dd>` pairs to match the four accepted rows above
+them, which is why the frame's literal `Main:` prefix becomes the term **Main**.
+
+**Also preserved, unchanged:** `Add Agenda` and `Start Class` remain `REGISTERED-OMISSION`s
+(A-019, A-026); `Start Class` keeps its governed relabelling; the four redundant carriers of
+eligibility state are untouched.
+
+tsc **0** · eslint **0 errors** (2 pre-existing `projectId` warnings, in files this work did not
+author) · build **0** · **route census 17**, enumerated from `app/**/page.tsx` ·
+`session-eligibility` **PASS** · `portal-navigation-active-state` **PASS** ·
+`post-login-destinations` **PASS** · **emitted-CSS verified** for all three classes used —
+⚠️ **no new class was introduced; the compiled stylesheet is byte-identical in size (45,748).**
+
+**RENDERED CAPTURE `NOT-RUN`** (authenticated surface; §12 stop-and-ask). `Accepted` is
+Operator-set only and has **NOT** been set.

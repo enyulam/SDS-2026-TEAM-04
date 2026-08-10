@@ -4847,3 +4847,58 @@ Phase 2 reuses **Phase 1's `report_get_canonical_context`**, whose gate already 
 ### Commit / next
 
 **Next: Phase 3 (`05` Trainer Schedule)** — room and `Main:` trainer. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**
+
+---
+
+## 2026-08-10 — HERO CHAIN **PHASE 3** — `05` Trainer Schedule (development clone, `develop`)
+
+**Track:** hero chain completion, plan §8 Phase 3. **Branch/worktree:** `develop` / none. **Starting HEAD:** the Phase 2 commit.
+
+### Scope
+
+Schedule Details renders the frame's **`Studio 2`** (room, G-6) and **`Main: Sam Ong`** (the assigned trainer, G-7) from governed fields. Each row **disappears entirely** when its field is NULL.
+
+### The F-04 dependency is discharged — and it was a dependency, not a ruled omission
+
+This pack recorded at **F-04** that the frame's room and its Main/Assist. names *"exist on no governed field and are omitted rather than fabricated"*. Correct at the time, and deliberately not invented around. **G-6 and G-7 closed a gap the project had already booked** — not an expansion of Final MVP scope.
+
+### ⛔ `Assist.` is refused in TWO places, neither of which is the renderer
+
+`class_session_assignments.trainer_role` is typed `centre_membership_role` (`management`/`trainer`/`parent`), so an assistant slot means **extending a governed enum that carries authorization vocabulary** — a §12 stop-and-ask on its own — and it would reintroduce the **TA persona A-014 defers**.
+
+* **Database:** `P3-4` measured the identity read returning **1 row**, and **no session anywhere carries a second active assignment**.
+* **Contract:** `P3-7c` pins that `TrainerSessionSummaryDto` has **no second staff field for a row to bind to**, and no roll-up rating, KEY FOCUS, slides or term field either.
+
+▶ **A database that returns one name cannot stop a frontend inventing a second slot. The contract assertion is the half that can.** `centre_membership_role` is **not extended**.
+
+### ⚠️ The RLS question this phase actually had to answer
+
+**`room` was added by Phase 0B AFTER `class_sessions_select_trainer` was written.** RLS is row-level rather than column-level, so it *should* be readable — but *"the policy predates the column"* is exactly the kind of assumption this project has been wrong about before.
+
+**So the suite runs under `SET LOCAL ROLE authenticated`, not as the owner.** `class_sessions` is owned by `postgres` and is **not** `FORCE ROW LEVEL SECURITY`, so an owner-side read would **bypass RLS entirely and prove nothing**. `P3-2` measured `Studio 2` reaching the trainer under RLS.
+
+### ⚠️ G-6 asserted where it would actually be violated
+
+`room` **carries no authorization meaning and must never scope a query.** `P3-5` measures that where that would show up: **`room` appears in NO `USING` or `WITH CHECK` expression anywhere in `public`.** Asserting it in a comment would have been worthless; asserting it against the policy catalogue is not.
+
+### Verification
+
+- **`npm run prove:hero-3` — 6 SQL legs + 3 contract legs, ALL PASS, 0 FAIL.** Transaction-scoped ending in `ROLLBACK`; the runner measured the governed counts **plus the room-bearing session count**: `0|0|0|0|4|0|4` → **unchanged**, so the `room` write left nothing behind.
+  - ⚠️ **`P3-1` NON-VACUITY, FIRST** — 4 sessions visible to the trainer under RLS. Without it, every leg below passes for the wrong reason (the `S-8` finding).
+  - `P3-3` the `Main:` name arrives through the **shared Phase 0A path**, not a join re-derived here.
+  - `P3-6` an unauthenticated caller receives no staff identity.
+- **No database object added.** Migrations **20**, unchanged.
+- `tsc` **0** · `eslint` **0 errors** (2 pre-existing `projectId` warnings) · `build` **0** · **route census 17**, enumerated · `session-eligibility` **PASS** · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS**.
+- **Emitted-CSS verified** for all three classes used. ⚠️ **No new class was introduced** — the compiled stylesheet is **byte-identical in size (45,748)**, which is itself the evidence.
+
+### Design note
+
+The `Main:` batch read is **fail-soft**: if it is unavailable the schedule still lists every assigned session with the row omitted. Staff identity is display context on this surface and must never be able to remove a session the caller's own scope already returned.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`.** `Add Agenda` / `Start Class` omissions preserved. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 4 (`06` Trainer Student Roster)** — trainer in the banner, lesson strip, room. ⛔ **KEY FOCUS is prohibited (G-3) and must never be rendered into the governed carried-over focus line.** ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**
