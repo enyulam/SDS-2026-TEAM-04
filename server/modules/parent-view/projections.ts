@@ -33,6 +33,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
+import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import { firstRow, type CanonicalReportRow } from "@/server/modules/report-workflow/rpc-types";
 
 /** Row shape of `report_get_canonical_context` (hero Phase 1). */
@@ -116,20 +117,54 @@ export interface CanonicalReportDto {
   readonly context: CanonicalReportContextDto | null;
 }
 
+/**
+ * ⛔ THE MOST CONSEQUENTIAL SILENT EMPTINESS IN THE WHOLE SWEEP, BECAUSE OF
+ * WHAT CONSUMES IT.
+ *
+ * Both reads discarded `error`. `getParentAvailabilityCore` branches on
+ * `linked.length === 0` → **`none_yet`**, which the Parent Dashboard renders
+ * as **"No learner linked to this account yet"**.
+ *
+ * ▶ So a REJECTED read told a parent, in plain language, **that no learner is
+ * linked to their account** — a false statement about their own family
+ * relationship, produced by a database fault they could neither see nor act
+ * on. The copy fix that made that sentence honest is precisely what made this
+ * read's failure mode dangerous: the clearer the empty state, the more
+ * convincing the lie.
+ *
+ * ⚠️ Returning `unavailable` here does NOT weaken R-C2-6. The parent-facing
+ * denial stays a single indistinguishable outcome; what changes is that a
+ * FAULT is no longer reported as a FACT about the family.
+ */
 async function listLinkedStudents(
   client: SupabaseClient,
-): Promise<Array<{ studentId: string; displayName: string }>> {
-  const { data: links } = await client
-    .from("parent_student_links")
-    .select("student_id, is_active")
-    .eq("is_active", true);
-  const ids = ((links ?? []) as Array<{ student_id: string }>).map((l) => l.student_id);
-  if (ids.length === 0) return [];
-  const { data: students } = await client.from("students").select("id, full_name").in("id", ids);
-  const names = new Map(
-    ((students ?? []) as Array<{ id: string; full_name: string }>).map((s) => [s.id, s.full_name]),
+): Promise<QueryOutcome<Array<{ studentId: string; displayName: string }>>> {
+  const links = await readRows<{ student_id: string }>(
+    "listLinkedStudents:parent_student_links",
+    () =>
+      client
+        .from("parent_student_links")
+        .select("student_id, is_active")
+        .eq("is_active", true),
   );
-  return ids.map((id) => ({ studentId: id, displayName: names.get(id) ?? "Student" }));
+  if (!links.ok) return { ok: false };
+
+  const ids = links.rows.map((l) => l.student_id);
+  // A genuinely OBSERVED absence of links — the read succeeded and returned
+  // none. This is the only case that may legitimately produce `none_yet`.
+  if (ids.length === 0) return { ok: true, rows: [] };
+
+  const students = await readRows<{ id: string; full_name: string }>(
+    "listLinkedStudents:students",
+    () => client.from("students").select("id, full_name").in("id", ids),
+  );
+  if (!students.ok) return { ok: false };
+
+  const names = new Map(students.rows.map((s) => [s.id, s.full_name]));
+  return {
+    ok: true,
+    rows: ids.map((id) => ({ studentId: id, displayName: names.get(id) ?? "Student" })),
+  };
 }
 
 /**
@@ -188,19 +223,36 @@ export async function listParentReportsCore(
   const identity = await requireRole(client, "parent");
   if (identity.outcome !== "success") return identity;
 
+  const linked = await listLinkedStudents(client);
+  /*
+   * ⛔ A rejection here must never become an empty report list: through
+   * `getParentAvailabilityCore` that renders as "No report published yet" for
+   * a family whose report HAS been published — withholding a submitted report
+   * from the audience it was published to.
+   */
+  if (!linked.ok) return { outcome: "unavailable" };
+
   const out: ParentReportListItemDto[] = [];
-  for (const student of await listLinkedStudents(client)) {
-    const { data: enrolments } = await client
-      .from("enrolments")
-      .select("class_module_id")
-      .eq("student_id", student.studentId);
-    for (const enrolment of (enrolments ?? []) as Array<{ class_module_id: string }>) {
-      const { data: sessions } = await client
-        .from("class_sessions")
-        .select("id, session_date")
-        .eq("class_module_id", enrolment.class_module_id)
-        .order("session_date", { ascending: true });
-      for (const session of (sessions ?? []) as Array<{ id: string; session_date: string }>) {
+  for (const student of linked.rows) {
+    const enrolments = await readRows<{ class_module_id: string }>(
+      "listParentReportsCore:enrolments",
+      () => client.from("enrolments").select("class_module_id").eq("student_id", student.studentId),
+    );
+    if (!enrolments.ok) return { outcome: "unavailable" };
+
+    for (const enrolment of enrolments.rows) {
+      const sessions = await readRows<{ id: string; session_date: string }>(
+        "listParentReportsCore:class_sessions",
+        () =>
+          client
+            .from("class_sessions")
+            .select("id, session_date")
+            .eq("class_module_id", enrolment.class_module_id)
+            .order("session_date", { ascending: true }),
+      );
+      if (!sessions.ok) return { outcome: "unavailable" };
+
+      for (const session of sessions.rows) {
         const { data, error } = await client.rpc("report_get_canonical", {
           p_class_session_id: session.id,
           p_student_id: student.studentId,
@@ -250,7 +302,13 @@ export async function getParentAvailabilityCore(
   if (identity.outcome !== "success") return identity;
 
   const linked = await listLinkedStudents(client);
-  if (linked.length === 0) return { outcome: "success", data: "none_yet" };
+  /*
+   * ⛔ `none_yet` IS A CLAIM ABOUT THE FAMILY, NOT A FALLBACK. It renders as
+   * "No learner linked to this account yet". Only an OBSERVED absence of
+   * links may produce it; a rejected read is `unavailable`.
+   */
+  if (!linked.ok) return { outcome: "unavailable" };
+  if (linked.rows.length === 0) return { outcome: "success", data: "none_yet" };
   const reports = await listParentReportsCore(client);
   if (reports.outcome !== "success") return reports;
   return {

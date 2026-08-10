@@ -5744,3 +5744,51 @@ That is the sharpest instance in this whole sweep of the shape the Operator name
 `tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`prove:hero-all` 16/16 `PASS`, verified by EXIT CODE** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
 
 **Remaining, measured: 4 sites, all in `parent-view`.** `Q-7`'s ratchet updated to 4.
+
+---
+
+## 2026-08-11 — **`QueryOutcome` ACROSS `parent-view`** — module 3 of 3, and the sweep closes at zero
+
+**Track:** the remaining 15 sites. **Branch:** `develop`. **Starting HEAD:** `334d3c6`.
+
+### The four sites — the most consequential of the fifteen, because of what CONSUMES them
+
+All four discarded `error`. What made them worse than the rest is downstream:
+
+- `getParentAvailabilityCore` branches on `linked.length === 0` → **`none_yet`**, which the Parent Dashboard renders as **"No learner linked to this account yet"**. ▶ ⛔ **A rejected read told a parent, in plain language, that no learner is linked to their account — a false statement about their own family, produced by a database fault they could neither see nor act on.**
+- An empty report list renders **"No report published yet"** — ⛔ **withholding a SUBMITTED report from the very audience it was published to.**
+
+⚠️ **The copy fix that made those sentences honest is exactly what made these reads' failure mode dangerous: THE CLEARER THE EMPTY STATE, THE MORE CONVINCING THE LIE.** Two days ago that copy said "try again later" and was vague enough to distrust; now it is specific, confident and — on a rejection — wrong.
+
+### ⛔ The read that was deliberately LEFT ALONE
+
+The per-pair `report_get_canonical` call keeps `if (error) continue;`. **That silence IS the R-C2-6 non-disclosure** — a parent must not be able to distinguish "not yours" from "nothing submitted" by the shape of the answer. Converting it to `unavailable` would have turned an authorization boundary into a distinguishable signal.
+
+▶ **A uniform sweep would have broken the thing it was protecting.** `P-5`/`P-5b` pin both halves — that the `continue` survives, and that the RPC was *not* converted — so nobody later "completes" the sweep by changing it.
+
+### The sweep closes
+
+**Measured across all of `server/modules`: `0` exact-shape sites, `0` reads that discard `error`.** Ratchet `Q-7` now holds at zero, with `Q-7c` failing if either count ever RISES — a new site is the defect returning, not progress.
+
+| Module | Sites | Proof |
+|---|---|---|
+| `report-workflow` | 7 | `prove:hero-14` |
+| `management-view` | 3 | `prove:hero-15` |
+| `parent-view` | 4 | `prove:hero-16` |
+| *(first fix)* | 1 | `prove:hero-12` |
+
+### Verification — `npm run prove:hero-16`, 19 legs, `PASS`
+
+`R-0a`/`R-0b` reachability · **`P-1`** a real rejection on `parent_student_links`, with **`P-1b`** discriminating on the **same select list** the function uses · `P-2` neither shape survives · **`P-3a`** `none_yet` is reachable **only** from an observed absence · `P-4` static unique labels · **`P-5`** the deliberate silence preserved · **`P-6`** Q-27 re-checked with a discrimination leg, because touching a parent projection is exactly when a rating field slips in.
+
+### ⚠️ Another pin fired, and was right to
+
+`prove:hero-13`'s `C-4c` pinned the exact source line `if (linked.length === 0) …`, which became `linked.rows.length` when `listLinkedStudents` gained its `QueryOutcome`. **It failed rather than following the code silently — which is why it is written as an exact match.** Updated, and **strengthened with `C-4d`**: the copy that suite verifies is now also proven **unreachable from a rejected read**, closing the loop between the two fixes.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`prove:hero-all` 17/17 `PASS`, verified by EXIT CODE** · `post-login-destinations` **PASS** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
+
+### One read deliberately not swept, recorded
+
+`session-context-projections.ts` (`getSessionContextsCore`) checks `error` and returns an **empty map** — documented fail-soft, because it is **decoration on rows whose governed content is already authorized**, and a missing class label must never remove a report management is required to review. It was never one of the fifteen. ⚠️ Recorded here so it is not mistaken for a missed site.

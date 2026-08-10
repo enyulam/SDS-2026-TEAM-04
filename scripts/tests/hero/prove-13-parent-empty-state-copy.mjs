@@ -116,9 +116,18 @@ check(
   "C-4b: it now states the real condition and names who ends it, the same shape as C-3",
 );
 check(
-  /if \(linked\.length === 0\) return \{ outcome: "success", data: "none_yet" \};/.test(
+  /if \(!linked\.ok\) return \{ outcome: "unavailable" \};/.test(readFileSync(PROJECTION, "utf8")),
+  "C-4d: ⛔ and `none_yet` is now UNREACHABLE from a rejected read — the copy this suite verifies would otherwise tell a parent no learner is linked to their account because of a database fault",
+);
+check(
+  /if \(linked\.rows\.length === 0\) return \{ outcome: "success", data: "none_yet" \};/.test(
     readFileSync(PROJECTION, "utf8"),
   ),
+  // ⚠️ Updated when `listLinkedStudents` became a `QueryOutcome`: the shape is
+  // now `linked.rows.length`. The CLAIM is unchanged and still verified at
+  // source — `none_yet` comes from zero linked students — and the pin caught
+  // the change rather than following it silently, which is why it is written
+  // as an exact match.
   "C-4c: SOURCE-CONFIRMED — `none_yet` is produced by ZERO linked students, so the corrected copy matches the projection rather than my reading of it",
 );
 

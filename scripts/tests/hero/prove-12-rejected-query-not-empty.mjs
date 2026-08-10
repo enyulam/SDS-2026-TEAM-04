@@ -238,10 +238,11 @@ for (const file of walk(join(ROOT, "server", "modules"))) {
  * site of either shape is the defect returning, not progress.
  */
 const EXPECTED_EXACT_SHAPE = 0;
-// Modules 1-2 complete. 4 remain, all in `parent-view`. Updated at each module boundary so every boundary is
+// ALL THREE MODULES COMPLETE: zero of either shape remain anywhere in
+// `server/modules`. The ratchet now holds at zero. Updated at each module boundary so every boundary is
 // HONESTLY green — a pin set to the end target would report failure for work
 // that has not been done yet, which is a different lie.
-const EXPECTED_ERROR_DISCARDED = 4;
+const EXPECTED_ERROR_DISCARDED = 0;
 
 check(
   exactShape.length === EXPECTED_EXACT_SHAPE,
