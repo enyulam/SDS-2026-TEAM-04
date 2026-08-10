@@ -3894,3 +3894,136 @@ No database reached. The frozen `zjukuffiuzkbiblmnuwl` **never contacted**. `mai
 **Blockers opened or closed:** the Phase 0 rail-capture `NOT-RUN` **closed by Operator manual verification** (§2). The `Sign out`/`Logout` item **closed by ruling** (§5). All other carried items untouched: `F-S6-REVIEW-1`, `F-DEMO-1`, `F-EVIDENCE-SCOPE-1`, `B-STAGE3-2`, `B-C2-1`, `B-C2-2`, `F-REGION-1`, `F-STAGE3-1`, the `project_id` fallout, the academy-asset dependency, the identity-row/page-title baseline, and the native checkbox radius.
 **Cleanup / rollback state:** no partial mutation.
 **Next permitted action:** ▶ **BATCH 3 — plan Phases 4 through 12, authorized by the Operator**, run autonomously, **committing at every phase boundary**. `NEW-QUESTION` remains a hard stop; a phase that changes a `REGISTERED-OMISSION` has failed and must be reverted and reported. Nothing in that authorization carries hosted, paid, public, human, push or submission authority.
+
+---
+
+## 2026-08-10 — UI RECONCILIATION **BATCH 3**, plan Phases 4 → 12 · **DEVELOPMENT CLONE, `develop`**
+
+**Track / workstream:** `F-UI-DRIFT-1` bucket (c) — `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` (v2) §4.
+**Branch / worktree:** `develop` / none. **Starting HEAD `05edd6d` → ending HEAD `cca7526`.**
+⚠️ Plan-phase numbering, **not** `CLAUDE.md` §10.
+
+### Scope
+
+All ten remaining screen phases of the plan, run autonomously under the Operator's Batch 3
+authorization, **one screen per phase, committing at every phase boundary and never mid-phase**.
+
+| Phase | Screen | `TRUE-DRIFT` resolved | `REGISTERED-OMISSION` preserved | Commit |
+|---|---|---|---|---|
+| 4 | `05` Trainer Schedule | 19 | 8 | `5dda019` |
+| 5 | `06` Trainer Student Roster | 22 | 7 | `ca9396e` |
+| 6a | `07` Trainer Grade Student | 14 | 6 | `1c93a4f` |
+| 6 | `08` Trainer AI Report Generation | 13 | 10 | `85e1f35` |
+| 7 | `29` Management Reports | 12 | 5 | `7634c71` |
+| 8 | `19` Management Student Report | 12 | 12 | `d83823f` |
+| 9 | `32` Parent Reports | 10 | 4 | `6146f73` |
+| 10 | `33` Parent Class Report | 9 | 5 | `e5cf572` |
+| 11 | `30` Parent Dashboard | 5 | 1 | `d37c45a` |
+| 12 | `11` Management Dashboard | 4 | 3 | `cca7526` |
+| | **TOTAL** | **120** | **61, ZERO CHANGED** | |
+
+**The two totals are never merged into one "reconciled" count** (plan §6.5) — conflating them is
+the failure mode the plan exists to prevent.
+
+### Files changed
+
+Ten feature components (`features/trainer/{trainer-schedule,trainer-roster,trainer-assessment,trainer-draft-generation}.tsx`,
+`features/management/{management-reports-queue,management-report-review,management-dashboard}.tsx`,
+`features/parent/{parent-reports-list,parent-canonical-report,parent-dashboard}.tsx`) ·
+`components/ui/page-heading.tsx` · `app/globals.css` (**one additive rule**) ·
+`docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (new) · ten pack `implementation-notes.md`.
+
+### Migration or schema changes
+
+**NONE.** No schema, migration, RPC, server action, DTO, projection, grant, policy, audit action
+or route. **Route census 17, unchanged at every phase boundary**, enumerated from the build's own
+route table each time. The only `app/` change is `app/globals.css`.
+
+### Automated verification (exit codes)
+
+`tsc --noEmit` **0** · `eslint .` **0** · `next build` **0** — at **every** phase boundary ·
+`tests/frontend/app-route-census.mjs` **PASS** · `portal-navigation-active-state.mjs` **PASS** ·
+`post-login-destinations.mjs` **PASS** · `session-eligibility.mjs` **PASS** ·
+A-050 anchor byte-identity **4/4 IDENTICAL** · emitted-CSS verification **every new value**,
+grepped out of the compiled stylesheet rather than read back off the component.
+
+### ⛔ NOT-RUN, with reasons — none carried forward as green
+
+- **Every rendered build-side capture.** All Batch 3 screens are **authenticated**; the portal
+  layouts run `requirePortalAccess`, which needs a session and therefore a reachable governed
+  database, and `.env.local` here configures the **hosted** dev project only — a `CLAUDE.md` §12
+  stop-and-ask no current authorization carries. **No capture was manufactured and no hosted or
+  paid service was contacted.**
+- **The Phase 6a runtime carry-over re-proof.** `npm run test:continuity` was **attempted**:
+  `CONT-0` PASSED, `CONT-A0` FAILED — the local Supabase stack's connection values could not be
+  captured. That is **`B-STAGE3-2`**, already registered and **Operator-owned**. The harness
+  reached **no database and no network**: it reads connection values only from `loadLocalStack()`,
+  never `.env.local`, and exited before constructing any client. **The leg is OWED, not waived.**
+- Each **non-happy-path state on screen 08** as its own captured view — same authenticated-render
+  blocker. Their *existence* is verified in source; their *appearance* is not.
+- The screen 32 **projection** was not re-confirmed at runtime; the client boundary is proven.
+- Everything already `NOT-RUN` before this batch: every disposable-stack harness, every
+  real-provider leg, password sign-in, `design-foundation.assertions.ts` (no runner).
+
+### Failures and recovery — FOUR LIVE DEFECTS FOUND, none introduced by this batch
+
+1. **`<h3 className="… text-brand-800">` on screen 05 rendered NAVY.** The unlayered
+   `h1..h4 { color: #1b2b4b }` rule outranks any layered colour utility, so the class was emitted,
+   matched and discarded — on every build since it was written. Fixed narrowly with
+   `text-brand-800!`, the **only** important utility in the application; a repository sweep found
+   no other heading carrying a colour utility the rule defeats.
+2. **`rounded-control` and `border-hairline` are UNDEFINED TOKENS.** Neither exists in
+   `@theme inline`, so Tailwind emitted **nothing** and screen 06's attendance toggle had been
+   rendering square-cornered and borderless. They were the only two uses in the repository.
+   ⚠️ **A different failure class from (1): there is no competing rule, the rule simply never
+   exists**, so the static cascade audit cannot catch it — only the compiled stylesheet can.
+3. **`text-ink-muted` (#8a93a8) at 3.079:1** — below the SC 1.4.3 floor for normal-size text —
+   live on `PageHeading`'s description and on two dashboard surfaces. Two earlier checkpoints had
+   recorded it and worked around it. Re-pointed to `text-ink`; **no token VALUE redefined**.
+4. **Three surfaces were still on the pre-reference LEGACY scale** (`text-2xl`, `font-black`,
+   `text-navy-950`, `text-sm`, `rounded-xl`), none of which appears in any frame.
+
+Also caught before it became a defect: moving screen 05's session card to the frame's fill would
+have made the eligibility chip vanish into it — **one of four redundant carriers** of the derived
+state (SC 1.4.1). Both that chip and the "Class" pill moved to the frame's white-pill treatment.
+
+### Decisions
+
+- **The page-title scale was fixed PER SCREEN, not at the token.** `--text-page-title` is a
+  Phase 0 owned artefact, is pinned by an assertion file with **no runner**, and reaches
+  out-of-plan surfaces. Phase 7 did reconcile the shared **`PageHeading`** — declared, with its
+  seven consumers enumerated — because five of them are Batch 3 screens.
+- **`.card`'s 16px radius left alone**: the frames do not agree (14/16/18/19px) and 16px is inside
+  that family. `rounded-*` on a `.card` element would lose the cascade anyway.
+- **`app/globals.css` gained exactly one additive rule**, `.form-field.notes-field`, mirroring the
+  ratified `.auth-field` pattern. No existing rule, token or value modified; `.form-field` **not**
+  moved into a layer; exactly two consumers, both on screen 07.
+- Shared primitives `Badge`, `Avatar`, `StatusPill` and `Button` left **untouched**; a `className`
+  override on any of them is two same-layer utilities decided by stylesheet order, not by the
+  class attribute.
+
+### Reviewer findings · Operator decisions received · Environment changes
+
+No independent adversarial reviewer ran; the verification above is this session's own.
+**No Operator decision was received during this window.** **No environment or infrastructure
+change.** **No database was written or read.** The frozen `zjukuffiuzkbiblmnuwl` was **never
+contacted**.
+
+### Blockers
+
+**Opened: none. Closed: none.** `B-STAGE3-2` re-confirmed as blocking the Phase 6a runtime leg.
+
+### Cleanup / rollback state
+
+**No partial mutation.** Every phase ended on a clean tree at its own commit.
+
+### Commit
+
+`5dda019` → `cca7526`, ten commits, one per phase boundary. **Nothing pushed. `main` untouched.**
+
+### Next permitted action
+
+**Operator review of Batch 3.** `PASS` here is this session's **evidence verdict only**;
+**`Accepted` is Operator-set only and has NOT been set or implied.** The owed items are the
+Phase 6a runtime carry-over leg (needs `B-STAGE3-2` resolved) and every rendered capture (needs a
+reachable governed database — a §12 stop-and-ask).

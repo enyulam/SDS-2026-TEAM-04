@@ -631,4 +631,6 @@ The frame draws **four KPI tiles** (Total Students, Assessed, Pending Approval, 
 | 9 | `32` Parent Reports | **`6146f73`** |
 | 10 | `33` Parent Class Report | **`e5cf572`** |
 | 11 | `30` Parent Dashboard | **`d37c45a`** |
-| 12 | `11` Management Dashboard | *pending — recorded in `docs/progress/STATUS.md` at the batch close* |
+| 12 | `11` Management Dashboard | **`cca7526`** |
+
+**Batch 3 totals — the two lists, never merged:** `TRUE-DRIFT` resolved **120** · `REGISTERED-OMISSION` preserved **61, ZERO CHANGED** · `NEW-QUESTION` **none** · `INCOMPLETE` **three, all recorded and none built** · route census **17** at every boundary.
