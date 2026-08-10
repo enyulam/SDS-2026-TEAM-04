@@ -1,7 +1,7 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
 > **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** and is **not a fifth layer of §15.1** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md` and the plan — never before, or it would originate them. Contains **no credential**.
+> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md` and `BUILD_NOTES.md` — never before, or it would originate them. Contains **no credential**.
 
 ---
 
@@ -10,20 +10,74 @@
 | | |
 |---|---|
 | **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
-| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422** · containers `supabase_*_best-coach-dev` |
-| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its still-running local stack **`best-coach-mvp` on 543xx**, hosted project **`zjukuffiuzkbiblmnuwl`**, and the frozen deployment **`best-coach-mvp.vercel.app`** |
+| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422**. `.env.local` now points here |
+| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its local stack **`best-coach-mvp` on 543xx**, hosted **`zjukuffiuzkbiblmnuwl`**, and **`best-coach-mvp.vercel.app`** |
 | ⛔ **Git** | **No push. No merge. No `main`. `develop` only.** |
-| ⚠️ **Credential** | The **hosted dev** database password was exposed in a session transcript on 2026-08-11 by a regex allow-list over env var names. **The Operator is rotating it.** Cause and rule are in `BUILD_NOTES.md` |
+| ⚠️ **Credential** | The **hosted dev** database password was exposed in a transcript on 2026-08-11 by a regex allow-list over env var names. **Operator rotating.** Cause and rule in `BUILD_NOTES.md` |
 
 ---
 
-## ▶ WHERE THIS STOPPED
+## ✅ THE HEADLINE — THE DEFECT YOU REPORTED DOES NOT EXIST
 
-✅ **The `rejected query → empty result` sweep is COMPLETE. All 16 sites closed**, measured at **0 exact-shape** and **0 error-discarded** across `server/modules`.
+**Your wording edits SAVED. All three of them.** Both trainer edits and the management wording edit are in the database as new immutable versions, with correct authorship, `report_version.created` audit events, changed content hashes and advanced pointers. The read RPCs return them today.
 
-⛔ **STOPPED BY OPERATOR INSTRUCTION.** The **ratified-decisions document** comes next, **with its own bounded instruction**.
+▶ **You were one step from filing a data-loss defect against a system that lost nothing.**
 
-⚠️ **Do not act on the document alone.** Amending ratified authority is a `CLAUDE.md` §12 stop-and-ask: it needs an instruction naming the **exact files and corrections**, uses **annotate-never-delete**, and is **never** carried by a standing authorization (§15.11). **A ratified decision is the INPUT to that instruction, not the instruction.**
+⚠️ Your management edit went to **`strengths`**, not `remarks` — my first comparison checked only `remarks` and wrongly reported it unchanged.
+
+⛔ **And my first diagnosis was wrong in a way worth knowing.** I reported the management editor as having **no status guard**. It has one, in the **adapter** (`participant-actions.ts:688`), one layer above where the trainer's sits. I had measured the RPC **directly over PostgREST**, bypassing that adapter, and then described the result as the application's behaviour. **I measured a layer and reported it as the system.** You authorized a fix for that non-defect; **I refused to build it** rather than encode a defect that isn't there.
+
+---
+
+## What was done — four commits, in your order
+
+| | Commit | |
+|---|---|---|
+| 1 | — | ⛔ **REFUSED** — premise false, both editors are guarded. See above |
+| 2 | **`ade7d45`** | `test:integration` wired and **run** |
+| 3 | **`835067f`** | the `→ null` shape closed; `Q-7` widened to three shapes |
+| 4 | **`5e37e74`** | the silent half made observable |
+
+---
+
+## ⚠️ THREE THINGS THAT NEED YOUR ATTENTION
+
+### 1. `prove:hero-all` is **13/17**, and your walkthrough is why
+
+`prove:hero-1 / 2 / 7 / 9` fail with `duplicate key … reports_session_student_key` and **0 legs executed** — they create a report for a fixture pair that **now already has one**.
+
+**Measured, not assumed:** the last all-green commit `948011b` is **18:58:32 UTC**; your three reports were created at **19:37, 19:55 and 20:00 UTC**. This batch is TypeScript-only and cannot affect a SQL suite.
+
+⚠️ **Same root cause as the integration suite's `INT-A5`**, found an hour earlier by a completely different route: **the canonical dev database is shared between your manual walkthroughs and the automated suites, and a manual walk silently invalidates their preconditions.** All four rolled back cleanly — the database is byte-unmoved.
+
+⛔ **I did not repair it.** The repair is deleting those report rows, and **they are your evidence and the subject of this diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. **How to share that database is your call.**
+
+### 2. Coverage that could not be invoked — and what it said once it could
+
+`run-integration.mjs`, the **only** harness exercising both wording saves end to end, **was wired to no npm script**. It now runs: **48 `PASS` · 3 `FAIL` · exit 1**, zero non-loopback requests, the billable leg **skipped by default and recorded as skipped, never passed**.
+
+**All 3 failures are suite staleness, reported not fixed per your instruction** — `INT-A5` ×2 (same fixture-pollution cause) and `INT-Q27`, which pins a Parent DTO shape that **hero Phase 2 ratified a change to**. `context` carries class/module/lesson/trainer — **no rating in any vocabulary** — so Q-27's actual prohibition is untouched. ⛔ The suite also calls `pass("INT-A5")` **unconditionally** after both `fail()`s, so it prints two `FAIL`s and then a `PASS`. The exit code held at 1.
+
+### 3. Widening the ratchet found three more sites than the two you named
+
+`Q-7d` failed on its first run naming three sites in `integration-adapter` nobody had listed. The worst: ⛔ **`adapterSaveTrainerEdit` reported a governed correction request as RESOLVED when the read that was supposed to confirm it had been REJECTED** — under a comment reading *"Observed, not asserted."*
+
+▶ **A ratchet pinned to the defect you found does not protect you from the same defect wearing a different return value.**
+
+---
+
+## ▶ HOW TO REPRODUCE THE SILENT SAVE — the walk that will settle it
+
+Your failing attempts left **no trace anywhere**, because a submit that never dispatches produces no server record at all. Two candidates remained and nothing could separate them. **I did not guess.** Three signals now make all three outcomes distinguishable:
+
+1. Open the browser console **before** navigating (`F12` → Console, `Verbose`/`debug` visible).
+2. Trainer report at `draft_ready` → **Edit**. The line beside the button should read **"No changes yet"**.
+3. Type one character. It must become **"Ready to save."** ⛔ **If it does not, that is candidate 1** — the button never enables and the click can never dispatch.
+4. Click **Save changes**. Expect `[trainer-report-editor] dispatching`, then `returned {outcome: …}`.
+5. **Console empty** → candidate 1. **Only `submit-ignored`** → candidate 2 (component not `ready`). **`dispatching` with nothing in the server log** → a third possibility neither candidate covered.
+6. Repeat on a `trainer_approved` report → Management **Edit wording**.
+
+**Report whichever of the three you see.**
 
 ---
 
@@ -31,49 +85,20 @@
 
 | Field | Value |
 |---|---|
-| **HEAD** | `cd55b11` on `develop`, working tree **clean** (plus this continuity commit) |
-| **Commits, per module boundary** | first fix `46310b9` (1 site) · `report-workflow` `6910ff2` (7) · ratchet `d5c7f6c` · `management-view` `334d3c6` (3) · `parent-view` `cd55b11` (4) |
-| **Proofs** | **`npm run prove:hero-all` — 17/17 `PASS`**, verified by **exit code** |
-| **Other gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · route census **17** · `post-login-destinations` **PASS** |
-| **Database** | **UNTOUCHED** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies |
-| **`.env.local`** | **NOT touched.** The app still reads hosted dev until you repoint it |
+| **HEAD** | `5e37e74` on `develop` (plus this continuity commit), working tree **clean** |
+| **Gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · route census **17** |
+| **Proofs** | **`prove:hero-all` 13/17** — see item 1 · **`test:integration` 48/3/3, exit 1** — see item 2 |
+| **Database** | **UNTOUCHED by this batch** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Your three walkthrough reports are intact |
+| **Dev server** | running on **3000** against the local stack |
 
----
+## ⛔ Carried
 
-## What the sweep closed
+- **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
+- ⚠️ **Phase 8/11 gap recorded:** structural consistency is **neither a visual nor a functional acceptance**. `prove:hero-8/11` would pass unchanged if either editor could not save at all; they passed here **only because both changed symmetrically**.
+- **Nothing pushed. No remote write of any kind.** Screens `11` and `30` untouched.
 
-`readRows(context, run)` decides the three cases **once**: a rejection, a `!data`-without-error (⛔ **not an observed emptiness**), and rows. ⚠️ **The defect was a repeated SHAPE, not a typo** — hand-writing the block sixteen times would have left sixteen chances to write it wrong again.
+## ▶ Next
 
-**The three worst silent emptinesses it removed:**
+⛔ **NONE. STOPPED.** The **ratified-decisions document**, with its own bounded instruction. ⚠️ **Do not act on the document alone** — a ratified decision is the **input** to that instruction, not the instruction.
 
-1. **The roster's carry-over read.** A rejection became *"there is no previous session"*, so the roster rendered **every learner with no carried-over focus and looked entirely normal** — `CLAUDE.md` §10 **Phase 1 exit condition (c)** silently not holding.
-2. **The management queue spine.** Screen `29` would have said **"No reports waiting"** while trainer-approved reports sat unreviewed — **a governed review step made invisible** (A-033).
-3. **The parent link read.** A rejection told a parent **no learner is linked to their account** — a false statement about their own family. ▶ **The clearer the empty state, the more convincing the lie.**
-
-⛔ **One read was deliberately NOT swept.** The per-pair `report_get_canonical` call keeps `if (error) continue` — **that silence IS the R-C2-6 non-disclosure**, since a parent must not distinguish *"not yours"* from *"nothing submitted"* by the shape of the answer. **A uniform sweep would have broken the thing it protects.** Pinned by `P-5`/`P-5b`.
-
----
-
-## ⚠️ Three things worth your attention
-
-1. **Two pins fired, both correctly** — `Q-7`'s counts and `prove:hero-13`'s exact-line check. **Both failed rather than following the code silently**, which is why they are written as exact matches. `Q-7` is now a **ratchet**: it fails if either count RISES.
-2. **I defeated my own rule with a pipe.** `prove:hero-all … | tail -2 && git commit` — a pipeline's exit status is the last command's, so a commit landed over a **failing** sweep, in the very commit adding the exit-code discipline. ▶ **Never place a pipe between a verdict and the decision that consumes it.** Fixed forward; every check since redirects to a file and tests the exit status.
-3. **The reachability gate is proven, not assumed.** A deliberate type error was written into the project, both gate legs **failed**, and the probe was removed with `tsc` verified clean. *A gate never seen to fail is a gate nobody has tested.*
-
----
-
-## ⛔ Carried / still `NOT-RUN`
-
-- **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface.
-- **`NOT APPLICABLE (G-1)`** on the three unframed surfaces — a **ruled disposition**, never a pass, never a gap.
-- **`B-C2-1`** untouched. **`NEW-QUESTION`: none.**
-- **Nothing pushed. No remote write of any kind.**
-- ⚠️ **The app still reads hosted dev**, which is 4 migrations behind. Repointing to local dev is **your** change to `.env.local`, plus a dev-server restart.
-
----
-
-## Reading order for the next session
-
-`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and the operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`docs/progress/STATUS.md`** → recent `docs/progress/BUILD_NOTES.md` → `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`, whose **§12 now carries twenty disciplines** and is the part of that closed plan with a life after closure.
-
-⚠️ **Then verify the recorded state against the repository** (§15.3) — existence governs facts.
+**Two open items only you can settle:** whether the management `unavailable` StatePanel should name *"already submitted"* (an **A-038** disclosure decision, and I will not move that boundary unasked), and how the canonical fixture database should be shared between manual walks and automated suites.
