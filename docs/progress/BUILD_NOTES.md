@@ -4392,3 +4392,70 @@ The established §2.3 pattern is a **root-level ruling instrument carrying the f
 ### Commit / next
 
 Committed. **Next: the Operator clears `B-STAGE3-2` step 2 personally, then authorizes Phase 0A in a fresh session.**
+
+---
+
+## 2026-08-10 — ⛔ **`B-STAGE3-2` CLOSED**, the OWED ACL proof discharged, and the P1-T09a expansion applied and independently re-measured
+
+**Operator-executed remediation**, on the corrected sequence. No session ran `supabase start`, `supabase stop`, the fixture loader or the expansion.
+
+### What the Operator reported
+
+- **`npm run fixtures:local` all green** — guards satisfied against **`supabase_db_best-coach-dev`**, **3 Auth identities**, **25 domain rows**, **28 canonical rows**, canonical SHA **`6bdff280…c576`**, residue proof passed.
+- **`npm run prove:trusted-store-acl` — 9 PASS · 0 NOT-PASS.** `report_store_draft` **owner-only**, **zero client `EXECUTE`** for `anon` / `authenticated` / `service_role`, the **control leg discriminating**, `BYPASSRLS` at platform baseline. ⚠️ **The OWED proof is DISCHARGED** — it had been `UNMEASURED` (0 PASS · 9 NOT-PASS) while the stack was down, and was deliberately never reported as passing.
+- **`P1-T09a` expansion applied**, then ⚠️ **accidentally invoked a SECOND time**, with the Operator reporting identical output including `COMMIT`.
+
+### ⚠️ THE DOUBLE-APPLY — MEASURED, NOT REASONED FROM THE GUARD'S INTENT
+
+The Operator's instruction was explicit: *"Report measured row counts, not the guard's intent."* Correct instinct, and it is the only thing that settles it — a guard that is *supposed* to abort proves nothing about whether it *did*.
+
+**Measured against `supabase_db_best-coach-dev`, read-only:**
+
+| Family | Measured | Expected |
+|---|---|---|
+| `students` `e2000000-%` | **6** | 6 |
+| `class_modules` `e4000000-%` | **2** | 2 |
+| `class_sessions` `e5000000-%` | **3** | 3 |
+| `enrolments` `e6000000-%` | **6** | 6 |
+| `class_session_assignments` `e7000000-%` | **3** | 3 |
+| `attendance` `e8000000-%` | **6** | 6 |
+| `observations` `e9000000-%` | **1** | 1 |
+| `observation_ratings` `ea000000-%` | **9** | 9 |
+| **TOTAL** | **36** | **36** |
+
+**Whole-table totals also exact:** `auth.users` **3** · `students` **7** (1 ratified + 6 expansion) · `class_sessions` **4** · `observations` **2** · `observation_ratings` **18**.
+
+**Duplicate scan — zero on every natural key:** attendance (session, student) **0** · enrolments (module, student) **0** · observation_ratings (observation, dimension) **0** · duplicate student names **0**.
+
+**Residual-dirt check — the thing `B-STAGE3-2` actually was:** `audit_events` **0** · `audit_chain_heads` **0** · `reports` **0** · `report_versions` **0**. The dirt is genuinely gone, not re-hidden.
+
+**✅ VERDICT: 36 rows, not 72. NO DUPLICATION. NOTHING TO CLEAN.**
+
+**Two independent reasons it could not have duplicated, both verified in the file:**
+
+1. **The load block opens with a precondition guard** that sums the `e2`/`e4`/`e5` families and raises `Expansion aborted: % expansion rows already exist.` when non-zero. **That sum measures 11 right now**, so any further `do_expand` run raises and rolls back.
+2. **There is no `ON CONFLICT` anywhere in the file and every id is a fixed literal.** Even with the guard removed, a second load would hit a primary-key violation and abort the transaction.
+
+⚠️ **One observation left unexplained rather than rationalized.** An aborted psql transaction prints `ERROR` and then `ROLLBACK` at the `COMMIT`; the Operator reported seeing `COMMIT`. Which invocation produced the output that was read could not be reconstructed. **The database is the authority and it says 36.** Inventing a tidy explanation for the terminal output would have been the wrong move — the measurement is what the decision rests on.
+
+**Ratified verifier re-run: `verify-local-fixtures.sql` exit 0** — *"SECTION C: all 7 negative tests were correctly rejected"*, *"SECTION D: rollback left no residue; fixture, Option B, seed and audit-guard boundaries all intact."*
+
+### Local stack state — both stacks running side by side
+
+| | Project | Ports | Containers |
+|---|---|---|---|
+| **This development clone** | `best-coach-dev` | **544xx** — api 54421 · db 54422 · shadow 54420 · studio 54423 · smtp 54424 · analytics 54427 · pooler 54429 | `supabase_*_best-coach-dev` |
+| ⛔ **Demonstration workspace** | `best-coach-mvp` | **543xx**, unchanged | `supabase_*_best-coach-mvp` — **UNTOUCHED** |
+| F17 disposable | `bc-f17-disposable` | **554xx** | created per-run |
+
+**No `supabase stop` was run against any project.** The demonstration stack stayed up throughout, which was the Operator's ruling and the reason the port block existed at all.
+
+### Fixture now available to Phase 0A
+
+The ratified 25-row minimum **plus** the `P1-T09a` expansion: **2 trainers · 2 class modules · 3–4 learners each · 2 parents · and the SECOND CLASS SESSION** the carry-over re-proof needs. ⚠️ **The owed Phase 6a runtime carry-over re-proof is now unblocked for the first time** — it had been blocked at `CONT-A0` since Batch 3.
+
+⚠️ **A standing consequence to carry:** with expansion rows present the loader **refuses `--reload`**, because they foreign-key the ratified trainer membership under `ON DELETE RESTRICT`. To reload the base fixture, run the expansion's cleanup first (`do_expand=false`, `do_expand_cleanup=true`).
+
+### Commit / next
+
+Continuity only. **Next: the Operator authorizes Plan Phase 0A in a fresh session.** No implementation authorization is in force.

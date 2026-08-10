@@ -10,8 +10,9 @@
 | | |
 |---|---|
 | **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
-| **Hosted target (configured, NOT contacted)** | **`poblcfbxxzgarclchzkx`** — Supabase, `ap-southeast-1` |
-| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace and hosted project **`zjukuffiuzkbiblmnuwl`**. **Never connect to that ref.** If any value read resolves to it — **STOP and tell the Operator** |
+| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422** · containers `supabase_*_best-coach-dev` |
+| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its **still-running local stack `best-coach-mvp` on 543xx**, and hosted project **`zjukuffiuzkbiblmnuwl`**. **Never connect to any of them.** Both are now **hard-denied in code**, unconditionally and non-overridably |
+| **Hosted target (configured, NOT contacted)** | `poblcfbxxzgarclchzkx` — Supabase, `ap-southeast-1` |
 | ⛔ **Git** | **No push. No merge. No `main`. `develop` only.** |
 
 ⚠️ **`STATUS.md` opens with a CURRENT EXECUTION STATE block for THIS clone**, above the demonstration-workspace `📌` block. Read the clone block; everything below it is history and is not about this repository.
@@ -20,11 +21,11 @@
 
 ## ▶ WHERE THIS STOPPED
 
-✅ **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` is WRITTEN (revision 2). PLANNING ONLY — NOTHING WAS BUILT.**
+✅ **`B-STAGE3-2` is CLOSED. Nothing blocks Plan Phase 0A.**
 
-**Stopped on Operator instruction.** The Operator will **authorize Phase 0A in a fresh session**.
+**Stopped on Operator instruction.** The Operator will **authorize Plan Phase 0A in a fresh session**.
 
-⚠️ **Before that, `B-STAGE3-2` should be cleared.** It is `OPERATOR-ONLY`, it blocks **every** end-to-end verification in the new plan, and the Operator asked to clear it *before* Phase 0A rather than discover it mid-phase. **The exact five steps are plan §7.2** — summarized below.
+**Outstanding Operator `Accepted`: none.**
 
 ---
 
@@ -32,154 +33,101 @@
 
 | | |
 |---|---|
-| Branch / worktree | `develop` / none |
-| HEAD | **`b3cdc64`** — **unmoved at both ends of this run** |
-| Working tree | **clean** — two commits this day: **`06f34c2`** the hero-chain plan and its continuity, then the ruling propagation |
-| Ahead of `origin/develop` | **24 commits, NONE pushed** |
-| Governed surfaces | **NONE touched.** No schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route |
-| Database | **None read, none written.** No hosted or paid service contacted; the frozen project never referenced |
-| Authorization in force | ⛔ **NONE.** Batch 3 is spent. **No `STANDING_LOCAL_EXECUTION_AUTHORIZATION` exists** |
-| Outstanding Operator `Accepted` | **None** |
+| Branch / worktree / tree | `develop` / none / **clean** |
+| HEAD | resolve with `git rev-parse HEAD` — five commits this day, latest `5f2118a` plus this continuity commit |
+| Ahead of `origin/develop` | **NONE pushed** |
+| Authorization in force | ⛔ **NONE.** No implementation authorization; **no `STANDING_LOCAL_EXECUTION_AUTHORIZATION`.** Every one of the hero plan's twelve phases needs explicit Operator authorization before any code is written |
+| Database | ✅ Local **`best-coach-dev`** loaded and verified. The frozen `zjukuffiuzkbiblmnuwl` and the demonstration local stack were **never contacted** |
 
 ---
 
-## ✅ THE EIGHT GOVERNANCE COLLISIONS — ALL RULED, 2026-08-10
+## ✅ `B-STAGE3-2` — CLOSED, Operator-executed
 
-Reported first, as a separate list, then ruled. **Settled — no phase re-opens one, and no phase designs around one.**
+`npm run fixtures:local` **all green** against `supabase_db_best-coach-dev`: **3 Auth identities · 25 domain rows · 28 canonical rows**, canonical SHA **`6bdff280…c576`**, residue proof passed.
 
-| | Ruling |
-|---|---|
-| **G-1** three unframed hero surfaces | **LEAVE UNFRAMED.** Functional completion covers all eleven routes; **visual acceptance covers the eight framed screens only.** The three are `NOT APPLICABLE (G-1)` — ⚠️ **a ruled disposition, never a `NOT-RUN`, never a defect** |
-| **G-2** "Overall Grade" | ⛔ **NO — all four surfaces, PERMANENTLY, not deferred** |
-| **G-3** lesson identity | ✅ **BUILD** number + title · ⛔ **KEY FOCUS chips OUT** |
-| **G-4** term | ⛔ **NO** — a label is not worth the substrate an §8-deferred item needs |
-| **G-5** trainer name on a Parent surface | ✅ **YES** — not a rating, not derived from one |
-| **G-6** room | ✅ **YES** |
-| **G-7** staff slots | ✅ **`Main:` built** · ⛔ **`Assist.` out; `centre_membership_role` NOT extended** |
-| **G-8** evidence | ⛔ **CONFIRMED OUT.** The frame's "500MB" is never implemented |
+**Independently re-measured afterwards:** `audit_events` **0** · `audit_chain_heads` **0** · `reports` **0** · `report_versions` **0**. ⚠️ **The dirt is gone, not re-hidden** — those four counts were the whole of `B-STAGE3-2`. `verify-local-fixtures.sql` **exit 0**, all 7 negative tests correctly rejected, no residue, boundaries intact.
 
-**Screen `11` confirmed OUT of hero scope** — management completes the workflow without ever loading `/management`. The rating chip goes with it to the portal plan.
+## ✅ The OWED ACL proof is DISCHARGED
 
-⚠️ **Five of the eight rulings REMOVE work.** The surviving new-build surface: three columns of schema, one identity projection, context fields on four existing projections, one narrow governed write. **Nothing in the plan computes an assessment fact.**
+`npm run prove:trusted-store-acl` — **9 PASS · 0 NOT-PASS.** `report_store_draft` **owner-only**, **zero client `EXECUTE`** for `anon` / `authenticated` / `service_role`, the control leg **discriminating**, `BYPASSRLS` at platform baseline.
 
----
+⚠️ It had been **`UNMEASURED` (0 PASS · 9 NOT-PASS)** while the stack was down, and was **never reported as passing**. That mattered: the suite's own negative control is designed so a zero-row reading is `UNMEASURED`, never a pass.
 
-## ✅ THE RULINGS ARE PROPAGATED TO ACTIVE AUTHORITY — done under a bounded §12 instruction
+## ✅ `P1-T09a` expansion applied — and the accidental DOUBLE-APPLY measured
 
-**New instrument: `FINAL_MVP_HERO_CHAIN_RULINGS.md`** at the repository root — the **§2.3 ruling-instrument class**, exactly as OD-4, the Phase-0 set and G-06 each did. Indexed at **Authority Lock §2.3**, with the operative rules placed in the six Lock sections they bind:
+⚠️ The Operator invoked it **twice**. **Measured, not reasoned from the guard's intent:**
 
-| Lock | Carries |
-|---|---|
-| **§11** Rating vocabulary | ⛔ **No roll-up rating exists** — the 9→7 and 4→3 mappings stay *pending client ratification*; A-049 preserved their proposed/term-only status |
-| **§13** Trainer authority | ⛔ **KEY FOCUS prohibited** with full reasoning · `room` carries **no authorization meaning** · ✅ `Main:` authorized as a projection · ⛔ `Assist.` prohibited, **`centre_membership_role` NOT extended** |
-| **§14** Management authority | ⛔ **Cannot receive a roll-up** — it is *computed from* the ratings A-038 bars |
-| **§15** Parent projection | ⛔ **No Overall Grade in any form** · ✅ **trainer name permitted**, widening the projection by **exactly one field** · ⛔ **nothing may disclose a correction cycle** |
-| **§19.1** Census | ✅ Three `class_sessions` columns authorized **in scope**; census unchanged today; ⚠️ **a scope ruling is not a migration authorization** |
-| **§28.4** U-25 | **`G-1`**, the split completion criterion, and `NOT APPLICABLE (G-1)` as a **ruled disposition — never a `NOT-RUN`, never a defect** |
-
-⚠️ **+27 lines, ZERO deletions. Every edit is an ADDITION** — no existing sentence, figure, ruling or supersession was modified, struck or renumbered. Annotate-never-delete was not needed, because nothing existing became false.
-
-### ⚠️ `CLAUDE.md` NOT TOUCHED — one candidate flagged for your decision
-
-**No ruling strictly requires it** — the Lock outranks `CLAUDE.md` for Final-MVP-defining questions and now carries all eight.
-
-**The one arguable candidate, reported not acted on:** `G-3`'s **KEY FOCUS prohibition** in **§12's stop-and-ask list**. §12 is the list a session consults first, and **§14.0 makes §12 what binds the Main Orchestrator** — a session about to build screen `06` reads §12 well before it reaches Lock §13. **Your call.**
-
----
-
-## ⛔ `B-STAGE3-2` — WHAT IS NEEDED FROM YOU
-
-**All LOCAL. Nothing hosted, billable or pushed. No credential ever reaches a session, a file, a log or a report.**
-
-**Run every command from the repository root, in your own terminal. Verified against the scripts themselves, not recalled.**
-
-| # | Command | What it does |
+| Family | Rows | Expected |
 |---|---|---|
-| **1** | `npx supabase stop --no-backup`<br>`npx supabase start` | ⚠️ **This IS step 2** — the **`D-0C` / `R-1` reconstruction**, your own ratified precedent. `--no-backup` discards the dirty volume, so the database comes back **empty and all migrations re-apply from scratch** — which is the **only** way the four `audit_events` rows go away. ⛔ **Never `supabase db reset`** (§12; it also destroys the three Auth identities). **No password.** Leave the stack running |
-| **2** | `npx supabase status` | Confirms the stack is up. ⚠️ **`CONT-A0` failed precisely because this was down** — every harness and the loader call `supabase status -o json` and abort otherwise. **Do not send me the output**; it contains local keys. Just say "up" |
-| **3** | `npm run fixtures:local` | Loads the **3 synthetic Auth identities + 25 baseline domain rows**. ⚠️ **Prompts three times, no-echo — this is where you enter the passwords.** One per identity (management, trainer, parent). ⛔ **Never paste a password into chat in either direction.** Report **only** the exit code |
-| **4** | *(the loader runs the verifier itself)* | **Confirm it reports the fixture verification passing — assertion `A19` in particular.** A19 is the one that failed. ✅ **A19 green is the signal `B-STAGE3-2` is genuinely closed** |
-| **5** | ✅ *Optional — needed for Phase 4's roster and the continuity re-proof's second session:*<br>`docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc --username=postgres --dbname=postgres -v do_expand=true -v do_expand_cleanup=false < scripts/fixtures/local_fixtures_expansion.sql` | Applies **`P1-T09a`** — 2 trainers, 2 class modules, 3–4 learners each, 2 parents, and **the second Class Session the carry-over re-proof needs**. ⚠️ **STRICTLY AFTER step 4.** Once applied, `npm run fixtures:local -- --reload` **fails closed** — the expansion rows foreign-key the ratified trainer membership under `ON DELETE RESTRICT`. **To undo it, re-run the same command with the two flags swapped** (`do_expand=false`, `do_expand_cleanup=true`) |
+| `students` `e2` · `class_modules` `e4` · `class_sessions` `e5` | **6 · 2 · 3** | 6 · 2 · 3 |
+| `enrolments` `e6` · `assignments` `e7` · `attendance` `e8` | **6 · 3 · 6** | 6 · 3 · 6 |
+| `observations` `e9` · `observation_ratings` `ea` | **1 · 9** | 1 · 9 |
+| **TOTAL** | **36** | **36** |
 
-⚠️ **Step 1 is not optional and is not `--reload`.** A plain `npm run fixtures:local -- --reload` **cannot succeed** here: `audit_events` is append-only and its `BEFORE DELETE OR UPDATE` trigger refuses **`postgres`** too. **Disabling that trigger is prohibited** — §12 forbids working around a fail-closed refusal by weakening the thing that refused.
+Whole-table totals exact too — `auth.users` **3** · students **7** · sessions **4** · observations **2** · ratings **18** — and **zero duplicates** on every natural key.
 
-**Measured damage:** `reports` 0 → 1 · `audit_events` 0 → 4 · `audit_chain_heads` 0 → 1 · fixture attendance `recorded_by_*` non-NULL → **A19 fails**. **Blast radius:** `readCanonical()` throws before `assertCanonicalPristine`, so **all six disposable-stack harnesses abort** and every `TEMPLATE postgres` clone inherits the dirt.
+✅ **36 rows, NOT 72. NO DUPLICATION. NOTHING TO CLEAN.**
 
-**If it stays blocked:** Phases 0A and 0B can be authored and committed — a migration and a projection are code. ⚠️ **But no phase can reach `PASS`**, so work would accumulate unverified. That is the pattern that produced the four defects Batch 3 found.
+**Two independent reasons it could not duplicate:** the load block's precondition guard raises `Expansion aborted: % expansion rows already exist` when the `e2`/`e4`/`e5` sum is non-zero — **it measures 11 now**; and there is **no `ON CONFLICT` anywhere, with fixed-literal ids**, so a second load hits a primary-key violation and aborts.
 
----
+⚠️ **One observation left unexplained rather than rationalized:** an aborted psql transaction prints `ERROR` then `ROLLBACK` at the `COMMIT`, yet `COMMIT` was reported. Which invocation produced the output that was read could not be reconstructed. **The database is the authority and it says 36.**
 
-## The plan in one screen
-
-**Twelve phases, by screen never by layer.** Each delivers projection → server action → frontend → end-to-end verification **before the next begins**. No frontend-first pass, no trailing integration phase.
-
-**`0A`** staff-identity projection · **`0B`** session metadata migration (`lesson_number`, `lesson_title`, `room`) · **`1`** `33` Parent Class Report · **`2`** `32` Parent Reports · **`3`** `05` · **`4`** `06` · **`5`** `07` · **`6`** `08` · **`7`** Trainer Review & Approve · **`8`** Trainer wording editor · **`9`** `29` · **`10`** `19` · **`11`** Management wording editor.
-
-⚠️ **Phase 0 SPLIT into 0A/0B because of your own G-3 ruling.** You approved parent-screens-first on the basis that they were the only ungated deliverable — true while G-3 was unruled. Ruling **G-3 = BUILD** gave them a lesson deliverable, and screen `32`'s **row title *is* the lesson title**, so both now need the lesson schema. **Your intent is preserved — the parent screens still go first.**
-
-**Why the parent screens are worst:** `CanonicalReportDto` carries **`panels` and `submittedAt` and nothing else** — the report page cannot state which class or session it is about, and cannot name the learner in its own heading.
-
-⚠️ **Every one of the twelve phases needs your explicit authorization before any code is written** (plan §11).
+⚠️ **Standing consequence:** with expansion rows present the loader **refuses `--reload`** — they foreign-key the ratified trainer membership under `ON DELETE RESTRICT`. To reload the base fixture, run the expansion cleanup first (`do_expand=false`, `do_expand_cleanup=true`).
 
 ---
 
-## ⚠️ PHASE 7 AND THE OWED RE-PROOF STAY SEPARATE
+## ✅ Local isolation — the hazard that produced all of this
 
-Both touch `observations.follow_up_notes`. **Different claims, proven independently.**
+Renaming `project_id` to `best-coach-dev` broke three assertions and left **one production line pointing at the frozen database**.
 
-- **The owed Phase 6a re-proof** backs **`CLAUDE.md` §10 Phase 1 exit (c)** — a note saved on `07` appears as the next session's previous focus. ⛔ **OWED**; proven statically only, which does not discharge it.
-- **Phase 7 / `F-S6-REVIEW-1`** backs **§6** — `/review` loads that value into an editable field with a save path.
+| Fix | State |
+|---|---|
+| **Ports** — this clone moved to a disjoint **544xx** block | ✅ Both stacks run side by side. **No `supabase stop` was ever run against any project** |
+| **`lib/supabase/public-config.ts`** — closed port allow-list | ✅ Left at 54321 it would have **refused this repo's own stack, or authorized the app to talk to the FROZEN one** |
+| ⚠️ **`server/modules/ai-drafting/trusted-store.ts:34`** — was `const CONTAINER = "supabase_db_best-coach-mvp"` | ✅ **FIXED.** `storeDraft` docker-execs as `postgres` to write `report_version` rows — a draft generated here would have written a governed version **into the demonstration database** |
+| **`scripts/physical-test/prove-trusted-store-acl.mjs:27`** — same literal | ✅ **FIXED.** It would have read the **demonstration** database's ACLs and reported them as this repository's |
+| **Three broken assertions** + `server/platform/local-target.ts` | ✅ Guarded: unconditional **HARD DENY** of `best-coach-mvp`, then a fail-closed pin from **`BEST_COACH_LOCAL_PROJECT_ID`**; container names **derived**, never literal |
 
-⚠️ **The re-proof runs FIRST, on the code before Phase 7 changes anything** — proving carry-over *after* adding a second write path proves the new path, not the original gate. **Neither may ever be reported as discharging the other.**
+**Proofs:** `prove-local-target-guard.mjs` **31 passed · 0 failed · exit 0** — deny in seven shapes, through five entry points, absent/blank/malformed pins, deny-before-shape ordering, and a **drift assertion** that both guards' frozen id, shape pattern and variable name are character-identical. Deny confirmed firing **from `trusted-store`'s own path before `docker` is spawned**. Resolution is **lazy**, so `npm run build` exits **0** with no pin in the environment — the hosted deployment cannot crash on a variable it does not have. `tsc` 0 · `eslint` 0 · `prove:stage2-routes` **PASS, 17**.
 
-Plan §9.2 records a **recommendation, not a decision**: a narrow governed write that reads the observation server-side and updates only `follow_up_notes`, rather than round-tripping nine ratings through the client. It needs its own authorization and inherits the CP-2/CP-4 boundary — **no Step 7H event, registry stays at 16.**
+⚠️ **The recorded general principle: DENY IDENTITY, NOT PORTS OR SPELLINGS.** Ports get reassigned and container names are derived; identity is the only stable thing to guard.
 
----
+**Sweep of `app/` `lib/` `server/`:** `trusted-store.ts:34` was the **only** container-name literal, the only `docker` invocation and the only live `best-coach-mvp` value in production code. **No frozen hosted ref anywhere.**
 
-## Provenance of the plan — audited, because you asked
+## ✅ R-C2-5 — the TEST was amended, the RULING was not
 
-✅ **`reference/*.png` and `reference/*.html`: YES for all eight framed hero screens.** Every `.html` was **re-extracted 2026-08-10**, not recalled across the context compaction. **No screen's frame content was derived without its `.html`**, so nothing needed re-deriving on that ground.
-
-⚠️ **The numbered packs' `screen.md` was NOT read at first drafting.** Read for all eight before revision 2. **It was the real gap** — it carries *Prohibited invention* and *Dependencies*, which the `.png` and `.html` cannot. Three changes followed:
-
-1. **A missing prohibition** — screens `32` **and** `33` both bar disclosing *"that a correction cycle is or was underway"*. **Constrains Phases 1 and 2**, the two sequenced first.
-2. **G-6 and G-7 were already recorded dependencies** at checkpoint **F-04** on screen `05` — the rulings **discharge** them rather than open them.
-3. **`PHYSICAL_TEST_SLICE_48H.md` §5.5 was checked, not assumed** — class, module, lesson and trainer are **not** on the absolute Management-DTO exclusion list, so the Phase 9 columns are permitted. **Evidence-backed now, not assumed.**
-
-**Standing lesson added to the plan (§12 item 8): read the numbered pack's `screen.md`, not only the `/reference/` artefacts.**
-
-### ⚠️ A THIRD FALSE-SOURCE INSTANCE — now recorded as a pattern
-
-Each `screen.md` §7 cites its RPCs as *"delivered on `feat/48h-backend`"* — a **`CLOSED_BY_NONUSE_POLICY`** branch whose worktree no longer exists on disk and from which **no contract, status or model may be taken**. **It was not trusted:** the functions were **enumerated from `supabase/migrations/`** instead, and all fifteen are at HEAD.
-
-**Third instance of the same class — a source that LOOKS authoritative but is not, where the claim may still be true:**
-
-1. `STATUS.md` naming a **HEAD 38 commits behind reality** while asserting three different current states — why §15.2 requires the snapshot be **replaced, never stacked**.
-2. **`CLAUDE.md:180`** instructing agents **not** to correct a vocabulary mismatch long after V2/V3 had landed — discharged by Phase A2 S-06/S-07.
-3. **`screen.md` citing a closed branch as the delivery source** — this one.
-
-▶ **Verify a claim against the artefact that would have to exist if it were true — the migration, the catalogue, the compiled stylesheet — never against a document that merely asserts it. A cited source is not evidence the thing is there**, exactly as *a declared class is not evidence it applied*. This is also why §15.3 puts **existence above precedence**.
+Operator ruling: **the port number in R-C2-5 is workspace-scoped.** It names 54321 because one workspace existed when it was written; its binding content is **the pinning, not the digits**. `run-runtime-profile.mjs` now reads the `[api]` port from `supabase/config.toml`. Was **7 failing cases; now exit 0**. ⚠️ **Tighter, not looser** — it now fails if `public-config.ts` and the stack it must reach ever disagree, which a hardcoded number could never detect.
 
 ---
 
-## ⛔ STILL `NOT-RUN` — none of it carried forward as green
+## The hero chain plan — twelve phases, by screen
 
-1. **Rendered captures on all ten authenticated screens** — need a reachable governed database, a §12 stop-and-ask. ⚠️ **The Operator walkthrough is point-in-time manual verification and does NOT substitute.**
-2. **The Phase 6a runtime carry-over re-proof** — ⛔ **OWED**, blocked at `CONT-A0` by `B-STAGE3-2`.
-3. Every disposable-stack harness · every real-provider leg · password sign-in · `design-foundation.assertions.ts` (no runner) · `test:continuity`.
+`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` (revision 2). **`0A`** staff-identity projection · **`0B`** session metadata migration (`lesson_number`, `lesson_title`, `room`) · **`1`** `33` Parent Class Report · **`2`** `32` Parent Reports · **`3`** `05` · **`4`** `06` · **`5`** `07` · **`6`** `08` · **`7`** Trainer Review & Approve · **`8`** Trainer wording editor · **`9`** `29` · **`10`** `19` · **`11`** Management wording editor.
+
+Each delivers projection → server action → frontend → end-to-end **before the next begins**. **Why the parent screens go first:** `CanonicalReportDto` carries **`panels` and `submittedAt` and nothing else** — the report page cannot say which class or session it is about, or name the learner in its own heading.
+
+**All eight governance collisions are RULED** (`FINAL_MVP_HERO_CHAIN_RULINGS.md`, indexed at Authority Lock §2.3): `G-1` leave unframed · `G-2` ⛔ Overall Grade permanently excluded · `G-3` ✅ lesson number/title, ⛔ KEY FOCUS chips · `G-4` ⛔ term · `G-5` ✅ trainer name on Parent · `G-6` ✅ room · `G-7` ✅ `Main:`, ⛔ `Assist.` · `G-8` ⛔ evidence out.
 
 ---
+
+## ⛔ STILL `NOT-RUN` / OWED
+
+1. ⚠️ **The Phase 6a runtime carry-over re-proof — OWED, but UNBLOCKED FOR THE FIRST TIME since Batch 3.** The expansion supplies the second class session it needs. Backs **`CLAUDE.md` §10 Phase 1 exit (c)**. ⚠️ **Plan §9.3: it must run FIRST, on the code as it stands before Phase 7 changes anything**, and must never be conflated with `F-S6-REVIEW-1`.
+2. **Rendered captures on all ten authenticated screens.** The Operator walkthrough is point-in-time and **does not substitute**.
+3. Every disposable-stack harness · every real-provider leg · password sign-in · `design-foundation.assertions.ts` (no runner).
+
+## ⚠️ One item flagged, awaiting your decision
+
+**`CLAUDE.md` was NOT edited** during the ruling propagation. No ruling strictly requires it — the Authority Lock outranks it for Final-MVP-defining questions and now carries all eight. **The one arguable candidate:** `G-3`'s **KEY FOCUS prohibition** in **§12's stop-and-ask list**, since §14.0 makes §12 the list that binds and a session building screen `06` reads §12 well before Lock §13.
 
 ## Carried, untouched
 
-`F-S6-REVIEW-1` (now **scheduled** as plan Phase 7) · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · **`B-STAGE3-2`** · `B-C2-1` / `B-C2-2` · `F-REGION-1` · `F-STAGE3-1` (screen `09`) · the `project_id` fallout · the **academy asset dependency** (Operator-owned; **never** `TRUE-DRIFT`) · `OD-3` · the `Remember me` native checkbox radius · **`Sign out` stays** (ruled 2026-08-10 — a later phase must not reconcile it toward the frame's `Logout`).
+`F-S6-REVIEW-1` (now scheduled as plan Phase 7) · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · `B-C2-1` / `B-C2-2` · `F-REGION-1` · `F-STAGE3-1` (screen `09`) · the academy asset dependency (Operator-owned; **never** `TRUE-DRIFT`) · `OD-3` · the `Remember me` checkbox radius · **`Sign out` stays** (ruled 2026-08-10).
 
 **Gates:** §3 persona sign-offs **NOT RECORDED**; no `CLAUDE.md` §10 phase-gate exit may be declared met. README and deployment instructions **still not written**. `B-G06-DET-1` — ⛔ **do not widen the lexicon.**
-
-⚠️ **The `CLAUDE.md` §6 amendment draft is unapplied** and may change what `F-S6-REVIEW-1` binds to. **Phase 7 should not start before it is ruled.**
 
 ---
 
 ## Reading order for the next session
 
-`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings — ⚠️ **including the new `FINAL_MVP_HERO_CHAIN_RULINGS.md`** → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`** → `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (cite it instead of re-deriving Batch 3) → the two earlier adjudications. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).
+`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings — ⚠️ **including `FINAL_MVP_HERO_CHAIN_RULINGS.md`** → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`** → `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md`. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).
