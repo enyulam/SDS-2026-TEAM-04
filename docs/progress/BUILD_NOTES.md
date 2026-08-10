@@ -4321,3 +4321,74 @@ surface touched; no database read or written; **no hosted or paid service contac
 
 **Next: the Operator authorizes Phase 0A in a fresh session.** Before that, `B-STAGE3-2` should be cleared per plan
 §7.2 — it is `OPERATOR-ONLY` and blocks every end-to-end verification in the plan.
+
+---
+
+## 2026-08-10 — **RULINGS `G-1` … `G-8` PROPAGATED TO ACTIVE AUTHORITY**, under a bounded §12 instruction
+
+**Authorization.** An explicit bounded Operator instruction issued **for this run only** — *"BOUNDED §12 INSTRUCTION — PROPAGATE THE RULINGS TO ACTIVE AUTHORITY. This instruction is the authorization §15.7 and §12 require, issued for this run only."* It named the six rulings to propagate, required the correct authority document be chosen **and stated before editing**, required **minimal edits — add rulings, change nothing else**, and prohibited touching `CLAUDE.md` unless a ruling genuinely belonged there, with **tell-me-first** on that.
+
+**Branch / worktree:** `develop` / none. **Starting HEAD `06f34c2`.**
+
+### Document choice, stated before editing
+
+**`FINAL_MVP_AUTHORITY_LOCK.md` is the correct home for all eight**, because these are **Final-MVP-defining scope questions** — precisely what the Lock exists for (*"WHAT THE FINAL MVP MUST BE"*) — and the Lock sits **above `CLAUDE.md`** in precedence for exactly those questions (`CLAUDE.md` §1).
+
+The established §2.3 pattern is a **root-level ruling instrument carrying the full text, indexed by a Lock paragraph**, with the operative rules placed in the Lock sections they bind. That is what OD-4, the Phase-0 ruling set and G-06 each did, and it is what was done here.
+
+| Ruling | Where | Why |
+|---|---|---|
+| All eight, in full with reasoning | **NEW `FINAL_MVP_HERO_CHAIN_RULINGS.md`** (repository root) | The §2.3 instrument class |
+| Index paragraph | Lock **§2.3** | Where every ruling instrument is indexed |
+| `G-2` unratified-roll-up ground | Lock **§11 Rating vocabulary** | The 9→7 / 4→3 roll-up status has no other home |
+| `G-2` Management ground | Lock **§14 Management authority** | Its *"Management CANNOT"* boundary |
+| `G-2` Parent ground · `G-5` | Lock **§15 Parent projection** | §15 enumerates exactly what a Parent receives; the *"even with softened wording"* bullet is the exact anchor |
+| `G-3` KEY FOCUS prohibition · `G-6` · `G-7` | Lock **§13 Trainer authority** | §13 owns observations and follow-up notes — the governed field KEY FOCUS would displace — and owns session assignment |
+| `G-3` + `G-6` schema authorized | Lock **§19.1 census** | Where schema authorization and its future delta are tracked |
+| `G-1` | Lock **§28.4 U-25** | Already covers both wording editors among the eight blocked families |
+| `G-4` · `G-8` | The instrument only | No behaviour change; `G-8` is already ruled at Lock §8/§8.1 and by the G-06 instrument |
+
+### ⚠️ `CLAUDE.md` — NOT TOUCHED, and one candidate flagged instead
+
+**No ruling strictly requires a `CLAUDE.md` edit.** The Lock outranks it for these questions and now carries all eight.
+
+**One candidate was flagged to the Operator rather than acted on:** `G-3`'s **KEY FOCUS prohibition** would sit naturally in **§12's stop-and-ask list**, because §12 is the operative list a session consults first and **§14.0 makes §12 the list that binds the Main Orchestrator** — a session about to build screen `06` reads §12 before it reads Lock §13. **Reported, not edited.** The Operator decides.
+
+### The six insertions — additions only, nothing existing altered
+
+**No existing sentence, figure, ruling or supersession was modified, struck or renumbered anywhere in the Lock.** The annotate-never-delete method was not needed, because nothing existing became false — every edit is an **addition** citing its ruling and dated.
+
+1. **§2.3** — one indexing paragraph naming `FINAL_MVP_HERO_CHAIN_RULINGS.md` and summarizing all eight.
+2. **§11** — ⛔ no roll-up rating exists; the 9→7 and 4→3 mappings stay *pending client ratification*, A-049 preserved their proposed/term-only status, and term generation is out of scope. Recorded as **permanent exclusion, not deferral**, holding independently of the §14 and §15 grounds.
+3. **§13** — the **KEY FOCUS prohibition** with its full reasoning (lesson-plan intent vs the governed carried-over focus; same visual position; the substitution would be **invisible on the rendered page**; it protects `CLAUDE.md` §10 Phase 1 exit **(c)**), plus SLIDES / View lesson plan, plus `room` carrying **no authorization meaning**, plus `Main:` authorized as a projection and `Assist.` prohibited with `centre_membership_role` **not extended**.
+4. **§14** — ⛔ Management cannot receive a roll-up, because it is **computed from** the nine ratings A-038 bars; the bar is on the data, not the presentation format.
+5. **§15** — ⛔ no Overall Grade on any Parent surface (**the most compressed possible restatement of the grid**, inside Q-27); ✅ **trainer name permitted**, widening the Parent projection **by exactly one field**, with the three-part reasoning recorded; and ⛔ **nothing may disclose that a correction cycle is or was underway**, carried up from the `32`/`33` pack records — the prohibition the provenance audit found missing.
+6. **§19.1** — three `class_sessions` columns authorized **in scope**; census figures **unchanged today**; on implementation the migration count moves by one and nothing else does. ⚠️ Recorded explicitly: **a scope ruling is not a migration authorization.**
+7. **§28.4** — `G-1`: the three unframed hero surfaces stay unframed; the completion criterion **splits**; `NOT APPLICABLE (G-1)` is a **ruled disposition, never a `NOT-RUN` and never a defect**; and the ruling closes **zero** U-25 families and permits no invented frame, node ID or field.
+
+### ⚠️ A THIRD FALSE-SOURCE INSTANCE — recorded alongside the other two
+
+**Every numbered pack's `screen.md` §7 cites its RPCs as *"delivered on `feat/48h-backend`"*.** That branch is **`CLOSED_BY_NONUSE_POLICY`** (`CLAUDE.md` §14.3a) — it may never be used for Final MVP implementation, its physical worktree no longer exists on disk, and **no contract, status or model may be taken from it.** A citation to it is therefore **not usable evidence that anything is present at HEAD**, even though the claim happens to be true.
+
+**It was not trusted.** The functions were **enumerated directly from `supabase/migrations/`** instead, and all fifteen named in the hero-chain plan are present at HEAD; both 48-hour branches were merged and are 0 commits ahead of `main`.
+
+**This is the third instance of the same class in this project, and the pattern is now explicit — a source that LOOKS authoritative but is not, where the claim may still be correct:**
+
+1. **`STATUS.md` naming a HEAD 38 commits behind reality** while simultaneously asserting three different current states — the reason `CLAUDE.md` §15.2 requires the snapshot be **replaced, never stacked**.
+2. **`CLAUDE.md:180` instructing agents NOT to correct the vocabulary mismatch** long after V2/V3 had landed — a live instruction pointing at spent state, discharged by Phase A2 S-06/S-07.
+3. **`screen.md` citing a `CLOSED_BY_NONUSE_POLICY` branch as the delivery source** — this instance.
+
+⚠️ **The standing lesson, generalized: verify a claim against the artefact that would have to exist if it were true — the migration, the catalogue, the compiled stylesheet — never against a document that merely asserts it.** This is the same discipline as *a declared class is not evidence it applied*: **a cited source is not evidence the thing is there.** It is also why `CLAUDE.md` §15.3 puts **existence above precedence** — a document never outranks a file that demonstrably exists on disk.
+
+### Also in this run
+
+- `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` §4.1 item 2 restated on Operator instruction: **`G-6` and `G-7` DISCHARGE a registered F-04 dependency rather than open new scope** — the stronger and more accurate framing, since the gap was correctly recorded at the time and deliberately not invented around.
+- The four continuity/plan files from the preceding run were committed as **`06f34c2`** on Operator instruction.
+
+### Verification
+
+`git status --porcelain -uall` at both ends. **No application file, governed surface, database, route or migration touched.** No hosted or paid service contacted; the frozen `zjukuffiuzkbiblmnuwl` never referenced. **`CLAUDE.md` not modified.** All edits written through the Q-28-compliant BOM-less UTF-8 path; **no PowerShell 5.1 `ConvertTo-Json` or `-Encoding UTF8` write anywhere.**
+
+### Commit / next
+
+Committed. **Next: the Operator clears `B-STAGE3-2` step 2 personally, then authorizes Phase 0A in a fresh session.**

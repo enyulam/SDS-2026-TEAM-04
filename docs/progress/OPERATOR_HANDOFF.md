@@ -34,8 +34,8 @@
 |---|---|
 | Branch / worktree | `develop` / none |
 | HEAD | **`b3cdc64`** — **unmoved at both ends of this run** |
-| Working tree | ⚠️ **DIRTY, DELIBERATELY — three uncommitted files.** `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` (new) · `docs/progress/STATUS.md` · `docs/progress/BUILD_NOTES.md`. **`CLAUDE.md` §12: during a documentation, governance or analysis run, do not commit — leave the diff for Operator review.** Say the word and it will be committed |
-| Ahead of `origin/develop` | **22 commits, NONE pushed** |
+| Working tree | **clean** — two commits this day: **`06f34c2`** the hero-chain plan and its continuity, then the ruling propagation |
+| Ahead of `origin/develop` | **24 commits, NONE pushed** |
 | Governed surfaces | **NONE touched.** No schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route |
 | Database | **None read, none written.** No hosted or paid service contacted; the frozen project never referenced |
 | Authorization in force | ⛔ **NONE.** Batch 3 is spent. **No `STANDING_LOCAL_EXECUTION_AUTHORIZATION` exists** |
@@ -64,13 +64,26 @@ Reported first, as a separate list, then ruled. **Settled — no phase re-opens 
 
 ---
 
-## ⚠️ ONE ITEM LEFT OPEN RATHER THAN ACTIONED — Operator's to decide
+## ✅ THE RULINGS ARE PROPAGATED TO ACTIVE AUTHORITY — done under a bounded §12 instruction
 
-**`CLAUDE.md` §15.7** requires a ruling that changes product behaviour to be propagated into an **active authority document**, and says a progress log must **never** be its sole authority.
+**New instrument: `FINAL_MVP_HERO_CHAIN_RULINGS.md`** at the repository root — the **§2.3 ruling-instrument class**, exactly as OD-4, the Phase-0 set and G-06 each did. Indexed at **Authority Lock §2.3**, with the operative rules placed in the six Lock sections they bind:
 
-**G-2 permanently excludes a product feature. G-3 and G-6 authorize schema.** They currently live only in `STATUS.md`, `BUILD_NOTES.md` and the plan — **all procedural or continuity, none of them authority.**
+| Lock | Carries |
+|---|---|
+| **§11** Rating vocabulary | ⛔ **No roll-up rating exists** — the 9→7 and 4→3 mappings stay *pending client ratification*; A-049 preserved their proposed/term-only status |
+| **§13** Trainer authority | ⛔ **KEY FOCUS prohibited** with full reasoning · `room` carries **no authorization meaning** · ✅ `Main:` authorized as a projection · ⛔ `Assist.` prohibited, **`centre_membership_role` NOT extended** |
+| **§14** Management authority | ⛔ **Cannot receive a roll-up** — it is *computed from* the ratings A-038 bars |
+| **§15** Parent projection | ⛔ **No Overall Grade in any form** · ✅ **trainer name permitted**, widening the projection by **exactly one field** · ⛔ **nothing may disclose a correction cycle** |
+| **§19.1** Census | ✅ Three `class_sessions` columns authorized **in scope**; census unchanged today; ⚠️ **a scope ruling is not a migration authorization** |
+| **§28.4** U-25 | **`G-1`**, the split completion criterion, and `NOT APPLICABLE (G-1)` as a **ruled disposition — never a `NOT-RUN`, never a defect** |
 
-⚠️ **Propagating them means editing ratified authority, which §12 permits only under an explicit bounded Operator instruction issued FOR THAT RUN.** No such instruction was given, so **nothing was edited.** Reported, not actioned — the same discipline Phase A and OD-4 ran under.
+⚠️ **+27 lines, ZERO deletions. Every edit is an ADDITION** — no existing sentence, figure, ruling or supersession was modified, struck or renumbered. Annotate-never-delete was not needed, because nothing existing became false.
+
+### ⚠️ `CLAUDE.md` NOT TOUCHED — one candidate flagged for your decision
+
+**No ruling strictly requires it** — the Lock outranks `CLAUDE.md` for Final-MVP-defining questions and now carries all eight.
+
+**The one arguable candidate, reported not acted on:** `G-3`'s **KEY FOCUS prohibition** in **§12's stop-and-ask list**. §12 is the list a session consults first, and **§14.0 makes §12 what binds the Main Orchestrator** — a session about to build screen `06` reads §12 well before it reaches Lock §13. **Your call.**
 
 ---
 
@@ -129,9 +142,19 @@ Plan §9.2 records a **recommendation, not a decision**: a narrow governed write
 2. **G-6 and G-7 were already recorded dependencies** at checkpoint **F-04** on screen `05` — the rulings **discharge** them rather than open them.
 3. **`PHYSICAL_TEST_SLICE_48H.md` §5.5 was checked, not assumed** — class, module, lesson and trainer are **not** on the absolute Management-DTO exclusion list, so the Phase 9 columns are permitted. **Evidence-backed now, not assumed.**
 
-**Second check, unprompted:** each `screen.md` calls its RPCs *"delivered on `feat/48h-backend`"* — a **`CLOSED_BY_NONUSE_POLICY`** branch. **Enumerated from the migrations instead**; all fifteen are at HEAD.
-
 **Standing lesson added to the plan (§12 item 8): read the numbered pack's `screen.md`, not only the `/reference/` artefacts.**
+
+### ⚠️ A THIRD FALSE-SOURCE INSTANCE — now recorded as a pattern
+
+Each `screen.md` §7 cites its RPCs as *"delivered on `feat/48h-backend`"* — a **`CLOSED_BY_NONUSE_POLICY`** branch whose worktree no longer exists on disk and from which **no contract, status or model may be taken**. **It was not trusted:** the functions were **enumerated from `supabase/migrations/`** instead, and all fifteen are at HEAD.
+
+**Third instance of the same class — a source that LOOKS authoritative but is not, where the claim may still be true:**
+
+1. `STATUS.md` naming a **HEAD 38 commits behind reality** while asserting three different current states — why §15.2 requires the snapshot be **replaced, never stacked**.
+2. **`CLAUDE.md:180`** instructing agents **not** to correct a vocabulary mismatch long after V2/V3 had landed — discharged by Phase A2 S-06/S-07.
+3. **`screen.md` citing a closed branch as the delivery source** — this one.
+
+▶ **Verify a claim against the artefact that would have to exist if it were true — the migration, the catalogue, the compiled stylesheet — never against a document that merely asserts it. A cited source is not evidence the thing is there**, exactly as *a declared class is not evidence it applied*. This is also why §15.3 puts **existence above precedence**.
 
 ---
 
@@ -155,4 +178,4 @@ Plan §9.2 records a **recommendation, not a decision**: a narrow governed write
 
 ## Reading order for the next session
 
-`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`** → `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (cite it instead of re-deriving Batch 3) → the two earlier adjudications. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3) — ⚠️ **expect a dirty tree; three files are uncommitted by design.**
+`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings — ⚠️ **including the new `FINAL_MVP_HERO_CHAIN_RULINGS.md`** → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`** → `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (cite it instead of re-deriving Batch 3) → the two earlier adjudications. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).
