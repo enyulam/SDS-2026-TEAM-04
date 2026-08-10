@@ -46,7 +46,8 @@
     "prove:hero-9": "node --env-file=.env.local scripts/tests/hero/prove-9-management-reports.mjs",
     "prove:hero-10": "node scripts/tests/hero/prove-10-management-student-report.mjs",
     "prove:hero-11": "node scripts/tests/hero/prove-8-unframed-foundation.mjs",
-    "prove:hero-all": "node scripts/tests/hero/prove-all.mjs"
+    "prove:hero-all": "node scripts/tests/hero/prove-all.mjs",
+    "prove:hero-12": "node --env-file=.env.local scripts/tests/hero/prove-12-rejected-query-not-empty.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

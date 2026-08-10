@@ -38,7 +38,10 @@
 
 import { spawnSync } from "node:child_process";
 
-const PROOFS = ["0a", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
+// ⚠️ EVERY suite belongs here — §12 item 17. Adding a proof includes adding
+// it to this list; a suite outside the sweep is a suite whose verdict nobody
+// is checking.
+const PROOFS = ["0a", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
 const results = [];
 for (const id of PROOFS) {

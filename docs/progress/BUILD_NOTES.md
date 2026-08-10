@@ -5492,3 +5492,55 @@ A process that died before running anything **can print any string it contains**
 ### Next
 
 ⛔ **STOPPED. Nothing started.** The Operator is walking the chain manually and will then send **a set of client-ratified decisions that amend ratified authority**. ⚠️ **No building of any kind until those arrive** — and amending ratified authority is a `CLAUDE.md` §12 stop-and-ask requiring its own bounded instruction naming the files and corrections, which a batch authorization never carries.
+
+---
+
+## 2026-08-11 — ⛔ **A REJECTED QUERY WAS RENDERING AS AN EMPTY ROSTER** — and the second pattern-redaction failure
+
+**Track:** post-hero defect fixes, fix 1 of 2. **Branch:** `develop`. **Operator-directed after diagnosis.**
+
+### The defect
+
+`listAssignedSessions` ended `if (error || !data) return []`. Pointed at a database **four migrations behind the code**, the selected `room` / `lesson_number` / `lesson_title` columns did not exist, PostgREST rejected the read with **`42703`**, and the Trainer schedule rendered **"no classes"**.
+
+▶ ⛔ **THE SCREEN MADE A POSITIVE CLAIM — *this trainer has no sessions* — THAT IT HAD NEVER ESTABLISHED**, and nothing anywhere named the cause. The Operator could not walk the chain and had no way to see why.
+
+⚠️ **Same family as every instrument defect in the hero batch: an ABSENCE reported as a FACT when it is really a FAILURE.** It would recur on **any** schema skew, not only this one — which is why the fix is a mechanism rather than a repair of one call.
+
+### The fix
+
+`listAssignedSessions` now returns **`QueryOutcome<SessionRow[]>`**, so ⛔ **`[]` and "the query failed" are DIFFERENT VALUES.** No single return means both, so a caller cannot conflate them by accident — stronger than remembering to check a flag beside an array. **Both** callers (`listTrainerSessionsCore`, `listReturnedReportsCore`) return the non-disclosing **`unavailable`** on rejection.
+
+⚠️ **The null-without-error case is treated as a failure too**, deliberately: a driver returning neither rows nor an error has not established an emptiness either.
+
+**New `server/platform/query-diagnostics.ts`** — `server-only`, names the read and the relation, and copies **four named fields** from the driver error. ⛔ **Never `...failure`**: a spread forwards whatever the driver attaches next, which is the same "everything matching a shape" mistake described below.
+
+### ⚠️ THE SECOND PATTERN-REDACTION FAILURE IN THIS PROJECT — mine
+
+Diagnosing which database the app read, I printed env var **names** with values suppressed — using a **regex allow-list**: keys matching `/URL/` shown, keys matching `/KEY|SECRET|TOKEN|PASSWORD/` withheld.
+
+⛔ **`BEST_COACH_HOSTED_DB_URL` matched `/URL/`. A Postgres connection string EMBEDS ITS PASSWORD BY CONSTRUCTION.** The hosted dev database password rendered to console and into the session transcript. **The Operator is rotating it.**
+
+⚠️ **§11 already carries this rule** — *"Do not rely on pattern-based redaction. Filtering credential-bearing output has already failed once in this project."* **It has now failed twice, and the second time I wrote the filter.** Both failures share one shape: a pattern describing what is *usually* safe, applied to a namespace where one member is not.
+
+▶ **THE RULE: ALLOW-LIST BY NAME, NEVER FILTER BY PATTERN.** `NEXT_PUBLIC_SUPABASE_URL` should have been named explicitly. A pattern cannot know that one URL-shaped key carries a secret; a list of exact names cannot be surprised.
+
+⚠️ **And the stronger form, applied in `query-diagnostics.ts`: build the function so it CANNOT RECEIVE a credential.** Its parameters are a static label and a PostgREST error — **there is nothing to redact, rather than a filter to trust.** `Q-6b` pins it.
+
+### Verification — `npm run prove:hero-12`, 15 legs, `PASS`
+
+- **`Q-1` / `Q-1b`** reproduce the **real** rejection against this database — a genuinely absent column, SQLSTATE **`42703`** — rather than simulating one. **`Q-1c`** is the discrimination leg: the same connection reading an existing column succeeds.
+- **`Q-5b`** each caller returns `unavailable`, never success-with-zero-rows.
+- **`Q-6`** the diagnostic cannot leak: four named fields, no spread, `server-only`, no parameter capable of carrying a credential.
+- ⚠️ **`Q-7` PINS THE SURVIVORS RATHER THAN HIDING THEM.** The Operator authorized fixing **one** site and asked for the rest to be reported first. **One `error || !data → []` site remains — `listEnrolledStudents`, in the same file, feeding the same surface, so the roster can STILL empty silently through it — and 14 sites never destructure `error` at all.** ⛔ **This fix is PARTIAL and the proof says so.** Any change to those counts now fails loudly.
+
+### ⚠️ Two of my own defects while writing the proof
+
+1. **`Q-3` was mis-scoped** — `code.slice(indexOf(fn))` runs to **end of file**, so it caught the shape in `listEnrolledStudents` and failed. Useful, but **not the failure the leg claimed**, and *a leg that fails for the wrong reason will one day pass for the wrong reason*. Now bounded to the function. **Fourth mis-scoped search** (plan §12 item 11).
+2. **The survivor scan counted my own doc comment**, which quotes `if (error || !data) return []` while explaining its removal. **Sixth instance of plan §12 item 13.** It now blanks comments while preserving line numbers, so every reported line number stays true.
+
+Also corrected: this suite's header claimed a **ROLLBACK it does not perform**, copied from a sibling suite. It opens no transaction and needs none; `Q-2` measures the counts instead. **An untrue sentence in a proof's own header is exactly what this batch keeps finding.**
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`npm run prove:hero-all` 13/13 `PASS`** (prove-12 registered in the sweep per §12 item 17) · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. **`.env.local` not touched.**

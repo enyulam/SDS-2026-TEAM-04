@@ -29,6 +29,10 @@ import {
 } from "@/server/modules/report-workflow/rpc-types";
 import { isDimensionCode, isRatingLevel } from "@/server/modules/framework/dimensions";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
+import {
+  reportQueryFailure,
+  type QueryOutcome,
+} from "@/server/platform/query-diagnostics";
 
 export interface TrainerSessionSummaryDto {
   readonly sessionId: string;
@@ -169,15 +173,50 @@ interface SessionRow {
   lesson_title?: string | null;
 }
 
-async function listAssignedSessions(client: SupabaseClient): Promise<SessionRow[]> {
+/**
+ * ⚠️ RETURNS A `QueryOutcome`, NOT AN ARRAY, AND THAT IS THE WHOLE FIX.
+ *
+ * This function previously ended `if (error || !data) return []`. Pointed at
+ * a database four migrations behind the code, the selected `room` /
+ * `lesson_number` / `lesson_title` columns did not exist, PostgREST rejected
+ * the read with `42703`, and the Trainer schedule rendered **"no classes"** —
+ * ⛔ **A REJECTED QUERY PRESENTED AS AN ESTABLISHED EMPTINESS**, with nothing
+ * anywhere naming the cause.
+ *
+ * ▶ **`[]` and "the query failed" are now different VALUES.** No single
+ * return means both, so a caller cannot conflate them by accident — which is
+ * stronger than remembering to check a flag beside an array.
+ *
+ * The rejection is named on the server (`reportQueryFailure`) and the caller
+ * returns the ordinary non-disclosing `unavailable`. **The surface never
+ * learns why, and never claims an emptiness it has not established.**
+ */
+async function listAssignedSessions(
+  client: SupabaseClient,
+): Promise<QueryOutcome<SessionRow[]>> {
   // class_sessions_select_trainer already scopes rows to the caller's live
   // active assignments, so a plain select IS the assigned-session list.
   const { data, error } = await client
     .from("class_sessions")
     .select("id, session_date, starts_at, ends_at, class_module_id, room, lesson_number, lesson_title")
     .order("session_date", { ascending: true });
-  if (error || !data) return [];
-  return data as SessionRow[];
+
+  if (error) {
+    reportQueryFailure("listAssignedSessions:class_sessions", error);
+    return { ok: false };
+  }
+  // ⚠️ `data` null WITHOUT an error is not an empty roster either — it is a
+  // response the driver could not give rows for. Treated as a failure for the
+  // same reason: this function may only report an emptiness it has actually
+  // observed.
+  if (!data) {
+    reportQueryFailure("listAssignedSessions:class_sessions", {
+      code: null,
+      message: "the driver returned neither rows nor an error",
+    });
+    return { ok: false };
+  }
+  return { ok: true, rows: data as SessionRow[] };
 }
 
 async function listEnrolledStudents(
@@ -222,7 +261,17 @@ export async function listTrainerSessionsCore(
   const identity = await requireRole(client, "trainer");
   if (identity.outcome !== "success") return identity;
 
-  const sessions = await listAssignedSessions(client);
+  const assigned = await listAssignedSessions(client);
+  /*
+   * ⛔ A REJECTED READ IS `unavailable`, NEVER AN EMPTY SCHEDULE. Returning
+   * success-with-zero-rows here would assert that the trainer has no sessions — a positive
+   * claim this projection has not established. The cause is already named in
+   * the server log; the caller receives the same non-disclosing outcome every
+   * other unavailable read returns, so nothing about the schema reaches a
+   * client.
+   */
+  if (!assigned.ok) return { outcome: "unavailable" };
+  const sessions = assigned.rows;
 
   /*
    * Hero Phase 3. The assigned trainer comes from the SHARED Phase 0A read
@@ -438,7 +487,17 @@ export async function listReturnedReportsCore(
   const identity = await requireRole(client, "trainer");
   if (identity.outcome !== "success") return identity;
 
-  const sessions = await listAssignedSessions(client);
+  const assigned = await listAssignedSessions(client);
+  /*
+   * ⛔ A REJECTED READ IS `unavailable`, NEVER AN EMPTY QUEUE. Returning
+   * success-with-zero-rows here would assert that no report has been returned to this trainer — a positive
+   * claim this projection has not established. The cause is already named in
+   * the server log; the caller receives the same non-disclosing outcome every
+   * other unavailable read returns, so nothing about the schema reaches a
+   * client.
+   */
+  if (!assigned.ok) return { outcome: "unavailable" };
+  const sessions = assigned.rows;
   const out: ReturnedReportQueueItemDto[] = [];
   for (const session of sessions) {
     const students = await listEnrolledStudents(client, session.class_module_id);
