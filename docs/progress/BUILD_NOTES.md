@@ -4632,3 +4632,65 @@ All 21 inspected files parse clean. The defects are **reachability and pre-exist
 ### Commit / next
 
 ⛔ **STOP. Then Plan Phase 0A**, which the Operator will authorize next. No implementation authorization is in force at this entry's close.
+
+---
+
+## 2026-08-10 — HERO CHAIN PHASE 0A and PHASE 0B (Operator-authorized, consecutive)
+
+- **Track / branch / worktree:** hero chain, Plan Phases 0A + 0B · `develop` · none.
+- **Starting HEAD:** `a310aa9`. **Phase 0A boundary commit:** `bdfe56b`.
+- **Operator authorization:** Plan Phases 0A and 0B, both, consecutively, with a commit at each phase boundary and a **STOP before Phase 1**. 0B carried an **explicitly-named bounded migration authorization** — lesson number, lesson title and room — which G-3 and G-6 expressly did **not** themselves confer.
+
+### PHASE 0A — the shared staff-identity read path
+
+**Built:** `public.class_session_staff_identity(uuid)` — one `SECURITY DEFINER`, `STABLE` function with a pinned empty `search_path`, one `authenticated` EXECUTE grant, and the TS read path `server/modules/class-session/staff-projections.ts`.
+
+⚠️ **Why a function and not an RLS policy — measured, not assumed.** G-5 permits the trainer's name on a **Parent** surface, and Step 7G gives a parent **no path** to either table it lives behind: `accounts` is own-row + management-only, and `class_session_assignments` states in its own comment *"Parents receive no assignment path in this checkpoint"*. Serving G-5 by RLS would mean **widening an `accounts` policy to admit parents generally, to deliver one display name**. The reviewed read path is the narrower instrument and is what A-030 prescribes. ▶ **This shipped NEITHER a policy NOR a table grant — strictly narrower than the "policy + its minimum matching grant" the plan contemplated.**
+
+**Three disjoint authorization grounds, each a live database fact re-derived per call:** an active trainer assignment to the session · an active management membership in the session's centre · a parent link to a student whose report **for that session** reached `submitted` **with a canonical version pointer**.
+
+⚠️ **The parent gate is the narrowest deliberately.** Without the `submitted` test a parent could confirm which trainer is assigned to a session whose report is still a draft or was never started — pre-publication information about a governed workflow, which the parent boundary does not admit.
+
+⛔ **G-7 held structurally, not by intention.** `class_session_assignments_one_active_per_session_idx` is a UNIQUE partial index, so at most one row can ever return; assertion `H0A-7` fails if that index is ever dropped. No `Assist.` slot, no `centre_membership_role` extension. ⛔ **G-2** — no rating or derived assessment fact. ⛔ **G-3** — staff identity only; it must never be joined into the roster's governed carried-over focus.
+
+**Proof — `npm run prove:hero-0a`: 9 PASS · 0 FAIL · 1 NOT-RUN.** ⚠️ **Discriminating by construction:** the same session id yields a name for trainer and management and **nothing** for parent and anon, so neither an always-return nor an always-deny implementation could pass. Anon is refused at the **privilege** layer (`42501`). The shape leg pins **exactly three** returned fields, so a later email, status, auth-id or centre-id addition fails. G-7 is checked across **every** session, not one sample.
+
+⛔ **NOT-RUN, named and not dressed up — `S-8`, the G-5 parent PERMIT leg.** It needs a report at `submitted`; producing one means driving the governed two-stage workflow against the **canonical fixture database** — the exact mutation class that caused `B-STAGE3-2`. Mutating legs belong on the disposable stack. **DENY is proven; PERMIT is unproven.**
+
+### PHASE 0B — session descriptive metadata
+
+**Design stated to the Operator BEFORE the migration was written**, as instructed, and then measured against reality after apply:
+
+| Column | Table | Type | Nullable | Default | Constraint |
+|---|---|---|---|---|---|
+| `lesson_number` | `public.class_sessions` | `smallint` | YES | none | `> 0` |
+| `lesson_title` | `public.class_sessions` | `text` | YES | none | `length(btrim(...)) > 0` |
+| `room` | `public.class_sessions` | `text` | YES | none | `length(btrim(...)) > 0` |
+
+**BACKFILL: NONE. ZERO ROWS WRITTEN.** ⚠️ A `NOT NULL` column with a default would not *record* these values, it would **MANUFACTURE** them — `lesson_number DEFAULT 1` asserts every existing session is lesson 1, a fabricated fact presented as a recorded one. NULL means exactly *not recorded*, which is the truth about every row. Same discipline screen `05`'s pack already applied at F-04, where room and the staff names *"exist on no governed field and are omitted rather than fabricated"*. The trimmed-length CHECKs stop `''` becoming a second spelling of "nothing". **No existing column was altered** (`H0B-4` pins all eight by name, type, nullability and default).
+
+▶ **BINDING ON EVERY LATER PHASE: a NULL lesson number, title or room means OMIT THE ELEMENT.** Never "Lesson 1", never "TBC", never an em-dash placeholder. A `REGISTERED-OMISSION` is preserved, not filled.
+
+⛔ **Prohibitions honoured and asserted:** KEY FOCUS is **not built in any form** — no column, array, JSON field, side table, projection field, DTO field or rendered output (`H0B-7`, a schema-wide scan). Also out: SLIDES chips and *View lesson plan* (G-3), term (G-4), Overall Grade (G-2), `Assist.` (G-7). ⚠️ `room` carries **no authorization meaning and must never scope a query** (G-6).
+
+### ⚠️ THREE FINDINGS — two were my own errors, and the proofs caught all three
+
+**1. `H0A-4` — the catalogue's representation, not the DDL's.** `SET search_path = ''` is stored as the literal **`search_path=""`, with quotes**. My first assertion looked for `search_path=`, failed, and **rolled the whole migration back** — verified at 39 functions before re-applying. Corrected by reading the representation off the **already-applied ratified functions** rather than from how the DDL was written.
+
+**2. `H0B-3` — a migration must never assert on FIXTURE data.** I first pinned `class_sessions` to **4 rows**. That is fixture state, not schema state, and **fresh-apply caught it immediately**: a database built from the migration files alone has **zero** sessions, because **fixtures are not migrations**. Left unfixed it would have broken the equivalence proof that makes the generated database types trustworthy. Rewritten as a **relationship** — all rows NULL — which is correct at every row count: necessarily vacuous at zero rows (the honest outcome on a fresh database) and **non-vacuous on the canonical database, where it evaluated against four real rows and found none written**.
+
+**3. ⚠️ `H0B-7` nearly banned a GOVERNED column — the G-3 confusion, committed in the opposite direction.** My prohibition scan included `%focus_chip%` and correctly failed against the pre-existing **`public.observations.focus_chips`**. That column is **not** the prohibited thing: it is the **trainer's own governed observation chips**, part of the mandatory nine-dimension B.E.S.T form (*"ratings, chips, notes, follow-up"*, `CLAUDE.md` §9), authored by the trainer about a session that **happened**. The prohibited KEY FOCUS is **lesson-plan intent** — what a lesson was *designed* to work on, authored by nobody governed, about a session that may not have happened yet. **They share the word "chips" and nothing else.** Banning the governed column to satisfy a pattern would have been the same substitution error G-3 exists to prevent, running the other way — and **A-054 already prohibits classifying by keyword instead of by context**. The pattern was narrowed and **`H0B-10` now asserts `observations.focus_chips` is PRESERVED**, paired with `H0B-7` precisely because substitution can be committed in either direction.
+
+### Verification
+
+- **Census — stated in advance, then measured:** functions **39 → 40** (0A +1) · authenticated EXECUTE **27 → 28** (0A +1) · migrations **17 → 19**. **Tables 27 · enums 12 · policies 29 · non-RLS 0 — ALL UNCHANGED.** `class_sessions` **8 → 11** columns, 3 new CHECKs. **Nothing moved that was not stated.**
+- **Fresh-apply from stripped: PASS.** All **19** migrations apply cleanly, in order, to a database with no project objects, **every existing migration's in-transaction assertions passing**. Fresh census landed exactly `27|40|12|29|19|28|0` with the 8 ordered `report_status` labels and the 1/3/9 seeds.
+- **Equivalence: PASS** — the canonical fixture database is **catalogue-equivalent** to a fresh application of the 19 committed files: **0 canonicalized differences** (78 raw differences are CRLF/LF transport only, the ratified F-P0-3 register).
+- **RLS unchanged** (RLS everywhere, 0 FORCE, 29 policies, 3 on `class_sessions`). **No new grant from 0B** — its `class_sessions` ACL is pinned character-exact in `H0B-6`. **ACL model unchanged:** `prove:trusted-store-acl` **9 PASS · 0 NOT-PASS**.
+- **Regression:** `tsc` **0** · `eslint` **0 errors** (2 pre-existing `projectId` warnings in files this work did not author) · `build` **0** · `test:continuity` **PASS** · `prove:hero-0a` **9 PASS** after 0B · `prove-local-target-guard` **31/0** · `prove:hosted-target-guard` **16/0**.
+- **Ledger:** the two new versions were recorded in `supabase_migrations.schema_migrations` (17 → 19), which the incremental apply had not done and which equivalence requires.
+- **`NEW-QUESTION`: NONE.** No governance question arose that the rulings did not already answer.
+
+### Commit / next
+
+⛔ **STOP for Operator review. Phase 1 is NOT authorized and was NOT begun.** `PASS` is this session's evidence verdict; **`Accepted` is Operator-set only** and none has been written or implied.

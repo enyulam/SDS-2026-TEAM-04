@@ -211,7 +211,7 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   // Deliberately a PINNED LITERAL, not `files.length`. Comparing the count
   // to itself would be vacuous; the pin exists so a new migration cannot
   // enter the tree without a human acknowledging it here.
-  if (files.length !== 17) fail(`${files.length} migration files found, expected 17`)
+  if (files.length !== 19) fail(`${files.length} migration files found, expected 19`)
   for (const f of files) {
     const version = f.split('_')[0]
     // Line endings are normalised to LF before the file is piped in. The
@@ -274,7 +274,26 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
   //  section 6.1 does not list is a CLAUDE.md section 12 stop-and-ask),
   //  policies stay 29, non-RLS tables stay 0, the eight report_status
   //  labels and the 1/3/9 seeds are untouched.)
-  const expected = '27|39|12|29|17|27|0|'
+  // (Moved 17 -> 19 migrations at hero Phase 0A + 0B. Each field that moved
+  //  is accounted for individually, for the reason stated above — a census
+  //  bumped wholesale to make a suite go green is how drift becomes
+  //  invisible:
+  //    M18 hero_0a_class_session_staff_identity -- +1 FUNCTION
+  //        (class_session_staff_identity), +1 authenticated EXECUTE. It
+  //        creates NO table, enum, label, policy or table grant; its own
+  //        H0A-1..H0A-7 assertions pin exactly that, including the ACL.
+  //    M19 hero_0b_class_session_lesson_metadata -- +3 COLUMNS on
+  //        class_sessions (lesson_number, lesson_title, room) and +3 CHECK
+  //        constraints. COLUMNS AND CONSTRAINTS ARE NOT IN THIS CENSUS, so
+  //        EVERY FIELD BELOW IS UNMOVED BY M19 except the migration count.
+  //        It creates no table, enum, function, policy or grant and writes
+  //        NO ROW; H0B-1..H0B-10 pin that, including the unchanged
+  //        class_sessions ACL and the zero-rows-written check.
+  //  So: functions 39 -> 40, authenticated EXECUTE 27 -> 28, migrations
+  //  17 -> 19. Tables stay 27, enums stay 12, policies stay 29, non-RLS
+  //  tables stay 0, the eight report_status labels and the 1/3/9 seeds are
+  //  untouched.)
+  const expected = '27|40|12|29|19|28|0|'
     + 'incomplete,observation_saved,drafting,draft_ready,needs_edit,trainer_approved,approved,submitted|1/3/9'
   if (census !== expected) fail(`fresh census is\n  ${census}\nexpected\n  ${expected}`)
   // The narration is DERIVED from the pinned literal, never retyped. It
