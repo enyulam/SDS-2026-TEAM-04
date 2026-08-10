@@ -37,6 +37,7 @@
 | 2 | **`ade7d45`** | `test:integration` wired and **run** |
 | 3 | **`835067f`** | the `→ null` shape closed; `Q-7` widened to three shapes |
 | 4 | **`5e37e74`** | the silent half made observable |
+| + | **`d89d52f`** | `INT-A5` no longer prints `PASS` for a leg that failed; both rulings recorded |
 
 ---
 
@@ -50,13 +51,13 @@
 
 ⚠️ **Same root cause as the integration suite's `INT-A5`**, found an hour earlier by a completely different route: **the canonical dev database is shared between your manual walkthroughs and the automated suites, and a manual walk silently invalidates their preconditions.** All four rolled back cleanly — the database is byte-unmoved.
 
-⛔ **I did not repair it.** The repair is deleting those report rows, and **they are your evidence and the subject of this diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. **How to share that database is your call.**
+⛔ **I did not repair it.** The repair is deleting those report rows, and **they are your evidence and the subject of this diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. ▶ **You ruled: isolation, never deletion.** The options are in this turn's report; **nothing was built.**
 
 ### 2. Coverage that could not be invoked — and what it said once it could
 
-`run-integration.mjs`, the **only** harness exercising both wording saves end to end, **was wired to no npm script**. It now runs: **48 `PASS` · 3 `FAIL` · exit 1**, zero non-loopback requests, the billable leg **skipped by default and recorded as skipped, never passed**.
+`run-integration.mjs`, the **only** harness exercising both wording saves end to end, **was wired to no npm script**. It now runs: **47 `PASS` · 3 `FAIL` · exit 1**, zero non-loopback requests, the billable leg **skipped by default and recorded as skipped, never passed**.
 
-**All 3 failures are suite staleness, reported not fixed per your instruction** — `INT-A5` ×2 (same fixture-pollution cause) and `INT-Q27`, which pins a Parent DTO shape that **hero Phase 2 ratified a change to**. `context` carries class/module/lesson/trainer — **no rating in any vocabulary** — so Q-27's actual prohibition is untouched. ⛔ The suite also calls `pass("INT-A5")` **unconditionally** after both `fail()`s, so it prints two `FAIL`s and then a `PASS`. The exit code held at 1.
+**All 3 failures are suite staleness, reported not fixed per your instruction** — `INT-A5` ×2 (same fixture-pollution cause) and `INT-Q27`, which pins a Parent DTO shape that **hero Phase 2 ratified a change to**. `context` carries class/module/lesson/trainer — **no rating in any vocabulary** — so Q-27's actual prohibition is untouched. ⛔ The suite also called `pass("INT-A5")` **unconditionally** after both `fail()`s, printing two `FAIL`s and then a `PASS` — **fixed in `d89d52f`** (`PASS` 48 → 47). ⚠️ A static scan suggested **49** ids could do this; **in the real run exactly one did**. *"Can print both" and "did print both" are different measurements.*
 
 ### 3. Widening the ratchet found three more sites than the two you named
 
@@ -81,13 +82,19 @@ Your failing attempts left **no trace anywhere**, because a submit that never di
 
 ---
 
+## ⛔ TWO RULINGS RECORDED, AND ONE ANSWER YOU STILL OWE
+
+**StatePanel — stays non-disclosing.** Recorded **at the guard** (`participant-actions.ts:688`), not only in the log, so a later phase reading the silence as a missing error message sees that it is ruled.
+
+**Shared database — isolation, never deletion.** Your three report rows are untouched. **`prove:hero-1/2/7/9` stay red** until you choose an approach; the shapes are in this turn's report and **nothing was built**.
+
 ## Position
 
 | Field | Value |
 |---|---|
-| **HEAD** | `5e37e74` on `develop` (plus this continuity commit), working tree **clean** |
+| **HEAD** | `d89d52f` on `develop` (plus this continuity commit), working tree **clean** |
 | **Gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · route census **17** |
-| **Proofs** | **`prove:hero-all` 13/17** — see item 1 · **`test:integration` 48/3/3, exit 1** — see item 2 |
+| **Proofs** | **`prove:hero-all` 13/17** — see item 1 · **`test:integration` 47 `PASS` / 3 `FAIL` / 3 `RECORDED`, exit 1** — see item 2 |
 | **Database** | **UNTOUCHED by this batch** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Your three walkthrough reports are intact |
 | **Dev server** | running on **3000** against the local stack |
 
