@@ -39,7 +39,7 @@ import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { getSessionContextsCore } from "@/server/modules/class-session/session-context-projections";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
-import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import {
   firstRow,
   type CorrectionIssueScope,
@@ -206,17 +206,27 @@ async function listCentrePairs(client: SupabaseClient): Promise<QueryOutcome<Pai
   return { ok: true, rows: pairs };
 }
 
+/**
+ * ⛔ A REJECTED READ IS NEVER "NOT A FINAL-REVIEW CANDIDATE".
+ *
+ * This returned `null` for both, and the queue's caller `continue`d on
+ * `null` — so a rejection DROPPED A TRAINER-APPROVED REPORT out of the
+ * management queue and rendered "No reports waiting" over a governed review
+ * step nobody had performed (A-033). ▶ The same reasoning that already
+ * guards the ENUMERATION eight lines below; only the per-pair read was left
+ * open. `null` now means an OBSERVED absence and nothing else.
+ */
 async function gatedReview(
   client: SupabaseClient,
   sessionId: string,
   studentId: string,
-): Promise<ManagementReviewRow | null> {
-  const { data, error } = await client.rpc("report_get_management_review", {
-    p_class_session_id: sessionId,
-    p_student_id: studentId,
-  });
-  if (error) return null;
-  return firstRow<ManagementReviewRow>(data);
+): Promise<QueryOutcome<ManagementReviewRow | null>> {
+  return readMaybeRow<ManagementReviewRow>("gatedReview:report_get_management_review", () =>
+    client.rpc("report_get_management_review", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    }),
+  );
 }
 
 /**
@@ -285,7 +295,11 @@ export async function listManagementPendingReviewCore(
 
   const out: ManagementQueueRowDto[] = [];
   for (const pair of pairs.rows) {
-    const row = await gatedReview(client, pair.sessionId, pair.studentId);
+    const review = await gatedReview(client, pair.sessionId, pair.studentId);
+    // A rejection must not shrink the queue: `continue` here would hide a
+    // trainer-approved report behind "No reports waiting".
+    if (!review.ok) return { outcome: "unavailable" };
+    const row = review.rows;
     if (!row || row.status !== "trainer_approved") continue;
     out.push({
       reportId: row.report_id,

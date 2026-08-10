@@ -38,6 +38,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { createRequestSupabaseClient } from "@/server/platform/supabase/request";
+import {
+  readMaybeRow,
+  readRows,
+  type QueryOutcome,
+} from "@/server/platform/query-diagnostics";
 import { resolveSessionIdentity, toSessionUserDto } from "@/server/modules/identity-access/session-core";
 import {
   FRAMEWORK_DIMENSIONS,
@@ -162,17 +167,33 @@ function correctionToUi(correction: {
   };
 }
 
+/**
+ * ⛔ A REJECTED READ IS NEVER "NO WORKING REPORT", AND NEVER "THE CORRECTION
+ * IS RESOLVED".
+ *
+ * This returned `null` for a rejection and for a genuine absence alike. Four
+ * of its six callers already mapped `null` to `unavailable`, so they were
+ * safe by accident; the two that did not were the consequential ones:
+ *
+ * - `adapterGetAssessmentDraft` read `null` as `reportId: null`, so a
+ *   rejection removed the trainer's path onward from the assessment surface.
+ * - `adapterSaveTrainerEdit` computed
+ *   `correctionResolved: … (after === null || …)` under a comment reading
+ *   *"Observed, not asserted"*. ⚠️ **A REJECTED READ WAS THEREFORE REPORTED
+ *   AS A RESOLVED GOVERNED CORRECTION REQUEST** — the one thing that comment
+ *   promised could not happen.
+ */
 async function readWorking(
   client: SupabaseClient,
   sessionId: string,
   studentId: string,
-): Promise<WorkingReportRow | null> {
-  const { data, error } = await client.rpc("report_get_working", {
-    p_class_session_id: sessionId,
-    p_student_id: studentId,
-  });
-  if (error) return null;
-  return firstRow<WorkingReportRow>(data);
+): Promise<QueryOutcome<WorkingReportRow | null>> {
+  return readMaybeRow<WorkingReportRow>("readWorking:report_get_working", () =>
+    client.rpc("report_get_working", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    }),
+  );
 }
 
 /**
@@ -189,28 +210,40 @@ async function readWorking(
  * rather than hidden here. Carrying the distinction all the way to the surface
  * requires a DTO contract change and is deliberately not made here.
  */
+/*
+ * ⚠️ THESE TWO KEEP THEIR `null` CONTRACT DELIBERATELY, and it is not the
+ * defect the sweep removed elsewhere. The comment above records the ratified
+ * F16-C1 design: `null` is an explicit "not read" marker, and the display
+ * substitution happens ONCE, VISIBLY, at the boundary — carrying the
+ * distinction further would need a DTO contract change that is out of scope.
+ *
+ * ⛔ What WAS missing is that a rejection reached that boundary having named
+ * nothing. `readRows` now decides the cases, so the cause is recorded on the
+ * server, while the returned shape and every caller stay exactly as ratified.
+ * ▶ The boundary did not move; only the silence was removed.
+ */
 async function readSessionDate(
   client: SupabaseClient,
   sessionId: string,
 ): Promise<string | null> {
-  const { data, error } = await client
-    .from("class_sessions")
-    .select("id, session_date")
-    .eq("id", sessionId);
-  if (error) return null;
-  return ((data?.[0] as { session_date?: string } | undefined)?.session_date) ?? null;
+  const rows = await readRows<{ session_date?: string }>(
+    "readSessionDate:class_sessions",
+    () => client.from("class_sessions").select("id, session_date").eq("id", sessionId),
+  );
+  if (!rows.ok) return null;
+  return rows.rows[0]?.session_date ?? null;
 }
 
 async function readStudentName(
   client: SupabaseClient,
   studentId: string,
 ): Promise<string | null> {
-  const { data, error } = await client
-    .from("students")
-    .select("id, full_name")
-    .eq("id", studentId);
-  if (error) return null;
-  return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? null;
+  const rows = await readRows<{ full_name?: string }>(
+    "readStudentName:students",
+    () => client.from("students").select("id, full_name").eq("id", studentId),
+  );
+  if (!rows.ok) return null;
+  return rows.rows[0]?.full_name ?? null;
 }
 
 /**
@@ -395,12 +428,15 @@ export async function adapterGetAssessmentDraft(
   const saved: TrainerObservationDto = observation.data;
   const ratingOf = new Map(saved.ratings.map((entry) => [entry.dimensionCode as string, entry.rating]));
   const working = await readWorking(client, sessionId, studentId);
+  // A rejection must not render as "no report yet" — that withdraws the
+  // trainer's route onward from a surface that never established it.
+  if (!working.ok) return { outcome: "unavailable" };
 
   return {
     outcome: "success",
     data: {
       // Null, not "", when no report exists yet — see AdapterAssessmentDraftDto.
-      reportId: working ? working.report_id : null,
+      reportId: working.rows ? working.rows.report_id : null,
       sessionId,
       studentId,
       studentDisplayName: (await readStudentName(client, studentId)) ?? UNREAD_STUDENT_NAME,
@@ -467,8 +503,11 @@ export async function adapterGetDraftGenerationContext(
   const context = await resolveContext(client, reportId);
   if (context.outcome !== "success") return context;
 
-  const working = await readWorking(client, context.data.sessionId, context.data.studentId);
-  if (!working) return { outcome: "unavailable" };
+  const workingOutcome = await readWorking(client, context.data.sessionId, context.data.studentId);
+  // Rejection and genuine absence both stay `unavailable` here — the surface
+  // is non-disclosing either way — but the cause is now NAMED on the server.
+  if (!workingOutcome.ok || !workingOutcome.rows) return { outcome: "unavailable" };
+  const working = workingOutcome.rows;
   // The generation surface exists for exactly two lifecycle positions. Any
   // other position is reported as `unavailable` rather than coerced into one
   // of the two — TypeScript never restates a status the database did not give.
@@ -885,8 +924,9 @@ export async function adapterSaveTrainerEdit(
   const context = await resolveContext(client, input.reportId);
   if (context.outcome !== "success") return context;
 
-  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
-  if (!before) return { outcome: "unavailable" };
+  const beforeOutcome = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!beforeOutcome.ok || !beforeOutcome.rows) return { outcome: "unavailable" };
+  const before = beforeOutcome.rows;
   // The expected-state argument is the position the DATABASE just reported,
   // routed straight back into the CAS. RPC-6 re-verifies it under the
   // aggregate row lock, so this is routing, not a legality decision.
@@ -912,6 +952,14 @@ export async function adapterSaveTrainerEdit(
   if (saved.data.status !== "draft_ready") return { outcome: "unavailable" };
 
   const after = await readWorking(client, context.data.sessionId, context.data.studentId);
+  /*
+   * ⛔ THE READ MUST HAVE SUCCEEDED BEFORE ITS SILENCE MEANS ANYTHING. The
+   * line below reads "no open correction" out of `after`, and a REJECTED read
+   * used to reach it as `null` — reporting a governed correction request as
+   * RESOLVED because a query failed, under a comment promising the opposite.
+   */
+  if (!after.ok) return { outcome: "unavailable" };
+  const afterRow = after.rows;
   return {
     outcome: "success",
     data: {
@@ -920,8 +968,10 @@ export async function adapterSaveTrainerEdit(
       versionId: saved.data.versionId,
       checklistReset: true,
       // Observed, not asserted: the correction is resolved when the database
-      // stops reporting an open one.
-      correctionResolved: hadOpenCorrection && (after === null || after.open_correction_request_id === null),
+      // stops reporting an open one. `afterRow` is now only ever an OBSERVED
+      // absence — a rejection returned above.
+      correctionResolved:
+        hadOpenCorrection && (afterRow === null || afterRow.open_correction_request_id === null),
     },
   };
 }
@@ -933,8 +983,9 @@ export async function adapterUpdateTrainerChecklist(
   const context = await resolveContext(client, input.reportId);
   if (context.outcome !== "success") return context;
 
-  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
-  if (!before) return { outcome: "unavailable" };
+  const beforeOutcome = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!beforeOutcome.ok || !beforeOutcome.rows) return { outcome: "unavailable" };
+  const before = beforeOutcome.rows;
 
   const updated = await updateTrainerChecklistCore(client, {
     reportId: input.reportId,
@@ -985,8 +1036,9 @@ export async function adapterTrainerApprove(
   const context = await resolveContext(client, input.reportId);
   if (context.outcome !== "success") return context;
 
-  const before = await readWorking(client, context.data.sessionId, context.data.studentId);
-  if (!before) return { outcome: "unavailable" };
+  const beforeOutcome = await readWorking(client, context.data.sessionId, context.data.studentId);
+  if (!beforeOutcome.ok || !beforeOutcome.rows) return { outcome: "unavailable" };
+  const before = beforeOutcome.rows;
   if (before.status !== "draft_ready" && before.status !== "needs_edit") {
     return {
       outcome: "stale_state",

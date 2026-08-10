@@ -210,12 +210,29 @@ const walk = (dir, acc = []) => {
 
 const exactShape = [];
 const errorDiscarded = [];
+/**
+ * ⚠️ THE THIRD SHAPE, ADDED AFTER THE SWEEP CLOSED AT ZERO AND WAS STILL
+ * INCOMPLETE. Two governed RPC reads collapsed a rejection into `null` rather
+ * than `[]` — `workingState` and `gatedReview` — and BOTH counts above stayed
+ * at zero while they did it, because neither shape matches. The sweep was
+ * scoped to `→ []`, so `→ null` was outside it BY CONSTRUCTION, and a ratchet
+ * that only watched the shapes already fixed could never have caught it.
+ *
+ * ▶ **A ratchet pinned to the defect you found does not protect you from the
+ *   same defect wearing a different return value.**
+ */
+const nullShape = [];
 for (const file of walk(join(ROOT, "server", "modules"))) {
   const lines = stripKeepingLines(readFileSync(file, "utf8")).split(/\r?\n/);
   const rel = file.slice(ROOT.length + 1).replace(/\\/g, "/");
   lines.forEach((line, i) => {
     if (/if\s*\(\s*error\s*\|\|\s*!data\s*\)\s*return\s*\[\]/.test(line)) {
       exactShape.push(`${rel}:${i + 1}`);
+    }
+    // `if (error) return null` / `if (error || !data) return null` — a
+    // rejection rendered as an ABSENCE rather than as an empty list.
+    if (/if\s*\(\s*error\s*(?:\|\|[^)]*)?\)\s*return\s+null\s*;?\s*$/.test(line)) {
+      nullShape.push(`${rel}:${i + 1}`);
     }
     // Same predicate as the reported sweep: the destructure and `await client`
     // may sit on one line, or the call may continue onto the next.
@@ -243,6 +260,10 @@ const EXPECTED_EXACT_SHAPE = 0;
 // HONESTLY green — a pin set to the end target would report failure for work
 // that has not been done yet, which is a different lie.
 const EXPECTED_ERROR_DISCARDED = 0;
+// The `→ null` residue, closed at the same zero: `workingState` and
+// `gatedReview` now return `QueryOutcome<Row | null>`, where `null` is an
+// OBSERVED absence and a rejection is `{ ok: false }`.
+const EXPECTED_NULL_SHAPE = 0;
 
 check(
   exactShape.length === EXPECTED_EXACT_SHAPE,
@@ -252,14 +273,35 @@ check(
   errorDiscarded.length === EXPECTED_ERROR_DISCARDED,
   `Q-7b: ⛔ zero reads discard \`error\` entirely (${errorDiscarded.length})${errorDiscarded.length ? ` — ${errorDiscarded.join(", ")}` : ""}`,
 );
+/*
+ * ⛔ Q-7d IS A COUNT PINNED AT ZERO, AND A COUNT PINNED AT ZERO PROVES NOTHING
+ * UNLESS THE DETECTOR CAN REACH A NON-ZERO. This leg runs the SAME predicate
+ * over the two shapes that were actually removed from this codebase, plus a
+ * line that must NOT match, so `Q-7d`'s zero is a measurement rather than a
+ * regex that never fires. (`prove:hero-13` passed seventeen legs against a
+ * file `tsc` rejected — a check that cannot fail is not a check.)
+ */
+const NULL_SHAPE_RE = /if\s*\(\s*error\s*(?:\|\|[^)]*)?\)\s*return\s+null\s*;?\s*$/;
 check(
-  exactShape.length <= EXPECTED_EXACT_SHAPE && errorDiscarded.length <= EXPECTED_ERROR_DISCARDED,
-  "Q-7c: ⛔ RATCHET — neither count has RISEN. A new site of either shape is the defect returning, not progress",
+  NULL_SHAPE_RE.test("  if (error) return null;") &&
+    NULL_SHAPE_RE.test("  if (error || !data) return null") &&
+    !NULL_SHAPE_RE.test("  if (error) return { outcome: \"unavailable\" };"),
+  "Q-7e: DISCRIMINATING — the `→ null` detector matches both removed shapes and rejects the correct one, so Q-7d's zero is measured, not vacuous",
+);
+check(
+  nullShape.length === EXPECTED_NULL_SHAPE,
+  `Q-7d: ⛔ zero \`if (error) → null\` sites remain — a rejection is never an ABSENCE either (${nullShape.length})${nullShape.length ? ` — ${nullShape.join(", ")}` : ""}`,
+);
+check(
+  exactShape.length <= EXPECTED_EXACT_SHAPE &&
+    errorDiscarded.length <= EXPECTED_ERROR_DISCARDED &&
+    nullShape.length <= EXPECTED_NULL_SHAPE,
+  "Q-7c: ⛔ RATCHET — none of the THREE counts has RISEN. A new site of any shape is the defect returning, not progress",
 );
 
 console.log(
   bad === 0
-    ? "\nRESULT: PASS — a rejected read is now `unavailable` with its cause named on the server, and an empty roster means an emptiness actually observed.\n        ⚠️ 15 sibling sites survive by instruction and are pinned by Q-7 — this fix is PARTIAL and says so."
+    ? "\nRESULT: PASS — a rejected read is now `unavailable` with its cause named on the server, and an empty roster means an emptiness actually observed.\n        Q-7 holds at ZERO across all THREE shapes — `→ []`, error-discarded, and `→ null`."
     : `\nRESULT: FAIL — ${bad} check(s) failed.`,
 );
 process.exit(bad === 0 ? 0 : 1);

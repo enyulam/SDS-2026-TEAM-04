@@ -30,6 +30,7 @@ import {
 import { isDimensionCode, isRatingLevel } from "@/server/modules/framework/dimensions";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
 import {
+  readMaybeRow,
   readRows,
   reportQueryFailure,
   type QueryOutcome,
@@ -263,17 +264,26 @@ async function listEnrolledStudents(
   };
 }
 
+/**
+ * ⛔ A REJECTED READ IS NEVER "THIS STUDENT HAS NO REPORT".
+ *
+ * This returned `null` for both, and all three callers read `null` as the
+ * absence: the schedule counted the student as `no_report`, the roster
+ * rendered no status, and the returned-corrections queue skipped them —
+ * telling a trainer they had no corrections outstanding. `null` now means an
+ * OBSERVED absence and nothing else; a rejection is `{ ok: false }`.
+ */
 async function workingState(
   client: SupabaseClient,
   sessionId: string,
   studentId: string,
-): Promise<WorkingReportRow | null> {
-  const { data, error } = await client.rpc("report_get_working", {
-    p_class_session_id: sessionId,
-    p_student_id: studentId,
-  });
-  if (error) return null;
-  return firstRow<WorkingReportRow>(data);
+): Promise<QueryOutcome<WorkingReportRow | null>> {
+  return readMaybeRow<WorkingReportRow>("workingState:report_get_working", () =>
+    client.rpc("report_get_working", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    }),
+  );
 }
 
 // ---------------------------------------------------------------------
@@ -353,7 +363,10 @@ export async function listTrainerSessionsCore(
     const counts: Partial<Record<ReportStatus | "no_report", number>> = {};
     for (const student of students) {
       const state = await workingState(client, session.id, student.studentId);
-      const key: ReportStatus | "no_report" = state ? state.status : "no_report";
+      // A rejection must not be counted as `no_report` — that is a fabricated
+      // status breakdown, not a missing one.
+      if (!state.ok) return { outcome: "unavailable" };
+      const key: ReportStatus | "no_report" = state.rows ? state.rows.status : "no_report";
       counts[key] = (counts[key] ?? 0) + 1;
     }
     out.push({
@@ -436,6 +449,9 @@ export async function getSessionRosterCore(
   const out: RosterEntryDto[] = [];
   for (const student of students) {
     const state = await workingState(client, sessionId, student.studentId);
+    // The roster must not report `no_report` for a status it failed to read.
+    if (!state.ok) return { outcome: "unavailable" };
+    const reportRow = state.rows;
     let previousFocus: string | null = null;
     if (priorSessionId) {
       const priorObservation = await getTrainerObservationCore(client, priorSessionId, student.studentId);
@@ -453,8 +469,8 @@ export async function getSessionRosterCore(
       // ...and whether that default was materialized or merely implied. See
       // the field's declaration for why the two must not be conflated.
       attendanceRecorded: attendanceRow !== undefined,
-      reportState: state ? state.status : "no_report",
-      reportId: state ? state.report_id : null,
+      reportState: reportRow ? reportRow.status : "no_report",
+      reportId: reportRow ? reportRow.report_id : null,
       previousSessionFocus: previousFocus,
     });
   }
@@ -582,19 +598,27 @@ export async function listReturnedReportsCore(
     if (!enrolled.ok) return { outcome: "unavailable" };
     for (const student of enrolled.rows) {
       const state = await workingState(client, session.id, student.studentId);
-      if (!state || state.status !== "needs_edit" || !state.open_correction_request_id) continue;
+      /*
+       * ⛔ THE SAME HAZARD THE COMMENT SIX LINES ABOVE ALREADY NAMES. That one
+       * guards the ENUMERATION; this per-student read was left unguarded, and
+       * a rejection here `continue`d — telling a trainer they had NO
+       * corrections outstanding while a returned report waited.
+       */
+      if (!state.ok) return { outcome: "unavailable" };
+      const row = state.rows;
+      if (!row || row.status !== "needs_edit" || !row.open_correction_request_id) continue;
       out.push({
-        reportId: state.report_id,
+        reportId: row.report_id,
         sessionId: session.id,
         studentId: student.studentId,
         studentDisplayName: student.displayName,
         sessionDate: session.session_date,
         correction: {
-          id: state.open_correction_request_id,
-          issueScope: state.open_correction_issue_scope,
-          ...(state.open_correction_dimension_code ? { dimensionCode: state.open_correction_dimension_code } : {}),
+          id: row.open_correction_request_id,
+          issueScope: row.open_correction_issue_scope,
+          ...(row.open_correction_dimension_code ? { dimensionCode: row.open_correction_dimension_code } : {}),
           status: "open",
-          reason: state.open_correction_reason ?? undefined,
+          reason: row.open_correction_reason ?? undefined,
         },
       });
     }

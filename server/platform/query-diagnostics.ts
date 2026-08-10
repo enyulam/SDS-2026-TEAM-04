@@ -130,3 +130,41 @@ export async function readRows<TRow>(
   }
   return { ok: true, rows: data as TRow[] };
 }
+
+/**
+ * The same three cases for a read that legitimately yields ZERO OR ONE row —
+ * the `→ null` counterpart of the `→ []` shape above.
+ *
+ * ⚠️ THIS CLOSES A RESIDUE THE SIXTEEN-SITE SWEEP DID NOT REACH. That sweep
+ * targeted table reads collapsing a rejection into `[]`. Two governed RPC
+ * reads collapsed one into `null` instead — a different shape, the identical
+ * defect — and were outside its scope by construction:
+ *
+ * - `trainer-projections.workingState` — `null` is read by three callers as
+ *   *"this student has no report"*. A rejection therefore counted the student
+ *   as `no_report` on the schedule, blanked the roster's status, and — worst
+ *   — made `continue` skip them in the RETURNED-CORRECTIONS queue, telling a
+ *   trainer they had **no corrections outstanding**. ⚠️ The line immediately
+ *   above that loop already warned that a rejection *"would silently shorten
+ *   the RETURNED-CORRECTIONS queue"* — and guarded the enumeration while the
+ *   per-student read beneath it stayed unguarded.
+ * - `management-view.gatedReview` — `null` is read as *"not a final-review
+ *   candidate"*, so a rejection **dropped a trainer-approved report out of
+ *   the management queue**: `"No reports waiting"` while a governed review
+ *   step sat unreviewed (A-033).
+ *
+ * ▶ **`null` here means an OBSERVED absence and nothing else.** A rejection
+ * is `{ ok: false }`, and there is no value that can mean both.
+ */
+export async function readMaybeRow<TRow>(
+  context: string,
+  run: () => PromiseLike<QueryResponse>,
+): Promise<QueryOutcome<TRow | null>> {
+  const outcome = await readRows<TRow>(context, run);
+  if (!outcome.ok) return { ok: false };
+  // Mirrors `firstRow`: an RPC may resolve to an array or to a bare object.
+  const data: unknown = outcome.rows;
+  if (Array.isArray(data)) return { ok: true, rows: data.length > 0 ? (data[0] as TRow) : null };
+  if (data && typeof data === "object") return { ok: true, rows: data as TRow };
+  return { ok: true, rows: null };
+}

@@ -5852,3 +5852,55 @@ Phases 8 and 11 measured `trainer-report-editor.tsx` and `management-wording-edi
 ⚠️ **`prove:hero-8` and `prove:hero-11` would pass unchanged if either editor could not save at all.** They compare shells, loading states and error panels; they never mount a form, never fire an action, and never assert that a mutation the surface offers is one the database will accept. For an unframed surface a mechanical consistency check is **the only guarantee that exists** — and it guarantees only that the surface *looks* like its sibling.
 
 ▶ **Two of the three `G-1` surfaces were measured as consistent and never measured as working.** That gap was invisible for exactly as long as the one harness that could have closed it had no way to be run.
+
+---
+
+## 2026-08-11 — **THE SWEEP CLOSED AT ZERO AND WAS STILL INCOMPLETE** — the `→ null` shape, and what widening the ratchet found
+
+The sixteen-site sweep measured `0` exact-shape and `0` error-discarded across `server/modules`, and both numbers were true. **Two governed RPC reads were collapsing a rejection into `null` the whole time**, and neither count could ever have moved: the sweep was scoped to `→ []`, so `→ null` was outside it **by construction**.
+
+▶ **A ratchet pinned to the defect you found does not protect you from the same defect wearing a different return value.**
+
+### The two named sites, and what `null` was being read as
+
+| Site | `null` was read as | Consequence of a rejection |
+|---|---|---|
+| `trainer-projections.workingState` | *"this student has no report"* | schedule counted them `no_report`; roster blanked the status; and the returned-corrections loop `continue`d — **telling a trainer they had no corrections outstanding** |
+| `management-view.gatedReview` | *"not a final-review candidate"* | `continue` **dropped a trainer-approved report out of the management queue** — `"No reports waiting"` over an unreviewed governed step (A-033) |
+
+⚠️ **The returned-corrections site is the sharpest.** The comment six lines above that loop already warns that a rejection *"would silently shorten the RETURNED-CORRECTIONS queue — a trainer would be told they have no corrections outstanding."* It guards the **enumeration**. The per-student read directly beneath it was left open, doing exactly what the comment forbids. ▶ **The hazard had already been reasoned about, written down, and then not applied one line further.**
+
+### ⛔ Widening `Q-7` immediately found THREE MORE, in a module the sweep never covered
+
+`Q-7d` was added, and failed on first run with three sites in `integration-adapter/participant-actions.ts` — **none of which anyone had listed**. That is the leg earning its place before it was ever green.
+
+- **`readWorking`** — the same defect as `workingState`. Four of its six callers happened to map `null` to `unavailable` and were **safe by accident**; the two that did not were the ones that mattered:
+  - `adapterGetAssessmentDraft` read `null` as `reportId: null`, so **a rejection withdrew the trainer's route onward** from the assessment surface.
+  - ⛔ **`adapterSaveTrainerEdit` computed `correctionResolved: … (after === null || …)`** — under a comment reading *"Observed, not asserted: the correction is resolved when the database stops reporting an open one."* **`after === null` is also what a REJECTED read returns**, so a failed query reported a **governed correction request as RESOLVED**. ▶ **The comment promised precisely the property the code did not have.**
+- **`readSessionDate` / `readStudentName`** — ⚠️ **NOT the same defect, and deliberately left as they are.** Their `null` is the ratified F16-C1 design: an explicit *"not read"* marker whose display substitution happens **once, visibly, at the boundary** (`UNREAD_STUDENT_NAME`), with the comment recording that carrying the distinction further needs a DTO contract change that is out of scope. **What was missing is that a rejection reached that boundary having named nothing.** They now decide through `readRows`, so the cause is recorded on the server while the returned shape and every caller stay exactly as ratified. ▶ **The boundary did not move; only the silence was removed.**
+
+### `readMaybeRow` — the `→ null` counterpart, decided once
+
+`null` now means an **OBSERVED absence** and nothing else; a rejection is `{ ok: false }`. Same reasoning as `readRows`: the defect was a repeated **shape**, so the three cases are decided in one place rather than hand-written at each site.
+
+### `Q-7` is now a THREE-shape ratchet — with a leg proving it can fail
+
+`Q-7a` `→ []` **0** · `Q-7b` error-discarded **0** · **`Q-7d` `→ null` 0** · `Q-7c` fails if **any** of the three RISES.
+
+⚠️ **`Q-7e` was added because a count pinned at zero proves nothing unless the detector can reach a non-zero.** It runs the same predicate over both removed shapes and one correct line that must not match. Separately, the detector was run against the **pre-fix source out of git** and found exactly the two real sites at `trainer-projections.ts:275` and `projections.ts:218` — **non-vacuity against real history, not only against a synthetic string.** *(`prove:hero-13` passed seventeen legs against a file `tsc` rejected; a check that cannot fail is not a check.)*
+
+The suite's own closing line still read *"15 sibling sites survive … this fix is PARTIAL"* — **true when written, false now**, and corrected rather than left to mislead.
+
+### ⚠️ THE REACHABILITY GATE FIRED, AND IT WAS RIGHT
+
+`prove:hero-14/15/16` failed `R-0b` immediately after the edits: `.next/BUILD_ID` predated the newly-changed sources. **That is the gate doing exactly the job it was built for** — the suites read source text, and stale text proves nothing about the running build. A rebuild cleared all three. *A gate never seen to fire is a gate nobody has tested; this one has now fired twice, both times correctly.*
+
+### ⛔ FOUR SQL SUITES ARE FAILING, AND NOT BECAUSE OF THIS WORK
+
+`prove:hero-1 / 2 / 7 / 9` fail with `duplicate key value violates unique constraint "reports_session_student_key"` and **0 legs executed**. They create a report for a fixture pair that **now already has one**.
+
+**Measured, not assumed:** the last all-green run was `948011b` at **2026-08-11 02:58:32 +0800 = 18:58:32 UTC**; the three reports were created at **19:37, 19:55 and 20:00 UTC** — all *after* it. This batch's edits are TypeScript-only and cannot affect a SQL suite. ▶ **The Operator's manual walkthrough populated the canonical fixture database, and the suites' preconditions assume it empty.**
+
+⚠️ **This is the SAME root cause as the integration suite's `INT-A5`**, found an hour earlier by a different route. **The canonical dev database is shared between manual walkthroughs and automated suites, and a manual walk silently invalidates suite preconditions.** Every one of the four **rolled back cleanly** — `3|6|24|1|0|1` before and after, byte-unmoved.
+
+⛔ **NOT REPAIRED, DELIBERATELY.** The obvious repair is to delete those report rows — **they are the Operator's walkthrough evidence and the subject of an active diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. **Reported instead.**
