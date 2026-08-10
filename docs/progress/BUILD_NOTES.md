@@ -4169,3 +4169,155 @@ Continuity only; no application change. **Next authorized action: write
 `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` — PLANNING ONLY, BUILD NOTHING.** That plan will cross
 governed surfaces the reconciliation plan forbade, and **every such phase needs explicit Operator
 authorization before any code is written.**
+
+---
+
+## 2026-08-10 — `HERO_CHAIN_COMPLETION_PLAN.md` written · **eight governance collisions RULED by the Operator** · nothing built
+
+**Scope:** planning only, on explicit Operator instruction — *"Write the plan. Change nothing. Report the governance
+collisions first."* **No application file was touched. No governed surface was touched. Nothing was committed** —
+`CLAUDE.md` §12 requires a documentation/governance/analysis run to leave its diff for Operator review.
+
+**Branch / worktree:** `develop` / none. **HEAD unmoved at `b3cdc64`** at both ends of the run.
+
+### What was produced
+
+`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` — twelve phases (`0A`, `0B`, then one screen each), structured **by screen,
+never by layer**, each delivering projection → server action → frontend → end-to-end verification before the next
+begins. **Eleven routes in scope**, from the trainer starting a class to the parent reading the submitted report.
+Screens `11` and `30` are **out** — neither is a step in the chain, because management's and the parent's post-login
+destinations are `/management/reports` and `/parent/reports` (proven by `post-login-destinations` D-1). The Operator
+confirmed that judgement.
+
+### ✅ The eight collisions, reported FIRST and then ruled
+
+The Operator's instruction was that the collisions be reported as a separate list **before** any phase — *"these are
+rulings I must make, never something you design around"*. All eight were ruled the same day:
+
+| | Ruling |
+|---|---|
+| **G-1** unframed surfaces (Trainer Review & Approve, both wording editors) | **LEAVE UNFRAMED.** Functional completion covers all eleven routes; **visual acceptance covers the eight framed screens only.** The three are recorded `NOT APPLICABLE (G-1)` — ⚠️ **a ruled disposition, never a `NOT-RUN` and never a defect** |
+| **G-2** "Overall Grade" roll-up | ⛔ **NO — all four surfaces, PERMANENTLY, not deferred.** Unratified (§3.6; A-049 proposed and term-only); derived from ratings Management may not see (A-038); on a Parent surface it is the caught leak in softened wording (Q-27) |
+| **G-3** lesson identity | ✅ **BUILD** number + title. ⛔ **KEY FOCUS chips OUT** — they are lesson-plan intent, and conflating them with the governed carried-over previous-session focus would **silently replace a governed field** |
+| **G-4** term | ⛔ **NO.** A display label is not worth building the substrate an §8-deferred roadmap item needs |
+| **G-5** trainer name on a Parent surface | ✅ **YES.** Not a rating and not derived from one; already disclosed on `29` and `06` |
+| **G-6** room | ✅ **YES** — one column, no governance weight |
+| **G-7** `Main:` / `Assist.` | ✅ **`Main:` built** · ⛔ **`Assist.` out.** The TA persona stays deferred (A-014); **`centre_membership_role` is NOT extended** |
+| **G-8** class video evidence | ⛔ **CONFIRMED OUT**, unchanged. **The frame's "500MB" is never implemented in any form** |
+
+⚠️ **Five of the eight rulings REMOVE work rather than add it.** The surviving new-build surface is far narrower than
+the frames suggest: three columns of schema, one identity projection, context fields on four existing projections, and
+one narrow governed write. **G-2 additionally removes the only reason any surface in this plan would need a
+server-side rating derivation — so nothing in the plan computes an assessment fact.**
+
+### ⚠️ A hypothesis corrected mid-analysis, and it changed several classifications
+
+`trainer_profiles` and `parent_profiles` are membership-keyed rows carrying **no name**, which initially read as
+"staff names need new schema". They do not — **`accounts.display_name` already holds them**, reachable via
+`class_session_assignments.trainer_membership_id → centre_memberships.account_id`. Every trainer-name delta is
+therefore **`NEEDS NEW PROJECTION`, not `NEEDS NEW SCHEMA`**: materially cheaper, lower governance risk, and no
+migration. It became **Phase 0A**, consumed by six of the eight framed screens.
+
+### ⚠️ THE PROVENANCE AUDIT — the Operator required it before relying on the plan, and it found a real gap
+
+The question asked was, per screen: was the `reference/ .png` read, the `reference/ .html` read, and the numbered
+pack's `screen.md` read — and *"if any screen's frame content was derived WITHOUT reading its reference/ .html, say
+which"*.
+
+**Answered by re-derivation, not from memory.** A context compaction sits between this session and the Batch 3 work,
+so **every `.html` was re-extracted today** and every frame string in the plan reproduced from that run.
+
+- ✅ **`.png` and `.html`: YES for all eight framed hero screens.** No screen's frame content was derived without its
+  `.html`. Nothing needed re-deriving on that ground.
+- ⚠️ **`screen.md`: NOT read at first drafting, for any of the eight.** Read for all eight before revision 2. **It was
+  the real gap**, because it carries §6 *Prohibited invention* and §7 *Dependencies* — governance the `.png` and
+  `.html` cannot carry. Three material changes followed:
+  1. **A prohibition that was missing.** Screens `32` **and** `33` both carry *"Do not disclose that a correction
+     cycle is or was underway."* `33` additionally bars revision number, correction reason, trainer note, draft, AI
+     history, content hash and audit row. **This constrains Phases 1 and 2 — the two sequenced first.**
+  2. **G-6 and G-7 were not new discoveries.** Screen `05` §7 already records at checkpoint **F-04** that the frame's
+     room/location and its Main/Assist. names *"exist on no governed field and are omitted rather than fabricated"*.
+     The rulings **discharge an already-recorded dependency** rather than open a new one.
+  3. **Screen `29` §6 points at an absolute exclusion list.** `PHYSICAL_TEST_SLICE_48H.md` §5.5 was checked rather
+     than assumed: class name, module, lesson and trainer name are **not** on it, so the Phase 9 columns are
+     permitted. The classification held — **but it is now evidence-backed rather than assumed.**
+
+**Standing lesson recorded in the plan (§12 item 8): read the numbered pack's `screen.md`, not only the `/reference/`
+artefacts.** Not reading it cost one prohibition and one already-registered dependency.
+
+### A second provenance check, unprompted
+
+Each pack's `screen.md` describes its RPCs as *"delivered on `feat/48h-backend`"* — a branch that is
+**`CLOSED_BY_NONUSE_POLICY`**. That phrasing must not be relied on. The functions were **enumerated from the
+migrations instead**, and all fifteen named in the plan are present at HEAD; both 48-hour branches were merged and are
+0 commits ahead of `main`.
+
+### Sequencing — the Operator's choice, and how a ruling moved it
+
+The Operator took the recommendation to do the parent screens first: **`CanonicalReportDto` carries `panels` and
+`submittedAt` and nothing else**, so a parent's report page cannot state which class or session it is about, and
+cannot name the learner in its own heading. That is the chain's worst defect.
+
+⚠️ **Ruling G-3 = BUILD then changed the prerequisites of that choice.** Screen `32`'s **row title *is* the lesson
+title**, so both parent screens now depend on the lesson schema. **The intent is preserved — the parent screens still
+go first — but Phase 0 splits into 0A (projection) and 0B (schema).** Deferring lesson to a later pass would be the
+"come back later" pattern the Operator's own structural rule excludes.
+
+### ⛔ `B-STAGE3-2` — the Operator asked exactly what is needed, and the plan §7 answers it
+
+Measured, not asserted: `reports` 0 → 1 · `audit_events` 0 → 4 · `audit_chain_heads` 0 → 1 · the fixture attendance
+row's `recorded_by_*` now non-NULL, so `verify-local-fixtures.sql` **fails A19**. The blast radius is wider than one
+assertion — `readCanonical()` throws **before** reaching `assertCanonicalPristine` because `fixtureChecksum()` runs
+the failing verifier, so **all six disposable-stack harnesses abort** and every `CREATE DATABASE … TEMPLATE postgres`
+inherits the dirt.
+
+⚠️ **`audit_events` is append-only and its `BEFORE DELETE OR UPDATE` trigger refuses `postgres` too — irreversible by
+design. The trigger was NOT disabled and must not be** (§12 forbids working around a fail-closed refusal by weakening
+what refused). **So a plain in-place `--reload` cannot succeed while those four rows exist**, which is why plan §7.2
+step 2 routes to the Operator's own `D-0C` precedent — a bounded LOCAL-only fresh reconstruction — and expressly not
+to `supabase db reset`.
+
+✅ **One useful finding while scoping it:** `scripts/fixtures/local_fixtures_expansion.sql` (`P1-T09a`) **already
+exists**, is **strictly additive and independently appliable** with a disjoint UUID family, and delivers exactly the
+broader `CLAUDE.md` §11 fixture shape — including **the second Class Session the continuity re-proof needs**. ⚠️ It
+must be applied **after** the verifier passes, because the loader **refuses `--reload` while expansion rows are
+present**.
+
+### ⚠️ Phase 7 and the owed re-proof are kept separate, on Operator instruction
+
+Both touch `observations.follow_up_notes`. They are **different claims** and are proven **independently**: the owed
+Phase 6a re-proof backs **`CLAUDE.md` §10 Phase 1 exit condition (c)** (a note saved on `07` appears as the next
+session's previous focus); Phase 7 / `F-S6-REVIEW-1` backs **§6** (the `/review` screen loads it into an editable
+field with a save path). Plan §9.3 binds four rules, the first of which is that **the re-proof runs FIRST, on the code
+as it stands before Phase 7 changes anything** — proving carry-over *after* adding a second write path proves the new
+path, not the original gate. **Neither may ever be reported as discharging the other.**
+
+Plan §9.2 also records a **recommendation, not a decision**: prefer a narrow governed write that reads the observation
+server-side and updates only `follow_up_notes`, over round-tripping nine ratings through the client. It still needs
+its own authorization, and it inherits the CP-2/CP-4 audit boundary — **no Step 7H event, registry stays at 16.**
+
+### ⚠️ One propagation item left OPEN rather than actioned
+
+`CLAUDE.md` §15.7 requires a ruling that changes product behaviour to be propagated into an **active authority
+document**, and says a progress log must never be its sole authority. **G-2 permanently excludes a product feature;
+G-3 and G-6 authorize schema.** They are currently recorded only in `STATUS.md`, here, and in the plan — **all three
+procedural or continuity, none of them authority.**
+
+**Propagating them means editing ratified authority, which §12 permits only under an explicit bounded Operator
+instruction issued for that run.** No such instruction was given, so **nothing was edited and the item is reported
+instead.** This is the same discipline Phase A and OD-4 each ran under.
+
+### Verification
+
+`git status --porcelain -uall` at both ends; **HEAD `b3cdc64` unmoved**; no application file touched; no governed
+surface touched; no database read or written; **no hosted or paid service contacted**; the frozen
+`zjukuffiuzkbiblmnuwl` never referenced. Frame values re-extracted with the read-only scratchpad extractor
+(`.html` → values only, never markup — plan §3.1 constraint).
+
+### Commit / next
+
+**Nothing committed — the diff is left for Operator review** (§12). Two files are uncommitted: the new plan and
+`STATUS.md`. ⚠️ **A fresh session will therefore see a dirty tree; that is deliberate and is recorded in `STATUS.md`.**
+
+**Next: the Operator authorizes Phase 0A in a fresh session.** Before that, `B-STAGE3-2` should be cleared per plan
+§7.2 — it is `OPERATOR-ONLY` and blocks every end-to-end verification in the plan.

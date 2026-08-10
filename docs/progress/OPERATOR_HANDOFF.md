@@ -18,41 +18,13 @@
 
 ---
 
-## ✅ BATCH 3 IS ACCEPTED — and the reconciliation plan is CLOSED
+## ▶ WHERE THIS STOPPED
 
-**Operator decision, 2026-08-10:** the full chain was walked manually, trainer through parent, all ten screens, nothing broken. **Phases 4–12 ACCEPTED.** With Batch 1 already accepted, `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` is **COMPLETE and CLOSED**.
+✅ **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` is WRITTEN (revision 2). PLANNING ONLY — NOTHING WAS BUILT.**
 
-⚠️ **That walkthrough is OPERATOR MANUAL VERIFICATION AT THESE COMMITS ONLY — point-in-time. NOT a harness pass. It does NOT cover hover, focus or responsive collapse, and does NOT transfer to a later change. The rendered captures below stay `NOT-RUN`.**
+**Stopped on Operator instruction.** The Operator will **authorize Phase 0A in a fresh session**.
 
-**All ten remaining screen phases of `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` §4 ran and are committed, one commit per phase boundary, none mid-phase.** Batch 3's authorization is now **spent**.
-
-| Phase | Screen | `TRUE-DRIFT` resolved | `REGISTERED-OMISSION` preserved | Commit |
-|---|---|---|---|---|
-| 4 | `05` Trainer Schedule | 19 | 8 | `5dda019` |
-| 5 | `06` Trainer Student Roster | 22 | 7 | `ca9396e` |
-| 6a | `07` Trainer Grade Student | 14 | 6 | `1c93a4f` |
-| 6 | `08` Trainer AI Report Generation | 13 | 10 | `85e1f35` |
-| 7 | `29` Management Reports | 12 | 5 | `7634c71` |
-| 8 | `19` Management Student Report | 12 | 12 | `d83823f` |
-| 9 | `32` Parent Reports | 10 | 4 | `6146f73` |
-| 10 | `33` Parent Class Report | 9 | 5 | `e5cf572` |
-| 11 | `30` Parent Dashboard | 5 | 1 | `d37c45a` |
-| 12 | `11` Management Dashboard | 4 | 3 | `cca7526` |
-| | **TOTAL** | **120** | **61, ZERO CHANGED** | |
-
-⚠️ **The two columns are SEPARATE LISTS and are never merged into one "reconciled" count** (plan §6.5). **No `REGISTERED-OMISSION` was changed in any phase.**
-
-**`NEW-QUESTION`: none, in any phase.**
-
----
-
-## ▶ NEXT AUTHORIZED ACTION
-
-▶ **Write `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` — PLANNING ONLY. BUILD NOTHING.**
-
-That plan addresses a **different** problem from reconciliation: screens that are **functionally incomplete**, not visually drifted. **It crosses governed surfaces the reconciliation plan forbade** — schema, projections, RPCs, server actions — so **every such phase needs explicit Operator authorization before any code is written.**
-
-**Outstanding Operator `Accepted`: none.** Batch 1 and Batch 3 are both accepted.
+⚠️ **Before that, `B-STAGE3-2` should be cleared.** It is `OPERATOR-ONLY`, it blocks **every** end-to-end verification in the new plan, and the Operator asked to clear it *before* Phase 0A rather than discover it mid-phase. **The exact five steps are plan §7.2** — summarized below.
 
 ---
 
@@ -60,62 +32,127 @@ That plan addresses a **different** problem from reconciliation: screens that ar
 
 | | |
 |---|---|
-| Branch / worktree / tree | `develop` / none / **clean** |
-| HEAD | **`cca7526`** (batch start `05edd6d`) |
+| Branch / worktree | `develop` / none |
+| HEAD | **`b3cdc64`** — **unmoved at both ends of this run** |
+| Working tree | ⚠️ **DIRTY, DELIBERATELY — three uncommitted files.** `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` (new) · `docs/progress/STATUS.md` · `docs/progress/BUILD_NOTES.md`. **`CLAUDE.md` §12: during a documentation, governance or analysis run, do not commit — leave the diff for Operator review.** Say the word and it will be committed |
 | Ahead of `origin/develop` | **22 commits, NONE pushed** |
-| Database | **none written, none read.** The frozen project was **never contacted** |
-| Governed surfaces | **NONE touched.** Route census **17** at every phase boundary. The only `app/` change is one additive CSS rule |
+| Governed surfaces | **NONE touched.** No schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route |
+| Database | **None read, none written.** No hosted or paid service contacted; the frozen project never referenced |
+| Authorization in force | ⛔ **NONE.** Batch 3 is spent. **No `STANDING_LOCAL_EXECUTION_AUTHORIZATION` exists** |
+| Outstanding Operator `Accepted` | **None** |
 
 ---
 
-## ⛔ WHAT IS `NOT-RUN` — none of it carried forward as green
+## ✅ THE EIGHT GOVERNANCE COLLISIONS — ALL RULED, 2026-08-10
 
-1. **Every rendered build-side capture, in every phase.** All ten screens are **authenticated**; `requirePortalAccess` needs a session and therefore a reachable governed database, and `.env.local` here configures the **hosted** dev project only — a §12 stop-and-ask no current authorization carries. **None was manufactured; no hosted or paid service was contacted.**
-   Replaced by frame-vs-source measurement, a **static cascade audit**, and **emitted-CSS verification** from the compiled stylesheet. ⚠️ **That pair proves a rule exists and that no *known* unlayered rule outranks it. It does not prove final geometry, wrapping, overflow or focus order on a live page.**
-2. **The Phase 6a runtime carry-over re-proof — ATTEMPTED, BLOCKED, AND OWED.** `npm run test:continuity` reached `CONT-0` (**PASS**) and failed at `CONT-A0`: the local Supabase stack's values could not be captured. That is **`B-STAGE3-2`**, already registered and **Operator-owned** (three interactive no-echo passwords). The harness reached **no database and no network** — it reads only `loadLocalStack()`, never `.env.local`, and exited before constructing any client. The chain was proven **statically** instead, link by link. **The runtime leg is owed, not waived.**
-3. Each screen-08 **non-happy-path state** as its own captured view; the screen-32 **projection** re-confirmation at runtime; screen-29's row-action matrix exercised live (it was re-proven by reading `ROW_PRESENTATION` and confirming it byte-unchanged).
-4. Everything already `NOT-RUN` before this batch: every disposable-stack harness, every real-provider leg, password sign-in, `design-foundation.assertions.ts` (no runner).
+Reported first, as a separate list, then ruled. **Settled — no phase re-opens one, and no phase designs around one.**
 
----
+| | Ruling |
+|---|---|
+| **G-1** three unframed hero surfaces | **LEAVE UNFRAMED.** Functional completion covers all eleven routes; **visual acceptance covers the eight framed screens only.** The three are `NOT APPLICABLE (G-1)` — ⚠️ **a ruled disposition, never a `NOT-RUN`, never a defect** |
+| **G-2** "Overall Grade" | ⛔ **NO — all four surfaces, PERMANENTLY, not deferred** |
+| **G-3** lesson identity | ✅ **BUILD** number + title · ⛔ **KEY FOCUS chips OUT** |
+| **G-4** term | ⛔ **NO** — a label is not worth the substrate an §8-deferred item needs |
+| **G-5** trainer name on a Parent surface | ✅ **YES** — not a rating, not derived from one |
+| **G-6** room | ✅ **YES** |
+| **G-7** staff slots | ✅ **`Main:` built** · ⛔ **`Assist.` out; `centre_membership_role` NOT extended** |
+| **G-8** evidence | ⛔ **CONFIRMED OUT.** The frame's "500MB" is never implemented |
 
-## ⚠️ FOUR LIVE DEFECTS FOUND — none introduced by this batch, all invisible to source review
+**Screen `11` confirmed OUT of hero scope** — management completes the workflow without ever loading `/management`. The rating chip goes with it to the portal plan.
 
-1. **A `text-brand-800` on screen 05's `<h3>` had been rendering NAVY on every build since it was written.** The unlayered `h1..h4 { color: #1b2b4b }` rule outranks any layered colour utility. Fixed with `text-brand-800!` — the **only** important utility in the application. A repository sweep found no other heading carrying a colour utility the rule defeats.
-2. **`rounded-control` and `border-hairline` are UNDEFINED TOKENS.** Neither exists in `@theme inline`, so Tailwind emitted **nothing**; screen 06's attendance toggle had been rendering square-cornered and borderless. They were the only two uses in the repository.
-   ⚠️ **This is a DIFFERENT failure class from (1) and the standing lesson does not cover it.** There is no competing rule — the rule simply never exists — so a cascade audit cannot catch it. **Only the compiled stylesheet can.** That check now runs every phase.
-3. **`text-ink-muted` (#8a93a8) measures 3.079:1**, below SC 1.4.3 for normal-size text, and was **live** on `PageHeading`'s description and two dashboard surfaces. Two earlier checkpoints recorded it and worked around it. Re-pointed to `text-ink`; **no token VALUE redefined** — `--color-ink-muted` still serves placeholders and disabled controls.
-4. **Three surfaces were still on the pre-reference LEGACY scale** (`text-2xl`, `font-black`, `text-navy-950`, `text-sm`, `rounded-xl`), none of which appears in any frame.
-
-Also caught **before** it became a defect: moving screen 05's session card to the frame's fill would have made the eligibility chip vanish into it — **one of four redundant carriers** of the derived state (SC 1.4.1).
-
----
-
-## Two decisions the Operator may want to reverse in one line
-
-- **The page-title scale was applied PER SCREEN, not at `--text-page-title`.** The token is a Phase 0 owned artefact, is pinned by an assertion file with **no runner**, and reaches out-of-plan surfaces.
-- **Phase 7 reconciled the shared `components/ui/page-heading.tsx`** — declared, with all seven consumers enumerated (five are Batch 3 screens; `trainer-dashboard` is cut and unmounted; `returned-reports-queue` is out of plan but moves toward consistency). It also closed defect (3) there.
-- **`app/globals.css` gained exactly one additive rule**, `.form-field.notes-field`, mirroring the ratified `.auth-field` pattern — no existing rule, token or value modified, `.form-field` not moved into a layer, exactly two consumers.
+⚠️ **Five of the eight rulings REMOVE work.** The surviving new-build surface: three columns of schema, one identity projection, context fields on four existing projections, one narrow governed write. **Nothing in the plan computes an assessment fact.**
 
 ---
 
-## `INCOMPLETE` — three, all recorded, none built
+## ⚠️ ONE ITEM LEFT OPEN RATHER THAN ACTIONED — Operator's to decide
 
-1. The **Phase 6a runtime carry-over leg** (above) — **owed**.
-2. Screen `30`'s **Profile Details** and **Calendar / Upcoming**. ⚠️ *"Profile Details promotes upward into the vacated space"* was **not actioned deliberately** — Profile Details is not built at all, so there is no card to promote. **No blank rectangle and no invented filler card was added.**
-3. Screen `11`'s two extra **KPI tiles** and its **approval list**.
+**`CLAUDE.md` §15.7** requires a ruling that changes product behaviour to be propagated into an **active authority document**, and says a progress log must **never** be its sole authority.
 
-**(2)** and **(3)** need governed projections that do not exist — a learner's date of birth, guardian contact and enrolment date are personal data with no parent projection. **New construction is not this plan's mandate**, and inventing fields would be the fabrication `GLOBAL_UI_RULES` §8 forbids.
+**G-2 permanently excludes a product feature. G-3 and G-6 authorize schema.** They currently live only in `STATUS.md`, `BUILD_NOTES.md` and the plan — **all procedural or continuity, none of them authority.**
+
+⚠️ **Propagating them means editing ratified authority, which §12 permits only under an explicit bounded Operator instruction issued FOR THAT RUN.** No such instruction was given, so **nothing was edited.** Reported, not actioned — the same discipline Phase A and OD-4 ran under.
+
+---
+
+## ⛔ `B-STAGE3-2` — WHAT IS NEEDED FROM YOU
+
+**All LOCAL. Nothing hosted, billable or pushed. No credential ever reaches a session, a file, a log or a report.**
+
+| # | Action |
+|---|---|
+| **1** | **Start the local Supabase stack** and leave it running. Every harness calls `supabase status -o json` and aborts if it is down. **No password** |
+| **2** | ⚠️ **Decide and perform the reset path.** ⛔ **Never `supabase db reset`.** An in-place `--reload` **cannot** clear the four `audit_events` rows — the append-only trigger refuses `postgres` too, and **must not be disabled** (§12). The precedent is **your own `D-0C` ruling**: a bounded LOCAL-only fresh reconstruction re-applying all 12 migrations under **R-1** semantics. ⚠️ **No session may choose or perform this** |
+| **3** | **`npm run fixtures:local`** in your own terminal — prompts **three times, no-echo**. ⚠️ **Never paste a password in either direction; send only the exit code and the verifier verdict** |
+| **4** | **Confirm `verify-local-fixtures.sql` passes, assertion `A19` in particular.** A19 is the one that failed — it is the signal the blocker is genuinely closed |
+| **5** | ✅ *Optional, for Phase 4's roster breadth:* apply `scripts/fixtures/local_fixtures_expansion.sql`. ⚠️ **It already exists** (`P1-T09a`), is **strictly additive and independently appliable**, and supplies **the second Class Session the continuity re-proof needs**. **Apply it AFTER step 4** — the loader refuses `--reload` while expansion rows are present |
+
+**Measured damage:** `reports` 0 → 1 · `audit_events` 0 → 4 · `audit_chain_heads` 0 → 1 · fixture attendance `recorded_by_*` non-NULL → **A19 fails**. **Blast radius:** `readCanonical()` throws before `assertCanonicalPristine`, so **all six disposable-stack harnesses abort** and every `TEMPLATE postgres` clone inherits the dirt.
+
+**If it stays blocked:** Phases 0A and 0B can be authored and committed — a migration and a projection are code. ⚠️ **But no phase can reach `PASS`**, so work would accumulate unverified. That is the pattern that produced the four defects Batch 3 found.
+
+---
+
+## The plan in one screen
+
+**Twelve phases, by screen never by layer.** Each delivers projection → server action → frontend → end-to-end verification **before the next begins**. No frontend-first pass, no trailing integration phase.
+
+**`0A`** staff-identity projection · **`0B`** session metadata migration (`lesson_number`, `lesson_title`, `room`) · **`1`** `33` Parent Class Report · **`2`** `32` Parent Reports · **`3`** `05` · **`4`** `06` · **`5`** `07` · **`6`** `08` · **`7`** Trainer Review & Approve · **`8`** Trainer wording editor · **`9`** `29` · **`10`** `19` · **`11`** Management wording editor.
+
+⚠️ **Phase 0 SPLIT into 0A/0B because of your own G-3 ruling.** You approved parent-screens-first on the basis that they were the only ungated deliverable — true while G-3 was unruled. Ruling **G-3 = BUILD** gave them a lesson deliverable, and screen `32`'s **row title *is* the lesson title**, so both now need the lesson schema. **Your intent is preserved — the parent screens still go first.**
+
+**Why the parent screens are worst:** `CanonicalReportDto` carries **`panels` and `submittedAt` and nothing else** — the report page cannot state which class or session it is about, and cannot name the learner in its own heading.
+
+⚠️ **Every one of the twelve phases needs your explicit authorization before any code is written** (plan §11).
+
+---
+
+## ⚠️ PHASE 7 AND THE OWED RE-PROOF STAY SEPARATE
+
+Both touch `observations.follow_up_notes`. **Different claims, proven independently.**
+
+- **The owed Phase 6a re-proof** backs **`CLAUDE.md` §10 Phase 1 exit (c)** — a note saved on `07` appears as the next session's previous focus. ⛔ **OWED**; proven statically only, which does not discharge it.
+- **Phase 7 / `F-S6-REVIEW-1`** backs **§6** — `/review` loads that value into an editable field with a save path.
+
+⚠️ **The re-proof runs FIRST, on the code before Phase 7 changes anything** — proving carry-over *after* adding a second write path proves the new path, not the original gate. **Neither may ever be reported as discharging the other.**
+
+Plan §9.2 records a **recommendation, not a decision**: a narrow governed write that reads the observation server-side and updates only `follow_up_notes`, rather than round-tripping nine ratings through the client. It needs its own authorization and inherits the CP-2/CP-4 boundary — **no Step 7H event, registry stays at 16.**
+
+---
+
+## Provenance of the plan — audited, because you asked
+
+✅ **`reference/*.png` and `reference/*.html`: YES for all eight framed hero screens.** Every `.html` was **re-extracted 2026-08-10**, not recalled across the context compaction. **No screen's frame content was derived without its `.html`**, so nothing needed re-deriving on that ground.
+
+⚠️ **The numbered packs' `screen.md` was NOT read at first drafting.** Read for all eight before revision 2. **It was the real gap** — it carries *Prohibited invention* and *Dependencies*, which the `.png` and `.html` cannot. Three changes followed:
+
+1. **A missing prohibition** — screens `32` **and** `33` both bar disclosing *"that a correction cycle is or was underway"*. **Constrains Phases 1 and 2**, the two sequenced first.
+2. **G-6 and G-7 were already recorded dependencies** at checkpoint **F-04** on screen `05` — the rulings **discharge** them rather than open them.
+3. **`PHYSICAL_TEST_SLICE_48H.md` §5.5 was checked, not assumed** — class, module, lesson and trainer are **not** on the absolute Management-DTO exclusion list, so the Phase 9 columns are permitted. **Evidence-backed now, not assumed.**
+
+**Second check, unprompted:** each `screen.md` calls its RPCs *"delivered on `feat/48h-backend`"* — a **`CLOSED_BY_NONUSE_POLICY`** branch. **Enumerated from the migrations instead**; all fifteen are at HEAD.
+
+**Standing lesson added to the plan (§12 item 8): read the numbered pack's `screen.md`, not only the `/reference/` artefacts.**
+
+---
+
+## ⛔ STILL `NOT-RUN` — none of it carried forward as green
+
+1. **Rendered captures on all ten authenticated screens** — need a reachable governed database, a §12 stop-and-ask. ⚠️ **The Operator walkthrough is point-in-time manual verification and does NOT substitute.**
+2. **The Phase 6a runtime carry-over re-proof** — ⛔ **OWED**, blocked at `CONT-A0` by `B-STAGE3-2`.
+3. Every disposable-stack harness · every real-provider leg · password sign-in · `design-foundation.assertions.ts` (no runner) · `test:continuity`.
 
 ---
 
 ## Carried, untouched
 
-`F-S6-REVIEW-1` (functional, explicitly out of this plan) · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · **`B-STAGE3-2`** (re-confirmed as blocking the Phase 6a leg) · `B-C2-1` / `B-C2-2` · `F-REGION-1` · `F-STAGE3-1` (screen `09`) · the `project_id` fallout · the **academy asset dependency** (Operator-owned; **never** `TRUE-DRIFT`) · `OD-3` · the `Remember me` native checkbox radius · **`Sign out` stays** (ruled 2026-08-10; a later phase must not reconcile it toward the frame's `Logout` — none did).
+`F-S6-REVIEW-1` (now **scheduled** as plan Phase 7) · `F-DEMO-1` · `F-EVIDENCE-SCOPE-1` · **`B-STAGE3-2`** · `B-C2-1` / `B-C2-2` · `F-REGION-1` · `F-STAGE3-1` (screen `09`) · the `project_id` fallout · the **academy asset dependency** (Operator-owned; **never** `TRUE-DRIFT`) · `OD-3` · the `Remember me` native checkbox radius · **`Sign out` stays** (ruled 2026-08-10 — a later phase must not reconcile it toward the frame's `Logout`).
 
 **Gates:** §3 persona sign-offs **NOT RECORDED**; no `CLAUDE.md` §10 phase-gate exit may be declared met. README and deployment instructions **still not written**. `B-G06-DET-1` — ⛔ **do not widen the lexicon.**
+
+⚠️ **The `CLAUDE.md` §6 amendment draft is unapplied** and may change what `F-S6-REVIEW-1` binds to. **Phase 7 should not start before it is ruled.**
 
 ---
 
 ## Reading order for the next session
 
-`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md` → **`docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md`** (cite it instead of re-deriving Batch 3) → `UI_RECONCILIATION_PHASE_0_RAIL_ADJUDICATION.md` → `UI_RECONCILIATION_PHASES_1_3_AUTH_ADJUDICATION.md`. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3).
+`CLAUDE.md` → `FINAL_MVP_AUTHORITY_LOCK.md` and operator rulings → `FINAL_MVP_EXECUTION_PLAN.md` → **`STATUS.md`** → recent `BUILD_NOTES.md` → **`docs/plan/HERO_CHAIN_COMPLETION_PLAN.md`** → `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (cite it instead of re-deriving Batch 3) → the two earlier adjudications. ⚠️ **A reading order, not a precedence order** — precedence is `CLAUDE.md` §1. **Then verify state against the repository before acting** (§15.3) — ⚠️ **expect a dirty tree; three files are uncommitted by design.**
