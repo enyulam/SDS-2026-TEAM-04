@@ -4694,3 +4694,57 @@ All 21 inspected files parse clean. The defects are **reachability and pre-exist
 ### Commit / next
 
 ⛔ **STOP for Operator review. Phase 1 is NOT authorized and was NOT begun.** `PASS` is this session's evidence verdict; **`Accepted` is Operator-set only** and none has been written or implied.
+
+---
+
+## 2026-08-10 — HERO PHASE 1 (`33` Parent Class Report) · S-8 CLOSED · two standing lessons recorded
+
+- **Track / branch:** hero chain Phase 1 · `develop`. **Phase 1 boundary commit:** `2e72287`.
+- **Operator authorization:** batch — Phases 1, 2, then the remaining hero phases in plan order, autonomously, committing at every phase boundary, **stopping before `F-S6-REVIEW-1`**.
+
+### ⚠️ Two numbering reconciliations, resolved from the plan rather than guessed
+
+The instruction named *"Phases 11, 10"*. The plan's own phase-table header states: *"Phases are renumbered from revision 1 … revision 1's 'Phase 11' is screen `33`, now **Phase 1**; revision 1's 'Phase 10' is screen `32`, now **Phase 2**."* So the batch is **plan order**, dependencies satisfied. The earlier *"do not begin Phase 11"* after 0B used the same mapping.
+
+The instruction also gated *"PHASE 5 (`F-S6-REVIEW-1`)"*. `F-S6-REVIEW-1` is revision-2 **Phase 7 — Trainer Review & Approve**, and the instruction's description (*"writes governed assessment substance from a surface that has never written it"*) is plan §9.1's wording for that phase verbatim. **Identifier and description agree; the bare number does not.** The stop is therefore taken at `F-S6-REVIEW-1`. ▶ **An identifier plus a matching description outranks a bare number**, and the safe direction was checked too: the reading costs nothing if the number was intended, because the intervening phases are authorized either way.
+
+### Built
+
+`public.report_get_canonical_context(uuid, uuid)` — learner name, Class Grade, Class Module, session date, lesson number/title (G-3), assigned trainer (G-5). Frontend renders the frame's page subtitle, the card heading `Class Report — <learner>`, the card meta line, and a **Report Details** block.
+
+⚠️ **Why a second function rather than widening RPC-13.** RPC-13's zero-row behaviour across all six denial cases is pinned byte-for-byte by `c2-suite.sql` T-C2-9, and **R-C2-6** requires every parent denial to be indistinguishable. Editing it would put that pinned behaviour at risk to add display fields. **RPC-13 is byte-untouched**, asserted by `H1-7`.
+
+⚠️ **The gate is a deliberate MIRROR of RPC-13's, step for step.** A looser gate would make this a **side channel disclosing reports the canonical read refuses** — the exact R-C2-6 failure. `H1-5` pins the mirror structurally; **`P1-6` proves it dynamically** by withdrawing the canonical pointer and confirming **both reads go dark together**.
+
+### ✅ S-8 IS CLOSED — the owed G-5 parent PERMIT leg
+
+A linked parent reads context for a genuinely `submitted` report. ⚠️ **It could not be proven before, and the reason matters:** with zero submitted reports the gate denies *everyone*, so "parent gets nothing" passes **for the wrong reason**. G-5 is the only hero ruling that **widens** disclosure, so an unproven permit was the leg most worth proving.
+
+⚠️ **And it was closed WITHOUT repeating `B-STAGE3-2`.** That incident was **committed** governed mutations driven through the served app. This suite drives the report to `submitted` **inside one transaction and ends in `ROLLBACK`** — nothing commits, and plpgsql cannot `COMMIT` inside a transaction block, so no governed RPC escapes it. **The runner measures the governed counts before and after and fails if any moved**; they did not (`0|0|0|0|0|1` → `0|0|0|0|0|1`). ▶ **A rolled-back transaction is a legitimate way to prove a permit leg that a read-only fixture cannot exhibit** — the prohibition is on *committing* to canonical, not on reading a hypothetical state.
+
+⚠️ **The schema refused three insert shapes on the way and was right every time** — the author/submitter pair checks, the management-only submitter pin (A-034), and the 64-hex `content_hash`. Every one was **satisfied honestly, never bypassed**, which is the §12 rule about not weakening what refused.
+
+### ⛔ NO TRAINER ROW ON SCREEN `33` — a deliberate departure from the plan, reported not resolved
+
+The plan's §6.1 delta table lists *"Trainer name — `NEEDS NEW PROJECTION` (Phase 0A) — ✅ G-5"* for screen `33`. **It was not built there.**
+
+⚠️ **G-5 grants PERMISSION, and permission is not a visible field.** The ratified `reference/Parent - Class Report/` frame draws **no trainer anywhere** — verified against the `.html`, **zero** trainer/coach/teacher occurrences — and **G-5's own evidence is frame `32`**, not this one. Rendering it here would **invent a visible element**, which §7.2 prohibits. The projection carries the field regardless, so nothing is wasted: **Phase 2 builds it on `32`, where the frame actually draws it.** ▶ **A procedural plan cannot add a visible field the ratified frame does not have.**
+
+### Preserved, re-cited inline
+
+**Term** (G-4) · **Overall Grade** (G-2) · the **Performance Summary per-dimension grid** (Q-27 — the caught leak `CLAUDE.md` §6 names by name) · **prose rating attributions** (A-052) · **Watch Together** (G-8, Authority Lock §8.1). **Zero `REGISTERED-OMISSION` changed.**
+
+**NULL means omit:** the lesson row is assembled from whichever of number/title is present and **disappears entirely when neither is**. The fixture deliberately leaves lesson/trainer unset on most sessions so the **omit path is exercised too**, not only the populated one.
+
+### Verification
+
+- **`prove:hero-1`** — **7/7 legs EXECUTED, 0 FAIL**, canonical byte-unmoved. ⚠️ The leg count is a **pinned literal, not `passes > 0`**: a suite that aborted after two legs would otherwise report green.
+- **Fresh-apply:** all **20** migrations from stripped, every existing migration's in-transaction assertions passing, census exactly `27|41|12|29|20|29|0`; **equivalence 0 canonicalized differences**.
+- **Route census 17** unchanged. **Emitted-CSS verified from the compiled stylesheet.** ⚠️ **The minifier ROUNDS to six decimals** — `0.8203125rem` is emitted `font-size:.820313rem` — so matching the authored precision reports a **false MISSING**. Third instance this session of *the stored representation is not the authored one* (after `search_path=""` and the fixture-vs-schema row pin).
+- `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+- **Census:** functions **40 → 41**, authenticated EXECUTE **28 → 29**, migrations **19 → 20**. Tables 27, enums 12, policies 29, RLS everywhere — unchanged.
+- **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 2 (`32` Parent Reports)** — which also builds the trainer name deferred from `33`. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**
