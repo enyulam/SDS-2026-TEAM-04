@@ -39,6 +39,7 @@ import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { getSessionContextsCore } from "@/server/modules/class-session/session-context-projections";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
+import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import {
   firstRow,
   type CorrectionIssueScope,
@@ -136,28 +137,62 @@ interface PairRow {
   studentDisplayName: string;
 }
 
-/** Enumerate every (session, enrolled student) pair of the managed centre. */
-async function listCentrePairs(client: SupabaseClient): Promise<PairRow[]> {
-  const { data: sessions } = await client
-    .from("class_sessions")
-    .select("id, session_date, class_module_id")
-    .order("session_date", { ascending: true });
+/**
+ * Enumerate every (session, enrolled student) pair of the managed centre.
+ *
+ * ⛔ ALL THREE READS PREVIOUSLY DISCARDED `error` — none was even
+ * destructured — and this enumeration is the SPINE of the pending-final-review
+ * queue. A rejection on any of them silently shortened the list of pairs, and
+ * a pair that never enters the list is never gated, never rendered and never
+ * counted.
+ *
+ * ⚠️ THAT IS THE MOST CONSEQUENTIAL SILENT EMPTINESS IN THIS MODULE. Screen
+ * `29` would have told management **"No reports waiting"** — a positive
+ * statement that the final-review queue is clear — while trainer-approved
+ * reports sat unreviewed. Management's final review is the ONLY gate between
+ * a trainer approval and a parent seeing a report (A-033), so a queue that
+ * silently under-reports does not degrade a display: it makes a governed
+ * review step invisible.
+ *
+ * It now returns a `QueryOutcome`, and every caller returns `unavailable`.
+ */
+async function listCentrePairs(client: SupabaseClient): Promise<QueryOutcome<PairRow[]>> {
+  const sessions = await readRows<{ id: string; session_date: string; class_module_id: string }>(
+    "listCentrePairs:class_sessions",
+    () =>
+      client
+        .from("class_sessions")
+        .select("id, session_date, class_module_id")
+        .order("session_date", { ascending: true }),
+  );
+  if (!sessions.ok) return { ok: false };
+
   const pairs: PairRow[] = [];
   const nameCache = new Map<string, string>();
-  for (const session of (sessions ?? []) as Array<{ id: string; session_date: string; class_module_id: string }>) {
-    const { data: enrolments } = await client
-      .from("enrolments")
-      .select("student_id")
-      .eq("class_module_id", session.class_module_id)
-      .eq("is_active", true);
-    for (const enrolment of (enrolments ?? []) as Array<{ student_id: string }>) {
+  for (const session of sessions.rows) {
+    const enrolments = await readRows<{ student_id: string }>(
+      "listCentrePairs:enrolments",
+      () =>
+        client
+          .from("enrolments")
+          .select("student_id")
+          .eq("class_module_id", session.class_module_id)
+          .eq("is_active", true),
+    );
+    if (!enrolments.ok) return { ok: false };
+
+    for (const enrolment of enrolments.rows) {
       let name = nameCache.get(enrolment.student_id);
       if (name === undefined) {
-        const { data: students } = await client
-          .from("students")
-          .select("id, full_name")
-          .eq("id", enrolment.student_id);
-        name = ((students?.[0] as { full_name?: string } | undefined)?.full_name) ?? "Student";
+        const students = await readRows<{ full_name?: string }>(
+          "listCentrePairs:students",
+          () => client.from("students").select("id, full_name").eq("id", enrolment.student_id),
+        );
+        if (!students.ok) return { ok: false };
+        // ⚠️ The "Student" placeholder survives for its LEGITIMATE case — a
+        // row read successfully whose name is genuinely unrecorded. What no
+        // longer reaches it is a rejection.
+        name = students.rows[0]?.full_name ?? "Student";
         nameCache.set(enrolment.student_id, name);
       }
       pairs.push({
@@ -168,7 +203,7 @@ async function listCentrePairs(client: SupabaseClient): Promise<PairRow[]> {
       });
     }
   }
-  return pairs;
+  return { ok: true, rows: pairs };
 }
 
 async function gatedReview(
@@ -239,8 +274,17 @@ export async function listManagementPendingReviewCore(
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
 
+  const pairs = await listCentrePairs(client);
+  /*
+   * ⛔ A REJECTED ENUMERATION IS NEVER AN EMPTY QUEUE. Success-with-zero-rows
+   * here renders "No reports waiting" — management being told the final-review
+   * queue is clear when it may not be. That is a governed review step made
+   * invisible, not a display defect.
+   */
+  if (!pairs.ok) return { outcome: "unavailable" };
+
   const out: ManagementQueueRowDto[] = [];
-  for (const pair of await listCentrePairs(client)) {
+  for (const pair of pairs.rows) {
     const row = await gatedReview(client, pair.sessionId, pair.studentId);
     if (!row || row.status !== "trainer_approved") continue;
     out.push({

@@ -5712,3 +5712,35 @@ npm run prove:hero-all --silent 2>&1 | tail -2 && git commit …
 **What had failed:** `prove:hero-12`'s `Q-7` count pins — **exactly as designed.** They asserted 1 exact-shape and 14 discarded sites; module 1 made it 0 and 7. ✅ **The pin fired because the counts changed, which is the entire reason it exists.** A pin that silently followed the code would have asserted nothing.
 
 **Fixed forward, not amended** (§12 forbids `amend`): `Q-7` is now a **ratchet** — `Q-7c` fails if either count RISES, since a new site of either shape is the defect returning, not progress — and the expected values are updated at **each module boundary** to the true current count. ⚠️ **Deliberately not set to the end target of 0/0**, which would report failure for work not yet done; that is a different lie, and it would make every intermediate boundary red for no reason.
+
+---
+
+## 2026-08-11 — **`QueryOutcome` ACROSS `management-view`** — module 2 of 3
+
+**Track:** the remaining 15 sites. **Branch:** `develop`. **Starting HEAD:** `d5c7f6c`.
+
+### The three sites, and why they were the worst of the fourteen
+
+All three reads in `listCentrePairs` **discarded `error` — none was even destructured.** That enumeration is the **spine of the pending-final-review queue**: a rejection silently shortened the list of (session, student) pairs, and ⛔ **a pair that never enters the list is never gated, never rendered and never counted.**
+
+▶ ⚠️ **Screen `29` would have said "No reports waiting"** — a positive claim that the final-review queue is **clear** — **while trainer-approved reports sat unreviewed.** Management's final review is the **only** gate between a trainer approval and a parent seeing a report (A-033), so this did not degrade a display: **it made a governed review step invisible.**
+
+That is the sharpest instance in this whole sweep of the shape the Operator named: *an absence reported as a fact when it is really a failure.*
+
+`listCentrePairs` now returns `QueryOutcome<PairRow[]>`; each of the three reads propagates its rejection rather than continuing with partial pairs; the caller returns the non-disclosing `unavailable`.
+
+⚠️ **The "Student" placeholder survives for its LEGITIMATE case** — a row read successfully whose name is genuinely unrecorded. What no longer reaches it is a rejection.
+
+### Verification — `npm run prove:hero-15`, 18 legs, `PASS`
+
+- **`R-0a`/`R-0b`** reachability first.
+- **`M-1`** a real rejection on `class_sessions`, with **`M-1b`** discriminating using the **same select list** `listCentrePairs` uses — so the control proves the schema serves that exact read, not merely some read.
+- **`M-2`** neither defective shape survives; **`M-3`** all three reads report under static, unique, relation-naming labels.
+- **`M-4`** the rejected enumeration returns `unavailable`, and `listCentrePairs` returns a `QueryOutcome`, so a rejection and an empty centre are different values.
+- ⚠️ **`M-5` re-checks §5.5 field by field** — **touching a projection is exactly when an exclusion slips**, so it is measured again here rather than inherited from the Phase 9 proof. With a discrimination leg.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`prove:hero-all` 16/16 `PASS`, verified by EXIT CODE** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
+
+**Remaining, measured: 4 sites, all in `parent-view`.** `Q-7`'s ratchet updated to 4.

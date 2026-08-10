@@ -238,11 +238,10 @@ for (const file of walk(join(ROOT, "server", "modules"))) {
  * site of either shape is the defect returning, not progress.
  */
 const EXPECTED_EXACT_SHAPE = 0;
-// Module 1 (`report-workflow`) complete. 7 remain: 3 in `management-view`,
-// 4 in `parent-view`. Updated at each module boundary so every boundary is
+// Modules 1-2 complete. 4 remain, all in `parent-view`. Updated at each module boundary so every boundary is
 // HONESTLY green — a pin set to the end target would report failure for work
 // that has not been done yet, which is a different lie.
-const EXPECTED_ERROR_DISCARDED = 7;
+const EXPECTED_ERROR_DISCARDED = 4;
 
 check(
   exactShape.length === EXPECTED_EXACT_SHAPE,
