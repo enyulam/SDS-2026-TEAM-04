@@ -5306,7 +5306,7 @@ Four permitted context fields rendered from their own governed fields (`P10-2`),
 
 ### ⚠️ Two of my matchers failed on first run — both bare-word matches
 
-- `/\btermb/` matched the screen's own sentence *refusing* term — which `P10-4c` **requires** — so the two legs **directly contradicted each other**.
+- `/\bterm\b/` *(a shell heredoc ate the second `\b` when this entry was first written; corrected in place as a transcription artefact, not a revision of the finding)* matched the screen's own sentence *refusing* term — which `P10-4c` **requires** — so the two legs **directly contradicted each other**.
 - `/audience/` matched **`audience_awareness`, the ninth B.E.S.T dimension**. That is §5's and A-054's hazard exactly, and G-06 **expressly refused** narrowing `DIMENSION_TERMS.audience_awareness`.
 
 ▶ **This is the shape A-052 already prohibits for rating labels, and it generalizes: a bare-word match over a governed vocabulary rejects legitimate content — in a TEST as much as in a leak guard.** Both now match a rendered shape. Recorded as plan §12 items **15** and **16**.
