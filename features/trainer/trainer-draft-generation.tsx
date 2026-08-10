@@ -114,10 +114,20 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  *     programmatically associated reason — the F-04 D1 / F-11 "Send Reminder to Trainer"
  *     treatment. NO UPLOADER IS INVENTED and the frame's format/size limits are omitted rather
  *     than fabricated, because they would be an unratified policy.
- *  D4 Report Details rows "Lesson" and "Term". No lesson-number, lesson-title or term field
- *     exists on any governed Trainer projection; `DraftGenerationContextDto` carries only
- *     `reportId`, `studentDisplayName`, `observationLockVersion` and `status`. Omitted rather
- *     than fabricated, and recorded as a dependency.
+ *  D4 Report Details rows "Lesson" and "Term". ✅ THE LESSON HALF IS DISCHARGED AT HERO
+ *     PHASE 6. It recorded that no lesson-number or lesson-title field existed on any
+ *     governed Trainer projection — correct when written, and deliberately not invented
+ *     around; it was a RECORDED DEPENDENCY, not a ruled omission. Phase 0B added the columns
+ *     under G-3 and Phase 4 carried them onto `TrainerSessionSummaryDto`. NULL still means
+ *     NOT RECORDED, so the row disappears entirely rather than showing a placeholder.
+ *     ⛔ THE TERM HALF IS NOT DISCHARGED AND WILL NOT BE — G-4 rules it out: a display label
+ *     is not worth building the substrate an §8-deferred roadmap item (End-of-Term report
+ *     GENERATION) requires, and building it "just for a label" would pull a deferred item
+ *     into scope by the back door. ⚠️ The on-screen note was rewritten with this: it used to
+ *     say these fields were "not carried by any governed Trainer projection", which is now
+ *     false for lesson and MISLEADING for term — "we don't have the data" and "we are not
+ *     allowed to show this" are different statements, and stating the weaker one invites a
+ *     later phase to "fix" a gap that is a decision.
  *  D5 Report Details row "Overall Grade: Mastering". No governed overall or roll-up competency
  *     grade exists — a single headline rating would be a DERIVED ASSESSMENT FACT this frontend
  *     computed, which is exactly the class of claim A-034/A-035 reserve to the governed
@@ -398,6 +408,24 @@ export function TrainerDraftGeneration() {
   const report = view?.report ?? null;
   const session = view?.session ?? null;
 
+  /*
+   * HERO PHASE 6 — the frame's "Lesson" row, built from whichever of number and
+   * title is actually recorded, and `null` when neither is.
+   *
+   * ⛔ LESSON IDENTITY ONLY (G-3). It is display context on this screen and is
+   * never mixed with, derived from, or rendered near an assessment fact: the
+   * nine governed rating snapshots below are the assessment, and no roll-up of
+   * them exists to sit beside this (G-2).
+   */
+  const lessonLabel = (() => {
+    if (session === null) return null;
+    const parts = [
+      session.lessonNumber === null ? null : String(session.lessonNumber),
+      session.lessonTitle,
+    ].filter((part): part is string => part !== null && part.length > 0);
+    return parts.length === 0 ? null : parts.join(" · ");
+  })();
+
   return (
     <div className="page-grid">
       <PageHeader
@@ -592,6 +620,22 @@ export function TrainerDraftGeneration() {
                   }
                 />
               )}
+              {/*
+                HERO PHASE 6 — the frame's "Lesson" row. D4 is DISCHARGED for the
+                lesson half: it recorded that no lesson-number or lesson-title field
+                existed on any governed Trainer projection, which was correct and was
+                deliberately not invented around. Phase 0B added the columns under G-3
+                and Phase 4 carried them onto `TrainerSessionSummaryDto`.
+
+                ⚠️ NULL MEANS NOT RECORDED — the whole row disappears. Never "Lesson 1",
+                never "TBC". Built from whichever of number/title is actually present.
+
+                ⛔ D4's TERM half and D5's OVERALL GRADE are NOT discharged and never
+                will be — see the note below the list, whose reason changed with them.
+              */}
+              {session && lessonLabel !== null && (
+                <DetailRow label="Lesson" value={lessonLabel} />
+              )}
               {report && (
                 <DetailRow label="Session date" value={formatDate(report.sessionDate)} />
               )}
@@ -604,12 +648,28 @@ export function TrainerDraftGeneration() {
               />
             </dl>
             {/*
-             * D4 / D5 — "Lesson", "Term" and "Overall Grade" are drawn in the frame and are
-             * omitted here. The reason is stated on screen rather than left as a silent gap.
+             * D4 (term half) / D5 — "Term" and "Overall Grade" are drawn in the frame and
+             * are omitted here. The reason is stated on screen rather than left as a
+             * silent gap.
+             *
+             * ⚠️ THE REASON CHANGED AT HERO PHASE 6 AND THE COPY CHANGED WITH IT. It read
+             * "Lesson number, term and a single overall grade are not carried by any
+             * governed Trainer projection". Lesson now IS carried, so leaving that
+             * sentence would have made it false about lesson — and, worse, it would have
+             * kept attributing the term and overall-grade omissions to a MISSING FIELD
+             * when both are now RULED OUT: G-4 (a display label is not worth building the
+             * substrate an §8-deferred roadmap item needs) and G-2 (permanently excluded
+             * on all four surfaces that draw it — on a Trainer surface a roll-up is a
+             * derived assessment fact this frontend would be computing).
+             *
+             * ▶ "We don't have the data" and "we are not allowed to show this" are
+             * different statements, and only one of them is still true here. Saying the
+             * weaker one would invite a later phase to "fix" a gap that is a decision.
              */}
             <p className="mt-4 text-small leading-6 text-ink">
-              Lesson number, term and a single overall grade are not carried by any governed
-              Trainer projection, so they are omitted rather than estimated.
+              A term and a single overall grade are deliberately not shown. Neither is part
+              of this report: the nine governed ratings below are the assessment, and no
+              roll-up of them exists.
             </p>
           </section>
 

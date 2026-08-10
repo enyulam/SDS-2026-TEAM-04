@@ -39,7 +39,8 @@
     "prove:hero-2": "node --env-file=.env.local scripts/tests/hero/prove-2-parent-report-list.mjs",
     "prove:hero-3": "node --env-file=.env.local scripts/tests/hero/prove-3-trainer-schedule.mjs",
     "prove:hero-4": "node --env-file=.env.local scripts/tests/hero/prove-4-roster-lesson-strip.mjs",
-    "prove:hero-5": "node --env-file=.env.local scripts/tests/hero/prove-5-review-rail.mjs"
+    "prove:hero-5": "node --env-file=.env.local scripts/tests/hero/prove-5-review-rail.mjs",
+    "prove:hero-6": "node scripts/tests/hero/prove-6-draft-report-details.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

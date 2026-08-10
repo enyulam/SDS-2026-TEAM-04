@@ -5002,3 +5002,58 @@ The plan classified this screen's only delta — *"rail bucket counts and per-le
 ### Commit / next
 
 **Next: Phase 6 (`08` Trainer AI Report Generation)** — class context and lesson in Report Details. ⛔ **Then STOP: Phase 7 is `F-S6-REVIEW-1` and the Operator wants its plan before it runs.**
+
+---
+
+## 2026-08-10 — HERO CHAIN **PHASE 6** — `08` Trainer AI Report Generation (development clone, `develop`)
+
+**Track:** hero chain completion, plan §8 Phase 6. **Branch/worktree:** `develop` / none. **Starting HEAD:** `ef65a5d`.
+
+### Scope
+
+The frame's **Lesson** row in Report Details, built from the governed session projection. **Class context was already there**, so the row is the whole visible delta. NULL still means NOT RECORDED and the row disappears entirely.
+
+**D4's lesson half is DISCHARGED** — it recorded that no lesson field existed on any governed Trainer projection, correctly, and was deliberately not invented around. **D4's term half and D5's Overall Grade are NOT discharged and never will be** (G-4, G-2).
+
+### ⚠️ The on-screen reason was WRONG once lesson landed, and copy is not cosmetic here
+
+The note under Report Details read: *"Lesson number, term and a single overall grade are **not carried by any governed Trainer projection**, so they are omitted rather than estimated."*
+
+Once Phase 0B/4 landed, that sentence was **false about lesson** — and, worse, it kept attributing the **term** and **overall grade** omissions to a **missing field** when both are now **ruled out**: **G-4** (a display label is not worth building the substrate an §8-deferred roadmap item needs) and **G-2** (permanently excluded on all four surfaces that draw it; on a Trainer surface a roll-up is a derived assessment fact this frontend would be computing).
+
+▶ **"We don't have the data" and "we are not allowed to show this" are different statements, and only one of them was still true.** Leaving the weaker one invites a later phase to "fix" a gap that is a decision. The note now says the term and overall grade are **deliberately** not shown, and that the nine governed ratings **are** the assessment. **`P6-6` asserts the old sentence is gone**, so it cannot drift back.
+
+### `08` carries the most ruled-out material of any frame in the chain — so the omissions are what this suite guards
+
+**All preserved, and each is one line away from being reinstated by a later phase "matching the frame better"** — which plan §12 item 1 calls a phase **FAILURE** even when the result looks closer to the design:
+
+⛔ **Term** (G-4) · ⛔ **Overall Grade** (G-2) · ⛔ **the 500MB evidence uploader** (G-8 — *"the frame's 500MB is never implemented in any form"*; G-05 sets 50 MiB if evidence is ever authorized) · ⛔ **"Confirm & Submit"** and ⛔ **"Save as draft"** (A-033/A-036 — **the trainer approves and does not publish**, and the stored draft already exists via the governed store path, so a second save affordance would be an invented mutation) · ⛔ the frame's **four-tile** Performance Summary, still rendered across **all nine** governed snapshots (A-017).
+
+**`P6-5` additionally refuses term and roll-up at the DATA layer** — no such field exists on the session DTO to bind a row to.
+
+### ⚠️ A THIRD mis-scoped search today — and this one was a FALSE POSITIVE
+
+`P6-4`'s Overall Grade leg was first written `/Overall Grade/i` and **FAILED — against this screen's own sentence saying a single overall grade is deliberately NOT shown.**
+
+▶ **That is the A-052 failure exactly**, in a new place: **a bare keyword match rejects legitimate prose**, which is precisely why A-052 prohibits that shape for the rating-label guard. **A screen that EXPLAINS an omission necessarily names it.** The patterns now target the **shape of a violation** — a `label="…"` row binding — and never the phrase.
+
+⚠️ **And because an absence assertion can pass on a broken pattern**, a new leg **`P6-4b`** runs the same matcher against a row that **is** rendered (`Name`). If it cannot find that, it cannot be trusted to fail to find `Term`.
+
+▶ **Three mis-scoped searches in one day, in three directions:** the emitted-CSS check reported a **false MISSING** (minifier rewrites); `P5-5` reported a **false FAIL** (regex captured only a parameter list); `P6-4` reported a **false VIOLATION** (keyword matched prose). **Same root: a search is evidence about the code only once it is proven discriminating.** All three now carry a leg that proves the search itself.
+
+### Verification
+
+- **`npm run prove:hero-6` — 12 legs, all PASS, 0 FAIL.** Source- and contract-scoped, and **says so**: the lesson column's readability under RLS is proven by `prove:hero-3` / `prove:hero-4` and is **not re-proven here**. It touches no database and writes nothing.
+  - ⚠️ **`P6-1a`/`P6-1b` are NON-VACUITY legs and run first** — every other leg is an **absence** assertion, and an absence assertion over an empty string passes perfectly.
+  - Comments are **stripped before every absence scan**: this file documents the prohibitions at length, so a naive scan would flag the very comments recording why there is no violation.
+- **`prove:hero-4` re-run — still PASS**, so the Phase 4 G-3 boundary is intact after this change.
+- `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · **route census 17** · `session-eligibility` / `portal-navigation-active-state` / `post-login-destinations` **PASS** · **emitted-CSS verified**, **no new class** — stylesheet still **45,748 bytes**.
+- **No database object, migration, DTO field or projection added.** Migrations **20**, unchanged.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`.** `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+⛔ **STOP. Phase 7 is `F-S6-REVIEW-1` (Trainer Review & Approve) and the Operator wants its plan reported BEFORE it is built.**
