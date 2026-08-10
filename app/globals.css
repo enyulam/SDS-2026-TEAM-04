@@ -296,6 +296,30 @@ a {
   padding: 0.875rem 0.9375rem;
 }
 
+/*
+ * The Observation Notes / Follow-up textareas' own geometry, measured off the
+ * frozen `Trainer - Grade Student` frame: 14px x 15px padding, a 12px radius and
+ * a VISIBLE hairline (`.form-field` declares its border transparent, so this
+ * colours an existing border rather than adding one — the control's box does not
+ * move).
+ *
+ * ⚠️ SAME REASON AS `.auth-field` ABOVE, AND IT IS NOT A STYLE PREFERENCE.
+ * `.form-field` is UNLAYERED and Tailwind emits its utilities into
+ * `@layer utilities`, so `rounded-[…]`, `px-[…]` and `py-[…]` written on a
+ * `.form-field` element are generated, matched, and silently lose the cascade.
+ * Writing them on the textarea would have LOOKED correct in review and changed
+ * nothing on screen.
+ *
+ * ADDITIVE ONLY: this is a new modifier with no existing consumer, so it moves
+ * no other surface. `.form-field` itself is deliberately NOT moved into a layer —
+ * that would change the cascade for every consumer in the application at once.
+ */
+.form-field.notes-field {
+  border-radius: 0.75rem;
+  border-color: var(--color-line);
+  padding: 0.875rem 0.9375rem;
+}
+
 /* ---------------------------------------------------------------------------
  * Loading presentation
  * ------------------------------------------------------------------------- */

@@ -198,6 +198,94 @@ Contrast on the new fill, computed: `text-brand-800` `#b02a63` on `brand-100` `#
 
 ---
 
+## PHASE 6a — `07` Trainer Grade Student
+
+- **Screen / route / component:** `07` · `/trainer/sessions/[sessionId]/students/[studentId]/assess` · `features/trainer/trainer-assessment.tsx`
+- **Reference:** `UI_REFERENCE_FINAL_MVP/reference/Trainer - Grade Student/` · frozen duplicate SHA-identical (`1df95a5b…`)
+- **Runs BEFORE Phase 6**, per plan §4 — it is step 4 of the physical-test flow and feeds the draft screen.
+
+### 6a.1 ⭐ THE FOLLOW-UP FIELD — the MUST-NOT-CHANGE this phase exists around
+
+**Preserved exactly, and it heads this phase's list.** The frame lists **only** "Observation Notes". The build keeps **"Follow-up for Next Session" as its own labelled control, bound to its own column**, and this phase:
+
+- did **not** merge it into Observation Notes — they are **separate columns**, and the carry-over must surface the follow-up **alone**;
+- did **not** blank its loaded value — `setFollowUp(draftResult.data.followUp)` is untouched;
+- did **not** touch its hint, which still names the Review & Approve "Coach Notes (Internal Only)" surface and the next roster's previous focus;
+- added an in-file comment stating **why** it survives, so a later reader does not "reconcile" it toward the frame.
+
+Only its **label and textarea type** moved, exactly as the Observation Notes control's did.
+
+### 6a.2 ⛔ THE END-TO-END CARRY-OVER RE-PROOF IS `NOT-RUN` — blocked, and NOT by this phase
+
+Plan §4 Phase 6a requires *"the carry-over re-proven end to end — save a follow-up note here and see it appear as the next session's previous focus."* **It was attempted and it failed on a pre-existing, Operator-owned blocker.**
+
+`npm run test:continuity` reached `CONT-0` (**PASS** — the earlier session's observation carries a non-empty 129-character follow-up note) and then failed at **`CONT-A0`**: *"the LOCAL Supabase stack's connection values could not be captured, or the stack is not local."* That is **`B-STAGE3-2`**, which plan §6 already records as blocking *"any phase needing pristine local fixtures"* and as **Operator-owned**, needing the three interactive no-echo passwords.
+
+⚠️ **Recorded as `NOT-RUN`, not as `PASS` and not as a `NEW-QUESTION`** — the blocker is already registered, so nothing new is being asked. **The harness reached no database and no network:** it reads connection values **only** from `loadLocalStack()`, never from `.env.local`, and it exited **before constructing any Supabase client**. The frozen `zjukuffiuzkbiblmnuwl` was not contacted, and no attempt was made to start or reload a stack.
+
+**What was proven instead — the same chain, statically, end to end.** Weaker than the runtime proof and declared as such:
+
+| Link | Evidence |
+|---|---|
+| the field's value reaches the save | `followUp` state → the submit payload (`trainer-assessment.tsx:360`) |
+| the save reaches the governed column | `server/modules/observation/core.ts:127` maps `input.followUpNotes` → `p_follow_up_notes`; the RPC parameter exists in `20260806090000_assessment_governed_persistence.sql:179` and the column in `20260803034500_step_7e_governed_core.sql:631` |
+| the column reaches the next roster | `server/modules/report-workflow/trainer-projections.ts:283` sets `previousSessionFocus` from it, and its declaration at `:112` names it *"ONE column, two screens (CLAUDE.md §6)"* |
+| the roster still renders it | Phase 5's D3, re-confirmed this phase |
+
+**The runtime leg remains owed** and must be run once `B-STAGE3-2` is resolved. It is not discharged by the static trace.
+
+### 6a.3 `TRUE-DRIFT` RESOLVED — 14
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title | 22px / 700 | 30px / 800 (+ inert tracking) | `text-[1.375rem] font-bold` |
+| T2 | Page description | 12.5px-class quiet type | 14px / `leading-6` | `text-small leading-5` — **kept**, it is a governance statement (A-017, A-050), only its type moved |
+| T3 | "Back to Student Roster" | 11px radius, 13.5px / 600 | 10px, 14px / 700 | `rounded-[11px] text-[0.84375rem] font-semibold` |
+| T4 | Identity card padding | 18px / 22px | 20px | `px-[22px] py-[18px]` |
+| T5 | Learner name | 18px / 700 | 20px / 800 | `text-[1.125rem] font-bold` |
+| T6 | Learner meta line | 12.5px / 400 at a 3px gap | 14px at 2px | `text-[0.78125rem] mt-[3px]` |
+| T7 | Rubric card padding | 20px top / 22px bottom / 24px sides | 20–24px uniform | `px-6 pb-[22px] pt-5` |
+| T8 | "Assessment Rubric" | 16px / 600 | 20px / 800 | `text-[1rem] font-semibold` |
+| T9 | Rubric sub-line + rated count | 12px / 400 | 14px / 13px bold | `text-[0.75rem]` |
+| T10 | Row rhythm | 16px | 10px | `gap-4` |
+| T11 | Dimension label + focus caption | 13px / 600 | 14px / 800; caption 11px / 700 at `0.1em` | `text-[0.8125rem] font-semibold`; caption `text-[0.625rem] font-semibold tracking-[0.06em]` |
+| T12 | Rating track + chips | 3px padding, 3px gutter, 8px radius, 11.5px, **500 resting → 600 selected** | 4px/4px, `text-small`, **800 in both states** | `p-[3px] gap-[3px]`, `py-[9px] text-[0.71875rem]`, `font-medium` → `font-semibold` |
+| T13 | Notes card + textareas | 18px/20px padding, heading 14.5px / 600; textarea **150px, 12px radius, 14×15px padding, visible hairline** | 20–24px, 17px / 800; textarea 160px at `.form-field`'s 10px radius and 12×14px padding | `px-5 py-[18px]`, `text-[0.90625rem] font-semibold`; `min-h-[9.375rem]` + a new `.form-field.notes-field` rule — see §6a.4 |
+| T14 | Group captions and the Review & Approve rail | captions 10px / 600; rail eyebrow 11.25px / 800; bucket count 13.13px, caption 8.25px / 700 | 11px / 800 at `0.14em`; 20px / 800 counts; 11px captions | moved to the frame's values |
+
+### 6a.4 The textarea geometry needed a CSS rule, not utilities — and `app/globals.css` was touched, ADDITIVELY
+
+The frame's textarea is **12px radius, 14 × 15px padding, with a visible hairline**. `.form-field` is **unlayered** and declares `border-radius`, `padding` and `border`, so `rounded-[…]`, `px-[…]` and `py-[…]` written on these textareas would have been **emitted, matched and discarded** — the identical trap Batch 1 measured on the login credentials.
+
+Fixed with a new **`.form-field.notes-field`** modifier, mirroring the ratified `.form-field.auth-field` pattern exactly.
+
+⚠️ **`app/globals.css` is a Phase 0 owned path, so this is declared rather than buried.** It is **purely additive**: a new two-class selector with **no prior consumer**, verified to be used by **exactly the two textareas on screen 07** and nowhere else. **No existing rule, token or value was modified**, `.form-field` was **not** moved into a layer, and no other surface in the application moves. Emitted and verified as `.form-field.notes-field{border-color:var(--color-line);border-radius:.75rem;padding:.875rem .9375rem}`, which outranks `.form-field` on specificity, both being unlayered.
+
+### 6a.5 `REGISTERED-OMISSION` PRESERVED — 6, ZERO CHANGED
+
+| # | Preserved | Citation |
+|---|---|---|
+| ⭐ | **The Follow-up for Next Session field** — kept, loaded, unmerged. See §6a.1 | Operator ruling 2026-08-10; `CLAUDE.md` §6; plan §4 |
+| D1 | **The nine rows stay in RATIFIED order** — the four B.E.S.T Competency dimensions, then the five Speech Linguistics Pattern dimensions — **not** the frame's interleaved order (Body, Eye contact, Emotion, Speech, Tonality, …), and the **two group captions stay** | `CLAUDE.md` §5, spec §3 |
+| D2 | **The behavioural anchor stays rendered beneath every row and inside each chip's accessible name.** The frame draws none. **Verified byte-identical to the backend this run — 4/4** (90 / 100 / 105 / 129 chars), measured rather than assumed, because the frontend copy is a deliberate mirror and not an import | A-050 |
+| D4 | **No "Junior" Class Grade and no user-facing "Student ID."** The frame draws *"Junior · Student ID 2025-113 · Public Speaking"*; the governed Class Grade, Class Module and session date stand instead | A-016 / A-054 |
+| D5 | **The selected-chip fills keep the DEEPER ramp step.** `ratingStyles` is byte-unchanged and still uses `rating-N-on-soft`; the frame's saturated fills measure **3.70 / 2.03 / 2.34 / 2.51 : 1** and all four fail SC 1.4.3. Only the chip's **weight** moved (800 → 600 selected, 500 resting), which changes no colour and no contrast — 11.5px is small text, so the 4.5:1 threshold applies identically either way | plan §4; persona §3.5 |
+| D6 | **No synthetic learners in the rail** — the governed roster projection only. The frame draws eight named learners | `GLOBAL_UI_RULES` §8 |
+
+**Also preserved:** all nine dimensions stay mandatory with **no Quick mode and no four-dimension path** (A-017); completion stays **server-validated** with the client check still named as a convenience only; selection is still carried by **shape, `aria-pressed`, the accessible name and the visible anchor line** — never colour alone.
+
+**Also deliberately not followed:** the shared `Button` (`large` = `min-h-12 px-5 py-3 text-body` at a 10px radius, against the frame's 16px/26px padding at 13px and 15px / 600) and the shared `Avatar` — both `components/ui/` primitives reaching out-of-plan screens; see §0.3(b) for why a `className` override is not a safe substitute.
+
+### 6a.6 `NEW-QUESTION` — none · `INCOMPLETE` — one, named
+
+**`INCOMPLETE`: the runtime carry-over re-proof (§6a.2).** Blocked by `B-STAGE3-2`, Operator-owned, and **owed** — not waived.
+
+### 6a.7 Verification
+
+`tsc` **0** · `eslint` **0** · `next build` **0** · **route census 17** · governed surfaces **none touched** (no schema, migration, RPC, server action, DTO, projection, grant, policy, audit action or route — `observation/core.ts`, `trainer-projections.ts` and the migrations were **read**, never edited) · four suites **PASS** · **emitted-CSS 13/13 OK** plus the `.form-field.notes-field` rule confirmed present · **A-050 anchor identity 4/4 IDENTICAL** · `test:continuity` **`NOT-RUN` / blocked at `CONT-A0`** · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -205,4 +293,5 @@ Contrast on the new fill, computed: `text-brand-800` `#b02a63` on `brand-100` `#
 | Phase | Screen | Commit |
 |---|---|---|
 | 4 | `05` Trainer Schedule | **`5dda019`** |
-| 5 | `06` Trainer Student Roster | *pending — recorded at the Phase 6a boundary* |
+| 5 | `06` Trainer Student Roster | **`ca9396e`** |
+| 6a | `07` Trainer Grade Student | *pending — recorded at the Phase 6 boundary* |

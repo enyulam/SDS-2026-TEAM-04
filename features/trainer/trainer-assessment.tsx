@@ -417,17 +417,18 @@ export function TrainerAssessment() {
     <div className="page-grid">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-page-title font-extrabold tracking-[-0.02em] text-ink-strong">
-            Grade Student
-          </h1>
-          <p className="mt-1 max-w-2xl text-body leading-6 text-ink">
+          <h1 className="text-[1.375rem] font-bold text-ink-strong">Grade Student</h1>
+          {/* The frame draws no description here. This one is a GOVERNANCE statement —
+              all nine dimensions are mandatory (A-017) and the anchors stay visible
+              (A-050) — so it is kept and only moved onto the frame's description type. */}
+          <p className="mt-0.5 max-w-2xl text-small leading-5 text-ink">
             All nine governed dimensions are required. Each level&rsquo;s behavioural anchor
             stays visible beside the choices.
           </p>
         </div>
         <Link
           href={`/trainer/sessions/${draft.sessionId}/roster`}
-          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-field bg-brand-100 px-4 py-2.5 text-body font-bold text-brand-800 no-underline transition hover:bg-brand-200"
+          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[11px] bg-brand-100 px-4 py-2.5 text-[0.84375rem] font-semibold text-brand-800 no-underline transition hover:bg-brand-200"
         >
           <Icon name="chevronLeft" size={16} />
           Back to Student Roster
@@ -443,13 +444,19 @@ export function TrainerAssessment() {
 
         <form className="page-grid min-w-0" onSubmit={handleSubmit} noValidate>
           {/* Student identity card (D4: no fabricated year label, no invented student number). */}
-          <section className="card flex flex-wrap items-center gap-4 p-5" aria-label="Learner">
+          <section
+            className="card flex flex-wrap items-center gap-4 px-[22px] py-[18px]"
+            aria-label="Learner"
+          >
             <Avatar displayName={draft.studentDisplayName} size="large" />
             <div className="min-w-0">
-              <h2 className="text-section-title font-extrabold">
+              <h2 className="text-[1.125rem] font-bold">
                 <span className="text-ink-strong">{draft.studentDisplayName}</span>
               </h2>
-              <p className="mt-0.5 text-body text-ink">
+              {/* D4 — no "Junior" year label and no user-facing "Student ID". The frame
+                  draws "Junior · Student ID 2025-113 · Public Speaking"; the governed
+                  Class Grade, Class Module and session date stand instead. */}
+              <p className="mt-[3px] text-[0.78125rem] text-ink">
                 {session ? (
                   <>
                     <span data-vocabulary="class-grade">{session.classGrade}</span>
@@ -535,16 +542,18 @@ export function TrainerAssessment() {
            * Assessment Rubric — the frame's single card, all NINE rows, in the
            * RATIFIED order rather than the frame's interleaved order (D1).
            * ------------------------------------------------------------- */}
-          <section className="card p-5 sm:p-6" aria-labelledby="rubric-heading">
+          <section className="card px-6 pb-[22px] pt-5" aria-labelledby="rubric-heading">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 id="rubric-heading" className="text-section-title font-extrabold">
+                <h2 id="rubric-heading" className="text-[1rem] font-semibold">
                   <span className="text-ink-strong">Assessment Rubric</span>
                 </h2>
-                <p className="mt-1 text-body text-ink">Select a level for each speaking skill</p>
+                <p className="mt-[3px] text-[0.75rem] text-ink">
+                  Select a level for each speaking skill
+                </p>
               </div>
               <p
-                className="text-small font-bold text-ink"
+                className="text-[0.75rem] font-semibold text-ink"
                 data-rated-count={ratedCount}
                 aria-live="polite"
               >
@@ -556,7 +565,7 @@ export function TrainerAssessment() {
               caption="B.E.S.T. Competency"
               detail="Body, Emotion, Speech and Tonality"
             />
-            <div className="mt-3 grid gap-2.5">
+            <div className="mt-3 grid gap-4">
               {competency.map((dimension) => renderDimension(dimension))}
             </div>
 
@@ -565,7 +574,7 @@ export function TrainerAssessment() {
               detail="Eye Contact, Vocal Projection, Emotional Expression, Sentence Flow and Audience Awareness"
               className="mt-7"
             />
-            <div className="mt-3 grid gap-2.5">
+            <div className="mt-3 grid gap-4">
               {linguistics.map((dimension) => renderDimension(dimension))}
             </div>
           </section>
@@ -574,26 +583,34 @@ export function TrainerAssessment() {
            * Observation Notes — the frame's card, plus the governed Follow-up
            * field the frame does not draw (D3).
            * ------------------------------------------------------------- */}
-          <section className="card p-5 sm:p-6" aria-labelledby="notes-heading">
+          <section className="card px-5 py-[18px]" aria-labelledby="notes-heading">
             <div className="flex items-center gap-3">
               <IconTile tone="brand">
                 <EyeGlyph />
               </IconTile>
-              <h2 id="notes-heading" className="text-card-title font-extrabold">
+              <h2 id="notes-heading" className="text-[0.90625rem] font-semibold">
                 <span className="text-ink-strong">Observation Notes</span>
               </h2>
             </div>
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            {/*
+              ⭐ THE FOLLOW-UP FIELD IS NOT MERGED INTO OBSERVATION NOTES, and the frame
+              lists only "Observation Notes". They are SEPARATE COLUMNS: the carry-over
+              must surface the follow-up ALONE, and the governed assessment save is
+              `observations.follow_up_notes`'s only writer (`CLAUDE.md` §6; plan §4
+              Phase 6a). Merging them would empty the roster's previous-focus carry-over
+              and void Phase 1 exit condition (c).
+            */}
+            <div className="mt-4 grid gap-5 lg:grid-cols-2">
               <div>
                 <label
                   htmlFor="observation-notes"
-                  className="block text-small font-bold text-ink-strong"
+                  className="block text-[0.78125rem] font-semibold text-ink-strong"
                 >
                   What was observed in this Class Session
                 </label>
                 <textarea
                   id="observation-notes"
-                  className="form-field mt-2 min-h-40 resize-y leading-6"
+                  className="form-field notes-field mt-2 min-h-[9.375rem] resize-y leading-6"
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="Write your observations about this student..."
@@ -603,13 +620,13 @@ export function TrainerAssessment() {
               <div>
                 <label
                   htmlFor="follow-up-notes"
-                  className="block text-small font-bold text-ink-strong"
+                  className="block text-[0.78125rem] font-semibold text-ink-strong"
                 >
                   Follow-up for Next Session
                 </label>
                 <textarea
                   id="follow-up-notes"
-                  className="form-field mt-2 min-h-40 resize-y leading-6"
+                  className="form-field notes-field mt-2 min-h-[9.375rem] resize-y leading-6"
                   value={followUp}
                   onChange={(event) => setFollowUp(event.target.value)}
                   aria-describedby="follow-up-notes-hint"
@@ -695,15 +712,15 @@ export function TrainerAssessment() {
 
         <div className="grid gap-2.5 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:items-center md:gap-4">
           <p className="min-w-0">
-            <span className="block text-body font-extrabold text-ink-strong">
+            <span className="block text-[0.8125rem] font-semibold text-ink-strong">
               {dimension.ordinal}. {dimension.displayName}
             </span>
-            <span className="mt-0.5 block text-micro font-bold uppercase tracking-[0.1em] text-neutral-on">
+            <span className="mt-0.5 block text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-neutral-on">
               {dimension.focus}
             </span>
           </p>
 
-          <div className="grid grid-cols-2 gap-1 rounded-field bg-surface-muted p-1 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-[3px] rounded-field bg-surface-muted p-[3px] sm:grid-cols-4">
             {RATING_LEVELS.map((rating) => {
               const active = selected === rating;
               const label = RATING_DISPLAY_LABELS[rating];
@@ -729,8 +746,10 @@ export function TrainerAssessment() {
                     setSaveResult(null);
                   }}
                   disabled={saveComplete}
-                  className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py-2 text-small font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                    active ? ratingStyles[rating].selected : ratingStyles[rating].idle
+                  className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-[0.5rem] border-2 px-2 py-[9px] text-[0.71875rem] transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    active
+                      ? `font-semibold ${ratingStyles[rating].selected}`
+                      : `font-medium ${ratingStyles[rating].idle}`
                   }`}
                 >
                   {/*
@@ -784,10 +803,10 @@ function RubricGroup({
 }) {
   return (
     <div className={`border-t border-line pt-4 ${className || "mt-5"}`}>
-      <h3 className="text-micro font-extrabold uppercase tracking-[0.14em]">
+      <h3 className="text-[0.625rem] font-semibold uppercase tracking-[0.06em]">
         <span className="text-neutral-on">{caption}</span>
       </h3>
-      <p className="mt-1 text-small text-ink">{detail}</p>
+      <p className="mt-1 text-[0.6875rem] text-ink">{detail}</p>
     </div>
   );
 }
@@ -830,7 +849,7 @@ function ReviewApproveRail({
     >
       <h2
         id="review-approve-heading"
-        className="text-micro font-extrabold uppercase tracking-[0.14em]"
+        className="text-[0.703125rem] font-extrabold uppercase tracking-[0.1em]"
       >
         <span className="text-brand-800">Review &amp; Approve</span>
       </h2>
@@ -843,10 +862,10 @@ function ReviewApproveRail({
             data-review-count={bucket.count}
             className={`rounded-card px-3 py-2.5 text-center ${bucket.tone}`}
           >
-            <span className="block text-section-title font-extrabold leading-tight">
+            <span className="block text-[0.8125rem] font-extrabold leading-tight">
               {bucket.count}
             </span>
-            <span className="mt-0.5 block text-micro font-extrabold uppercase tracking-[0.1em]">
+            <span className="mt-0.5 block text-[0.53125rem] font-bold uppercase tracking-[0.04em]">
               {bucket.label}
             </span>
           </li>

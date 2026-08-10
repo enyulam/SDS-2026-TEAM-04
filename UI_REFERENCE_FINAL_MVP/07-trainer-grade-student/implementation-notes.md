@@ -490,3 +490,102 @@ Recorded, not fixed:           outside the owned paths and still open - portal-s
                                primary actions at 4.517:1; and the shared Avatar "muted"
                                variant at 2.004:1 recorded above.
 ```
+
+### UI RECONCILIATION plan Phase 6a (`F-UI-DRIFT-1` bucket (c)) — 2026-08-10
+
+```
+Timestamp (Asia/Singapore):    2026-08-10
+Source branch:                 develop (DEVELOPMENT CLONE)
+Starting commit:               ca9396e
+Screen ID:                     07
+Existing route audited:        Yes. Route unchanged. Route census 17, unchanged.
+Components preserved:          components/ui/{button,avatar,icon}.tsx byte-unchanged.
+                               ratingStyles byte-unchanged (D5).
+Components replaced:           None.   Components created: None.
+DTO and port changes:          NONE.   Fixture changes: NONE.
+CSS:                           app/globals.css gained ONE ADDITIVE rule,
+                               ".form-field.notes-field", mirroring the ratified
+                               ".form-field.auth-field" pattern. No existing rule, token or
+                               value was modified; .form-field was NOT moved into a layer;
+                               the new selector has exactly two consumers, both on this
+                               screen. Needed because .form-field is UNLAYERED and declares
+                               border-radius / padding / border, so rounded-[..] / px-[..] /
+                               py-[..] on those textareas would have been emitted, matched
+                               and silently discarded.
+Vocabulary dependencies:       None new. A-049 labels and A-050 anchors unchanged.
+Governance blockers:           NEW-QUESTION: none.
+                               INCOMPLETE: ONE, named - see below.
+
+*** THE FOLLOW-UP FIELD - PRESERVED, AND IT HEADS THIS PHASE'S LIST ***
+                               The frame lists ONLY "Observation Notes". "Follow-up for Next
+                               Session" remains its own labelled control bound to its own
+                               column. NOT merged into Observation Notes; its loaded value NOT
+                               blanked; its hint untouched. Only its label and textarea TYPE
+                               moved. An in-file comment now states WHY it survives, so a
+                               later reader does not reconcile it toward the frame.
+
+*** THE END-TO-END CARRY-OVER RE-PROOF IS **NOT-RUN**, AND IT IS OWED ***
+                               `npm run test:continuity` was ATTEMPTED. It reached CONT-0
+                               (PASS - the earlier session's observation carries a non-empty
+                               129-char follow-up note) and then FAILED at CONT-A0: the LOCAL
+                               Supabase stack's connection values could not be captured. That
+                               is B-STAGE3-2, which the build plan section 6 already records
+                               as blocking any phase needing pristine local fixtures, and as
+                               OPERATOR-OWNED (three interactive no-echo passwords).
+                               Recorded as NOT-RUN, NOT as PASS and NOT as a NEW-QUESTION -
+                               the blocker is already registered. The harness reached NO
+                               database and NO network: it reads connection values only from
+                               loadLocalStack(), never from .env.local, and exited BEFORE
+                               constructing any Supabase client. The frozen project was not
+                               contacted and no stack start or reload was attempted.
+                               Proven instead, statically and end to end: followUp state ->
+                               submit payload (trainer-assessment.tsx:360) -> observation/
+                               core.ts:127 maps input.followUpNotes -> p_follow_up_notes ->
+                               the RPC parameter (20260806090000...:179) and column
+                               (20260803034500...:631) -> trainer-projections.ts:283 sets
+                               previousSessionFocus from it. Weaker than the runtime leg and
+                               declared as such. THE RUNTIME LEG REMAINS OWED.
+
+TRUE-DRIFT RESOLVED:           14. Full table: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md
+                               Phase 6a section 6a.3.
+
+REGISTERED-OMISSION PRESERVED: 6, ZERO CHANGED - the Follow-up field; D1 ratified dimension
+                               order with both group captions (NOT the frame's interleaved
+                               order); D2 behavioural anchors rendered and in each chip's
+                               accessible name, VERIFIED BYTE-IDENTICAL to the backend 4/4
+                               (90/100/105/129 chars) rather than assumed; D4 no "Junior"
+                               Class Grade and no user-facing "Student ID"; D5 selected-chip
+                               fills keep the DEEPER ramp step - ratingStyles is byte-
+                               unchanged and the frame's saturated fills (3.70/2.03/2.34/
+                               2.51:1, all failing SC 1.4.3) were NOT restored, only the
+                               chip's WEIGHT moved; D6 no synthetic learners in the rail.
+                               Also preserved: nine dimensions mandatory, no Quick mode, no
+                               four-dimension path (A-017); completion still server-validated
+                               with the client check named a convenience only; selection still
+                               carried by shape, aria-pressed, the accessible name and the
+                               visible anchor line, never colour alone.
+                               Reported as a SEPARATE list from TRUE-DRIFT (plan 6.5).
+
+Browser viewport:              n/a - see below.
+Before/After screenshot:       NOT CAPTURED.
+                               *** RENDERED CAPTURE IS **NOT-RUN**, WITH ITS REASON. ***
+                               Screen 07 is AUTHENTICATED; reaching a governed database here
+                               is a CLAUDE.md 12 stop-and-ask no current authorization
+                               carries. No capture manufactured; no hosted or paid service
+                               contacted. NOT-RUN is not PASS.
+Validation:                    tsc 0 - eslint 0 - build 0 - route census 17 UNCHANGED
+                               app-route-census / portal-navigation-active-state /
+                               post-login-destinations / session-eligibility  all PASS
+                               emitted-CSS verification 13/13 OK, plus the new
+                               .form-field.notes-field rule confirmed present in the compiled
+                               stylesheet
+                               A-050 anchor byte-identity 4/4 IDENTICAL
+                               test:continuity NOT-RUN (blocked at CONT-A0, B-STAGE3-2)
+                               reference.png SHA-256 1df95a5b... verified UNCHANGED.
+                               No governed surface touched. No dependency added.
+Ending commit:                 recorded in docs/progress/STATUS.md and in the adjudication
+                               Commits table (filled one phase late).
+Acceptance status:             PASS is this session EVIDENCE verdict only, and it is
+                               QUALIFIED by one owed runtime leg.
+                               Accepted is OPERATOR-SET ONLY and has NOT been set.
+```
