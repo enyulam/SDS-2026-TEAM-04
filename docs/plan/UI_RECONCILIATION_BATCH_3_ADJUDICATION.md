@@ -338,6 +338,67 @@ Verified two ways: each divergence comment is intact, **and** every prohibited f
 
 ---
 
+## PHASE 7 — `29` Management Reports
+
+- **Screen / route / component:** `29` · `/management/reports` · `features/management/management-reports-queue.tsx`
+- **Reference:** `reference/Management - Reports/` · frozen duplicate SHA-identical (`eddda3b1…`)
+
+### 7.1 ⚠️ THIS PHASE RECONCILED A SHARED PRIMITIVE — `components/ui/page-heading.tsx` — AND THAT IS DECLARED, NOT BURIED
+
+Every earlier phase applied the frame's page title **inside its own component** and left shared primitives alone (§0.3(a)). Screen 29 renders its title through the shared **`PageHeading`**, and so do **four more Batch 3 screens** — `30`, `32`, `33` and `11`. Hand-rolling the same heading five times to avoid touching one file would have been worse, not safer, so it was reconciled **once, here**.
+
+**Its seven consumers, enumerated rather than assumed:**
+
+| Consumer | Status |
+|---|---|
+| `management-reports-queue` · `parent-dashboard` · `parent-reports-list` · `parent-canonical-report` · `management-dashboard` | **five in-plan Batch 3 screens** — Phases 7, 11, 9, 10, 12 |
+| `trainer-dashboard` | screen `01`, **CUT and UNMOUNTED** (plan §4 Phase 13) — it never renders, so nothing moves |
+| `returned-reports-queue` | screen `09`, **out of plan**. It moves **toward** consistency with every other page title, and screen 09's open item is a surface **substitution**, which a type change does not touch |
+
+**Two changes, both improving:**
+
+1. **Title → the frame's 22px / 700**, and `tracking-[-0.02em]` **removed** — the unlayered `h1..h4` rule outranked it, so it was emitted, matched and discarded.
+2. **`description` re-pointed from `text-ink-muted` to `text-ink`.** ⚠️ This closes a **live SC 1.4.3 failure**: `#8a93a8` measures **3.079:1** on the canvas, below the 4.5:1 floor for normal-size text. Two earlier checkpoints recorded it and worked around it by not using the prop; **three consumers still pass it**, so the failure was live on `management-dashboard`, `parent-dashboard` and `returned-reports-queue`. Same F-01c treatment as elsewhere: hue preserved, luminance moved, and **NO TOKEN VALUE REDEFINED** — `--color-ink-muted` is unchanged and still serves placeholders and disabled controls.
+
+### 7.2 `TRUE-DRIFT` RESOLVED — 12
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title | 22px / 700 | 30px / 800 (+ inert tracking) | `PageHeading` — §7.1 |
+| T2 | Page description | 12.5px / 400 at a 2px gap | 14px / `leading-6` at 4px | `mt-0.5 text-small leading-5` |
+| T3 | "Filter:" caption | 13px / 500 quiet | 14px / 700 strong ink | `text-small font-medium text-ink` |
+| T4 | Filter pills | 9px/14px padding, 13px / 500 | `ps-4 pe-9`, 14px / 600 | `ps-3.5 pe-8 text-small font-medium` |
+| T5 | Search field width | 230px | 256px | `sm:w-[14.375rem]` |
+| T6 | Search radius / type | 11px · 12.5px | 10px · 14px | `rounded-[11px] text-[0.78125rem]` |
+| T7 | Table caption | 15px / 600 | 17px / 700 | `text-[0.9375rem] font-semibold` |
+| T8 | Caption note | 11.5px-class | 13px | `text-[0.71875rem]` |
+| T9 | Column headers | 11px / 600, 12px below | 13px / 600, 12px both sides | `text-[0.6875rem] pb-3 pt-4` |
+| T10 | Row padding | 11px vertical, 24px sides | 16px / 20–24px | `px-6 py-[11px]` |
+| T11 | Row cells | name 13px / 600, meta 12px / 500, sub-line 11px | 14px / 700, 14px, 13px | `text-[0.8125rem] font-semibold`, `text-[0.75rem] font-medium`, `text-[0.6875rem]` |
+| T12 | Row actions | 12px / 600 | 14px / 700 | `text-[0.75rem] font-semibold` on both the live and the inert action |
+
+### 7.3 `REGISTERED-OMISSION` PRESERVED — 5, ZERO CHANGED
+
+`ROW_PRESENTATION` — the table that decides content exposure **once, per governed status** — is **byte-unchanged**; only `className` strings moved.
+
+| # | Preserved | Citation |
+|---|---|---|
+| 1 | **The frame's status vocabulary is Figma mock data.** It draws **"Approved" / "Needs approval"**; the **eight ratified statuses win** and the divergence stays recorded. `submitted` still renders as *"Approved · published to the linked parent"* — the governed referent, because under A-036 `approved` is transient-in-transaction and a filter over that literal would be empty forever | A-036; plan §4 |
+| 2 | **Row actions are decided per row by status**, through `ROW_PRESENTATION`. There is deliberately **no shared generic "view report" handler** | `CLAUDE.md` §6; plan §4 |
+| 3 | **`trainer_approved` and `submitted` are the only statuses exposing report content** — the final-review candidate and the canonical submitted version, the exactly two things A-038 permits Management to read | A-038 |
+| 4 | **`needs_edit` and `draft_ready` expose NO report content** and get their reminder/metadata treatment only | A-038; plan §4 |
+| 5 | **No raw per-dimension rating, checklist internal, approval internal or content hash on any row** — verified by sweep: zero occurrences of any rating token, `ratingSnapshots`, `content_hash` or `contentHash` in the component | A-038 |
+
+**Also deliberately not followed:** the frame's **Lesson** and **Trainer** columns and its `4 · Speaking` lesson labels — the governed Management queue projection carries neither, and the on-screen note saying so stays; and the frame's `Class` column tinting.
+
+### 7.4 `NEW-QUESTION` — none · `INCOMPLETE` — none
+
+### 7.5 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 11/11 OK** · A-038 sweep **0 occurrences** · **rendered capture `NOT-RUN`** (§0.1). ⚠️ The **per-status row-action matrix was re-proven by reading `ROW_PRESENTATION` and confirming it byte-unchanged**, not by exercising each status against a live queue — that needs the authenticated render §0.1 blocks.
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -347,4 +408,5 @@ Verified two ways: each divergence comment is intact, **and** every prohibited f
 | 4 | `05` Trainer Schedule | **`5dda019`** |
 | 5 | `06` Trainer Student Roster | **`ca9396e`** |
 | 6a | `07` Trainer Grade Student | **`1c93a4f`** |
-| 6 | `08` Trainer AI Report Generation | *pending — recorded at the Phase 7 boundary* |
+| 6 | `08` Trainer AI Report Generation | **`85e1f35`** |
+| 7 | `29` Management Reports | *pending — recorded at the Phase 8 boundary* |

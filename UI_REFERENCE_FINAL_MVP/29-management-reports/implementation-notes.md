@@ -360,3 +360,26 @@ Acceptance status:             Proposed for operator review. NOT accepted — on
                                marks a screen visually accepted.
 ```
 
+
+### UI RECONCILIATION plan Phase 7 — 2026-08-10
+
+Visual reconciliation only against `reference/Management - Reports/` (A-056).
+12 TRUE-DRIFT resolved; 5 REGISTERED-OMISSION preserved, ZERO changed (frame status
+vocabulary is Figma mock data and the eight ratified statuses win; row actions decided per
+row by status with no shared generic view handler; `trainer_approved` and `submitted` the
+only content-exposing statuses; `needs_edit`/`draft_ready` expose none; no rating, checklist
+internal, approval internal or content hash on any row — swept, 0 occurrences). `ROW_PRESENTATION`
+byte-unchanged. Reported as two separate lists (plan §6.5).
+
+This phase also reconciled the SHARED `components/ui/page-heading.tsx` (7 consumers, 5 of them
+in-plan Batch 3 screens) and closed a LIVE SC 1.4.3 failure there — `text-ink-muted` at 3.079:1
+→ `text-ink`. NO token value redefined.
+
+RENDERED CAPTURE **NOT-RUN** — authenticated surface; reaching a governed database here is a
+`CLAUDE.md` §12 stop-and-ask no current authorization carries. None manufactured, no hosted
+service contacted. NOT-RUN is not PASS. The row-action matrix was re-proven by reading the
+table, not by exercising each status live.
+
+tsc 0 · eslint 0 · build 0 · route census 17 unchanged · emitted-CSS 11/11 · no governed
+surface touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 7.
+`Accepted` is Operator-set only and has NOT been set.

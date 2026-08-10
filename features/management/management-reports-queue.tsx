@@ -210,14 +210,14 @@ export function ManagementReportsQueue() {
       */}
       <div>
         <PageHeading title="Reports" />
-        <p className="mt-1 max-w-2xl text-body leading-6 text-ink">
+        <p className="mt-0.5 max-w-2xl text-small leading-5 text-ink">
           School-wide report oversight for this centre.
         </p>
       </div>
 
       <section aria-label="Report filters" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-body font-bold text-ink-strong">Filter:</span>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-small font-medium text-ink">Filter:</span>
 
           {/* Governed: the two ratified `?status=` compatibility aliases of screen 29. */}
           <FilterChip
@@ -258,7 +258,7 @@ export function ManagementReportsQueue() {
             options={[{ value: "", label: "All classes" }]}
           />
 
-          <div className="relative w-full sm:ms-auto sm:w-64">
+          <div className="relative w-full sm:ms-auto sm:w-[14.375rem]">
             <label className="sr-only" htmlFor={`${searchId}-search`}>
               Search students in this queue
             </label>
@@ -285,7 +285,7 @@ export function ManagementReportsQueue() {
               placeholder="Search students"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="h-11 w-full rounded-field border border-line bg-surface ps-10 pe-3.5 text-body text-ink-strong placeholder:text-neutral-on"
+              className="h-11 w-full rounded-[11px] border border-line bg-surface ps-10 pe-3.5 text-[0.78125rem] text-ink-strong placeholder:text-neutral-on"
             />
           </div>
         </div>
@@ -309,27 +309,35 @@ export function ManagementReportsQueue() {
         <section className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[44rem] border-collapse text-left">
-              <caption className="px-5 pt-5 text-left text-card-title font-bold text-ink-strong sm:px-6">
+              <caption className="px-6 pt-4 text-left text-[0.9375rem] font-semibold text-ink-strong">
                 {caption}
-                <span className="mt-1 block text-small font-normal text-ink">{captionNote}</span>
+                <span className="mt-1 block text-[0.71875rem] font-normal text-ink">
+                  {captionNote}
+                </span>
               </caption>
               <thead>
                 <tr className="border-b border-line">
                   <th
                     scope="col"
-                    className="px-5 py-3 text-small font-semibold text-neutral-on sm:px-6"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
                   >
                     Student
                   </th>
-                  <th scope="col" className="px-5 py-3 text-small font-semibold text-neutral-on">
+                  <th
+                    scope="col"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
+                  >
                     Session
                   </th>
-                  <th scope="col" className="px-5 py-3 text-small font-semibold text-neutral-on">
+                  <th
+                    scope="col"
+                    className="px-6 pb-3 pt-4 text-[0.6875rem] font-semibold text-neutral-on"
+                  >
                     Status
                   </th>
                   <th
                     scope="col"
-                    className="px-5 py-3 text-right text-small font-semibold text-neutral-on sm:px-6"
+                    className="px-6 pb-3 pt-4 text-right text-[0.6875rem] font-semibold text-neutral-on"
                   >
                     Action
                   </th>
@@ -408,7 +416,7 @@ function FilterChip({
         disabled={disabled}
         aria-describedby={describedBy}
         onChange={(event) => onChange?.(event.target.value)}
-        className={`h-10 appearance-none rounded-full border border-line ps-4 pe-9 text-body font-semibold ${
+        className={`h-10 appearance-none rounded-full border border-line ps-3.5 pe-8 text-small font-medium ${
           disabled
             ? "cursor-not-allowed bg-surface-muted text-ink-subtle"
             : "cursor-pointer bg-surface text-ink-strong"
@@ -457,31 +465,31 @@ function RowGroup({
   return (
     <>
       <tr className={correction ? "" : "border-b border-line last:border-0"}>
-        <td className="px-5 py-4 sm:px-6">
-          <span className="flex items-center gap-3">
+        <td className="px-6 py-[11px]">
+          <span className="flex items-center gap-[11px]">
             <Avatar displayName={row.studentDisplayName} size="small" />
-            <span className="text-body font-bold text-ink-strong">
+            <span className="text-[0.8125rem] font-semibold text-ink-strong">
               {row.studentDisplayName}
             </span>
           </span>
         </td>
-        <td className="px-5 py-4 text-body text-ink">
+        <td className="px-6 py-[11px] text-[0.75rem] font-medium text-ink">
           {formatDate(row.sessionDate)}
           {row.submittedAt && (
             /* Publication metadata, not content: WHEN it was published, never what. */
-            <span className="mt-0.5 block text-small text-neutral-on">
+            <span className="mt-0.5 block text-[0.6875rem] text-neutral-on">
               Published {formatDate(row.submittedAt.slice(0, 10))}
             </span>
           )}
         </td>
-        <td className="px-5 py-4">
+        <td className="px-6 py-[11px]">
           <Badge tone={presentation.tone}>{presentation.label}</Badge>
         </td>
-        <td className="px-5 py-4 text-right sm:px-6">
+        <td className="px-6 py-[11px] text-right">
           {presentation.exposesContent ? (
             <Link
               href={`/management/reports/${row.reportId}/review`}
-              className="inline-flex min-h-11 items-center gap-1 rounded-field px-2 py-2 text-body font-bold text-brand-800 hover:text-brand-700"
+              className="inline-flex min-h-11 items-center gap-1 rounded-field px-2 py-2 text-[0.75rem] font-semibold text-brand-800 hover:text-brand-700"
             >
               {row.status === "submitted" ? "View report" : "Review"}
               <span aria-hidden="true">›</span>
@@ -492,7 +500,7 @@ function RowGroup({
               type="button"
               disabled
               aria-describedby={reminderNoteId}
-              className="inline-flex min-h-11 cursor-not-allowed items-center rounded-field border border-line bg-surface-muted px-3 py-2 text-body font-bold text-ink-subtle"
+              className="inline-flex min-h-11 cursor-not-allowed items-center rounded-field border border-line bg-surface-muted px-3 py-2 text-[0.75rem] font-semibold text-ink-subtle"
             >
               Send Reminder to Trainer
             </button>
