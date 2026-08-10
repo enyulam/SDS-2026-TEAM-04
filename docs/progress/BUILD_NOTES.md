@@ -5904,3 +5904,59 @@ The suite's own closing line still read *"15 sibling sites survive … this fix 
 ⚠️ **This is the SAME root cause as the integration suite's `INT-A5`**, found an hour earlier by a different route. **The canonical dev database is shared between manual walkthroughs and automated suites, and a manual walk silently invalidates suite preconditions.** Every one of the four **rolled back cleanly** — `3|6|24|1|0|1` before and after, byte-unmoved.
 
 ⛔ **NOT REPAIRED, DELIBERATELY.** The obvious repair is to delete those report rows — **they are the Operator's walkthrough evidence and the subject of an active diagnosis.** Removing them to make a suite green would destroy the record to protect the instrument. **Reported instead.**
+
+---
+
+## 2026-08-11 — **MAKING THE SILENT HALF OBSERVABLE** — a save that never dispatches leaves no evidence anywhere
+
+The Operator reported both wording editors failing to save. Measurement showed **every save that reached the server succeeded**. The attempts they described left **no trace of any kind** — no action call, no rejected call, no non-2xx, nothing in the dev server log.
+
+▶ **That absence is the whole finding.** A submit that never dispatches produces **no server-side record at all**, so from the server's side it is indistinguishable from a walk in which the user never clicked. Two candidates remained and **nothing in the system could separate them**:
+
+1. the Save button never enabled, so the click did nothing; or
+2. the component never reached `ready`, so the handler returned early.
+
+⛔ **Guessing between them would have been a repair aimed at an unidentified cause** — the thing this batch has repeatedly refused to do. Three independent signals were added instead, so the next walk **measures** it.
+
+### 1. The disabled button now states its reason — on screen
+
+Both editors disabled the Save button on `!changed || saving` and **said nothing about it**. ⚠️ **A disabled button that does not say why is indistinguishable from a broken one**, and "I typed and clicked Save and nothing happened" is exactly what candidate 1 looks like from the user's chair.
+
+An `aria-live="polite"` line now sits beside the button: *"No changes yet — edit a panel to enable saving."* · *"Saving…"* · *"Ready to save."* The trainer editor additionally names its reaffirmation constraint, which previously disabled the button with no explanation at all.
+
+⚠️ **`disabled` is DERIVED from that reason, not computed beside it.** A separate boolean and a separate explanation are two things that can disagree, and **a button whose stated reason is wrong is worse than one that says nothing**. `saveBlockedReason === null` means the save can proceed; there is no second source.
+
+### 2. The silent early return now speaks
+
+Both handlers opened with `if (resource.kind !== "ready" || !panels) return;` — **a silent exit that dispatches nothing, logs nothing, and renders nothing**. It is candidate 2's exact signature. The trainer's now sets a banner (*"The editor is still loading…"*); both emit a trace.
+
+### 3. A development-only trace at the three decision points
+
+`lib/frontend/editor-trace.ts` emits `submit-ignored` · `dispatching` · `returned` with the outcome. **Between the browser console and the dev server log, the two candidates are now separable in every combination:**
+
+| Console | Server log | Meaning |
+|---|---|---|
+| *(nothing)* | *(nothing)* | the click never reached the handler — **the button was disabled**, and the on-screen line now says why |
+| `submit-ignored` | *(nothing)* | the handler ran and refused — **the component was not `ready`** |
+| `dispatching` | action call | it fired; `returned` carries the outcome, and a failure already renders a banner |
+
+⛔ **REPORT SUBSTANCE CANNOT REACH IT, BY CONSTRUCTION.** `details` accepts booleans, numbers, and a **closed union** of state words — there is no shape in which a panel body, a learner's name, a rating, a trainer note, an id, a hash or a token can be passed. ▶ **Nothing to redact, rather than a filter to trust**, the same construction as `query-diagnostics.ts` and for the same reason. It is silent in production and never leaves the browser.
+
+⚠️ **`tsc` rejected the first version of that union for omitting four ratified outcome labels** — so the outcome half is now **derived from the ratified result contract** rather than hand-copied. A transcribed vocabulary is a second place for it to live, and the two would drift.
+
+### Verified reachable, not merely written
+
+The five new strings were measured **in the built client chunks** (`No changes yet` ·2, `Ready to save` ·2, both surface labels, `still loading`), with a control string absent — so this is a measurement of the shipped bundle, not of the source. `tsc` **0** · `eslint` **0 errors** · `build` **0** · route census **17**.
+
+⚠️ **`prove:hero-8/11` still pass — and only because both editors changed symmetrically.** A one-sided change would have failed them. That is the narrow, real value of an unframed-surface consistency check, and it remains **no evidence whatever that either editor functions**.
+
+### ▶ HOW TO REPRODUCE IT — for the next walk
+
+1. Open the browser console **before** navigating (`F12` → Console; keep `Verbose`/`debug` visible).
+2. Open a trainer report at `draft_ready` → **Edit**. The line by the button should read **"No changes yet"**.
+3. Type one character in any panel. It must change to **"Ready to save."** ⛔ **If it does not, that is candidate 1 — the button never enables, and the click can never dispatch.**
+4. Click **Save changes**. Expect `[trainer-report-editor] dispatching` then `[trainer-report-editor] returned {outcome: …}`.
+5. **If the console stays empty**, the handler never ran → candidate 1 confirmed. **If only `submit-ignored` appears**, the component was not `ready` → candidate 2 confirmed. **If `dispatching` appears with no server-log entry**, the dispatch left the browser and did not arrive — a third possibility neither candidate covered.
+6. Repeat on a `trainer_approved` report → Management **Edit wording**.
+
+**Report whichever of those three you see.** The point of this change is that all three are now distinguishable; **none of them was, an hour ago.**

@@ -16,6 +16,9 @@ import type {
   ReportPanelsDto,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
+import { makeEditorTrace } from "@/lib/frontend/editor-trace";
+
+const trace = makeEditorTrace("management-wording-editor");
 
 /**
  * The Management wording-only editor — the `/edit` sub-surface of screen 19.
@@ -96,11 +99,30 @@ export function ManagementWordingEditor() {
     return <LoadingSkeleton label="Loading wording editor" rows={5} />;
   }
 
+  /**
+   * ⛔ THE SINGLE SOURCE OF TRUTH FOR "CAN THIS SAVE". `null` means it can,
+   * and the button's `disabled` is derived from it.
+   */
+  const saveBlockedReason: string | null = saving
+    ? "Saving…"
+    : !changed
+      ? "No changes yet — edit a panel to enable saving."
+      : null;
+
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (resource.kind !== "ready" || !panels) return;
+    /*
+     * ⛔ THIS RETURN USED TO BE SILENT — no action, no server log, no banner:
+     * the exact shape of "I clicked Save and nothing happened", and
+     * indistinguishable from a save that fired and failed.
+     */
+    if (resource.kind !== "ready" || !panels) {
+      trace("submit-ignored", { resource: resource.kind, hasPanels: panels !== null });
+      return;
+    }
     setSaving(true);
     setFailure(null);
+    trace("dispatching", { changed });
     const result = await port.managementEditWording({
       reportId: params.reportId,
       expectedLockVersion: resource.data.lockVersion,
@@ -109,6 +131,7 @@ export function ManagementWordingEditor() {
       panels,
     });
     setSaving(false);
+    trace("returned", { outcome: result.outcome });
     if (result.outcome === "success") setSaved(true);
     else setFailure(result);
   }
@@ -188,16 +211,26 @@ export function ManagementWordingEditor() {
           These four panels are the entire Management editable set. Saving creates a new immutable
           version and publishes nothing.
         </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <Link
-            href={`/management/reports/${params.reportId}/review`}
-            className="inline-flex min-h-12 items-center justify-center rounded-field border border-line bg-surface px-5 py-3 text-body font-bold text-ink-strong no-underline shadow-raised transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
-          >
-            Cancel
-          </Link>
-          <Button type="submit" size="large" disabled={!changed || saving}>
-            {saving ? "Saving wording…" : "Save wording changes"}
-          </Button>
+        <div className="flex flex-col items-end gap-3">
+          {/*
+            ⛔ A DISABLED BUTTON THAT DOES NOT SAY WHY IS INDISTINGUISHABLE
+            FROM A BROKEN ONE.
+          */}
+          <p className="text-small leading-6 text-neutral-on" aria-live="polite">
+            {saveBlockedReason ?? "Ready to save."}
+          </p>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Link
+              href={`/management/reports/${params.reportId}/review`}
+              className="inline-flex min-h-12 items-center justify-center rounded-field border border-line bg-surface px-5 py-3 text-body font-bold text-ink-strong no-underline shadow-raised transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
+            >
+              Cancel
+            </Link>
+            {/* Derived from the reason, so the control and its explanation cannot drift apart. */}
+            <Button type="submit" size="large" disabled={saveBlockedReason !== null}>
+              {saving ? "Saving wording…" : "Save wording changes"}
+            </Button>
+          </div>
         </div>
       </div>
     </form>

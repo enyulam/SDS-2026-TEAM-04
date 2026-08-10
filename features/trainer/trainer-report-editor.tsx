@@ -15,6 +15,9 @@ import type {
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type ResourceState } from "./resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
+import { makeEditorTrace } from "@/lib/frontend/editor-trace";
+
+const trace = makeEditorTrace("trainer-report-editor");
 
 /**
  * Trainer wording editor — the `/trainer/reports/[reportId]/edit` sub-surface of screen 10
@@ -88,12 +91,23 @@ export function TrainerReportEditor() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (resource.kind !== "ready" || !panels) return;
+    /*
+     * ⛔ THIS RETURN USED TO BE SILENT. A submit that ends here dispatches no
+     * action, so it reaches NO server log, NO network tab and NO banner — the
+     * exact shape of "I clicked Save and nothing happened", and indistinguish-
+     * able from a save that fired and failed. It now says so.
+     */
+    if (resource.kind !== "ready" || !panels) {
+      trace("submit-ignored", { resource: resource.kind, hasPanels: panels !== null });
+      setError("The editor is still loading. Wait for the panels to appear, then save again.");
+      return;
+    }
     const returned =
       resource.data.status === "needs_edit" &&
       resource.data.openCorrection?.status === "open";
     setSaving(true);
     setError(null);
+    trace("dispatching", { returned, correctionMode });
     const result = await port.saveTrainerEdit({
       reportId: resource.data.reportId,
       expectedLockVersion: resource.data.lockVersion,
@@ -104,6 +118,7 @@ export function TrainerReportEditor() {
         : {}),
     });
     setSaving(false);
+    trace("returned", { outcome: result.outcome });
     if (result.outcome === "success") {
       router.push(
         `/trainer/reports/${resource.data.reportId}/review?saved=${result.data.correctionResolved ? "correction" : "1"}`,
@@ -126,6 +141,19 @@ export function TrainerReportEditor() {
   const returned =
     resource.data.status === "needs_edit" && resource.data.openCorrection?.status === "open";
   const reviewHref = `/trainer/reports/${resource.data.reportId}/review`;
+
+  /**
+   * ⛔ THE SINGLE SOURCE OF TRUTH FOR "CAN THIS SAVE". `null` means it can.
+   * The button's `disabled` is derived from this, so the control and its
+   * explanation cannot drift apart.
+   */
+  const saveBlockedReason: string | null = saving
+    ? "Saving…"
+    : !returned && !changed
+      ? "No changes yet — edit a panel to enable saving."
+      : returned && correctionMode === "reaffirmed" && changed
+        ? "Reaffirming requires the content to stay unchanged. Undo your edits, or choose “I corrected the flagged content”."
+        : null;
 
   return (
     <form className="page-grid" onSubmit={save} noValidate>
@@ -245,7 +273,16 @@ export function TrainerReportEditor() {
             </fieldset>
           )}
         </div>
-        <div className="flex flex-col-reverse gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3">
+          {/*
+            ⛔ A DISABLED BUTTON THAT DOES NOT SAY WHY IS INDISTINGUISHABLE
+            FROM A BROKEN ONE. This is the on-screen half of the answer to
+            "I clicked Save and nothing happened".
+          */}
+          <p className="text-small leading-6 text-neutral-on sm:text-right" aria-live="polite">
+            {saveBlockedReason ?? "Ready to save."}
+          </p>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row">
           <Link
             href={reviewHref}
             className="inline-flex min-h-12 items-center justify-center rounded-field border border-line bg-surface px-5 py-3 text-body font-bold text-ink-strong no-underline shadow-raised transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
@@ -255,11 +292,13 @@ export function TrainerReportEditor() {
           <Button
             type="submit"
             size="large"
-            disabled={
-              (!returned && !changed) ||
-              saving ||
-              (returned && correctionMode === "reaffirmed" && changed)
-            }
+            /*
+             * ⚠️ DERIVED FROM THE REASON, NOT COMPUTED BESIDE IT. A separate
+             * boolean and a separate explanation are two things that can
+             * disagree, and a button whose stated reason is wrong is worse
+             * than one that says nothing.
+             */
+            disabled={saveBlockedReason !== null}
           >
             {saving
               ? "Saving new version…"
@@ -269,6 +308,7 @@ export function TrainerReportEditor() {
                   : "Create correction version"
                 : "Save changes & return to review"}
           </Button>
+          </div>
         </div>
       </section>
     </form>

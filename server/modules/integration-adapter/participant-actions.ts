@@ -53,7 +53,6 @@ import {
 import { deriveSessionEligibility } from "@/lib/schedule/session-eligibility";
 import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver";
 import {
-  firstRow,
   type CorrectionIssueScope,
   type WorkingReportRow,
 } from "@/server/modules/report-workflow/rpc-types";
