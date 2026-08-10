@@ -408,6 +408,16 @@ export type SaveTrainerEditSuccess = {
   readonly correctionResolved: boolean;
 };
 
+/**
+ * Hero Phase 7 / F-S6-REVIEW-1. TWO FIELDS, deliberately: the note and the
+ * report identity. No session id, no student id, no ratings, no lock version -
+ * session, student and centre are DERIVED inside the governed RPC.
+ */
+export type SaveFollowUpNotesInput = {
+  readonly reportId: string;
+  readonly followUpNotes: string;
+};
+
 export type UpdateTrainerChecklistInput = {
   readonly reportId: string;
   readonly expectedVersionId: string;

@@ -82,6 +82,7 @@ import {
   saveTrainerEditCore,
   trainerApproveCore,
   updateTrainerChecklistCore,
+  saveFollowUpNotesCore,
 } from "@/server/modules/report-workflow/core";
 import { requestDraft as requestDraftAction } from "@/server/modules/report-workflow/actions";
 import type {
@@ -120,6 +121,7 @@ import type {
   AdapterTrainerSessionSummaryDto,
   AdapterTrainerWorkingReportDto,
   AdapterUpdateTrainerChecklistInput,
+  AdapterSaveFollowUpNotesInput,
 } from "@/server/modules/integration-adapter/adapter-dtos";
 
 // ---------------------------------------------------------------------
@@ -923,6 +925,34 @@ export async function adapterUpdateTrainerChecklist(
   if (updated.outcome !== "success") return updated;
 
   // The port returns the re-read working report, never a locally patched copy.
+  return adapterGetTrainerWorkingReport(input.reportId);
+}
+
+/**
+ * Hero Phase 7 / `F-S6-REVIEW-1` — the governed follow-up note save.
+ *
+ * ⚠️ Note the contrast with the checklist action above, and it is deliberate:
+ * that one reads the working report FIRST to obtain `lock_version` for its
+ * compare-and-set. This one does not, because it performs no CAS and bumps no
+ * lock. Adding a pre-read here would imply a concurrency guarantee the write
+ * does not make, and would be the kind of ceremony that reads as safety
+ * without providing it.
+ *
+ * It re-reads AFTERWARDS for the same reason the checklist action does: the
+ * port returns the governed value the database now holds, never a locally
+ * patched copy of what the client sent.
+ */
+export async function adapterSaveFollowUpNotes(
+  input: AdapterSaveFollowUpNotesInput,
+): Promise<ActionResult<AdapterTrainerWorkingReportDto>> {
+  const client = await createRequestSupabaseClient();
+
+  const saved = await saveFollowUpNotesCore(client, {
+    reportId: input.reportId,
+    followUpNotes: input.followUpNotes,
+  });
+  if (saved.outcome !== "success") return saved;
+
   return adapterGetTrainerWorkingReport(input.reportId);
 }
 

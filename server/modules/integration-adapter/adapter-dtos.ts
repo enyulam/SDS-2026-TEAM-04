@@ -355,6 +355,18 @@ export interface AdapterSaveTrainerEditSuccess {
   readonly correctionResolved: boolean;
 }
 
+/**
+ * Hero Phase 7 / `F-S6-REVIEW-1`. ⚠️ TWO FIELDS, DELIBERATELY. The client
+ * supplies the note and the report identity and NOTHING else — no session id,
+ * no student id, no ratings, no lock version. Session, student and centre are
+ * DERIVED inside the RPC, so no governed rating round-trips through the
+ * browser and the write cannot be aimed at another learner.
+ */
+export interface AdapterSaveFollowUpNotesInput {
+  readonly reportId: string;
+  readonly followUpNotes: string;
+}
+
 export interface AdapterUpdateTrainerChecklistInput {
   readonly reportId: string;
   readonly expectedVersionId: string;

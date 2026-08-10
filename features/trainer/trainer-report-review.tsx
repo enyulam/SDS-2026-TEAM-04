@@ -217,6 +217,24 @@ export function TrainerReportReview() {
   >(null);
   const evidenceNoteId = useId();
 
+  /*
+   * HERO PHASE 7 / `F-S6-REVIEW-1` — the editable follow-up note.
+   *
+   * ⚠️ `coachNotesDraft` is `null` until the governed value arrives, and is
+   * seeded from it — NEVER from "". §6 requires the current value to be
+   * "always loaded, never blanked": a draft initialised to the empty string
+   * would render an empty box for a moment and, if the trainer saved in that
+   * moment, would silently ERASE the note that feeds the next session's
+   * carried-over focus. The null sentinel makes "not loaded yet" a state the
+   * render can see, rather than one it mistakes for "the trainer cleared it".
+   */
+  const [coachNotesDraft, setCoachNotesDraft] = useState<string | null>(null);
+  const [coachNotesSaving, setCoachNotesSaving] = useState(false);
+  const [coachNotesError, setCoachNotesError] = useState<string | null>(null);
+  const [coachNotesSaved, setCoachNotesSaved] = useState(false);
+  const coachNotesId = useId();
+  const coachNotesHelpId = useId();
+
   useEffect(() => {
     let active = true;
     void Promise.all([
@@ -251,6 +269,47 @@ export function TrainerReportReview() {
     const { checklist } = resource.data.report;
     return checklistConfig.every((item) => checklist[item.key] === true);
   }, [resource]);
+
+  /**
+   * HERO PHASE 7 / `F-S6-REVIEW-1` — save the follow-up note.
+   *
+   * ⚠️ It sends the note and the report id and NOTHING else. Contrast
+   * `toggleChecklist` below, which legitimately sends `expectedVersionId`
+   * because the checklist attests to a SPECIFIC text and must go stale when
+   * that text changes. This note attests to nothing, is in no frozen version
+   * and under no content hash, so a version check here would refuse a
+   * legitimate correction and imply a guarantee the write does not make.
+   *
+   * ⛔ It never touches `checklistSaving` or `actionError`. Those belong to
+   * the approval path, and a note save must never be able to present itself
+   * as — or interfere with — a checklist or approval outcome.
+   */
+  async function handleSaveCoachNotes() {
+    if (resource.kind !== "ready" || coachNotesDraft === null) return;
+    const { report, session } = resource.data;
+    setCoachNotesSaving(true);
+    setCoachNotesError(null);
+    setCoachNotesSaved(false);
+    const result = await port.saveFollowUpNotes({
+      reportId: report.reportId,
+      followUpNotes: coachNotesDraft,
+    });
+    setCoachNotesSaving(false);
+    if (result.outcome === "success") {
+      // Re-seed from what the SERVER returned, not from the local draft: the
+      // governed value is the one that carries forward, and echoing the draft
+      // back would hide a write that silently did not land.
+      setCoachNotesDraft(result.data.coachNotes);
+      setCoachNotesSaved(true);
+      setResource({ kind: "ready", data: { report: result.data, session } });
+    } else {
+      setCoachNotesError(
+        "message" in result
+          ? result.message
+          : "The follow-up note could not be saved. Reload the report and try again.",
+      );
+    }
+  }
 
   async function toggleChecklist(key: keyof ChecklistDto) {
     if (resource.kind !== "ready") return;
@@ -311,6 +370,16 @@ export function TrainerReportReview() {
   const trainerApproved = report.status === "trainer_approved";
   const canEdit = report.status === "draft_ready" && !returned;
   const canApprove = canEdit && checklistComplete;
+
+  /*
+   * HERO PHASE 7. ⚠️ The governed value is the DEFAULT, not a fallback for an
+   * error case: until the trainer types, `coachNotesDraft` is null and the
+   * field shows exactly what the database holds. That is §6's "always loaded,
+   * never blanked" implemented without an effect that could race the load, and
+   * without an initial "" that a save could turn into a silent erasure of the
+   * note feeding the next session's carried-over focus.
+   */
+  const coachNotesValue = coachNotesDraft ?? report.coachNotes;
   const checkedCount = checklistConfig.filter(
     (item) => report.checklist[item.key] === true,
   ).length;
@@ -522,11 +591,67 @@ export function TrainerReportReview() {
                 Never parent-visible
               </span>
             </div>
-            <p className="mt-4 rounded-card bg-surface-muted p-4 text-body leading-7 text-ink">
-              {report.coachNotes || "No follow-up note was recorded."}
-            </p>
-            <p className="mt-3 text-small leading-6 text-neutral-on">
-              This is the same Follow-up for Next Session field saved during assessment.
+            {/*
+              HERO PHASE 7 / `F-S6-REVIEW-1`. This was a read-only <p> until
+              2026-08-10, when the Operator ruled `CLAUDE.md` §6 decision D-2
+              as EDITABLE WITH A SAVE PATH.
+
+              ⚠️ WHY THE READ-ONLY FORM WAS A DEFECT AND NOT A STYLE CHOICE:
+              the clause's stated safeguard is that the trainer is "editing
+              their earlier note after seeing the AI draft and evidence, not
+              overwriting it unknowingly". Against a <p>, that protects
+              nothing, because nothing here could overwrite anything — the
+              rationale had no referent. Making the field editable is what
+              gives the safeguard something to be about.
+
+              ⚠️ THE VALUE IS ALWAYS LOADED, NEVER BLANKED (§6). The textarea
+              is seeded from the governed `coachNotes` and re-seeded whenever
+              the server returns a new one, so the trainer refines their own
+              earlier note rather than starting from an empty box.
+
+              ⛔ ONE COLUMN, TWO SURFACES. This writes the SAME
+              `observations.follow_up_notes` the B.E.S.T Form writes, through
+              the governed `assessment_save_follow_up_notes`. It sends the note
+              and the report id and NOTHING else — no ratings, no lock version
+              — so no governed rating round-trips through this client.
+            */}
+            <label htmlFor={coachNotesId} className="sr-only">
+              Coach Notes, internal only
+            </label>
+            <textarea
+              id={coachNotesId}
+              value={coachNotesValue}
+              onChange={(event) => setCoachNotesDraft(event.target.value)}
+              disabled={coachNotesSaving}
+              rows={5}
+              className="mt-4 block w-full rounded-card border border-line bg-surface p-4 text-body leading-7 text-ink disabled:bg-surface-muted disabled:text-ink-subtle"
+              placeholder="No follow-up note was recorded."
+              aria-describedby={coachNotesHelpId}
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void handleSaveCoachNotes()}
+                disabled={coachNotesSaving || coachNotesValue === report.coachNotes}
+                className="inline-flex min-h-11 items-center justify-center rounded-field bg-brand-700 px-4 py-2.5 text-[0.78125rem] font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-ink-subtle"
+              >
+                {coachNotesSaving ? "Saving follow-up note…" : "Save follow-up note"}
+              </button>
+              {coachNotesError !== null && (
+                <span role="alert" className="text-small leading-6 text-danger-on">
+                  {coachNotesError}
+                </span>
+              )}
+              {coachNotesSaved && coachNotesError === null && (
+                <span role="status" className="text-small leading-6 text-neutral-on">
+                  Saved.
+                </span>
+              )}
+            </div>
+            <p id={coachNotesHelpId} className="mt-3 text-small leading-6 text-neutral-on">
+              This is the same Follow-up for Next Session field saved during assessment, and it
+              carries forward as the next session&rsquo;s previous focus. Saving it changes no
+              rating, no report status and no approval.
             </p>
           </section>
 

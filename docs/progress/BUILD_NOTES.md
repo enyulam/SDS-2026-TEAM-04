@@ -5119,3 +5119,67 @@ Per Operator instruction this is **folded into the third-instance entry** for *t
 ⛔ **THIS DISCHARGES NOTHING ABOUT `F-S6-REVIEW-1`, AND `F-S6-REVIEW-1` WILL DISCHARGE NOTHING ABOUT THIS** (plan §9.3 rules 2 and 4). They touch the same column and are **different claims**: this proves a note **carries forward to the next session**; that will prove the review surface **loads it into an editable field and can save it back**. Two verdicts, recorded separately.
 
 **Database:** read-only; no governed count moved. **Commit:** with the F-S6-REVIEW-1 work.
+
+---
+
+## 2026-08-11 — HERO CHAIN **PHASE 7** — `F-S6-REVIEW-1`, the governed follow-up note save
+
+**Track:** hero chain completion, plan §8 Phase 7 / §9. **Branch:** `develop`. **Starting HEAD:** `459be14`.
+**Authorization:** Operator ruling 2026-08-10 — the §6 amendment (D-2 = **EDITABLE**) and a **bounded §12 authorization** for the new governed object, with five stated bounds.
+
+### The object
+
+**`public.assessment_save_follow_up_notes(p_report_id uuid, p_follow_up_notes text) → TABLE (follow_up_notes text)`** — migration `20260811090000`, **41 → 42 functions**, one `authenticated` EXECUTE, tables/enums/policies **unchanged**.
+
+**Bounds honoured, each measurable:** it updates `follow_up_notes` and nothing else · it reads the observation **server-side**, the client supplying the note and the report identity only · **no audit event, registry held at 16** · **one** grant, the minimum matching EXECUTE · stated in full before it was written.
+
+**Gate = a deliberate MIRROR of `assessment_save_observation` steps 1–4**, with the **byte-identical `BC101`** denial, so a caller cannot distinguish "no such report" from "not your report", and so this cannot become **a second, weaker way into the same column**. Session, student and centre are **derived from the report**, never parameters.
+
+### ⚠️ Step 5 — the session-start gate — MEASURED, then DROPPED
+
+Operator instruction: measure what it would refuse, then keep or drop it, and **never decide silently**. **Measured 2026-08-11 against this database:**
+
+- `assessment_save_observation` is the **only** function that INSERTs into `observations` (1 of 41), and it carries the start gate — **the only `BC104` site in the schema**;
+- `observations` has **zero** client INSERT/UPDATE grants and **zero** RLS policies, so **no other creation path exists**;
+- **0 of 2** observations belong to a session whose start is in the future — **structural, not fixture luck**.
+
+▶ **The gate would be UNREACHABLE here.** This function requires the observation to already exist, and its existence **proves the start gate passed at creation**. The one case it could ever fire is a session **rescheduled forward** after the observation was written — where it would refuse a trainer correcting **their own note**, exactly what decision 2 protects and the same shape as A-026's rule that an attendance correction must not destroy existing work.
+
+▶ **What replaces it is stronger, not weaker:** the observation-must-exist precondition proves the gate **passed at creation**, rather than re-testing a clock that can move underneath a committed row. **`P7-6` proves that precondition refuses and creates nothing.**
+
+### The surface
+
+The read-only `<p>` is now a real `<textarea>` with a save control. ⚠️ **The read-only form was a defect, not a style choice:** §6's safeguard is that the trainer edits their earlier note *"not overwriting it unknowingly"* — against a `<p>` that **protects nothing, because nothing there could overwrite anything.** The rationale had no referent; making the field editable is what gives it one.
+
+⚠️ **The draft is `null` until the trainer types, and the field renders the governed value** — never seeded from `""`. An empty initial draft would show a blank box for a moment and, if saved in that moment, would **silently erase the note that feeds the next session's carried-over focus.** `P7-7f` pins it.
+
+⛔ **The note save never touches `checklistSaving` or `actionError`** — those belong to the approval path, and a note save must never present itself as, or interfere with, a checklist or approval outcome. It sends **no `expectedVersionId`**, deliberately: the checklist attests to a *specific text* and must go stale when that text changes; **this note attests to nothing**, so a version check would refuse a legitimate correction and imply a guarantee the write does not make.
+
+### Verification — TWO INDEPENDENT VERDICTS, neither standing in for the other
+
+⛔ **Plan §9.3 rules 2 and 4 are honoured explicitly.**
+
+1. **The Phase 6a carry-over proof — `npm run test:continuity`, `PASS`, 5 legs — run at `459be14`, BEFORE this write path existed.** Operator instruction: it was discharged earlier, but Phases 2–6 touched the roster surface afterwards, and §9.3 rule 1's intent is that it precede **the new write path**, not that it run once ever. `CONT-0` is its non-vacuity leg (a real 129-char note). ✅ **Re-run again AFTER the build and still `PASS`** — recorded as a separate observation that the new path broke nothing, **not** as evidence for Phase 7.
+2. **`npm run prove:hero-7` — 6 SQL legs + 6 surface legs, all `PASS`.** Transaction-scoped, ending in `ROLLBACK`.
+   - ⚠️ **`P7-1` is the NON-VACUITY / permit leg** — the assigned trainer's save actually lands; every refusal below is meaningless otherwise.
+   - **`P7-3` measures that nothing else moved:** `lock_version` **1**, **9** rating rows, status **`draft_ready`**, `audit_events` **0** — all unmoved across the write.
+   - **`P7-4`** management, parent **and** unauthenticated all refused with the **identical** `BC101`. **`P7-5`** those three refusals left the column **byte-unchanged** — a denial that still wrote would be the worst outcome, so it is measured.
+   - **`P7-7a…f`** the surface half, which **has no SQL equivalent**: the database cannot tell whether the screen reaches the function, whether the field is genuinely editable, or whether the client sends more than it should. `P7-7c` locates the call site **before** `P7-7d/e` measure it.
+   - ⚠️ **The runner's byte-unmoved check includes an MD5 over every follow-up note**, not just row counts — this suite **writes to that column**, and a row count would not notice a value that failed to roll back.
+
+### ⚠️ Two of my own defects, caught and recorded
+
+1. **`psql -f` autocommits per statement.** The first apply left the function **committed** while its assertion block aborted — the migration is written to be atomic and my ad-hoc application method broke that. Dropped the partial function and re-applied with **`--single-transaction`**, which is what the Supabase CLI does. ▶ **A migration's atomicity is a property of how it is APPLIED, not only of how it is written.**
+2. **`pg_proc.prosrc` stores the function's COMMENTS**, so `H7-6`'s token scan failed against this function's own comment saying *"No lock_version, no rating row, no status, no audit event"*. **The code was correct; the scan was reading the sentence that documents it.** Now strips comments before scanning, and says so. ⚠️ **The `status` pattern was also over-broad** — it would have matched step 4's legitimate `m.status = 'active'`; narrowed to `SET status` / `report_status`. ▶ **Third and fourth instances of the same root recorded this session**, and both were caught **by reading, before running**.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · **route census 17** · `session-eligibility` **PASS** · `post-login-destinations` **PASS** · `prove:hero-4` re-run **PASS** · **emitted-CSS verified, no new class** (stylesheet still **45,748 bytes**) · migrations **20 → 21**, ledger row inserted · functions **41 → 42** · tables **27**, enums **12**, policies **29** — unchanged.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on this authenticated surface. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 8 (Trainer wording editor)** — foundation consistency only; **visual acceptance `NOT APPLICABLE (G-1)`**. ⚠️ **Measure at HEAD before accepting the plan's classification** (§12 item 10).

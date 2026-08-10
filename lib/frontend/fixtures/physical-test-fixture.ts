@@ -39,6 +39,7 @@ import {
   type TrainerSessionSummaryDto,
   type TrainerWorkingReportDto,
   type UpdateTrainerChecklistInput,
+  type SaveFollowUpNotesInput,
 } from "../contracts/physical-test";
 import type { UiActionResult } from "../contracts/result";
 import type { PhysicalTestPort } from "../physical-test-port";
@@ -1396,6 +1397,33 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       return { outcome: "unavailable" };
     }
     report.checklist = clone(input.checklist);
+    this.writeState(state);
+    return this.getTrainerWorkingReport(input.reportId);
+  }
+
+  /**
+   * Hero Phase 7 / `F-S6-REVIEW-1`.
+   *
+   * ⚠️ It writes `observation.followUp` — the SAME field `saveObservation`
+   * writes and the same one the roster's carried-over focus reads. That is the
+   * point of the clause: one column, two surfaces. A fixture that kept a
+   * separate "review note" would model two notes and would hide exactly the
+   * defect the governed function exists to prevent.
+   *
+   * ⛔ No status gate and no lock bump, mirroring the RPC: the note is in no
+   * frozen version and under no content hash, and the carry-over must stay
+   * correctable. Contrast `updateTrainerChecklist` above, which legitimately
+   * refuses outside `draft_ready`/`needs_edit` and version-checks — the
+   * checklist attests to a specific text, this note does not.
+   */
+  async saveFollowUpNotes(
+    input: SaveFollowUpNotesInput,
+  ): Promise<UiActionResult<TrainerWorkingReportDto>> {
+    await delay(200);
+    const state = this.readState();
+    const report = state.reports[input.reportId];
+    if (!report) return { outcome: "unavailable" };
+    report.observation.followUp = input.followUpNotes;
     this.writeState(state);
     return this.getTrainerWorkingReport(input.reportId);
   }

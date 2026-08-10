@@ -72,6 +72,7 @@ import type {
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
   UpdateTrainerChecklistInput,
+  SaveFollowUpNotesInput,
 } from "../contracts/physical-test";
 import type { UiActionResult } from "../contracts/result";
 import type {
@@ -104,6 +105,7 @@ import {
   adapterSetAttendance,
   adapterTrainerApprove,
   adapterUpdateTrainerChecklist,
+  adapterSaveFollowUpNotes,
 } from "@/server/modules/integration-adapter/participant-actions";
 
 const REAL_PARTICIPANT_IDENTITY: Extract<
@@ -258,6 +260,17 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       input: UpdateTrainerChecklistInput,
     ): Promise<UiActionResult<TrainerWorkingReportDto>> {
       return guard(() => adapterUpdateTrainerChecklist(input));
+    },
+
+    /**
+     * Hero Phase 7 / `F-S6-REVIEW-1`. Two fields cross this boundary — the
+     * note and the report identity. Session, student and centre are DERIVED
+     * inside the governed RPC, so no rating round-trips through the client.
+     */
+    saveFollowUpNotes(
+      input: SaveFollowUpNotesInput,
+    ): Promise<UiActionResult<TrainerWorkingReportDto>> {
+      return guard(() => adapterSaveFollowUpNotes(input));
     },
 
     /** Freezes a version. PUBLISHES NOTHING (A-020). */

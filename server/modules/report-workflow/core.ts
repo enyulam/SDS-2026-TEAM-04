@@ -164,6 +164,47 @@ export async function updateTrainerChecklistCore(
 }
 
 // ---------------------------------------------------------------------
+// saveFollowUpNotes — hero Phase 7 / `F-S6-REVIEW-1`.
+//
+// `CLAUDE.md` §6, as amended 2026-08-10 (D-2 ruled EDITABLE WITH A SAVE
+// PATH): the Review & Approve WORKFLOW SURFACE loads the trainer's current
+// follow-up value into a real editable field and can save it back, against
+// the SAME `observations.follow_up_notes` column the B.E.S.T Form writes.
+//
+// ⚠️ THE INPUT IS DELIBERATELY TWO FIELDS. The client supplies the note and
+// the report identity and NOTHING else — no session id, no student id, no
+// ratings, no lock version. Session, student and centre are DERIVED inside
+// the RPC, so a tampered client cannot aim this write at another learner,
+// and no governed rating ever round-trips through the browser. That is the
+// whole reason option (b) was chosen over reusing the assessment save.
+//
+// ⛔ No `lock_version` is sent and none is bumped: this writes one column,
+// and bumping the lock would misrepresent what changed AND invalidate a
+// concurrently-open assessment form. Last-write-wins is the honest posture
+// for a single-writer free-text field.
+// ⛔ No audit event; the Step 7H registry stays at 16 (CP-2 / CP-4).
+// ---------------------------------------------------------------------
+export interface SaveFollowUpNotesInput {
+  readonly reportId: string;
+  readonly followUpNotes: string;
+}
+
+export async function saveFollowUpNotesCore(
+  db: RpcCaller,
+  input: SaveFollowUpNotesInput,
+): Promise<ActionResult<{ reportId: string }>> {
+  const shape = requireUuid(input.reportId, "reportId");
+  if (shape) return shape;
+
+  const { error } = await db.rpc("assessment_save_follow_up_notes", {
+    p_report_id: input.reportId,
+    p_follow_up_notes: input.followUpNotes,
+  });
+  if (error) return mapSqlErrorToResult(error.code, error.message);
+  return { outcome: "success", data: { reportId: input.reportId } };
+}
+
+// ---------------------------------------------------------------------
 // trainerApprove — RPC-8 (T7/T8). Freezes the version; PUBLISHES NOTHING.
 // ---------------------------------------------------------------------
 export interface TrainerApproveInput {

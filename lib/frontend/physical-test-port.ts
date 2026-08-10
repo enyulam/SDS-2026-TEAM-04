@@ -29,6 +29,7 @@ import type {
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
   UpdateTrainerChecklistInput,
+  SaveFollowUpNotesInput,
 } from "./contracts/physical-test";
 import type { UiActionResult } from "./contracts/result";
 
@@ -132,6 +133,19 @@ export interface PhysicalTestPort {
   ): Promise<UiActionResult<SaveTrainerEditSuccess>>;
   updateTrainerChecklist(
     input: UpdateTrainerChecklistInput,
+  ): Promise<UiActionResult<TrainerWorkingReportDto>>;
+  /**
+   * Hero Phase 7 / `F-S6-REVIEW-1` — the governed follow-up note save from the
+   * Review & Approve workflow surface (`CLAUDE.md` §6, D-2 ruled EDITABLE).
+   *
+   * ⚠️ Two fields only: the note and the report identity. Session, student and
+   * centre are DERIVED server-side, so no governed rating round-trips through
+   * the client and the write cannot be aimed at another learner. It writes
+   * `observations.follow_up_notes` and nothing else — no lock bump, no rating
+   * row, no status change, no audit event.
+   */
+  saveFollowUpNotes(
+    input: SaveFollowUpNotesInput,
   ): Promise<UiActionResult<TrainerWorkingReportDto>>;
   trainerApprove(
     input: TrainerApproveInput,
