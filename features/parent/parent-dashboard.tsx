@@ -127,14 +127,21 @@ export function ParentDashboard() {
             {state.data.reports.length} {state.data.reports.length === 1 ? "report is" : "reports are"}{" "}
             ready to view.
           </FeedbackBanner>
-          <section className="card p-6 sm:p-7">
-            <h2 className="text-2xl font-black text-navy-950">Ready to read</h2>
-            <p className="mt-2 text-sm leading-6 text-ink-muted">
+          <section className="card px-5 py-[18px]">
+            {/*
+              The legacy `text-2xl font-black text-navy-950` / `text-sm text-ink-muted`
+              scale predates the reference foundation. `text-ink-muted` (#8a93a8) is
+              additionally a LIVE 3.079:1 SC 1.4.3 failure on this fill, so it is
+              re-pointed to `text-ink` here for the same F-01c reason applied elsewhere —
+              hue preserved, luminance moved, NO token value redefined.
+            */}
+            <h2 className="text-[1rem] font-semibold text-ink-strong">Ready to read</h2>
+            <p className="mt-1 text-[0.75rem] leading-5 text-ink">
               Visit the report list to open the latest available family report.
             </p>
             <Link
               href="/parent/reports"
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-field bg-brand-700 px-4 py-2.5 text-[0.78125rem] font-semibold text-white hover:bg-brand-800"
             >
               View available reports
             </Link>
@@ -142,10 +149,10 @@ export function ParentDashboard() {
         </>
       ) : (
         <section className="card px-6 py-12 text-center" role="status">
-          <h2 className="text-xl font-black text-navy-950">
+          <h2 className="text-[1rem] font-semibold text-ink-strong">
             {availability === "linked_unavailable" ? "Family view unavailable" : "No reports available yet"}
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink-muted">
+          <p className="mx-auto mt-1 max-w-xl text-[0.75rem] leading-5 text-ink">
             {availability === "linked_unavailable"
               ? "This family view cannot be shown right now. Try again later."
               : "When a report is ready for your linked learner, it will appear here."}

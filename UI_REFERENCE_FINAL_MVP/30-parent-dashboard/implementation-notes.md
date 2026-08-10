@@ -225,3 +225,38 @@ Canonical instrument: `FINAL_MVP_AUTHORITY_LOCK.md` §15.2. **Q-27 elevates and 
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+### UI RECONCILIATION plan Phase 11 — 2026-08-10
+
+Visual reconciliation only against `reference/Parent - Dashboard/` (A-056; **no** frozen
+duplicate — NOT a missing reference and not a reason to re-export).
+
+**INCOMPLETE was separated from TRUE-DRIFT FIRST**, as the plan requires. The frame additionally
+draws a Profile Details list and a right-hand Calendar/Upcoming column; both are **INCOMPLETE,
+NOT drift, and NOTHING was built for them** — several would need governed parent projections
+that do not exist (date of birth, guardian contact and enrolment date are personal data with no
+current parent projection), and inventing fields would be the fabrication `GLOBAL_UI_RULES` §8
+forbids.
+
+**5 TRUE-DRIFT resolved**, confined to what is actually built. This screen was still on the
+pre-reference **LEGACY** scale — `text-2xl` / `text-xl` / `font-black` / `text-navy-950` /
+`text-sm` / `text-ink-muted`, none of which any frame uses, and `text-ink-muted` was a second
+**LIVE 3.079:1 SC 1.4.3 failure**. Every legacy token is now gone from a rendered `className`.
+
+**1 REGISTERED-OMISSION preserved, ZERO changed** — **Q-27**: the "This Term's Skills"
+nine-dimension card stays `DO_NOT_IMPLEMENT` **in its entirety**. Verified at the **DATA** layer
+(the surface reads only `getParentAvailability` and `listParentSubmittedReports`, neither
+carrying a rating) and at the **RENDER** layer (every rating token comment-only). Its absence is
+`EXPECTED / REQUIRED`, never `MISSING IMPLEMENTATION` and never a `VISUAL REGRESSION`.
+
+⚠️ "Profile Details promotes upward into the vacated space" was **NOT actioned**, deliberately:
+Profile Details is not built at all, so there is no card to promote and no vacated space. **No
+blank rectangle and no invented filler card was added.**
+
+**RENDERED CAPTURE `NOT-RUN`** — authenticated surface; a `CLAUDE.md` §12 stop-and-ask no
+current authorization carries. None manufactured, no hosted service contacted. `NOT-RUN` is not
+`PASS`.
+
+`tsc` 0 · `eslint` 0 · `build` 0 · route census **17** unchanged · emitted-CSS 4/4 · no governed
+surface touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 11.
+**`Accepted` is Operator-set only and has NOT been set.**

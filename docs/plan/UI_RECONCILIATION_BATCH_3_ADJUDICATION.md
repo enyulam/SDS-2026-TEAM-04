@@ -535,6 +535,49 @@ Plan §4 is explicit that the absence of each of these is **`EXPECTED / REQUIRED
 
 ---
 
+## PHASE 11 — `30` Parent Dashboard · *non-core, `Partially implemented`*
+
+- **Screen / route / component:** `30` · `/parent` · `features/parent/parent-dashboard.tsx`
+- **Reference:** `reference/Parent - Dashboard/` · **no** frozen duplicate — *not a missing reference, and not a reason to re-export from live Figma* (A-056)
+
+### 11.1 ⚠️ `INCOMPLETE` SEPARATED FROM `TRUE-DRIFT` FIRST, AS THE PLAN REQUIRES
+
+Plan §4 warns that most of this frame is unbuilt and that **new construction is not this plan's mandate**. Measured against the frame, the built surface renders a heading, a banner and one card; the frame additionally draws a **Profile Details** list (date of birth, guardian, contact, class, trainer, enrolled) and a right-hand **Calendar / Upcoming** column.
+
+**Those are `INCOMPLETE`, NOT `TRUE-DRIFT`, and nothing was built for them.** Several would need governed parent-facing projections that do not exist — a learner's date of birth, guardian contact number and enrolment date are **personal data with no current parent projection**, and inventing fields for them would be exactly the fabrication `GLOBAL_UI_RULES` §8 forbids. Recorded, not built.
+
+### 11.2 `TRUE-DRIFT` RESOLVED — 5
+
+Confined to what is actually built.
+
+| # | Location | Frame | Was | Now |
+|---|---|---|---|---|
+| T1 | Page title / description | 22px / 700 · 12.5px / 400 | 30px / 800 · `text-body` on `text-ink-muted` | via `PageHeading` — Phase 7 §7.1, which also closed the description's **live 3.079:1 AA failure** |
+| T2 | Card padding | 18px vertical / 20px sides | 24–28px | `px-5 py-[18px]` |
+| T3 | Card heading | 16px / 600 | **legacy** `text-2xl font-black text-navy-950` | `text-[1rem] font-semibold text-ink-strong` |
+| T4 | Card body | 12.5px-class quiet | **legacy** `text-sm` on `text-ink-muted` — a second **live 3.079:1 failure** | `text-[0.75rem] leading-5 text-ink` |
+| T5 | Primary action + empty state | 12.5px / 600, token radius | 14px / 700, `rounded-xl`, `text-xl font-black text-navy-950` | `text-[0.78125rem] font-semibold rounded-field`, heading to `text-[1rem] font-semibold` |
+
+⚠️ **This screen was still on the pre-reference LEGACY scale** — `text-2xl` / `text-xl` / `font-black` / `text-navy-950` / `text-sm` / `text-ink-muted`, none of which any frame uses. Every legacy token is now gone from a rendered `className`; the only remaining occurrences are inside the explanatory comment recording that fact.
+
+### 11.3 `REGISTERED-OMISSION` PRESERVED — 1, ZERO CHANGED, and it is the whole point of this screen
+
+| # | Preserved | Citation |
+|---|---|---|
+| Q-27 | ⛔ **The "This Term's Skills" nine-dimension card is `DO_NOT_IMPLEMENT` IN ITS ENTIRETY** — title, all nine labels (Body, Eye contact, Emotion, Speech, Tonality, Vocal projection, Emotional expression, Sentence flow, Audience awareness, all measured in the frame at 12.5px / 500), all bars, all rating-derived visual state, and **any replacement ratings visualization**. Hiding, obscuring, emptying, collapsing, renaming or substituting are **non-compliance**. It is a **DATA boundary, not CSS**: the ratings must not reach a Parent session through the UI, page state, DTOs, projections, RPC results, APIs, server actions or client payloads, and **fetching them to hide them client-side is a violation**. Verified this run — the surface reads only `getParentAvailability` and `listParentSubmittedReports`, neither carries a rating, and every rating token in the file is **comment-only** | Q-27; Authority Lock §15.2 |
+
+**Its absence is `EXPECTED / REQUIRED`, never `MISSING IMPLEMENTATION` and never a `VISUAL REGRESSION`** — recorded here as satisfied-by-omission with its citation, exactly as plan §4 requires.
+
+⚠️ **"Profile Details promotes upward into the vacated space" was NOT actioned**, and that is deliberate: **Profile Details is not built at all** (§11.1), so there is no card to promote and no vacated space to fill. **No blank rectangle and no invented filler card was added** — the requirement binds whenever Profile Details is built, which is new construction outside this plan.
+
+### 11.4 `NEW-QUESTION` — none · `INCOMPLETE` — recorded in §11.1, not built
+
+### 11.5 Verification
+
+`tsc` **0** · `eslint` **0** · `build` **0** · **route census 17** · governed surfaces **none touched** · **emitted-CSS 4/4 OK** · Q-27 verified at the **data** layer (the two reads carry no rating) and at the **render** layer (zero rating tokens) · **rendered capture `NOT-RUN`** (§0.1).
+
+---
+
 ## Commits
 
 ⚠️ **Each row is filled one phase LATE, and that is deliberate: a commit cannot cite its own SHA.** A row reading `pending` means the phase's own commit exists but its hash is recorded in the *next* phase's commit — never that the phase was not committed. The authoritative live list is `docs/progress/STATUS.md`, and `git log --oneline` settles any disagreement.
@@ -548,4 +591,5 @@ Plan §4 is explicit that the absence of each of these is **`EXPECTED / REQUIRED
 | 7 | `29` Management Reports | **`7634c71`** |
 | 8 | `19` Management Student Report | **`d83823f`** |
 | 9 | `32` Parent Reports | **`6146f73`** |
-| 10 | `33` Parent Class Report | *pending — recorded at the Phase 11 boundary* |
+| 10 | `33` Parent Class Report | **`e5cf572`** |
+| 11 | `30` Parent Dashboard | *pending — recorded at the Phase 12 boundary* |
