@@ -30,6 +30,7 @@ import {
 import { isDimensionCode, isRatingLevel } from "@/server/modules/framework/dimensions";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
 import {
+  readRows,
   reportQueryFailure,
   type QueryOutcome,
 } from "@/server/platform/query-diagnostics";
@@ -219,24 +220,47 @@ async function listAssignedSessions(
   return { ok: true, rows: data as SessionRow[] };
 }
 
+/**
+ * ⚠️ THE SECOND HALF OF THE ROSTER FIX. `listAssignedSessions` was corrected
+ * first; this function kept the identical `if (error || !data) return []`,
+ * in the SAME file, feeding the SAME surface — so the roster could still
+ * empty silently through it. Half a fix is not a fix.
+ *
+ * ⛔ The `students` read was worse than the enrolments one: it never
+ * destructured `error` at all, so a rejection there was discarded before
+ * anything could check it and every learner silently became "Student".
+ */
 async function listEnrolledStudents(
   client: SupabaseClient,
   moduleId: string,
-): Promise<Array<{ studentId: string; displayName: string }>> {
-  const { data, error } = await client
-    .from("enrolments")
-    .select("student_id, is_active")
-    .eq("class_module_id", moduleId)
-    .eq("is_active", true);
-  if (error || !data) return [];
-  const ids = (data as Array<{ student_id: string }>).map((r) => r.student_id);
-  if (ids.length === 0) return [];
-  const { data: students } = await client
-    .from("students")
-    .select("id, full_name")
-    .in("id", ids);
-  const names = new Map(((students ?? []) as Array<{ id: string; full_name: string }>).map((s) => [s.id, s.full_name]));
-  return ids.map((id) => ({ studentId: id, displayName: names.get(id) ?? "Student" }));
+): Promise<QueryOutcome<Array<{ studentId: string; displayName: string }>>> {
+  const enrolments = await readRows<{ student_id: string }>(
+    "listEnrolledStudents:enrolments",
+    () =>
+      client
+        .from("enrolments")
+        .select("student_id, is_active")
+        .eq("class_module_id", moduleId)
+        .eq("is_active", true),
+  );
+  if (!enrolments.ok) return { ok: false };
+
+  const ids = enrolments.rows.map((r) => r.student_id);
+  // ⚠️ A GENUINELY OBSERVED emptiness — the read succeeded and returned no
+  // rows. This is the only kind this function may report.
+  if (ids.length === 0) return { ok: true, rows: [] };
+
+  const students = await readRows<{ id: string; full_name: string }>(
+    "listEnrolledStudents:students",
+    () => client.from("students").select("id, full_name").in("id", ids),
+  );
+  if (!students.ok) return { ok: false };
+
+  const names = new Map(students.rows.map((s) => [s.id, s.full_name]));
+  return {
+    ok: true,
+    rows: ids.map((id) => ({ studentId: id, displayName: names.get(id) ?? "Student" })),
+  };
 }
 
 async function workingState(
@@ -292,20 +316,40 @@ export async function listTrainerSessionsCore(
 
   const out: TrainerSessionSummaryDto[] = [];
   for (const session of sessions) {
-    const { data: modules } = await client
-      .from("class_modules")
-      .select("id, title, class_grade_id")
-      .eq("id", session.class_module_id);
-    const moduleRow = (modules?.[0] ?? null) as { title: string; class_grade_id: string } | null;
+    const modules = await readRows<{ title: string; class_grade_id: string }>(
+      "listTrainerSessionsCore:class_modules",
+      () =>
+        client
+          .from("class_modules")
+          .select("id, title, class_grade_id")
+          .eq("id", session.class_module_id),
+    );
+    if (!modules.ok) return { outcome: "unavailable" };
+    const moduleRow = modules.rows[0] ?? null;
+
     let grade = "";
     if (moduleRow) {
-      const { data: grades } = await client
-        .from("class_grades")
-        .select("id, display_name")
-        .eq("id", moduleRow.class_grade_id);
-      grade = ((grades?.[0] as { display_name?: string } | undefined)?.display_name) ?? "";
+      const grades = await readRows<{ display_name?: string }>(
+        "listTrainerSessionsCore:class_grades",
+        () =>
+          client
+            .from("class_grades")
+            .select("id, display_name")
+            .eq("id", moduleRow.class_grade_id),
+      );
+      if (!grades.ok) return { outcome: "unavailable" };
+      grade = grades.rows[0]?.display_name ?? "";
     }
-    const students = await listEnrolledStudents(client, session.class_module_id);
+
+    /*
+     * ⛔ A REJECTED ROSTER READ IS NOT A SESSION WITH ZERO LEARNERS. The old
+     * code rendered `studentCount: 0` for a rejection, which is a MEASUREMENT
+     * a trainer would reasonably act on — an empty class. It is now the
+     * non-disclosing `unavailable`, exactly as a rejected session list is.
+     */
+    const enrolled = await listEnrolledStudents(client, session.class_module_id);
+    if (!enrolled.ok) return { outcome: "unavailable" };
+    const students = enrolled.rows;
     const counts: Partial<Record<ReportStatus | "no_report", number>> = {};
     for (const student of students) {
       const state = await workingState(client, session.id, student.studentId);
@@ -349,24 +393,46 @@ export async function getSessionRosterCore(
   const session = sessions[0] as SessionRow;
 
   // The previous assigned session of the same module (for follow-up carry-over).
-  const { data: prior } = await client
-    .from("class_sessions")
-    .select("id, session_date")
-    .eq("class_module_id", session.class_module_id)
-    .lt("session_date", session.session_date)
-    .order("session_date", { ascending: false })
-    .limit(1);
-  const priorSessionId = ((prior?.[0] as { id?: string } | undefined)?.id) ?? null;
-
-  const { data: attendance } = await client
-    .from("attendance")
-    .select("student_id, status")
-    .eq("class_session_id", sessionId);
-  const attendanceOf = new Map(
-    ((attendance ?? []) as Array<{ student_id: string; status: string }>).map((a) => [a.student_id, a.status]),
+  /*
+   * ⚠️ THE CARRY-OVER'S OWN READ, AND THE MOST DANGEROUS ONE ON THIS SURFACE.
+   * A rejection here previously became `priorSessionId = null`, i.e. "there is
+   * no previous session" — so the roster would render EVERY learner with no
+   * carried-over previous-session focus and look completely normal. That is
+   * `CLAUDE.md` §10 Phase 1 exit condition (c) silently not holding, which is
+   * precisely the guarantee the G-3 prohibition exists to protect.
+   */
+  const prior = await readRows<{ id?: string }>(
+    "getSessionRosterCore:class_sessions(prior)",
+    () =>
+      client
+        .from("class_sessions")
+        .select("id, session_date")
+        .eq("class_module_id", session.class_module_id)
+        .lt("session_date", session.session_date)
+        .order("session_date", { ascending: false })
+        .limit(1),
   );
+  if (!prior.ok) return { outcome: "unavailable" };
+  const priorSessionId = prior.rows[0]?.id ?? null;
 
-  const students = await listEnrolledStudents(client, session.class_module_id);
+  /*
+   * ⛔ A REJECTED ATTENDANCE READ MUST NOT BECOME "no row recorded". `A-018`
+   * materializes the Present default LAZILY, so "no row" is a REAL committed
+   * state that `attendanceRecorded: false` reports and that the governed
+   * compare-and-set depends on. A rejection rendered as "no row" would feed
+   * the trainer's toggle a false `expectedStatus` and be answered
+   * `stale_state`, with nothing on the surface able to explain why.
+   */
+  const attendance = await readRows<{ student_id: string; status: string }>(
+    "getSessionRosterCore:attendance",
+    () => client.from("attendance").select("student_id, status").eq("class_session_id", sessionId),
+  );
+  if (!attendance.ok) return { outcome: "unavailable" };
+  const attendanceOf = new Map(attendance.rows.map((a) => [a.student_id, a.status]));
+
+  const enrolled = await listEnrolledStudents(client, session.class_module_id);
+  if (!enrolled.ok) return { outcome: "unavailable" };
+  const students = enrolled.rows;
   const out: RosterEntryDto[] = [];
   for (const student of students) {
     const state = await workingState(client, sessionId, student.studentId);
@@ -415,8 +481,18 @@ export async function getTrainerWorkingReportCore(
   const row = firstRow<WorkingReportRow>(data);
   if (!row) return { outcome: "unavailable" };
 
-  const { data: students } = await client.from("students").select("id, full_name").eq("id", studentId);
-  const displayName = ((students?.[0] as { full_name?: string } | undefined)?.full_name) ?? "Student";
+  /*
+   * ⚠️ Fail-CLOSED rather than fail-soft, and the difference matters on this
+   * surface: the trainer approval confirmation NAMES the learner. Rendering
+   * the placeholder "Student" because a read was rejected would ask a trainer
+   * to approve a report for someone the screen could not name.
+   */
+  const students = await readRows<{ full_name?: string }>(
+    "getTrainerWorkingReportCore:students",
+    () => client.from("students").select("id, full_name").eq("id", studentId),
+  );
+  if (!students.ok) return { outcome: "unavailable" };
+  const displayName = students.rows[0]?.full_name ?? "Student";
 
   const observation = await getTrainerObservationCore(client, sessionId, studentId);
   const coachNotes =
@@ -500,8 +576,11 @@ export async function listReturnedReportsCore(
   const sessions = assigned.rows;
   const out: ReturnedReportQueueItemDto[] = [];
   for (const session of sessions) {
-    const students = await listEnrolledStudents(client, session.class_module_id);
-    for (const student of students) {
+    const enrolled = await listEnrolledStudents(client, session.class_module_id);
+    // ⛔ A rejection here would silently shorten the RETURNED-CORRECTIONS
+    // queue — a trainer would be told they have no corrections outstanding.
+    if (!enrolled.ok) return { outcome: "unavailable" };
+    for (const student of enrolled.rows) {
       const state = await workingState(client, session.id, student.studentId);
       if (!state || state.status !== "needs_edit" || !state.open_correction_request_id) continue;
       out.push({

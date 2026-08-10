@@ -80,3 +80,53 @@ export function reportQueryFailure(context: string, failure: QueryFailure | null
  * single value that means both.
  */
 export type QueryOutcome<T> = { readonly ok: true; readonly rows: T } | { readonly ok: false };
+
+/** The shape a `@supabase/supabase-js` builder resolves to. */
+interface QueryResponse {
+  readonly data: unknown;
+  readonly error: QueryFailure | null;
+}
+
+/**
+ * Run a read and return a `QueryOutcome` — the ONE place the three cases are
+ * decided.
+ *
+ * ⚠️ THIS EXISTS BECAUSE THE DEFECT WAS A REPEATED SHAPE, NOT A TYPO. Sixteen
+ * call sites in this codebase collapsed a rejection into an empty array: two
+ * wrote `if (error || !data) return []`, and **fourteen never destructured
+ * `error` at all**, so the rejection was discarded before anything could
+ * check it. Hand-writing the correct three-case block sixteen times would
+ * leave sixteen chances to write it wrong again, and the seventeenth call
+ * site would start the cycle over.
+ *
+ * ▶ **The three cases, decided once:**
+ * 1. `error` — the read was REJECTED. Report it, return `{ ok: false }`.
+ * 2. `!data` with no error — the driver gave neither rows nor a reason.
+ *    ⛔ **This is NOT an empty result.** An emptiness must be OBSERVED before
+ *    it may be reported, and nothing here observed one.
+ * 3. rows — the only case that may be reported as data, `[]` included.
+ *
+ * ⚠️ `context` MUST be a short, static, developer-authored label naming the
+ * read and the relation (`"listEnrolledStudents:enrolments"`). ⛔ Never
+ * interpolate a value into it: it is written to a log, and the whole point of
+ * `reportQueryFailure`'s design is that no caller datum can reach that log.
+ */
+export async function readRows<TRow>(
+  context: string,
+  run: () => PromiseLike<QueryResponse>,
+): Promise<QueryOutcome<TRow[]>> {
+  const { data, error } = await run();
+
+  if (error) {
+    reportQueryFailure(context, error);
+    return { ok: false };
+  }
+  if (data === null || data === undefined) {
+    reportQueryFailure(context, {
+      code: null,
+      message: "the driver returned neither rows nor an error",
+    });
+    return { ok: false };
+  }
+  return { ok: true, rows: data as TRow[] };
+}

@@ -52,6 +52,7 @@ import { OpenAiDraftProvider } from "@/server/modules/ai-drafting/provider";
 import { createTrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store-transport";
 import { emitDraftDiagnostic } from "@/server/modules/ai-drafting/draft-diagnostics";
 import type { TrustedDraftStore } from "@/server/modules/ai-drafting/trusted-store";
+import { readRows } from "@/server/platform/query-diagnostics";
 
 export async function saveObservation(
   input: SaveObservationInput,
@@ -124,16 +125,40 @@ export async function requestDraft(
     };
   }
 
+  /*
+   * ⚠️ THE LEARNER'S NAME IS READ HERE, BEFORE `requestDraftCore`, AND A
+   * REJECTION FAILS THE ACTION.
+   *
+   * It used to be read inside the `readStudentDisplayName` callback, which
+   * never destructured `error` — and `request-draft-core` substitutes
+   * `"the student"` for a null. ⛔ So a REJECTED read did not merely lose a
+   * name: it sent a prompt built from a placeholder to the LLM, produced a
+   * real draft addressing "the student", and persisted it as a governed
+   * `report_version`. Nothing downstream could tell that from a learner whose
+   * name is genuinely unrecorded.
+   *
+   * ⚠️ Hoisting it keeps the fix INSIDE this module. The alternative was to
+   * widen `RequestDraftDeps.readStudentDisplayName` to carry a failure
+   * channel, which would have rippled a contract change through
+   * `ai-drafting`'s governed core — grounding, idempotency and persistence —
+   * to fix a read that belongs to this module. **The null fallback survives
+   * for its legitimate case** (a genuinely absent name); what no longer
+   * reaches it is a rejection.
+   */
+  const studentRows = await readRows<{ full_name?: string }>(
+    "requestDraft:students",
+    () => client.from("students").select("id, full_name").eq("id", input.studentId),
+  );
+  if (!studentRows.ok) return { outcome: "unavailable" };
+  const studentDisplayName = studentRows.rows[0]?.full_name ?? null;
+
   return requestDraftCore(
     {
       db: client,
       provider,
       trustedStore,
       authUserSub: userData.user.id,
-      readStudentDisplayName: async (studentId: string) => {
-        const { data } = await client.from("students").select("id, full_name").eq("id", studentId);
-        return ((data?.[0] as { full_name?: string } | undefined)?.full_name) ?? null;
-      },
+      readStudentDisplayName: async () => studentDisplayName,
     },
     input,
   );

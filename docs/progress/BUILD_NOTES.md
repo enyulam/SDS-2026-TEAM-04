@@ -5601,3 +5601,94 @@ The explanatory comment was first placed as `{/* … */}` **directly inside a `?
 ### Carried
 
 **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface — this is a source-level proof and does not change that.
+
+---
+
+## 2026-08-11 — ⛔ **THE INSTRUMENT AGREED WITH ITSELF WHILE THE THING UNDER TEST WAS INERT** — two defects that together define a family
+
+> **Operator-directed entry, 2026-08-11.** The template-literal defect already has its own record. This one pairs it with the `prove:hero-13` defect, because *"they are the same family and together they define it."* Neither alone shows the shape; the two together do.
+
+### The two
+
+**1 — the harness never parsed.** (`prove:hero-8`, Phase 11.) Backticks inside a template literal made the module a syntax error. It never parsed, never imported, **never ran one of its fourteen legs**. The regression sweep matched stdout for `RESULT: [A-Z]*`, and **Node's `SyntaxError` report echoes the offending source line — which was the success message, containing the literal `RESULT: PASS`.** The sweep reported the suite green.
+
+**2 — the subject never compiled.** (`prove:hero-13`, the `/parent` copy fix.) The explanatory comment was placed as `{/* … */}` directly inside a `? :` branch, where JSX permits a single expression and not a children-position comment. **All seventeen legs passed** — the new strings were present, the old ones gone — against a file **`tsc` rejected with six errors**.
+
+### ⚠️ Why they are one family
+
+| | Defect 1 | Defect 2 |
+|---|---|---|
+| What was inert | the **harness** | the **subject** |
+| What the evidence was | the harness's own **success string**, echoed by a crash | the subject's own **source text**, read from a file that could not compile |
+| What the suite believed | it had run | it had measured running code |
+| What was actually true | **nothing executed** | **nothing was reachable** |
+
+▶ **THE SHAPE: A MEASUREMENT WAS TAKEN OF SOMETHING THAT WAS NOT THERE, AND THE MEASUREMENT AGREED WITH ITSELF.** In both, every internal consistency check the instrument could perform passed — because the instrument was consistent; it was the *link to reality* that was missing.
+
+⚠️ **Neither could be caught by looking harder at the text.** That is what separates this family from the earlier ones this project has met. `bool_and` over zero rows, the `CANONICAL_CONTAINERS` inversion and the S-8 gate were all **assertions passing because the object they measured did not exist** — but in each, the object was *data*, and a second query could see the problem. Here the missing link is **execution** and **compilation**, which no amount of reading reveals.
+
+⛔ **And both fail GREEN.** A crash is honest. These produce exactly the string a reader looks for, in the expected format, on a line there is no reason to distrust.
+
+### The two rules, and why each needs its own mechanism
+
+1. ⛔ **NEVER DECIDE A SUITE'S VERDICT BY MATCHING ITS OUTPUT — EXIT CODE IS THE ONLY VERDICT.** A process that died before running anything can print any string it contains. → `npm run prove:hero-all` (plan §12 item 17).
+2. ⛔ **A PROOF THAT READS TEXT CANNOT TELL YOU THE TEXT IS REACHABLE.** → `scripts/tests/hero/reachability-gate.mjs`, called first by every source-reading suite (plan §12 item 19).
+
+⚠️ **Rule 1's mechanism does not catch rule 2's defect, and vice versa.** `prove:hero-13` **exited 0** — the exit-code sweep was perfectly satisfied — because the *suite* ran fine; it was the *subject* that was broken. Conversely a reachability gate would not have noticed a harness that never parsed, since nothing of the gate would have run either. ▶ **Two failure modes, two mechanisms, and neither is redundant.**
+
+### The gate, and proof that it discriminates
+
+`assertReachable()` runs **`tsc --noEmit`** live, and verifies that **`.next/BUILD_ID` — written only on a SUCCESSFUL build — post-dates the newest source file.** A failed build leaves the previous `BUILD_ID` behind, which is then *older* than the edit, so the check fails closed.
+
+⚠️ **Proven discriminating, not assumed.** A deliberate type error was written into a temporary file inside the project, `prove:hero-14` was run, and **both `R-0a` and `R-0b` FAILED**; the probe was deleted and `tsc` verified clean again. A gate that has never been seen to fail is a gate nobody has tested — which is the whole lesson of this entry, applied to the fix for it.
+
+### What it cost
+
+**Nothing shipped wrong from either.** Both were caught the same way — by running one thing alone and looking at what actually happened. ⚠️ **Both were caught by habit rather than by design**, and that is the honest statement: *a defect found by luck is not a defect handled.* The two mechanisms above are what replaces the luck.
+
+---
+
+## 2026-08-11 — **`QueryOutcome` ACROSS `report-workflow`** — module 1 of 3
+
+**Track:** the remaining 15 sites, Operator-authorized. **Branch:** `develop`. **Starting HEAD:** `f5d13af`.
+
+### The mechanism, built once
+
+**`readRows(context, run)`** in `server/platform/query-diagnostics.ts` decides the three cases in ONE place:
+
+1. `error` → report, `{ ok: false }`.
+2. `!data` with no error → ⛔ **not an empty result.** An emptiness must be **observed** before it may be reported, and nothing here observed one. Report, `{ ok: false }`.
+3. rows → the only case reportable as data, `[]` included.
+
+⚠️ **This exists because the defect was a REPEATED SHAPE, not a typo.** Hand-writing the correct three-case block sixteen times would leave sixteen chances to write it wrong again, and the seventeenth call site would start the cycle over.
+
+⛔ **The credential property is preserved by construction:** `readRows` passes only a **static developer-authored label** and the driver's error to `reportQueryFailure`, which copies **four named fields** and never spreads. **Nothing to redact, rather than a filter to trust.**
+
+### The seven sites in this module
+
+| Read | What its silent failure produced |
+|---|---|
+| `listEnrolledStudents:enrolments` | ⛔ the identical `error \|\| !data → []`, **same file, same surface** as the first fix — the roster could still empty silently through it. **Half a fix is not a fix.** |
+| `listEnrolledStudents:students` | every learner silently became the placeholder **"Student"** |
+| `listTrainerSessionsCore:class_modules` / `:class_grades` | a session with a blank module and grade |
+| `getSessionRosterCore:class_sessions(prior)` | ⚠️ **the worst one.** A rejection became *"there is no previous session"*, so the roster rendered **every learner with no carried-over focus and looked entirely normal** — `CLAUDE.md` §10 Phase 1 exit condition (c) silently not holding |
+| `getSessionRosterCore:attendance` | a rejection became *"no row recorded"*, which is a **real committed state** under A-018's lazy default. It would feed the governed compare-and-set a false `expectedStatus`, be answered `stale_state`, and nothing on screen could explain why |
+| `getTrainerWorkingReportCore:students` | the trainer approval confirmation **names the learner** — this would have asked a trainer to approve a report for someone the screen could not name |
+| `requestDraft:students` | ⛔ **the most consequential.** A rejection became `null`, which `request-draft-core` substitutes as **"the student"** — so a prompt built from a placeholder went to the LLM, produced a real draft addressing "the student", and **persisted it as a governed `report_version`.** Indistinguishable downstream from a learner whose name is genuinely unrecorded |
+
+⚠️ **`requestDraft:students` was hoisted OUT of the `readStudentDisplayName` callback and read before `requestDraftCore`.** The alternative was widening `RequestDraftDeps` to carry a failure channel, **rippling a contract change through `ai-drafting`'s governed core — grounding, idempotency, persistence — to fix a read belonging to this module.** The null fallback survives for its legitimate case; what no longer reaches it is a rejection.
+
+### Verification — `npm run prove:hero-14`, 17 legs, `PASS`
+
+- ⚠️ **`R-0a`/`R-0b` REACHABILITY FIRST.** See the paired-defect entry above: a source-reading suite must first establish that the code compiles and that a successful build post-dates it.
+- **`W-1`** reproduces a **real** rejection on `enrolments` — the relation `listEnrolledStudents` actually queries — with `W-1b` discriminating and `W-1c` measuring the database unmoved.
+- **`W-2`** zero of **both** defective shapes remain in the module.
+- **`W-3`** all eight reads go through `readRows`; every context label names read **and** relation, is a **static literal** (⛔ no caller datum can be interpolated into a log line), and is unique.
+- **`W-4`** thirteen guards, each returning the non-disclosing `unavailable` or propagating `{ ok: false }`. **`W-4c`** ⛔ no rejection is reported as `unauthorized` — **a schema fault must never be presented as a permission decision.**
+- **`W-5`** names the two whose silent failure would have been worst.
+
+### Counts
+
+`tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** · **`prove:hero-all` 15/15 `PASS`** · database **untouched**: 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies.
+
+**Remaining, measured:** **0** exact-shape and **0** discarded-error sites in `report-workflow`; **7 remain** — 3 in `management-view`, 4 in `parent-view` — module 2 and module 3.
