@@ -92,6 +92,21 @@ export type TrainerSessionSummaryDto = {
    */
   readonly room: string | null;
   readonly trainerDisplayName: string | null;
+  /**
+   * Hero Phase 4 (screen `06` lesson strip). NULL MEANS NOT RECORDED — OMIT
+   * the element. Never "Lesson 1", never "TBC".
+   *
+   * ⛔ LESSON IDENTITY ONLY (G-3). There is NO KEY FOCUS field and none may be
+   * added. KEY FOCUS is lesson-plan INTENT; `RosterEntryDto.previousSessionFocus`
+   * is the trainer's own GOVERNED carried-over focus, derived from
+   * `observations.follow_up_notes`. ⚠️ They occupy the same visual position in
+   * the frame, so conflating them would silently replace a governed field with
+   * an ungoverned one — invisibly, on the rendered page. No lesson field may be
+   * rendered into the carried-over focus line, or into any surface that
+   * presents the governed focus.
+   */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
 };
 
 export type RosterEntryDto = {

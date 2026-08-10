@@ -698,6 +698,8 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
           // path, which is a real rendering case and not a gap.
           room: session.room ?? null,
           trainerDisplayName: session.trainerName ?? null,
+          lessonNumber: session.lessonNumber ?? null,
+          lessonTitle: session.lessonTitle ?? null,
         };
       }),
     };

@@ -296,6 +296,8 @@ export async function adapterListTrainerSessions(): Promise<
       // to tell "not recorded" from "recorded as empty" to omit correctly.
       room: session.room,
       trainerDisplayName: session.trainerDisplayName,
+      lessonNumber: session.lessonNumber,
+      lessonTitle: session.lessonTitle,
     })),
   };
 }

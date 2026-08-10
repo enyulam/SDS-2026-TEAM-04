@@ -442,3 +442,57 @@ Ending commit:                 recorded in docs/progress/STATUS.md and in the ad
 Acceptance status:             PASS is this session EVIDENCE verdict only.
                                Accepted is OPERATOR-SET ONLY and has NOT been set.
 ```
+
+### HERO CHAIN plan Phase 4 — 2026-08-10 — the lesson strip, the banner trainer, and the G-3 boundary
+
+**Track:** hero chain completion, plan §8 Phase 4. **Branch/worktree:** `develop` / none. **Starting HEAD:** `34d234e`.
+
+### Scope
+
+Banner: `Junior · Public Speaking · Studio 2` and `Trainer: <name>`. Lesson strip: `Lesson N · Title` as the headline, with module, Class Grade, date and room beneath. Every segment **disappears** when its field is NULL — with no lesson recorded the headline falls back to the governed Class Module **exactly as before**, which is the pre-existing title and not a placeholder standing in for a lesson.
+
+**Two recorded divergences discharged, both of which were DEPENDENCIES rather than ruled omissions:** **D2** (*"no lesson number, lesson title or room field exists on `TrainerSessionSummaryDto`"*) and **D5** (*"the projection carries no assignment-name field"*). Both were correct when written and deliberately not invented around.
+
+### ⛔ The G-3 boundary is the point of this phase, and it is asserted in THREE layers
+
+The frame draws **KEY FOCUS** chips in *exactly* the visual position the roster already uses for the trainer's **governed carried-over previous-session focus**. KEY FOCUS is lesson-plan **intent**; `previousSessionFocus` comes from the trainer's own `observations.follow_up_notes` on the previous session of the same module. ⚠️ **Conflating them would silently replace a governed field with an ungoverned one, and the strip would still look correct.** `CLAUDE.md` §10 Phase 1 exit condition **(c)** depends on that not happening.
+
+* **Schema** — `P4-5`: no `focus` / `slide` / `lesson_plan` / `material` column on `class_sessions`, **and `observations.focus_chips` is still present.** Both halves: asserting only the absence would pass equally well on a schema that had *lost* the governed chips.
+* **Contract** — `P4-7d/e/f`: the session DTO carries the lesson fields and **no** KEY FOCUS / slides / attachment / lesson-plan field; `RosterEntryDto.previousSessionFocus` is **still there and was not replaced**.
+* **JSX** — `P4-7a/b/c`: ⚠️ **this is the layer that matters, and the database cannot enforce it.** Both values are legitimately readable by the same trainer on the same page, so the violation would happen entirely in the component. The check locates the carried-focus block **by its own label**, asserts **no lesson token appears inside it**, *and* asserts the block **still renders `carriedFocus`** — an emptied block would otherwise satisfy the first assertion perfectly.
+
+**The frame's region is kept, filled from the governed focus, and LABELLED FOR WHAT IT IS.** That label is the safeguard, and Phase 4 changed neither it nor its source.
+
+### ⚠️ A leg was WRONG and the harness caught it — recorded, because the refusal was right
+
+`P4-4`'s first revision selected `observations.follow_up_notes` **directly** as `authenticated` and was refused: **`permission denied for table observations`.**
+
+**The refusal was correct and the leg was wrong.** `authenticated` holds **no table grant** on `observations` — deliberate deny-by-default (A-030: *privilege and policy are separate layers*), and `getSessionRosterCore` reads the carry-over through **`assessment_get_trainer_observation`**, never the table.
+
+▶ **The fix made the evidence stronger, not weaker.** Reading through the RPC proves the boundary **on the path the roster actually uses**, rather than on a table the application never touches. ⚠️ **It would have been easy to "fix" this by granting `SELECT` on `observations` to `authenticated`** — which §12 names explicitly: *never work around a fail-closed refusal by weakening the thing that refused.* The grant was not touched.
+
+⚠️ **Note also what did NOT happen: the runner reported `FAIL` with `3/6` legs and did not report green.** The pinned literal leg count is what made an aborted suite visible; `passes > 0` would have shown four passes and looked fine.
+
+### Verification
+
+- **`npm run prove:hero-4` — 6 SQL legs + 6 contract/JSX legs, ALL PASS, 0 FAIL.** Transaction-scoped ending in `ROLLBACK`; counts `0|0|0|0|0|1` → **unchanged**, so the lesson/room write left nothing behind.
+  - ⚠️ **`P4-1` NON-VACUITY, FIRST** — a **real carry-over pair** exists (prev `e5…0001` → curr `e5…0002`, note length 129), supplied by the `P1-T09a` fixture expansion. It **raises** rather than continuing if absent: a carry-over that does not exist cannot be proven undisturbed.
+  - `P4-4` the governed carried-over note is **byte-unchanged** after lesson identity was written, and contains no lesson value.
+  - `P4-6` an unauthenticated caller reaches neither the session row nor the staff identity.
+- **No database object added.** Migrations **20**, unchanged.
+- `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · **route census 17** · `session-eligibility` **PASS** · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS**.
+- **Emitted-CSS verified** for all four classes used; **no new class** — compiled stylesheet still **45,748 bytes**.
+
+### Preserved, unchanged
+
+⛔ **KEY FOCUS chips** (G-3) · **SLIDES** chips and **View lesson plan**, which stays visibly inert with its stated reason (G-3, G-8 class) · **"CLASS IN SESSION"** live dot and eyebrow, still relabelled "Class Session" because the session-lifecycle enum is deferred and A-026 forbids inventing a placeholder · the frame's **eight synthetic learner cards** are still not ported.
+
+⚠️ **The strip's caption stays "This session"**, not the frame's "THIS LESSON": the block still carries session-level facts, and a caption rename is reconciliation work rather than this phase's delta.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`.** `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 5 (`07` Trainer Grade Student)** — rail bucket counts and per-learner status; all inputs already exist on `getSessionRosterCore`. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**

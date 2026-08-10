@@ -55,6 +55,23 @@ export interface TrainerSessionSummaryDto {
    */
   readonly room: string | null;
   readonly trainerDisplayName: string | null;
+  /**
+   * Hero Phase 4 (screen `06` lesson strip). Both NULLABLE — NULL MEANS NOT
+   * RECORDED, so the element is OMITTED. Never "Lesson 1", never "TBC".
+   *
+   * ⛔ LESSON IDENTITY ONLY (G-3). These are the lesson's NUMBER and TITLE.
+   * The frame's **KEY FOCUS chips are PROHIBITED** and no column exists for
+   * them: KEY FOCUS is lesson-plan INTENT, whereas `RosterEntryDto.
+   * previousSessionFocus` is the trainer's own governed carried-over focus,
+   * derived from `observations.follow_up_notes`. ⚠️ They occupy the same
+   * visual position in the frame, so conflating them would silently replace a
+   * governed field with an ungoverned one and the substitution would be
+   * invisible on the rendered page. **No lesson field may ever be rendered
+   * into the carried-over focus line, or into any surface presenting the
+   * governed focus** — this protects `CLAUDE.md` §10 Phase 1 exit (c).
+   */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
 }
 
 export interface RosterEntryDto {
@@ -146,8 +163,10 @@ interface SessionRow {
   starts_at: string | null;
   ends_at: string | null;
   class_module_id: string;
-  /** Hero Phase 0B, surfaced at Phase 3. Nullable; NULL means NOT RECORDED. */
+  /** Hero Phase 0B, surfaced at Phase 3/4. Nullable; NULL means NOT RECORDED. */
   room?: string | null;
+  lesson_number?: number | null;
+  lesson_title?: string | null;
 }
 
 async function listAssignedSessions(client: SupabaseClient): Promise<SessionRow[]> {
@@ -155,7 +174,7 @@ async function listAssignedSessions(client: SupabaseClient): Promise<SessionRow[
   // active assignments, so a plain select IS the assigned-session list.
   const { data, error } = await client
     .from("class_sessions")
-    .select("id, session_date, starts_at, ends_at, class_module_id, room")
+    .select("id, session_date, starts_at, ends_at, class_module_id, room, lesson_number, lesson_title")
     .order("session_date", { ascending: true });
   if (error || !data) return [];
   return data as SessionRow[];
@@ -255,6 +274,8 @@ export async function listTrainerSessionsCore(
       countsByReportState: counts,
       room: session.room ?? null,
       trainerDisplayName: staffById?.get(session.id)?.trainerDisplayName ?? null,
+      lessonNumber: session.lesson_number ?? null,
+      lessonTitle: session.lesson_title ?? null,
     });
   }
   return { outcome: "success", data: out };

@@ -78,6 +78,14 @@ export interface AdapterTrainerSessionSummaryDto {
    */
   readonly room: string | null;
   readonly trainerDisplayName: string | null;
+  /**
+   * Hero Phase 4 (screen `06`). NULL means NOT RECORDED — omit the element.
+   * ⛔ Lesson IDENTITY only. There is no KEY FOCUS field and none may be
+   * added (G-3): lesson-plan intent must never be rendered into, or beside,
+   * the governed carried-over previous-session focus.
+   */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
 }
 
 export interface AdapterRosterEntryDto {

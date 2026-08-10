@@ -18,11 +18,11 @@
 
 ## ▶ WHERE THIS STOPPED
 
-**Position:** hero **Phases 0A, 0B, 1 ✅ OPERATOR-ACCEPTED**; **Phases 2 (`32`) and 3 (`05`) built, proven and committed**.
-**Next:** **Phase 4 — `06` Trainer Student Roster** (trainer banner, lesson strip, room). ⛔ **KEY FOCUS prohibited (G-3)** and never rendered into the governed carried-over focus line.
+**Position:** hero **Phases 0A, 0B, 1 ✅ OPERATOR-ACCEPTED**; **Phases 2 (`32`), 3 (`05`) and 4 (`06`) built, proven and committed**.
+**Next:** **Phase 5 — `07` Trainer Grade Student** (rail bucket counts and per-learner status; all inputs already exist on `getSessionRosterCore`).
 ⛔ **HARD STOP BEFORE `F-S6-REVIEW-1` (revision-2 Phase 7)** — report before building it.
 
-**Outstanding Operator `Accepted`: Phases 2 and 3.**
+**Outstanding Operator `Accepted`: Phases 2, 3 and 4.**
 
 ---
 
@@ -31,10 +31,10 @@
 | | |
 |---|---|
 | Branch / worktree / tree | `develop` / none / **clean** |
-| HEAD | resolve with `git rev-parse HEAD`. Phase boundaries: `bdfe56b` (0A) · `1486a54` (0B) · `2e72287` (1) · `d3651ee` (2) · this commit (3) |
+| HEAD | resolve with `git rev-parse HEAD`. Phase boundaries: `bdfe56b` (0A) · `1486a54` (0B) · `2e72287` (1) · `d3651ee` (2) · `34d234e` (3) · this commit (4) |
 | Ahead of `origin/develop` | **NONE pushed** |
 | Authorization in force | **BATCH:** the remaining hero phases **in plan order, autonomously**, commit at **every** phase boundary, **stop before `F-S6-REVIEW-1`** |
-| Database | ✅ Local **`best-coach-dev`**. **20 migrations · 27 tables · 41 functions · 12 enums · 29 policies.** Governed counts **`reports` 0 · `report_versions` 0 · `audit_events` 0** — unmoved. **Neither Phase 2 nor Phase 3 added a database object** |
+| Database | ✅ Local **`best-coach-dev`**. **20 migrations · 27 tables · 41 functions · 12 enums · 29 policies.** Governed counts **`reports` 0 · `report_versions` 0 · `audit_events` 0** — unmoved. **No Phase 2, 3 or 4 added a database object** |
 
 ---
 
@@ -50,6 +50,8 @@
 **Phase 2 — `32` Parent Reports.** Row title = lesson title; meta line = Class Grade · Class Module · Lesson N · Trainer · Session date · Received. **No database object added** — it reuses Phase 1's context function rather than creating a second gate. **`prove:hero-2`: 6 SQL + 3 contract legs, all PASS**, canonical byte-unmoved, non-vacuity measured first.
 
 **Phase 3 — `05` Trainer Schedule.** The frame's `Studio 2` (G-6) and `Main: Sam Ong` (G-7); each row omitted entirely when NULL. **No database object added.** ⚠️ **The suite runs under `SET LOCAL ROLE authenticated`, not as the owner** — `class_sessions` is owner-owned and not `FORCE RLS`, and `room` was added by Phase 0B *after* the trainer policy was written, so readability was **measured, not reasoned about**. ⛔ **`Assist.` is refused in two places, neither the renderer:** the database returns at most one name and no session carries a second active assignment; the DTO has no second staff field to bind to. **G-6 asserted against the policy catalogue** — `room` appears in no `USING`/`WITH CHECK` expression. **`prove:hero-3`: 6 SQL + 3 contract legs, all PASS.**
+
+**Phase 4 — `06` Trainer Student Roster.** Banner room + `Trainer:` name; lesson strip `Lesson N · Title`. ⛔ **The G-3 boundary is asserted in three layers — schema, contract and JSX** — because the database cannot enforce it: both lesson identity and the governed carried-over focus are legitimately readable by the same trainer on the same page, so the violation would happen entirely in the component. ⚠️ **One leg was wrong and its refusal was right:** it read `observations` directly as `authenticated` and got `permission denied` (no table grant, by design). Fixed by reading through the RPC the roster actually uses — **stronger evidence, and the grant was not weakened**. **`prove:hero-4`: 6 SQL + 6 contract/JSX legs, all PASS.**
 
 ---
 

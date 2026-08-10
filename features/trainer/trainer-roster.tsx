@@ -89,18 +89,34 @@ import { asFailure, type ResourceState } from "./resource-state";
  *     plainly "do not invent a placeholder enum". A banner claiming a state no governed field
  *     carries would be a false claim, so the eyebrow names the governed entity — "CLASS
  *     SESSION" — and the frame's live dot is dropped with it. Same adjudication as F-04's D2.
- *  D2 "Lesson 3 · Voice & Projection" and its date/room line — no lesson number, lesson title
- *     or room field exists on `TrainerSessionSummaryDto`. Omitted rather than fabricated; the
- *     strip shows the governed Class Module, Class Grade, date and time instead.
- *  D3 "KEY FOCUS" chips — the frame's chips are lesson-plan tags with no governed backing. The
- *     region is kept but is filled from the ONLY governed focus data on this screen, the
- *     roster's carried-over previous-session focus, and is labelled for what it actually is.
+ *  D2 ✅ DISCHARGED AT HERO PHASE 4. It read: "no lesson number, lesson title or room field
+ *     exists on `TrainerSessionSummaryDto`. Omitted rather than fabricated". That was correct
+ *     when written and was deliberately not invented around — it was a RECORDED DEPENDENCY,
+ *     not a ruled omission. Phase 0B added `lesson_number`, `lesson_title` and `room` under
+ *     G-3 and G-6; Phase 3 carried room and the trainer onto this DTO and Phase 4 the lesson.
+ *     ⚠️ NULL still means NOT RECORDED: with no lesson the strip headline falls back to the
+ *     governed Class Module exactly as before, which is the PRE-EXISTING title and not a
+ *     placeholder standing in for a lesson.
+ *  D3 ⛔ "KEY FOCUS" chips — PROHIBITED, and this is the sharpest prohibition on the screen
+ *     (G-3, `FINAL_MVP_HERO_CHAIN_RULINGS.md` §3.2). They are lesson-plan INTENT — what a
+ *     lesson is DESIGNED to work on. The region in that position is filled from the ONLY
+ *     governed focus data here, the roster's carried-over previous-session focus, and is
+ *     LABELLED FOR WHAT IT ACTUALLY IS — which is the whole safeguard: the two occupy the same
+ *     visual position, so an unlabelled substitution would look correct while no longer showing
+ *     what the trainer wrote. ⚠️ NEITHER the label NOR the source may be changed, and no
+ *     lesson field may be rendered into this region or beside it as a second chip row. It is
+ *     what protects `CLAUDE.md` §10 Phase 1 exit condition (c). Phase 4 left both untouched.
  *  D4 "SLIDES" chips (KEY / PPTX attachments) — no governed material, attachment or lesson-plan
  *     field exists. The chips are omitted rather than faked, and "View lesson plan" keeps the
  *     frame's label but is rendered DISABLED with a visible, programmatically associated
  *     reason — the F-04 D1 / F-11 treatment for an affordance with no governed backing.
- *  D5 "Trainer: <name>" — the projection carries no assignment-name field (the same dependency
- *     F-04 recorded), so no staff identity is rendered.
+ *  D5 ✅ DISCHARGED AT HERO PHASE 4. It read: "the projection carries no assignment-name field
+ *     (the same dependency F-04 recorded), so no staff identity is rendered". Phase 0A built
+ *     the shared staff-identity read path and Phase 3 carried it onto this DTO, so the banner
+ *     now renders the frame's "Trainer: <name>" — omitted entirely when the session has no
+ *     active assignment, which is a real governed state.
+ *     ⛔ ONE NAME ONLY. There is no `Assist.` row and no second staff field to bind one to:
+ *     `centre_membership_role` is not extended and the TA persona stays deferred (G-7, A-014).
  *  D6 The frame draws EIGHT synthetic learner cards. Figma mock data is never ported
  *     (`GLOBAL_UI_RULES` §8): the grid renders exactly what the governed roster projection
  *     returns, in the frame's four-column composition.
@@ -274,6 +290,28 @@ export function TrainerRoster() {
     );
   }, [attendanceFilter, roster, sortMode]);
 
+  /*
+   * HERO PHASE 4 — the frame's "Lesson 3 · Voice & Projection", built from
+   * whichever of number/title is actually recorded and `null` when neither is.
+   *
+   * ⛔ THIS IS LESSON IDENTITY AND NOTHING ELSE (G-3). It must never be
+   * rendered into `carriedFocus` below, or beside it as a second chip row. The
+   * frame draws KEY FOCUS chips in that position; they are lesson-plan INTENT,
+   * `previousSessionFocus` is the trainer's own governed follow-up note, and
+   * conflating them would silently replace a governed field with an ungoverned
+   * one — invisibly, because the strip would still look right. That is what
+   * protects `CLAUDE.md` §10 Phase 1 exit condition (c).
+   */
+  const lessonLabel = useMemo(() => {
+    const session = state.kind === "ready" ? state.data.session : null;
+    if (session === null) return null;
+    const parts = [
+      session.lessonNumber === null ? null : `Lesson ${session.lessonNumber}`,
+      session.lessonTitle,
+    ].filter((part): part is string => part !== null && part.length > 0);
+    return parts.length === 0 ? null : parts.join(" · ");
+  }, [state]);
+
   /* Continuity summary — distinct carried-over focus notes across the live roster. */
   const carriedFocus = useMemo(
     () => [
@@ -364,11 +402,31 @@ export function TrainerRoster() {
               <span data-vocabulary="class-grade">{session.classGrade}</span>
               {" · "}
               {session.moduleName}
+              {/* HERO PHASE 4 — the frame's "Junior · Public Speaking · Studio 2".
+                  ⚠️ NULL means NOT RECORDED, so the segment and its separator
+                  disappear together; never a dangling "· " and never "TBC". */}
+              {session.room === null ? null : ` · ${session.room}`}
             </span>
           </h2>
           <p className="mt-1 text-[0.75rem] text-white/80">
             {formatDate(session.date)} · {session.startTime}–{session.endTime}
           </p>
+          {/*
+            HERO PHASE 4 — the frame's "Trainer: Argen Maulie". D5 is DISCHARGED:
+            it recorded that "the projection carries no assignment-name field (the
+            same dependency F-04 recorded)", which was correct at the time and was
+            deliberately not invented around. Phase 0A built the shared staff-identity
+            read path and Phase 3 carried it onto this DTO.
+
+            ⛔ ONE NAME. There is no `Assist.` row (G-7) and no second staff field to
+            bind one to — `centre_membership_role` is not extended and the TA persona
+            stays deferred (A-014).
+          */}
+          {session.trainerDisplayName === null ? null : (
+            <p className="mt-1 text-[0.75rem] text-white/80">
+              Trainer: {session.trainerDisplayName}
+            </p>
+          )}
         </div>
         <div className="mt-5 w-full max-w-[15rem] lg:mt-0">
           <p className="text-[0.75rem] font-medium text-white lg:text-right">
@@ -401,14 +459,46 @@ export function TrainerRoster() {
          */
         className="grid gap-5 rounded-card border-[1.5px] border-brand-200 bg-surface px-[22px] py-[18px] shadow-card lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_minmax(0,17rem)] lg:gap-6"
       >
+        {/*
+          HERO PHASE 4 — the frame's "Lesson 3 · Voice & Projection" over
+          "Tue 11 Mar · Studio 2". D2 is DISCHARGED for both halves: it recorded
+          that "no lesson number, lesson title or room field exists on
+          `TrainerSessionSummaryDto`", correctly, and Phase 0B added the columns
+          under G-3 and G-6.
+
+          ⚠️ NULL MEANS NOT RECORDED. With no lesson recorded the headline falls
+          back to the governed Class Module exactly as before — that is the
+          PRE-EXISTING title, not a placeholder standing in for a lesson. Room
+          drops out of the second line the same way.
+
+          ⚠️ The strip's CAPTION is deliberately left as "This session" rather
+          than moved to the frame's "THIS LESSON": this block still carries
+          session-level facts (module, Class Grade, date, room) and renames are
+          reconciliation work, not this phase's delta.
+        */}
         <div className="lg:border-r lg:border-line lg:pr-6">
           <StripLabel>This session</StripLabel>
           <p className="mt-1.5 text-[0.875rem] font-semibold text-ink-strong">
-            {session.moduleName}
+            {lessonLabel ?? session.moduleName}
           </p>
           <p className="mt-1 text-[0.6875rem] text-ink">
-            <span data-vocabulary="class-grade">{session.classGrade}</span> ·{" "}
-            {formatDate(session.date)}
+            {[
+              lessonLabel === null ? null : session.moduleName,
+              session.classGrade,
+              formatDate(session.date),
+              session.room,
+            ]
+              .filter((part): part is string => part !== null && part.length > 0)
+              .map((part, index) => (
+                <span key={part}>
+                  {index > 0 ? " · " : null}
+                  {part === session.classGrade ? (
+                    <span data-vocabulary="class-grade">{part}</span>
+                  ) : (
+                    part
+                  )}
+                </span>
+              ))}
           </p>
         </div>
 
