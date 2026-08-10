@@ -84,8 +84,16 @@ import { listManagementCorrectionsFromRpc } from "@/server/modules/management-vi
 import { resolveReportContextCore } from "@/server/modules/report-workflow/context-resolver.ts";
 import { getCanonicalReportCore } from "@/server/modules/parent-view/projections.ts";
 
+import { resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
+
 const ROOT = process.cwd();
-const CONTAINER = "supabase_db_best-coach-mvp";
+// ⚠️ NOT A LITERAL. This was `supabase_db_best-coach-mvp` — the FROZEN
+// demonstration container — and with both local stacks running that name
+// RESOLVED, so this harness reached the demonstration database instead of
+// this repository's. Guarded resolution: unconditional non-overridable HARD
+// DENY of the frozen project, then a fail-closed pin from
+// BEST_COACH_LOCAL_PROJECT_ID. Container name DERIVED, never literal.
+const { dbContainer: CONTAINER } = resolveLocalTarget();
 const SEED_DB = "bc_b2_seed";
 const WORK_DB = "bc_b2";
 

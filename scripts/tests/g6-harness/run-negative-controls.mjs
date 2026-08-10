@@ -48,6 +48,8 @@ import {
   panelsMateriallyDiffer,
   parseArgs,
 } from "../../physical-test/activate-g6.mjs";
+import { resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
+
 import { requireRatifiedLlmConfig } from "@/server/platform/llm-config.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -283,8 +285,13 @@ function testTtyAndLlmGates() {
 // NC-TEARDOWN -- teardown runs on an aborting exception and on Ctrl+C.
 // =====================================================================
 function anyDisposableDbPresent() {
+  // ⚠️ NOT A LITERAL. This was `supabase_db_best-coach-mvp` — the FROZEN
+  // demonstration container — so this probe asked the DEMONSTRATION database
+  // whether THIS harness's disposable databases existed, and would have
+  // reported "none present" no matter what this clone had left behind.
+  const { dbContainer } = resolveLocalTarget();
   const r = spawnSync("docker", [
-    "exec", "-i", "supabase_db_best-coach-mvp", "psql", "--no-psqlrc", "--username=postgres",
+    "exec", "-i", dbContainer, "psql", "--no-psqlrc", "--username=postgres",
     "--dbname=template1", "--quiet", "-t", "-A",
   ], { input: "SELECT datname FROM pg_database WHERE datname IN ('bc_g6_seed','bc_g6');\n" });
   return r.stdout.toString().trim();

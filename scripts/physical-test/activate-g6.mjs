@@ -129,6 +129,8 @@ import { saveObservationCore, getTrainerObservationCore } from "@/server/modules
 import { validateGrounding } from "@/server/modules/ai-drafting/grounding.ts";
 import { POLARITY_BANDS } from "@/server/modules/framework/dimensions.ts";
 
+import { resolveLocalTarget } from "../fixtures/local-target-guard.mjs";
+
 // =====================================================================
 // SafeError — every message here is AUTHORED in this repository. Nothing
 // derived from captured child output, a provider response, or an
@@ -257,7 +259,13 @@ EXIT CODES
 // harness can never collide with `run-integration.mjs`'s own
 // `bc_b2_seed` / `bc_b2` disposable databases.
 // =====================================================================
-const CONTAINER = "supabase_db_best-coach-mvp";
+// ⚠️ NOT A LITERAL. This was `supabase_db_best-coach-mvp` — the FROZEN
+// demonstration container — and with both local stacks running that name
+// RESOLVED, so this harness reached the demonstration database instead of
+// this repository's. Guarded resolution: unconditional non-overridable HARD
+// DENY of the frozen project, then a fail-closed pin from
+// BEST_COACH_LOCAL_PROJECT_ID. Container name DERIVED, never literal.
+const { dbContainer: CONTAINER } = resolveLocalTarget();
 const SEED_DB = "bc_g6_seed";
 const WORK_DB = "bc_g6";
 

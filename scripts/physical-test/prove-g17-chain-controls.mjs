@@ -58,7 +58,15 @@ import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const CONTAINER = 'supabase_db_best-coach-mvp'
+import { resolveLocalTarget } from "../fixtures/local-target-guard.mjs"
+
+// ⚠️ NOT A LITERAL. This was `supabase_db_best-coach-mvp` — the FROZEN
+// demonstration container — and with both local stacks running that name
+// RESOLVED, so this harness reached the demonstration database instead of
+// this repository's. Guarded resolution: unconditional non-overridable HARD
+// DENY of the frozen project, then a fail-closed pin from
+// BEST_COACH_LOCAL_PROJECT_ID. Container name DERIVED, never literal.
+const { dbContainer: CONTAINER } = resolveLocalTarget()
 const CANONICAL = 'postgres'
 const SEED_DB = 'bc_g17_seed'
 const WORK_DB = 'bc_g17'

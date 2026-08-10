@@ -4528,3 +4528,56 @@ Continuity only. **Next: the Operator authorizes Plan Phase 0A in a fresh sessio
 ### Commit / next
 
 **Next: sweep the remaining `scripts/` frozen literals — Operator-authorized, bounded, BEFORE Plan Phase 0A.** With both stacks running, every remaining literal is a live path to the demonstration database, and Phase 0A onward runs harnesses constantly. **Phase 0A is NOT authorized.**
+
+---
+
+## 2026-08-10 — `scripts/` frozen-literal sweep (bounded Operator task, before Plan Phase 0A)
+
+- **Track / branch / worktree:** isolation remediation · `develop` · none.
+- **Starting HEAD:** `5b49490`.
+- **Scope:** enumerate and retarget every live path under `scripts/` that named the frozen demonstration project. Authorized as a bounded task **before Plan Phase 0A**, on the Operator's reasoning that with both local stacks running every such literal is a **live** path to the demonstration database, and Phase 0A onward runs harnesses constantly.
+- **Migration or schema changes:** **NONE.** No governed surface touched — no schema, RPC, DTO, projection, grant, policy, audit action or route.
+
+### Enumeration — reported BEFORE any fix, so the list could not be retrofitted
+
+**45 live (non-comment) occurrences across 25 files**, classified in three groups.
+
+**LEGITIMATE — the literal IS the mechanism (4 files, 12 occurrences, unchanged):** `local-target-guard.mjs:59` and `hosted-target-guard.mjs:44` (the guards' own frozen constants) · `prove-local-target-guard.mjs` ×9 and `prove-hosted-target-guard.mjs:57` (deny-proof **inputs** — removing them would delete the proof).
+
+**FIXED — 19 files.** Seventeen carried a plain `const CONTAINER = 'supabase_db_best-coach-mvp'`. Two were worse:
+
+⚠️ **`disposable-stack.mjs:84–95` — INVERTED PROTECTION, the most serious find of the sweep.** `CANONICAL_CONTAINERS` is documented *"Every container the canonical stack owns. None of these is ever touched"* and is consumed by five `prove-disposable-*` harnesses for teardown protection and isolation assertions. All ten entries were frozen literals, so the list **protected the demonstration stack and left this clone's own `supabase_*_best-coach-dev` containers unprotected**. Concretely: `prove-disposable-isolation.mjs:373` tests disposable/canonical container **overlap** against the wrong set, so a disposable container colliding with one of THIS repository's containers **would not have been detected**; and the "all canonical containers still running" assertions passed only because the demonstration stack happens to be up — they proved nothing about the stack being protected. ⚠️ **`CANONICAL_DB_CONTAINER` ten lines above had already been retargeted through the guard in the earlier pass; the array was missed.** Both now derive from one resolved project id, which is what makes them incapable of disagreeing.
+
+⚠️ **`load-local-fixtures.mjs:903` — an operator-facing instruction to write to the frozen database.** The expansion-teardown error hands the Operator a remediation command to copy and run; it named `docker exec -i supabase_db_best-coach-mvp`. **No guard intercepts a human copying a command out of an error message**, which makes a stale literal in operator-facing text *more* dangerous than one on a code path, not less. The file already resolved `DB_CONTAINER` correctly at line 56 — the string was stale. Now interpolated.
+
+Also fixed: `run-negative-controls.mjs:287`, where the teardown probe asked the **demonstration** database whether **this** harness's disposable databases existed — it would have reported "none present" regardless of what this clone had left behind.
+
+**REPORTED, DELIBERATELY NOT FIXED — hosted surface (2 files, 4 occurrences).** `hosted-cdp.mjs:20–21` and `run-f-hosted-draft.mjs:31–32` pin `best-coach-mvp.vercel.app`, the frozen demonstration **deployment**. ⚠️ **A distinct identity class that no guard covers:** `hosted-target-guard` denies the Supabase ref `zjukuffiuzkbiblmnuwl`, not the Vercel host. Retargeting or denying a hosted harness is a **`CLAUDE.md` §12 hosted-surface decision**, so both were left untouched and escalated. **This is a known remaining exposure, recorded rather than silently closed.**
+
+### The fix
+
+Every retargeted site now resolves through `scripts/fixtures/local-target-guard.mjs`: **unconditional, non-overridable HARD DENY** of `best-coach-mvp` first, then a **fail-closed positive pin** from `BEST_COACH_LOCAL_PROJECT_ID`, with the container name **DERIVED**. `--env-file=.env.local` added to `test:exit-condition-b`, the one npm script that needed it.
+
+**Result: 45 → 17 live occurrences.** The 17 are exactly the 12 legitimate guard/guard-proof sites and the 4 escalated Vercel lines (+1 hosted guard constant). **No frozen local-container literal survives outside comments and the guards' own constants.**
+
+### Verification
+
+- **Deny proved from SEVEN retargeted harnesses**, both legs each: frozen pin → `HARD DENY`; pin absent → fail-closed refusal. `run-canonical` · `prove-v1-freeze` · `run-assessment` · `prove-g17-chain-controls` · `verify-fresh-apply` · `run-c3-bypass` · `run-integration`.
+- **No drift between guard copies:** `prove-local-target-guard` **31 passed · 0 failed**, including the assertion that the frozen id, shape pattern and variable name are character-identical across the `.mjs` and `.ts` copies.
+- `CANONICAL_CONTAINERS` re-derived and read back: **10 containers, all `…_best-coach-dev`, zero frozen**.
+- `tsc --noEmit` **0** · `eslint` on all changed files **0 errors** (one `no-unused-vars` warning at `load-local-fixtures.mjs:176` **confirmed pre-existing at HEAD**, not introduced) · `node --check` **OK on all 19** · `package.json` re-verified: `JSON.parse` OK, **no BOM**, 27 script keys (Q-28).
+- **Regression:** `prove:trusted-store-acl` **9 PASS · 0 NOT-PASS**, unchanged · `test:continuity` still **PASS**.
+- **Canonical database untouched:** `reports` 0 · `report_versions` 0 · `audit_events` 0 · `observations` 2. **The frozen stack was never contacted; no `supabase stop` was run against any project.**
+
+### ⚠️ Two things a later session must not misread
+
+1. **Fifteen of the nineteen harnesses have NO npm script** and are invoked bare. They now **fail closed without a pin**, where previously they ran — against the wrong database. That is a deliberate improvement, not a regression. The guard's own error names the missing variable.
+2. **`run-integration.mjs` requires `--conditions=react-server --import ./scripts/tests/integration/alias-loader.mjs`.** Run without them it dies at `server-only` or at `@/` resolution *before reaching the guard* — which is why its first deny probe read as a false negative. **Pre-existing invocation defect, not introduced here, and not fixed** (no runner was invented for it).
+
+### Already broken for other reasons — listed, NOT fixed, per instruction
+
+All 21 inspected files parse clean. The defects are **reachability and pre-existing state**: the fifteen no-runner harnesses above · `run-integration`'s two-flag invocation, recorded nowhere · and **`run-c2.mjs`, which carries `B-C2-1` — OPEN and UNDIAGNOSED** (order-dependent failure; **hero negative control K remains NOT SATISFIED**). `run-c2` was retargeted like the rest and **`B-C2-1` was not touched, not re-derived and is not affected by this sweep**.
+
+### Commit / next
+
+⛔ **STOP. Plan Phase 0A is NOT authorized.** Awaiting the Operator, including a decision on the two escalated Vercel-host harnesses.

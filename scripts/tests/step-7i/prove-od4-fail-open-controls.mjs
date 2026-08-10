@@ -67,8 +67,16 @@ import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import { derivePanelColumns, assertPanelAnchor } from './od4-panel-guard.mjs'
 
+import { resolveLocalTarget } from "../../fixtures/local-target-guard.mjs"
+
 const ROOT = process.cwd()
-const CONTAINER = 'supabase_db_best-coach-mvp'
+// ⚠️ NOT A LITERAL. This was `supabase_db_best-coach-mvp` — the FROZEN
+// demonstration container — and with both local stacks running that name
+// RESOLVED, so this harness reached the demonstration database instead of
+// this repository's. Guarded resolution: unconditional non-overridable HARD
+// DENY of the frozen project, then a fail-closed pin from
+// BEST_COACH_LOCAL_PROJECT_ID. Container name DERIVED, never literal.
+const { dbContainer: CONTAINER } = resolveLocalTarget()
 const MIG_DIR = join(ROOT, 'supabase', 'migrations')
 
 let failures = 0

@@ -80,19 +80,40 @@ export const CANONICAL_DB_PORT = 54422
 export const CANONICAL_STUDIO_PORT = 54423
 export const CANONICAL_INBUCKET_PORT = 54424
 
-/** Every container the canonical stack owns. None of these is ever touched. */
+/**
+ * Every container the canonical stack owns. None of these is ever touched.
+ *
+ * ⚠️ DERIVED FROM CANONICAL_PROJECT_ID, NEVER LITERAL — and this list is the
+ * reason that matters more here than anywhere else. Until 2026-08-10 all ten
+ * entries were hard-coded `…_best-coach-mvp`, which INVERTED the protection
+ * once this clone took its own project id:
+ *
+ *   - this list is the NEVER-TOUCH set for teardown, so it was protecting the
+ *     FROZEN demonstration stack while leaving THIS clone's own containers
+ *     unprotected;
+ *   - `prove-disposable-isolation.mjs` checks disposable/canonical container
+ *     OVERLAP against this list, so a disposable container colliding with one
+ *     of this repository's own containers would NOT have been detected;
+ *   - the "all canonical containers are still running" assertions passed only
+ *     because the demonstration stack happens to be up — they proved nothing
+ *     about the stack this harness is actually protecting.
+ *
+ * `CANONICAL_DB_CONTAINER` above was retargeted through the guard; this array
+ * was missed in that pass. Deriving both from one resolved project id is what
+ * makes them incapable of disagreeing.
+ */
 export const CANONICAL_CONTAINERS = [
-  'supabase_db_best-coach-mvp',
-  'supabase_studio_best-coach-mvp',
-  'supabase_pg_meta_best-coach-mvp',
-  'supabase_edge_runtime_best-coach-mvp',
-  'supabase_storage_best-coach-mvp',
-  'supabase_rest_best-coach-mvp',
-  'supabase_realtime_best-coach-mvp',
-  'supabase_inbucket_best-coach-mvp',
-  'supabase_auth_best-coach-mvp',
-  'supabase_kong_best-coach-mvp',
-]
+  'db',
+  'studio',
+  'pg_meta',
+  'edge_runtime',
+  'storage',
+  'rest',
+  'realtime',
+  'inbucket',
+  'auth',
+  'kong',
+].map((service) => `supabase_${service}_${CANONICAL_PROJECT_ID}`)
 
 export const EXPECTED_CANONICAL_CHECKSUM =
   '6bdff280e550503d212832c2fd1099ac45880c2bc430bfdff8f92a3b35ffc576'

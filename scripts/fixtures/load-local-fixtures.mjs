@@ -900,7 +900,13 @@ async function main() {
       `${expansionRows} P1-T09a expansion row(s) are present. They foreign-key to the ratified ` +
         'trainer membership under ON DELETE RESTRICT, so the fixture teardown would fail partway ' +
         'through.\n\nRemove them first, then re-run this command:\n\n' +
-        '  docker exec -i supabase_db_best-coach-mvp psql --no-psqlrc --username=postgres ' +
+        // ⚠️ DERIVED. This named `supabase_db_best-coach-mvp` until 2026-08-10 —
+        // so the remediation this error hands the Operator would have run the
+        // expansion-cleanup DML against the FROZEN demonstration database. No
+        // guard intercepts a human copying a command out of an error message,
+        // which makes a stale literal in operator-facing text more dangerous
+        // than one on a code path, not less.
+        `  docker exec -i ${DB_CONTAINER} psql --no-psqlrc --username=postgres ` +
         '--dbname=postgres -v do_expand=false -v do_expand_cleanup=true ' +
         '< scripts/fixtures/local_fixtures_expansion.sql\n\n' +
         'Nothing was created, deleted or modified by this run.',
