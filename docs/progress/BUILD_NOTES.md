@@ -6122,3 +6122,48 @@ The discriminating leg was applied by matching each runner's byte-unmoved line �
 **`prove:hero-all` 17/17, verified by exit code.** `tsc` 0 · `eslint` 0 errors · the Operator's three report rows **untouched and verified present**.
 
 ⚠️ **`test:integration`'s `INT-A5` has the identical root cause and was NOT in this ruling's scope** — it still asserts *"before approval/submission"* against a pair that now holds a submitted report. The same remedy would close it; it is not authorized and remains reported.
+
+---
+
+## 2026-08-11 — **THE FIVE PORTAL DECISIONS PROPAGATED** — and the two things that would have gone wrong quietly
+
+A bounded §12 amendment run, authorized for that run only and naming the exact files and corrections. **Annotate-never-delete throughout: 86 additions, 6 deletions**, and each of the 6 deleted lines was verified **still present in struck form** — mechanically, by searching for it, not by eye.
+
+### The instruction's own table under-specified, and saying so was the work
+
+The decisions document's §6 named the documents to amend. Read literally it would have left the build broken in three ways, all reported **before** any edit and all confirmed:
+
+1. ⛔ **The decisions document did not exist as a file.** Every annotation would have cited *"operator ruling `D-1`"* — a ruling living only in a chat transcript. §15.7 forbids a log being the sole authority; §1's ladder resolves operator rulings to **instruments**; all five prior ruling sets are root files. **`FINAL_MVP_PORTAL_DECISIONS.md` now exists and is indexed at Authority Lock §2.3.**
+2. ⛔ **`A-038` was restated in SIX active locations, not one.** Amending only the amendment that defines it would have left **`CLAUDE.md` §6 — read at the start of every session — still saying management never reads raw per-dimension ratings.** ▶ **A prohibition left standing in the contract is exactly what makes a later session correctly refuse work the Operator authorized.** A half-amendment is worse than none.
+3. ⛔ **`D-1` silently knocked out one of `G-2`'s three grounds.** Authority Lock §14 excluded a Management roll-up *because* it would deliver an aggregate past a bar `A-038` set. **Remove the bar and that reason evaporates** — while the exclusion still holds on the two survivors (unratified roll-up; the `Q-27` leak on Parent surfaces). The reason is struck with why it lapsed; **the outcome is untouched.** *(Third instance this batch of the same defect: a rule whose stated reason has gone stale invites a later phase to "fix" it. Same as `report_status`, same as the content hash below.)*
+
+### ⛔ THE MOST VALUABLE ANNOTATION IN THE RUN — the subject changed, not only the outcome
+
+`G-8` refused **CLASS video evidence**. `D-5` authorizes **PER-CHILD evidence** — one child, their own report, tagged to exactly one session, never moved or reused.
+
+▶ **Annotating that as "reversed" and stopping would have been true about the verdict and catastrophically false about the scope.** Screen `08`'s frame still draws a class-video uploader reading *"up to 500MB"*. A reader arriving at a `G-8` marked simply *superseded* would have built precisely the thing the ruling still refuses — with the frame apparently agreeing.
+
+**Recorded as plan §12 discipline 24:** *when a ruling is superseded, state whether the SUBJECT changed as well as the outcome.* It cuts both ways — `G-4`'s refusal was reasoned against building a substrate **to render a label**, and `D-3` builds it because **the calendar needs the structure**. The question changed, not just the answer.
+
+### ⛔ AND AN ANNOTATION SPLIT A TABLE IN A RATIFIED AMENDMENT
+
+The `A-038` annotation landed **between the Management and Parent rows** of A-038's role-visibility table, orphaning the Parent row — the row carrying the **parent boundary**. In a rendered view that row stops being a table row at all.
+
+⚠️ **It was caught only because the Operator required the DIFF rather than a description.** No summary of "annotated A-038's Management row" would have shown it. Fixed, then a **structural lint** was run across all eight touched files for any table row followed by a blank line or a blockquote followed by another table row — **clean**.
+
+**Recorded as plan §12 discipline 25**, and it belongs beside the §11 encoding checks: ▶ ***the file parses*** and ***the file still renders what it says*** are two different claims.
+
+### Two judgement calls made conservatively, both confirmed
+
+- **The content-hash rule was NOT amended.** `D-1` named the ratings and nothing else. Its management-facing 4⁹-reconstruction rationale has genuinely lapsed — **you cannot leak to someone a grid they are permitted to see** — so the *reason* is annotated and the *rule* stands, with widening it flagged as a §12 stop-and-ask. ▶ **Inferring the wider reading would have been the failure**; the Operator confirmed no such release was intended.
+- **Phase-0 §4's third sentence** (*"Parent receives NO evidence access"*) was annotated as superseded by `D-5` rather than struck, because it belongs to that section's evidence ruling rather than to `D-1`.
+
+### What is explicitly unchanged
+
+⛔ **`Q-27` does not move.** Every one of the six `A-038` annotations says so, and §15.2 has **zero** diff hits. ⛔ **`A-014` stays deferred** — the TA / `Assist.` persona and `centre_membership_role` are restated as unchanged in three files. ⛔ **`G-2`'s exclusion remains permanent**, with an explicit line at §11: *if a surface ever displays `D-2`'s value as a number, a band or a grade, that is `G-2` and it is prohibited.* ⛔ **`D-2` ratifies ONE mapping** — band→percentage, for its own never-rendered value; the 4→3 term mapping and the 9→7 roll-up **remain pending client ratification**.
+
+### Left alone, by ruling, and recorded so it cannot mislead
+
+The **~10 UI packs' `GC-6` entries** and `FINAL_MVP_EXECUTION_PLAN.md` still state `A-038`'s Management rating prohibition. They are downstream, sit at **functional rank 5**, and are not read as authority at session start. ⚠️ **Recorded in the new instrument as a known follow-up, because a reader must not take a pack's `GC-6` as a live prohibition after `D-1`.** Reconciling them belongs to the PORTAL COMPLETION PLAN.
+
+⛔ **Nothing was implemented.** `D-1` … `D-5` authorize no table, enum, column, bucket, policy, RPC, grant, audit action string, migration, route or screen. Each still needs its own explicit Operator authorization.

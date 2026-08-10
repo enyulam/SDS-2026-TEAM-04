@@ -19,53 +19,63 @@
 
 ## ✅ WHERE THIS STOPPED
 
-**`prove:hero-all` is 17/17, verified by exit code.** The four SQL suites your manual walkthrough had broken are green again — **without deleting anything of yours.**
+**The five client-ratified portal decisions `D-1` … `D-5` are propagated into ratified authority** (`3bebdc7`). **`prove:hero-all` is 17/17.**
 
-⛔ **STOPPED BY OPERATOR INSTRUCTION.** The **ratified-decisions document** comes next, **with its own bounded instruction**. ⚠️ **Do not act on the document alone** — amending ratified authority is a `CLAUDE.md` §12 stop-and-ask needing an instruction naming the exact files and corrections; **a ratified decision is the INPUT to that instruction, not the instruction.**
+⛔ **STOPPED BY OPERATOR INSTRUCTION.** The **PORTAL COMPLETION PLAN** comes next, **as its own instruction**.
+
+⛔ **NOTHING WAS IMPLEMENTED.** `D-1` … `D-5` authorize **no** table, enum, column, bucket, policy, RPC, grant, audit action string, migration, route or screen. **Each needs its own explicit Operator authorization.**
 
 ---
 
-## What the fix actually is
+## What the amendment run actually decided
 
-`prove:hero-1/2/7/9` used to take a `(session, student)` pair with `ORDER BY … LIMIT 1` and insert a report for it — so **the suites depended on the state of a database a human uses.** A shared prelude now **MINTS** the whole subject inside the existing `ROLLBACK`: student, enrolment, session, trainer assignment, parent link, observation and nine mixed ratings.
+**New instrument: `FINAL_MVP_PORTAL_DECISIONS.md`** at the repository root, §2.3 class, indexed in the Authority Lock beside the hero-chain and Phase-0 sets. It exists because a ruling living only in a session transcript would leave every annotation citing nothing (§15.7).
 
-▶ **The collision is structurally impossible now** — a session minted a statement ago cannot already have a report — and the rollback-based non-mutation proof still runs **against the real database**, which is exactly what the clone would have cost.
+| | Ruling | Where it landed |
+|---|---|---|
+| **`D-1`** | Management may **VIEW** the nine ratings, **READ ONLY** | `A-038` **plus five more active locations** |
+| **`D-2`** | Computed session score, **never rendered as a number** | Authority Lock §11, against `G-2` |
+| **`D-3`** | Terms as **scheduling structure**, reversing `G-4` | Hero rulings §4 |
+| **`D-4`** | Lesson materials; KEY FOCUS **qualified, not deleted** | Hero rulings §3 · Lock §13 · `CLAUDE.md` §12 |
+| **`D-5`** | **Per-child** video evidence, activating `A-001` | Hero rulings §8 · Amendments 008 and 001 |
 
-⛔ **Your three report rows are untouched and verified present** (`2c4bb887` submitted · `723a6837` submitted · `e751c809` draft_ready).
+**86 additions, 6 deletions**, annotate-never-delete, with every deleted line verified **still present in struck form** — by searching for it, not by eye.
 
 ---
 
 ## ⚠️ FOUR THINGS WORTH YOUR ATTENTION
 
-### 1. Byte-unmoved is now a measurement, not a tautology
+### 1. Your §6 table under-specified, and reporting that before editing was the work
 
-You required it still measure the canonical database and still be **capable of failing**. ⛔ `before === after` is also what a counting query that observes **nothing** returns — so a widened count that silently matched no table would have passed forever.
+Three gaps, all confirmed: the decisions document **did not exist as a file** · `A-038` was restated in **six** active locations, so amending only Amendment 004 would have left **`CLAUDE.md` §6 still prohibiting `D-1`** · and `D-1` **knocked out one of `G-2`'s three grounds**.
 
-Each suite now emits the **same counts mid-transaction** and the runner asserts they differ:
+▶ **A prohibition left standing in the contract is exactly what makes a later session correctly refuse work you authorized.**
 
-```
-3|6|24|1|0|1|7|7|3  ->  4|7|24|1|1|2|8|8|4  ->  3|6|24|1|0|1|7|7|3
-```
+### 2. ⛔ The subject changed, not only the outcome
 
-The counts were also **widened** to `students`, `enrolments` and `observations` so they cover the rows the minting creates. **Leakage was measured, not assumed:** eight runs leave every count identical and `students LIKE 'Isolated Fixture%'` returns **0**.
+`G-8` refused **CLASS** video evidence; `D-5` authorizes **PER-CHILD** evidence. Marking it merely *"reversed"* would have been true about the verdict and **false about the scope** — screen `08`'s frame still draws a class uploader reading *"up to 500MB"*, so the next reader would have built the refused thing **with the frame apparently agreeing**. Now **plan §12 discipline 24**.
 
-### 2. The schema refused three more shapes, and was right all three times
+### 3. ⛔ An annotation split a table inside a ratified amendment
 
-Ambiguous `centre_id` (an `OUT` parameter *and* a column on four of these tables — fixed by using locals throughout, which removes the **class** of error rather than the occurrence) · `pg_catalog.current_date` (a keyword, not a function) · `d.display_order` (the column is `sort_order`). ▶ **A guess about a column name is not a measurement.** Those suites already carried a sentence about three earlier refusals; **it is six for six now.**
+It landed **between the Management and Parent rows** of `A-038`'s role-visibility table — orphaning the row that carries **the parent boundary**. ⚠️ **No summary would have revealed it; only the diff did.** Fixed, and a **structural lint** across all eight touched files found no other split. Now **plan §12 discipline 25**, beside the §11 encoding checks: ▶ ***the file parses*** and ***the file still renders what it says*** are two different claims.
 
-### 3. `P2-4` was measuring the fixture's shape as well as the rule
+### 4. `G-2` lost a ground and the exclusion still stands
 
-It counted the parent's **entire** list and required zero — silently assuming that parent had exactly one linked learner. Yours now also has a real submitted report for a different learner, so the leg failed **while the rule it tests held perfectly**. Scoped to the minted learner, **plus a live-link reading taken first** so the zero is only reachable from a non-zero.
-
-### 4. ⛔ The patch silently skipped two of the four
-
-The discriminating leg was inserted by matching each runner's byte-unmoved **prose**; `prove-7` and `prove-9` word theirs differently and were **skipped** — their SQL emitted the marker and nothing read it, leaving the tautology intact. Caught by counting the marker in all four files. ▶ **Verify a bulk edit by counting the result in every target, never by trusting the patch's own report.**
+Authority Lock §14 excluded a Management roll-up *because* it would deliver an aggregate past a bar `A-038` set. **`D-1` removes that bar, so the reason lapsed** — struck with why — while the exclusion holds on the two survivors: the roll-up is **unratified**, and on a Parent surface it is the **`Q-27` leak**. Third instance this batch of the same defect: **a rule whose stated reason has gone stale invites a later phase to "fix" it.**
 
 ---
 
-## ⚠️ Still red, and out of this ruling's scope
+## ⛔ Explicitly unchanged
 
-**`test:integration` stays at 47 `PASS` / 3 `FAIL`.** `INT-A5` has the **identical root cause** — it asserts *"before approval/submission"* against a pair that now holds a submitted report. **The same remedy would close it. It was not in this ruling and remains reported, not fixed.** `INT-Q27` is stale against ratified hero Phase 2 (`context` carries class/module/lesson/trainer — **no rating in any vocabulary**, so Q-27's prohibition is untouched).
+- **`Q-27` does not move.** All six `A-038` annotations say so; §15.2 has **zero** diff hits.
+- **`A-014` stays deferred** — TA / `Assist.` persona, and `centre_membership_role` **not** extended. Restated in three files.
+- **`G-2` permanent**, with an explicit test at §11: *if a surface ever displays `D-2`'s value as a number, a band or a grade, that is `G-2` and it is prohibited.*
+- **`D-2` ratifies ONE mapping** — band→percentage, for its own never-rendered value. The **4→3 term mapping** and the **9→7 roll-up** remain **pending client ratification**.
+- **The content-hash rule was NOT amended** — rationale annotated as lapsed, rule standing; widening it is a §12 stop-and-ask.
+
+## ⚠️ Known follow-up, left alone by ruling
+
+The **~10 UI packs' `GC-6` entries** and `FINAL_MVP_EXECUTION_PLAN.md` still state `A-038`'s Management rating prohibition. Downstream, **functional rank 5**, not read as authority at session start. **Recorded in the new instrument so nobody takes a pack's `GC-6` as live after `D-1`.** Reconciling them belongs to the PORTAL COMPLETION PLAN.
 
 ---
 
@@ -73,20 +83,20 @@ The discriminating leg was inserted by matching each runner's byte-unmoved **pro
 
 | Field | Value |
 |---|---|
-| **HEAD** | `develop`, working tree **clean** at the fixture-isolation commit plus this continuity commit |
-| **Gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0** · route census **17** |
-| **Proofs** | ✅ **`prove:hero-all` 17/17 by exit code** · ⚠️ `test:integration` 47/3/3, exit 1 — see above |
+| **HEAD** | `3bebdc7` on `develop` plus this continuity commit, working tree **clean** |
+| **Gates** | `tsc` **0** · `eslint` **0 errors** (2 pre-existing) · `build` **0** · route census **17** |
+| **Proofs** | ✅ **`prove:hero-all` 17/17 by exit code** · ⚠️ `test:integration` 47/3/3, exit 1 — `INT-A5` shares the fixture-state root cause and was out of that ruling's scope |
 | **Database** | **UNTOUCHED** — 21 migrations · 27 tables · 42 functions · 12 enums · 29 policies. Your three walkthrough reports intact |
 | **Dev server** | running on **3000** against the local stack |
 
 ## ⛔ Carried
 
 - **RENDERED CAPTURE `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
-- ⚠️ **The silent-save reproduction is still owed a walk** — three signals now separate the two candidates; steps are in `BUILD_NOTES` and unchanged.
+- ⚠️ **The silent-save reproduction is still owed a walk** — three signals now separate the candidates; steps in `BUILD_NOTES`.
 - ⚠️ **Phase 8/11 gap stands:** structural consistency is neither a visual nor a functional acceptance.
-- Plan §12 now carries **23 disciplines**; three added this turn, including *"can fail" and "did fail" are different measurements*.
+- Plan §12 now carries **25 disciplines**; two added this run.
 - **Nothing pushed. No remote write of any kind.** Screens `11` and `30` untouched.
 
 ## ▶ Next
 
-⛔ **NONE. STOPPED.** The ratified-decisions document, with its own bounded instruction.
+⛔ **NONE. STOPPED.** The **PORTAL COMPLETION PLAN**, as its own instruction. It carries `D-1` … `D-5` plus the deferred portal items — Management Dashboard, Parent Dashboard, and the 20 unbuilt screens.
