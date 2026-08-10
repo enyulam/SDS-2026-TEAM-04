@@ -233,12 +233,24 @@ export interface AdapterManagementReviewDto {
   readonly openCorrectionStatus?: "open" | "resolved";
 }
 
+/**
+ * Hero Phase 2 (screen `32`). The five context fields are Class Grade,
+ * Class Module, lesson number/title (G-3) and the assigned trainer (G-5).
+ * ⛔ No rating in any vocabulary (Q-27, G-2), no observation, note, draft,
+ * AI history, hash, revision number, status or audit row, and nothing
+ * disclosing a correction cycle. NULL means NOT RECORDED — omit.
+ */
 export interface AdapterParentReportListItemDto {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionId: string;
   readonly sessionDate: string;
   readonly submittedAt: string;
+  readonly classGradeLabel: string | null;
+  readonly classModuleTitle: string | null;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
 }
 
 /**

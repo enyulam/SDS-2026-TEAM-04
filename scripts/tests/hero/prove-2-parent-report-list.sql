@@ -1,0 +1,273 @@
+-- =====================================================================
+-- HERO PHASE 2 -- the parent submitted-report LIST (screen `32`)
+-- =====================================================================
+-- Phase 2 adds NO database object. Its read is `report_get_canonical`
+-- followed, for a pair that ALREADY resolved, by the Phase 1 context
+-- function -- so what this suite proves is not a new gate but that the
+-- LIST'S OWN KEY PATH reaches the context, and that the list's three
+-- refusals still refuse.
+--
+-- ⚠️ WHY THIS DOES NOT REPEAT `B-STAGE3-2`. That incident was caused by
+-- COMMITTED governed mutations driven through the served app against the
+-- canonical fixture database. THIS SUITE RUNS ENTIRELY INSIDE ONE
+-- TRANSACTION AND ENDS IN `ROLLBACK` -- the mechanism accepted at Phase 1
+-- and now the standing pattern for any proof needing governed state.
+-- plpgsql functions cannot COMMIT inside a transaction block, so no
+-- governed RPC can escape the rollback either. The runner re-measures the
+-- governed counts afterwards and fails if any moved.
+--
+-- ⚠️ NON-VACUITY IS LEG ONE, AND IT IS FIRST ON PURPOSE. With zero
+-- submitted reports every refusal in this suite would pass FOR THE WRONG
+-- REASON -- the same class of defect as `bool_and` over zero rows and the
+-- inverted `CANONICAL_CONTAINERS` guard: an assertion passing because the
+-- object it measures does not exist. P2-1 measures that the enumeration
+-- actually found something BEFORE any later leg asserts over it.
+--
+-- ---------------------------------------------------------------------
+-- ⚠️ WHAT THIS SUITE DOES NOT PROVE -- stated, not implied
+-- ---------------------------------------------------------------------
+-- It runs as the table owner, so the RLS scoping of `parent_student_links`
+-- and `enrolments` is NOT re-proven here; that is Step 7G policy work,
+-- pinned by its own suites. The enumeration below MIRRORS the projection's
+-- key path in order to reach the pairs -- it is not evidence that path is
+-- RLS-scoped. What IS proven for every leg is the decision that actually
+-- produces or withholds a row: `report_get_canonical` is SECURITY DEFINER
+-- and re-derives the caller's reach from the JWT claim this suite sets, and
+-- `listParentReportsCore` drops any pair it refuses (`if (!row) continue`).
+-- The rendered surface remains NOT-RUN, as on every authenticated screen.
+--
+-- Run by scripts/tests/hero/prove-2-parent-report-list.mjs
+-- =====================================================================
+\set ON_ERROR_STOP on
+\pset pager off
+\pset footer off
+
+BEGIN;
+
+CREATE FUNCTION pg_temp.as_parent() RETURNS void LANGUAGE plpgsql AS $$
+BEGIN PERFORM pg_catalog.set_config('request.jwt.claims',
+  '{"sub":"d0000000-0000-4000-8000-000000000003","role":"authenticated"}', true); END $$;
+
+CREATE FUNCTION pg_temp.as_nobody() RETURNS void LANGUAGE plpgsql AS $$
+BEGIN PERFORM pg_catalog.set_config('request.jwt.claims', '', true); END $$;
+
+DO $suite$
+DECLARE
+  v_session      uuid;
+  v_student      uuid;
+  v_centre       uuid;
+  v_module       uuid;
+  v_enrolment    uuid;
+  v_obs          uuid;
+  v_report       uuid;
+  v_version      uuid;
+  v_other_sess   uuid;
+  v_trainer_mem  uuid;
+  v_mgmt_mem     uuid;
+  v_n            bigint;
+  v_listed       bigint;
+  v_ctx          record;
+  v_pass         int := 0;
+  v_fail         int := 0;
+BEGIN
+  -- ---------------------------------------------------------------
+  -- Set up, identically to Phase 1: reach a genuinely `submitted`
+  -- report by writing the aggregate directly as owner. The governed
+  -- lifecycle RPCs are proven elsewhere; what this suite needs is the
+  -- STATE, so that every assertion below is about the LIST.
+  -- ---------------------------------------------------------------
+  SELECT cs.id, cs.centre_id, cs.class_module_id
+    INTO v_session, v_centre, v_module
+    FROM public.class_sessions cs
+   ORDER BY cs.session_date
+   LIMIT 1;
+
+  SELECT e.student_id, e.id INTO v_student, v_enrolment
+    FROM public.enrolments e
+   WHERE e.class_module_id = v_module
+   ORDER BY e.student_id
+   LIMIT 1;
+
+  IF v_session IS NULL OR v_student IS NULL THEN
+    RAISE EXCEPTION 'P2-SETUP failed: the fixture has no session/enrolment pair to work with';
+  END IF;
+
+  SELECT o.id INTO v_obs FROM public.observations o
+   WHERE o.class_session_id = v_session AND o.student_id = v_student;
+
+  UPDATE public.class_sessions
+     SET lesson_number = 4, lesson_title = 'Expressive Delivery', room = 'Studio 2'
+   WHERE id = v_session;
+
+  SELECT m.id INTO v_trainer_mem FROM public.centre_memberships m
+   WHERE m.role = 'trainer' AND m.status = 'active' LIMIT 1;
+  SELECT m.id INTO v_mgmt_mem FROM public.centre_memberships m
+   WHERE m.role = 'management' AND m.status = 'active' LIMIT 1;
+
+  INSERT INTO public.reports (centre_id, class_session_id, class_module_id, student_id,
+                              enrolment_id, observation_id, status, lock_version)
+       VALUES (v_centre, v_session, v_module, v_student, v_enrolment, v_obs, 'submitted', 1)
+    RETURNING id INTO v_report;
+
+  INSERT INTO public.report_versions (report_id, centre_id, revision_number,
+                                      authored_by_membership_id, authored_by_role,
+                                      content_hash, content_hash_version,
+                                      overview, strengths, areas_for_development, remarks,
+                                      submitted_at, submitted_by_membership_id, submitted_by_role)
+       VALUES (v_report, v_centre, 1,
+               v_trainer_mem, 'trainer',
+               pg_catalog.repeat('b', 64), 2,
+               'Overview prose.', 'Strengths prose.', 'Areas prose.', 'Remarks prose.',
+               pg_catalog.now(), v_mgmt_mem, 'management')
+    RETURNING id INTO v_version;
+
+  UPDATE public.reports
+     SET latest_submitted_version_id = v_version, current_cycle_version_id = v_version
+   WHERE id = v_report;
+
+  -- A SECOND session of the SAME module, with NO report at all. This is
+  -- the candidate P2-3 needs, and it is created here rather than assumed
+  -- from the fixture so the leg is deterministic whether or not the
+  -- P1-T09a expansion has been applied.
+  INSERT INTO public.class_sessions (centre_id, class_module_id, session_date, starts_at, ends_at)
+       VALUES (v_centre, v_module, (pg_catalog.now() + INTERVAL '7 days')::date, '10:00', '11:00')
+    RETURNING id INTO v_other_sess;
+
+  RAISE NOTICE 'P2-SETUP  -- a submitted report and an unreported session exist IN THIS TRANSACTION ONLY';
+
+  -- ---------------------------------------------------------------
+  -- P2-1 -- ⚠️ NON-VACUITY, FIRST. Walk the list's own key path as a
+  -- linked parent -- active links -> enrolments -> sessions -> the
+  -- canonical read -- and count the rows the projection would emit.
+  -- Every refusal leg below is meaningless unless this is non-zero.
+  -- ---------------------------------------------------------------
+  PERFORM pg_temp.as_parent();
+  SELECT pg_catalog.count(*) INTO v_listed
+    FROM public.parent_student_links l
+    JOIN public.enrolments e      ON e.student_id = l.student_id
+    JOIN public.class_sessions cs ON cs.class_module_id = e.class_module_id
+   CROSS JOIN LATERAL public.report_get_canonical(cs.id, l.student_id) rc
+   WHERE l.is_active;
+
+  IF v_listed > 0 THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-1 -- NON-VACUOUS: the list enumeration emits % row(s); the refusal legs below measure something that exists', v_listed;
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-1 -- the enumeration emitted ZERO rows; every later leg would pass for the wrong reason';
+  END IF;
+
+  -- ---------------------------------------------------------------
+  -- P2-2 -- the four new meta-line fields reach a row the list emits.
+  -- Read through the SAME pair the enumeration matched.
+  -- ---------------------------------------------------------------
+  SELECT * INTO v_ctx FROM public.report_get_canonical_context(v_session, v_student);
+  IF v_ctx.class_grade_label IS NOT NULL
+     AND v_ctx.class_module_title IS NOT NULL
+     AND v_ctx.lesson_number = 4
+     AND v_ctx.lesson_title = 'Expressive Delivery'
+     AND v_ctx.trainer_display_name IS NOT NULL
+  THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-2 -- the row carries % · % · Lesson % · % (title "%")',
+      v_ctx.class_grade_label, v_ctx.class_module_title, v_ctx.lesson_number,
+      v_ctx.trainer_display_name, v_ctx.lesson_title;
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-2 -- a meta-line field did not arrive (% / % / % / % / %)',
+      v_ctx.class_grade_label, v_ctx.class_module_title, v_ctx.lesson_number,
+      v_ctx.lesson_title, v_ctx.trainer_display_name;
+  END IF;
+
+  -- ---------------------------------------------------------------
+  -- P2-3 -- ⛔ screen.md §6: DO NOT LIST AN UNSUBMITTED REPORT. The
+  -- second session of the same module is enumerated as a candidate and
+  -- must contribute nothing, because the canonical read resolves
+  -- EXCLUSIVELY through `latest_submitted_version_id`.
+  -- ---------------------------------------------------------------
+  PERFORM pg_temp.as_parent();
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM public.report_get_canonical(v_other_sess, v_student);
+  IF v_n = 0 THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-3 -- an enumerated session with no submitted report contributes NO row';
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-3 -- an unsubmitted session contributed % row(s)', v_n;
+  END IF;
+
+  -- ---------------------------------------------------------------
+  -- P2-4 -- ⛔ screen.md §6: DO NOT LIST A REPORT FOR A CHILD WITH NO
+  -- LIVE LINK. Deactivate the link inside this transaction, so the deny
+  -- is measured against the SAME row the permit just used, and re-walk
+  -- the whole enumeration rather than one pair.
+  -- ---------------------------------------------------------------
+  UPDATE public.parent_student_links SET is_active = false, unlinked_at = pg_catalog.now()
+   WHERE student_id = v_student;
+  PERFORM pg_temp.as_parent();
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM public.parent_student_links l
+    JOIN public.enrolments e      ON e.student_id = l.student_id
+    JOIN public.class_sessions cs ON cs.class_module_id = e.class_module_id
+   CROSS JOIN LATERAL public.report_get_canonical(cs.id, l.student_id) rc
+   WHERE l.is_active;
+  IF v_n = 0 THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-4 -- with the link withdrawn the list emits NO row (was %)', v_listed;
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-4 -- an unlinked parent still listed % row(s)', v_n;
+  END IF;
+  UPDATE public.parent_student_links SET is_active = true, unlinked_at = NULL
+   WHERE student_id = v_student;
+
+  -- ---------------------------------------------------------------
+  -- P2-5 -- an unauthenticated caller lists nothing, and gets no
+  -- context either. Both halves, because the list is two reads.
+  -- ---------------------------------------------------------------
+  PERFORM pg_temp.as_nobody();
+  SELECT pg_catalog.count(*) INTO v_n FROM public.report_get_canonical(v_session, v_student);
+  SELECT pg_catalog.count(*) INTO v_listed
+    FROM public.report_get_canonical_context(v_session, v_student);
+  IF v_n = 0 AND v_listed = 0 THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-5 -- an unauthenticated caller gets neither a row nor its context';
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-5 -- unauthenticated received % canonical row(s) and % context row(s)', v_n, v_listed;
+  END IF;
+
+  -- ---------------------------------------------------------------
+  -- P2-6 -- ⛔ the context function is UNCHANGED by Phase 2. Phase 2
+  -- added no database object, so its own claim is that it added none:
+  -- still 41 functions, and still exactly 7 returned fields, so no
+  -- rating, hash, revision number, status or correction field could
+  -- have been slipped onto the list row through the shared read.
+  -- ---------------------------------------------------------------
+  SELECT pg_catalog.count(*) INTO v_n
+    FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public' AND p.proname = 'report_get_canonical_context'
+     AND pg_catalog.array_length(p.proargnames, 1) = 9;  -- 2 IN + 7 OUT
+  SELECT pg_catalog.count(*) INTO v_listed
+    FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public';
+  IF v_n = 1 AND v_listed = 41 THEN
+    v_pass := v_pass + 1;
+    RAISE NOTICE 'PASS P2-6 -- 41 functions (Phase 2 added none) and the context return set is still exactly 7';
+  ELSE
+    v_fail := v_fail + 1;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 41) and context field-set match = %', v_listed, v_n;
+  END IF;
+
+  RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;
+  IF v_fail > 0 THEN
+    RAISE EXCEPTION 'Phase 2 parent-list suite FAILED with % failure(s)', v_fail;
+  END IF;
+  IF v_pass <> 6 THEN
+    RAISE EXCEPTION 'Phase 2 parent-list suite is INCOMPLETE: % of 6 legs ran; an unrun leg is NOT-RUN, never PASS', v_pass;
+  END IF;
+END;
+$suite$;
+
+-- ⚠️ NOTHING ABOVE IS KEPT. The canonical fixture database is unchanged.
+ROLLBACK;

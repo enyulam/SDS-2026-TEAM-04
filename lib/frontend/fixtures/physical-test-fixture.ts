@@ -1065,12 +1065,23 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       if (!report.latestSubmitted) continue;
       const match = findStudent(report.sessionId, report.studentId);
       if (!match) continue;
+      // Hero Phase 2 context, from the SAME helper the canonical detail read
+      // uses — one fixture source, so the list and the detail can never drift
+      // apart the way two hand-written literals would. Sessions that leave
+      // the optional fields unset exercise the OMIT path, which is a real
+      // rendering case and not a gap.
+      const context = fixtureReportContext(report.sessionId, report.studentId);
       reports.push({
         studentId: report.studentId,
         studentDisplayName: match.student.displayName,
         sessionId: report.sessionId,
         sessionDate: match.session.date,
         submittedAt: report.latestSubmitted.submittedAt,
+        classGradeLabel: context?.classGradeLabel ?? null,
+        classModuleTitle: context?.classModuleTitle ?? null,
+        lessonNumber: context?.lessonNumber ?? null,
+        lessonTitle: context?.lessonTitle ?? null,
+        trainerDisplayName: context?.trainerDisplayName ?? null,
       });
     }
     return { outcome: "success", data: reports };

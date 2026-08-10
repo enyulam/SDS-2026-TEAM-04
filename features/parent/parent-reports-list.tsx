@@ -34,6 +34,16 @@ import type { ParentReportListItemDto } from "@/lib/frontend/contracts/physical-
  * `docs/workstreams/48H_FRONTEND_PROGRESS.md` and in the checkpoint report — Figma never
  * bypasses governance, and the divergence is recorded, never silently resolved.
  *
+ * ⚠️ HERO PHASE 2 — the frame's row title and meta line are now built, and the rating chip is
+ * NOT. Those two facts belong together: the F-14 reconstruction omitted the title, the class,
+ * the lesson and the trainer because no governed field carried them, and omitted the chip
+ * because governance forbids it. Phase 0A/0B/2 discharged the first reason for four of those
+ * five elements — Class Grade, Class Module, lesson number/title (G-3) and the assigned
+ * trainer (G-5, expressly permitted on a Parent surface because it is NOT a rating and NOT
+ * derived from one). ⛔ THE CHIP'S REASON IS UNTOUCHED AND PERMANENT (Q-27, G-2), and the
+ * projection carries no rating field for it to bind to. A dependency being discharged for the
+ * fields beside it is never evidence the prohibited one moved.
+ *
  * Reachability is the governed projection's, not this component's: `listParentSubmittedReports`
  * returns only the canonical submitted version `reports.latest_submitted_version_id` names,
  * for students reachable through a live `parent_student_links` row. The child affordance
@@ -75,13 +85,28 @@ export function ParentReportsList() {
   /**
    * The linked-child affordance is derived from the rows the governed projection returned,
    * so it can never name a student the authenticated Parent has no live link to.
+   *
+   * Hero Phase 2 adds the frame's Class Grade to it ("Alicia Gomez · Junior"). ⚠️ It is
+   * rendered ONLY when every row for that child agrees on one grade, and omitted otherwise.
+   * A learner may be enrolled in modules of different Class Grades, and the frame — drawn for
+   * a single child in a single grade — does not say which one wins. Omitting an ambiguous
+   * value is the same discipline as omitting a NULL one: never fabricate, never pick.
    */
   const linkedChildren = useMemo(() => {
-    const seen = new Map<string, string>();
+    const seen = new Map<string, { displayName: string; grades: Set<string> }>();
     for (const row of rows) {
-      if (!seen.has(row.studentId)) seen.set(row.studentId, row.studentDisplayName);
+      const entry = seen.get(row.studentId) ?? {
+        displayName: row.studentDisplayName,
+        grades: new Set<string>(),
+      };
+      if (row.classGradeLabel) entry.grades.add(row.classGradeLabel);
+      seen.set(row.studentId, entry);
     }
-    return [...seen].map(([studentId, displayName]) => ({ studentId, displayName }));
+    return [...seen].map(([studentId, entry]) => ({
+      studentId,
+      displayName: entry.displayName,
+      classGradeLabel: entry.grades.size === 1 ? [...entry.grades][0] : null,
+    }));
   }, [rows]);
 
   const visibleRows = useMemo(
@@ -134,7 +159,9 @@ export function ParentReportsList() {
               <>
                 <p className="block text-[0.59375rem] font-medium text-ink">Viewing</p>
                 <p className="mt-0.5 text-[0.78125rem] font-semibold text-ink-strong">
-                  {linkedChildren[0].displayName}
+                  {linkedChildren[0].classGradeLabel
+                    ? `${linkedChildren[0].displayName} · ${linkedChildren[0].classGradeLabel}`
+                    : linkedChildren[0].displayName}
                 </p>
               </>
             ) : (
@@ -182,7 +209,55 @@ export function ParentReportsList() {
             All Reports
           </h2>
 
-          {visibleRows.map((report) => (
+          {visibleRows.map((report) => {
+            /*
+              HERO PHASE 2 — the frame's row title and meta line, over governed fields.
+              The dependency this component recorded at F-14 ("the governed Parent
+              projection carries none of those fields") is now DISCHARGED: Phase 0B added
+              the lesson columns, Phase 0A the staff-identity read path, and Phase 2 carries
+              both plus Class Grade and Class Module onto `ParentReportListItemDto`.
+
+              ⚠️ NULL MEANS NOT RECORDED, SO THE SEGMENT IS OMITTED. Every part below is
+              dropped when its field is null — never "Lesson 1", never "TBC", never a dash
+              standing in for a value. The meta line is assembled from whatever survived,
+              so a session with no lesson metadata renders a shorter line rather than a
+              line full of placeholders.
+
+              ⛔ STILL OMITTED, and re-verified this phase: the frame's PER-ROW RATING CHIP
+              ("Mastering" / "Developing"). Q-27 makes the nine ratings a DATA boundary on
+              every Parent surface and G-2 permanently excludes any roll-up rating — a
+              per-row chip is the most compressed possible restatement of the grid. The
+              projection carries no rating field for it to bind to, so this is refused at
+              the data layer and not merely unrendered here.
+            */
+            const rowTitle = report.lessonTitle ?? report.studentDisplayName;
+
+            /*
+              The learner's name appears in the meta line ONLY when the title is no longer
+              carrying it AND more than one child is linked. The frame is drawn for a single
+              child, so it never faces this case; with two linked learners and "All linked
+              learners" selected, lesson-titled rows would otherwise be indistinguishable by
+              child. This adds no field and discloses nothing new — it re-places a name the
+              row already showed.
+            */
+            const metaParts = [
+              rowTitle !== report.studentDisplayName && linkedChildren.length > 1
+                ? report.studentDisplayName
+                : null,
+              report.classGradeLabel,
+              report.classModuleTitle,
+              report.lessonNumber === null ? null : `Lesson ${report.lessonNumber}`,
+              report.trainerDisplayName,
+              // Pre-existing content, preserved rather than dropped: the session date was
+              // accepted on this surface at F-14 and reconciled in Batch 3. The frame shows
+              // only "Received", and removing an accepted element is outside this phase's
+              // delta set — two sessions of one module can share a lesson title, so the
+              // class day still distinguishes them.
+              `Session ${formatDate(report.sessionDate)}`,
+              `Received ${formatDateTime(report.submittedAt)}`,
+            ].filter((part): part is string => part !== null && part.length > 0);
+
+            return (
             <article
               key={`${report.sessionId}:${report.studentId}`}
               className="card flex flex-col gap-4 px-5 py-[18px] sm:flex-row sm:items-center sm:gap-4"
@@ -192,21 +267,8 @@ export function ParentReportsList() {
               </IconTile>
 
               <div className="min-w-0 flex-1">
-                {/*
-                  The frame's row title is a lesson/topic name and its meta line carries
-                  class grade, class module, lesson number and trainer name. The governed
-                  Parent projection carries none of those fields, so they are OMITTED rather
-                  than fabricated (GLOBAL_UI_RULES §10) and recorded as a dependency. The row
-                  is titled with the governed student name — which also keeps the existing
-                  three-role smoke assertion on this heading valid.
-                */}
-                <h2 className="text-[1rem] font-semibold text-ink-strong">
-                  {report.studentDisplayName}
-                </h2>
-                <p className="mt-[3px] text-[0.75rem] text-ink">
-                  Session {formatDate(report.sessionDate)} · Received{" "}
-                  {formatDateTime(report.submittedAt)}
-                </p>
+                <h2 className="text-[1rem] font-semibold text-ink-strong">{rowTitle}</h2>
+                <p className="mt-[3px] text-[0.75rem] text-ink">{metaParts.join(" · ")}</p>
               </div>
 
               <Link
@@ -221,7 +283,8 @@ export function ParentReportsList() {
                 </span>
               </Link>
             </article>
-          ))}
+            );
+          })}
         </section>
       )}
     </div>

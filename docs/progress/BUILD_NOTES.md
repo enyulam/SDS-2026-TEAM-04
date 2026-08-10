@@ -4748,3 +4748,102 @@ The plan's §6.1 delta table lists *"Trainer name — `NEEDS NEW PROJECTION` (Ph
 ### Commit / next
 
 **Next: Phase 2 (`32` Parent Reports)** — which also builds the trainer name deferred from `33`. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**
+
+---
+
+## 2026-08-10 — OPERATOR RULINGS AND FINDINGS RECORDED (development clone, `develop`)
+
+**Scope.** Four Operator items received at the start of this session, recorded here because a progress log may record *that* a decision happened but must never be its sole authority (`CLAUDE.md` §15.7). Each is propagated to the document a later phase actually reads.
+
+### 1. ✅ RULED — **no trainer row on `33`; it is built on `32`**
+
+Phase 1 departed from the plan's §6.1 delta table, reported the departure rather than resolving it silently, and **the Operator has ruled the departure correct**:
+
+> **`G-5` grants PERMISSION; permission is not a visible field.** Frame `33` draws no trainer, **`G-5`'s evidence is frame `32`**, and rendering it on `33` would invent a visible element. Build it on `32`, where the frame draws it.
+
+**Propagated to `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` §6.1 (the row is struck) and new §6.1a**, so **no later phase can "complete" `33` by adding it**. Its absence there is `EXPECTED / REQUIRED`, exactly as Q-27's absent skills card is on `30`. **`G-5` is undiminished** — `32` exercises the permission; a permission exercised on one surface and not another is not a partial permission. **The generalizable rule: a procedural plan cannot add a visible element the ratified frame lacks** — a delta table is a *reading* of a frame, and the frame decides what is drawn while governance decides whether it may be. Visual counterpart of *screen presence is not authorization*.
+
+### 2. ✅ RECORDED — **an assertion can pass because the object it measures does not exist**
+
+The Operator names this **the significant finding** of Phase 1, and the reason `S-8` could not have been closed earlier: **with zero submitted reports the canonical gate denies EVERYONE, so the DENY leg was passing for the wrong reason.** It was never evidence the gate discriminates — only evidence there was nothing to discriminate over.
+
+⚠️ **Same class as `bool_and` over zero rows and the inverted `CANONICAL_CONTAINERS` guard.** And it landed on **`G-5` — the one hero ruling that WIDENS disclosure** — which is exactly where a false green costs most.
+
+▶ **Standing rule, now plan §12 item 8: every proof of a refusal must first measure that the thing being refused EXISTS.** Phase 2's `P2-1` is a dedicated non-vacuity leg placed **before** its three refusal legs and reports the row count it found. **A refusal suite with no permit leg is `NOT-RUN` wearing a `PASS`.**
+
+### 3. ✅ ACCEPTED — **the transaction-scoped proof is the pattern for any future proof needing governed state**
+
+Accepted as **materially different from `B-STAGE3-2`, not merely more careful.** The difference is structural: `B-STAGE3-2` **committed** governed mutations through the served app against the canonical database. This pattern constructs the state it needs **inside one transaction and ends in `ROLLBACK`**; **plpgsql functions cannot `COMMIT` inside a transaction block**, so no governed RPC escapes it; and **the runner measures the governed counts before and after**, making "nothing was committed" part of the *proof* rather than an external observation.
+
+▶ **Use it wherever a proof needs a report, a version or a lifecycle state the fixture does not carry.** It needs no fixture reload, no Operator credential and no disposable stack — which is why it closed a leg blocked since Batch 3. Recorded as plan §12 item 9.
+
+### 4. ⚠️ **THIRD INSTANCE — *the stored representation is not the authored one*** (its own entry, per Operator instruction)
+
+**The CSS minifier ROUNDS to six decimals.** `text-[0.8203125rem]` (seven decimals) is stored `font-size:.820313rem`, so **grepping the compiled stylesheet for the authored precision reports a false MISSING** — the rule is there; the search was wrong.
+
+**Third instance of one class this session**, alongside:
+
+* **`search_path=""`** — the catalogue stores `SET search_path = ''` **with quotes**, so an assertion written against the authored form failed and rolled a whole migration back;
+* **the encrypted env envelope** — what is stored is not what was written.
+
+*(The Phase 1 entry above named the fixture-vs-schema row pin as the second companion. Corrected by the Operator: that one is a different class — **fixture state mistaken for schema state**, a question of scope, not of representation. The three above share one mechanism.)*
+
+⚠️ **A FOURTH FACET OF THE SAME CLASS WAS FOUND TODAY, BY THIS RULE FAILING AGAIN.** Phase 2's emitted-CSS check reported **five of five classes `NOT EMITTED`** — including `text-[1rem]`, which cannot plausibly be missing. **The minifier also STRIPS THE LEADING ZERO:** `0.78125rem` is stored `.78125rem`, and `.text-body{font-size:.875rem}` sits in the same file as standing evidence. All five verified present once the matcher normalized for both rewrites.
+
+▶ **The lesson generalizes past CSS, and it is the same shape as *a declared class is not evidence it applied*: when you verify against a stored artefact, verify against ITS representation, not yours.** A negative result from a search you wrote is evidence about the search until the search is proven discriminating. The Phase 2 checker now normalizes rounding **and** leading zeros, and prints the emitted declaration block so a human sees what was actually found.
+
+**Files changed:** `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` (§6.1 strike, new §6.1a, §12 items 8–9), this log, `docs/progress/STATUS.md`.
+**Governed surfaces:** none. **Migrations:** none. **Database:** untouched. **Commit:** with the Phase 2 checkpoint below.
+
+---
+
+## 2026-08-10 — HERO CHAIN **PHASE 2** — `32` Parent Reports (development clone, `develop`)
+
+**Track:** hero chain completion, plan §8 Phase 2. **Branch/worktree:** `develop` / none. **Starting HEAD:** `d7675ba`.
+
+### Scope
+
+The frame's **row title** and **meta line**, over governed fields: row title = **lesson title**; meta line = `Class Grade · Class Module · Lesson N · Trainer · Session date · Received date`. Every segment is dropped when its field is NULL.
+
+### ⚠️ NO DATABASE OBJECT WAS ADDED — and that is the phase's main design decision
+
+Phase 2 reuses **Phase 1's `report_get_canonical_context`**, whose gate already mirrors RPC-13 step for step. A list-shaped second RPC would have created a **second gate to keep in step** — the R-C2-6 side-channel risk this chain exists to avoid. The context read was factored out of the R-11 detail path into one shared `readCanonicalContext`, so **exactly one place could ever drift**. Measured at the end: **41 functions, unchanged**; migrations **20**, unchanged.
+
+**Call order carries the safety, and it is stated in the code:** the context read runs **only for a pair that has already resolved a canonical submitted version**, so it can decorate a row the parent boundary already admitted and can never admit one. It is **fail-soft** — losing presentation context must never drop a governed row from the list.
+
+### The four preserved items are not all the same kind of thing
+
+* ⛔ **The per-row AGGREGATE RATING CHIP — ruled `REGISTERED-OMISSION`, PRESERVED, permanent** (Q-27 data boundary; G-2 roll-up exclusion). Now refused at the **data layer**: `ParentReportListItemDto` carries **no rating field to bind to**.
+* ✅ **"No lesson number or trainer name" was a RECORDED DEPENDENCY, not a ruled omission** — F-14 omitted them because no governed field carried them, correctly and without inventing around it. **G-3** and **G-5** closed that dependency. ▶ **Discharging a dependency beside a prohibition is never evidence the prohibition moved.**
+
+### Verification
+
+- **`npm run prove:hero-2` — 6 SQL legs + 3 contract legs, ALL PASS, 0 FAIL.** Transaction-scoped, ending in `ROLLBACK`; governed counts `0|0|0|0|4|1` → **unchanged**.
+  - ⚠️ **`P2-1` NON-VACUITY, FIRST** — measured the list emitting **1 row** before any refusal asserted over it. Without it, the three refusals below pass for the wrong reason.
+  - `P2-2` the row carries `Beginner · Beginner Public Speaking — Fixture Module A · Lesson 4 · Fixture Trainer One`, title `Expressive Delivery`.
+  - `P2-3` an enumerated session with **no submitted report** contributes no row. `P2-4` a **withdrawn link** takes the list 1 → 0. `P2-5` **unauthenticated** gets neither row nor context.
+  - `P2-6` 41 functions and the context return set still exactly 7.
+  - **`P2-7` pins the parent-facing LIST DTO in TypeScript** — exact-set match **and** a prohibited-substring scan. Two assertions because either alone can be edited around: the set catches an added field, the scan catches one added under a name the set was then widened to accept.
+- **Q-27 swept across all three Parent surfaces — zero rating tokens outside comments**, asserted on the render path, **not** by a bare rating-word regex (A-052 prohibits that shape).
+- `tsc` **0** · `eslint` **0 errors** (2 pre-existing `projectId` warnings, in files this work did not author) · `build` **0** · **route census 17**, enumerated from `app/**/page.tsx` · `portal-navigation-active-state` **PASS** · `post-login-destinations` **PASS**.
+- **Emitted-CSS re-verified** for all five touched classes. ⚠️ **No `className` changed in this phase** — only the children of two elements did.
+
+### ⚠️ Findings recorded rather than smoothed over
+
+1. **`tests/frontend/app-route-census.mjs` is a MODULE, not a runnable suite.** Invoking it directly exits **0 with no output and asserts nothing** — reporting that as `app-route-census PASS` would be a false green. The real assertions live in `portal-navigation-active-state` and `post-login-destinations`, which import it and **require `--import ./scripts/tests/integration/alias-loader.mjs`**. Both were run properly and both pass; `D-5` confirms the 17-route census was **enumerated on this run**, not restated.
+2. **`integrated-route-security` is `NOT-RUN`** — it needs a served app at `127.0.0.1:3000`. Not part of this phase's exit criteria; recorded, not carried as green.
+
+### Two deliberate divergences from the frame, reported not resolved
+
+1. **The learner's name moves into the meta line** when the lesson title has taken the row title **and more than one child is linked**. The frame is drawn for one child and never faces this; without it, lesson-titled rows are indistinguishable by child under "All linked learners". Adds no field, discloses nothing new.
+2. **Class Grade on the "Viewing" affordance** renders **only when every row for that child agrees on one grade**. A learner may enrol across Class Grades and the frame does not say which wins — **omitting an ambiguous value is the same discipline as omitting a NULL one.**
+
+**The session date is PRESERVED, not dropped** — accepted at F-14, reconciled in Batch 3, outside this phase's delta set, and it still distinguishes two sessions of one module that share a lesson title.
+
+### Carried
+
+**RENDERED CAPTURE `NOT-RUN`** on this authenticated surface, unchanged. `B-C2-1` untouched. **`NEW-QUESTION`: none.**
+
+### Commit / next
+
+**Next: Phase 3 (`05` Trainer Schedule)** — room and `Main:` trainer. ⛔ **Stop before `F-S6-REVIEW-1` (Phase 7).**

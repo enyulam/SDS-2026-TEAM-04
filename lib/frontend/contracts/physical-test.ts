@@ -228,12 +228,33 @@ export type ManagementReviewDto = {
   readonly openCorrectionStatus?: CorrectionRequestDto["status"];
 };
 
+/**
+ * A row of the parent's submitted-report list — hero Phase 2 (screen `32`).
+ *
+ * ⛔ THIS TYPE IS THE PARENT-FACING DISCLOSURE SURFACE FOR THE LIST, and it
+ * is pinned as such by `prove:hero-2` leg P2-7, which asserts this exact
+ * field set. The five context fields are Class Grade, Class Module, lesson
+ * number/title (G-3) and the assigned trainer (G-5 — permitted on a Parent
+ * surface precisely because it is NOT a rating and NOT derived from one).
+ * Nothing here is a rating in any vocabulary (Q-27, G-2), an observation, a
+ * trainer note, a draft, AI history, a content hash, a REVISION NUMBER, a
+ * lifecycle status or an audit row, and nothing discloses that a correction
+ * cycle is or was underway.
+ *
+ * ⚠️ NULL MEANS NOT RECORDED — render by OMITTING the element. Never
+ * "Lesson 1", never "TBC", never a placeholder dash.
+ */
 export type ParentReportListItemDto = {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionId: string;
   readonly sessionDate: string;
   readonly submittedAt: string;
+  readonly classGradeLabel: string | null;
+  readonly classModuleTitle: string | null;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
 };
 
 /**

@@ -199,13 +199,28 @@ Assigned trainer display name via `class_session_assignments → centre_membersh
 | **Learner name in the card heading** | **`NEEDS NEW PROJECTION`** — ⚠️ the surface knows the student **id** from the route but not the **name** |
 | **Class Grade + module** on the page heading, card subtitle and Report Details | **`NEEDS NEW PROJECTION`** — data exists |
 | **Lesson `N · Title`** | **`NEEDS NEW SCHEMA`** (Phase 0B) then projection — ✅ G-3 |
-| **Trainer name** | **`NEEDS NEW PROJECTION`** (Phase 0A) — ✅ G-5 |
+| ~~**Trainer name**~~ | ⛔ **STRUCK — OPERATOR RULING, 2026-08-10. NOT BUILT ON `33`; BUILT ON `32` IN PHASE 2.** See §6.1a |
 | Term | ⛔ **`REGISTERED-OMISSION`** — G-4 |
 | Overall Grade | ⛔ **`REGISTERED-OMISSION`** — G-2 |
 | Performance Summary tiles · prose rating attributions | ⛔ **`REGISTERED-OMISSION`** — Q-27, A-052 |
 | Watch Together | ⛔ **`REGISTERED-OMISSION`** — G-8, Authority Lock §8.1 |
 
 ⚠️ **Standing constraint (`screen.md` §6):** nothing on this surface may render a rating, observation, **correction reason**, trainer note, draft, AI history, content hash, **revision number** or audit row, and **nothing may disclose that a correction cycle is or was underway.** The new context fields must be added without widening the read toward any of them.
+
+### 6.1a ✅ OPERATOR RULING, 2026-08-10 — **NO TRAINER ROW ON `33`. IT IS BUILT ON `32`.**
+
+**The delta table above listed a trainer row on `33`. Phase 1 departed from it, reported the departure rather than resolving it silently, and the Operator has RULED THE DEPARTURE CORRECT.**
+
+**The ruling, in its own terms:**
+
+> **`G-5` grants PERMISSION; permission is not a visible field.** Frame `33` draws no trainer, **`G-5`'s evidence is frame `32`**, and rendering it on `33` would **invent a visible element**. Build it on `32`, where the frame draws it.
+
+**Binding consequences — read all four:**
+
+1. ⛔ **No later phase may "complete" `33` by adding a trainer row.** Its absence there is **`EXPECTED / REQUIRED`**, exactly as Q-27's absent skills card is on `30` — never a gap, never a visual regression, never an unfinished delta.
+2. **`G-5` is unchanged and undiminished.** It permits the assigned trainer's display name on a Parent surface, and `32` exercises that permission in Phase 2. A permission that is exercised on one surface and not another is not a partial permission.
+3. ⚠️ **The generalizable rule, which is why this is recorded rather than just done:** a **procedural plan cannot add a visible element the ratified frame lacks.** The plan sits below the visual ladder (`CLAUDE.md` §1, §7.4 / A-056), and a delta table is a reading of a frame — where the two disagree, **the frame decides what is drawn** and governance decides whether it may be. This is the visual counterpart of *screen presence is not authorization* (A-045).
+4. **The governed projection is unaffected.** `report_get_canonical_context` returns `trainer_display_name` and continues to; the field reaches `33`'s DTO and is **deliberately not rendered there**. Carrying a permitted field that a frame does not draw is correct; **inventing an element to consume it is not.**
 
 ### 6.2 `32` Parent Reports — **Phase 2**
 
@@ -481,7 +496,9 @@ The Operator approved **Phase 0 → 11 → 10** — the parent screens first, on
 5. ⚠️ **The frame-wins default never overrides an accessibility guarantee.** Screen `05` nearly proved this the hard way: matching the frame's card fill would have collapsed the eligibility chip into it and reduced **four** redundant carriers of state to three (SC 1.4.1). *Frame wins* is scoped to differences **no ratified rule speaks to** — and a ratified rule speaks whenever colour is doing load-bearing work.
 6. **Governance outranks the frame, always.** Where they disagree the rule wins **and the divergence is recorded, never silently resolved.**
 7. **Record what was dropped.** Silent truncation reads as "covered everything".
-8. ⚠️ **New, from §4.1: read the numbered pack's `screen.md`, not only the `/reference/` artefacts.** Its *Prohibited invention* and *Dependencies* sections carry governance the `.png` and `.html` cannot. **Not reading it cost this plan one prohibition and one already-registered dependency at first drafting.**
+8. ⚠️ **AN ASSERTION CAN PASS BECAUSE THE OBJECT IT MEASURES DOES NOT EXIST — measure non-vacuity FIRST.** ✅ **Operator-recorded 2026-08-10 as the significant finding of Phase 1.** `S-8` could not have been closed earlier for a reason worth stating precisely: **with zero submitted reports the canonical gate denies EVERYONE**, so the DENY leg was **passing for the wrong reason**. It was never evidence the gate discriminates — only evidence there was nothing to discriminate over. ⚠️ **This is the same class as `bool_and` over zero rows and the inverted `CANONICAL_CONTAINERS` guard**, and it landed on **`G-5`, the one hero ruling that WIDENS disclosure** — the leg where a false green mattered most. ▶ **Every proof of a refusal must first measure that the thing being refused EXISTS.** Phase 1 proved it by constructing a genuinely `submitted` report; Phase 2's `P2-1` is a dedicated non-vacuity leg placed **before** its three refusal legs, and reports the row count it found. **A refusal suite with no permit leg is NOT-RUN wearing a PASS.**
+9. ✅ **THE TRANSACTION-SCOPED PROOF IS THE ACCEPTED PATTERN FOR ANY PROOF NEEDING GOVERNED STATE.** ✅ **Operator-accepted 2026-08-10, and accepted as MATERIALLY DIFFERENT from `B-STAGE3-2` rather than merely more careful.** The difference is structural, not attitudinal: `B-STAGE3-2` **committed** governed mutations through the served app against the canonical database; this pattern constructs the state it needs **inside one transaction and ends in `ROLLBACK`**, and **plpgsql functions cannot `COMMIT` inside a transaction block**, so no governed RPC can escape it either. **The runner then measures the governed counts before and after and FAILS if any moved** — so "nothing was committed" is part of the **proof**, not an external observation. ▶ **Use this shape wherever a proof needs a report, a version or a lifecycle state that the fixture does not carry.** It needs no fixture reload, no Operator credential and no disposable stack — which is precisely why it closed a leg that had been blocked since Batch 3.
+10. ⚠️ **New, from §4.1: read the numbered pack's `screen.md`, not only the `/reference/` artefacts.** Its *Prohibited invention* and *Dependencies* sections carry governance the `.png` and `.html` cannot. **Not reading it cost this plan one prohibition and one already-registered dependency at first drafting.**
 
 ---
 

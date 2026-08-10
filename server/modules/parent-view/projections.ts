@@ -46,12 +46,32 @@ interface CanonicalContextRow {
   readonly trainer_display_name: string | null;
 }
 
+/**
+ * A row of the parent's submitted-report list — hero Phase 2 (screen `32`).
+ *
+ * ⛔ The five context fields are display context the frame names and
+ * governance permits: Class Grade, Class Module, lesson number/title (G-3)
+ * and the assigned trainer (G-5, expressly permitted on a Parent surface
+ * because it is NOT a rating and NOT derived from one). NOTHING here is a
+ * rating in any vocabulary (Q-27, G-2), an observation, a trainer note, a
+ * draft, AI history, a content hash, a REVISION NUMBER, a lifecycle status
+ * or an audit row, and nothing discloses that a correction cycle is or was
+ * underway. Adding any of those is a §12 stop-and-ask.
+ *
+ * ⚠️ NULL MEANS NOT RECORDED — render by OMITTING the element. Never
+ * "Lesson 1", never "TBC", never a placeholder dash.
+ */
 export interface ParentReportListItemDto {
   readonly studentId: string;
   readonly studentDisplayName: string;
   readonly sessionId: string;
   readonly sessionDate: string;
   readonly submittedAt: string;
+  readonly classGradeLabel: string | null;
+  readonly classModuleTitle: string | null;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly trainerDisplayName: string | null;
 }
 
 export type AvailabilityState = "available" | "none_yet" | "linked_unavailable";
@@ -112,6 +132,53 @@ async function listLinkedStudents(
   return ids.map((id) => ({ studentId: id, displayName: names.get(id) ?? "Student" }));
 }
 
+/**
+ * The one display-context read, shared by R-9 (the list) and R-11 (the
+ * detail) — hero Phase 2 factored it out of R-11 rather than writing a
+ * second copy.
+ *
+ * ⚠️ ONE GATE, NOT TWO. `report_get_canonical_context` mirrors RPC-13's
+ * authorization step for step, which is what stops it becoming a side
+ * channel that discloses a report the canonical read refuses (R-C2-6).
+ * Every caller reaches it through this function, so there is exactly one
+ * place that gate could ever drift — and a list-shaped second RPC would
+ * have created a second one.
+ *
+ * ⚠️ FAIL-SOFT IS DELIBERATE, AND SAFE ONLY BECAUSE OF THE CALL ORDER.
+ * Both callers invoke this only AFTER the canonical read has already
+ * succeeded for the same pair, so this call cannot widen what the caller
+ * may see; it can only fail to decorate it. Context is presentation, and
+ * losing it must never withhold — or silently drop from the list — the
+ * governed narrative a parent is entitled to. A missing context renders as
+ * omitted elements, never as a denial and never as a placeholder.
+ */
+async function readCanonicalContext(
+  client: SupabaseClient,
+  sessionId: string,
+  studentId: string,
+): Promise<CanonicalReportContextDto | null> {
+  try {
+    const ctx = await client.rpc("report_get_canonical_context", {
+      p_class_session_id: sessionId,
+      p_student_id: studentId,
+    });
+    if (ctx.error) return null;
+    const c = firstRow<CanonicalContextRow>(ctx.data);
+    if (!c) return null;
+    return {
+      studentDisplayName: c.student_display_name,
+      classGradeLabel: c.class_grade_label,
+      classModuleTitle: c.class_module_title,
+      sessionDate: c.session_date,
+      lessonNumber: c.lesson_number ?? null,
+      lessonTitle: c.lesson_title ?? null,
+      trainerDisplayName: c.trainer_display_name ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------
 // R-9 — the submitted-report list
 // ---------------------------------------------------------------------
@@ -141,12 +208,31 @@ export async function listParentReportsCore(
         if (error) continue; // non-disclosing: an unreachable pair is simply absent
         const row = firstRow<CanonicalReportRow>(data);
         if (!row) continue; // zero rows = nothing submitted for this pair
+
+        /*
+         * Hero Phase 2. Read SECOND, and only for a pair that has ALREADY
+         * resolved a canonical submitted version — so the context read adds
+         * display fields to a row the parent boundary has already admitted
+         * and can never admit a row of its own. Reachability stays exactly
+         * where it was: `latest_submitted_version_id` and a live
+         * `parent_student_links` row, both re-derived inside RPC-13.
+         *
+         * The extra round trip is per MATCHED row, not per candidate
+         * session — the enumeration above already costs one call per
+         * session and the matched set is a small subset of it.
+         */
+        const context = await readCanonicalContext(client, session.id, student.studentId);
         out.push({
           studentId: student.studentId,
           studentDisplayName: student.displayName,
           sessionId: session.id,
           sessionDate: session.session_date,
           submittedAt: row.submitted_at,
+          classGradeLabel: context?.classGradeLabel ?? null,
+          classModuleTitle: context?.classModuleTitle ?? null,
+          lessonNumber: context?.lessonNumber ?? null,
+          lessonTitle: context?.lessonTitle ?? null,
+          trainerDisplayName: context?.trainerDisplayName ?? null,
         });
       }
     }
@@ -249,43 +335,15 @@ export async function getCanonicalReportCore(
   const row = firstRow<CanonicalReportRow>(data);
   if (!row) return CANONICAL_READ_DENIED;
 
-  // Display context — hero Phase 1. Read SECOND and deliberately FAIL-SOFT.
+  // Display context — hero Phase 1, moved to the shared reader at Phase 2.
   //
   // ⚠️ The ordering matters and is not incidental. The canonical read above
   // is the governance boundary; this call cannot widen it, because
   // `report_get_canonical_context` mirrors that same gate step for step and
   // is reached only after it has already succeeded. A caller who was refused
-  // above has already returned.
-  //
-  // Fail-soft is the correct posture HERE and nowhere else on this surface:
-  // context is presentation, and losing it must never withhold the governed
-  // narrative a parent is entitled to read. A missing context therefore
-  // renders as omitted rows — the same treatment a NULL lesson or room gets —
-  // never as a denial and never as a placeholder.
-  let context: CanonicalReportContextDto | null = null;
-  try {
-    const ctx = await client.rpc("report_get_canonical_context", {
-      p_class_session_id: sessionId,
-      p_student_id: studentId,
-    });
-    if (!ctx.error) {
-      const c = firstRow<CanonicalContextRow>(ctx.data);
-      if (c) {
-        context = {
-          studentDisplayName: c.student_display_name,
-          classGradeLabel: c.class_grade_label,
-          classModuleTitle: c.class_module_title,
-          sessionDate: c.session_date,
-          lessonNumber: c.lesson_number ?? null,
-          lessonTitle: c.lesson_title ?? null,
-          trainerDisplayName: c.trainer_display_name ?? null,
-        };
-      }
-    }
-  } catch {
-    // Same posture: presentation context is never worth failing the read.
-    context = null;
-  }
+  // above has already returned. The fail-soft rationale lives on
+  // `readCanonicalContext` and is now stated once for both callers.
+  const context = await readCanonicalContext(client, sessionId, studentId);
 
   return {
     outcome: "success",

@@ -387,3 +387,66 @@ baseline and was not re-exercised. NOT-RUN is not PASS.
 tsc 0 · eslint 0 · build 0 · route census 17 unchanged · emitted-CSS 7/7 · no governed surface
 touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 9.
 `Accepted` is Operator-set only and has NOT been set.
+
+### HERO CHAIN plan Phase 2 — 2026-08-10 — the row title and meta line, over governed fields
+
+**A FUNCTIONAL completion, not a visual reconciliation.** The row title and meta line the frame
+draws are now built from governed data: **row title = lesson title**, meta line =
+`Class Grade · Class Module · Lesson N · Trainer · Session date · Received date`.
+
+⚠️ **THE F-14 DEPENDENCY IS DISCHARGED, AND THE DISTINCTION MATTERS.** The Phase 9 entry above
+records four things as preserved, and they are **not all the same kind of thing**:
+
+* ⛔ **The per-row AGGREGATE RATING CHIP is a ruled `REGISTERED-OMISSION` — PRESERVED, UNCHANGED,
+  and permanent.** Q-27 makes the nine ratings a **data boundary** on every Parent surface and
+  **G-2** permanently excludes any roll-up rating on all four surfaces that draw one. It was not
+  reinstated in any form or wording. ⚠️ **It is now refused at the DATA layer, not merely
+  unrendered:** `ParentReportListItemDto` carries **no rating field for a chip to bind to**, and
+  `prove:hero-2` leg **P2-7** pins that field set — exact-set match **and** a prohibited-substring
+  scan, because either alone can be edited around.
+* ✅ **"No lesson number or trainer name" was a RECORDED DEPENDENCY, not a ruled omission.** F-14
+  omitted them because **no governed field carried them** — the correct treatment at the time, and
+  deliberately not invented around. **G-3** (lesson number/title) and **G-5** (the assigned trainer
+  on a Parent surface) closed that dependency; Phase 0B added the columns, Phase 0A the
+  staff-identity read path, Phase 2 carries them onto the row. **Discharging a dependency beside a
+  prohibition is never evidence the prohibition moved.**
+
+**Proof — `npm run prove:hero-2`: 6 SQL legs + 3 contract legs, all PASS, 0 FAIL.** Run inside one
+transaction ending in `ROLLBACK`; the runner measured the governed counts before and after
+(`0|0|0|0|4|1` → **unchanged**). ⚠️ **`P2-1` is a NON-VACUITY leg and it runs FIRST** — it measured
+the list emitting **1 row** before any refusal leg asserted over it, because with zero submitted
+reports every refusal below would pass **for the wrong reason** (the `S-8` finding). The three
+refusals then held: an enumerated session with **no submitted report** contributes no row; a
+**withdrawn link** takes the list from 1 row to 0; an **unauthenticated** caller gets neither row
+nor context.
+
+**Q-27 swept again across all three Parent surfaces — zero rating tokens outside comments**,
+asserted on the render path rather than by a bare rating-word regex (A-052 prohibits that shape).
+
+**No database object was added.** Phase 2 reuses Phase 1's `report_get_canonical_context`, whose
+gate already mirrors RPC-13 step for step — a list-shaped second RPC would have created a **second
+gate to keep in step**, which is the R-C2-6 side-channel risk this chain has been avoiding.
+Measured: **41 functions, unchanged**.
+
+**Two deliberate divergences from the frame, both recorded rather than silently resolved:**
+
+1. **The learner's name moves into the meta line** when the lesson title has taken the row title
+   **and more than one child is linked.** The frame is drawn for a single child and never faces
+   this case; without it, lesson-titled rows would be indistinguishable by child under "All linked
+   learners". It adds no field and discloses nothing new — it re-places a name the row already had.
+2. **The Class Grade on the "Viewing" affordance** (frame: `Alicia Gomez · Junior`) renders **only
+   when every row for that child agrees on one grade**, and is omitted otherwise. A learner may
+   enrol in modules of different Class Grades and the frame does not say which wins — **omitting an
+   ambiguous value is the same discipline as omitting a NULL one.**
+
+**The session date is PRESERVED, not dropped.** The frame shows only "Received"; the session date
+was accepted on this surface at F-14 and reconciled in Batch 3, and removing an accepted element is
+outside this phase's delta set. Two sessions of one module can share a lesson title, so the class
+day still distinguishes them.
+
+tsc 0 · eslint 0 (2 pre-existing warnings in files this work did not author) · build 0 · **route
+census 17, enumerated from `app/**/page.tsx`** · emitted-CSS re-verified for all five touched
+classes — ⚠️ **no `className` changed in this phase; only the children of two elements did.**
+
+**RENDERED CAPTURE `NOT-RUN`** (authenticated surface; §12 stop-and-ask) — unchanged, and never to
+be reported otherwise. `Accepted` is Operator-set only and has **NOT** been set.
