@@ -249,7 +249,35 @@ export function TrainerRoster() {
       studentId: entry.studentId,
       /* Omitted exactly when the projection says no record exists yet. */
       ...(entry.attendanceRecorded ? { expectedStatus: entry.attendanceState } : {}),
-      newStatus: entry.attendanceState === "absent" ? "present" : "absent",
+      /*
+       * ⛔ F-ATTENDANCE-INIT-1 — FIX A. THE UNRECORDED LEARNER SENDS `present`,
+       * NOT THE OPPOSITE OF AN EFFECTIVE STATE THAT WAS NEVER RECORDED.
+       *
+       * This read `entry.attendanceState === "absent" ? "present" : "absent"`.
+       * For a learner with NO attendance row the effective state is A-018's
+       * IMPLIED Present, so the only value this expression could ever produce
+       * was `absent` — ▶ **there was no route anywhere in the product that
+       * could write `present` to a learner who had never been touched.**
+       *
+       * The assessment save requires an EXISTING row at `present` and treats a
+       * missing row as fail-closed (`BC102`), so every learner enrolled through
+       * the application was UNASSESSABLE until a trainer marked them absent and
+       * back — two `attendance.changed` events, append-only and irreversible,
+       * to reach the state the product already claimed they were in.
+       *
+       * ⚠️ THE TOGGLE IS STILL A TOGGLE for a recorded learner. What changed is
+       * that "no record" now has its OWN intent — CONFIRM PRESENT — instead of
+       * being folded into a flip whose starting point does not exist.
+       *
+       * ⛔ This does NOT weaken step 7's fail-closed guard, and must not be
+       * "improved" into doing so: the assessment save may never materialize its
+       * own attendance precondition (standing prohibition, `D`).
+       */
+      newStatus: !entry.attendanceRecorded
+        ? "present"
+        : entry.attendanceState === "absent"
+          ? "present"
+          : "absent",
     });
 
     setAttendanceBusy(null);
@@ -733,13 +761,40 @@ function RosterCard({
         ) : (
           <Avatar displayName={entry.displayName} size="large" shape="square" />
         )}
+        {/*
+          ⛔ F-ATTENDANCE-INIT-1 — FIX B. AN IMPLIED DEFAULT IS NOT A MEASURED
+          VALUE, AND THE PILL NOW SAYS SO.
+
+          This rendered "Present" for BOTH a learner whose row says present and
+          a learner with no row at all — an unmeasured value presented as a
+          measured one. The projection has carried `attendanceRecorded` since it
+          was added, and its own declaration warns about exactly this
+          conflation; ▶ THE SURFACE SIMPLY NEVER CONSUMED THE FIELD.
+
+          ⚠️ That is not cosmetic. The two states behave differently at the
+          governed write (the compare-and-set omits `expectedStatus` for one of
+          them) and at the assessment save (`BC102` fails closed on a missing
+          row). A trainer looking at "Present" had no way to know which of two
+          different committed states they were looking at, or why Save & Generate
+          would refuse.
+        */}
         <span
+          data-attendance-recorded={entry.attendanceRecorded ? "true" : "false"}
           className={`inline-flex items-center gap-1 text-[0.59375rem] font-semibold uppercase tracking-[0.04em] ${
-            absent ? "text-neutral-on" : "text-success-on"
+            absent ? "text-neutral-on" : entry.attendanceRecorded ? "text-success-on" : "text-ink-subtle"
           }`}
         >
-          <Icon name={absent ? "close" : "check"} size={11} />
-          {absent ? "Absent" : "Present"}
+          {/*
+            ⚠️ THE UNRECORDED STATE GETS NO CHECK, AND THE ABSENCE IS THE POINT
+            — a check mark reads as "confirmed", which is the one thing this
+            state is not. There is no `clock` in `IconName` and adding an icon
+            is outside this fix.
+            ⛔ COLOUR IS NOT CARRYING THE MEANING (SC 1.4.1): the three states
+            read differently as TEXT, and the muted tone is reinforcement only.
+          */}
+          {absent ? <Icon name="close" size={11} /> : null}
+          {!absent && entry.attendanceRecorded ? <Icon name="check" size={11} /> : null}
+          {absent ? "Absent" : entry.attendanceRecorded ? "Present" : "Present — not yet recorded"}
         </span>
       </div>
 
@@ -801,12 +856,21 @@ function RosterCard({
            */
           className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-field border border-line px-3 py-2 text-[0.75rem] font-semibold text-ink transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <Icon name={absent ? "check" : "close"} size={13} />
+          {/*
+            ⛔ F-ATTENDANCE-INIT-1 — the control NAMES THE INTENT IT SENDS.
+            For an unrecorded learner this is not a flip: it CONFIRMS the A-018
+            default and materializes the row, so calling it "Mark absent" would
+            have described the opposite of what it now does. The label still
+            states the destination state, never the current one.
+          */}
+          <Icon name={absent || !entry.attendanceRecorded ? "check" : "close"} size={13} />
           {busy
             ? "Saving…"
             : absent
               ? `Mark ${entry.displayName} present`
-              : `Mark ${entry.displayName} absent`}
+              : !entry.attendanceRecorded
+                ? `Confirm ${entry.displayName} present`
+                : `Mark ${entry.displayName} absent`}
         </button>
       </div>
     </article>
@@ -833,6 +897,31 @@ function resolveAction(sessionId: string, entry: RosterEntryDto): ResolvedAction
       kind: "inert",
       label: "Assess",
       reason: "Assessment is unavailable while this learner is marked absent.",
+    };
+  }
+
+  /*
+   * ⛔ F-ATTENDANCE-INIT-1 — FIX B, THE GATE. A learner with NO attendance row
+   * is offered NO assessment path, because the server would refuse the save.
+   *
+   * The card used to gate on the EFFECTIVE state, which folds "no row" into
+   * A-018's implied Present — so it offered `Assess` to a learner whose
+   * `Save & Generate` the governed save answers with `BC102`. ▶ A SURFACE MUST
+   * NOT OFFER A PATH THE SERVER WILL REFUSE; the trainer filled nine dimensions
+   * before finding out, and refilling the form never helped because the form
+   * was never the problem.
+   *
+   * ⚠️ THIS IS NOT A SECOND SOURCE OF TRUTH. The server's guard is unchanged
+   * and remains the authority — this only stops the surface CONTRADICTING it.
+   * Confirming the learner present (the control on this card) materializes the
+   * row through the one governed write path and the gate opens.
+   */
+  if (!entry.attendanceRecorded) {
+    return {
+      kind: "inert",
+      label: "Assess",
+      reason:
+        "Confirm this learner present before assessing. Present is the default, but no attendance record exists for them yet.",
     };
   }
 

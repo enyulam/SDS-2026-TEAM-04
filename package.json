@@ -55,7 +55,8 @@
     "prove:hero-16": "node --env-file=.env.local scripts/tests/hero/prove-16-parent-view-query-outcomes.mjs",
     "prove:portal-1": "node --env-file=.env.local scripts/tests/portal/prove-p1-1b-management-ratings.mjs",
     "prove:portal-2": "node --env-file=.env.local scripts/tests/portal/prove-p1-2-evidence-substrate.mjs",
-    "sweep:evidence-orphans": "node --env-file=.env.local scripts/maintenance/sweep-evidence-orphans.mjs"
+    "sweep:evidence-orphans": "node --env-file=.env.local scripts/maintenance/sweep-evidence-orphans.mjs",
+    "prove:f-attendance-init-1": "node --env-file=.env.local scripts/tests/portal/prove-f-attendance-init-1.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

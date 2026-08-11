@@ -6403,3 +6403,98 @@ Both sites were replaced in this one migration to read `public.audit_action_regi
 
 **Gates:** `prove:portal-2` **exit 0** (18 SQL legs + 20 runner checks) · `prove:portal-1` **exit 0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
 **Next step:** ⛔ **STOPPED.**
+
+---
+
+## 2026-08-12 (second entry) — `F-ATTENDANCE-INIT-1`: a learner with no attendance row could never be assessed
+
+**Branch:** `develop`. **HEAD in:** `268e7da` → **out:** this entry's commit.
+**Scope:** the Operator's Week-13 rehearsal defect, found on the deployed system on learner `Priya Menon`. **Fixes A and B as one pass**, per ruling. ⛔ **`P1-2`'s upload transport deliberately NOT continued.**
+
+### ▶ THE DEFECT — three defensible decisions that only break in combination
+
+1. The governed save requires an **existing** `attendance` row at `present` and treats a **missing row as fail-closed** (`BC102`, step 7). **Correct, and deliberate.**
+2. `A-018`'s Present default is materialized **lazily**, so **"no row" is a real committed state** distinct from "row says present". **Also correct.**
+3. The roster's toggle sent the **opposite of the EFFECTIVE state** — and for an unrecorded learner the effective state is the *implied* Present, so the expression could only ever produce `absent`.
+
+▶ **NO ROUTE ANYWHERE IN THE PRODUCT COULD WRITE `present` TO A LEARNER WHO HAD NEVER BEEN TOUCHED.** The read model said Present, the write guard said no row, and the only reconciliation available through the UI was to mark the learner **absent first**.
+
+⚠️ **SCOPE, STATED PLAINLY: THIS IS NOT DEMO-DATA-SPECIFIC.** **Any learner enrolled through the application, in production, is unassessable until a trainer marks them absent and back.** Every newly enrolled student hits it. The two-click workaround costs **two `attendance.changed` events per learner — append-only and irreversible**.
+
+### ⚠️ WHY AMELIA TAN WORKED AND PRIYA MENON DID NOT — corroboration, not coincidence
+
+**`Amelia Tan` carries TWO `attendance.changed` audit events.** The Operator performed the absent-then-present flip **unknowingly** during the walkthrough, which materialized her row. `Fixture Student One` works for a different reason: `scripts/fixtures/local_fixtures.sql` seeds an attendance row directly. ▶ **Every learner who worked had had their row created by something other than the product's own enrolment path** — which is exactly what a defect of this shape looks like from the outside, and why it survived a full walkthrough.
+
+### Root cause VERIFIED AT HEAD — and five cited locations differ
+
+⛔ **The document's reasoning is correct in every substantive respect.** Verified independently rather than accepted: the `BC102` guard and its comment, the lazy default, the toggle expression, the three SELECT policies with no INSERT/UPDATE policy, the `recorded_by_*` nullability comment, and the RPC's `initialized: true` path all measure exactly as described.
+
+⚠️ **Five line references were stale, and one omission matters:**
+
+| Cited | Actual at HEAD |
+|---|---|
+| `trainer-roster.tsx:236` (toggle) | **`:252`** |
+| `trainer-projections.ts:277-280` (conflation) | **`:468-471`** — `277-280` is `workingState` |
+| `trainer-projections.ts:47-65` (doc comment) | **`:86-105`** — `47-65` is the `room`/`trainerDisplayName` comment |
+| `action-result.ts:131` (`BC102` map) | **`:130`** |
+| `attendance_governed_write_path.sql:385-411` | **`:386-411`** |
+
+▶ **The omission that matters: `expectedStatus` was ALREADY omitted correctly** for an unrecorded learner (`trainer-roster.tsx:251`). Fix A was therefore **half-present** — the CAS shape was right and only `newStatus` was wrong. **A reader taking the document at face value would have re-implemented a line that was already correct** and might have concluded the fix was larger than it is.
+
+### The fix — A and B together, as ruled
+
+**A.** For `attendanceRecorded === false` the control now sends **`present`**, and its label reads **"Confirm _ present"** — it names the intent it sends rather than describing a flip whose starting point does not exist. **A recorded learner still toggles both ways**; the fix added an intent, it did not replace the toggle.
+
+**B.** ⛔ **Because A alone would have left the projection still presenting an unmaterialized default as a measured value** — the same silent-conflation family this project keeps hitting, and the projection's **own declaration already warned about it** while the surface never consumed the field:
+- the pill renders **`Present — not yet recorded`**, distinct from `Present`, with `data-attendance-recorded` exposing it structurally;
+- **`resolveAction` gates the Assess link on `attendanceRecorded`**, so the surface stops offering a path the server will refuse.
+
+⚠️ **`resolveAction`'s gate is NOT a second source of truth.** The server's guard is unchanged and remains the authority; this only stops the surface **contradicting** it. The trainer had been filling nine dimensions before finding out, and refilling never helped **because the form was never the problem**.
+
+⚠️ **The unrecorded pill carries NO check mark, and the absence is the point** — a check reads as *confirmed*, which is the one thing that state is not. There is no `clock` in `IconName` and adding an icon was outside this fix. ⛔ **Colour is not carrying the meaning**: all three states differ as TEXT (SC 1.4.1), asserted by its own control leg.
+
+### `FIX C` — ROSTER-OPEN INITIALIZATION: ⛔ RAISED AND **DECLINED**
+
+**Operator ruling, 2026-08-12: NO, not now.** It would turn **a page view into a governed write emitting audit events for every enrolled learner**, and it **needs a decided actor**. **A + B make it unnecessary.**
+
+⛔ **RECORDED SO IT CANNOT BE RE-DERIVED AS A GAP.** Two documents read as though roster-open initialization already exists, and **neither is licence to build it**:
+- **`A-018`'s wording** — *"when a valid class-session roster is initialized, each enrolled student is Present by default"*;
+- **`20260803034500_step_7e_governed_core.sql:518-523`**, which makes `recorded_by_membership_id` / `recorded_by_role` nullable *"because a roster is initialised Present by default **before any trainer touches it**"*.
+
+▶ **That pre-trainer initialization is not implemented anywhere, and after this ruling it is DECLINED rather than missing.** The nullable columns stay correct regardless — the fixture path also produces `NULL` recorders.
+
+### `FIX D` — ⛔ CONFIRMED AS A **STANDING PROHIBITION**, not a rejected option
+
+**THE ASSESSMENT SAVE MUST NEVER MATERIALIZE ITS OWN ATTENDANCE PRECONDITION.** Step 7's fail-closed is deliberate; letting the assessment create the fact it depends on means **it manufactures its own precondition**, and `A-018`/`A-026` make *"absence must never create or expose a fabricated assessment"* structural.
+
+**It is now measured, not merely promised:** `FA-7` proves a refused save creates **no** attendance row, `FA-8` proves the refusal was actually reached, and a runner leg proves the save contains **no attendance `INSERT`** — with a control proving that pattern fires.
+
+### Proofs — `npm run prove:f-attendance-init-1`, exit 0
+
+**9 SQL legs + 16 runner checks, every required proof with a control:**
+
+| Required | Leg | Its control |
+|---|---|---|
+| a learner with no row is offered no assessment path | the gate resolves `inert` | **the gate precedes the report-state switch**, so no branch routes around it |
+| the initialize is audited **exactly once** | `FA-5` — one event, `state_from` NULL, `initialized: true` | `FA-6` — **a confirmed no-op emits NOTHING**, so "once" is discrimination, not a floor |
+| unrecorded renders distinguishably | the three-state pill | **all three differ as TEXT** (SC 1.4.1) |
+| the RPC's `initialized: true` path works as claimed | `FA-3` | `FA-4` — an already-recorded learner returns **`false`**, so `true` is a measurement |
+
+Plus **`FA-1` reproduces the defect** (`BC102` exactly) with **`FA-2` as its control** — the *same* save succeeds once the row exists, so `FA-1` is the attendance guard refusing and not the save being broken for another reason.
+
+⚠️ **`FA-0` is the leg that makes the rest mean anything:** the shared mint seeds **both** an attendance row and an observation, so the suite **deletes them first** to reach the state a genuinely newly-enrolled learner is in. **Without it `FA-1` would have passed for the wrong reason.**
+
+### Two measured corrections to my own suite, both caught by running it
+
+1. **`attendance_set_status`'s arguments are `(session, student, EXPECTED, NEW)`** — I had them reversed and got *"a new status is required"*. **The RPC refused a malformed call correctly.**
+2. **`assessment_dimensions` carries NO `authenticated` SELECT**, so building the ratings payload under impersonation failed `42501`. ▶ **A real refusal, and one that would have MASKED the `BC102` this suite exists to measure.** The payload is built owner-side now; in the product the nine codes come from a frontend constant, not a client read of that table.
+3. **`FA-4` first used a second minted pair and got `stale state`** — its attendance state was an **assumption about what the mint seeds**. ⛔ **A control must not rest on an assumption**; it now reuses the learner whose row `FA-3` is *measured* to have created.
+
+### ⛔ Not done, deliberately
+
+- ⛔ **The hosted demonstration database was NOT touched.** The document's **§5 direct-seed option is NOT authorized** and was not run. **The frozen build stays frozen** — the Operator is handling the demo learners through the governed UI.
+- ⛔ **`P1-2`'s upload transport was NOT continued.**
+- ⚠️ **No schema change, no RPC change, no new audit action string.** The registry stays at **19**; the census is **unchanged at 23 migrations · 28 tables · 49 functions**.
+
+**Gates:** `prove:f-attendance-init-1` **exit 0** · `prove:portal-2` **exit 0** · `prove:portal-1` **exit 0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+**Next step:** ⛔ **STOPPED.**
