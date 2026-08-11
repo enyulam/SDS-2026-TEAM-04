@@ -1,131 +1,112 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
-> **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Regenerated **2026-08-12**, after the facts below were written to `STATUS.md` and `BUILD_NOTES.md` and committed. Contains **no credential**.
+> ⛔ **NOT A TRACKER · NOT AUTHORITY · DERIVED.** Every line is reproduced or mechanically
+> reduced from `STATUS.md`, `BUILD_NOTES.md`, the stop report, `git`, or the live database.
+> **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
+> Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
+
+**Regenerated:** 2026-08-12, at the Part 1 stop.
 
 ---
 
-## ⛔ WHICH WORKSPACE IS THIS
+## Position
 
 | | |
 |---|---|
-| **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
-| **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422** |
-| ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its stack on **543xx**, hosted **`zjukuffiuzkbiblmnuwl`**, **`best-coach-mvp.vercel.app`** |
-| ✅ **Git — PUSHED 2026-08-12** | **`develop` only.** ⛔ **`main` was NOT pushed and nothing was merged.** Confirmed **by querying `origin`**, not by trusting push output |
+| **HEAD** | **`4cfb57f`** — *docs: Part 1 verified on deployed dev; correct the G-05 file-size restatement* |
+| **Branch** | `develop` |
+| **Tree** | **CLEAN** (`git status --porcelain -uall` empty) |
+| **Remote** | `origin` → `github.com/enyulam/best-coach-mvp` (**PRIVATE**) · `develop` = **`4cfb57f`** · `main` = **`5eb84bc`, UNTOUCHED** |
+| **Tags** | `best-coach-part-1-complete` · `hero-feature-baseline` · `stage3-authenticated-green` |
+| **Worktrees** | **ONE** — the main checkout at `4cfb57f [develop]`. `worktrees/` does not exist |
+| **Migrations** | **25 on disk · 25 applied LOCAL · 25 applied HOSTED DEV** — ordered ledgers byte-identical |
 
----
-
-## ✅ PART 1 IS COMPLETE — AND ITS GATE IS YOUR WALKTHROUGH, NOT A SUITE
-
-`P1-1a` · `P1-1b` · screen `19` · `F-ATTENDANCE-INIT-1` · `P1-2` · `P1-5` · `P1-2b` · **`P1-3`** · **`P1-4`**. **`D-1` and `D-5` are both live end to end across all three roles.** For `D-5`: substrate → **resumable upload** → **governed attach** → list → **removal** → parent arm → signed-URL path → **players on `08`, `10`, `19` and `33`**.
-
-**You walked all six stages on a fresh learner and every stage held:** roster (*"Present — not yet recorded"*, no Assess link) · assess (nine dimensions, **saves without the absent-then-present workaround**) · draft (clip **attaches and plays** on `08`) · trainer review (clip plays, the stale inert block gone) · management (nine tiles, Report Details above them, clip plays, **Approve & Submit works without having viewed it**) · parent (four panels, clip plays, **no download control, no ratings**).
+## Environments
 
 | | |
 |---|---|
-| **origin/develop** | **`c348915`** — equal to local `HEAD`; tree **clean** |
-| **origin/main** | **`5eb84bc` — UNCHANGED** |
-| **Tag** | **`best-coach-part-1-complete`** → tag object `8423033`, dereferencing (`^{}`) to **`c348915`**. Annotated, on origin |
-| **Gates** | ✅ **`prove:no-secrets` exit 0** · ✅ `prove:portal-34` **0** (8 SQL + 24 runner) · ✅ `prove:portal-2b` **0** (17 SQL + 26 runner) · ✅ `prove:portal-5` **0** (11 SQL + 23 runner) · ✅ `prove:portal-5-composed` **0** · ✅ `prove:encoding` **0** · ✅ `prove:portal-1` **0** · ✅ `prove:portal-2` **0** · ✅ `prove:f-attendance-init-1` **0** · ✅ **`prove:hero-all` 17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0** |
-| **Database** | **25 migrations · 28 tables · 49 functions · 12 enums · 29 public policies · 1 storage policy · registry 19.** ⛔ **`P1-3` and `P1-4` added NO migration at all** — both are presentation-only over `P1-2`'s read path |
+| **Hosted dev DB** | `poblcfbxxzgarclchzkx` (Supabase, `ap-southeast-1`). 28 tables · 49 functions · 12 enums · 29 `public` policies · 1 `storage` policy · 3 `auth.users` |
+| **Deployed dev app** | **`https://best-coach-dev.vercel.app`** — Vercel `best-coach-dev`, production branch **`develop`**, latest production deployment **READY at `4cfb57f`** |
+| ⛔ **FROZEN, OFF LIMITS** | `best-coach-mvp.vercel.app` (on `main`) and hosted `zjukuffiuzkbiblmnuwl`. Verified byte-identical to its captured baseline after every step this session |
+| **Fixtures (hosted)** | **Step 7F MINIMUM ONLY** — 1 learner, 1 session, 1 module, 9 ratings. The report is at `observation_saved`, `lock_version 4`, `report_versions 0` |
 
----
+## Current phase — Part 1
 
-## ✅ `A-004` IS NOW RUN — BY YOU, AND RECORDED AS YOURS
+✅ **VERIFIED END TO END ON THE DEPLOYED DEV ENVIRONMENT** by Operator walkthrough at `f2200e8`,
+hosted dev at 25 migrations: trainer start class → … → linked parent viewing the session report.
 
-**Reclassified `NOT-RUN` → OPERATOR-PERFORMED, both directions.** ▶ **PERMITTED:** the linked parent sees and plays their own learner's clip. ⛔ **REFUSAL:** nothing else was reachable.
+**Outstanding, and NOT covered by that walkthrough:**
 
-⚠️ **Its limits are stated rather than assumed, because an over-read acceptance is worse than an honest `NOT-RUN`:** **point-in-time at this commit** · **does not cover hover, focus or responsive collapse** · **not a substitute for `A-003`'s automated prohibited-path legs**, which remain the machine-checked half.
+- ⛔ **`CLAUDE.md` §10 Phase 1 exit condition (c) is UNPROVEN, not passed.** The hosted fixture is
+  the Step 7F minimum and `observations.follow_up_notes` was **measured NULL** — no note to carry,
+  no second session to carry it to. **The chain the walkthrough covered does not contain (c).**
+- The broader §11 fixture (2 trainers, 2 modules, 3–4 learners, 2 parents, **a second session**)
+  is **deferred**, and is exactly what (c) requires.
+- The walkthrough is **POINT-IN-TIME** against `f2200e8`. Any later commit, migration, fixture or
+  environment change **reopens it**; no later state inherits it (`CLAUDE.md` §14.7).
 
-Still standing: ⛔ **`A-003`'s `unscanned` leg is `NOT APPLICABLE (C-3)`, never `PASS`** · **rendered capture is `NOT-RUN`** on every rebuilt evidence region — a green DOM-text proof is not a visual acceptance.
+## Which ending fired
 
----
+**Control handed back at a checkpoint.** Part 1 is verified and recorded; **Part 2 comes as its own
+Operator instruction.** No hard gate was hit at the stop, and context was sufficient.
 
-## ⛔ THE DEFECT THAT MATTERED MOST WOULD HAVE PASSED EVERY SUITE IN THIS PROJECT
+## Suites and proofs that RAN this session
 
-**`F-ATTENDANCE-INIT-1` was found by your walkthrough.** Every suite passed throughout — because every suite reaches its subject through **`mint_isolated_pair`, and `mint_isolated_pair` seeds attendance.** ▶ **The fixtures made the broken state unreachable.**
-
-⚠️ **This is not an argument for fewer proofs. It is the boundary of what a fixture-built proof can see:** a harness that constructs its own subject can only measure states its constructor can produce. The six seeded walkthrough learners deliberately leave that row **unmaterialized**, so the path is now reachable by a test at all.
-
----
-
-## ✅ THE PRE-PUBLICATION SECRET SCAN — `npm run prove:no-secrets`, EXIT 0
-
-**Written fresh in this repository** — the demonstration-push scanner lived in the other workspace, so **the controls carry the whole weight.**
-
-| | |
+| Suite | Result |
 |---|---|
-| Scanned | **293 commits · 1,947 blobs (136 MB) · 687 tracked files** |
-| ⛔ **CREDENTIAL findings** | **ZERO** |
-| Identifiers | **71 occurrences, both ADJUDICATED TRUE NEGATIVE by you** |
-| Controls | **all four FIRED** — working tree, history (scratch commit under a temp ref, ref deleted, `develop` never moved), and both neutralizer legs |
+| `npm run prove:no-secrets` | **exit 0, ×3.** CLEAN — 0 credentials · 87 occurrences / 13 locations all ADJUDICATED · 4 controls fired · `develop` never moved |
+| `npm run fixtures:hosted-preflight` | **exit 1 BY DESIGN** — "NOT EMPTY" is the correct verdict for a populated project; used as a census, not a gate |
+| `npm run fixtures:hosted-push --dry-run`, then live | **exit 0.** 8 migrations applied, each reporting its own in-file assertions (`H0A-1..7`, `H0B-1..10`, `H1-1..7`, `H7-1..8`, `D1-1..9`, `E1-E10`, `P5-1..5`, `T1..T5`) |
+| Post-push census vs local | **PASS** — 25/28/49/12, identical ordered ledgers |
+| `report_cancel_draft` (governed RPC) | **PASS** — `drafting`→`observation_saved`, `lock_version` 3→4, +1 audit event, 9 ratings and the observation intact |
+| 50 MiB restatement sweep | **PASS after its control caught the detector** — 23 hits / 12 files, 687 tracked files |
 
-⛔ **Exit status is interpreted, never assumed** — `status === null` exits 2. This project's false-`CLEAN` was a history search that **died unnoticed**. ⛔ **No credential is ever printed by any path**; a finding names the file, the commit and the kind, never the text.
+## NOT-RUN this session, with reasons — never merged with the above
 
-⚠️ **LIMIT, STATED:** the **rotated** `BEST_COACH_HOSTED_DB_URL` password is not held by this session and is covered by **SHAPE ONLY**. **Exact-containment coverage of the old value is NOT claimed.**
+| Not run | Reason |
+|---|---|
+| `npm run build` · unit · integration · Playwright | Not invoked. **No application code changed this session** — every commit is docs/governance except the publication register |
+| Local hero E2E and negative controls | Not invoked; superseded in evidentiary value for Part 1 by the Operator's deployed walkthrough, which does **not** substitute for them as automated proof |
+| Grounding detector vs real provider prose (**`B-G06-DET-1`**) | **NO automated verdict produced.** Only as proven as the walkthrough's own drafts |
+| Fixture load / expansion | **Withheld by explicit Operator instruction.** The three synthetic passwords stayed unused |
+| Assertion-vacuity sweep | **NOT RUN this session, per harness.** Not carried forward from any prior session |
 
-**Your rulings are recorded in the instrument**, each **pinned by a truncated SHA-256 of the exact value ruled on** — change the value and it **re-raises**. ▶ *"Not a credential is yours, not a disclosure is mine."*
+## Open gates · undiagnosed · unratified
 
----
+- ⛔ **Ten stale `50 MiB` restatements are RECORDED, NOT FIXED.** Only `CLAUDE.md`'s G-05 row was
+  authorized. **The clause preventing the fix:** `CLAUDE.md` §12 — editing ratified authority needs
+  its own bounded instruction naming the files. Sites: `FINAL_MVP_AUTHORITY_LOCK.md:271,273,774,1353` ·
+  `FINAL_MVP_EXECUTION_PLAN.md:1313-1314` · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md:423` ·
+  `FINAL_MVP_HERO_CHAIN_RULINGS.md:165` · `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md:172,174` ·
+  `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md:48` · `docs/plan/PORTAL_COMPLETION_PLAN.md:324` ·
+  `UI_REFERENCE_FINAL_MVP/08-…/implementation-notes.md:496`.
+  ▶ **`AUTHORITY_LOCK.md:1353` is the most dangerous**: it presents a **settled** question as an
+  **open register row**, which invites a session to re-decide what `C-16` already ruled.
+- **`B-G06-DET-1`** — open, and untested against real provider prose by any automated harness.
+- **Standing credential-custody rule (Operator, 2026-08-12):** credentials go into files and
+  dashboards **by the Operator**; the session reads and verifies; **never through chat, either
+  direction.** Consequence: the session cannot assert the *contents* of Operator-placed values —
+  only their presence and their metadata.
 
-## ⚠️ THREE DEFECTS THE CONTROLS CAUGHT, IN SEQUENCE — ALL IN THE INSTRUMENT
+## Claims made earlier in this run that execution does NOT prove
 
-1. **`SHAPE_EXEMPT` was unreachable in the history pass**, because `scanBlobs` passed `""` as the path. ▶ **A rule applied on one pass and not the other is not a rule.**
-2. **Every `.env.local` value was treated as a credential**, making the gate permanently red on a project ref and a loopback URL. ▶ **A permanently-red gate is one people learn to bypass**, and **a real key must never be able to hide in a crowd of benign matches.**
-3. **The scanner then blocked on its own build-log entry**, which named the synthetic fixture and so reproduced its shape. ⚠️ **The first repair exempted the FILES — the wrong shape of fix**, since a build log is exactly where a careless paste lands. Moved to the exact adjudicated **string**; then **that** exemption's control failed, because substring replacement made it **a prefix rule wearing an exact-string label**. Fixed with boundary assertions, held by two legs in opposite directions.
+- **`SUPABASE_DB_POOLED_URL` is verified REPLACED, not verified WORKING.** `updatedAt > createdAt`
+  proves modification, not that the connection string is valid. **Only a real draft through the
+  deployed system proves that** — the Operator's walkthrough is the sole evidence it functions.
+- **`report_evidence` is 0 rows.** The evidence substrate is deployed but **no evidence object has
+  ever been written in any environment**.
+- The `pgdelta-target-ca.crt` error during the migration push is a **post-push catalogue-caching**
+  failure, **not** a migration outcome — which is why the push was verified **by census, not by
+  exit code**.
 
-⛔ **The `BUILD_NOTES.md` mojibake is LEFT IN PLACE by your ruling**, and the reason is recorded so it is not "fixed" later into something that no longer demonstrates what it describes: **the corruption IS the exhibit.**
+## Next permitted action
 
----
+**Await the Operator's Part 2 instruction.** No autonomous continuation is authorized.
 
-## ▶ THE OTHER THINGS WORTH YOUR ATTENTION
+**Prerequisites already satisfied:** tree clean · `develop` pushed and verified from `origin` ·
+`main` untouched · hosted dev schema-current · deployed dev app READY at `4cfb57f` · publication
+gate CLEAN.
 
-**`C-5` governs the management player and the wording matters: VISIBILITY REQUIRED · ATTESTATION ABSENT · ENFORCED BY NOTHING.** No precondition on Approve & Submit, no management checklist item — `A-036`'s checklist stays a **trainer** instrument. **`P34-5` proves the non-gate by submitting a report whose clip was never accessed.**
-
-**A wrongly-cited prohibition was struck on screen `19`.** Its `P5` note claimed evidence sat outside management's read under `A-038`; both halves fail — the path exists with an explicit **management arm** built under `C-7`, and `A-038` governs assessment substance, not media. ▶ **A wrongly-cited prohibition is worse than a missing feature: the feature gets built, the prohibition gets defended.**
-
-**One shared player, three surfaces** (`components/ui/evidence-viewer.tsx`). Three copies of a `<video>` is how **one** quietly acquires a `download` attribute nobody re-checked. The no-download absence is measured **in the built client chunks**, not the source.
-
-**Vercel's production branch is `main`** — your dashboard verification, whose card states *"To update your Production Deployment, push to the `main` branch."* ⚠️ **A dashboard setting, not a repository file**, which is why no `vercel.json` records it. **Pushing `develop` created a preview and cannot move `best-coach-mvp.vercel.app`.**
-
----
-
-## ⚠️ THE SWEEPER IS BUILT AND UNSCHEDULED — A DECISION, NOT AN OVERSIGHT
-
-`npm run sweep:evidence-orphans` reports by default and deletes only with `--delete`. ⛔ **No cron, queue, Edge Function or credentialed CI runner exists, and adding one is hosted work (§12).** A leg asserts **no surface and no module claims orphans are cleaned automatically.**
-
----
-
-## ▶ DECISIONS OWED
-
-| # | Question | Blocks |
-|---|---|---|
-| **1** | **Part 2** — `D-2`, `D-3` and `D-4` are implemented nowhere and each needs its own authorization | everything after this point |
-
-✅ **Closed this run:** `A-004` **run** · the secret scan's identifiers **adjudicated** · `A-002` ruled forward · `C-7` ruled · `R-4a` closed · `P1-2b`, `P1-3`, `P1-4` built.
-
----
-
-## ⛔ Explicitly unchanged
-
-- **`Q-27` does not move** — `D-5` is **media**, and no rating reaches a parent · **`G-2` permanent** · **`A-014`** TA persona deferred · **the content-hash rule unamended**.
-- **`C-9` holds** — management queue `29` and dashboard `11` render no rating.
-- ⛔ **Management may never attach and may never remove evidence** — `CLAUDE.md` §6, not a `D-5` choice. Both are measured.
-- ⛔ **Removal is trainer-only and NOT limited to pre-submitted** — a wrong clip that reached a parent must stay pullable.
-- ⛔ **No download control for any role, Parent included**, and ⛔ **no surface claims technical impossibility.**
-- ⛔ **The frame's `Class Video Evidence` heading and `500MB` are NOT built** (`G-8`, `C-16`) — **`REGISTERED-OMISSION`, never ends.**
-- ⛔ **`A-057`'s prohibition re-arms at THREE.** A fourth evidence action is a fresh stop-and-ask.
-- ⛔ **No dependency was added.** TUS is an HTTP protocol; `fetch` was enough.
-
-## ⚠️ Carried
-
-- **The silent-save reproduction is still owed a walk** — steps in `BUILD_NOTES.md`.
-- ⚠️ **Authority Lock §19.1's census reads `15 migrations · 36 functions`** against a live **25 · 49**. ✅ **You ruled *record, do not fix*.**
-- **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
-- **Phase 8/11 gap stands** · **`test:integration` 47/3/3, exit 1** (suite staleness) · ⛔ **`09` refuses its canonical route** (`C2C-007`) · **`A-044` knowingly unmet for `28`**.
-- ⚠️ **`prove:hero-8/11` compare SHELLS** and are not evidence for the evidence surfaces.
-
-## ▶ Next
-
-⛔ **NONE. STOPPED.** **Part 2 comes as its own instruction.**
+⛔ **Not carried by anything above, and each needing its own Operator authorization:** any hosted or
+billable operation · fixture reload or expansion · editing ratified authority · a push to `main` ·
+public deployment · human testing · final submission.
