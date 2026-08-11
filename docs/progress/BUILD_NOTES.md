@@ -7112,3 +7112,65 @@ The session's own pre-write guard fired on the literal `postgresql://` — **the
 - **None blocking.** `best-coach-dev` is live on `develop` against the dev database; `best-coach-mvp` remains on `main` against the frozen demonstration database.
 - ⚠️ **This commit is DELIBERATELY UNPUSHED.** Pushing it triggers a second production deployment of `best-coach-dev`, which would supersede the deployment reported above. **Push it with the next substantive change rather than spending a build on a docs-only commit** — or push deliberately, knowing a new deployment follows.
 - **Not performed, and reserved to the Operator:** walking the deployed application. The AI drafting path — provider call, grounding, and the trusted-draft persistence that consumes the rotated pooled URL — **has never been exercised in this environment** and remains unproven.
+
+---
+
+## 2026-08-12 — HOSTED DEV BROUGHT CURRENT · 8 migrations applied · the `QueryOutcome` vindication
+
+- **Track / workstream:** hosted dev environment. **Branch:** `develop`. **Worktree:** main (only).
+- **Environment change:** hosted dev database advanced **17 → 25 migrations**. **No redeploy** — the running deployment already carried the code.
+- **Gate:** `CLAUDE.md` §12 HOSTED — **explicitly authorized by the Operator** for this operation, scoped to applying the 8 missing migrations. Fixture reload and expansion were **expressly withheld**, and the three synthetic-identity passwords stayed unused.
+
+### ⛔ THE `QueryOutcome` VINDICATION — a design decision that has now paid for itself
+
+**The symptom.** A signed-in trainer on the deployed dev environment saw the non-disclosing *"This item isn't available"* on the schedule.
+
+**What that message did, and why it mattered so much.** The schedule read had been **rejected by the database**, and `listTrainerSessionsCore` reported it as **`unavailable`** rather than as an empty schedule. The comment on that branch states the principle: *"A REJECTED READ IS `unavailable`, NEVER AN EMPTY SCHEDULE. Returning success-with-zero-rows here would assert that the trainer has no sessions — a positive claim this projection has not established."*
+
+▶ **THE COUNTERFACTUAL IS THE WHOLE VALUE.** Had that read degraded to success-with-zero-rows, the screen would have shown **an empty schedule**, which is indistinguishable from a **fixture problem** — no sessions seeded, no assignment, a broken RLS predicate, a wrong trainer identity. **The investigation would have started in the data and stayed there**, because every visible fact would have pointed at it. Instead the honest `unavailable` said *a read was refused*, which points at **schema or authorization** — and the cause was found in a single diagnostic pass.
+
+⚠️ **The failure was not in the data at all. It was eight migrations of missing schema.** No amount of examining fixtures would have found it, because the fixtures were correct.
+
+**The generalisation worth keeping:** ▶ **an error state that is honest about its own category is worth more than one that is merely graceful.** A fabricated empty result is not a degraded success — it is a **false positive claim**, and it sends the next reader to the wrong subsystem. **Distinguishing "I found nothing" from "I was not allowed to look" is a diagnostic asset, not a nicety.**
+
+### Diagnosis (read-only, prior turn)
+
+Hosted was **8 migrations behind** — fixtured early, before the Part 1 schema existed. Confirmed against the ledger, not inferred. `class_sessions` lacked `room`, `lesson_number` and `lesson_title`; the schedule query selects all three, so PostgREST returned **`42703 undefined_column`**, which became `{ok:false}` → `unavailable`. The evidence table and all five evidence functions were absent, along with five more functions.
+
+**`class_session_staff_identity` was ALSO missing but is FAIL-SOFT** — it would only have dropped the `Main:` line. ⚠️ **The hard blocker was the column select, and naming the single decisive cause mattered more than listing every absence**, because only one of them produced the symptom.
+
+### Application — 8 migrations, in ledger order
+
+Dry run first; it named exactly the 8 the diagnosis predicted, in order. Applied via the repository's guarded wrapper on the **session pooler (5432)** — the transaction pooler cannot run this DDL. Every migration ran its own in-file assertion block and reported it: `H0A-1..H0A-7` · `H0B-1..H0B-10` (**0 rows written**) · `H1-1..H1-7` · `H7-1..H7-8` · `D1-1..D1-9` · `E1-E10` · `P5-1..P5-5` · `T1..T5`.
+
+⚠️ **VERIFIED BY CENSUS, NOT BY EXIT CODE — and the distinction was load-bearing.** The CLI emitted a `pgdelta-target-ca.crt` `ENOENT` failure from its **post-push catalogue-caching** step. **That is not a migration outcome**, and a run judged by trailing stderr would have been read as a partial failure. Conversely, a run judged by exit code alone would have accepted `0` without ever confirming what landed. **Neither signal is the measurement.**
+
+| metric | hosted | local | expected | |
+|---|---|---|---|---|
+| migrations | 25 | 25 | 25 | PASS |
+| tables | 28 | 28 | 28 | PASS |
+| functions | 49 | 49 | 49 | PASS |
+| enums | 12 | 12 | 12 | PASS |
+| `public` policies | 29 | 29 | — | PASS |
+| `storage` policies | 1 | 1 | — | PASS |
+| `auth.users` | 3 | 3 | — | PASS |
+
+**Ordered ledgers are now byte-identical between hosted and local.** All three `class_sessions` columns present; `report_evidence` present; all ten previously-missing functions present.
+
+### Storage — measured separately, and that separation was necessary
+
+⚠️ **The `public`-schema policy count CANNOT see storage policies**, so equal `public` counts never implied equal coverage. Measured directly: bucket **`evidence`** · `public=false` · **`file_size_limit = 104857600` (100 MiB)** · `allowed_mime_types = ["video/mp4","video/quicktime"]` · **1 `storage.objects` policy**, `INSERT evidence_objects_insert_authoring_trainer`. Local matches on all counts.
+
+**The 100 MiB figure is CORRECT and is `C-16`'s, not an error.** The migration enforces it in **three independent places** — a `CHECK (byte_size > 0 AND byte_size <= 104857600)`, the bucket's own `file_size_limit`, and assertion **`E4`**, which fails the migration outright if the bucket limit is anything else. ⓘ **Observation for Operator disposition, NOT acted on:** `CLAUDE.md`'s Phase-0 ruling row still records **50 MiB** from `G-05`, which `C-16` superseded. **Another stale restatement of the recurring kind. No governance file was edited.**
+
+### Existing data — undisturbed, verified against a pre-push baseline
+
+The baseline was captured **before** the push, so this is a comparison rather than an assertion. `reports` **1 row · `drafting` · `lock_version 3` · no cycle version · no submitted version — unchanged**. `auth.users 3` · `students 1` · `class_sessions 1` · `observation_ratings 9` · `audit_events 3` · `report_versions 0` · `report_evidence 0` (new, empty). **No row was written, altered or deleted by any of the 8.**
+
+### Blockers / next
+
+- **None blocking.** Hosted dev is schema-current and the deployed app should now resolve the trainer schedule.
+- ⚠️ **This commit and `9339128` are BOTH UNPUSHED, deliberately.** Pushing triggers a `best-coach-dev` production deployment, and the Operator instruction for this window was **do NOT redeploy**. The schema gap needed no redeploy — `f2200e8` already carried the code.
+- **Deferred by explicit Operator instruction:** fixture reload and the broader §11 fixture expansion. The hosted fixture remains the **Step 7F minimum** — one learner, one session, one module — which is sufficient to render the schedule but **not** the broader shape Phase 1's continuity proof will need.
+- **Still never exercised in any environment:** the AI drafting path end-to-end — provider call, grounding verdict against real prose, and trusted-draft persistence through the pooled connection. **`B-G06-DET-1` remains untested against real provider output.**
+- **Next action is the Operator's:** walk the deployed application.
