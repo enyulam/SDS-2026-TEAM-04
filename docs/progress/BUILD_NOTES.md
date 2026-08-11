@@ -6301,3 +6301,52 @@ The tree-wide completeness scan alternated **`management|MANAGEMENT`** and **mis
 
 **Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** (9 SQL + 10 runner + 9 surface) · `tsc` 0 · `eslint` 0 errors · `build` 0 · route census **17**.
 **Next step:** ⛔ **STOPPED.**
+
+---
+
+## 2026-08-11 (fourth entry) — three disciplines recorded at Operator instruction
+
+**Branch:** `develop`. **HEAD in:** `7a401e4` → **out:** this entry's commit.
+**Scope:** ⛔ **RECORDING ONLY — no code, no schema, no proof changed.** The Operator accepted the screen `19` frontend and directed that three things from it be recorded as **standing disciplines** rather than left as incidents of the phase that produced them.
+
+### 1 · ⛔ A GOVERNANCE-MANDATED ADDITION THAT CONTRADICTS ITS FRAME IS CITED IN THREE PLACES
+
+**The component · the DTO · `BUILD_NOTES.md`.** ▶ **These are the three places a visual pass looks**, and a visual pass is the thing that removes such an addition.
+
+**The failure it prevents is a *correct-looking* one.** A later session comparing screen `19` against its ratified frame finds a nine-dimension grid the frame does not draw, concludes **drift**, and removes it — ⛔ **reverting a ratified decision while believing it is enforcing one.** The frame is genuine authority (`A-045`); it is simply **not the authority that decided this**. **The visual ladder does not outrank a functional ruling** (`A-056`).
+
+⚠️ **One citation is not enough, and the reason is mechanical, not belt-and-braces.** A citation only in the component is invisible to someone auditing DTO shape; one only in the DTO is invisible to someone reading JSX; one only in a log is invisible to both. **The three places are chosen because they are the three surfaces a removal would pass through** — the pattern is *cover the removal path*, not *repeat yourself three times*.
+
+**Applies to:** every element required by a ruling and absent from — or contradicted by — its frame. **Live instances:** `19`'s nine-dimension grid (`D-1`/`C-10`). **Its mirror image already exists** and is governed the same way: an element the frame **draws** and a ruling **forbids** — `30`'s "This Term's Skills" card (`Q-27`), `29`'s "All terms" chip (`G-4`) — recorded as `REGISTERED-OMISSION`. ▶ **Same defect, opposite sign; both are a frame and a ruling disagreeing, and the ruling wins in both directions.**
+
+### 2 · ⚠️ WHEN A PIN MOVES, CHECK WHETHER THE LEG STILL DESCRIBES WHAT IT MEASURES
+
+**Raising `M-3a` from 3 to 4 with a reason was routine.** ▶ **The valuable half was noticing the leg's NAME had gone wrong.**
+
+It read *"all THREE **spine** reads"*. Three of the four are the management pending-queue spine; the fourth is a **report-detail** read. Left alone, the leg would have told every later reader that **a rating read had joined the queue enumeration** — ⛔ **exactly the thing `C-9` forbids** — and it would have said so from inside a **passing** proof, which is where a reader least expects to be misled.
+
+**The rule:** a pin carries **two** claims — a **value** and a **description of what the value counts**. Moving the value without re-reading the description leaves a true number under a false sentence. ⚠️ **A test name is read far more often than a test body**, so a stale name propagates further than a stale assertion. **Check the name at every pin move, and rename when the population it measures has changed shape rather than only size.**
+
+### 3 · ⛔ THE FALSE-VERDICT FAMILY HAS NOW OCCURRED AT EVERY LAYER
+
+**Added at Operator instruction:** `prove:portal-1` **exited 0 twice against a suite my edit had never reached.** A Python heredoc lost its escaping; the instrument stayed silent and the result stayed green.
+
+▶ **With this instance the family is complete across all four layers:**
+
+| Layer | Instance |
+|---|---|
+| **The measured object** | the CSS minifier's stored representation — a false `MISSING` |
+| **The measuring instrument** | the backtick `SyntaxError` whose echoed source line contained `RESULT: PASS`; the regex that captured a parameter list; the bare keyword that matched prose |
+| **The sweep over instruments** | `P1-1a`'s case-sensitive detector — a false `CLEAN` |
+| ⛔ **The EDIT to the instrument** | **this one — the edit never landed, and the unmodified suite passed** |
+
+⚠️ **The fourth layer is the one with no natural alarm.** The other three at least *ran something*. Here the correct old thing ran and returned the correct old answer; ▶ **nothing anywhere was wrong except the belief that the file had changed.**
+
+**The rule this adds:** ⛔ **a green run proves nothing about a file you did not confirm changed.** After editing an instrument, confirm the **file** changed — the new leg count, the new text, a deliberate failure — **before** trusting the run. **Exit code is the only verdict, and it is a verdict about the code that actually executed.**
+
+### Also recorded
+
+- ⛔ **Nothing was built this entry.** The next work — **`C-7`, `P1-2`'s table family** — is reported to the Operator as its own question and **creates nothing until ruled**.
+
+**Gates:** unchanged from `7a401e4` — ✅ `prove:hero-all` **17/17** · ✅ `prove:portal-1` **exit 0** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+**Next step:** ⛔ **STOPPED** — awaiting the `C-7` ruling.
