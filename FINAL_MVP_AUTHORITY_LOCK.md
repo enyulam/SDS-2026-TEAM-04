@@ -199,11 +199,17 @@ Trainer assessment → AI draft → Trainer edit/review → **Trainer approval**
 
 A-014's evidence sub-clause recorded the uploader as **UNRESOLVED** (U-09/U-10/U-11) and forbade any agent from inventing one. **The operator — not an agent — has now named the Trainer**, discharging that prohibition.
 
-**A-001 is ARMED but UNACTIVATED for the parent surface. A-003's and A-004's *permitted* legs are BOTH STOOD DOWN**; their *prohibited/refusal* legs remain fully required.
+~~**A-001 is ARMED but UNACTIVATED for the parent surface. A-003's and A-004's *permitted* legs are BOTH STOOD DOWN**; their *prohibited/refusal* legs remain fully required.~~
 
-A-003 is a Phase 2 exit condition expressed as **prohibited vs permitted** paths; A-004 requires Parent UAT to test **both** directions. §8.1 removes the parent surface, so **neither permitted leg has anything to exercise**. Both re-arm with Phase 2. Every refusal case — unauthorized, unrelated-child, pre-`Submitted`, unconsented, unscanned, expired-URL, direct-storage-path, public-access — **remains required and must fail closed**.
+~~A-003 is a Phase 2 exit condition expressed as **prohibited vs permitted** paths; A-004 requires Parent UAT to test **both** directions. §8.1 removes the parent surface, so **neither permitted leg has anything to exercise**. Both re-arm with Phase 2.~~ Every refusal case — unauthorized, unrelated-child, pre-`Submitted`, ~~unconsented~~ *(**centre-level under `C-2`**; no per-request refusal exists to test)*, ~~unscanned~~ ⛔ *(**`NOT APPLICABLE (C-3)`, never `PASS`** — the scan gate is removed, and a must-fail leg with nothing to test either fails forever or gets quietly marked green)*, expired-URL, direct-storage-path, public-access — **remains required and must fail closed**.
 
-*(Two successive drafts got this wrong: the first declared all three "ARMED and binding", inconsistent with §8.1; the second corrected A-004 but left A-003 — structurally identical, and sitting in the same sentence — untouched.)*
+✅ **CORRECTED 2026-08-12 UNDER A BOUNDED §12 AUTHORIZATION NAMING THIS LINE. ⛔ A-001 IS *ACTIVATED* FOR PARENT EVIDENCE, AND A-003's AND A-004's *PERMITTED* LEGS STAND UP.** Operator ruling **`D-5`** authorized per-child video evidence with the **linked Parent as one of its three audiences**, and **`C-1`** superseded **§8.1** — both on **2026-08-11**. **`A-002`** was ruled forward on **2026-08-12**, placing parent evidence access in **Part 1** at plan phase **`P1-5`**.
+
+⚠️ **THIS IS THE SECOND `C-1` RESIDUE INSIDE THE INSTRUMENT `C-1` AMENDED.** `C-1` corrected §8.1 and §15 and did not reach **this restatement two sections away**, so the Lock went on asserting the parent surface was removed **by its own superseded clause**. ▶ **And the Lock OUTRANKS `CLAUDE.md`, so for a session reading in precedence order this was the governing sentence.**
+
+⛔ **WHAT DID NOT CHANGE, AND MUST NOT BE READ AS RELAXED.** Every refusal leg above is **still required and still fails closed**. **`A-004`'s both-direction Parent UAT is HUMAN and is the Operator's to perform** — ⛔ **no session may report it as run, under any circumstances**; it is `NOT-RUN` until the Operator says otherwise. **`A-001`'s gates apply in full** — linked child only, submitted report only, short-TTL server-minted signed URL. **No download control for any role** (`D-5`), and **no surface may claim technical impossibility**. ⛔ **`Q-27` does not move: this is media, and no rating reaches a parent.**
+
+*(~~Two~~ **Three** successive drafts got this wrong: the first declared all three "ARMED and binding", inconsistent with §8.1; the second corrected A-004 but left A-003 — structurally identical, and sitting in the same sentence — untouched; **the third was this one, correct when written and left standing for a day after the ruling that reversed it.** ▶ **The first two failures were about getting a rule right; the third was about keeping it current, which is a different discipline and the one this project keeps losing.**)*
 
 **Rules.**
 

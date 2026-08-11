@@ -207,6 +207,8 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 - **GC-4 — PERFORMANCE SUMMARY grid, "Overall Grade", prose rating attributions, "Watch Together" video. A-021/A-048; A-034/A-035. Evidence is now RULED required with the Trainer as uploader, but the PARENT EVIDENCE PROJECTION IS RULED OUT of the Final MVP (Authority Lock section 8.1), so "Watch Together" stays omitted on a positive ruling. A-001 remains armed but unactivated. ALREADY CORRECTLY OMITTED — keep it omitted.**
 
+  ✅ **AMENDED 2026-08-12 — THE VIDEO HALF OF GC-4 IS REVERSED; THE RATING HALF IS NOT.** `D-5` authorized per-child video with the **linked Parent as one of its three audiences**, `C-1` superseded Authority Lock §8.1, and `A-002` was ruled forward placing the access in **Part 1** (`P1-5`). ▶ **"Watch Together" — a per-child clip, not class footage — is now IN SCOPE and is built at `P1-5`.** ⛔ **EVERYTHING ELSE IN GC-4 STANDS UNCHANGED AND IS PERMANENT:** the PERFORMANCE SUMMARY grid, "Overall Grade" and the prose rating attributions stay **absent** — `Q-27` bars the nine ratings from every Parent surface, DTO, projection and payload, and `G-2` bars any roll-up. ⚠️ **One row, two prohibitions, only one reversed** — do not read this amendment as loosening the other.
+
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
 
@@ -217,9 +219,11 @@ Visual reconciliation only against `reference/Parent - Class Report/` (A-056).
 (plan §6.5), and each recorded as SATISFIED BY OMISSION, never as a gap: the "Performance
 Summary" per-dimension grid stays absent (including in softened wording); no "Overall Grade";
 the frame's PROSE RATING ATTRIBUTIONS ("Assessed as Mastered in eye contact…", "currently
-assessed as Developing") are NOT ported (A-052); the "Watch Together" evidence video stays
+assessed as Developing") are NOT ported (A-052); ~~the "Watch Together" evidence video stays
 omitted (Authority Lock §8.1 — parent evidence projection is OUT of the Final MVP; A-001 is
-ratified but ARMED AND UNACTIVATED and any parent evidence surface is a §12 stop-and-ask); and
+ratified but ARMED AND UNACTIVATED and any parent evidence surface is a §12 stop-and-ask)~~
+✅ **SUPERSEDED 2026-08-12 — see the GC-4 amendment above. The clip is IN and is built at `P1-5`;
+the rating prohibitions in the same list are UNCHANGED**; and
 the four panels render the governed submitted narrative with nothing written over it. All five
 verified comment-only — zero render.
 

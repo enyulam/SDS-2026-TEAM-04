@@ -45,6 +45,7 @@ import type {
   AssessmentDraftDto,
   AvailabilityStateDto,
   CanonicalReportDto,
+  EvidenceViewUrlDto,
   DimensionDto,
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
@@ -82,6 +83,7 @@ import type {
 import {
   adapterGetAssessmentDraft,
   adapterGetCanonicalReport,
+  adapterMintEvidenceViewUrl,
   adapterGetDimensions,
   adapterGetDraftGenerationContext,
   adapterGetManagementReview,
@@ -220,6 +222,15 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       studentId: string,
     ): Promise<UiActionResult<CanonicalReportDto>> {
       return guard(() => adapterGetCanonicalReport(sessionId, studentId));
+    },
+
+    /*
+     * ⛔ P1-5. One call, one mint, one `evidence.accessed`. The elevated
+     * client used behind this signs a path the governed RPC has ALREADY
+     * authorized — it never decides who may view.
+     */
+    mintEvidenceViewUrl(evidenceId: string): Promise<UiActionResult<EvidenceViewUrlDto>> {
+      return guard(() => adapterMintEvidenceViewUrl(evidenceId));
     },
 
     // ---- writes ------------------------------------------------------

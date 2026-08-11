@@ -9,7 +9,11 @@ import { StatePanel } from "@/components/ui/state-panel";
 import { REPORT_PANEL_CONFIG } from "@/features/trainer/report-panel-config";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
-import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contracts/physical-test";
+import type {
+  CanonicalReportDto,
+  ParentEvidenceClipDto,
+  ReportPanelsDto,
+} from "@/lib/frontend/contracts/physical-test";
 
 /**
  * Screen 33 — Parent Class Report (FRONTEND RECONSTRUCTION F15 / operator checkpoint F-15).
@@ -67,15 +71,16 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
  *     A-001; `C-1` superseded Authority Lock §8.1; `A-002` was amended 2026-08-12 so parent
  *     evidence access is PART 1 work, at plan phase `P1-5`. ▶ A-001's permitted leg is LIVE,
  *     not stood down, and A-003/A-004 are now BOTH-DIRECTION requirements.
- *     ⛔ THIS REGION IS STILL NOT BUILT, AND MUST NOT BE BUILT HERE UNTIL `P1-5` IS
- *     AUTHORIZED — the reason changed from DESCOPED to UNBUILT-AND-SCHEDULED, which is why
- *     the citation is corrected rather than the code. When it lands: linked child only,
- *     submitted report only, short-TTL server-minted signed URL, NO download control for any
- *     role, and `evidence.accessed` on every mint.
+ *     ✅ BUILT 2026-08-12 AT `P1-5`, UNDER ITS OWN AUTHORIZATION. Item 4 is therefore NO LONGER
+ *     AN OMISSION — it is a delivered feature, and the three items above it are UNCHANGED.
+ *     ⚠️ ONE ROW OF THE PACK'S GC-4 REGISTER CARRIED TWO PROHIBITIONS AND ONLY ONE WAS
+ *     REVERSED: the clip is in; the per-dimension grid, "Overall Grade" and the prose rating
+ *     attributions stay PERMANENTLY absent. Do not read this as loosening items 1–3.
+ *     Gates, all live: linked child only · SUBMITTED report only · short-TTL SERVER-MINTED
+ *     signed URL, derived server-side and never carried on the DTO · `evidence.accessed` on
+ *     EVERY mint · ⛔ NO download control for any role · ⛔ and NO claim of technical
+ *     impossibility, because streamed video remains retrievable and D-5 says so plainly.
  *     ⛔ Q-27 IS UNAFFECTED IN BOTH DIRECTIONS: this is media, and no rating reaches a parent.
- *     No such governed path exists, so the region is omitted
- *     rather than faked — an affordance no governed port method backs is never invented
- *     (GLOBAL_UI_RULES §10), and no media element is rendered on this surface at all.
  *
  * The frame's "Report Details" sidebar is likewise not reconstructed. Its "Overall Grade" row is
  * prohibited outright (2 above), and its Name / Class / Lesson / Term rows have no governed
@@ -250,6 +255,52 @@ export function ParentCanonicalReport() {
         </div>
 
         {/*
+          ✅ P1-5 — "WATCH TOGETHER". D-5's per-child clip, built 2026-08-12.
+
+          ⛔ THIS REGION WAS A REGISTERED OMISSION AND IS NOW BUILT ON A
+             POSITIVE RULING, NOT ON DRIFT. The pack recorded it omitted under
+             Authority Lock §8.1; `D-5` ruled the projection IN, `C-1`
+             superseded §8.1, and `A-002` was ruled forward on 2026-08-12
+             placing the access in Part 1. The `33` pack's GC-4 row carries the
+             reversal — and carries, in the same breath, that GC-4's OTHER
+             prohibitions are untouched.
+
+          ⛔ Q-27 IS UNMOVED AND THIS IS THE SURFACE IT GOVERNS. One row, two
+             prohibitions, only one reversed: the nine ratings, "Overall Grade"
+             and the frame's prose rating attributions stay ABSENT here. This
+             is MEDIA. Nothing about it carries assessment substance.
+
+          ⛔ NO DOWNLOAD CONTROL, FOR ANY ROLE INCLUDING PARENT (D-5).
+             `controlsList="nodownload"` removes the browser's own menu item,
+             and no affordance of ours replaces it. ⚠️ THE COPY DOES NOT CLAIM
+             TECHNICAL IMPOSSIBILITY — streamed video remains retrievable by a
+             determined user with browser tooling, D-5 says so plainly, and no
+             surface may say otherwise.
+
+          ⚠️ THE URL IS MINTED ON DEMAND, NOT WITH THE PAGE. Every mint is one
+             governed call that emits `evidence.accessed` — the only trace that
+             a URL to this child's video existed, for whom and when. Minting it
+             alongside the report would record an access that never happened
+             and would leave a live URL in the page for every visit.
+        */}
+        {state.data.evidence.length > 0 && (
+          <section className="px-[26px] pb-6" aria-labelledby="watch-together-heading">
+            <h2 id="watch-together-heading">
+              <span className="text-[0.8203125rem] font-extrabold text-ink-strong">
+                Watch Together
+              </span>
+            </h2>
+            <p className="mt-1 text-[0.71875rem] leading-5 text-ink">
+              Your child&rsquo;s own recording from this session. It plays here for viewing; there
+              is no download.
+            </p>
+            {state.data.evidence.map((clip) => (
+              <EvidencePlayer key={clip.id} clip={clip} />
+            ))}
+          </section>
+        )}
+
+        {/*
           REPORT DETAILS — hero Phase 1. The frame draws five rows: Name,
           Class, Lesson, Term, Overall Grade. THREE ARE BUILT AND TWO ARE
           REGISTERED OMISSIONS, each preserved with its citation:
@@ -266,10 +317,19 @@ export function ParentCanonicalReport() {
 
           Also still omitted from this screen, unchanged from the F-15
           reconstruction and re-verified this phase: the PERFORMANCE SUMMARY
-          per-dimension grid (the caught leak `CLAUDE.md` §6 names by name),
-          the prose rating attributions (A-052), and WATCH TOGETHER (G-8;
-          Authority Lock §8.1 puts the parent evidence projection out of the
-          Final MVP entirely).
+          per-dimension grid (the caught leak `CLAUDE.md` §6 names by name)
+          and the prose rating attributions (A-052).
+
+          ⚠️ ~~"and WATCH TOGETHER (G-8; Authority Lock §8.1 puts the parent
+             evidence projection out of the Final MVP entirely)"~~ — STRUCK
+             2026-08-12 at P1-5 and preserved per annotate-never-delete. It is
+             BUILT, forty lines above this comment. ⛔ AND IT WAS STALE FOR THE
+             WHOLE OF P1-5's BUILD: the region was added, the citation above it
+             written, and this line — the other half of the same file — kept
+             asserting the opposite. That is the RESTATEMENT DEFECT arriving
+             inside a single file, and it is why the rule is *sweep the tree,
+             never the list*. G-8 is untouched and still refuses CLASS footage;
+             §8.1 was superseded by `C-1`, not by this build.
 
           ⛔ NO TRAINER ROW. G-5 PERMITS the assigned trainer's name on a
           Parent surface — but permission is not a visible field. THIS FRAME
@@ -312,6 +372,72 @@ type PanelIconName = "star" | "arrowUp" | "target" | "heart";
  * outside this checkpoint's owned paths, so it is not extended here. These four match the frame's
  * section marks (star, rising arrow, target, heart) in the shared stroked line style.
  */
+/**
+ * ⛔ NO DOWNLOAD CONTROL, AND NO CLAIM OF IMPOSSIBILITY (D-5).
+ *
+ * `controlsList="nodownload"` removes the browser's own download item and
+ * `disablePictureInPicture` removes the detach affordance. ⚠️ NEITHER MAKES
+ * THE STREAM UNRETRIEVABLE, and the copy on this screen says so. D-5 requires
+ * the limitation to be stated rather than hidden: the product provides no
+ * download affordance; it does not claim technical impossibility.
+ *
+ * ⚠️ THE URL IS FETCHED ON PLAY, NOT ON RENDER. One mint = one
+ * `evidence.accessed` event, so an access recorded is an access a human
+ * actually asked for. Minting on render would fabricate an access on every
+ * page view and put a live URL in the document for visits nobody made.
+ */
+function EvidencePlayer({ clip }: { readonly clip: ParentEvidenceClipDto }) {
+  const port = usePhysicalTestPort();
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function play() {
+    if (busy || url) return;
+    setBusy(true);
+    const result = await port.mintEvidenceViewUrl(clip.id);
+    setBusy(false);
+    // ⛔ A REFUSAL IS NOT AN EMPTY PLAYER. No reason is disclosed — every
+    // denial reads the same to the caller, exactly as the RPC answers it.
+    if (result.outcome !== "success") { setFailed(true); return; }
+    setUrl(result.data.url);
+  }
+
+  if (failed) {
+    return (
+      <p data-evidence-state="unavailable" className="mt-3 text-[0.71875rem] leading-5 text-ink">
+        This recording is not available to view right now.
+      </p>
+    );
+  }
+
+  if (!url) {
+    return (
+      <button
+        type="button"
+        data-evidence-play={clip.id}
+        onClick={() => void play()}
+        disabled={busy}
+        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-[0.78125rem] font-semibold text-ink disabled:opacity-60"
+      >
+        {busy ? "Preparing…" : "Play recording"}
+      </button>
+    );
+  }
+
+  return (
+    <video
+      data-evidence-player={clip.id}
+      src={url}
+      controls
+      controlsList="nodownload"
+      disablePictureInPicture
+      preload="none"
+      className="mt-3 w-full rounded-card"
+    />
+  );
+}
+
 function PanelIcon({ name }: { readonly name: PanelIconName }) {
   return (
     <svg

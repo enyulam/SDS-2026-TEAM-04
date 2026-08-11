@@ -6,6 +6,7 @@ import {
   type AssessmentRatingDto,
   type CanonicalReportContextDto,
   type CanonicalReportDto,
+  type EvidenceViewUrlDto,
   type ChecklistDto,
   type CorrectionRequestDto,
   type DimensionCode,
@@ -1060,6 +1061,14 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         panels: clone(report.latestSubmitted.panels),
         submittedAt: report.latestSubmitted.submittedAt,
         context: fixtureReportContext(report.sessionId, report.studentId),
+        /*
+         * ⛔ P1-5. The fixture carries NO clip: the evidence substrate exists
+         * but the upload transport does not, so no fixture report has one.
+         * ⚠️ An invented clip here would put a player on the fixture surface
+         * that no governed path backs — the affordance-without-a-backing rule
+         * (GLOBAL_UI_RULES §10). The empty list is the honest state.
+         */
+        evidence: [],
       },
     };
   }
@@ -1148,6 +1157,19 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     return { outcome: "success", data: reports };
   }
 
+  /*
+   * ⛔ THE FIXTURE MINTS NOTHING, AND NEVER WILL. No fixture report carries a
+   * clip, so this is unreachable through the UI — and it answers `unavailable`
+   * rather than inventing a URL, because a fake media URL on a PARENT surface
+   * is exactly the affordance-without-a-backing this project refuses
+   * (GLOBAL_UI_RULES §10). ⚠️ It also emits no `evidence.accessed`, which is
+   * correct: nothing was accessed.
+   */
+  async mintEvidenceViewUrl(): Promise<UiActionResult<EvidenceViewUrlDto>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
   async getCanonicalReport(
     sessionId: string,
     studentId: string,
@@ -1167,6 +1189,14 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         panels: clone(report.latestSubmitted.panels),
         submittedAt: report.latestSubmitted.submittedAt,
         context: fixtureReportContext(report.sessionId, report.studentId),
+        /*
+         * ⛔ P1-5. The fixture carries NO clip: the evidence substrate exists
+         * but the upload transport does not, so no fixture report has one.
+         * ⚠️ An invented clip would put a player on the fixture surface that
+         * no governed path backs — an affordance without a backing is never
+         * invented (GLOBAL_UI_RULES §10). The empty list is the honest state.
+         */
+        evidence: [],
       },
     };
   }

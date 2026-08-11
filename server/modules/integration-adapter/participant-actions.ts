@@ -69,6 +69,8 @@ import {
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
 } from "@/server/modules/management-view/projections";
+import { createElevatedSupabaseClient } from "@/server/platform/supabase/elevated";
+import { listEvidenceCore as listEvidenceForParentCore, mintEvidenceViewUrlCore } from "@/server/modules/evidence/projections";
 import {
   getCanonicalReportCore,
   getParentAvailabilityCore,
@@ -703,7 +705,17 @@ export async function adapterGetManagementSubmittedReport(
     // lesson on screen `19`) is hero Phase 10's deliverable and has not been
     // authorized yet. `null` renders as omitted rows — the same treatment a
     // NULL lesson gets — rather than as fabricated or back-derived values.
-    data: { panels: review.data.panels, submittedAt: review.data.submittedAt, context: null },
+    // ⛔ P1-5: the MANAGEMENT submitted-report read carries NO clip. D-5 gives
+    // management the clip on its REVIEW surface, before Approve & Submit —
+    // this is the after-the-fact published view, and widening it here would
+    // add a media read nothing asked for. Empty, not omitted, so the DTO
+    // stays one shape across every caller.
+    data: {
+      panels: review.data.panels,
+      submittedAt: review.data.submittedAt,
+      context: null,
+      evidence: [],
+    },
   };
 }
 
@@ -816,7 +828,25 @@ export async function adapterGetCanonicalReport(
   // `report_get_canonical` is itself keyed by the pair and resolves EXCLUSIVELY
   // through `latest_submitted_version_id`, re-deriving the caller's reach on
   // every call. A caller naming a pair it may not read gets zero rows.
-  return getCanonicalReportCore(await createRequestSupabaseClient(), sessionId, studentId);
+  const client = await createRequestSupabaseClient();
+  const report = await getCanonicalReportCore(client, sessionId, studentId);
+  if (report.outcome !== "success") return report;
+
+  /*
+   * ⛔ P1-5. The clip list is read AFTER the canonical read has already
+   * admitted this caller, through a function whose parent arm carries the SAME
+   * two gates — a live link and a submitted report. Two gates, written to
+   * move together (R-C2-6).
+   *
+   * ⚠️ A FAILED EVIDENCE READ MAKES THE WHOLE REPORT `unavailable`, rather
+   * than a report with no clip. An empty list is EXACTLY the shape a refused
+   * read would take here, and a parent silently shown "no recording" when one
+   * exists is a governance failure wearing a success (Q-7).
+   */
+  const clips = await listEvidenceForParentCore(client, sessionId, studentId);
+  if (clips.outcome !== "success") return { outcome: "unavailable" };
+
+  return { outcome: "success", data: { ...report.data, evidence: clips.data } };
 }
 
 // ---------------------------------------------------------------------
@@ -1192,4 +1222,27 @@ export async function adapterManagementApproveAndSubmit(
       parentVisible: true,
     },
   };
+}
+
+/**
+ * ⛔ P1-5 — mint ONE short-TTL view URL for D-5's per-child clip (A-001 gate 6).
+ *
+ * ⚠️ TWO CLIENTS, DELIBERATELY. The REQUEST client carries the caller's own
+ * identity, so the RPC's live gate applies exactly as it does to every other
+ * read. The ELEVATED client is used ONLY to SIGN a path the governed RPC has
+ * already authorized — ⛔ it never decides who may view, and it is never
+ * reached before authorization succeeds.
+ *
+ * ⛔ NO DOWNLOAD OPTION IS PASSED (D-5). Adding one would create the download
+ * control D-5 refuses for every role, Parent included — invisibly, inside an
+ * options object.
+ */
+export async function adapterMintEvidenceViewUrl(
+  evidenceId: string,
+): Promise<ActionResult<{ readonly url: string; readonly expiresInSeconds: number }>> {
+  return mintEvidenceViewUrlCore(
+    await createRequestSupabaseClient(),
+    createElevatedSupabaseClient(),
+    evidenceId,
+  );
 }

@@ -310,10 +310,24 @@ export interface AdapterCanonicalReportContextDto {
   readonly trainerDisplayName: string | null;
 }
 
+export interface AdapterEvidenceClipDto {
+  readonly id: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+}
+
 export interface AdapterCanonicalReportDto {
   readonly panels: AdapterReportPanelsDto;
   readonly submittedAt: string;
   readonly context: AdapterCanonicalReportContextDto | null;
+  /**
+   * ⛔ P1-5 — D-5's per-child clip, METADATA ONLY.
+   *
+   * No storage path and no URL: the key is derived server-side and a URL is
+   * minted only on demand (A-001 gates 6 and 7). ⛔ No rating, dimension or
+   * band — Q-27 governs this DTO, not merely the page drawn from it.
+   */
+  readonly evidence: readonly AdapterEvidenceClipDto[];
 }
 
 export type AdapterAvailabilityStateDto = "available" | "none_yet" | "linked_unavailable";

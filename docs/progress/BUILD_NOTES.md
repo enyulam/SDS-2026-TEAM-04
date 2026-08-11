@@ -6560,3 +6560,74 @@ The block matcher still expected **`</dl>`** after the list became a **`<ul>`** 
 
 **Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** · `prove:portal-2` **exit 0** · `prove:f-attendance-init-1` **exit 0** · `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0**.
 **Next step:** ⛔ **STOPPED.**
+
+
+---
+
+## 2026-08-12 — `P1-5` PARENT EVIDENCE ARM · the two remaining §12 corrections · the tree-wide restatement sweep
+
+**Track / workstream:** `docs/plan/PORTAL_COMPLETION_PLAN.md` Part 1, phase `P1-5`. **Branch:** `develop`, main worktree, no parallel writer.
+**Starting HEAD:** `0dc8cbf`.
+
+### 1. The two named §12 corrections, and why the list was not the boundary
+
+Under a bounded §12 authorization naming each location, annotate-never-delete:
+
+- **`FINAL_MVP_AUTHORITY_LOCK.md` §8 (line 202)** — *"A-001 is ARMED but UNACTIVATED for the parent surface… A-003's and A-004's permitted legs are BOTH STOOD DOWN"*, struck. ⚠️ **This was the more serious of the two: the Lock OUTRANKS `CLAUDE.md`**, so for a session reading in precedence order it was the governing sentence — and it was the **second `C-1` residue inside the very instrument `C-1` amended**.
+- **`CLAUDE.md` §1.1 (line 82)** — the same claim citing §8.1, struck the same way.
+
+Both now state: **A-001 is ACTIVATED for parent evidence**; **A-003's and A-004's *permitted* legs stand up**; and — unchanged — every refusal leg still fails closed, **A-003's `unscanned` leg is `NOT APPLICABLE (C-3)` and never `PASS`**, **A-004's both-direction UAT is HUMAN and the Operator's to run**, and **`Q-27` does not move**.
+
+⛔ **THE OPERATOR'S LIST HAS NOW BEEN INCOMPLETE THREE TIMES.** Four named sites, then two more, then **nine further live sites that no list contained** — `FINAL_MVP_EXECUTION_PLAN.md` ×2, the Phase A reconciliation, `FINAL_MVP_PORTAL_DECISIONS.md` ×2, the `33` pack ×3, and the `GC-4` register. ▶ **This is the measurement that settles the method rather than a criticism of the lists.** A handed list is a **starting point and never a completeness claim**; the only thing that has ever been complete is a **scan of the tree with a control proving the detector fires**.
+
+⚠️ **My own triage was incomplete too, for a dumber reason:** I read the **first 60 lines** of my own sweep's output and reported from that. The sweep was right; the reading of it was not. **An instrument that reports more than you read has not been read.**
+
+### 2. A tenth site, found inside the file this phase was editing
+
+`features/parent/parent-canonical-report.tsx` gained the **Watch Together** region with a full three-place citation — while a comment **forty lines below it** went on listing Watch Together among the screen's omissions, *"(G-8; Authority Lock §8.1 puts the parent evidence projection out of the Final MVP entirely)"*. ▶ **The restatement defect arriving inside a SINGLE FILE, in the same commit that made it false.** Struck in place. `G-8` is untouched and still refuses **class** footage; §8.1 was superseded by `C-1`, not by this build.
+
+### 3. `P1-5` — the parent arm
+
+**Migration `supabase/migrations/20260812150000_portal_p1_5_parent_evidence_arm.sql`.**
+
+The arm was added to **both** `evidence_list_for_report` and `evidence_record_access`, each **mirroring `RPC-13`'s dispatch step for step**: resolve exactly one active membership (`HAVING count(*) = 1`, `NULL` → return), then for `parent` require **`app_parent_reaches_student`** and **`latest_submitted_version_id IS NOT NULL`**. Putting the arm on `evidence_record_access` is what makes **`evidence.accessed` fire on a parent mint** — without it the parent path would have been the one audience whose viewing left no trace.
+
+**Transport:** `mintEvidenceViewUrlCore` calls the governed RPC **first** and only then signs, using the elevated client **solely to sign a key the RPC already authorized**. `EVIDENCE_URL_TTL_SECONDS = 120`. ⛔ **No `download` option is passed to `createSignedUrl`** — D-5's refused control is exactly the kind of thing that appears invisibly inside an options object, so it is now a measured leg with a control.
+
+**Surface:** screen `33`'s **Watch Together** section and `EvidencePlayer` — `controlsList="nodownload"`, `disablePictureInPicture`, `preload="none"`, **URL minted on play, never on render**. Minting with the page would record an access nobody asked for and leave a live URL in the document for every visit. ⛔ **The copy states there is no download and claims NO technical impossibility anywhere** — streamed video stays retrievable, D-5 says so, and no surface may say otherwise. **`Q-27` unmoved: this is media, and no rating reaches a parent.**
+
+**`E9` was retired deliberately, in the migration that made it false.** It failed the build if a parent arm appeared, and **it did exactly its job for a day.** ▶ It is retired because **its premise was ruled away, not because it was inconvenient** — and it is retired by **redefining the two functions it guarded**, so the guard is *replaced*, never dropped around. A runner leg reads the **unstripped** migration to prove the retirement is **stated**: an assertion removed silently is a guard that disappears without anyone deciding it should.
+
+### 4. Proofs
+
+**`scripts/tests/portal/prove-p1-5-parent-evidence.sql` — 11 legs, every refusal with a control:** permitted leg (P5a-1) · no path/url/object returned (P5a-2) · unauthorized (P5a-3) · unrelated child (P5a-4) · pre-submitted (P5a-5) **with P5a-6 restoring `submitted` to prove the zeros are discrimination and not a broken fixture** · a denied access emits nothing (P5a-7) **with P5a-8 proving a permitted mint emits exactly one `evidence.accessed`, `actor_role = parent`** · direct storage path (P5a-9) · public object (P5a-10) · Q-27 unmoved on the same report (P5a-11).
+
+**`prove-p1-5-parent-evidence.mjs` — 22 checks, including the leg SQL cannot carry.** ⛔ **A TTL is a property of the minted token, and the database never sees one.** The runner mints a **1-second** URL, reads **`exp − iat = 1` out of the token itself**, waits past the window, and gets **HTTP 400** — ⚠️ **with a control that fetches a LIVE URL for the SAME object and gets HTTP 200.** Without that control the expiry leg is equally true of a path that never worked. **The public-object fetch runs BEFORE the cleanup deliberately**: run after, it would have been equally true of a key that was never there.
+
+⚠️ **My first probe upload was refused `415` by the bucket's own `allowed_mime_types`.** Recorded and **measured as a leg** rather than worked around — `C-16`'s 100 MiB is not the only per-bucket control, and a live control found by accident is worth more than one asserted from a plan.
+
+**A `P1-2` leg's pin moved, and the leg was rewritten rather than deleted.** *"the evidence module carries NO parent arm"* was true and load-bearing while A-002 deferred it, and would now fail **for the right reason** — precisely the case where deleting a leg quietly loses a measurement. It now measures what still holds: **the RPC authorizes and audits before anything is signed**, and **no `download` option is passed**. Second application of *when a pin moves, check whether the leg still describes what it measures*.
+
+### 5. ⛔ NOT RUN, AND NOT CLAIMED
+
+- **`A-004`'s both-direction Parent UAT — `NOT-RUN`. HUMAN, and the Operator's to perform.** ⚠️ `prove:portal-5` exiting 0 says **nothing** about it, and the runner **prints that in its own output** so a reader of the green result cannot mistake one for the other. ⛔ **No session may report it as run, under any circumstances.**
+- **`A-003`'s `unscanned` leg — `NOT APPLICABLE (C-3)`**, never `PASS`.
+- **Rendered capture on screen `33`'s new region — `NOT-RUN`.** A green DOM-text proof is not a visual acceptance.
+
+### 6. The family entry — a new route to the same defect
+
+Added to the false-verdict family: **the read-only leg that passed against an empty string**. The block matcher still expected `</dl>` after screen `19`'s list became a `<ul>`, so it located **nothing**, and *"carries no input or button"* is **trivially true of nothing**. ▶ **Previous instances arrived through logic; this one arrived through MARKUP.** The family now spans: the measured object · the measuring instrument · the sweep · the edit to the instrument · and now the *shape of the document being measured*. The guard is unchanged and is the only one that has ever worked: **a companion leg asserting the subject EXISTS is what makes an absence assertion mean anything.**
+
+**Files changed:** `supabase/migrations/20260812150000_portal_p1_5_parent_evidence_arm.sql` (new) · `scripts/tests/portal/prove-p1-5-parent-evidence.sql` + `.mjs` (new) · `scripts/tests/portal/prove-p1-2-evidence-substrate.mjs` · `server/modules/evidence/projections.ts` · `server/modules/integration-adapter/{adapter-dtos,participant-actions}.ts` · `lib/frontend/{contracts/physical-test,physical-test-port,adapters/real-participant-port,fixtures/physical-test-fixture}.ts` · `features/parent/parent-canonical-report.tsx` · `package.json` · `CLAUDE.md` · `FINAL_MVP_AUTHORITY_LOCK.md` · `FINAL_MVP_EXECUTION_PLAN.md` · `UI_REFERENCE_FINAL_MVP/33-parent-class-report/implementation-notes.md` · `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.md` · `docs/progress/STATUS.md`.
+
+**Migration / schema:** one migration applied locally (`supabase migration up`, ⛔ never `db reset`). ⛔ **Census UNMOVED — 28 tables · 49 functions · 12 enums · 29 policies · registry 19.** The migration **replaced** two functions; it added nothing.
+
+**Gates:** `prove:portal-5` **exit 0** (11 SQL + 22 runner) · `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** · `prove:portal-2` **exit 0** · `prove:f-attendance-init-1` **exit 0** · `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0**.
+
+**Failures and recovery:** the probe upload's `415` (turned into a leg) · three hero suites failed their **build-post-dates-source** reachability leg after the surface edits and passed on rebuild — ⚠️ **the leg working exactly as designed, and the reason a stale `.next` cannot silently satisfy a surface proof.**
+
+**Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No remote, no push, no billable call.
+
+**Blockers:** none opened. **`A-002` closed as a blocker on `P1-5` by the 2026-08-12 ruling.**
+
+**Next step:** ⛔ **STOPPED by Operator instruction.**

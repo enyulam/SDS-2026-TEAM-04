@@ -1927,7 +1927,7 @@ under §7.6).
 **P2-T05 — Evidence upload / read / delete governance**
 
 - **Objective** — The three governed operations, exactly as authorized and no wider.
-- **Authority** — Lock §8; A-001 (**armed but unactivated**); A-003 (prohibited-path exit; the
+- **Authority** — Lock §8; A-001 (~~**armed but unactivated**~~ ✅ **ACTIVATED 2026-08-11 by `D-5`; parent access is Part 1 `P1-5` under the 2026-08-12 `A-002` ruling**); A-003 (prohibited-path exit; the
   *permitted* leg for parent access is **stood down**).
 - **Depends on** — P2-T04.
 - **Files/systems** — evidence RPCs; `server/modules/evidence/`; server actions; port.
@@ -4088,7 +4088,7 @@ hold, each with positive evidence.
 - **Teaching Assistant** — deferred under A-014; not a completion gate.
 - **Notifications** — `DEFERRED_BY_RATIFIED_DECISION`, with the two U-25 notification surfaces
   blocked pending P0-T09 item 4.
-- **Parent evidence projection** — ruled OUT (Lock §8.1); A-001's gates stay armed but unactivated.
+- ~~**Parent evidence projection** — ruled OUT (Lock §8.1); A-001's gates stay armed but unactivated.~~ ✅ **REVERSED 2026-08-12.** `D-5` ruled it IN, `C-1` superseded Lock §8.1, `A-002` places it in **Part 1** (`P1-5`). **A-001's gates are LIVE**; every refusal leg is unchanged, `A-003`'s `unscanned` leg is **`NOT APPLICABLE (C-3)`**, and **`A-004`'s both-direction UAT is HUMAN and the Operator's to run**.
 
 **Anything unmet must be recorded as unmet, with its reason. A gap declared honestly is a result; a
 gap papered over is a failure.**

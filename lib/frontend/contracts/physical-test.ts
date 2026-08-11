@@ -345,10 +345,47 @@ export type CanonicalReportContextDto = {
   readonly trainerDisplayName: string | null;
 };
 
+/**
+ * ⛔ P1-5 — D-5's per-child clip metadata, and NOTHING ELSE.
+ *
+ * No storage path and no URL: the key is derived server-side and a URL is
+ * minted only on demand (A-001 gates 6 and 7). No rating, no dimension, no
+ * band — Q-27 governs this DTO, not merely the page drawn from it.
+ */
+export type ParentEvidenceClipDto = {
+  readonly id: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+};
+
 export type CanonicalReportDto = {
   readonly panels: ReportPanelsDto;
   readonly submittedAt: string;
   readonly context: CanonicalReportContextDto | null;
+  /**
+   * ⚠️ GOVERNANCE-MANDATED ADDITION (P1-5, 2026-08-12). Empty until D-5's
+   * clip exists for the linked child's SUBMITTED report. The frame draws
+   * "Watch Together"; it was a REGISTERED OMISSION until D-5/C-1/A-002 ruled
+   * it in, so its presence is a ruling, not drift.
+   */
+  readonly evidence: readonly ParentEvidenceClipDto[];
+};
+
+/**
+ * ⛔ P1-5 — mint ONE short-TTL view URL for ONE clip (A-001 gate 6).
+ *
+ * ⚠️ ONE CALL = ONE `evidence.accessed` EVENT. It is deliberately NOT part of
+ * `getCanonicalReport`: bundling it would record an access on every page view
+ * and put a live URL in the document for visits nobody made. The only trace
+ * that a URL to a child's video existed is this event, so it must correspond
+ * to something a human actually asked for.
+ *
+ * ⛔ Returns a URL and nothing else — never a storage path (A-001 gate 7), and
+ * never a download link (D-5).
+ */
+export type EvidenceViewUrlDto = {
+  readonly url: string;
+  readonly expiresInSeconds: number;
 };
 
 export type AvailabilityStateDto =

@@ -189,11 +189,33 @@ check(
   "CONTROL: the refused-framing pattern FIRES against text that contains it",
 );
 
-// ⛔ A-002: no parent arm anywhere on the server side.
+// ⛔ THIS LEG'S PIN MOVED, AND THE LEG WAS REWRITTEN RATHER THAN DELETED.
+//
+// It read: "A-002: the evidence module carries NO parent arm -- deliberately
+// not built, not built-and-unreachable", scanning `projections.ts` for the
+// word `parent`. That was TRUE and LOAD-BEARING while A-002 deferred parent
+// access to Phase 2. ⚠️ On 2026-08-12 the Operator ruled A-002 forward and
+// P1-5 BUILT the arm, so the old leg would now fail for the RIGHT reason --
+// which is exactly the case where deleting a leg quietly loses a measurement.
+//
+// What the leg protects is unchanged: the mint must be a GOVERNED call, not
+// a client-reachable path to the elevated client. So it now measures the
+// property that actually still holds -- authorization happens in the RPC
+// BEFORE anything is signed, and the elevated client only ever signs.
 const evidenceModule = strip(["server", "modules", "evidence", "projections.ts"]);
+const mintBody = evidenceModule.slice(evidenceModule.indexOf("export async function mintEvidenceViewUrlCore"));
 check(
-  !/\bparent\b/i.test(evidenceModule.replace(/EvidenceItemDto|EVIDENCE_[A-Z_]+/g, "")),
-  "A-002: the evidence module carries NO parent arm -- deliberately not built, not built-and-unreachable",
+  mintBody.indexOf("evidence_record_access") > 0 &&
+    mintBody.indexOf("evidence_record_access") < mintBody.indexOf("createSignedUrl"),
+  "the governed RPC authorizes and audits BEFORE anything is signed -- the elevated client signs, it never decides",
+);
+check(
+  !/download\s*:/.test(mintBody),
+  "D-5: no `download` option is passed to createSignedUrl -- the control D-5 refuses cannot appear inside an options object",
+);
+check(
+  /download\s*:/.test("createSignedUrl(p, 60, { download: true })"),
+  "CONTROL: the download-option pattern FIRES against a call that passes one",
 );
 
 // config.toml's local raise, and the reason it is not the boundary.

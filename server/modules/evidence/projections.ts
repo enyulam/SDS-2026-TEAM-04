@@ -129,3 +129,65 @@ export async function listEvidenceCore(
     })),
   };
 }
+
+/**
+ * ⚠️ THE SHORT-TTL SERVER-MINTED SIGNED URL — A-001 gate 6.
+ *
+ * 120 seconds. Long enough for a `<video>` element to begin streaming, short
+ * enough that a URL copied out of devtools is dead before it is useful. It is
+ * deliberately NOT hours: the URL is a bearer capability, and its lifetime is
+ * the only thing bounding who can replay it once it has left this process.
+ */
+export const EVIDENCE_URL_TTL_SECONDS = 120;
+
+/**
+ * Authorize one view, record it, and mint the URL.
+ *
+ * ⛔ THE ORDER IS LOAD-BEARING AND MUST NOT BE "OPTIMIZED". Authorization and
+ * the audit event happen FIRST, inside one governed RPC, and only then is a
+ * URL minted. Minting first and auditing afterwards would leave a live URL
+ * behind whenever the audit write failed — `evidence.accessed` is the ONLY
+ * trace that a URL to a child's video ever existed, and it matters more now
+ * that `C-3` removed scanning.
+ *
+ * ⛔ THE OBJECT KEY IS DERIVED HERE, SERVER-SIDE, AND NEVER CROSSES THE
+ * BOUNDARY (A-001 gate 7). The RPC returns a report id and a media type; the
+ * path is reconstructed from them and handed straight to the signer.
+ *
+ * ⛔ NO DOWNLOAD AFFORDANCE (D-5). `createSignedUrl` is called WITHOUT the
+ * `download` option, so the URL carries no attachment disposition. Adding it
+ * would create the download control D-5 refuses for every role, Parent
+ * included — and it would do so invisibly, in an options object.
+ */
+export async function mintEvidenceViewUrlCore(
+  client: SupabaseClient,
+  elevated: SupabaseClient,
+  evidenceId: string,
+): Promise<ActionResult<{ readonly url: string; readonly expiresInSeconds: number }>> {
+  const guard = await resolveSessionIdentity(client);
+  if (guard.outcome !== "success") return guard;
+
+  // ⚠️ The role check refuses nobody the RPC would admit; it only stops a
+  // request reaching the RPC with no identity at all. The gate is the RPC's,
+  // resolved live in the database on every call (ADR-4).
+  const { data, error } = await client.rpc("evidence_record_access", { p_evidence_id: evidenceId });
+  if (error) return { outcome: "unavailable" };
+
+  const row = Array.isArray(data) ? data[0] : data;
+  // ⛔ A REFUSAL IS `unauthorized`, NOT AN EMPTY PLAYER. The RPC answers every
+  // denial with the same shape, and no reason is disclosed to the caller.
+  if (!row || row.o_authorized !== true) return { outcome: "unauthorized" };
+
+  const path = evidenceObjectPath(row.o_report_id, evidenceId, row.o_media_type);
+  if (!path) return { outcome: "unavailable" };
+
+  const signed = await elevated.storage
+    .from(EVIDENCE_BUCKET)
+    .createSignedUrl(path, EVIDENCE_URL_TTL_SECONDS);
+  if (signed.error || !signed.data?.signedUrl) return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: { url: signed.data.signedUrl, expiresInSeconds: EVIDENCE_URL_TTL_SECONDS },
+  };
+}

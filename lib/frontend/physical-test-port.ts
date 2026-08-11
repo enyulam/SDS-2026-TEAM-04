@@ -2,6 +2,7 @@ import type {
   AvailabilityStateDto,
   AssessmentDraftDto,
   CanonicalReportDto,
+  EvidenceViewUrlDto,
   DimensionDto,
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
@@ -110,6 +111,16 @@ export interface PhysicalTestPort {
     sessionId: string,
     studentId: string,
   ): Promise<UiActionResult<CanonicalReportDto>>;
+
+  /**
+   * ⛔ P1-5 — D-5's per-child clip. ONE call mints ONE short-TTL URL and emits
+   * ONE `evidence.accessed`, so an access recorded is an access a human asked
+   * for. ⚠️ It is a SEPARATE method on purpose: folding it into
+   * `getCanonicalReport` would fabricate an access on every page view and put
+   * a live URL in the document for visits nobody made.
+   * Returns a URL — never a storage path (A-001 gate 7), never a download (D-5).
+   */
+  mintEvidenceViewUrl(evidenceId: string): Promise<UiActionResult<EvidenceViewUrlDto>>;
 
   /**
    * A-018's governed Trainer Present/Absent control, and the FIRST governed
