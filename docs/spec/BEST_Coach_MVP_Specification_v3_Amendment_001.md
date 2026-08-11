@@ -55,14 +55,16 @@ Supersedes any **absolute** statement that parents can never receive evidence ac
 **Ratified rule.** A parent may access **only their linked child's** evidence, and only when **all** of the following pass:
 
 1. the associated report status is `Submitted`;
-2. valid `evidence_media` consent exists for that child (§22);
+2. ~~valid `evidence_media` consent exists for that child (§22);~~ ✅ **AMENDED 2026-08-11 BY OPERATOR RULING `C-2`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C — PORTAL COMPLETION RULINGS): **consent is recorded ONCE AT THE CENTRE, not per media item and not per child.** The struck text assumed **per-record** consent; the actual arrangement is **academy-level consent, already in place for existing practice** and confirmed with iSpeak Academy at `D-5`. ⛔ **NO `consent_records` TABLE IS CREATED** — Phase-0 ruling `G-05` ruled it out, `CLAUDE.md` §3.1 records that no PDPA table exists and none may be created without an amendment, and this ruling **does not create one**. The gate is satisfied by the centre-level arrangement being in force, evidenced in governance, **not by a per-object lookup**. ⚠️ **This narrows what the gate CHECKS; it does not remove the requirement that the arrangement exist.**
 3. the requesting account has a live `parent_child_link`;
 4. the evidence belongs to that child and that report context;
-5. the object has passed the required scan/status checks (`scan_status`);
+5. ~~the object has passed the required scan/status checks (`scan_status`);~~ ⛔ **GATE REMOVED 2026-08-11 BY OPERATOR RULING `C-3`** (same instrument). **No scanning infrastructure exists and none will be built.** ⚠️ **`scan_status` had no ratified vocabulary anywhere** (Authority Lock §8.2) and Phase-0 ruling `G-05` prohibits a **fake scan state** — so the gate could only ever have been satisfied by inventing one. ▶ **AN HONEST ABSENCE BEATS A SATISFIED-LOOKING GATE.** **THE LIMITATION IS RECORDED, NOT HIDDEN: uploaded media is NOT SCANNED for malware or harmful content, and a production deployment would require scanning before real media is handled.** This must be stated **in the product's own UI text on every upload surface**, not only here. **Every other gate in this list is unchanged and applies in full.**
 6. access is via a **short-TTL, server-minted signed URL**;
 7. direct bucket access, raw storage-path access, public-object access, and any unrelated-child access remain **prohibited**.
 
 The application does **not** verify whether a recording contains only one child; single-child framing remains an operational filming-process requirement, not a code-level guarantee.
+
+⚠️ **THE TWO LIMITATIONS THIS CLAUSE NOW CARRIES, STATED TOGETHER SO NEITHER IS READ AS AN OVERSIGHT.** Uploaded media is **not scanned** (`C-3`), and the application **does not verify single-child framing** (the paragraph above). Both are **known, ruled and recorded**; neither is a defect to be "fixed" by a later phase inventing a mechanism. **A production deployment would require the first.**
 
 This reconciles v3 §21 with the gated parent-evidence feature already described in `CLAUDE.md` §6(2): the feature stands, precisely because it is fully gated.
 
@@ -78,16 +80,26 @@ This reconciles v3 §21 with the gated parent-evidence feature already described
 Replaces the absolute v3 §26 Phase 2 exit ("a parent can never reach an evidence URL") and the equivalent `CLAUDE.md` §10 / Plan Phase 2 wording.
 
 **Corrected exit:**
-- **Must fail:** unauthorized, unrelated-child, pre-`Submitted`, unconsented, unscanned, expired-URL, direct-storage-path, and public access.
+- **Must fail:** unauthorized, unrelated-child, pre-`Submitted`, ~~unconsented, unscanned,~~ expired-URL, direct-storage-path, and public access.
 - **May succeed:** a correctly linked parent retrieving **only their child's** `Submitted`, consented evidence through a valid **short-TTL, server-minted signed URL**.
+
+> ⚠️ **CONSEQUENTIAL AMENDMENT, 2026-08-11 — operator rulings `C-2` and `C-3`, propagated here because this clause RESTATES A-001's gates and would otherwise stand demanding proofs that now have no referent.**
+>
+> - **`unscanned` is STRUCK.** `C-3` removed the scan gate outright, so there is **no unscanned state to refuse**. ⛔ **Leaving this leg standing would have been worse than removing it:** a must-fail leg with nothing to test either fails forever or is quietly marked `PASS` against a condition that cannot arise — **the `S-8` defect exactly, on a refusal proof.** Report it **`NOT APPLICABLE (C-3)`**, never `PASS`.
+> - **`unconsented` is STRUCK AS A PER-RECORD PROOF and survives in a different form.** Under `C-2` consent is **centre-level**, so there is no per-object consent flag to withhold in a test. What remains provable is that **the centre-level arrangement is in force**; that is a governance precondition, not a per-request refusal path.
+> - ⛔ **EVERY OTHER MUST-FAIL LEG IS UNCHANGED AND STILL MANDATORY** — unauthorized, unrelated-child, pre-`Submitted`, expired-URL, direct-storage-path and public access. **A-003's both-direction shape is undiminished**, and its permitted leg is now live under `D-5`.
 
 ## A-004 — Corrected Parent UAT
 
 Parent UAT (Plan §5.2) must test **both** directions:
 
 - **Permitted:** access for the linked child when every A-001 gate passes.
-- **Refused:** another child's evidence; before `Submitted`; without `evidence_media` consent; via direct storage paths; with an expired or tampered signed URL.
+- **Refused:** another child's evidence; before `Submitted`; ~~without `evidence_media` consent;~~ via direct storage paths; with an expired or tampered signed URL.
 - **Absent from the parent view:** drafts, internal notes, raw per-dimension ratings, and AI draft history.
+
+> ⚠️ **CONSEQUENTIAL AMENDMENT, 2026-08-11 — operator ruling `C-2`, for the same reason recorded at A-003.** Consent is now **centre-level**, so *"without `evidence_media` consent"* has no per-participant state a UAT session could construct. ⛔ **Every other refusal leg is unchanged and still mandatory**, and the **both-direction requirement is undiminished** — `A-004` still demands the permitted leg **and** the refusals, and `D-5` is what finally gives the permitted leg something to exercise.
+>
+> ⛔ **`C-3`'s scan-gate removal changes NOTHING here** — `A-004` never listed an unscanned refusal, so no leg is struck on that ground.
 
 ## A-005 — Local Git workflow
 

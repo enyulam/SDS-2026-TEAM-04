@@ -179,7 +179,13 @@ The frame's `06` lesson strip draws **KEY FOCUS** chips (*Vocal projection · To
 2. **Nothing is authorized to build.** Evidence media **is** a Final MVP requirement and the **Trainer is the ruled uploader** (Authority Lock §8, §8.1) — but **Amendment 008 ratified two audit action strings and expressly authorized no evidence schema, bucket, policy, grant, RPC, UI or migration.**
 3. ⚠️ **`FINAL_MVP_G06_GROUNDING_RULING.md` already ruled evidence media OUT of the hero slice**, with every A-001/A-003/A-004 safeguard intact and the Step 7H audit registry held at **16**.
 
-**Unchanged:** the **Parent evidence projection stays out of the Final MVP** (Authority Lock §8.1) regardless of any later evidence authorization. **A-001 remains ratified but ARMED AND UNACTIVATED.**
+~~**Unchanged:** the **Parent evidence projection stays out of the Final MVP** (Authority Lock §8.1) regardless of any later evidence authorization. **A-001 remains ratified but ARMED AND UNACTIVATED.**~~
+
+> ⛔ **STRUCK 2026-08-11 — operator ruling `C-1`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C). **THE PARENT EVIDENCE PROJECTION IS IN THE FINAL MVP** and **`A-001` IS ACTIVATED**, both by `D-5`. Authority Lock §8.1 — the clause cited above — has itself been superseded on the same ruling.
+>
+> ⚠️ **THIS SENTENCE IS THE REASON `C-1` EXISTED, AND IT IS WORTH SAYING WHY.** The words *"regardless of any later evidence authorization"* were written to make this line **survive its own supersession** — so a reader arriving after `D-5` would find a preserved clause explicitly instructing them to disregard the very authorization they were acting under. ▶ **A clause drafted to outlive the decision it depends on is not durable, it is a trap for the next reader.** ⛔ **Do not write another one.**
+>
+> ▶ **The new ground is client consent confirmed with iSpeak Academy — NOT a re-reading of the canonical PDFs**, whose finding that they require no parent-facing evidence projection **still stands** (Authority Lock §8.1). ⛔ **`Q-27` is untouched**, `A-001`'s gates apply in full as amended by `C-2` and `C-3`, and **`A-002` remains an open gate.**
 
 ---
 

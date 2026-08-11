@@ -220,7 +220,23 @@ A-003 is a Phase 2 exit condition expressed as **prohibited vs permitted** paths
 
 **§19 already ratifies the posture:** *"Storage | Supabase Storage, Singapore | Private buckets; backend-minted signed URLs only."*
 
-### 8.1 RULING — the Parent evidence projection is **OUT** of the Final MVP
+### 8.1 ~~RULING — the Parent evidence projection is **OUT** of the Final MVP~~ ✅ **SUPERSEDED 2026-08-11 BY OPERATOR RULING `D-5`, ON A NEW GROUND**
+
+> ✅ **SUPERSEDED 2026-08-11 by operator ruling `D-5`, propagated here under operator ruling `C-1`** (`FINAL_MVP_PORTAL_DECISIONS.md`; §2.3). **THE PARENT EVIDENCE PROJECTION IS *IN* THE FINAL MVP.** The linked Parent is one of `D-5`'s three ruled audiences — Management · the authoring Trainer · the linked Parent — the same boundary the report text already uses.
+>
+> ⚠️ **READ THE GROUND BEFORE READING THE REVERSAL. THE ORIGINAL GROUND HAS NOT LAPSED.** The ruling below turned on a conditional: Parent receives no internal evidence *"unless the canonical PDFs explicitly require a parent-facing evidence projection."* **Both PDFs were read in full, and that finding STILL STANDS — neither requires, or mentions, a parent-facing evidence projection.** ⛔ **`D-5` does not overturn that reading and no reader may cite this supersession as evidence the PDFs say otherwise.**
+>
+> ▶ **`D-5` RESTS ON A DIFFERENT BASIS ENTIRELY: CLIENT CONSENT, CONFIRMED WITH iSpeak ACADEMY.** The academy already shares performance recordings with parents in existing practice and has confirmed the processing is covered. **That is a new ground, not a re-reading of the old one** — which is precisely why the projection needed an explicit operator ruling rather than an inference from the PDFs in either direction.
+>
+> ⚠️ **This correction exists because the 2026-08-11 `D-1` … `D-5` propagation run amended Amendment 001 `A-001` and hero ruling `G-8` and DID NOT REACH THIS SECTION.** A prohibition left standing in the contract is exactly what makes a later session read it and **correctly refuse work the Operator authorized** — the Operator's own sequencing note. Recorded per annotate-never-delete; **nothing below is deleted.**
+>
+> ⛔ **WHAT DOES NOT MOVE.** `A-001`'s gates are **live, not relaxed** — as amended the same day by `C-2` (consent is **centre-level**, no `consent_records` table) and `C-3` (**the scan gate is removed and the absence is stated honestly, in the instrument and in the product's own UI text**). `A-003`'s remaining prohibited paths and `A-004`'s both-direction Parent UAT apply in full. ⛔ **`Q-27` is untouched** — evidence media is not a rating, and the nine per-dimension ratings still reach no Parent surface in any form. ⛔ **No download affordance for any role, including Parent**, and **no surface may claim technical impossibility.**
+>
+> ⚠️ **ONE GATE IS NOT DISCHARGED BY `D-5` AND REMAINS OPEN: `A-002`.** It assigns *"actual parent evidence access… first implemented and tested in **Phase 2**, never Phase 1"*, and `CLAUDE.md` §10 Phase 2 has not been entered. **`C-1` resolved this section and §15; it did not rule on `A-002`.** That gate is recorded as outstanding in `docs/plan/PORTAL_COMPLETION_PLAN.md` and blocks its phase `P1-5`.
+>
+> ⛔ **`D-5` STILL AUTHORIZES NO SCHEMA, BUCKET, POLICY, GRANT, RPC, AUDIT ACTION STRING, MIGRATION OR UI.** Each needs its own explicit Operator authorization at its phase.
+
+**HISTORICAL — the original ruling, preserved unedited:**
 
 The operator's rule is conditional: Parent receives no internal evidence *"unless the canonical PDFs explicitly require a parent-facing evidence projection."* **Both PDFs were read in full. Neither requires — or even mentions — a parent-facing evidence projection, assessment evidence media, or any learner-video capability.** The condition is not met.
 
@@ -388,7 +404,7 @@ The Parent receives the **submitted canonical narrative only**, read-only:
 - The four prose panels — **Overview · Strengths · Areas for Development · Remarks** — from the canonical submitted version. ***(Updated 2026-08-07 by operator ruling **OD-4**. This previously read "Today's Strength, Next Focus, Practice Suggestion, Session Takeaway"; that model is **SUPERSEDED_BY_OD-4_FINAL_REPORT_MODEL**. See §15.1 and `FINAL_MVP_OD4_REPORT_SEMANTICS_RULING.md`. The implementation still carries the old column and field names — that is a registered Phase B migration, not a contradiction of this line.)***
 - **No preapproval versions, no drafts, no AI draft history.**
 - **No internal trainer notes.**
-- **No internal evidence** (§8.1 — ruled out of the Final MVP).
+- ~~**No internal evidence** (§8.1 — ruled out of the Final MVP).~~ ✅ **AMENDED 2026-08-11 — operator ruling `D-5`, propagated under `C-1`** (`FINAL_MVP_PORTAL_DECISIONS.md`; §2.3). **THE PARENT RECEIVES PER-CHILD VIDEO EVIDENCE for the session report they are already entitled to read** — subject, in full, to `A-001`'s gates as amended the same day by `C-2` and `C-3`, and to `A-003`'s remaining prohibited paths. ⛔ **NO DOWNLOAD AFFORDANCE FOR ANY ROLE, and no surface may claim technical impossibility** — streamed video is retrievable by a determined user with browser tooling, and the product says so rather than pretending otherwise. ⛔ **This widens the Parent projection by MEDIA ONLY. It moves no other bullet in this list**, and expressly **not** the rating bullet below it: **`Q-27` is untouched.** ⚠️ **`A-002` (parent evidence access belongs to Phase 2) is NOT discharged by this and remains an open gate** — see §8.1.
 - **No per-dimension rating grid, in any form or wording** — this is a *caught leak* and is prohibited absolutely. The "simplified performance summary" requirement is satisfied by the prose panels; a second panel restating per-dimension ratings, **even with softened wording, recreates the same leak**. ⚠️ **EXTENDED 2026-08-08 by operator ruling Q-27 (§15.2): this is no longer only a report-surface rule and no longer only a UI rule.** The nine dimension ratings must be excluded from **every** Parent surface — Dashboard included — and from **Parent-facing DTOs, projections, RPC results, server actions and client payloads**. **CSS hiding is not exclusion.**
 - **No Management or Trainer controls.**
 - ⛔ **No "Overall Grade" or roll-up rating, in any form or wording — ADDED 2026-08-10 by operator ruling `G-2`** (`FINAL_MVP_HERO_CHAIN_RULINGS.md` §2). The frames draw one on `33` and as a per-row chip on `32`; **neither is built.** ⚠️ **A single grade is the most compressed possible restatement of the per-dimension grid**, so it is squarely the leak the bullet above prohibits *"even with softened wording"*, and it is inside **Q-27**'s data boundary. **Permanent exclusion, not a deferral.**
