@@ -581,3 +581,54 @@ The Operator approved **Phase 0 → 11 → 10** — the parent screens first, on
 - It does **not** pull into scope: evidence media (G-8), a term entity (G-4), an Overall Grade (G-2), lesson-plan focus or slides (G-3), or the TA persona (G-7).
 - It does **not** commission frames for the three unframed surfaces (G-1), and does not treat their absence as a gap.
 - It does **not** claim any screen is close to acceptance. **Visual acceptance remains `Not started` for all 36**, and this plan changes that for none of them.
+
+
+---
+
+## 12A. CARRIED DISCIPLINES — added 2026-08-12 under a bounded Operator instruction
+
+*These extend §12's carried disciplines. Process only; no product rule changes.*
+
+### D-26 ⛔ THE STALE-RESTATEMENT DEFECT — NINE INSTANCES, ONE SHAPE
+
+**The cause is always the same: a fact is recorded in MORE THAN ONE PLACE, and only ONE of them is corrected.** It is never exotic and never a reasoning failure — it is a **propagation** failure.
+
+**Where it has appeared, and the range is the point:** in **ratified authority** · in **source comments** · in **test pins** · in **operator-facing text** · and **twice in the artifact built to prevent it**, in consecutive regenerations. ▶ **No document class is immune, including the ones written specifically to catch it.**
+
+⚠️ **A propagation run is not complete until the RESTATEMENTS have been swept for across the tree** — not against the list the run was handed. **The Operator's list has been incomplete three times.**
+
+### D-27 ⛔ THE NINTH INSTANCE — IT REPRODUCED INSIDE THE CORRECTION FOR THE EIGHTH
+
+**Recorded verbatim, because it is the argument for `CLAUDE.md` §15.8.1 and nothing weaker would do.**
+
+While correcting the eighth instance, the session amended a `CLAUDE.md` table row so its opening read **"EXACTLY THREE STRINGS"** while its **tail still read "it ratifies two strings"** — and the same cell carried a duplicated `evidence.deleted` clause whose rationale had itself lapsed. **A fact recorded twice in a single table cell, corrected once.**
+
+▶ **If it can happen INSIDE the correction for the eighth instance, written by the party who had just diagnosed the pattern, in the same edit, then NO AMOUNT OF CARE SUBSTITUTES FOR A MECHANICAL CHECK.** It was caught only because the diff was read before committing — **not** because the author was being careful. They were being as careful as it is possible to be, having just written the diagnosis.
+
+### D-28 ⛔ THE HARDEST CASE: TWICE WITHIN ONE SENTENCE, ROW OR CELL
+
+**A fact recorded twice inside a single sentence, table row or cell is the hardest case of all** — harder than the same fact in two files.
+
+⚠️ **The reason is a property of reading, not of diligence: a reader correcting such a row HAS ALREADY SEEN the other half, and does not re-read it.** Having just parsed the row to locate the error, they treat the rest as known. **Proximity defeats the check that distance would have triggered.**
+
+**Observed twice on the same day:** the `A-057` cell above, and both `R-4a` rows in `PORTAL_COMPLETION_PLAN.md`, whose fronts were corrected while their tails still asserted *"the live registry is still 16"*. ▶ **When correcting any row, re-read the WHOLE row afterwards, mechanically.**
+
+### D-29 A RAW SWEEP CANNOT REACH ZERO UNDER ANNOTATE-NEVER-DELETE
+
+**The method PRESERVES the struck text, so raw string hits are expected to RISE after a correction pass** — measured 23 → 29, every added hit a correction. **Reporting that as failure is as wrong as reporting a raw zero as success.**
+
+**Classify `LIVE` / `ANNOTATED` / `EXEMPT`, and GATE THE RUN on a control that separates a live claim from an annotated one.** Every exemption carries its stated reason. **A classifier that has never been seen to distinguish is not known to distinguish.**
+
+### D-30 ⛔ REMOVE THE LITERAL — NEVER WIDEN THE CLASSIFIER AROUND IT
+
+When a detector fires on your own prose, **delete or rephrase the offending literal.** ⛔ **Do NOT add an exemption, an anchor exception or a nearby marker to quiet it.**
+
+**Annotating a detector into silence is how a gate stops measuring** — and the exemption always looks locally reasonable, which is why it gets accepted. *(Observed: a typographic flourish embedding a size literal re-triggered the sweep; the fix was to remove the flourish.)*
+
+### D-31 MEASURE THE BUILD, NOT THE FRAME, BEFORE CLAIMING A PHASE NEEDS SCHEMA
+
+**A delta table is a reading of a frame, not a measurement of the build.**
+
+**`P2-1` classified `NEEDS NEW SCHEMA` from the frame; measurement at HEAD showed management `SELECT` policies AND matching `authenticated` grants already existed on all six tables it reads.** ▶ **Scoping from the frame would have spent an Operator schema authorization on nothing.**
+
+⚠️ **Check POLICY and GRANT separately** — they are two layers, and a present policy with no grant reads as an RLS failure (`A-030`).

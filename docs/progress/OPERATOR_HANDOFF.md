@@ -42,9 +42,13 @@ is DEFERRED by `C-11`, with `A-044` noted and unmet deliberately.**
 `NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`. **No migration, and no Operator schema gate in
 front of it** — scoping it from the frame instead would have spent an authorization on nothing.
 
-⛔ **Schema gates ahead, all `AWAITING_OPERATOR`:** `P2-2` and `P2-6` under `R-7`/`C-7`. `P1-2` is
-additionally blocked by `R-4a` — the `evidence.uploaded`/`evidence.attached` collapse question,
-registry **16 → 19** if collapsed — which also blocks `P1-3`, `P1-4` and `P1-5`.
+⛔ **Schema gates ahead, all `AWAITING_OPERATOR`:** `P2-2` and `P2-6` under `R-7`/`C-7`.
+
+✅ **`R-4a` IS RULED and `P1-2`…`P1-5` ARE NOT BLOCKED** — corrected 2026-08-12. `C-4` collapsed
+`evidence.uploaded` into `evidence.attached` on **2026-08-11**; registry is **19**, measured live at
+HEAD. All four phases are **built and Operator-walked** across all three roles, locally and on
+deployed dev. ⚠️ **This was the NINTH-instance trigger: a ruled decision carried as an open blocker
+through two consecutive handoffs, stopping work that was never blocked.**
 
 ### Part 1 — verified, and its limits
 
