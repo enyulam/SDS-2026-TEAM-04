@@ -1,7 +1,7 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
 > **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md` and the plan, and committed. Contains **no credential**.
+> Regenerated **2026-08-12**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md` and the plan, and committed. Contains **no credential**.
 
 ---
 
@@ -18,37 +18,34 @@
 
 ## ✅ WHERE THIS STOPPED
 
-▶ **`D-1` IS COMPLETE END TO END — the first of the five portal decisions to reach a surface.** Screen `19` renders the nine per-dimension ratings, read-only, for management.
-
-The chain is **projection → adapter DTO → adapter action → frontend contract → fixture → component** — the same spine every other proven surface uses. `getManagementRatingsCore` reads through **`readRows`** and returns `unavailable` on rejection (⚠️ `Q-7`: **a rejected query is not an empty result**, and here a rejection's shape would be an empty grid).
+**`P1-2` IS BUILT AND PROVEN — the `D-5` evidence substrate.** One table · one private bucket · one storage policy · four RPCs · three audit strings.
 
 | | |
 |---|---|
-| **HEAD** | **`5c4bce1`** on `develop`, tree **clean**. Five commits this run: `e502600` · `8be2403` · `dc29d9d` · `7c717a8` · `5c4bce1` |
-| **Gates** | ✅ **`prove:hero-all` 17/17 by exit code** · ✅ **`prove:portal-1` exit 0** — **9 SQL + 10 runner + 9 surface legs** · `tsc` **0** · `eslint` **0 errors** · `build` **0** · route census **17** |
-| **Database** | ⚠️ **UNCHANGED SINCE `P1-1b`** — the frontend added **no database object**. **22 migrations · 27 tables · 43 functions · 12 enums · 29 policies**. **Audit registry still live at 16** |
+| **HEAD** | **`b798ff3`** on `develop`, tree **clean**. Three commits this run: `6885c20` · `b798ff3` (and this handoff) |
+| **Gates** | ✅ **`prove:portal-2` exit 0** — 18 SQL legs + 20 runner checks · ✅ **`prove:portal-1` exit 0** · ✅ **`prove:hero-all` 17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0** |
+| **Database** | **23 migrations · 28 tables · 49 functions · 12 enums · 29 public policies · 1 storage policy** (the first in the project). Governed rows **byte-unmoved** |
+
+⚠️ **`P1-2` IS NOT COMPLETE, AND THE PAGE SAYS SO.** The **resumable upload transport is not built**, so the trainer's attach control is **inert rather than simulated** and states that in its own text. **Substrate, surface copy and every governance leg are done; the transport is the named remaining half.** It needs **no new governance** — only build time.
 
 ---
 
-## ⚠️ THE ONE THING A LATER PASS COULD UNDO
+## ▶ THE THINGS WORTH YOUR ATTENTION
 
-**THE NINE-DIMENSION GRID IS A GOVERNANCE-MANDATED ADDITION.** ⛔ **The `19` reference frame does not draw it — it draws four.** **`D-1`** requires the grid; **`C-10`** requires **all nine**.
+**The omission-is-the-control reasoning is now in the migration and it fails the build.** ⛔ **Assertion `E1` refuses the migration** if `student_id` or `class_session_id` ever appears on `report_evidence`. ▶ **A reason that lives only in a plan cannot stop a later phase denormalising "for query convenience"; one that fails the build can.**
 
-▶ **A visual pass that removed it *for matching the frame* would be reverting a ratified decision.** The citation is therefore in the **component**, the **DTO** and `BUILD_NOTES.md` — the three places such a pass would look. **The visual ladder does not outrank a functional ruling** (`A-045`, `A-056`).
+**The dual-registry landmine is closed rather than survived.** Both Step 7H declaration sites now read `public.audit_action_registry()`, so a future extension has **one** site. `E5` fails the migration if a literal survives, and **`P2a-12b` proves chain verification ACCEPTS all three new strings** — with **`P2a-12a` as its non-vacuity leg**, because verification trivially accepts a chain containing none of them.
 
-**Read-only is structural, not styling:** no `input`, `select`, `textarea`, `button`, `onChange` or `onClick` in the block, asserted against **comment-stripped** source. **`G-2` holds** — no Overall Grade, average or headline band. **All twelve `REGISTERED-OMISSION` markers intact.**
+**The sweeper: the script was cheap so it is built; the automation is not, so the limitation is recorded.** ⛔ **Not scheduled** — no cron, queue, Edge Function or credentialed CI runner exists, and adding one is **hosted work** (§12). ⚠️ **Proven in both branches**: a planted probe was **within grace → not swept**, aged → **reported**, `--delete` → **removed, zero residue**. *A clean sweep over zero objects is a vacuous result.*
 
 ---
 
-## ⛔ A DISCIPLINE PROMOTED OUT OF AN INCIDENT, AT YOUR INSTRUCTION
+## ⛔ TWO OF MY OWN INSTRUMENTS FAILED CORRECTLY, AND NEITHER FIX WAS A GRANT
 
-▶ **A COMPARISON IS ONLY EVIDENCE WHEN BOTH SIDES MEASURE THE SAME THING.**
+1. **The sweeper read `report_evidence` through PostgREST with the secret key** and got `permission denied`. ▶ **The refusal was right** — the table holds **zero** client privileges for **every** role including `service_role`, which is exactly what assertion `E3` exists to protect. It reads owner-side now. ⚠️ **A fifth `SECURITY DEFINER` function was also rejected: `C-7` approved a family of four, and adding a database object to make a local script convenient is not what that ruling authorized.** *(Second instance of this shape in two phases.)*
+2. **A runner leg scanned the whole migration for `consent_records` and matched assertion `E10`** — whose entire job is to prove no such table exists. ▶ **A prohibition is scanned in the DDL, never in the prose that defends it.**
 
-`P1-1b`'s anti-tautology leg was itself tautological — it compared a **nine-field** prelude string against the runner's **six-field** one, so it passed because *the formats differ*. ⚠️ **Strictly worse than the tautology it guards against**: that one is visible in the assertion's own text, this one lived in a **second file** the reader never opens, and it reported `PASS`.
-
-**It sits beside *a check that cannot fail is not a check* and answers a different question** — the older rule asks whether the detector **can** fire; this asks whether, when it fires, **it is firing on the thing you think it is**. ⛔ **A control leg satisfies the first and is completely blind to the second.**
-
-**Also this run:** `prove:portal-1` **exited 0 twice against a suite my edit had never reached** — a heredoc lost its escaping, the instrument stayed silent, the result stayed green. ▶ **A green run proves nothing about a file you did not confirm changed.**
+**Also found:** `storage.protect_delete()` refuses a direct bucket `DELETE`, so **a bucket-creating migration is not SQL-reversible** — and it is why the invariant's probe bucket can only be removed by `ROLLBACK`. A runner leg proves it did not survive.
 
 ---
 
@@ -56,27 +53,25 @@ The chain is **projection → adapter DTO → adapter action → frontend contra
 
 | # | Question | Blocks |
 |---|---|---|
-| **1** | **`C-7` — `P1-2`'s TABLE FAMILY, as its own question**: what tables, what columns, what policies, what grants, and what each is for. ⚠️ **You stated expressly that the screen `19` authorization was not this one** | ⛔ **`P1-2`** and the whole evidence chain |
-| **2** | **`A-002`** — parent evidence is Phase 2 work. ⚠️ **Reserved for its own question**; carried, not forgotten | ⛔ **`P1-5`** |
-
-✅ **`R-4a` is CLOSED** by the collapse ruling. ✅ **The screen `19` frontend is no longer owed** — it is built.
+| **1** | **`A-002`** — parent evidence. ⚠️ **You reserved it for its own question at `P1-5`.** ⛔ **No parent arm exists anywhere** — RPC, module or surface — and **assertion `E9` fails the migration if one appears.** Deliberately not built rather than built-and-unreachable | ⛔ **`P1-5`** |
+| **2** | **`P1-2`'s upload transport** — not a governance question, a build one. Say the word and it is the next unit | the visible half of `D-5` |
 
 ---
 
 ## ⛔ Explicitly unchanged
 
-- **`Q-27` does not move** — proven at the data layer *and* now at the surface: parent `30`/`32`/`33` render no rating.
-- **`G-2` permanent** · **`A-014`** TA persona deferred · **the content-hash rule unamended**.
-- **`C-9` holds**: the management **queue `29`** and **dashboard `11`** render no rating — a list invites comparison between children.
-- **Management may VIEW, never EDIT** — an assessment-level disagreement is a return to the trainer.
-- **`A-057`'s prohibition re-arms at THREE.** ⛔ **Do not reintroduce `evidence.uploaded`.**
+- **`Q-27` does not move** · **`G-2` permanent** · **`A-014`** TA persona deferred · **the content-hash rule unamended**.
+- **`C-9` holds** — management queue `29` and dashboard `11` render no rating.
+- **Management may never remove evidence** — not a `D-5` choice: §6 already forbids a management write reaching evidence.
+- ⛔ **The frame's `Class Video Evidence` heading and `500MB` are NOT built** (`G-8`, `C-16`) — **`REGISTERED-OMISSION`, never ends.**
+- ⛔ **`A-057`'s prohibition re-arms at THREE.** A fourth evidence action is a fresh stop-and-ask.
 
 ## ⚠️ Carried
 
-- **The silent-save reproduction is still owed a walk** — steps in `BUILD_NOTES.md`; carry into the Part 1 → Part 2 re-walk.
-- ⚠️ **Authority Lock §19.1's "ratified census" reads `15 migrations · 36 functions`** against a live **22 · 43**. ✅ **You ruled *record, do not fix*.** **Recorded again, deliberately untouched.**
-- **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface — ⚠️ **including screen `19` with its new grid** · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
-- **Phase 8/11 gap stands** · **`test:integration` 47/3/3, exit 1** (suite staleness; `run-integration.mjs:517` calls `pass("INT-A5")` unconditionally) · ⛔ **`09` refuses its canonical route** (`C2C-007`) · **`A-044` knowingly unmet for `28`**.
+- **The silent-save reproduction is still owed a walk** — steps in `BUILD_NOTES.md`.
+- ⚠️ **Authority Lock §19.1's census reads `15 migrations · 36 functions`** against a live **23 · 49**. ✅ **You ruled *record, do not fix*.**
+- **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
+- **Phase 8/11 gap stands** · **`test:integration` 47/3/3, exit 1** (suite staleness) · ⛔ **`09` refuses its canonical route** (`C2C-007`) · **`A-044` knowingly unmet for `28`**.
 
 ## ▶ Next
 
