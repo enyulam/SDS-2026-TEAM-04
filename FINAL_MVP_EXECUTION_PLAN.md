@@ -2594,8 +2594,14 @@ canonicalization + `proxy.ts`, on merged `main`)** → P3-T08 → P3-T09`.
   neither may be expanded into AI-authored prose, which would pull the deferred Weekly Class Health
   Brief into scope. **No LLM, ever, on either panel.**
 - **Negative controls** — **Inventing a Figma frame, node ID or field for any U-25 family is a `CLAUDE.md` §12
-  stop-and-ask.** Management must never see raw per-dimension assessment data — A-038's bar stands
-  and **Q-27 grants Management nothing**. **GC counts, stated precisely — the register is not
+  stop-and-ask.** ~~Management must never see raw per-dimension assessment data — A-038's bar stands
+  and **Q-27 grants Management nothing**.~~ ✅ **CORRECTED 2026-08-11 (operator ruling `C-18`,
+  `FINAL_MVP_PORTAL_DECISIONS.md` §C).** **`A-038`'s bar NO LONGER STANDS in the Management
+  direction:** operator ruling **`D-1`** (2026-08-11) permits Management to **VIEW the nine
+  per-dimension ratings, READ ONLY**, on a **report detail surface** only (**`C-9`**), rendering
+  **all nine** (**`C-10`**). ⛔ **Management may VIEW, never EDIT** — an assessment-level
+  disagreement is a **return to the trainer**. ⛔ **`Q-27` still grants Management nothing and the
+  PARENT boundary does not move by one field.** **GC counts, stated precisely — the register is not
   Management-only:** **GC-6** (per-dimension rating surfaces the frame draws but governance forbids)
   appears in seven packs, of which **five are in-scope Management** — `11, 15, 16, 17, 18`; the
   other two are `28` (out of scope) and `30` (Track P/A). **GC-7** appears in four packs but **only

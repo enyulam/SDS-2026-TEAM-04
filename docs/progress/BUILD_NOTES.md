@@ -6167,3 +6167,56 @@ The `A-038` annotation landed **between the Management and Parent rows** of A-03
 The **~10 UI packs' `GC-6` entries** and `FINAL_MVP_EXECUTION_PLAN.md` still state `A-038`'s Management rating prohibition. They are downstream, sit at **functional rank 5**, and are not read as authority at session start. ⚠️ **Recorded in the new instrument as a known follow-up, because a reader must not take a pack's `GC-6` as a live prohibition after `D-1`.** Reconciling them belongs to the PORTAL COMPLETION PLAN.
 
 ⛔ **Nothing was implemented.** `D-1` … `D-5` authorize no table, enum, column, bucket, policy, RPC, grant, audit action string, migration, route or screen. Each still needs its own explicit Operator authorization.
+
+---
+
+## 2026-08-11 — PORTAL COMPLETION PLAN: eighteen collisions ruled, four amendments propagated, `P1-1a` swept
+
+**Branch/worktree:** `develop` / none. **HEAD in:** `8d52121` → **out:** this entry's commit (two commits: `e502600` then the `C-4` + sweep commit).
+**Scope:** planning and governance propagation, plus one authorized documentation/comment sweep. ⛔ **No migration, no schema, no projection, no RPC, no rendered change.**
+
+### What happened
+
+The PORTAL COMPLETION PLAN was written from measurement at HEAD, reporting **eighteen governance collisions** before any phase. The Operator ruled all eighteen. Four carried bounded §12 authorizations to amend ratified authority; those were propagated using annotate-never-delete, with **every superseded line verified still present in struck form by search — and the search proven able to return false first**.
+
+**`C-1`** closed the gap the `D-1`…`D-5` amendment run left: it reached Amendment 001 `A-001` and hero `G-8` but **not** the Authority Lock, which still ruled the Parent evidence projection **OUT** at §8.1 and §15. All three now carry `D-5` and all three state the **new ground** — client consent confirmed with iSpeak Academy — while recording that **§8.1's original ground has not lapsed**: the canonical PDFs still require no parent-facing evidence projection. Two different bases, not a reversal of the first.
+
+⚠️ **`G-8`'s clause was written to survive its own supersession** — *"regardless of any later evidence authorization"* — so a reader arriving after `D-5` would have found a preserved instruction to disregard the authorization they were acting under. **A clause drafted to outlive the decision it depends on is a trap for the next reader, not durability.** Recorded as its own lesson.
+
+**`C-2`/`C-3`** amended `A-001`'s consent and scan gates, and were propagated to **`A-003` and `A-004`**, which restate the same gates. Left alone, `A-003`'s `unscanned` must-fail leg would have stood demanding a proof with no referent — and a must-fail leg with nothing to test either fails forever or gets quietly marked green. **That is the `S-8` defect landing on a refusal proof.** It now reports `NOT APPLICABLE (C-3)`, never `PASS`.
+
+### ⛔ `C-4` was HELD, then re-ruled — the batch's most consequential judgement
+
+The first `C-4` said *"add `evidence.attached` and `evidence.removed`. 16 → 18"*, while `A-057` already ratified **`evidence.uploaded`/`evidence.accessed`**, also 16 → 18. **Four strings, one slot count, three mutually exclusive readings.** It was **recorded, not resolved**.
+
+▶ **The `replace` reading would have satisfied the instruction as written and silently deleted `evidence.accessed`** — the only trace that a short-TTL signed URL to a child's video was minted, for whom and when. That is an **audit control**, and it matters more since `C-3` removed scanning. **It would have looked exactly like compliance.**
+
+The Operator re-ruled **all four, registry `16 → 20`**, recording that the original arithmetic came from a wrong premise. `A-057` is amended: four strings, the *"must not be extended beyond these two"* clause struck, ⛔ **the prohibition re-armed at four**, and the historical `G-05` provenance quotation left **unedited** because it accurately records what that instruction said.
+
+⚠️ **One question the Operator RESERVED and I did not answer for them:** `evidence.uploaded` and `evidence.attached` **appear to be one governed action** — under `D-5` the trainer uploads at assessment time with the object already tagged to exactly one report and never movable, so the upload *is* the attach. **`A-029` requires one event per governed action.** If collapsed the registry is `16 → 19`. **The live registry is still 16 and `A-057` has never been implemented, so nothing is baked in.** Recorded at `A-057.1a`.
+
+### `P1-1a` — the authorized sweep
+
+**16 locations corrected**, not the 15 the register recorded. The omission was **screen `19`'s own pack**, which had to move in the **opposite direction**: its notes still said Management never reads ratings, on the one screen where `D-1` **lifts** that.
+
+Everywhere else the conclusion held and only the ground moved — `A-038` no longer bars Management from ratings as such, so `C-9` (report-detail-surfaces-only) and `G-2` (roll-ups permanently excluded) now carry it. ⛔ **`management-dashboard.tsx`'s banner was the priority**: it reached the right conclusion for the wrong reason, on the file someone has open while implementing `D-1`.
+
+### ⛔ THE SWEEP'S OWN DETECTOR WAS BROKEN — and only its control revealed it
+
+The tree-wide completeness scan alternated **`management|MANAGEMENT`** and **missed `Management`**, title case, which is what the files actually use. It reported **"0 uncorrected claims outside the register"** while matching almost nothing.
+
+▶ **Caught by a deliberate non-vacuity control** — a probe the detector was required to MATCH — which printed `BROKEN — every result above is meaningless`. Case-insensitive, the same scan found **four more sites**, all in `CLOSED`/`HISTORICAL` instruments and all **left alone by rule** (§12: never rewrite historical evidence that accurately records superseded state). **True count: 20 claims — 16 corrected, 4 preserved.**
+
+⚠️ **Fourth direction of this project's recurring defect, and the worst of the four.** After false `MISSING` (the CSS minifier's stored representation), false `FAIL` (a regex that captured a parameter list) and false `VIOLATION` (a bare keyword matching prose), this is a **false `CLEAN`** — ▶ **nobody re-checks a sweep that reports nothing left to do.**
+
+**Now binding on every later phase:** a sweep carries a control proving its detector can **fire**, and a completeness claim is scanned **across the tree**, never only across the list the sweep was handed. **A register checked against itself cannot tell you what it omitted.**
+
+### Also recorded
+
+- ⛔ **A stray `cp` put a scratch verifier into `scripts/tests/`.** Outside `P1-1a`'s scope; **removed**, and recorded rather than quietly dropped.
+- **Two measured index defects corrected** in `SCREEN_INDEX.md`: `09`'s canonical route is **refused**, not partial (`C2C-007`); **no route renders `10`**, a *core* screen the index placed at a path that does not exist.
+- **`A-002` deliberately NOT ruled** — it returns as its own question when Part 1 reaches it. `P1-5` stays blocked.
+- **`P1-1b` read narrowly and NOT started.** The authorization named *"the stale `GC-6`/`A-038` sweep"*; the `D-1` projection and its new management-only read await a separate word.
+
+**Gates:** `tsc` 0 · `eslint` 0 errors (2 pre-existing warnings) · `build` 0 · route census 17 · encoding + table-integrity 19/19 clean.
+**Next step:** ⛔ **STOPPED.** `P1-1b`, `R-4a` and `A-002` each need an Operator decision.

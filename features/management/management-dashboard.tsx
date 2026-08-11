@@ -21,12 +21,31 @@ import type { ManagementQueueRowDto } from "@/lib/frontend/contracts/physical-te
  * behaviour was not changed.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ THE FRAME DRAWS RATINGS ON A MANAGEMENT SURFACE. IT MUST NOT BE BUILT (A-038)
+ * ⛔ THE FRAME DRAWS RATINGS ON A MANAGEMENT SURFACE. IT MUST NOT BE BUILT
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  *
+ * ⚠️ CORRECTED 2026-08-11 (operator ruling C-18, FINAL_MVP_PORTAL_DECISIONS.md §C). THE
+ * CONCLUSION IS UNCHANGED — NO RATING IS BUILT HERE — BUT THE GROUND HAS MOVED, AND CITING
+ * THE LAPSED ONE IS WHAT INVITES A LATER PHASE TO "FIX" IT.
+ *
+ * ⛔ D-1 (2026-08-11) permits Management to VIEW the nine per-dimension ratings, READ ONLY.
+ *    So `A-038` no longer bars Management from ratings as such, and this banner previously
+ *    reached the RIGHT CONCLUSION FOR THE WRONG REASON. Two independent grounds now carry it,
+ *    and either alone is sufficient:
+ *
+ *      1. C-9 — D-1 reaches REPORT DETAIL SURFACES ONLY. This is a LIST surface. Ratings on a
+ *         list "invite comparison between children", which was expressly not authorized.
+ *      2. G-2 — what this frame actually draws is a SINGLE ROLL-UP "B.E.S.T. Rating" per row,
+ *         not the nine. A roll-up is PERMANENTLY EXCLUDED on every surface. G-2's own
+ *         A-038-derived ground lapsed with D-1; it survives on the other two (the roll-up is
+ *         unratified, and on a Parent surface it is the Q-27 leak).
+ *
+ * ⛔ SO: NOTHING CHANGES ON THIS SCREEN. Do not add a rating column, chip, tile or bar here,
+ *    and do not read D-1 as permitting one. If you are implementing D-1, the surface you want
+ *    is screen 19 (`management-report-review.tsx`), not this one.
+ *
  * `reference/Management - Dashboard/` shows an approval list whose rows carry the student's
- * current **B.E.S.T. Rating**. MANAGEMENT NEVER READS RAW PER-DIMENSION RATINGS (A-038;
- * `CLAUDE.md` §6; GLOBAL_UI_RULES §4). This is the same class of leak already caught once on a
+ * current **B.E.S.T. Rating**. This is the same class of leak already caught once on a
  * Parent surface, and the same adjudication operator ruling R-B5 recorded for screen 19's
  * "Performance Summary": governance overrides the frozen screenshot, the divergence is
  * RECORDED and never silently resolved (A-045, preserved by A-056).

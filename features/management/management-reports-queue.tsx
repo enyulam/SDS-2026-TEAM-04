@@ -541,10 +541,21 @@ function RowGroup({
           </span>
         </td>
         {/*
-          G-4: there is no term cell here and there must never be one.
+          ⚠️ CORRECTED 2026-08-11 (C-18). Both conclusions hold; both grounds moved.
+
+          G-4: REVERSED by D-3 — terms are permitted as scheduling structure.
+          There is still no term cell HERE: D-3 authorizes no column, RPC or
+          screen, and the frame's "All terms" filter remains unbuilt until its
+          own phase. Its absence is now a DEPENDENCY, not a permanent refusal.
+
           G-2: there is no grade, roll-up or rating cell here either — nothing
-          on this row is derived from an assessment fact (A-038 independently
-          bars management from the per-dimension ratings such a cell would need).
+          on this row is derived from an assessment fact.
+          ~~(A-038 independently bars management from the per-dimension
+          ratings such a cell would need)~~ — THAT GROUND LAPSED with D-1,
+          which lets Management view the nine, read only. TWO grounds still
+          carry this cell's absence, either sufficient alone:
+            • C-9 — D-1 reaches REPORT DETAIL surfaces only. This is a LIST.
+            • G-2 — a roll-up is permanently excluded on every surface.
         */}
         <td className="px-6 py-[11px] text-[0.75rem] text-ink">
           {row.classGradeLabel || row.classModuleTitle ? (

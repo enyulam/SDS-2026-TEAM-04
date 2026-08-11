@@ -46,7 +46,16 @@ const trace = makeEditorTrace("management-wording-editor");
  *    never this form.
  *  - `wordingHash` is the SEPARATE, domain-separated proof over these four panels only. It is
  *    carried to the server and is never rendered. The report CONTENT hash — which covers the
- *    panels PLUS the nine ratings — never reaches any Management surface at all (A-038).
+ *    panels PLUS the nine ratings — never reaches any Management surface at all.
+ *
+ *    ⚠️ RULE UNCHANGED, GROUND ANNOTATED 2026-08-11 (C-18). The content-hash prohibition was
+ *    NOT amended by D-1 and still binds for BOTH audiences. What lapsed is one of its reasons:
+ *    the 4^9 = 262,144-trial reconstruction argument only bites against a reader who may not
+ *    already see the grid, and D-1 lets Management see it. For MANAGEMENT the rule now rests on
+ *    its other ground — `wordingHash` is the right instrument for the proof Management actually
+ *    needs, and the content hash carries assessment substance no management workflow requires.
+ *    For a PARENT the original reasoning is untouched and absolute (Q-27).
+ *    ⛔ WIDENING THE HASH RULE IS A §12 STOP-AND-ASK, NOT AN INFERENCE FROM D-1.
  *
  * No behaviour, field, label, validation rule or governed call was changed by the restyle.
  */

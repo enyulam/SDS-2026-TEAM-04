@@ -6,7 +6,9 @@
 
 **Ratification provenance — recorded explicitly, because this instrument sits above `FINAL_MVP_AUTHORITY_LOCK.md` and `CLAUDE.md` on the §1 ladder.** This amendment exists because the operator issued an explicit bounded instruction while resolving the Plan Phase-0 decision packet (**G-05 / P0-T10 item 6**), which directed, in terms: *"The Operator AUTHORIZES a minimal evidence-specific audit-registry extension. Use the project's amendment mechanism and determine the next non-colliding amendment/clause identifier from disk. Add EXACTLY these new governed evidence actions: `evidence.uploaded`, `evidence.accessed` … Do NOT extend the registry beyond these two strings,"* and further: *"This message is the explicit bounded Operator authority required to author the minimal amendment for these two actions only."* **The authoring session did not ratify this amendment and has no authority to do so** (`CLAUDE.md` §14.0, §14.7: *"a Claude session may not ratify"*). It drafted the instrument that instruction called for, within the scope that instruction set. **If the operator's instruction is ever found not to have covered this, A-057 is void and the Step 7H sixteen-action registry stands unchanged.**
 
-**Amends:** the **Step 7H audit action registry** as fixed by Amendment 003 **A-029** and implemented in `supabase/migrations/20260804213000_step_7h_audit_chain.sql`. **Additively, by exactly two action strings.** No other instrument is amended.
+**Amends:** the **Step 7H audit action registry** as fixed by Amendment 003 **A-029** and implemented in `supabase/migrations/20260804213000_step_7h_audit_chain.sql`. ~~**Additively, by exactly two action strings.**~~ ✅ **Additively, by exactly FOUR action strings — extended 2026-08-11 by operator ruling `C-4`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C). No other instrument is amended.
+
+⚠️ **The provenance quotation immediately above is HISTORICAL and is NOT edited.** It records, accurately, what the `G-05` instruction said in 2026-08-08 — including *"Do NOT extend the registry beyond these two strings."* **That instruction was correct for its own scope and was never breached**: the extension beyond two was made by a **separate, later, explicit bounded Operator authorization** (`C-4`), which is exactly the route the original instruction's stop-and-ask required. ▶ **Do not read the quotation as a live prohibition, and do not rewrite it.**
 
 > **Clause-continuity check.** The highest clause in any committed instrument is **A-056** (Amendment 007). No clause **A-057** is used anywhere in the committed tree. **A-057 is therefore the correct next clause, and this is Amendment 008.** No ratified instrument was renumbered, edited or overwritten to produce it. Amendments 001–007 remain **byte-for-byte unchanged**.
 
@@ -32,22 +34,44 @@ Specification v3 remains the **authoritative baseline**. Amendment 001 (**A-001 
 
 ---
 
-## A-057 — Minimal evidence audit-registry extension: exactly two governed actions
+## A-057 — Minimal evidence audit-registry extension: ~~exactly two~~ ✅ **exactly four** governed actions *(extended 2026-08-11, `C-4`)*
 
 ### A-057.1 The extension
 
-The Step 7H governed action registry is extended **additively by exactly two strings**:
+~~The Step 7H governed action registry is extended **additively by exactly two strings**:~~ ✅ **EXTENDED TO FOUR, 2026-08-11 BY OPERATOR RULING `C-4`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C), under an explicit bounded `CLAUDE.md` §12 authorization issued for that run. The registry is extended **additively by exactly four strings**:
 
 | Action | Meaning |
 |---|---|
 | **`evidence.uploaded`** | A governed **Trainer** upload has successfully become an **accepted private evidence record/object**. The event is emitted on success only — an upload that is rejected by media-type policy, by the size ceiling, by path/integrity validation or by authorization **emits no `evidence.uploaded`**. |
 | **`evidence.accessed`** | The server has **successfully authorized a governed evidence review and minted the short-TTL signed access URL**. It may be emitted for an authorized **Trainer** or an authorized **Management** review. |
+| **`evidence.attached`** ✅ **ADDED BY `C-4`** | The accepted evidence object has been **tagged to exactly one session report**. Under `D-5` an object is *"tagged to exactly one session report"* and **can never be moved or reused**. ⚠️ **SEE `A-057.1a` — THIS MAY BE THE SAME GOVERNED ACTION AS `evidence.uploaded`, AND THAT QUESTION IS OPEN.** |
+| **`evidence.removed`** ✅ **ADDED BY `C-4`** | A governed removal of an evidence object has succeeded. `D-5` rules that evidence **can be removed**; this is the action string for it. ⛔ **It is NOT `evidence.deleted`** — see `A-057.2`. |
 
-**Registry size: 16 → 18.** The sixteen existing strings — `report.created`, `report_version.created`, `report.state_changed`, `attendance.changed`, `admin.module_created`, `admin.session_created`, `admin.trainer_assigned`, `admin.student_created`, `admin.enrolment_changed`, `admin.parent_link_changed`, `admin.profile_created`, `invitation.created`, `invitation.revoked`, `invitation.reissued`, `membership.role_changed`, `membership.bootstrap` — are **unchanged, unreordered and unrenamed**.
+**Registry size: ~~16 → 18~~ ✅ `16 → 20` (`C-4`).** The sixteen existing strings — `report.created`, `report_version.created`, `report.state_changed`, `attendance.changed`, `admin.module_created`, `admin.session_created`, `admin.trainer_assigned`, `admin.student_created`, `admin.enrolment_changed`, `admin.parent_link_changed`, `admin.profile_created`, `invitation.created`, `invitation.revoked`, `invitation.reissued`, `membership.role_changed`, `membership.bootstrap` — are **unchanged, unreordered and unrenamed**.
+
+### A-057.1a ⚠️ AN OPEN QUESTION THE OPERATOR RESERVED — `evidence.uploaded` vs `evidence.attached`
+
+**Recorded here, inside the clause, because it must not be lost between documents.** The Operator ruled all four strings and expressly reserved the collapse decision: *"If any two of the four are genuinely the same event under different names, say which and I will collapse them. **Do not collapse them yourself.**"*
+
+⚠️ **`evidence.uploaded` and `evidence.attached` appear to be ONE governed action.** Under `D-5`'s ruled shape the Trainer uploads **at assessment time** and the object is **tagged to exactly one session report** and **can never be moved or reused**. **There is no authorized workflow in which an evidence object exists unattached and is attached later** — so the upload *is* the attach, and two strings would describe one action.
+
+⛔ **That matters because `A-029` requires ONE EVENT PER GOVERNED ACTION.** Two strings for a single action would put the registry in tension with the rule this amendment expressly preserves.
+
+▶ **Nothing is baked in.** The **live Step 7H registry is still 16**; `A-057` has never been implemented in any migration. The collapse remains a clean, cost-free ruling for the Operator to make, and **no implementation phase may proceed on the four strings until it is made** — see `A-057.2`.
+
+**If the collapse is ruled, the resulting registry is 16 → 19**: `evidence.uploaded` (upload-and-tag, one action) · `evidence.accessed` · `evidence.removed`.
 
 ### A-057.2 What is expressly NOT added
 
-**`evidence.deleted` is NOT added, and must not be.** No application evidence-delete workflow is authorized, so an action string for one would encode a capability that does not exist. **The registry must not be extended beyond these two strings** — a third evidence action is a fresh stop-and-ask under `CLAUDE.md` §12, not an extension of this clause.
+~~**`evidence.deleted` is NOT added, and must not be.**~~ ✅ **SUPERSEDED IN PART, 2026-08-11 BY OPERATOR RULING `C-4`.** ⚠️ **THE NAME IS STILL NOT ADDED — the CAPABILITY now is.** `D-5` authorizes evidence removal, so the reasoning below (*"an action string for one would encode a capability that does not exist"*) **has lapsed on its facts**: the capability exists, ruled by the Operator on 2026-08-11. The action string is **`evidence.removed`**, not `evidence.deleted`, and ⛔ **`evidence.deleted` itself remains unadded and must not be introduced** — a second name for one action is the defect `A-057.1a` already flags.
+
+No application evidence-delete workflow was authorized **when this clause was written**; one is authorized now, and it is a **removal**, not a hard delete. ⛔ **`A-029`'s append-only, correction-by-new-event and no-redaction rules are untouched** — removing an evidence object **never** removes or rewrites the audit events that recorded it.
+
+~~**The registry must not be extended beyond these two strings** — a third evidence action is a fresh stop-and-ask under `CLAUDE.md` §12, not an extension of this clause.~~ ✅ **THE FRESH STOP-AND-ASK WAS RAISED AND ANSWERED.** It was raised by the PORTAL COMPLETION PLAN's collision review as **`C-4`**, held rather than resolved by the reporting session, and ruled by the Operator on 2026-08-11 with **an explicit bounded §12 authorization to extend beyond the two**. ▶ **The clause worked exactly as written: it stopped a session from extending the registry by inference, and routed the decision to the Operator.**
+
+⛔ **THE PROHIBITION RE-ARMS AT FOUR.** **The registry must not be extended beyond these four strings** — a fifth evidence action is a fresh `CLAUDE.md` §12 stop-and-ask, not an extension of this clause. **`C-4` is not a standing licence.**
+
+⚠️ **The Operator's own record of why the arithmetic changed, preserved because it is the reasoning that decides the clause:** the ruling first read *"16 → 18"*, which was **arithmetic from a wrong premise — that `A-057` had not already named two strings**. Corrected to **`16 → 20`**. ▶ **`evidence.accessed` was the string most at risk from the wrong premise, and it is the one that mattered most: it is the ONLY trace that a short-TTL signed URL to a child's video was minted, for whom, and when.** That is an **audit control**, not bookkeeping — and it carries more weight since **`C-3` removed the scan gate**, leaving access logging as one of the few remaining controls on the media path.
 
 ### A-057.3 Denied attempts are never recorded as successes
 
@@ -69,10 +93,10 @@ A-029's data-minimization rule applies in full. **An evidence audit payload carr
 
 | Instrument | Clause | Treatment | Effect |
 |---|---|---|---|
-| Amendment 003 | **A-029** | **Extended, additively** | The governed action registry gains **exactly two** strings, `evidence.uploaded` and `evidence.accessed`. Every other element of A-029 — attribution, durable actor FKs, polymorphic targets, one-event-per-action, generic state columns, correction-by-new-event, no redaction, data minimization — is **preserved unchanged**. |
+| Amendment 003 | **A-029** | **Extended, additively** | The governed action registry gains ~~**exactly two** strings, `evidence.uploaded` and `evidence.accessed`~~ ✅ **exactly FOUR strings — `evidence.uploaded`, `evidence.accessed`, `evidence.attached`, `evidence.removed` (`C-4`, 2026-08-11)**. Every other element of A-029 — attribution, durable actor FKs, polymorphic targets, **one-event-per-action**, generic state columns, correction-by-new-event, no redaction, data minimization — is **preserved unchanged**. ⚠️ **One-event-per-action is why `A-057.1a` is open**: `evidence.uploaded` and `evidence.attached` may be one action, and if they are, four strings would sit in tension with this very row. |
 | Amendment 003 | A-031 | **Not amended** | No table, enum, column or seed row is added. The ceiling is untouched. |
 | Amendment 003 | A-026 | **Not amended** | The registry stays a **function-enforced `text[]`**, never an enum. |
-| `CLAUDE.md` §12 | *"extend the Step 7H audit registry"* stop-and-ask | **Discharged for these two strings only** | The stop-and-ask remains fully in force for **any** further registry change, including `evidence.deleted`. |
+| `CLAUDE.md` §12 | *"extend the Step 7H audit registry"* stop-and-ask | **Discharged for these ~~two~~ ✅ FOUR strings only** | The stop-and-ask **remains fully in force for any further registry change**, including `evidence.deleted`. ⛔ **It RE-ARMS AT FOUR: a fifth evidence action is a fresh stop-and-ask, and `C-4` is not a standing licence.** |
 | Specification v3 §23 | Append-only, hash-chained audit | **Not amended** | Reaffirmed by A-057.5. |
 
 **Amendment 008 names no other clause of any instrument.**

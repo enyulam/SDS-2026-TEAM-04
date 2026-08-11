@@ -79,7 +79,7 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 | **`C-1`** | ✅ **Propagation corrected.** Authority Lock **§8.1** and **§15**, and `G-8`'s *"regardless of any later evidence authorization"* clause, now carry `D-5`. ▶ **The NEW GROUND is stated in all three: client consent confirmed with iSpeak Academy. §8.1's original ground has NOT lapsed** — the PDFs still require no parent evidence projection, and no reader may cite the supersession as evidence otherwise | ✅ **DONE** |
 | **`C-2`** | ✅ **Consent is CENTRE-LEVEL**, recorded once, not per media item. ⛔ **No `consent_records` table.** `A-001` gate 2 amended; propagated to `A-003`/`A-004` | `P1-2`, `P1-5` |
 | **`C-3`** | ⛔ **Scan gate REMOVED. No scanning infrastructure exists and none will be built.** ⛔ No invented vocabulary, no fake state. **The absence is stated in the instrument AND in the product's own UI text on every upload surface** | `P1-2` |
-| **`C-4`** | ⛔ **HELD — `A-057` is NOT amended.** The ruling names `evidence.attached`/`evidence.removed`; `A-057` ratifies `evidence.uploaded`/`evidence.accessed`. **Both say 16 → 18 and there are four strings between them** | ⛔ **BLOCKS `P1-2`** |
+| **`C-4`** | ✅ **RE-RULED AND APPLIED — ALL FOUR STRINGS, registry `16 → 20`.** `evidence.uploaded` · `evidence.accessed` · `evidence.attached` · `evidence.removed`. `A-057` amended, with the *"must not be extended beyond these two"* clause struck and ⛔ **the prohibition RE-ARMED AT FOUR** | ⚠️ **`P1-2` still needs the reserved collapse question ruled — `R-4a`** |
 | **`C-5`** | ⚠️ **Visibility required · attestation absent · enforced by nothing.** Evidence must be **visible** on the management review surface before Approve & Submit; **whether a human watched it is not enforceable and no attestation claiming otherwise will be built.** `A-036`'s checklist stays trainer-only | `P1-3` |
 | **`C-6`** | ⛔ **No lessons entity. Terms group SESSIONS.** Lesson identity stays two columns on `class_sessions`. `G-3.1` and `A-016` stand | `P2-2` |
 | **`C-7`** | ⛔ **Per-phase authorization**, not a blanket amendment | `P1-2` `P2-2` `P2-6` |
@@ -97,14 +97,16 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 
 ### 2.3 ⛔ What still blocks a phase after the rulings
 
-| # | Blocker | Blocks |
-|---|---|---|
-| **`R-4`** | **`C-4` is held.** Choosing among its three reconciliations decides **audit coverage** — one reading deletes the only trace that a signed URL to a child's video was minted. `CLAUDE.md` §12 and `A-057` §50 both make this a stop-and-ask | ⛔ **`P1-2`** and therefore the whole evidence chain |
-| **`R-5`** | **`A-002` is untouched by `C-1`** — *"actual parent evidence access is first implemented and tested in **Phase 2**, never Phase 1"*, and `CLAUDE.md` §10 Phase 2 has not been entered | ⛔ **`P1-5`** |
-| **`R-12`** | **`C-12` requires the `31` report before the ruling** | ⛔ **`P2-23`** — §6.1 discharges the report; the ruling is owed |
-| **`R-14`** | **`C-14` field inventories await ratification** | ⛔ **`P2-2` `P2-11` `P2-12` `P2-13` `P2-14`** — §6.3 discharges the listing |
-| **`R-16`** | **`C-16` figure awaits confirmation** | ⛔ **`P1-2`** — §6.4 discharges the proposal |
-| **`R-7`** | **`C-7` per-phase table authorizations not yet given** | ⛔ **`P1-2` `P2-2` `P2-6`** |
+| # | Blocker | Blocks | State |
+|---|---|---|---|
+| **`R-4a`** | ⚠️ **The `C-4` collapse question is RESERVED to the Operator.** `evidence.uploaded` and `evidence.attached` **appear to be one governed action** — `D-5` has the Trainer upload at assessment time with the object already tagged to exactly one report and never movable, so **the upload IS the attach**. ⛔ **`A-029` requires one event per governed action**, a rule `A-057`'s own table lists as preserved. **If collapsed, the registry is `16 → 19`.** ▶ **Nothing is baked in — the live registry is still 16 and `A-057` has never been implemented** | ⛔ **`P1-2`** | `AWAITING_OPERATOR` |
+| **`R-5`** | **`A-002`** — *"actual parent evidence access is first implemented and tested in **Phase 2**, never Phase 1"*, and `CLAUDE.md` §10 Phase 2 has not been entered. ⛔ **DELIBERATELY NOT RULED** — it returns as **its own question** when Part 1 reaches it, because *"a §10 phase-ordering rule deserves its own ruling, not a footnote"* | ⛔ **`P1-5`** | `AWAITING_OPERATOR`, by design |
+| **`R-7`** | **`C-7` per-phase table authorizations not yet given** | ⛔ **`P1-2` `P2-2` `P2-6`** | `AWAITING_OPERATOR` |
+| ~~`R-12`~~ | ✅ **RULED** — both ratified marking states, distinguishably; no third state. §6.1 | `P2-23` | **CLEARED** |
+| ~~`R-14`~~ | ✅ **RULED** — six omitted; six fields ratified. §6.3 | — | **CLEARED** |
+| ~~`R-16`~~ | ✅ **RULED** — `100 MiB`, per-bucket, resumable required. §6.4 | — | **CLEARED** |
+
+⚠️ **`P1-2` remains blocked on `R-4a` and `R-7`, and therefore so does the whole evidence chain (`P1-3`, `P1-4`, `P1-5`).**
 
 ---
 
@@ -129,6 +131,17 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 ---
 
 ### P1-1 · Screen `19` Management Student Report — `D-1`, all nine ratings read-only
+
+> ✅ **PARTIALLY AUTHORIZED 2026-08-11. `P1-1` IS SPLIT IN TWO, AND ONLY THE FIRST HALF IS AUTHORIZED.**
+>
+> The Operator's words were *"AUTHORIZE P1-1 ONLY — the stale `GC-6`/`A-038` sweep… Complete it, commit, and STOP."* ⚠️ **That gloss names the reconciliation, not the projection**, and the stated reason — *"the `management-dashboard.tsx` banner is the file someone has open **while implementing `D-1`**"* — puts the sweep **before** the `D-1` build rather than inside it.
+>
+> | | Scope | State |
+> |---|---|---|
+> | **`P1-1a`** | ⚠️ **The `A-038` / `GC-6` reconciliation only** — §6.5's fifteen locations. **Documentation and code comments. No projection, no RPC, no migration, no rendered change.** | ✅ **AUTHORIZED** |
+> | **`P1-1b`** | The `D-1` projection extension + the new management-only read that returns the nine ratings | ⛔ **NOT AUTHORIZED — awaiting a separate word** |
+>
+> ▶ **Read narrowly on purpose.** `P1-1b` adds a reviewed `SECURITY DEFINER` read and its grant — a governed change `CLAUDE.md` §12 requires be authorized explicitly. **Where an authorization's scope is ambiguous, the narrower reading is the safe one**, and the cost of asking is one message.
 
 **Frame** · `reference/Management - Student Report/` + `19-management-student-report/screen.md` + `implementation-notes.md` (`GC-5`, `R-B5`). Draws: the four panels · **Class Video Evidence** · Report Details · **Performance Summary tiles for four dimensions** · approval panel · **Confirm & Approve** · **Save as draft**.
 
@@ -264,7 +277,19 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 ▶ **Honest summary: roughly half the frame's distinctive content is the rating apparatus, and all of it goes.** What remains is a **month calendar of the child's sessions, plus a report list** — genuinely useful, and visibly plainer than the frame. ⚠️ **Its absence is `EXPECTED / REQUIRED`, never a visual regression** — but the Operator should see the shape before authorizing, which is what `C-12` asked for.
 
-**One design consequence.** With colouring gone, the calendar needs a **non-rating** way to distinguish days. The ratified, non-derived options are: **a session occurred** · **a report is available to read**. ⛔ **Neither is rating-derived**, and no third state may be invented.
+**One design consequence — ✅ RULED 2026-08-11 (`C-12`).** With colouring gone, the calendar marks days using **BOTH ratified states, distinguishably**: **a session occurred** and **a report is available to read**. *"They are different facts and a parent needs both."* ⛔ **Neither is rating-derived, and no third state may be invented.**
+
+**⚠️ The states NEST — they are not two orthogonal flags, and building them as such would produce an unreachable combination.** A report can only exist for a session that happened, so the reachable cells are exactly three: **no session** · **session, no report yet** · **session + report available**.
+
+**✅ SC 1.4.1 answer: yes, both are distinguishable without colour carrying meaning alone.** The Operator asked to be told if they were not; they are not.
+
+| Cell state | Non-colour encoding |
+|---|---|
+| No session | date numeral only |
+| Session, no report | a **filled dot** beneath the numeral — **shape**, present or absent |
+| Session + report available | the dot **plus a distinct document glyph**, and the cell becomes an **actionable control** with a visible focus ring — **shape + glyph + interactivity**, three non-colour differences |
+
+**Binding accessibility conditions:** every cell carries an **accessible name stating the facts in words** (*"14 March — session held; report available"*), so a screen-reader user gets the same information without any visual channel · glyphs meet **SC 1.4.11** non-text contrast at 3:1 · any text meets **SC 1.4.3** · colour may **reinforce** the distinction but must never be the sole carrier. ▶ **The legend that made this screen `GC-2`'s worst limb is gone; a legend explaining *these two states* is permitted and is not rating vocabulary** — it glosses scheduling and publication facts, never a competency taxonomy (**A-052**).
 
 ### 6.2 `C-13` — the narrower residue
 
@@ -284,7 +309,30 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 | `class_modules` | `id` · `centre_id` · `class_grade_id` · **`title`** · `is_active` · timestamps |
 | `class_sessions` | `id` · `centre_id` · `class_module_id` · `session_date` · `starts_at` · `ends_at` · timestamps · **+ `lesson_number` · `lesson_title` · `room`** (hero 0B) |
 
-▶ **Essentially every field on these forms beyond a name is unbacked.** Each row below therefore needs **both** a ratification and a column.
+▶ **Essentially every field on these forms beyond a name is unbacked.** Each field therefore needs **both** a ratification and a column.
+
+### ✅ RULED 2026-08-11 (`C-14`) — six fields ratified, six omitted
+
+**The ratified field set, and nothing else:**
+
+| Field | Backing today |
+|---|---|
+| **learner name** | ✅ `students.full_name` |
+| **class** | ✅ `class_modules.title` + `class_grades` |
+| **trainer** | ✅ `class_session_assignments` → `accounts.display_name` |
+| **enrolment date** | ⚠️ **needs a column** — `enrolments` exists; no dated enrolment field measured |
+| **guardian name** | ⛔ **NEEDS A COLUMN** |
+| **guardian contact** | ⛔ **NEEDS A COLUMN** |
+
+⚠️ **The Operator's own note, recorded because it is the load-bearing part:** *"`trainer_profiles` and `parent_profiles` carry no name, email or phone — so guardian name and contact need columns, and that is a schema authorization I will give at the phase, not now."* ▶ **Ratifying a field is not authorizing its column.** `P2-12`/`P2-13` cannot start on these two without that separate authorization.
+
+⛔ **OMITTED, all six:** **gender · home address · employee ID · class code · capacity · relationship.**
+
+⛔ **Everything else drawn on `20` `21` `22` `24` `26` `27` needs its own ruling at its phase** — including first/last-name splitting, student ID, date of birth, day/time recurrence patterns and programme. **Do not schema a field from a frame (`A-022`).**
+
+⚠️ **`C-13` and `C-14` are consistent, and the difference is worth stating.** `C-13` permits a parent to *see* their own child's **date of birth**; `C-14` does not ratify DOB as a **captured field**. ▶ **Permission to display and authorization to store are different acts** — DOB stays unratified for capture until ruled at its phase.
+
+**The full listing that produced the ruling is retained below as the record of what was measured and asked.**
 
 | Screen | Field | Status |
 |---|---|---|
@@ -314,9 +362,19 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 | | **capacity** | ⚠️ **Ratify — recommend OMIT.** No enrolment ceiling is enforced anywhere |
 | **`23`** Trainers | **`On leave` status** | ⛔ **PROHIBITED — `GC-12`.** `centre_memberships.status` is exactly `pending`/`active`/`deactivated` |
 
-### 6.4 `C-16` — the proposed upload limit, and what it costs
+### 6.4 `C-16` — ✅ RULED: `100 MiB` per object
 
-**Recommendation: `200 MiB` per object.**
+**✅ RULED 2026-08-11: `100 MiB`** — *"Take the cheaper option on every axis."* The `200 MiB` proposal and its costs are retained below as the record.
+
+**Three binding conditions came with the figure, and none is optional:**
+
+1. ⛔ **Enforce PER BUCKET, and re-validate server-side.** `config.toml`'s `file_size_limit` is **global**; relying on it alone would silently widen the deferred **photo** and **lesson-materials** buckets. The evidence bucket carries its own ceiling, and the server re-checks it — **a client-side or config-level limit is not a boundary.**
+2. ⚠️ **Resumable upload is REQUIRED, not optional** — *"a single-shot POST on classroom wifi is a failure mode we would be designing in."* This is a `P1-2` acceptance condition.
+3. ⚠️ **The trade is accepted knowingly:** `100 MiB` covers roughly **90 seconds** of 1080p phone video. Longer clips are **rejected**, so the refusal message must **name the limit and be actionable** — a trainer who cannot tell why an upload failed will retry it, which is the worst outcome on a classroom network.
+
+⚠️ **`C-3` compounds this and the two must be read together:** the scan gate is gone, so **every accepted byte is unscanned**. The lower ceiling is now also a **containment** measure, not only a cost one.
+
+**The superseded proposal, retained as the record — `200 MiB`:**
 
 **Why that figure.** A per-child clip is one presentation turn — realistically **1–3 minutes**. Phone video at 1080p30 runs ~8 Mbps ≈ **60 MB/min**, so three minutes ≈ **180 MB**. `200 MiB` covers that with headroom and **still refuses** a long class recording, which is the shape `G-8` refused and `D-5` did not authorize. **500 MB is the frame's number and buys only the footage that is out of scope.**
 
@@ -343,7 +401,32 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 ⛔ **`management-dashboard.tsx` is the priority.** Its nine-line banner reads *"THE FRAME DRAWS RATINGS ON A MANAGEMENT SURFACE. IT MUST NOT BE BUILT (A-038)"*. ▶ **After `D-1` it reaches the RIGHT CONCLUSION for the WRONG REASON** — the frame's rating there is a **roll-up**, so `G-2` still excludes it, but the comment credits `A-038`. ⚠️ **And `C-9` means the conclusion holds for a second reason too**: `11` is a list surface, and `D-1` does not reach it.
 
-**Fourth instance in this project of the same defect: a rule whose stated reason has gone stale invites a later phase to "fix" it.** Each of the 15 locations is corrected to state **which ground now carries it** — `G-2`, `C-9`, or both — never left asserting a lapsed one.
+**Fourth instance in this project of the same defect: a rule whose stated reason has gone stale invites a later phase to "fix" it.** Each location is corrected to state **which ground now carries it** — `G-2`, `C-9`, or both — never left asserting a lapsed one.
+
+### ✅ `P1-1a` EXECUTED 2026-08-11 — and the register was under-measured by five
+
+**16 locations annotated** (the 15 recorded above plus **screen `19`'s own pack**, which had to move in the opposite direction — `GC-5`'s Performance Summary limb is now **permitted**, and its notes still said Management never reads ratings on the one screen where `D-1` lifts that).
+
+⛔ **A completeness scan across the whole tracked tree then found FOUR MORE**, none of them in the recorded register:
+
+| Site | Disposition |
+|---|---|
+| `UI_REFERENCE_FINAL_MVP/AUTONOMOUS_48H_RISK_REGISTER.md:130` | ⛔ **LEFT ALONE — historical**, closed Run B sprint artefact |
+| `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md:438` | ⛔ **LEFT ALONE — historical** adjudication record |
+| `docs/plan/UI_RECONCILIATION_BUILD_PLAN.md:296` | ⛔ **LEFT ALONE** — banner reads *"✅ CLOSED — COMPLETE. Operator decision, 2026-08-10."* |
+| `docs/workstreams/48H_FRONTEND_PROGRESS.md:437` | ⛔ **LEFT ALONE** — banner reads *"⚠️ HISTORICAL — CLOSED SPRINT."* |
+
+▶ **Each carries a `CLOSED`/`HISTORICAL` banner and accurately records what was true when written.** `CLAUDE.md` §12 forbids rewriting historical evidence that accurately records superseded state, so they are **excluded by rule, not by oversight** — the same treatment `BUILD_NOTES.md` gets under §15.4. **The true count of `A-038` management-rating claims in the tracked tree is 20: 16 corrected, 4 deliberately preserved.**
+
+### ⚠️ THE COMPLETENESS SCAN'S FIRST DETECTOR WAS BROKEN, AND ITS CONTROL IS THE ONLY REASON THIS IS KNOWN
+
+The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, title case, which is what the files actually use.** It reported **"0 uncorrected claims outside the register"** while matching almost nothing.
+
+▶ **It was caught by a deliberate non-vacuity control** — a probe string the detector was required to MATCH — which reported `BROKEN — every result above is meaningless`. With the case-insensitive fix the same scan found the four sites above.
+
+⚠️ **This is the project's recurring defect in its fourth direction.** The three recorded instances were a false `MISSING` (the CSS minifier's stored representation), a false `FAIL` (a regex that captured a parameter list), and a false `VIOLATION` (a bare keyword matching prose). ▶ **This one is a false `CLEAN` — the most dangerous of the four, because a sweep that reports nothing left to do is exactly the result nobody re-checks.**
+
+**Binding on every later phase: a sweep must carry a control proving its detector can FIRE, and a completeness claim must be scanned across the tree, never only across the list the sweep was given.** A register checked against itself cannot tell you what it omitted.
 
 ---
 
@@ -425,8 +508,9 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 | Phase | Change class | Before any code |
 |---|---|---|
-| **P1-1** | Management projection extension + a new management-only read | ✅ **REQUIRED** — no open blocker |
-| **P1-2** | ⚠️ **SCHEMA + STORAGE + audit registry** — the highest-risk item in the plan | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-4` `R-7` `R-16`** |
+| **P1-1a** | Documentation + code-comment reconciliation only | ✅ **GIVEN 2026-08-11** — executed and committed |
+| **P1-1b** | Management projection extension + a new management-only read | ⛔ **NOT GIVEN** — the 2026-08-11 authorization named the sweep |
+| **P1-2** | ⚠️ **SCHEMA + STORAGE + audit registry** — the highest-risk item in the plan | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-4a` `R-7`** |
 | **P1-3** | Management read of evidence; ⛔ **no transition-guard change** (`C-5`) | ✅ **REQUIRED** |
 | **P1-4** | Trainer read of evidence | ✅ **REQUIRED** |
 | **P1-5** | ⚠️ **Parent projection extension** | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-5` (`A-002`)** |
@@ -446,8 +530,9 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 | Item | State | Where |
 |---|---|---|
-| ⛔ **`C-4` held — the audit-registry discrepancy** | `AWAITING_OPERATOR` | Blocks `P1-2`. Three reconciliations, each costing something: **replace** deletes the access event (the only trace a signed URL to a child's video was minted) · **all four** contradicts "16 → 18" · **keep `A-057`'s two** leaves `D-5`'s removal unaudited |
-| ⛔ **`A-002` — parent evidence is Phase 2 work** | `AWAITING_OPERATOR` | Blocks `P1-5` |
+| ⚠️ **`R-4a` — the reserved `C-4` collapse question** | `AWAITING_OPERATOR` | Blocks `P1-2`. `evidence.uploaded` and `evidence.attached` **appear to be one governed action**; `A-029` requires one event per action. **If collapsed, `16 → 19`.** ▶ **Live registry is still 16 and `A-057` is unimplemented, so nothing is baked in** |
+| ⛔ **`A-002` — parent evidence is Phase 2 work** | `AWAITING_OPERATOR`, **by design** | Blocks `P1-5`. ⚠️ **Deliberately not ruled** — it returns as **its own question** when Part 1 reaches it, not as a footnote to an evidence phase |
+| ⛔ **`P1-1b` — the `D-1` projection half** | `AWAITING_OPERATOR` | The 2026-08-11 authorization named the sweep; the projection and its new management-only read await a separate word |
 | ⚠️ **The silent-save reproduction is still owed a walk** | `OPEN` | Carry into §5. Console empty = the button never enabled · `submit-ignored` = not `ready` · `dispatching` with no server-log entry = a third possibility neither candidate covered. Steps in `BUILD_NOTES.md`; repeat on a `trainer_approved` report → Management **Edit wording** |
 | ✅ **The `A-038` / `GC-6` reconciliation** | **SCHEDULED** | `P1-1`, measured scope at §6.5 — **15 locations, 4 of them live source** |
 | ⚠️ **`test:integration` 47/3/3, exit 1** | `OPEN` | `INT-A5`/`INT-Q27` are **suite staleness, product correct**; ⛔ `run-integration.mjs:517` calls `pass("INT-A5")` **unconditionally** after both `fail()`s. Fix before Part 2 so the suite can gate |
@@ -464,4 +549,4 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 ⚠️ **`PASS` is an evidence verdict; `Accepted` is the Operator's and only the Operator's.** A session never accepts its own work, and **code existing is not work being complete**.
 
-**Every phase is `NOT_STARTED`. `P1-1` is the only Part 1 phase with no open blocker.**
+**`P1-1a` is `PASS` — executed and committed 2026-08-11. Every other phase is `NOT_STARTED`, and `P1-1b`, `P1-2` and `P1-5` each carry a named open blocker.**

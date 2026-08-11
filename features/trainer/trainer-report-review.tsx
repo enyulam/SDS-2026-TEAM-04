@@ -64,7 +64,13 @@ import { usePhysicalTestPort, usePortalRuntime } from "@/features/portal/portal-
  *    reapproval of the returned version itself and routes to a fresh correction or an explicit
  *    reaffirmation version; a silent byte-identical save is rejected server-side (A-035/A-036).
  *  - THE CONTENT HASH IS NEVER RENDERED. It is carried to the server as a concurrency proof and
- *    is never shown, because the hash covers the four panels PLUS the nine ratings (A-038).
+ *    is never shown, because the hash covers the four panels PLUS the nine ratings.
+ *    ⚠️ RULE UNCHANGED, GROUND ANNOTATED 2026-08-11 (C-18). D-1 did NOT amend the content-hash
+ *    prohibition; it still binds for both audiences. Only the 4^9-reconstruction rationale
+ *    lapsed, and only for MANAGEMENT, who may now see the grid it would reconstruct. On this
+ *    TRAINER surface nothing changes at all — the trainer already holds the ratings (see the
+ *    next bullet), so the hash was never withheld from them on disclosure grounds.
+ *    ⛔ Widening the hash rule is a §12 stop-and-ask, not an inference from D-1.
  *  - THE NINE RATING SNAPSHOTS ARE TRAINER-INTERNAL. This is the Trainer's own source check
  *    against the assessment substance. The management and parent boundaries are unchanged and
  *    are proved separately: no competency-rating token reaches those surfaces.

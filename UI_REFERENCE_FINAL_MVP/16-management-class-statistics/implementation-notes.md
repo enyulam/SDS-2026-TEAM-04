@@ -50,6 +50,17 @@ Acceptance status:
 Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.md` (GC register, declared authoritative by `FINAL_MVP_AUTHORITY_LOCK.md` section 28.2). The `reference/` tree is VISUAL rank 1 but FUNCTIONAL rank 5 (lowest) - it cannot override a functional, privacy or security rule.
 
 - **GC-6 — Per-dimension rating surfaces shown to MANAGEMENT. Prohibited by CLAUDE.md section 6 / A-038. DO NOT BUILD.**
+
+  ⚠️ **CORRECTED 2026-08-11 — operator ruling `C-18`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C). **THE CONCLUSION IS UNCHANGED — `DO NOT BUILD` STILL STANDS — BUT THE GROUND HAS MOVED, AND THE BULLET ABOVE NOW CITES A LAPSED ONE.**
+
+  ⛔ **`A-038` NO LONGER BARS MANAGEMENT FROM RATINGS AS SUCH.** Operator ruling **`D-1`** (2026-08-11) permits Management to **VIEW the nine per-dimension ratings, READ ONLY**. Quoting `A-038`'s management rating bar as live is now wrong, and a reader who checks it will find it superseded — which is exactly how a genuine prohibition gets discarded along with a stale citation.
+
+  ✅ **TWO INDEPENDENT GROUNDS CARRY SCREEN `16` INSTEAD. Either alone is sufficient:**
+
+  1. **`C-9`** — `D-1` reaches **REPORT DETAIL SURFACES ONLY**. This screen is not one. *"Ratings on a list or a statistics surface is a different disclosure shape — it invites comparison between children, which is not what I authorized."*
+  2. **`G-2`** — the **`"Overall"` / `"Strongest / Focus area"`** limbs are **roll-up ratings**, and a roll-up is **PERMANENTLY EXCLUDED on every surface**. ⚠️ `G-2`'s own `A-038`-derived ground lapsed with `D-1`; it survives on its two others — the roll-up is **unratified**, and on a Parent surface it is the **`Q-27`** leak.
+
+  ⛔ **NOTHING ON THIS SCREEN CHANGES.** Do not add a rating badge, bar, column, tile or chip, and **do not read `D-1` as permitting one here.** The surface `D-1` actually moves is **screen `19`**.
 - **GC-10 — The frame OMITS the "Management Insight" panel and the "Students Needing Follow-up" table, both mandated by CLAUDE.md section 6 with an EXACT DETERMINISTIC TEMPLATE. The frame is incomplete. The Insight panel must NEVER be AI-authored prose.**
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**

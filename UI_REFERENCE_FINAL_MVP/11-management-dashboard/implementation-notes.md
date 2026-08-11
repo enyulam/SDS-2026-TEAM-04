@@ -192,6 +192,17 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 - **GC-6 — The frame shows per-student competency badges / per-dimension bars / "Overall" / "Strongest / Focus area" to MANAGEMENT. CLAUDE.md section 6 and A-038: management NEVER reads raw per-dimension ratings. DO NOT BUILD.**
 
+  ⚠️ **CORRECTED 2026-08-11 — operator ruling `C-18`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C). **THE CONCLUSION IS UNCHANGED — `DO NOT BUILD` STILL STANDS — BUT THE GROUND HAS MOVED, AND THE BULLET ABOVE NOW CITES A LAPSED ONE.**
+
+  ⛔ **`A-038` NO LONGER BARS MANAGEMENT FROM RATINGS AS SUCH.** Operator ruling **`D-1`** (2026-08-11) permits Management to **VIEW the nine per-dimension ratings, READ ONLY**. Quoting `A-038`'s management rating bar as live is now wrong, and a reader who checks it will find it superseded — which is exactly how a genuine prohibition gets discarded along with a stale citation.
+
+  ✅ **TWO INDEPENDENT GROUNDS CARRY SCREEN `11` INSTEAD. Either alone is sufficient:**
+
+  1. **`C-9`** — `D-1` reaches **REPORT DETAIL SURFACES ONLY**. This screen is not one. *"Ratings on a list or a statistics surface is a different disclosure shape — it invites comparison between children, which is not what I authorized."*
+  2. **`G-2`** — the **`"Overall"` / `"Strongest / Focus area"`** limbs are **roll-up ratings**, and a roll-up is **PERMANENTLY EXCLUDED on every surface**. ⚠️ `G-2`'s own `A-038`-derived ground lapsed with `D-1`; it survives on its two others — the roll-up is **unratified**, and on a Parent surface it is the **`Q-27`** leak.
+
+  ⛔ **NOTHING ON THIS SCREEN CHANGES.** Do not add a rating badge, bar, column, tile or chip, and **do not read `D-1` as permitting one here.** The surface `D-1` actually moves is **screen `19`**.
+
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
 

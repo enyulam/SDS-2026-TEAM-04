@@ -53,11 +53,32 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *     audience comes from AUTHORIZATION, never from an attribute on the row (A-038). A toggle
  *     would assert a per-audience artefact this system deliberately does not have, and would
  *     imply Management can preview a second, differently-scoped rendering of the same report.
- *  P2 "Performance Summary" — the raw per-dimension rating grid. Management never reads raw
- *     per-dimension ratings (A-038; `CLAUDE.md` §6; GLOBAL_UI_RULES §4). This is the same class
- *     of leak already caught once on the Parent surface. NOTHING on this screen renders a
- *     competency-rating token, and `tests/frontend/three-role-browser-smoke.mjs` proves it
- *     structurally, not by eye.
+ *  P2 "Performance Summary" — the raw per-dimension rating grid.
+ *
+ *     ✅ SUPERSEDED 2026-08-11 BY OPERATOR RULINGS D-1 AND C-10 (corrected under C-18).
+ *     ⚠️ THIS IS THE ONE SURFACE IN THE CORPUS WHERE THE PROHIBITION ACTUALLY LIFTED — read
+ *        this before trusting any other A-038 rating comment in the codebase.
+ *
+ *     ~~Management never reads raw per-dimension ratings (A-038).~~ D-1 permits Management to
+ *     VIEW the nine per-dimension ratings, READ ONLY, and C-9 confines that permission to
+ *     REPORT DETAIL SURFACES — of which this is one. C-10 then ruled ALL NINE rather than the
+ *     frame's four, because rendering four is a selection of assessment substance with no
+ *     ratified basis.
+ *
+ *     ⛔ BUT NOTHING IS BUILT YET, AND THAT IS NOT AN OVERSIGHT. D-1 authorizes no projection,
+ *        RPC, grant or migration. The build is plan phase P1-1b
+ *        (`docs/plan/PORTAL_COMPLETION_PLAN.md`), which is NOT YET AUTHORIZED. Until it is,
+ *        NOTHING on this screen renders a competency-rating token, and
+ *        `tests/frontend/three-role-browser-smoke.mjs` proves it structurally, not by eye.
+ *
+ *     ⛔ WHEN IT IS BUILT: the ratings must NOT be added to `report_get_canonical`, which
+ *        dispatches on role and serves parent, trainer and management from one body. That
+ *        would put them one branch away from a Parent session and make Q-27 depend on a
+ *        conditional. They arrive on a SEPARATE management-only read.
+ *
+ *     ⛔ MANAGEMENT MAY VIEW, NEVER EDIT. An assessment-level disagreement remains a RETURN TO
+ *        THE TRAINER, never a management edit (A-034; D-1). And Q-27 is untouched — D-1 moves
+ *        A-038 in the MANAGEMENT direction only and grants Parent nothing.
  *  P3 "Overall Grade: Mastering" in Report Details. No governed overall or roll-up competency
  *     grade exists, and computing one here would manufacture a DERIVED ASSESSMENT FACT this
  *     frontend invented — reserved to the governed assessment (A-034/A-035) — while also
@@ -590,13 +611,26 @@ export function ManagementReportReview() {
               {/*
                 Hero chain Phase 10. Class, Lesson and Trainer are IDENTITY AND
                 SCHEDULING facts about the session — not assessment substance,
-                so A-038's bar on Management reading raw per-dimension data is
-                untouched and P2/P3 below are unaffected.
+                so they were never affected by A-038's rating bar either way.
 
-                ⛔ G-4 — there is no Term row and there must never be one.
-                ⛔ G-2 — there is no grade or roll-up row either, and A-038
-                   bars it independently: computing one needs the very
-                   per-dimension ratings Management may not read.
+                ⚠️ CORRECTED 2026-08-11 (C-18). This said A-038's bar "is
+                   untouched". D-1 MOVED IT: Management may now VIEW the nine
+                   ratings, read only, on a report detail surface — which this
+                   is. See P2 in the file header.
+
+                ⛔ G-4 — REVERSED by D-3: terms are permitted as scheduling
+                   structure. There is still no Term row HERE, because D-3
+                   authorizes no column, RPC or screen and none is built.
+                ⛔ G-2 — there is no grade or roll-up row either.
+                   ~~and A-038 bars it independently: computing one needs the
+                   very per-dimension ratings Management may not read.~~
+                   ⚠️ THAT GROUND LAPSED 2026-08-11 (D-1) — Management may now
+                   read those ratings, so there is no bar for an aggregate to
+                   smuggle past. G-2 SURVIVES UNCHANGED on its two other
+                   independent grounds: the roll-up is UNRATIFIED, and on a
+                   Parent surface it is the Q-27 leak. PERMANENT EXCLUSION,
+                   NOT A DEFERRAL — and D-2's computed session score is a
+                   different thing (never rendered as a number).
                 ⛔ G-3 — Lesson is lesson IDENTITY. It is never lesson-plan
                    KEY FOCUS intent, and never the governed carried-over
                    previous-session focus.

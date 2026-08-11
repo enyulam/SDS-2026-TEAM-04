@@ -162,7 +162,7 @@ Authority Lock §14 excluded a Management roll-up **because** *"permitting it wo
 | **`C-1`** | ✅ **CORRECT THE PROPAGATION.** The `D-1` … `D-5` amendment run missed **Authority Lock §8.1 and §15**. Amend both to reflect `D-5`, annotate-never-delete, **stating the NEW GROUND explicitly**. Correct `G-8`'s *"regardless of any later evidence authorization"* clause the same way | ✅ **DONE** — three locations amended |
 | **`C-2`** | ✅ **AMEND THE GATE, DO NOT INVENT A TABLE.** `A-001` gate (b) assumed **per-record** consent. The actual arrangement is **academy-level consent, already in place for existing practice**. Consent is recorded **once at the centre**, not per media item. ⛔ **No `consent_records` table** | ✅ **DONE** — `A-001` gate 2, propagated to `A-003`/`A-004` |
 | **`C-3`** | ⛔ **DROP THE SCAN GATE AND RECORD THE LIMITATION HONESTLY.** No scanning infrastructure exists and **none will be built**. ⛔ **Do NOT invent a vocabulary or a fake state.** Record prominently — **in the instrument AND in the UI's own text** — that uploaded media is **not scanned** and that a production deployment would require it. ▶ **An honest absence beats a satisfied-looking gate** | ✅ **DONE** — `A-001` gate 5 removed; UI-text obligation binds every upload surface |
-| **`C-4`** | ✅ **AUTHORIZED: add `evidence.attached` and `evidence.removed` to the audit registry. 16 → 18. Amend `A-057` accordingly** | ⛔ **HELD — see the discrepancy below. `A-057` is NOT yet amended** |
+| **`C-4`** | ~~✅ add `evidence.attached` and `evidence.removed`. 16 → 18~~ ✅ **RE-RULED SAME DAY: ALL FOUR STRINGS, REGISTRY `16 → 20`** | ✅ **APPLIED** — `A-057` amended; ⚠️ **one collapse question reserved** |
 | **`C-5`** | ⚠️ **GUIDANCE, NOT A GATE, AND SAY SO.** Evidence must be **VISIBLE** on the management review surface before Approve & Submit. **Whether a human watched it is not enforceable by software, and no attestation claiming otherwise will be built.** `A-036`'s checklist stays **trainer-only**. Record as **visibility required · attestation absent · enforced by nothing** | Binds plan phase `P1-3` |
 | **`C-6`** | ⛔ **NO LESSONS ENTITY.** Terms group **SESSIONS**, not lessons. Lesson identity stays the **two columns on `class_sessions`**. **`G-3.1` and `A-016` both stand** | Binds `P2-2` |
 | **`C-7`** | ⛔ **PER-PHASE AUTHORIZATION, not a blanket amendment.** Every new table family needs its own explicit Operator ruling at its phase | Binds `P1-2`, `P2-2`, `P2-6` |
@@ -180,22 +180,41 @@ Authority Lock §14 excluded a Management roll-up **because** *"permitting it wo
 
 **Measurement corrections accepted the same day:** `SCREEN_INDEX.md` is wrong about screen `10`'s route, and `09`'s `C2C-007` is **a refusal, not a lag**. ✅ **The index is corrected** (its Notes A and B).
 
-## ⛔ `C-4` IS HELD — an internal discrepancy that changes the audit registry
+## ✅ `C-4` — RE-RULED AND APPLIED. Registry `16 → 20`, all four strings
 
-**`C-4` was not applied, and `A-057` is unamended.** The ruling and the ratified clause name **different pairs of strings**, and every reconciliation of them costs something a session must not choose:
+**The first `C-4` was held rather than applied.** The ruling and `A-057` named **different pairs**, and both said `16 → 18` — four distinct strings, one slot count. The reporting session recorded the discrepancy instead of picking a reading.
 
-| | Strings | Registry |
+**The Operator re-ruled the same day, and recorded why:**
+
+> *"ALL FOUR STRINGS. Registry 16 → 20, not 18. My '16 → 18' was arithmetic from a wrong premise — I did not know `A-057` already named two. This instruction is the bounded §12 authorization to extend beyond `A-057`'s 'must not be extended beyond these two strings', and amend `A-057` to record why: `D-5` authorizes a removal action that did not exist when `A-057` was written."*
+
+**`evidence.uploaded` · `evidence.accessed` · `evidence.attached` · `evidence.removed`**
+
+▶ **The deciding reason, in the Operator's words:** *"`evidence.accessed` is the only trace that a signed URL to a child's video was minted, for whom and when. That is an audit control, and dropping it to fit a slot count I invented would be the worst of the three options — more so now that `C-3` removed scanning."*
+
+⚠️ **This is the clearest vindication in the corpus of holding a ruling instead of applying it.** The `replace` reading would have satisfied the instruction *as written* and **silently deleted an audit control** — and it would have looked like compliance. ▶ **A ruling with an internal arithmetic inconsistency is a stop-and-ask, not a puzzle to solve.**
+
+✅ **`A-057` is amended** — `A-057.1` (four strings, `16 → 20`), `A-057.1a` (the reserved question), `A-057.2` (the *"must not be extended beyond these two"* clause struck, with **the prohibition re-armed at four**), the provenance quotation left **historical and unedited**, and both supersession-table rows updated.
+
+### ⚠️ The one question the Operator RESERVED — `evidence.uploaded` vs `evidence.attached`
+
+> *"If any two of the four are genuinely the same event under different names, say which and I will collapse them. **Do not collapse them yourself.**"*
+
+**Answer: yes — `evidence.uploaded` and `evidence.attached` appear to be ONE governed action.** Under `D-5` the Trainer uploads **at assessment time**, and the object is **tagged to exactly one session report** and **can never be moved or reused**. **No authorized workflow leaves an object unattached to be attached later**, so the upload *is* the attach.
+
+⛔ **It matters because `A-029` requires ONE EVENT PER GOVERNED ACTION** — a rule `A-057`'s own supersession table lists as *preserved unchanged*. Two strings for one action puts the registry in tension with it.
+
+▶ **Nothing is baked in and the collapse stays cheap.** The **live registry is still 16**; `A-057` has never been implemented in any migration. **If collapsed, the registry is `16 → 19`.** ⛔ **No implementation phase may proceed on the four strings until this is ruled** — recorded at `A-057.1a` so it cannot be lost between documents.
+
+## The remaining rulings, as applied
+
+| # | Ruled | Applied |
 |---|---|---|
-| **`A-057` as ratified** | `evidence.uploaded` · `evidence.accessed` | 16 → **18** |
-| **`C-4` as ruled** | `evidence.attached` · `evidence.removed` | 16 → **18** |
-
-⚠️ **Both say 18, and there are four distinct strings between them.** The readings are mutually exclusive:
-
-- **Replace** — `attached`/`removed` supersede `uploaded`/`accessed`. Registry 18. ⛔ **This DELETES the access event**, which is the record that a short-TTL signed URL to a child's video was minted, for whom, and when. **That is an audit control, not bookkeeping** — it is the only trace that anyone viewed the media.
-- **Add all four** — registry 16 → **20**. ⛔ Contradicts the ruling's own "16 → 18" and `A-057`'s *"the registry must not be extended beyond these two strings."*
-- **Keep `A-057`'s two, add nothing** — registry 18. ⛔ Leaves `D-5`'s ruled **removal** capability with **no audit action**, which is the collision `C-4` was raised to close.
-
-▶ **`CLAUDE.md` §12 makes extending the Step 7H audit registry a standing stop-and-ask, and `A-057` §50 makes a third evidence action a *fresh* one.** A session choosing among these would be deciding an audit-coverage question by inference. **It is recorded, not resolved.** ⛔ **Plan phase `P1-2` cannot start until it is.**
+| **`C-12`** | ✅ **Calendar marking: use BOTH ratified states, distinguishably.** *"A session occurred"* and *"a report is available"* are **different facts and a parent needs both**. ⛔ **Invent no third state.** ⚠️ **SC 1.4.1 applies** — if two states cannot be shown distinguishably without colour carrying meaning alone, say so | Plan §6.1; the accessibility answer is recorded there |
+| **`C-13`** | ✅ **Accepted — and the framing correction IS the finding:** §15 governs the **report projection** and Profile Details is a **Dashboard element**. A report-scoped rule applied to a non-report surface. ⛔ **The TA field stays prohibited under `A-014`** | Plan §6.2 |
+| **`C-14`** | ✅ **Omit all six recommended.** **Ratified fields: learner name · class · trainer · enrolment date · guardian name · guardian contact.** Everything else needs its own ruling at its phase. ⚠️ **`trainer_profiles` and `parent_profiles` carry no name, email or phone — so guardian name and contact NEED COLUMNS, and that schema authorization comes at the phase, not now** | Plan §6.3 |
+| **`C-16`** | ✅ **`100 MiB` — the cheaper option on every axis.** ⛔ **Enforce PER BUCKET and re-validate server-side**; `config.toml`'s global `file_size_limit` **must not silently widen the deferred photo and materials buckets**. ⚠️ **Resumable upload is REQUIRED, not optional** — a single-shot POST on classroom wifi is *"a failure mode we would be designing in"* | Plan §6.4 |
+| **`A-002`** | ⛔ **NOT RULED, deliberately. `P1-5` stays blocked.** It comes back as **its own question** when Part 1 reaches it — *"a §10 phase-ordering rule deserves its own ruling, not a footnote"* | Plan `R-5` |
 
 ## ⚠️ `C-13` — the narrower residue, as asked
 

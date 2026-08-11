@@ -249,9 +249,18 @@ resolved. SIX OMISSIONS:
       OMITTED.
   P2  "PERFORMANCE SUMMARY" — the raw per-dimension rating grid (the frame shows SPEECH
       MASTERING, TONALITY MASTERED, EYE CONTACT BEGINNING, AUDIENCE AWARENESS DEVELOPING).
-      Management never reads raw per-dimension ratings (A-038; CLAUDE.md §6; GLOBAL_UI_RULES §4).
-      This is the same class of leak already caught once on the Parent Feedback Report. OMITTED,
-      and its absence is now a permanent structural assertion, not a claim.
+      ~~Management never reads raw per-dimension ratings (A-038).~~
+      ✅ SUPERSEDED 2026-08-11 BY OPERATOR RULINGS D-1 / C-10 (corrected under C-18).
+      ⚠️ THIS IS THE ONE PACK IN THE ESTATE WHERE THE PROHIBITION GENUINELY LIFTED.
+      D-1 permits Management to VIEW the nine per-dimension ratings, READ ONLY; C-9 confines
+      that to REPORT DETAIL SURFACES, and screen 19 IS one; C-10 then ruled ALL NINE rather
+      than the frame's four, because rendering four is a selection of assessment substance
+      with no ratified basis.
+      ⛔ ITS ABSENCE IS THEREFORE NO LONGER "A PERMANENT STRUCTURAL ASSERTION" — it is now a
+      PENDING IMPLEMENTATION. The build is plan phase P1-1b, NOT YET AUTHORIZED. Until that
+      authorization, nothing renders here and the structural assertions stay in place.
+      ⛔ MANAGEMENT MAY VIEW, NEVER EDIT — an assessment-level disagreement is a RETURN TO THE
+      TRAINER. Q-27 is untouched and the Parent boundary does not move.
   P3  Report Details row "Overall Grade: Mastering". No governed overall or roll-up competency
       grade exists. Computing one here would manufacture a DERIVED ASSESSMENT FACT this frontend
       invented — the class of claim A-034/A-035 reserve to the governed assessment — while also
@@ -430,6 +439,16 @@ Recorded, not fixed (outside owned paths): components/brand/brand-mark.tsx:86 ha
 Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.md` (GC register, declared authoritative by `FINAL_MVP_AUTHORITY_LOCK.md` section 28.2). The `reference/` tree is VISUAL rank 1 but FUNCTIONAL rank 5 (lowest) - it cannot override a functional, privacy or security rule.
 
 - **GC-5 — Audience toggle, Performance Summary grid, Overall Grade, "Save as draft". A-038: management never reads raw ratings or the content hash. A-036: there is no management draft state. ALREADY CORRECTLY OMITTED under R-B5 — keep it omitted.**
+
+  ⚠️ **PARTLY DISCHARGED 2026-08-11 — operator rulings `D-1` / `C-10`, recorded under `C-18`. READ LIMB BY LIMB; THEY DO NOT MOVE TOGETHER.**
+
+  | Limb | Now |
+  |---|---|
+  | **Performance Summary grid** | ✅ **PERMITTED — and required at `P1-1b`, ALL NINE** (`D-1`, `C-9` reaches report detail surfaces and this is one, `C-10` rules nine not four). ⛔ **Not yet built; `P1-1b` is not yet authorized.** |
+  | **Overall Grade** | ⛔ **STILL EXCLUDED — `G-2`, PERMANENTLY.** Its `A-038` ground lapsed with `D-1`; it survives on **unratified** and on `Q-27`. |
+  | **`Save as draft`** | ⛔ **STILL EXCLUDED — `A-036`.** There is no management draft state; adding one needs a ninth `report_status`. |
+  | **Audience toggle** | ⛔ **STILL EXCLUDED.** There is no `kind` enum and no `audience` column; audience comes from **authorization**, never an attribute on the row. |
+  | **Content hash** | ⛔ **STILL EXCLUDED for both audiences.** The rule was **not** amended by `D-1`; only its 4⁹ rationale lapsed, and only for Management. **Widening it is a §12 stop-and-ask.** |
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
