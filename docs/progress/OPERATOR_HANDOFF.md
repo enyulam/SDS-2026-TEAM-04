@@ -1,7 +1,7 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
 > **NOT A TRACKER · NOT AUTHORITY · DERIVED** (`CLAUDE.md` §15.8 / `FINAL_MVP_G06_GROUNDING_RULING.md` §H-8). Written at every stop and **OVERWRITTEN, never appended**. It **originates nothing** — **where this and `docs/progress/STATUS.md` disagree, `STATUS.md` wins and this file is stale.**
-> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md`, the plan and the amended authority. Contains **no credential**.
+> Regenerated **2026-08-11**, after the facts below were written to `STATUS.md`, `BUILD_NOTES.md` and the plan, and committed. Contains **no credential**.
 
 ---
 
@@ -18,31 +18,37 @@
 
 ## ✅ WHERE THIS STOPPED
 
-**`P1-1b` IS BUILT AND PROVEN.** `public.report_get_management_ratings(uuid, uuid)` — SECURITY DEFINER, `STABLE`, `search_path` pinned, **one `authenticated` EXECUTE**, no table/enum/policy. **`C-4` is collapsed to THREE strings, registry `16 → 19`.**
+▶ **`D-1` IS COMPLETE END TO END — the first of the five portal decisions to reach a surface.** Screen `19` renders the nine per-dimension ratings, read-only, for management.
 
-⛔ **THE FRONTEND IS NOT BUILT, DELIBERATELY.** The authorization was for *"the `D-1` management-only read"*. **Screen `19` renders no rating today** — the read exists and nothing consumes it. That is a stopping point, not an incomplete phase.
+The chain is **projection → adapter DTO → adapter action → frontend contract → fixture → component** — the same spine every other proven surface uses. `getManagementRatingsCore` reads through **`readRows`** and returns `unavailable` on rejection (⚠️ `Q-7`: **a rejected query is not an empty result**, and here a rejection's shape would be an empty grid).
 
 | | |
 |---|---|
-| **HEAD** | **`7c717a8`** on `develop`, tree **clean**. Four commits this run: `e502600` · `8be2403` · `dc29d9d` · `7c717a8` |
-| **Gates** | ✅ **`prove:hero-all` 17/17 by exit code** · ✅ **`prove:portal-1` exit 0** (9 SQL legs + 10 runner checks) · `tsc` **0** · `eslint` **0 errors** · `build` **0** · route census **17** |
-| **Database** | ⚠️ **ONE migration applied locally** (`supabase migration up`, ⛔ never `db reset`) — **22 migrations · 27 tables · 43 functions · 12 enums · 29 policies**. Governed rows **byte-unmoved**. **Audit registry still live at 16** |
+| **HEAD** | **`5c4bce1`** on `develop`, tree **clean**. Five commits this run: `e502600` · `8be2403` · `dc29d9d` · `7c717a8` · `5c4bce1` |
+| **Gates** | ✅ **`prove:hero-all` 17/17 by exit code** · ✅ **`prove:portal-1` exit 0** — **9 SQL + 10 runner + 9 surface legs** · `tsc` **0** · `eslint` **0 errors** · `build` **0** · route census **17** |
+| **Database** | ⚠️ **UNCHANGED SINCE `P1-1b`** — the frontend added **no database object**. **22 migrations · 27 tables · 43 functions · 12 enums · 29 policies**. **Audit registry still live at 16** |
 
 ---
 
-## ▶ WHAT `P1-1b` PROVED
+## ⚠️ THE ONE THING A LATER PASS COULD UNDO
 
-Non-vacuity **first** — a version with nine ratings exists and management reads them. Then **trainer, parent and anon each read zero**. Then ⚠️ **the control you required**: the same probe re-read as management *after* the three denials, so the zeros are proven to be **discrimination, not blindness**. `D1a-7` proves `C-9` at the **data** layer — a `needs_edit` report returns nothing even to management. `D1a-9` proves **both management reads go dark together**. `D1a-8` proves **`Q-27` did not move**.
+**THE NINE-DIMENSION GRID IS A GOVERNANCE-MANDATED ADDITION.** ⛔ **The `19` reference frame does not draw it — it draws four.** **`D-1`** requires the grid; **`C-10`** requires **all nine**.
 
-⚠️ **A separate function was chosen over widening the review RPC, and the trade is recorded.** `report_get_working` already carries `ratings jsonb`, and `R-C2-6` warns a second RPC is a second gate — but widening changes a **return type** on the RPC the **proven** screen `19` path depends on. The side-channel risk is **mitigated, not ignored**: `D1-6` pins both gates to the same predicate, and `D1a-9` proves they refuse together.
+▶ **A visual pass that removed it *for matching the frame* would be reverting a ratified decision.** The citation is therefore in the **component**, the **DTO** and `BUILD_NOTES.md` — the three places such a pass would look. **The visual ladder does not outrank a functional ruling** (`A-045`, `A-056`).
+
+**Read-only is structural, not styling:** no `input`, `select`, `textarea`, `button`, `onChange` or `onClick` in the block, asserted against **comment-stripped** source. **`G-2` holds** — no Overall Grade, average or headline band. **All twelve `REGISTERED-OMISSION` markers intact.**
 
 ---
 
-## ⛔ THREE DEFECTS IN MY OWN INSTRUMENTS, ALL CAUGHT BY THE HARNESS
+## ⛔ A DISCIPLINE PROMOTED OUT OF AN INCIDENT, AT YOUR INSTRUCTION
 
-1. **The first deny leg mutated `public.reports` as `authenticated`** and got `permission denied`. ▶ **The refusal was correct and the fix was NOT a grant** — deny-by-default (`A-030`), and granting it to make a suite run is what §12 forbids. Setup now runs as owner; only the READ is impersonated.
-2. ⛔ **The *counts-moved-mid-transaction* leg was passing for the wrong reason** — it compared a **nine-field** prelude string against the runner's **six-field** one, so it passed because *the formats differ*. **A false green in the leg whose whole job is to stop `before = after` being a tautology.** ▶ **A comparison is only evidence when both sides measure the same thing.**
-3. **`prove:hero-2`'s `P2-6` census pin fired** at 42 → 43. ⛔ **Updated with its reason named, never removed.**
+▶ **A COMPARISON IS ONLY EVIDENCE WHEN BOTH SIDES MEASURE THE SAME THING.**
+
+`P1-1b`'s anti-tautology leg was itself tautological — it compared a **nine-field** prelude string against the runner's **six-field** one, so it passed because *the formats differ*. ⚠️ **Strictly worse than the tautology it guards against**: that one is visible in the assertion's own text, this one lived in a **second file** the reader never opens, and it reported `PASS`.
+
+**It sits beside *a check that cannot fail is not a check* and answers a different question** — the older rule asks whether the detector **can** fire; this asks whether, when it fires, **it is firing on the thing you think it is**. ⛔ **A control leg satisfies the first and is completely blind to the second.**
+
+**Also this run:** `prove:portal-1` **exited 0 twice against a suite my edit had never reached** — a heredoc lost its escaping, the instrument stayed silent, the result stayed green. ▶ **A green run proves nothing about a file you did not confirm changed.**
 
 ---
 
@@ -50,26 +56,26 @@ Non-vacuity **first** — a version with nine ratings exists and management read
 
 | # | Question | Blocks |
 |---|---|---|
-| **1** | **`C-7`** — per-phase table-family authorizations (evidence, terms, materials) | ⛔ **`P1-2`** and the evidence chain |
-| **2** | **`A-002`** — parent evidence is Phase 2 work. ⚠️ **You reserved this for its own question**; it is carried, not forgotten | ⛔ **`P1-5`** |
-| **3** | **The screen `19` frontend** that would consume the new read | the visible half of `D-1` |
+| **1** | **`C-7` — `P1-2`'s TABLE FAMILY, as its own question**: what tables, what columns, what policies, what grants, and what each is for. ⚠️ **You stated expressly that the screen `19` authorization was not this one** | ⛔ **`P1-2`** and the whole evidence chain |
+| **2** | **`A-002`** — parent evidence is Phase 2 work. ⚠️ **Reserved for its own question**; carried, not forgotten | ⛔ **`P1-5`** |
 
-✅ **`R-4a` is CLOSED** by the collapse ruling.
+✅ **`R-4a` is CLOSED** by the collapse ruling. ✅ **The screen `19` frontend is no longer owed** — it is built.
 
 ---
 
 ## ⛔ Explicitly unchanged
 
-- **`Q-27` does not move** — proven at the data layer this run, not asserted.
+- **`Q-27` does not move** — proven at the data layer *and* now at the surface: parent `30`/`32`/`33` render no rating.
 - **`G-2` permanent** · **`A-014`** TA persona deferred · **the content-hash rule unamended**.
+- **`C-9` holds**: the management **queue `29`** and **dashboard `11`** render no rating — a list invites comparison between children.
 - **Management may VIEW, never EDIT** — an assessment-level disagreement is a return to the trainer.
-- **`A-057`'s prohibition re-arms at THREE.** ⛔ **Do not reintroduce `evidence.uploaded`** — a second name for one action is the defect the collapse closed.
+- **`A-057`'s prohibition re-arms at THREE.** ⛔ **Do not reintroduce `evidence.uploaded`.**
 
 ## ⚠️ Carried
 
 - **The silent-save reproduction is still owed a walk** — steps in `BUILD_NOTES.md`; carry into the Part 1 → Part 2 re-walk.
-- ⚠️ **Authority Lock §19.1's "ratified census" reads `15 migrations · 36 functions`** — reality was **21 · 42** *before* this phase and is **22 · 43** now. **The divergence predates this work**; correcting a ratified instrument was outside `P1-1b`'s scope. **Recorded, not silently repaired.**
-- **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
+- ⚠️ **Authority Lock §19.1's "ratified census" reads `15 migrations · 36 functions`** against a live **22 · 43**. ✅ **You ruled *record, do not fix*.** **Recorded again, deliberately untouched.**
+- **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface — ⚠️ **including screen `19` with its new grid** · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
 - **Phase 8/11 gap stands** · **`test:integration` 47/3/3, exit 1** (suite staleness; `run-integration.mjs:517` calls `pass("INT-A5")` unconditionally) · ⛔ **`09` refuses its canonical route** (`C2C-007`) · **`A-044` knowingly unmet for `28`**.
 
 ## ▶ Next
