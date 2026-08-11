@@ -265,6 +265,17 @@ BEGIN
   -- status or correction field could have been slipped onto the list row
   -- through the shared read.
   --
+  -- ⚠️ THE FUNCTION COUNT MOVED 43 -> 49 ON 2026-08-12, AND THE SIX ARE NAMED.
+  -- Portal phase P1-2 (migration `20260812090000`, D-5 evidence substrate,
+  -- under the C-7 table-family ruling) added: `audit_action_registry`,
+  -- `app_trainer_may_attach_evidence`, `evidence_attach_confirm`,
+  -- `evidence_list_for_report`, `evidence_record_access` and
+  -- `evidence_remove`. ⛔ UPDATED WITH ITS REASON, NEVER RELAXED.
+  -- ⚠️ NONE OF THE SIX IS PARENT-REACHABLE: `evidence_list_for_report` has
+  -- NO PARENT ARM AT ALL (A-002 is unruled and it was deliberately not
+  -- built), so this suite's subject -- what a parent can read -- is
+  -- untouched, and the context field-set assertion below is still exactly 7.
+  --
   -- ⚠️ THE FUNCTION COUNT MOVED 42 -> 43 ON 2026-08-11, AND THE REASON IS
   -- NAMED HERE RATHER THAN QUIETLY BUMPED. Portal phase P1-1b added exactly
   -- one function, `report_get_management_ratings` (migration
@@ -297,12 +308,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 43 THEN
+  IF v_n = 1 AND v_listed = 49 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 43 functions (Phase 2 added none; Phase 7 and portal P1-1b each added the one named above) and the context return set is still exactly 7';
+    RAISE NOTICE 'PASS P2-6 -- 49 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 the six named above) and the context return set is still exactly 7';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 43) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 49) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

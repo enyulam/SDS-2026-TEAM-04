@@ -688,6 +688,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P1-1a** | Documentation + code-comment reconciliation only | ✅ **GIVEN 2026-08-11** — executed and committed |
 | **P1-1b** | Management projection extension + a new management-only read | ✅ **GIVEN 2026-08-11** — bounded §12. Built, proven, committed |
 | **P1-1c** | The screen `19` frontend consuming that read | ✅ **GIVEN 2026-08-11** — bounded, with six named constraints. Built, proven, committed. ⛔ **Expressly NOT the `C-7` table-family authorization** |
+| **P1-2** | The `D-5` evidence table family, bucket, storage policy and RPCs | ✅ **GIVEN 2026-08-12** — the `C-7` ruling, approved as designed, plus four named decisions. Built and proven; ⚠️ **the resumable upload transport is outstanding** |
 | **P1-2** | ⚠️ **SCHEMA + STORAGE + audit registry** — the highest-risk item in the plan | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-4a` `R-7`** |
 | **P1-3** | Management read of evidence; ⛔ **no transition-guard change** (`C-5`) | ✅ **REQUIRED** |
 | **P1-4** | Trainer read of evidence | ✅ **REQUIRED** |

@@ -560,18 +560,33 @@ export function TrainerDraftGeneration() {
             )}
           </section>
 
-          {/* D3 — frame region kept, rendered inert. No uploader and no limits invented. */}
-          <section className="card p-5 sm:p-6" aria-labelledby="class-video-evidence-heading">
-            <h2 id="class-video-evidence-heading">
+          {/*
+            P1-2 — D-5 per-child video evidence.
+
+            ⛔ THE FRAME'S HEADING IS NOT BUILT AS DRAWN, AND THAT IS THE POINT.
+            The `19`-era frame draws "Class Video Evidence · MP4, MOV · up to
+            500MB each". G-8 REFUSED class footage; D-5 authorizes PER-CHILD
+            evidence only, and C-16 ruled 100 MiB, not the frame's 500 MB.
+            Building the heading as drawn would put the refused thing on the
+            page with the frame apparently agreeing. `REGISTERED-OMISSION`:
+            the class framing and the 500 MB figure NEVER END.
+
+            ⚠️ GOVERNANCE-MANDATED COPY BELOW — cited so a later visual pass
+            does not remove it for not matching the frame. The visual ladder
+            does not outrank a functional ruling (A-045, A-056).
+          */}
+          <section className="card p-5 sm:p-6" aria-labelledby="child-video-evidence-heading">
+            <h2 id="child-video-evidence-heading">
               <span className="text-[1rem] font-semibold text-ink-strong">
-                Class Video Evidence
+                Video Evidence for This Learner
               </span>
             </h2>
             <p className="mt-1 text-[0.75rem] text-neutral-on">
-              Recordings from this session to support the report
+              One recording of this learner&rsquo;s own presentation turn, attached to this
+              session&rsquo;s report. MP4 or MOV, up to 100 MB.
             </p>
             <div
-              data-evidence-state="unavailable"
+              data-evidence-state="transport-not-built"
               className="mt-4 grid min-h-44 place-items-center rounded-panel border border-dashed border-line-strong bg-surface-muted px-6 py-10 text-center"
             >
               <div>
@@ -581,20 +596,54 @@ export function TrainerDraftGeneration() {
                   aria-describedby={evidenceNoteId}
                   className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-[0.78125rem] font-semibold text-ink-subtle"
                 >
-                  Attach class recording
+                  Attach this learner&rsquo;s recording
                   <Icon name="chevronRight" size={16} />
                 </button>
                 <p
                   id={evidenceNoteId}
                   className="mx-auto mt-3 max-w-md text-small leading-6 text-ink"
                 >
-                  Evidence upload is inactive in this workspace. Evidence capture is a required
-                  part of the final product and the Trainer is the person who will upload it, but
-                  the evidence schema and its governed upload path are not built yet — so this
-                  control is inert rather than simulated.
+                  The governed evidence substrate is built — table, private bucket, upload policy
+                  and the attach, list, access and remove operations. The resumable upload
+                  transport this control needs is not built yet, so the control is inert rather
+                  than simulated.
                 </p>
               </div>
             </div>
+
+            {/*
+              ⛔ C-3, MANDATORY UI TEXT, AND PART OF THIS PHASE'S ACCEPTANCE.
+              The scan gate was REMOVED because no scanning infrastructure
+              exists and none will be built. C-3 requires the absence be stated
+              in the instrument AND in the product's own text on every upload
+              surface. ▶ An honest absence beats a satisfied-looking gate, and
+              a gate removed in an instrument but not surfaced here is neither.
+              ⚠️ Permanently visible. NOT behind a disclosure, NOT a tooltip.
+            */}
+            <p
+              data-evidence-notice="unscanned"
+              className="mt-4 rounded-field border border-line bg-surface px-4 py-3 text-small leading-6 text-ink"
+            >
+              <strong className="font-semibold text-ink-strong">Uploaded media is not scanned</strong>{" "}
+              for malware or harmful content. A production deployment would require scanning before
+              real media is handled.
+            </p>
+
+            {/*
+              ⛔ D-5's retrievability limitation, stated and never denied. The
+              product provides NO download control for any role, including
+              Parent — and it does NOT claim technical impossibility. No
+              surface may say otherwise.
+            */}
+            <p
+              data-evidence-notice="no-download"
+              className="mt-2 text-small leading-6 text-ink-subtle"
+            >
+              Video is streamed for review only. There is no download control for any role.
+              Streamed video remains technically retrievable by a determined user with browser
+              tooling; this is a deliberate limitation of the affordance, not a technical
+              guarantee.
+            </p>
           </section>
         </div>
 

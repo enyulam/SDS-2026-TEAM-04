@@ -6350,3 +6350,56 @@ It read *"all THREE **spine** reads"*. Three of the four are the management pend
 
 **Gates:** unchanged from `7a401e4` — ✅ `prove:hero-all` **17/17** · ✅ `prove:portal-1` **exit 0** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
 **Next step:** ⛔ **STOPPED** — awaiting the `C-7` ruling.
+
+---
+
+## 2026-08-12 — `P1-2` BUILT: the `D-5` per-child evidence substrate
+
+**Branch:** `develop`. **HEAD in:** `6885c20` → **out:** this entry's commit.
+**Scope:** plan phase **`P1-2`** under the **`C-7` table-family ruling** (approved as designed, 2026-08-11) plus four Operator decisions. **Migration `20260812090000_portal_d5_evidence_substrate.sql`.**
+
+### What was built
+
+**One table, one bucket, one storage policy, four RPCs, three audit strings.** `public.report_evidence` — nine columns, anchored on `(report_id, centre_id) → reports(id, centre_id)`, `UNIQUE (report_id)`, 100 MiB as a `CHECK`, durable actor FKs, **RLS on with zero policies and zero client grants**. Private bucket `evidence` carrying its own `file_size_limit`. `evidence_attach_confirm` · `evidence_list_for_report` · `evidence_record_access` · `evidence_remove`, each `SECURITY DEFINER` with a pinned `search_path` and one `authenticated` EXECUTE.
+
+⛔ **THE OMISSION-IS-THE-CONTROL REASONING IS NOW IN THE MIGRATION ITSELF**, at Operator instruction, not only in the plan — a 25-line header explaining why `student_id` and `class_session_id` must never be added, and **assertion E1 refuses the migration if either appears**. ▶ **A reason that lives only in a plan cannot stop a later phase denormalizing "for query convenience"**; one that fails the build can.
+
+### ⛔ THE DUAL-REGISTRY LANDMINE IS CLOSED, NOT JUST SURVIVED
+
+Step 7H declared the 16-string registry **twice** — `audit_append_event` line 439, `audit_verify_chain` line 744. ▶ **A one-sided extension writes events that chain verification then rejects: corruption invisible until someone verifies.**
+
+Both sites were replaced in this one migration to read `public.audit_action_registry()`, so **a future extension has exactly ONE site**. Assertion **E5** fails the migration if either function still contains a registry literal, and **`P2a-12b` proves `audit_verify_chain` ACCEPTS a chain containing all three new actions** — with **`P2a-12a` as its non-vacuity leg**, because verification trivially accepts a chain that contains none of them.
+
+⚠️ **A single-source refactor of the audit internals was the larger change and was taken deliberately**; the alternative — pasting the 16 strings into a third and fourth place — would have made the landmine worse while appearing to fix it.
+
+### The four decisions, as ruled
+
+1. **The `storage.objects` INSERT policy is accepted as a bounded, reasoned exception to `ADR-3`**, and what the client can write is stated exactly in the migration: an **opaque object**, **private bucket**, **path requiring proven trainer authority**, **governed by nothing until a server RPC attaches it**. ⚠️ **Attach is pre-submission; removal is not** — that asymmetry is ruled, and the reason is recorded where a reader would otherwise "fix" it.
+2. **One clip per report**, structural (`UNIQUE (report_id)`).
+3. **Removal is Trainer-only and NOT limited to pre-`submitted`** — removal withdraws media rather than editing an approved artefact.
+4. **`config.toml` 50 → 100 MiB**, local only. ⛔ **The durable ceiling is the bucket row**; `config.toml` does not travel to a hosted project.
+
+### ▶ THE ORPHAN SWEEPER — the answer was "the script is cheap, the automation is not"
+
+**`npm run sweep:evidence-orphans`** is built: lists the bucket, subtracts referenced paths, applies a **two-hour grace window** so an upload still in flight is never swept out from under a trainer, **reports by default and deletes only with `--delete`**.
+
+⛔ **IT IS NOT SCHEDULED, AND THAT IS THE LIMITATION.** There is no scheduler in this project — no cron, no queue, no Edge Function, no credentialed CI runner — and adding one is **hosted work**, a §12 stop-and-ask. **Recorded in the script's own header, in the migration, and here.**
+
+⚠️ **PROVEN, NOT ASSUMED — because a clean sweep over zero objects is a vacuous result.** A probe object was planted: **within grace → not swept**; aged past the window → **reported as an orphan**; `--delete` → **removed, zero residue**. **Both branches of the grace logic were exercised.**
+
+### ⛔ TWO OF MY OWN INSTRUMENTS FAILED CORRECTLY, AND NEITHER FIX WAS A GRANT
+
+1. **The sweeper's first shape read `report_evidence` through PostgREST with the secret key** and got `permission denied`. ▶ **The refusal was right.** `report_evidence` holds **zero** client privileges for every role *including* `service_role` — the posture assertion **E3** exists to protect. It now reads owner-side through `psql`, the way every proof runner here reads. **A fifth `SECURITY DEFINER` function would also have worked and was rejected: `C-7` approved a family of four, and adding a database object to make a local script convenient is not what that ruling authorized.** *(Second instance of this exact shape in two phases, after `P1-1b`'s `D1a-7`.)*
+2. **A runner leg scanned the whole migration for `consent_records` and failed** — it was matching **assertion E10**, whose entire job is to prove no such table exists. ▶ **The check was reading the sentence that documents the thing rather than the thing.** Same family as the regex that captured a parameter list. **A prohibition is scanned in the DDL, never in the prose that defends it.**
+
+### Also found
+
+- ⚠️ **`storage.protect_delete()` refuses a direct `DELETE` from `storage.buckets`.** A bucket-creating migration is therefore **not SQL-reversible** — and it is why `P2a-11`'s probe bucket can only be removed by the `ROLLBACK`. A runner leg proves it did not survive.
+- ⛔ **`P1-2` is NOT complete.** The **resumable upload transport is not built**, so the trainer's attach control is **inert rather than simulated** and says so on the page. The substrate, the surface copy and every governance leg are done; **the transport is the named remaining half.**
+- ⚠️ **The frame's `Class Video Evidence` heading and `500MB` are NOT built** — `G-8` refused class footage and `C-16` ruled 100 MiB. **`REGISTERED-OMISSION`, never ends**, and a runner leg with a control asserts the refused framing is absent.
+- ⛔ **No parent arm exists anywhere** — RPC, module or surface. `A-002` is unruled; **assertion E9 fails the migration if one appears.** Building it unreachable now is the `S-8` shape exactly.
+
+**Census: 22 → 23 migrations · 43 → 49 functions · 27 → 28 tables.** Enums 12 and `public` policies 29 **unchanged**; **one storage policy**, the first in the project. `prove:hero-2`'s `P2-6` pin raised **43 → 49 with all six named**; ⛔ **updated, never relaxed**.
+
+**Gates:** `prove:portal-2` **exit 0** (18 SQL legs + 20 runner checks) · `prove:portal-1` **exit 0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+**Next step:** ⛔ **STOPPED.**
