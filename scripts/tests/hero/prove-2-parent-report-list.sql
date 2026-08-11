@@ -265,7 +265,18 @@ BEGIN
   -- status or correction field could have been slipped onto the list row
   -- through the shared read.
   --
-  -- ⚠️ THE FUNCTION COUNT MOVED 41 -> 42, AND THE REASON IS NAMED HERE
+  -- ⚠️ THE FUNCTION COUNT MOVED 42 -> 43 ON 2026-08-11, AND THE REASON IS
+  -- NAMED HERE RATHER THAN QUIETLY BUMPED. Portal phase P1-1b added exactly
+  -- one function, `report_get_management_ratings` (migration
+  -- `20260811140000`), under a bounded Operator authorization implementing
+  -- D-1. ⛔ THE PIN IS UPDATED, NEVER REMOVED: it fired correctly, and a
+  -- census ratchet that gets deleted the first time it is inconvenient is
+  -- not a ratchet. ⚠️ AND THE NEW FUNCTION CHANGES NOTHING THIS SUITE
+  -- PROTECTS -- it is MANAGEMENT-ONLY and returns no parent-reachable field;
+  -- the context field-set assertion below is what proves that, and it is
+  -- unchanged at exactly 7.
+  --
+  -- ⚠️ THE FUNCTION COUNT PREVIOUSLY MOVED 41 -> 42, AND THAT REASON IS KEPT
   -- RATHER THAN QUIETLY BUMPED. Phase 7 added exactly one function,
   -- `assessment_save_follow_up_notes`, under a bounded Operator
   -- authorization (migration `20260811090000`). This leg failed on the
@@ -286,12 +297,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 42 THEN
+  IF v_n = 1 AND v_listed = 43 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 42 functions (Phase 2 added none; Phase 7 added the one named above) and the context return set is still exactly 7';
+    RAISE NOTICE 'PASS P2-6 -- 43 functions (Phase 2 added none; Phase 7 and portal P1-1b each added the one named above) and the context return set is still exactly 7';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 42) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 43) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

@@ -6220,3 +6220,41 @@ The tree-wide completeness scan alternated **`management|MANAGEMENT`** and **mis
 
 **Gates:** `tsc` 0 · `eslint` 0 errors (2 pre-existing warnings) · `build` 0 · route census 17 · encoding + table-integrity 19/19 clean.
 **Next step:** ⛔ **STOPPED.** `P1-1b`, `R-4a` and `A-002` each need an Operator decision.
+
+---
+
+## 2026-08-11 (second entry) — `C-4` collapsed to three strings; `P1-1b` built and proven
+
+**Branch:** `develop`. **HEAD in:** `dc29d9d` → **out:** this entry's commit.
+**Scope:** the `C-4` collapse ruling, and plan phase **`P1-1b`** — the `D-1` management-only read — under a bounded §12 authorization. ⛔ **No frontend was built.**
+
+### `C-4` collapse
+
+`evidence.uploaded` and `evidence.attached` **were one governed action**: under `D-5` the Trainer uploads at assessment time and the object is already tagged to exactly one report and can never be moved, so **the upload IS the attach**, and `A-029` requires one event per governed action. The Operator ruled the collapse and chose **`evidence.attached`** — *"it names what the event means for the child's report, not what the file transfer did."*
+
+**`A-057` now carries three strings, registry `16 → 19`.** The prohibition **re-arms at three**, and the historical `G-05` provenance quotation stays unedited. ▶ **Nothing had to be unpicked, because the live registry is still 16 and `A-057` has never been implemented** — which is the payoff for holding `C-4` rather than applying its first arithmetic.
+
+### `P1-1b`
+
+**The object, signature and gate were stated in the plan BEFORE the migration was written**, as the Operator required.
+
+`public.report_get_management_ratings(uuid, uuid)` — SECURITY DEFINER, `STABLE`, `search_path` pinned, **one `authenticated` EXECUTE**, no table/enum/policy. Its gate **mirrors `report_get_management_review` step for step**, and step 4 is **`C-9` made physical**: only `trainer_approved` and `submitted` return anything.
+
+⚠️ **A separate function was chosen over widening the review RPC, and the trade is recorded rather than glossed.** `report_get_working` already carries `ratings jsonb`, and `R-C2-6` warns that *"a second RPC is a second gate to keep in step"* — but widening changes a **return type** on the RPC the **proven** screen `19` path depends on, and Part 1's premise is that those surfaces are the only end-to-end evidence. **The side-channel risk is mitigated, not ignored:** `D1-6` pins both gates to the same predicate, and `D1a-9` proves **both reads go dark together**.
+
+**Nine in-transaction assertions + `prove:portal-1` (9 SQL legs, 10 runner checks, exit 0).** Non-vacuity first; trainer, parent and anon each read zero; **the Operator-required control re-reads as management after the denials**, so the three zeros are proven to be discrimination rather than blindness. **Census 21 → 22 migrations, 42 → 43 functions**; tables, enums and policies unchanged.
+
+### ⛔ THREE DEFECTS IN MY OWN INSTRUMENTS, ALL CAUGHT BY THE HARNESS
+
+1. **The first deny leg mutated `public.reports` while impersonating `authenticated`** and got `permission denied`. ▶ **The refusal was correct and the fix was NOT a grant.** `authenticated` holds no table grant on `reports` — deliberate deny-by-default (`A-030`) — and granting it to make a suite run is exactly what §12 forbids. Setup now runs as the **owner**; only the READ is impersonated. Same shape as `P4-4`.
+2. ⛔ **The *counts-moved-mid-transaction* leg was passing for the wrong reason.** It compared the shared prelude's **nine-field** count string against the runner's **six-field** one, so it passed because *the formats differ*, not because anything moved — **a false green in the leg whose entire purpose is to stop `before = after` being a tautology.** Replaced with a same-shape `pg_temp.runner_counts()`. ▶ **A comparison is only evidence when both sides measure the same thing.**
+3. **`prove:hero-2`'s `P2-6` census pin fired** at 42 → 43. ⛔ **Updated with its reason named, never removed** — a census ratchet deleted the first time it is inconvenient is not a ratchet. The `context` field-set assertion it guards is unchanged at exactly 7.
+
+### Also recorded
+
+- ⛔ **The frontend is NOT built, deliberately.** The authorization was for *"the `D-1` management-only read"*. **Screen `19` renders no rating today** — the read exists and nothing consumes it.
+- ⚠️ **Authority Lock §19.1's "ratified Final MVP census" reads `15 migrations · 36 functions`** while reality was **21 · 42** before this phase. **The divergence predates this work**; correcting a ratified instrument is outside `P1-1b`'s authorization. **Recorded, not silently repaired.**
+- **`R-4a` is now closed by the collapse ruling.** `A-002` stays reserved and still blocks `P1-5`; `C-7` still blocks `P1-2`.
+
+**Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** · `tsc` 0 · `eslint` 0 errors · `build` 0.
+**Next step:** ⛔ **STOPPED.**

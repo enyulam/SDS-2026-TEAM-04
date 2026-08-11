@@ -164,7 +164,52 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 **Verification — `prove:portal-1`.** Non-vacuity first: a version with nine ratings **exists** (the `S-8` finding). Then: management reads **nine, and exactly nine** · a **parent** call returns **no rating field in any shape**, asserted as an exact field-set match **and** a prohibited-substring scan, because either alone can be edited around · a **trainer** call unchanged · **no rating reaches `report_get_canonical`** · `ParentReportListItemDto` and `CanonicalReportContextDto` field sets **byte-unmoved** · governed counts unmoved, with mid-transaction counts proven to **differ**.
 
-**Authorization** ✅ **REQUIRED.** No open blocker.
+**Authorization** ✅ **`P1-1a` GIVEN and executed. `P1-1b` GIVEN 2026-08-11** — bounded §12 authorization to build the `D-1` management-only read.
+
+#### `P1-1b` — THE OBJECT, SIGNATURE AND GATE, STATED BEFORE IT IS WRITTEN
+
+**Object** · `public.report_get_management_ratings(p_class_session_id uuid, p_student_id uuid)`
+**Returns** · `TABLE(dimension_code public.dimension_code, display_name text, sort_order smallint, rating public.competency_rating)` — **exactly nine rows**, ordered by `sort_order`.
+**Properties** · `LANGUAGE plpgsql` · `STABLE` · `SECURITY DEFINER` · `SET search_path TO ''`
+**Grant** · `REVOKE ALL FROM PUBLIC`, then **one** `GRANT EXECUTE TO authenticated` — the minimum matching grant, nothing wider.
+
+**The gate MIRRORS `report_get_management_review` STEP FOR STEP:**
+
+| # | Step | Effect |
+|---|---|---|
+| 1 | `app_current_account_id()` is `NULL` | ⛔ **RETURN** — this is the `anon` deny |
+| 2 | no `reports` row for `(session, student)` | ⛔ **RETURN** |
+| 3 | **exactly one ACTIVE `management` membership in the report's own centre** | ⛔ **RETURN** otherwise — **this is the whole management-only leg.** A trainer or parent holds no `management` membership, so the aggregate is `NULL` and the function returns zero rows. `HAVING count(*) = 1` fails closed on zero **and on more than one** |
+| 4 | status dispatch | `trainer_approved` → `current_cycle_version_id` · `submitted` → `latest_submitted_version_id` · ⛔ **every other status returns nothing** |
+| 5 | emit the nine `report_version_ratings` rows for that resolved version | joined to `assessment_dimensions` for `display_name`/`sort_order` |
+
+⛔ **Step 4 is `C-9` made physical.** The two dispatch branches are exactly the two reads `A-038` permits Management — the final-review candidate and the canonical submitted version. **`incomplete`, `observation_saved`, `drafting`, `draft_ready` and `needs_edit` return nothing**, so no rating reaches Management before a trainer approval exists.
+
+**What it deliberately does NOT return:** panel text · content hash · wording hash · checklist · approval internals · trainer notes · correction reason · `lock_version` · revision number. **Nine dimension/rating pairs and their labels, and nothing else.**
+
+**⚠️ THE DESIGN TRADE, STATED BECAUSE IT CUTS BOTH WAYS.** `report_get_working` already carries `ratings jsonb`, so **widening `report_get_management_review` with a `ratings` column would have followed that precedent and kept ONE gate** — and `R-C2-6` warns that *"a second RPC is a second gate to keep in step"*, while hero Phase 1 warns that *"a looser gate would be a side channel disclosing reports the canonical read refuses"*. ▶ **A separate function was chosen anyway**, for two reasons: widening changes a **return type** (`DROP` + `CREATE`) on the RPC the **proven** screen `19` review path depends on, and **Part 1's whole premise is that these surfaces are the only end-to-end evidence**; and the Operator's authorization names an object with **its own minimum matching grant**. ⛔ **The side-channel risk is therefore mitigated, not ignored: a proof leg asserts BOTH READS GO DARK TOGETHER**, the pattern hero Phase 1 invented for exactly this (`P1-6`).
+
+⛔ **`report_get_canonical` IS NOT TOUCHED.** It dispatches on role and serves parent, trainer and management from one body; adding ratings there would put them one branch from a Parent session and make **`Q-27` depend on a conditional**.
+
+#### ✅ `P1-1b` BUILT AND PROVEN — 2026-08-11
+
+**Migration `20260811140000_portal_d1_management_ratings.sql`**, applied locally via `supabase migration up` (⛔ never `db reset`). **Nine in-transaction assertions `D1-1` … `D1-9`** passed, covering: SECURITY DEFINER + `STABLE` · `search_path` pinned (asserted against the catalogue's `search_path=""` **with quotes**, the `H0A-4` lesson) · exactly one `authenticated` EXECUTE and **no `anon`/`PUBLIC`** · no prohibited field in the return type **including `overall`/`grade`/`band`** (`G-2`) · **both management gates are the same predicate** · `report_get_canonical` unaltered · **no rating or dimension field on any of the three parent-reachable reads** · audit registry unmoved at 16.
+
+**`npm run prove:portal-1` — 9 SQL legs + 10 runner checks, exit 0.** Non-vacuity first; the three denials (**trainer · parent · anon**) each read zero; **`D1a-6` is the Operator-required control**, re-reading as management *after* the denials so the three zeros are proven to be discrimination rather than blindness; `D1a-7` proves `C-9` at the **data** layer (a `needs_edit` report returns nothing even to management); `D1a-9` proves **both management reads go dark together**; `D1a-8` proves **Q-27 did not move**.
+
+**Census: 21 → 22 migrations, 42 → 43 functions.** Tables, enums and policies **unchanged**. Governed row counts **byte-unmoved**, with the mid-transaction reading proven to differ (`report_version_ratings` 54 → 63, exactly the nine minted).
+
+⚠️ **THREE DEFECTS IN MY OWN INSTRUMENTS, ALL CAUGHT BY THE HARNESS RATHER THAN BY REVIEW:**
+
+1. ⛔ **The first `D1a-7` mutated `public.reports` while impersonating `authenticated` and got `permission denied`.** ▶ **The refusal was correct and the fix was NOT a grant** — `authenticated` holds no table grant on `reports` (deny-by-default, `A-030`), and granting it to make a suite run is precisely what §12 forbids. The setup now runs as the **owner**, and only the READ is impersonated. Same shape as the Phase 4 `P4-4` correction.
+2. ⛔ **The `counts moved mid-transaction` leg was passing for the wrong reason.** It compared the shared prelude's **nine-field** string against the runner's **six-field** string, so it passed because *the formats differ*, not because anything moved — **a false green in the leg whose whole job is to stop `before = after` being a tautology.** A same-shape `pg_temp.runner_counts()` replaced it.
+3. ⚠️ **`prove:hero-2`'s `P2-6` census pin fired**, because the new function moved the count 42 → 43. ▶ **The pin was UPDATED, never removed, with the reason named** — a census ratchet deleted the first time it is inconvenient is not a ratchet. The `context` field-set assertion it guards is **unchanged at exactly 7**.
+
+**`npm run prove:hero-all` — 17/17 by exit code** after the pin update. `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+
+⛔ **THE FRONTEND IS NOT BUILT.** The authorization was for *"the `D-1` management-only read"*. **Screen `19` renders no rating today** — the read exists and nothing consumes it. That is a **deliberate stopping point**, not an incomplete phase, and the structural assertions on `19` still hold.
+
+⚠️ **A pre-existing staleness found and NOT fixed:** **Authority Lock §19.1's "ratified Final MVP census" reads `15 migrations · 36 functions`** while reality was **21 · 42** *before* this phase and is **22 · 43** after. **The divergence predates this work** and correcting a ratified instrument is outside `P1-1b`'s authorization. **Recorded, not silently repaired** — `STATUS.md` carries the live census.
 
 ---
 
