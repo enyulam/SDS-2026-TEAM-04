@@ -6916,3 +6916,77 @@ The first run reported **BLOCKED (65 + 13)**. Both halves were the instrument, n
 **Final result: `npm run prove:no-secrets` — exit 0.** 293 commits · 1,947 blobs (136 MB) · 687 tracked files · **ZERO credential findings** · 71 adjudicated identifier occurrences · **all four controls fired**.
 
 **Next step:** push `develop` **only**, tag, confirm via `origin`, regenerate the handoff, **then STOP**.
+
+---
+
+## 2026-08-12 — SECOND VERCEL PROJECT `best-coach-dev` · PHASE A (create · link · connect)
+
+- **Track / workstream:** hosted dev environment, second Vercel project. **Branch:** `develop`. **Worktree:** main (only).
+- **Starting HEAD:** `264b1d2` → **ending HEAD:** `264b1d2` (no commit in this window).
+- **Scope:** create a SECOND Vercel project for the `develop` branch pointed at the DEV Supabase project `poblcfbxxzgarclchzkx`, leaving the demonstration project `best-coach-mvp` and its frozen build untouched.
+
+### ⛔ OPERATOR-SUPPLIED PREMISE REFUTED BY MEASUREMENT
+
+**The premise:** *"Seven of the eight environment variables can be read from `.env.local`"* — naming `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY` among them.
+
+**The measurement:** those three same-named keys hold **LOCAL stack values, not DEV values**. `.env.local` was repointed at the local stack during Part 1 so the app could run on `54421` — Operator-confirmed cause.
+
+| Key | Measured | Correct DEV source |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | loopback `http://127.0.0.1:544xx` (22 ch) | `BEST_COACH_HOSTED_SUPABASE_URL` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | local legacy anon JWT (`eyJ…`, 153 ch) | **no DEV counterpart exists in the file — Operator supplies** |
+| `SUPABASE_SECRET_KEY` | local legacy JWT (`eyJ…`, 164 ch) | `BEST_COACH_HOSTED_SECRET_KEY` |
+
+⚠️ **Following the instruction literally would have deployed the hosted dev app against `http://127.0.0.1:544xx`** — a hosted build pointed at a loopback address, dead on arrival, and failing in a way that reads as an application bug rather than a configuration one. **Operator ruling: the premise was wrong, the measurement stands.** ▶ Recorded because the general shape recurs: **a file whose KEY NAMES match a target contract does not thereby hold that target's VALUES**, and the same-named key is precisely the one a reader trusts without checking.
+
+✅ **No frozen-database hazard from the file:** all twelve keys searched by exact containment — **`zjukuffiuzkbiblmnuwl` appears in none**.
+
+### Verification of the DEV secret key — ONE authorized outward call
+
+Shape-and-pairing evidence was rejected by the Operator as too weak for the value that reaches the database. **Authorized: one read-only `GET https://poblcfbxxzgarclchzkx.supabase.co/rest/v1/`** carrying `BEST_COACH_HOSTED_SECRET_KEY`.
+
+**HTTP 200 — PASS.** The key authenticates against `poblcfbxxzgarclchzkx`. **1 outward request, no writes, no credential printed.** The new-format Supabase secret key embeds no project ref, so containment could never have proven this; a 200/401 is the only decisive test. *(Node exited with a libuv `UV_HANDLE_CLOSING` teardown assertion after the verdict printed — cosmetic, does not affect the result.)*
+
+### Commands run
+
+```
+npx vercel project add best-coach-dev
+npx vercel link --yes --project best-coach-dev
+npx vercel git connect https://github.com/enyulam/best-coach-mvp.git --yes
+npx vercel project update best-coach-dev --framework nextjs
+```
+
+**Project created:** `prj_w5KUXbEf80lVtCYLAIbFCbV0QjI4` · `envichquas/best-coach-dev` · created 2026-08-12 04:24:58.
+
+### Ordering — why connect came BEFORE any credential
+
+Vercel's **Production Branch** field only exists once a Git repo is connected, and on connect it defaults to the repository's default branch — measured `main` (`git remote show origin` → `HEAD branch: main`). The window in which `best-coach-dev` would treat `main` as production therefore **cannot be avoided, only made harmless**. It was opened with the project holding **zero environment variables — measured, not assumed** (`vercel env ls` → *No Environment Variables found*), so a stray `main` build had **no credential with which to reach the dev project**.
+
+### ⚠️ THE CLI CANNOT SET THE PRODUCTION BRANCH — measured
+
+`vercel project update` exposes only `--framework`, `--build-command`, `--dev-command`, `--install-command`, `--output-directory`, `--root-directory`, `--auto-detect`. `vercel git connect` takes `[git-url]` only, **no branch flag**. No `vercel project settings` command exists. `vercel.json` can gate *which* branches deploy but **cannot name the production branch**. ▶ **A dashboard-only setting — the same class of fact already recorded for `best-coach-mvp`, which no amount of reading this repository can establish.**
+
+`vercel project inspect` does **not** surface the connected repo or the production branch either, so the setting is **not CLI-readable after the fact**. It will be proven **behaviourally** instead: a push of `develop` that yields a deployment whose target is **Production** demonstrates `develop` is the production branch.
+
+### Defect found and corrected in-window
+
+`vercel project add` creates a project with **Framework Preset `Other`** and output directory *"`public` if it exists, or `.`"* — **framework detection does not run for a CLI-created project**, only for a dashboard import. A git-triggered build would have produced a broken static deployment from a Next.js repository. Corrected to **Next.js**; settings now match `best-coach-mvp` exactly (`npm run build` or `next build`, Next.js default output, root `.`, Node 24.x).
+
+### Environment / infrastructure changes
+
+- **`.env.local` was written by `vercel link`** — it added `VERCEL_OIDC_TOKEN`. **All twelve pre-existing keys verified byte-length-identical afterwards; zero altered.** The file is gitignored (`.gitignore:34,45`), as is `.vercel/` (`:38,44`), so the working tree stayed clean.
+- **No database was contacted** beyond the single authorized read-only GET. The frozen `zjukuffiuzkbiblmnuwl` was **never contacted**.
+
+### Manual verification — the demonstration project is UNTOUCHED
+
+Baseline captured **before** any write and compared **after** Phase A. Identical on every field: deployment `dpl_payTudZqPUm7kYs5sQ9PMDx6b2x1` → `best-coach-ldu3j6aan-envichquas.vercel.app`, target `production`, status `Ready`, created Mon 10 Aug 2026 03:31:58 SGT, aliases `best-coach-mvp.vercel.app` · `best-coach-mvp-envichquas.vercel.app` · `best-coach-mvp-git-main-envichquas.vercel.app`. ▶ **Compared, not asserted** — per Operator instruction.
+
+`vercel ls best-coach-dev` → **no deployments**. Connecting a repository triggers no build.
+
+### Blockers / next
+
+- **AWAITING_OPERATOR** — set `best-coach-dev` → Settings → Git → **Production Branch = `develop`**. Nothing proceeds until confirmed.
+- **Then Phase B:** eight environment variables, Production + Preview, values piped via stdin and never printed. `BEST_COACH_SUPABASE_RUNTIME_PROFILE` and `NEXT_PUBLIC_BEST_COACH_FIXTURE_MODE` are **not created — not even blank**.
+- **Then Phase C:** `npm run prove:no-secrets` (any finding blocks) → push `develop` only → Vercel builds from git, so the deployed URL corresponds to a commit anyone can fetch.
+
+- **Commit:** none in this window. **Cleanup / rollback state:** no partial mutation; `best-coach-dev` is a created-but-undeployed project holding zero environment variables.
