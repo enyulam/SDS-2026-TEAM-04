@@ -5,7 +5,25 @@
 > **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-12, at the **PART 2 KICKOFF** checkpoint — a phase boundary, before `P2-1`.
+**Regenerated:** 2026-08-12, at the `P2-1` analysis checkpoint — before any `P2-1` code was written.
+
+---
+
+## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — what was re-verified, and what had lapsed
+
+**Re-verified against current state, not copied forward:**
+
+| Carried claim | Method | Result |
+|---|---|---|
+| `R-4a` blocking `P1-2`…`P1-5` | live `audit_action_registry()` + Amendment 008 | ⛔ **LAPSED** — ruled by `C-4` on 2026-08-11; registry is **19**; all four phases built and Operator-walked |
+| Pooled URL "not verified working" | Operator walkthrough exercises the trusted-store write | ⛔ **LAPSED** (previous regeneration) — corrected |
+| `report_evidence` "never held a row" | Operator attached a clip locally | ⛔ **LAPSED** (previous regeneration) — corrected, scoped **LOCAL** |
+| Phase 1 exit condition (c) unproven | hosted `follow_up_notes` measured NULL; fixture still Step 7F minimum | ✅ **STILL TRUE** — carried |
+| `B-G06-DET-1` open | no automated verdict produced since | ✅ **STILL TRUE** — carried |
+| `P2-2`/`P2-6` `C-7` schema gates | `PORTAL_COMPLETION_PLAN.md` §2.3 `R-7` | ✅ **STILL TRUE** — carried |
+| `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
+
+⚠️ **Every lapsed item was corrected in its SOURCE record before this file was derived** — `CLAUDE.md`, `PORTAL_COMPLETION_PLAN.md` and `BUILD_NOTES.md` — because correcting only the handoff reproduces the defect.
 
 ---
 
@@ -30,25 +48,21 @@
 | ⛔ **FROZEN, OFF LIMITS** | `best-coach-mvp.vercel.app` (on `main`) and hosted `zjukuffiuzkbiblmnuwl`. Verified byte-identical to its captured baseline after every step this session |
 | **Fixtures (hosted)** | **Step 7F MINIMUM ONLY** — 1 learner, 1 session, 1 module, 9 ratings. The report is at `observation_saved`, `lock_version 4`, `report_versions 0` |
 
-## Current phase — PART 2, at the boundary before `P2-1`
+## Current phase — PART 2, `P2-1` ANALYSIS COMPLETE, CODE NOT STARTED
 
-**Operator intent: the COMPLETE PLANNED PROTOTYPE** — every screen in the ratified inventory with an
-integrated backend, **not a subset**. Autonomous, in plan order (`PORTAL_COMPLETION_PLAN.md` §7),
-committing at every phase boundary. **23 buildable phases `P2-1`…`P2-23`; `P2-24` (`28` Term Report)
-is DEFERRED by `C-11`, with `A-044` noted and unmet deliberately.**
+**23 buildable phases `P2-1`…`P2-23`; `P2-24` (`28` Term Report) DEFERRED by `C-11`.**
 
-⚠️ **`P2-1` (`12` Management Classes) IS MEASURED AND NEEDS NO SCHEMA.** Management `SELECT` policies
-**and** matching `authenticated` grants already exist on all six tables it reads. Classified
-`NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`. **No migration, and no Operator schema gate in
-front of it** — scoping it from the frame instead would have spent an authorization on nothing.
+**`P2-1` (`12` Management Classes) — frame read, delta classified, NO SCHEMA NEEDED** (management
+`SELECT` policies **and** matching `authenticated` grants exist on all six tables, measured at HEAD).
+Classification: `NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`.
 
-⛔ **Schema gates ahead, all `AWAITING_OPERATOR`:** `P2-2` and `P2-6` under `R-7`/`C-7`.
+⛔ **Three governance divergences found in the frame — each would have been built wrong from it:**
+1. The frame's level tab reads **`Junior`**; ratified vocabulary is **`Beginner`** (A-016, A-054).
+2. **`Asst. <name>` is a TA field — PROHIBITED** (`A-014`, `G-7`). `REGISTERED-OMISSION`, **never ends**.
+3. **`X / 12 Lessons done`** needs lesson data that arrives with `D-3`/`D-4`. `REGISTERED-OMISSION`,
+   **ends when data arrives**.
 
-✅ **`R-4a` IS RULED and `P1-2`…`P1-5` ARE NOT BLOCKED** — corrected 2026-08-12. `C-4` collapsed
-`evidence.uploaded` into `evidence.attached` on **2026-08-11**; registry is **19**, measured live at
-HEAD. All four phases are **built and Operator-walked** across all three roles, locally and on
-deployed dev. ⚠️ **This was the NINTH-instance trigger: a ruled decision carried as an open blocker
-through two consecutive handoffs, stopping work that was never blocked.**
+⛔ **Schema gates ahead, `AWAITING_OPERATOR`:** `P2-2` and `P2-6` under `R-7`/`C-7`.
 
 ### Part 1 — verified, and its limits
 
@@ -67,10 +81,11 @@ hosted dev at 25 migrations: trainer start class → … → linked parent viewi
 
 ## Which ending fired
 
-**Ending C — remaining context insufficient to safely begin AND finish the next phase.** Stopped at a
-phase boundary **before** `P2-1` construction. ⚠️ **Nothing of `P2-1` is half-built:** §3 requires each
-phase to deliver its screen COMPLETE — projection, server action, frontend, verification — before the
-next begins, so starting it here would have created exactly the partial state that rule prevents.
+**Ending C — remaining context insufficient to begin AND finish `P2-1`.** Stopped **before writing any
+`P2-1` code**. ⚠️ **Nothing is half-built:** §3 requires each phase to deliver its screen COMPLETE —
+projection, server action, frontend, verification — before the next begins. The frame read, the three
+divergences and the delta classification are the phase's **analysis step**, recorded in
+`BUILD_NOTES.md`, so the next session starts from measurement rather than from the frame.
 
 ## Suites and proofs that RAN this session
 
@@ -130,10 +145,10 @@ next begins, so starting it here would have created exactly the partial state th
 
 ## Next permitted action
 
-**Build `P2-1` (`12` Management Classes) COMPLETE** — projection → server action → frontend →
-verification, in that order (§3: server-side precedes the frontend that consumes it). **No gate stands
-in front of it**, measured rather than assumed. **Then `P2-2`, which DOES hit a `C-7` schema gate and
-must STOP with its tables, columns, policies and grants stated.**
+**Write `P2-1`'s code** — projection → server action → frontend → verification, in that order (§3:
+server-side precedes the frontend that consumes it). **Its analysis is done and recorded; no gate
+stands in front of it.** Honour the three registered omissions above. **Then `P2-2`, which DOES hit a
+`C-7` schema gate and must STOP with its tables, columns, policies and grants stated.**
 
 **Prerequisites already satisfied:** tree clean · `develop` pushed and verified from `origin` ·
 `main` untouched · hosted dev schema-current · deployed dev app READY at `4cfb57f` · publication

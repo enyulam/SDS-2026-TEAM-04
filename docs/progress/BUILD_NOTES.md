@@ -7310,3 +7310,49 @@ The sweep was rebuilt to classify **LIVE / ANNOTATED / EXEMPT**, with a control 
 **Stopped at a phase boundary BEFORE `P2-1` construction**, per the Operator's standing instruction for context exhaustion. **Nothing of `P2-1` is half-built** — the phase shape requires *"that screen COMPLETE — projection, server action, frontend, verification — before the next begins"*, and starting it here would have left exactly the partial state that rule exists to prevent.
 
 **Next permitted action:** build `P2-1` complete. No gate stands in front of it.
+
+---
+
+## 2026-08-12 — `R-4a` corrected · §15.8.1 freshness obligation · `P2-1` frame read and delta
+
+- **Branch:** `develop`. **Scope:** governance corrections + the `P2-1` frame read. **No code, schema, fixture or deployment change.**
+
+### ⛔ EIGHTH INSTANCE — `R-4a` carried as an open blocker for a full day after it was ruled
+
+**Verified at source before recording anything**, on the Operator's instruction: live `audit_action_registry()` returns **19 strings** — `evidence.attached` · `evidence.accessed` · `evidence.removed` — and Amendment 008 carries **`A-057.1a`**, the `C-4` collapse ruling of **2026-08-11**. **`P1-2` … `P1-5` are built and Operator-walked across all three roles, locally and on deployed dev.**
+
+▶ **A stale BLOCKER is worse than an ordinary stale fact: it does not merely mislead, it STOPS WORK THAT WAS NEVER BLOCKED.** Eight sites corrected — six in `PORTAL_COMPLETION_PLAN.md`, the handoff, and `CLAUDE.md`'s A-057 row, which still read *"exactly two strings"* / *"Registry 16 → 18"*.
+
+### ⛔ NINTH INSTANCE — IT REPRODUCED INSIDE THE CORRECTION FOR THE EIGHTH
+
+**Recorded verbatim at Operator instruction, because it is the argument for §15.8.1.**
+
+While correcting the eighth instance, the session amended a `CLAUDE.md` table row so its opening read **"EXACTLY THREE STRINGS"** while its **tail still read *"it ratifies two strings"***, and the same cell kept a duplicated `evidence.deleted` clause whose rationale had itself lapsed. **A fact recorded twice in a single table cell, corrected once.**
+
+▶ **If it can happen INSIDE the correction for the eighth instance, in the same edit, written by the party who had just diagnosed the pattern, then NO AMOUNT OF CARE SUBSTITUTES FOR A MECHANICAL CHECK.** ⚠️ It was caught only because the diff was read before committing — **not** because the author was careful. They were as careful as it is possible to be. **The same defect then appeared a third time the same hour**, in both `R-4a` rows, whose fronts were corrected while their tails still asserted *"the live registry is still 16"*.
+
+### ✅ `CLAUDE.md` §15.8.1 — the freshness obligation
+
+Four requirements: **re-verify** every open item, blocker and limit against current state, never from `STATUS.md` alone · **correct the SOURCE first**, because correcting only the handoff reproduces the defect · **check any open RULING against the ruling instruments** · **report what was re-verified and what lapsed**, because silence is indistinguishable from not having checked.
+
+**Sited at §15.8.1, not inside H-8** — H-8 itself names `CLAUDE.md` §15.8 *"the scope-correct permanent home"*, and H-8 scopes itself to Plan Phases 0–4 while this obligation must not expire. ▶ **It is the deliberate mirror of §15.3: verify-never-trust at session START, and now at session END. A contract that verified only on entry was always half a contract.** **The Operator accepted this placement over their own instruction**, and an explicit **do-not-tidy-back-into-H-8** guard is recorded in the section so a later reader cannot undo it while believing they are consolidating.
+
+**Six disciplines added at `HERO_CHAIN_COMPLETION_PLAN.md` §12A (`D-26` … `D-31`).**
+
+### `P2-1` — `12` Management Classes: frame read, delta classified
+
+**Frame:** `UI_REFERENCE_FINAL_MVP/reference/Management - Classes/`. Sidebar · `Classes` header · `All Classes` + count pill · **level tabs** · `+ Add Class` · class cards carrying module title, level, trainer, **`Asst. <name>`**, student count and **`X / 12 Lessons done`**.
+
+⛔ **THREE GOVERNANCE DIVERGENCES — the frame is visual authority only, and each of these would have been built wrong from it:**
+
+1. ⛔ **The frame's level tab reads `Junior`. The ratified Class Grade vocabulary is `Beginner` / `Intermediate` / `Advanced`** (A-016, A-054, and the three seeded `class_grades` rows). **Governance wins; the tab is `Beginner`.** ⚠️ **This is a vocabulary divergence, not a synonym** — A-054 prohibits global keyword replacement and requires classifying each occurrence by context.
+2. ⛔ **`Asst. <name>` on every card is a Teaching Assistant field — PROHIBITED by `A-014` and `G-7`**, exactly as the same field is prohibited on screen `30` (`PORTAL_COMPLETION_PLAN.md` §538). **`REGISTERED-OMISSION`, and it NEVER ENDS** — it is not waiting on data.
+3. ⚠️ **`X / 12 Lessons done` requires lesson data that does not exist yet** — it arrives with `D-3`/`D-4` at `P2-2`/`P2-6`. **`REGISTERED-OMISSION`, ENDS WHEN DATA ARRIVES.**
+
+**`+ Add Class` targets screen `26`, which is `P2-2`** — the control is rendered, its destination lands next phase.
+
+**Delta classification: `NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`. NOT `NEEDS NEW SCHEMA`** — measured at HEAD: management `SELECT` policies **and** matching `authenticated` grants already exist on all six tables. **No Operator schema gate stands in front of `P2-1`.**
+
+### Checkpoint
+
+**Stopped BEFORE writing `P2-1` code.** §3 requires the phase to deliver its screen COMPLETE — projection, server action, frontend, verification — before the next begins; **remaining context could not finish and verify it**, and a partial build is exactly what that rule prevents. **Nothing of `P2-1` is half-built.** The frame read, the three divergences and the delta classification are the phase's analysis step and are recorded above, so the next session starts from measurement rather than from the frame.
