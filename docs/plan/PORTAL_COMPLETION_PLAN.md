@@ -268,6 +268,113 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 ---
 
+#### `C-7` · `P1-2`'s TABLE FAMILY — PROPOSED FOR RULING, 2026-08-11
+
+⛔ **THIS SECTION CREATES NOTHING.** No table, column, type, bucket, policy, grant, RPC, audit string, migration or route exists from it. It is the `C-7` per-phase question put to the Operator **before any code**, in the shape `P1-1b`'s design was stated before its migration was written. **Every measurement below was taken at HEAD, not read off a document.**
+
+##### 1 · One table, and per-child scope is a CONSEQUENCE of its key rather than a check
+
+**`public.report_evidence`**
+
+| Column | Type | Null | Default | What it is for |
+|---|---|---|---|---|
+| `id` | `uuid` | NOT NULL | `gen_random_uuid()` | PK. ⚠️ **Minted by the server BEFORE upload** so the object key is known in advance — see §5 |
+| `report_id` | `uuid` | NOT NULL | — | **The anchor.** `D-5`: tagged to exactly one session report |
+| `centre_id` | `uuid` | NOT NULL | — | Carried for the composite FK and for `audit_append_event`'s required centre scope |
+| `storage_object_path` | `text` | NOT NULL | — | The exact object key. **UNIQUE** — one row can never point at another row's object |
+| `media_type` | `text` | NOT NULL | — | `CHECK IN ('video/mp4','video/quicktime')` — the frame's `MP4, MOV` |
+| `byte_size` | `bigint` | NOT NULL | — | `CHECK (> 0 AND <= 104857600)` — **`C-16`'s 100 MiB, in the database** |
+| `uploaded_by_account_id` | `uuid` | NOT NULL | — | Durable actor (`A-029`), `ON DELETE RESTRICT` |
+| `uploaded_by_membership_id` | `uuid` | NOT NULL | — | The membership the upload was made under — role at the time, not role today |
+| `created_at` | `timestamptz` | NOT NULL | `now()` | — |
+
+**Constraints:** `FOREIGN KEY (report_id, centre_id) REFERENCES public.reports (id, centre_id) ON DELETE RESTRICT` — the existing `reports_id_centre_key` makes this composite form available, and it is the project's established way of making centre drift **unrepresentable** rather than merely checked. Plus `UNIQUE (report_id)` — **at most one clip per report** (§8, decision 2).
+
+⚠️ **THIS IS THE ANSWER TO *"how is per-child scope enforced structurally"*, AND IT IS THE REASON FOR THE SHAPE.** `reports` already carries `reports_session_student_key UNIQUE (class_session_id, student_id)` — **measured at `20260803034500_step_7e_governed_core.sql`**. ▶ **A row FK'd to `reports.id` is therefore already exactly one child in exactly one session; there is nothing left to enforce.**
+
+⛔ **THIS IS WHY THERE IS NO `student_id` AND NO `class_session_id` COLUMN, and the omission is the control.** Denormalizing either would create a second, independently-writable answer to *"whose clip is this?"* — and **two answers that can disagree is precisely how class footage gets attached as a child's clip**: a row naming a session but no student, or naming a student the report does not, is *representable* the moment those columns exist. **With only `report_id` there is no such row to write.** A clip of a whole class can still be *filmed* and uploaded — `A-001` already states the application does not verify single-child framing, and `D-5` does not change that — but it can only ever be **attached to exactly one child's report**, and the surface, the audit event and the parent projection all name that one child.
+
+##### 2 · Policies and grants — ⛔ ZERO in `public`, and that is the established pattern, not an omission
+
+**Measured at HEAD:** `public.reports` and `public.report_versions` hold **no client `GRANT` and no RLS policy of any kind**. Every report read is a reviewed `SECURITY DEFINER` RPC (`A-030`). The 13 tables that *do* carry `GRANT SELECT TO authenticated` are pinned **by exact name** in Step 7H assertion **B9**.
+
+▶ **`report_evidence` belongs in the report class, not the roster class.** So: **RLS enabled · zero policies · zero client grants**, reached only through the RPCs in §3. **This is strictly narrower than "a policy plus its minimum matching grant"** — the same choice Phase 0A made and the Operator accepted.
+
+⚠️ **There IS one policy in this family, and it is on `storage.objects`, not on `public`.** It exists only because resumable upload requires it — §5. **Do not read the two as the same layer.**
+
+##### 3 · Four RPCs, and where the three audit strings fire
+
+| RPC | Volatility | EXECUTE | Gate | Audit |
+|---|---|---|---|---|
+| `evidence_attach_confirm(report_id, evidence_id, object_path, media_type, byte_size)` | `VOLATILE` | `authenticated` | **Authoring trainer only** — `app_trainer_reaches_session` on the report's session · report **not** `submitted` · re-validates `byte_size` and `media_type` **server-side** | ▶ **`evidence.attached`**, in the **same transaction** as the INSERT |
+| `evidence_list_for_report(class_session_id, student_id)` | `STABLE` | `authenticated` | **Role-dispatching, mirroring RPC-13 step for step** — trainer via session assignment · management via a single active management membership · parent via `app_parent_reaches_student` **and** `latest_submitted_version_id IS NOT NULL` | ⛔ **none** — a list read is not an access |
+| `evidence_record_access(evidence_id)` | `VOLATILE` | `authenticated` | **The same predicate as the list read**, re-evaluated | ▶ **`evidence.accessed`**, emitted **only on success** |
+| `evidence_remove(evidence_id)` | `VOLATILE` | `authenticated` | **Authoring trainer only**, report **not** `submitted` | ▶ **`evidence.removed`**, same transaction as the DELETE |
+
+⛔ **`evidence.accessed` fires when the server MINTS the signed URL, not when the video plays.** It is the only trace that a URL to a child's video was minted, for whom and when — the Operator's stated reason for keeping it through the `C-4` collapse. **A denied attempt emits nothing** (`A-057`), so the deny path returns the same zero-row shape every other refusal in this codebase returns.
+
+⚠️ **THE LIST READ RETURNS NO STORAGE PATH.** `A-001` gate 7 prohibits raw storage-path access, and the path is **derivable** from `{report_id}/{id}.{ext}`, so the server computes it and the client never receives it. ▶ **This is what lets every RPC stay `authenticated`-executable instead of dragging in the owner-only privileged transport** that `report_store_draft` needs.
+
+⚠️ **EXTENDING THE REGISTRY TOUCHES TWO ARRAYS, NOT ONE — measured.** `20260804213000_step_7h_audit_chain.sql` declares the 16-string registry **twice**: at **line 439** inside `audit_append_event` and again at **line 744** inside `audit_verify_chain`. ▶ **Updating only the first would let events be written that chain verification then rejects** — a corruption that surfaces only when someone verifies. Both go to 19, in one migration, with an assertion that they are identical.
+
+##### 4 · The bucket, and how `C-16`'s ceiling is stopped from widening the deferred buckets
+
+**Bucket `evidence` — private, created by migration** (`INSERT INTO storage.buckets`), carrying its own `file_size_limit = 104857600` and `allowed_mime_types = {video/mp4,video/quicktime}`. **No public bucket, ever.**
+
+⚠️ **`supabase/config.toml` currently reads `file_size_limit = "50MiB"` GLOBAL, and declares NO buckets** (the `[storage.buckets.images]` block is commented out) — **measured**. Two facts follow that decide the answer:
+
+1. ⛔ **`config.toml` is LOCAL-DEV ONLY.** It does not travel to a hosted project. ▶ **A ceiling that exists only there is not a boundary** — the durable one is the `storage.buckets` **row**, which a migration creates and which applies wherever the migration is applied.
+2. **The global limit is a CAP, not a grant.** Raising it to `100MiB` widens nothing by itself — but it **removes the accidental 50 MiB backstop** currently sitting under every future bucket.
+
+▶ **So the answer to *"how is the global limit prevented from widening the deferred photo and materials buckets"* is: those buckets do not exist, and the rule is that neither may ever be created without its OWN `file_size_limit` on its own bucket row.** A bucket created without one inherits the global cap — exactly the silent widening `C-16` names. **`prove:portal-2` asserts it as an invariant over `storage.buckets`, not as a promise: every bucket row has a non-null `file_size_limit`, and no bucket is public.** ⚠️ **An invariant over the whole table is what makes it bind on buckets that do not exist yet** — a check naming only `evidence` would be silent on the day the photo bucket is added, which is the day it matters.
+
+**Server-side re-validation** happens in `evidence_attach_confirm`: it re-reads the object's recorded size and rejects if it exceeds the ceiling. ⛔ **Three independent ceilings — bucket row, database `CHECK`, RPC — because the client-side one is not a boundary at all.**
+
+##### 5 · Resumable upload — required, and it forces the one genuine architectural question
+
+⚠️ **`C-16` makes resumable upload an acceptance condition, and that condition is what puts a policy on `storage.objects`.** Supabase's resumable (TUS) endpoint authenticates the **client's own JWT** and is governed by storage RLS. A server-minted single-shot signed upload URL is **not** resumable, and proxying 100 MiB through a server action is not viable on a serverless host.
+
+**Proposed shape:**
+
+1. A server action verifies the trainer's authority, **mints the `evidence_id`**, and returns the deterministic object key **`{report_id}/{evidence_id}.{ext}`**. ⛔ **No row is written yet.**
+2. The client TUS-uploads to that exact key.
+3. `evidence_attach_confirm` verifies the object, re-validates size and type, INSERTs the row, and emits `evidence.attached`.
+
+**The storage policy** is `INSERT` on `storage.objects` for `authenticated`, `bucket_id = 'evidence'`, gated on a helper checking the caller is the authoring trainer for **`(storage.foldername(name))[1]::uuid`** — the report id in the first path segment. ▶ **A live DB check, per `ADR-4`; the client cannot forge a path into a report it does not own.** ⛔ **No `SELECT`, `UPDATE` or `DELETE` policy on `storage.objects` for anyone** — reads are server-minted signed URLs only, and removal runs as the owner.
+
+⚠️ **THE HONEST COST, STATED RATHER THAN GLOSSED.** This is the **first client-direct write in the product**, and `ADR-3` says writes are server-only. ▶ **It is a bounded exception, not a precedent:** what the client can write is an **opaque object in a private bucket at a path it must prove authority over**, and **that object is governed by nothing until a server RPC attaches it.** An unconfirmed upload is an **orphan** — invisible to every read path, referenced by no row. **Orphans are possible and there is no sweeper; that is a stated limitation, not a hidden one.**
+
+##### 6 · How the `C-3` unscanned limitation surfaces in the product's own text
+
+⛔ **Part of `P1-2`'s acceptance, not a nicety** — *"an honest absence beats a satisfied-looking gate"*, and **a gate removed in an instrument but not surfaced in the product is neither.**
+
+- **On the upload surface**, permanently visible and not behind a disclosure: **uploaded media is NOT scanned for malware or harmful content, and a production deployment would require scanning.**
+- **On the parent-facing surface** when `P1-5` is reached, the **no-download** limitation is stated the way `D-5` requires: the product provides no download control and ⛔ **does not claim technical impossibility.**
+- ⛔ **`prove:portal-2` asserts the upload-surface text is PRESENT** — comment-stripped, so a paragraph *explaining* the obligation cannot satisfy it.
+- ⛔ **`A-003`'s `unscanned` leg is `NOT APPLICABLE (C-3)` — never `PASS`.** A must-fail leg with nothing to test either fails forever or gets quietly marked green, which is the `S-8` defect landing on a refusal proof.
+
+##### 7 · What `A-002` would block — stated separately, and NOT part of this question
+
+⚠️ **`A-002` is untouched by this family and the Operator rules it at `P1-5`, not now.** Recorded here only so the boundary is unmistakable:
+
+- **`A-002` blocks the PARENT half and nothing else** — the parent branch of `evidence_list_for_report`, the parent signed-URL path, the parent surface on screen `33`, and `A-004`'s both-direction Parent UAT.
+- ▶ **It blocks NONE of §1–§6.** The table, bucket, storage policy, the RPCs, two of the three audit strings and the trainer/management surfaces are `P1-2`/`P1-3`/`P1-4` work and stand or fall on `C-7` alone.
+- ⚠️ **The parent branch may be BUILT INTO the RPC gate as an unreachable arm, or LEFT OUT until `P1-5`.** ⛔ **Left out is the recommendation** — an unexercised authorization arm is exactly the `S-8` shape: it looks proven because the surrounding legs pass, while the one path that matters has never returned a row.
+
+##### 8 · ⚠️ FOUR DECISIONS INSIDE THE FAMILY THAT ARE THE OPERATOR'S, NOT MINE
+
+1. ⛔ **The `storage.objects` INSERT policy** — the first client-direct write in the product (§5). **Required by `C-16`'s resumable condition**; there is no route satisfying both it and a strict reading of `ADR-3`. ▶ **This is the ruling that actually matters in this family.**
+2. **`UNIQUE (report_id)` — one clip per report.** `D-5` says *"tagged to exactly one session report"*, which constrains the clip's target, **not the count**. ▶ **One is recommended**: management *"views it"*, singular, and no frame answers which of several a parent would see. **Removal plus re-upload covers the correction case.**
+3. **Removal is Trainer-only and pre-`submitted`.** ⚠️ **The actor is NOT my choice — `CLAUDE.md` §6 already forbids a management write reaching evidence**, so management removal is ruled out independently of `D-5`. **The pre-`submitted` window IS a choice**: after submission a parent may already have seen the clip. **Recommended, and it needs your word.**
+4. **`config.toml`'s global `50MiB` → `100MiB`.** Local-dev only, but without it no local proof of the ceiling can run. ▶ **The durable ceiling is the bucket row**, and the invariant in §4 is what stops the raise from mattering elsewhere.
+
+##### 9 · What this family does NOT contain
+
+⛔ **No `consent_records` table** (`C-2`) · **no scan state, status enum or vocabulary of any kind** (`C-3`) · **no retention or erasure object** (Phase 4) · **no `centre_membership_role` extension** (`A-014`) · **no photo or lesson-materials bucket** (`C-14`/`C-15`, `D-4` — each needs its own `C-7` ruling) · **no download affordance for any role** (`D-5`) · **no class-footage framing and no 500 MB** (`G-8`; `REGISTERED-OMISSION`, never ends) · **no new enum** · **no change to `Q-27`, `G-2`, `A-038` or the content hash.**
+
+---
+
+
 ### P1-3 · Screen `19`, second visit — `D-5` management evidence review
 
 ⚠️ **A DELIBERATE DEPARTURE FROM ONE-SCREEN-ONE-PHASE, RECORDED RATHER THAN HIDDEN.** `19` is the only screen two decisions land on. Coupling them would make the smallest, safest change in Part 1 (`D-1`) wait behind the largest (`D-5`). **`19`'s full verification re-runs at both.**
