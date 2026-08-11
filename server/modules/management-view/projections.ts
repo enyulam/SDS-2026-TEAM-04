@@ -40,6 +40,7 @@ import { requireRole } from "@/server/modules/identity-access/session-core";
 import { getSessionContextsCore } from "@/server/modules/class-session/session-context-projections";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
 import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { DimensionCode, RatingLevel } from "@/server/modules/framework/dimensions";
 import {
   firstRow,
   type CorrectionIssueScope,
@@ -476,5 +477,93 @@ export async function getManagementReviewCandidateCore(
       ...(row.open_correction_issue_scope ? { openCorrectionScope: row.open_correction_issue_scope } : {}),
       ...(row.open_correction_status ? { openCorrectionStatus: row.open_correction_status } : {}),
     },
+  };
+}
+
+/**
+ * D-1 / C-9 / C-10 — the nine per-dimension ratings for a MANAGEMENT REPORT
+ * DETAIL surface, READ ONLY.
+ *
+ * ⛔ MANAGEMENT MAY VIEW, NEVER EDIT. This is a read. An assessment-level
+ * disagreement remains a RETURN TO THE TRAINER (A-034, D-1), and no write
+ * path to a rating exists on any management surface.
+ *
+ * ⛔ C-9 — REPORT DETAIL SURFACES ONLY. Not the queue, not a list, not a
+ * statistics surface: "ratings on a list or a statistics surface is a
+ * different disclosure shape — it invites comparison between children".
+ * The gate is enforced in the database (only `trainer_approved` and
+ * `submitted` return anything), not here; this function must never be
+ * called from a list projection regardless.
+ *
+ * ⛔ Q-27 IS UNTOUCHED. D-1 moves A-038 in the MANAGEMENT direction only and
+ * grants Parent nothing. `report_get_management_ratings` returns zero rows
+ * for a parent, a trainer and an unidentified caller alike, proven by
+ * `npm run prove:portal-1` legs D1a-3/4/5 with a control leg (D1a-6) showing
+ * the probe can return rows at all.
+ *
+ * ⛔ NO ROLL-UP IS COMPUTED HERE OR ANYWHERE (G-2). There is no average, no
+ * headline band, no Overall Grade. Nine dimension/rating pairs travel as
+ * nine pairs.
+ */
+/**
+ * The row shape `report_get_management_ratings` returns.
+ *
+ * ⚠️ DECLARED LOCALLY, NOT DERIVED FROM `Database`, AND THAT IS DELIBERATE.
+ * The committed generated database types predate migration
+ * `20260811140000` and do not carry this function. ⛔ `CLAUDE.md` §12
+ * prohibits HAND-EDITING generated database types, and regenerating them is
+ * Step 7J's own checkpoint — not a side effect of this phase. Deriving the
+ * type here would therefore mean either editing a generated file or
+ * regenerating one unauthorized.
+ *
+ * ▶ This shape is asserted against the DATABASE by `prove:portal-1`, not
+ * against a type file — the function's own in-migration assertion `D1-5`
+ * pins the return type's field names, and leg `D1a-2` pins nine distinct
+ * dimension codes at runtime.
+ */
+type ManagementRatingRow = {
+  readonly dimension_code: DimensionCode;
+  readonly display_name: string;
+  readonly rating: RatingLevel;
+};
+
+/**
+ * One dimension and its rating, as a management report detail surface reads
+ * it. ⛔ There is no aggregate field, and none may be added (G-2).
+ */
+export type ReportRatingSnapshotDto = {
+  readonly dimensionCode: DimensionCode;
+  readonly displayName: string;
+  readonly rating: RatingLevel;
+};
+
+export async function getManagementRatingsCore(
+  client: SupabaseClient,
+  sessionId: string,
+  studentId: string,
+): Promise<ActionResult<readonly ReportRatingSnapshotDto[]>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const rows = await readRows<ManagementRatingRow>(
+    "getManagementRatingsCore:report_get_management_ratings",
+    () =>
+      client.rpc("report_get_management_ratings", {
+        p_class_session_id: sessionId,
+        p_student_id: studentId,
+      }),
+  );
+  // ⚠️ A REJECTED QUERY IS NOT AN EMPTY RESULT (Q-7). `readRows` decides the
+  // three cases once; collapsing a rejection into `[]` here would render an
+  // assessment as having no ratings, which looks entirely normal.
+  if (!rows.ok) return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: rows.rows.map((row: ManagementRatingRow) => ({
+      dimensionCode: row.dimension_code,
+      displayName: row.display_name,
+      rating: row.rating,
+    })),
   };
 }

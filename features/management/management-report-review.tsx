@@ -19,6 +19,7 @@ import {
   type CorrectionRequestDto,
   type DimensionCode,
   type ManagementReviewDto,
+  type RatingLevel,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 
@@ -65,16 +66,18 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *     frame's four, because rendering four is a selection of assessment substance with no
  *     ratified basis.
  *
- *     ⛔ BUT NOTHING IS BUILT YET, AND THAT IS NOT AN OVERSIGHT. D-1 authorizes no projection,
- *        RPC, grant or migration. The build is plan phase P1-1b
- *        (`docs/plan/PORTAL_COMPLETION_PLAN.md`), which is NOT YET AUTHORIZED. Until it is,
- *        NOTHING on this screen renders a competency-rating token, and
- *        `tests/frontend/three-role-browser-smoke.mjs` proves it structurally, not by eye.
+ *     ✅ BUILT 2026-08-11 AT PLAN PHASE P1-1b. The "Assessment Summary" section in the right
+ *        rail renders ALL NINE, READ ONLY. ⛔ IT IS A GOVERNANCE-MANDATED ADDITION, NOT DRIFT:
+ *        the frame draws FOUR dimensions and this shows NINE, and a visual-acceptance pass must
+ *        read that divergence as EXPECTED / REQUIRED rather than correct it back to the image.
  *
- *     ⛔ WHEN IT IS BUILT: the ratings must NOT be added to `report_get_canonical`, which
- *        dispatches on role and serves parent, trainer and management from one body. That
- *        would put them one branch away from a Parent session and make Q-27 depend on a
- *        conditional. They arrive on a SEPARATE management-only read.
+ *     ⛔ THE RATINGS DO NOT COME FROM `report_get_canonical`. That function dispatches on role
+ *        and serves parent, trainer and management from ONE body; putting ratings in it would
+ *        leave them one branch from a Parent session and make Q-27 depend on a conditional.
+ *        They arrive on the SEPARATE management-only read
+ *        `public.report_get_management_ratings` (migration 20260811140000), whose gate mirrors
+ *        RPC-15 step for step. `npm run prove:portal-1` proves trainer, parent and anon each
+ *        read ZERO rows, with a CONTROL leg proving the probe can return rows at all.
  *
  *     ⛔ MANAGEMENT MAY VIEW, NEVER EDIT. An assessment-level disagreement remains a RETURN TO
  *        THE TRAINER, never a management edit (A-034; D-1). And Q-27 is untouched — D-1 moves
@@ -204,6 +207,23 @@ const PANEL_PRESENTATION: Readonly<
   strengths: { icon: "check", tone: "success" },
   areasForDevelopment: { icon: "chevronRight", tone: "warning" },
   remarks: { icon: "reports", tone: "brand" },
+};
+
+/**
+ * The ratified competency vocabulary (A-049), title-cased for display.
+ *
+ * ⛔ A LOOKUP, NEVER A COMPUTATION. There is no ordering, no score, no
+ * aggregation and no comparison here — adding any would be G-2. The storage
+ * values are lowercase; these are presentation only.
+ *
+ * ⚠️ Class Grade is a DIFFERENT vocabulary (Beginner / Intermediate /
+ * Advanced) and must never be substituted here (A-054).
+ */
+const RATING_LABELS: Readonly<Record<RatingLevel, string>> = {
+  beginning: "Beginning",
+  developing: "Developing",
+  mastering: "Mastering",
+  mastered: "Mastered",
 };
 
 type ActionFailure = Exclude<UiActionResult<unknown>, { outcome: "success" }>;
@@ -600,6 +620,71 @@ export function ManagementReportReview() {
 
         {/* Right rail — the frame's Report Details and approval stack, prohibited cards omitted. */}
         <aside className="grid content-start gap-5" aria-label="Report detail">
+          {/*
+            ══════════════════════════════════════════════════════════════
+            ASSESSMENT SUMMARY — THE NINE PER-DIMENSION RATINGS.
+            ⛔ GOVERNANCE-MANDATED ADDITION. IT IS NOT DRIFT, AND A VISUAL
+               PASS MUST NOT REMOVE IT FOR FAILING TO MATCH THE FRAME.
+            ══════════════════════════════════════════════════════════════
+
+            Authority: D-1 (management may VIEW the nine, READ ONLY) ·
+            C-9 (report detail surfaces ONLY) · C-10 (ALL NINE, not the
+            frame's four). Instrument: FINAL_MVP_PORTAL_DECISIONS.md §C.
+
+            ⚠️ THE RATIFIED FRAME DRAWS A DIFFERENT THING. `reference/
+            Management - Student Report/` draws a "Performance Summary" of
+            FOUR dimensions — speech, tonality, eye contact, audience
+            awareness. C-10 ruled ALL NINE, because rendering four is a
+            SELECTION of assessment substance with no ratified basis, and
+            the four drawn are not a ratified subset of anything.
+
+            ▶ So this block diverges from the frame in BOTH directions: it
+              exists where the frame's version was previously omitted, and
+              it shows nine where the frame shows four. BOTH are RULED.
+              Recorded here, cited, so a later visual-acceptance pass reads
+              the divergence as EXPECTED / REQUIRED rather than as drift to
+              be corrected back toward the image.
+
+            ⛔ READ ONLY. There is no input, no select, no button and no
+               handler here, and none may be added. Management may VIEW,
+               never EDIT — an assessment-level disagreement is a RETURN TO
+               THE TRAINER (A-034, D-1), which is the control already
+               rendered further down this page.
+
+            ⛔ G-2 — NO ROLL-UP. No average, no headline band, no "Overall
+               Grade", no count of how many sit at each level. Nine pairs
+               are rendered as nine pairs. G-2 is a PERMANENT exclusion and
+               D-1 did not touch it: it lost one of its three grounds and
+               stands on the other two.
+
+            ⛔ Q-27 — this is a MANAGEMENT surface. Nothing here reaches a
+               Parent DTO, projection, RPC result or client payload, and
+               `prove:portal-1` proves the parent read returns zero rows for
+               this very report.
+          */}
+          <section className="card p-5" aria-labelledby="assessment-summary-heading">
+            <h2 id="assessment-summary-heading">
+              <span className="text-[0.9375rem] font-semibold text-ink-strong">
+                Assessment Summary
+              </span>
+            </h2>
+            <p className="mt-1 text-[0.75rem] leading-5 text-ink">
+              The Trainer&rsquo;s nine ratings for this report, shown for review. Ratings cannot be
+              changed here &mdash; if one looks wrong, return the report to the Trainer.
+            </p>
+            <dl className="mt-3 divide-y divide-line text-[0.75rem]" data-testid="management-ratings">
+              {report.ratings.map((snapshot) => (
+                <div
+                  key={snapshot.dimensionCode}
+                  className="flex items-center justify-between gap-4 py-2"
+                >
+                  <dt className="text-ink">{snapshot.displayName}</dt>
+                  <dd className="font-semibold text-ink-strong">{RATING_LABELS[snapshot.rating]}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
           <section className="card p-5" aria-labelledby="report-details-heading">
             <h2 id="report-details-heading">
               <span className="text-[0.9375rem] font-semibold text-ink-strong">

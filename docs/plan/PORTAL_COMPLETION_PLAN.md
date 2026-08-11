@@ -139,7 +139,8 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 > | | Scope | State |
 > |---|---|---|
 > | **`P1-1a`** | ⚠️ **The `A-038` / `GC-6` reconciliation only** — §6.5's fifteen locations. **Documentation and code comments. No projection, no RPC, no migration, no rendered change.** | ✅ **AUTHORIZED** |
-> | **`P1-1b`** | The `D-1` projection extension + the new management-only read that returns the nine ratings | ⛔ **NOT AUTHORIZED — awaiting a separate word** |
+> | **`P1-1b`** | The `D-1` projection extension + the new management-only read that returns the nine ratings | ✅ **AUTHORIZED, BUILT AND PROVEN 2026-08-11** |
+> | **`P1-1c`** | The screen `19` frontend consumer for that read | ✅ **AUTHORIZED, BUILT AND PROVEN 2026-08-11** |
 >
 > ▶ **Read narrowly on purpose.** `P1-1b` adds a reviewed `SECURITY DEFINER` read and its grant — a governed change `CLAUDE.md` §12 requires be authorized explicitly. **Where an authorization's scope is ambiguous, the narrower reading is the safe one**, and the cost of asking is one message.
 
@@ -207,9 +208,33 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 **`npm run prove:hero-all` — 17/17 by exit code** after the pin update. `tsc` **0** · `eslint` **0 errors** · `build` **0**.
 
-⛔ **THE FRONTEND IS NOT BUILT.** The authorization was for *"the `D-1` management-only read"*. **Screen `19` renders no rating today** — the read exists and nothing consumes it. That is a **deliberate stopping point**, not an incomplete phase, and the structural assertions on `19` still hold.
+~~⛔ **THE FRONTEND IS NOT BUILT.** The authorization was for *"the `D-1` management-only read"*. **Screen `19` renders no rating today** — the read exists and nothing consumes it. That is a **deliberate stopping point**, not an incomplete phase, and the structural assertions on `19` still hold.~~ ✅ **SUPERSEDED THE SAME DAY — the frontend was authorized and built. See `P1-1c` immediately below.** Preserved because it records why the read shipped without a consumer, which is otherwise indistinguishable from an unfinished phase.
 
-⚠️ **A pre-existing staleness found and NOT fixed:** **Authority Lock §19.1's "ratified Final MVP census" reads `15 migrations · 36 functions`** while reality was **21 · 42** *before* this phase and is **22 · 43** after. **The divergence predates this work** and correcting a ratified instrument is outside `P1-1b`'s authorization. **Recorded, not silently repaired** — `STATUS.md` carries the live census.
+⚠️ **A pre-existing staleness found and NOT fixed:** **Authority Lock §19.1's "ratified Final MVP census" reads `15 migrations · 36 functions`** while reality was **21 · 42** *before* this phase and is **22 · 43** after. **The divergence predates this work** and correcting a ratified instrument is outside `P1-1b`'s authorization. ✅ **The Operator ruled *record, do not fix*.** **Recorded, not silently repaired** — `STATUS.md` carries the live census.
+
+---
+
+#### ✅ `P1-1c` — THE SCREEN `19` FRONTEND — BUILT AND PROVEN, 2026-08-11
+
+**Authorization** ✅ **GIVEN 2026-08-11**, bounded: *"build the consumer for the read that now exists"* — all nine dimensions, read-only, **management review detail only** (`C-9`), **no roll-up in any form** (`G-2`), every `REGISTERED-OMISSION` preserved, the addition **recorded as cited**, and proof that **nothing changed for trainer or parent**.
+
+**The chain, end to end:** `getManagementRatingsCore` (projection) → `AdapterRatingSnapshotDto` / `ratings` on `AdapterManagementReviewDto` → `adapterGetManagementReview` → `ManagementReviewDto` → the physical-test fixture → `management-report-review.tsx`. **The same spine every other proven surface uses** — no new pathway was invented for it.
+
+⚠️ **`Q-7` applied at the new boundary:** the projection reads through **`readRows`** and returns `unavailable` on a failed read, and `adapterGetManagementReview` **returns `unavailable` rather than falling through**. ▶ **A rejected query is not an empty result** — and on this screen an empty grid is precisely the shape a rejection would otherwise take.
+
+⚠️ **THE NINE-DIMENSION GRID IS A GOVERNANCE-MANDATED ADDITION, AND IT IS CITED IN THREE PLACES.** ⛔ **The `19` frame does not draw it** — it draws four. **`D-1` requires it and `C-10` requires all nine.** A later visual pass that removed it *for matching the frame* would be reverting a ratified decision, so the citation sits in the **component**, the **DTO** and `BUILD_NOTES.md` — the three places such a pass would look. **The visual ladder does not outrank a functional ruling** (`A-045`, `A-056`).
+
+**Read-only is structural, not styling:** the block carries **no `input`, `select`, `textarea`, `button`, `onChange` or `onClick`**, asserted against **comment-stripped** source. **`G-2` holds** — no Overall Grade, no average, no headline band. **All twelve `REGISTERED-OMISSION` markers on `19` intact.**
+
+**`prove:portal-1` now carries NINE SURFACE LEGS** on top of its 9 SQL + 10 runner checks: the grid renders · its rendered value is the **rating itself** (so the absence scans describe a **real** grid, not an empty div) · `C-9` on queue `29` and dashboard `11` · `Q-27` on parent `30`/`32`/`33` · the **trainer** surface unchanged · and a control proving the rating-render pattern fires.
+
+✅ **THE `M-3` RATCHET FIRED AND IT WAS RIGHT.** `prove:hero-15` pins the module's `readRows` sites **by exact label**; the fourth is **compliance, not a breach**. ⛔ **Raised to four with its reason, never loosened to a range**, and renamed off *"spine reads"* — three are the queue spine, the fourth is a report-detail read, and calling all four "spine" would tell the next reader that a rating read had joined the **queue** enumeration, which **`C-9` forbids**.
+
+⛔ **`prove:portal-1` EXITED 0 TWICE AGAINST A SUITE MY EDIT HAD NEVER REACHED** — a heredoc lost its escaping, the instrument stayed silent, the result stayed green. ▶ **A green run proves nothing about a file you did not confirm changed.**
+
+⚠️ **Five `tsc` errors caught before any run, one of which mattered:** `AdapterRatingSnapshotDto` had typed dimension and rating as `string`. **A closed vocabulary widened to `string` at a DTO boundary is how an unmapped rating reaches a surface**; both are unions again.
+
+⛔ **`C-7` IS UNTOUCHED BY THIS.** The Operator stated it expressly: **`P1-2`'s table family returns as its own question** — what tables, what columns, what policies, what grants, and what each is for. **This authorization is not that one.**
 
 ---
 
@@ -554,7 +579,8 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | Phase | Change class | Before any code |
 |---|---|---|
 | **P1-1a** | Documentation + code-comment reconciliation only | ✅ **GIVEN 2026-08-11** — executed and committed |
-| **P1-1b** | Management projection extension + a new management-only read | ⛔ **NOT GIVEN** — the 2026-08-11 authorization named the sweep |
+| **P1-1b** | Management projection extension + a new management-only read | ✅ **GIVEN 2026-08-11** — bounded §12. Built, proven, committed |
+| **P1-1c** | The screen `19` frontend consuming that read | ✅ **GIVEN 2026-08-11** — bounded, with six named constraints. Built, proven, committed. ⛔ **Expressly NOT the `C-7` table-family authorization** |
 | **P1-2** | ⚠️ **SCHEMA + STORAGE + audit registry** — the highest-risk item in the plan | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-4a` `R-7`** |
 | **P1-3** | Management read of evidence; ⛔ **no transition-guard change** (`C-5`) | ✅ **REQUIRED** |
 | **P1-4** | Trainer read of evidence | ✅ **REQUIRED** |
@@ -577,7 +603,8 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 |---|---|---|
 | ⚠️ **`R-4a` — the reserved `C-4` collapse question** | `AWAITING_OPERATOR` | Blocks `P1-2`. `evidence.uploaded` and `evidence.attached` **appear to be one governed action**; `A-029` requires one event per action. **If collapsed, `16 → 19`.** ▶ **Live registry is still 16 and `A-057` is unimplemented, so nothing is baked in** |
 | ⛔ **`A-002` — parent evidence is Phase 2 work** | `AWAITING_OPERATOR`, **by design** | Blocks `P1-5`. ⚠️ **Deliberately not ruled** — it returns as **its own question** when Part 1 reaches it, not as a footnote to an evidence phase |
-| ⛔ **`P1-1b` — the `D-1` projection half** | `AWAITING_OPERATOR` | The 2026-08-11 authorization named the sweep; the projection and its new management-only read await a separate word |
+| ✅ **`P1-1b` — the `D-1` read** | `PASS` | `report_get_management_ratings`, nine in-transaction assertions, `prove:portal-1` exit 0 |
+| ✅ **`P1-1c` — the screen `19` frontend** | `PASS` | The full chain; nine surface legs. ▶ **`D-1` is COMPLETE end to end** |
 | ⚠️ **The silent-save reproduction is still owed a walk** | `OPEN` | Carry into §5. Console empty = the button never enabled · `submit-ignored` = not `ready` · `dispatching` with no server-log entry = a third possibility neither candidate covered. Steps in `BUILD_NOTES.md`; repeat on a `trainer_approved` report → Management **Edit wording** |
 | ✅ **The `A-038` / `GC-6` reconciliation** | **SCHEDULED** | `P1-1`, measured scope at §6.5 — **15 locations, 4 of them live source** |
 | ⚠️ **`test:integration` 47/3/3, exit 1** | `OPEN` | `INT-A5`/`INT-Q27` are **suite staleness, product correct**; ⛔ `run-integration.mjs:517` calls `pass("INT-A5")` **unconditionally** after both `fail()`s. Fix before Part 2 so the suite can gate |
@@ -594,4 +621,4 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 
 ⚠️ **`PASS` is an evidence verdict; `Accepted` is the Operator's and only the Operator's.** A session never accepts its own work, and **code existing is not work being complete**.
 
-**`P1-1a` is `PASS` — executed and committed 2026-08-11. Every other phase is `NOT_STARTED`, and `P1-1b`, `P1-2` and `P1-5` each carry a named open blocker.**
+**`P1-1a`, `P1-1b` and `P1-1c` are `PASS` — executed and committed 2026-08-11, making `D-1` the first of the five portal decisions to reach a surface. ⚠️ `PASS` is the session evidence verdict; `Accepted` is the Operator's (§14.1, §15.6). Every other phase is `NOT_STARTED`, and `P1-2` (`C-7`) and `P1-5` (`A-002`) each carry a named open blocker.**

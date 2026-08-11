@@ -6258,3 +6258,46 @@ The tree-wide completeness scan alternated **`management|MANAGEMENT`** and **mis
 
 **Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** · `tsc` 0 · `eslint` 0 errors · `build` 0.
 **Next step:** ⛔ **STOPPED.**
+
+---
+
+## 2026-08-11 (third entry) — the screen `19` frontend; and a verification discipline promoted out of an incident
+
+**Branch:** `develop`. **HEAD in:** `7c717a8` → **out:** this entry's commit.
+**Scope:** the **screen `19` frontend consumer** for `P1-1b`'s `D-1` read, under a bounded Operator authorization; and the Operator's instruction that the previous entry's **Defect 2** be recorded **as a discipline in its own right**, not only as an incident inside the phase that produced it.
+
+### ⛔ A COMPARISON IS ONLY EVIDENCE WHEN BOTH SIDES MEASURE THE SAME THING
+
+**Recorded as a standing verification discipline, at the Operator's instruction, and it belongs beside *a check that cannot fail is not a check*.**
+
+`P1-1b`'s runner asserted `during !== before` — the leg whose **entire purpose** is to stop `before === after` being a tautology, because a counting query that observes nothing also returns `before === after`. It passed. ▶ **It passed because the two strings were built by different code with different field counts** — the shared prelude emitted **nine** fields, the runner **six** — so `during !== before` was true of *any* two runs, including a run in which nothing moved at all.
+
+⚠️ **This is a strictly worse failure than the one it was written to prevent.** The tautology it guards against is at least visible in the assertion's own text; this one is invisible there and lives in a **second file** the reader of the assertion never opens. **An anti-tautology leg that is itself tautological removes the very safeguard the reader believes is present** — and it removes it *silently*, because the leg reports `PASS`.
+
+**The rule, now binding on every later phase:** where a proof compares two measurements, the two sides are produced by **the same measuring code**, or the proof states in its own text why they are commensurable. Fixed here with a shared `pg_temp.runner_counts()` emitting the runner's exact six-field shape.
+
+▶ **Its relationship to the existing discipline.** *"A check that cannot fail is not a check"* asks whether the detector **can** fire; ⛔ **this asks whether, when it fires, it is firing on the thing you think it is.** A control leg satisfies the first and is completely blind to the second — `Q-7e` would have passed here. **Two different questions; the project has now been bitten by both.**
+
+### The screen `19` frontend
+
+`report_get_management_ratings` had no consumer. The chain is now complete: **projection → adapter DTO → adapter action → frontend contract → fixture → component**, the same spine every other proven surface uses. `getManagementRatingsCore` reads through **`readRows`** and returns `unavailable` on a failed read — ⚠️ **`Q-7`: a rejected query is not an empty result**, and an empty grid is precisely the shape a rejection would otherwise take on this screen.
+
+⚠️ **THE NINE-DIMENSION GRID IS A GOVERNANCE-MANDATED ADDITION, AND IT IS CITED IN THE SOURCE.** **The `19` reference frame does not draw it.** It is required by **`D-1`** and by **`C-10`** (*all nine, not the frame's four*). ⛔ **A later visual pass that removes it for "not matching the frame" would be reverting a ratified decision** — so the citation sits in the component, in the DTO and in this entry, in the three places such a pass would look. **The visual ladder does not outrank a functional ruling** (`A-045`, `A-056`).
+
+**Read-only is structural, not styling:** the block carries **no `input`, `select`, `textarea`, `button`, `onChange` or `onClick`**, asserted against the **comment-stripped** source. **`G-2` holds**: no Overall Grade, no average, no headline band, in any form. **All twelve `REGISTERED-OMISSION` markers on the screen are intact.**
+
+**`prove:portal-1` now carries nine surface legs** on top of its 9 SQL legs and 10 runner checks — the grid renders, its rendered value is the **rating itself** (so the absence scans below it describe a real grid rather than an empty div), `C-9` on the queue `29` and dashboard `11`, `Q-27` on parent `30`/`32`/`33`, the **trainer** surface unchanged, and a control proving the rating-render pattern fires.
+
+### The `M-3` ratchet fired, and it was right
+
+`prove:hero-15` `M-3a`/`M-3b` pin the module's `readRows` call sites **by exact label**. The fourth call — `getManagementRatingsCore:report_get_management_ratings` — is **compliance, not a breach**: it routes through `readRows` exactly as `Q-7` requires. ⛔ **The pin was raised to four with the reason named, never loosened to a range**, and the leg renamed off *"spine reads"* — three are the pending-queue spine, the fourth is a report-detail read, and calling all four "spine" would have told the next reader that a rating read had joined the queue enumeration, which **`C-9` forbids**.
+
+### Also recorded
+
+- ⛔ **`prove:portal-1` exited 0 twice against a suite my edit had never reached** — a Python heredoc lost its escaping, the instrument stayed silent, and the result stayed green. ▶ **A green run proves nothing about a file you did not confirm changed.** Fixed by writing the legs to a file and inserting by line index.
+- **Five `tsc` errors caught before any run**, one of which mattered: `AdapterRatingSnapshotDto` had typed the dimension and rating as `string`. **A closed vocabulary widened to `string` at a DTO boundary is how an unmapped rating reaches a surface**; both are unions again.
+- ⚠️ **Authority Lock §19.1's stale census is STILL not repaired** — it reads `15 migrations · 36 functions` against a live `22 · 43`. **Recorded again, deliberately untouched**: the Operator ruled *record, do not fix*, and editing a ratified instrument needs its own bounded authorization (§12).
+- **`C-7` remains per-phase.** `P1-2`'s table family — tables, columns, policies, grants, and what each is for — returns as **its own question**. This authorization is not that one.
+
+**Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** (9 SQL + 10 runner + 9 surface) · `tsc` 0 · `eslint` 0 errors · `build` 0 · route census **17**.
+**Next step:** ⛔ **STOPPED.**

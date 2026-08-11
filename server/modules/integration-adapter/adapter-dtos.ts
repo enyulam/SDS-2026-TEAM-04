@@ -252,7 +252,19 @@ export interface AdapterManagementQueueRowDto {
   readonly submittedAt?: string;
 }
 
+export interface AdapterRatingSnapshotDto {
+  readonly dimensionCode: AdapterDimensionCode;
+  readonly displayName: string;
+  readonly rating: AdapterRatingLevel;
+}
+
 export interface AdapterManagementReviewDto {
+  /**
+   * D-1 / C-10 — the nine per-dimension ratings, READ ONLY.
+   * ⛔ C-9: report detail surfaces only — never on a queue or list DTO.
+   * ⛔ G-2: nine pairs, never an aggregate.
+   */
+  readonly ratings: readonly AdapterRatingSnapshotDto[];
   readonly status: "trainer_approved";
   readonly lockVersion: number;
   readonly versionId: string;

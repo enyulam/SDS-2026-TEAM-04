@@ -264,6 +264,27 @@ export type ManagementQueueRowDto = {
 };
 
 export type ManagementReviewDto = {
+  /**
+   * D-1 / C-10 — THE NINE PER-DIMENSION RATINGS, READ ONLY.
+   *
+   * ⛔ GOVERNANCE-MANDATED ADDITION, NOT DRIFT. The ratified frame
+   * `reference/Management - Student Report/` draws a Performance Summary of
+   * FOUR dimensions; operator ruling C-10 requires ALL NINE, because
+   * rendering four is a selection of assessment substance with no ratified
+   * basis. A later visual pass must NOT remove this for failing to match the
+   * frame — the divergence is RULED and recorded (D-1, C-9, C-10).
+   *
+   * ⛔ C-9 — this field belongs to the REPORT DETAIL surface only. It must
+   * never be added to `ManagementQueueRowDto` or any list/statistics DTO:
+   * ratings on a list "invite comparison between children".
+   *
+   * ⛔ G-2 — nine pairs travel as nine pairs. No average, no headline band,
+   * no Overall Grade is computed here or downstream.
+   *
+   * ⛔ Q-27 — this is a MANAGEMENT DTO. No parent-facing DTO gains a rating
+   * field, in any vocabulary.
+   */
+  readonly ratings: readonly ReportRatingSnapshotDto[];
   readonly status: "trainer_approved";
   readonly lockVersion: number;
   readonly versionId: string;

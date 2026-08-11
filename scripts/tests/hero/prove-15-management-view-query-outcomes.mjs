@@ -91,12 +91,30 @@ const discarded = code.split(/\r?\n/).filter((l) => {
 check(discarded.length === 0, `M-2c: ⛔ no read discards \`error\` (${discarded.length})`);
 
 // ---------------------------------------------------------------------
-// M-3 — all three spine reads report, with static unique labels.
+// M-3 — every read in this module reports, with static unique labels.
 // ---------------------------------------------------------------------
+// ⚠️ MOVED 3 -> 4 ON 2026-08-11, AND THE RATCHET FIRED CORRECTLY. Portal
+// phase P1-1b added `getManagementRatingsCore` (D-1), which reads
+// `report_get_management_ratings`. ▶ The fourth entry is COMPLIANCE, not a
+// breach: the new read goes through `readRows` exactly as the ratchet
+// requires, so what this leg caught was a module growing a read — which is
+// precisely what it exists to notice.
+//
+// ⛔ THE PIN IS RAISED, NEVER REMOVED, AND THE LABEL LIST IS EXACT. A count
+// alone would let a future read slip in unnamed; the exact-list form means a
+// new read must be declared here deliberately. Same treatment as
+// `prove:hero-2`'s P2-6 census pin on the same day.
+//
+// ⚠️ The name is no longer "spine reads" — three of the four are the
+// pending-queue spine, the fourth is a report-detail read. Calling them all
+// "spine" would have made the next reader think a rating read had been
+// added to the queue enumeration, which C-9 expressly forbids.
 const contexts = [...code.matchAll(/readRows<[^>]*>\(\s*"([^"]+)"/g)].map((m) => m[1]);
-check(contexts.length === 3, `M-3a: all THREE spine reads go through \`readRows\` (${contexts.length})`);
+check(contexts.length === 4, `M-3a: all FOUR reads go through \`readRows\` (${contexts.length})`);
 check(
-  contexts.join(",") === "listCentrePairs:class_sessions,listCentrePairs:enrolments,listCentrePairs:students",
+  contexts.join(",") ===
+    "listCentrePairs:class_sessions,listCentrePairs:enrolments,listCentrePairs:students," +
+      "getManagementRatingsCore:report_get_management_ratings",
   `M-3b: each names the read and its relation — ${contexts.join(", ")}`,
 );
 check(

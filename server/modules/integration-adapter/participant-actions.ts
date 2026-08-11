@@ -63,6 +63,7 @@ import {
   listTrainerSessionsCore,
 } from "@/server/modules/report-workflow/trainer-projections";
 import {
+  getManagementRatingsCore,
   getManagementReviewCandidateCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
@@ -746,9 +747,36 @@ export async function adapterGetManagementReview(
     return { outcome: "unavailable" };
   }
 
+  /*
+   * D-1 / C-9 / C-10 — the nine per-dimension ratings for this REPORT DETAIL
+   * surface, READ ONLY.
+   *
+   * ⚠️ FETCHED ONLY AFTER the status gate above has already admitted this
+   * caller, so the ratings read can never widen what the review read
+   * refuses. `report_get_management_ratings` applies the SAME gate again in
+   * the database — this ordering is defence in depth, not the boundary.
+   *
+   * ⛔ A FAILED RATINGS READ MAKES THE WHOLE SURFACE UNAVAILABLE. It does
+   * NOT fall through to an empty grid: rendering "no ratings" for an
+   * assessment that has nine would look entirely normal and would be the
+   * Q-7 defect (`a rejected query is not an empty result`) on an A-038
+   * surface.
+   */
+  const ratings = await getManagementRatingsCore(
+    client,
+    context.data.sessionId,
+    context.data.studentId,
+  );
+  if (ratings.outcome !== "success") return { outcome: "unavailable" };
+
   return {
     outcome: "success",
     data: {
+      ratings: ratings.data.map((r) => ({
+        dimensionCode: r.dimensionCode,
+        displayName: r.displayName,
+        rating: r.rating,
+      })),
       status: review.data.status,
       lockVersion: review.data.lockVersion,
       versionId: review.data.versionId,

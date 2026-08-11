@@ -128,5 +128,73 @@ check(
   "CONTROL: every absence pattern above FIRES against text that contains the thing",
 );
 
+// ---------------------------------------------------------------------
+// THE SURFACE HALF -- what the database cannot see.
+// WARNING: comments are stripped first. This screen DOCUMENTS its governed
+// omissions at length, so an unstripped scan would match the paragraph
+// explaining a prohibition rather than the code that honours it. That has
+// produced a false verdict every time it was skipped in this project.
+// ---------------------------------------------------------------------
+const F = (...parts) => join(ROOT, ...parts);
+const strip = (f) =>
+  readFileSync(f, "utf8")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
+const RENDERS_RATING = /\.ratings\b|ratingSnapshots|RATING_LABELS/;
+const screen = strip(F("features", "management", "management-report-review.tsx"));
+
+check(
+  /data-testid="management-ratings"/.test(screen) && /report\.ratings\.map/.test(screen),
+  "screen 19 RENDERS the nine ratings (D-1) -- the grid exists, not merely the read",
+);
+// NON-VACUITY for the absence scans below: the renderer must be present, or
+// "no edit control" is trivially true of a screen that renders nothing.
+check(
+  /RATING_LABELS\[snapshot\.rating\]/.test(screen),
+  "the rendered value is the RATING itself -- so the absence checks below describe a real grid",
+);
+const block = (screen.match(/data-testid="management-ratings"[\s\S]*?<\/dl>/) ?? [""])[0];
+check(block.length > 0, "the ratings block was located for scanning");
+check(
+  !/<input|<select|<textarea|<button|onChange|onClick/.test(block),
+  "the ratings grid carries NO input, select, textarea, button or handler -- READ ONLY (D-1)",
+);
+check(
+  !/Overall Grade|overallGrade|averageRating|ratingAverage|headlineBand/.test(screen),
+  "no Overall Grade, average or headline band on screen 19 (G-2, permanent)",
+);
+for (const [label, file] of [
+  ["queue (29)", F("features", "management", "management-reports-queue.tsx")],
+  ["dashboard (11)", F("features", "management", "management-dashboard.tsx")],
+]) {
+  check(
+    !RENDERS_RATING.test(strip(file)),
+    `C-9: the management ${label} renders NO rating -- a list invites comparison between children`,
+  );
+}
+for (const [label, file] of [
+  ["canonical report (33)", F("features", "parent", "parent-canonical-report.tsx")],
+  ["reports list (32)", F("features", "parent", "parent-reports-list.tsx")],
+  ["dashboard (30)", F("features", "parent", "parent-dashboard.tsx")],
+]) {
+  check(
+    !RENDERS_RATING.test(strip(file)),
+    `Q-27: the parent ${label} renders NO rating -- D-1 grants Parent nothing`,
+  );
+}
+check(
+  /ratingSnapshots/.test(strip(F("features", "trainer", "trainer-report-review.tsx"))),
+  "the TRAINER surface still carries its own rating snapshots -- unchanged by D-1, not collateral damage",
+);
+// CONTROL for the six absence scans: the pattern must FIRE against text that
+// contains the thing. An absence assertion on a broken pattern passes perfectly.
+check(
+  RENDERS_RATING.test("x.ratings.map"),
+  "CONTROL: the rating-render pattern FIRES against text that renders ratings",
+);
+
+
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);
 process.exit(bad === 0 ? 0 : 1);

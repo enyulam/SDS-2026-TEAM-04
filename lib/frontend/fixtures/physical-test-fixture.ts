@@ -1073,9 +1073,24 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     if (!report || report.status !== "trainer_approved") {
       return { outcome: "unavailable" };
     }
+    /*
+     * D-1 / C-10 -- the nine ratings. ⛔ An INCOMPLETE rating set makes the
+     * surface unavailable rather than rendering a partial grid: a management
+     * reviewer seeing six of nine would have no way to tell that three are
+     * missing rather than unrated, and the whole point of C-10 is that a
+     * SUBSET of the nine is a selection of assessment substance.
+     */
+    const reviewRatings = report.versionRatings;
+    if (!isCompleteRatings(reviewRatings)) return { outcome: "unavailable" };
     return {
       outcome: "success",
       data: {
+        // D-1 / C-10 -- all NINE, read only. C-9: this surface only.
+        ratings: GOVERNED_DIMENSIONS.map((dimension) => ({
+          dimensionCode: dimension.dimensionCode,
+          displayName: dimension.displayName,
+          rating: reviewRatings[dimension.dimensionCode],
+        })),
         status: "trainer_approved",
         lockVersion: report.lockVersion,
         versionId: report.versionId,
