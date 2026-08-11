@@ -67,7 +67,7 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 | **`G-4`** — terms omitted; `29`'s "All terms" filter refused | ✅ **REVERSED by `D-3`** | terms permitted as **scheduling structure**, grouping **SESSIONS** (`C-6`) |
 | **`G-3`** — KEY FOCUS, SLIDES, `View lesson plan` prohibited | ✅ **QUALIFIED by `D-4`** | chips permitted **in a distinct position with a distinct label**; materials within `D-4`'s scope. Unblocks `03` and `14` |
 | **`G-8`** — class video evidence out | ✅ **SUPERSEDED by `D-5`** | ⚠️ **the subject changed, not only the verdict** — `G-8` refused **class** footage, `D-5` authorizes **per-child** |
-| **`A-001`** — armed but unactivated | ✅ **ACTIVATED** | by `D-5`; ⛔ **and `A-002` still gates it** — see `R-5` |
+| **`A-001`** — armed but unactivated | ✅ **ACTIVATED** | by `D-5`; ✅ **and `A-002` no longer gates it — RULED 2026-08-12**, see `R-5` |
 | **`G-2`'s ground 2** | ⛔ **GROUND LAPSED, EXCLUSION UNCHANGED** | survives on **unratified** + `Q-27` |
 
 ⛔ **`GC-1` `GC-2` `GC-3` `GC-4` `GC-7` `GC-8` `GC-9` `GC-10` `GC-11` `GC-12` `GC-13` `GC-14` are untouched.** Nothing weakens `Q-27`, `A-014`, `A-036`, `A-052` or the parent boundary.
@@ -100,7 +100,7 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 | # | Blocker | Blocks | State |
 |---|---|---|---|
 | **`R-4a`** | ⚠️ **The `C-4` collapse question is RESERVED to the Operator.** `evidence.uploaded` and `evidence.attached` **appear to be one governed action** — `D-5` has the Trainer upload at assessment time with the object already tagged to exactly one report and never movable, so **the upload IS the attach**. ⛔ **`A-029` requires one event per governed action**, a rule `A-057`'s own table lists as preserved. **If collapsed, the registry is `16 → 19`.** ▶ **Nothing is baked in — the live registry is still 16 and `A-057` has never been implemented** | ⛔ **`P1-2`** | `AWAITING_OPERATOR` |
-| **`R-5`** | **`A-002`** — *"actual parent evidence access is first implemented and tested in **Phase 2**, never Phase 1"*, and `CLAUDE.md` §10 Phase 2 has not been entered. ⛔ **DELIBERATELY NOT RULED** — it returns as **its own question** when Part 1 reaches it, because *"a §10 phase-ordering rule deserves its own ruling, not a footnote"* | ⛔ **`P1-5`** | `AWAITING_OPERATOR`, by design |
+| **`R-5`** | ~~**`A-002`** — *"actual parent evidence access is first implemented and tested in **Phase 2**, never Phase 1"*~~ ✅ **RULED 2026-08-12: PARENT EVIDENCE ACCESS IS AUTHORIZED IN PART 1.** The new ground is `D-5` — **client-ratified**, its premise is that **all three roles watch the clip**, and consent is confirmed. ▶ *"A rule written before that decision existed should not outlive it."* ⛔ **Amended for parent EVIDENCE access ONLY**; every other phase boundary `A-002` governs is unchanged, and every `A-001`/`A-003`/`A-004` gate applies in full | ✅ **`P1-5` UNBLOCKED** | `RESOLVED` — ⚠️ the ruling unblocks the phase; **`P1-5` still needs its own explicit authorization** |
 | **`R-7`** | **`C-7` per-phase table authorizations not yet given** | ⛔ **`P1-2` `P2-2` `P2-6`** | `AWAITING_OPERATOR` |
 | ~~`R-12`~~ | ✅ **RULED** — both ratified marking states, distinguishably; no third state. §6.1 | `P2-23` | **CLEARED** |
 | ~~`R-14`~~ | ✅ **RULED** — six omitted; six fields ratified. §6.3 | — | **CLEARED** |
@@ -401,7 +401,7 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 ### P1-5 · Screen `33` Parent Class Report — `D-5` parent evidence view
 
-⛔ **BLOCKED on `R-5`.** `C-1` resolved Authority Lock §8.1 and §15 and `G-8`; **it did not rule on `A-002`**, which assigns parent evidence access to **Phase 2, "never Phase 1"**, and `CLAUDE.md` §10 Phase 2 has not been entered.
+~~⛔ **BLOCKED on `R-5`.** `C-1` resolved Authority Lock §8.1 and §15 and `G-8`; **it did not rule on `A-002`**, which assigns parent evidence access to **Phase 2, "never Phase 1"**, and `CLAUDE.md` §10 Phase 2 has not been entered.~~ ✅ **UNBLOCKED 2026-08-12 — `A-002` IS AMENDED** (`docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_001.md`, A-002). ⚠️ **Unblocked is not authorized**: `P1-5` still requires its own explicit Operator authorization before any code.
 
 ✅ **`C-1` and `C-2` cleared the other two blockers** — the projection is IN, on the new ground of client consent confirmed with the academy, and the consent gate is centre-level with no table to build.
 
@@ -692,7 +692,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P1-2** | ⚠️ **SCHEMA + STORAGE + audit registry** — the highest-risk item in the plan | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-4a` `R-7`** |
 | **P1-3** | Management read of evidence; ⛔ **no transition-guard change** (`C-5`) | ✅ **REQUIRED** |
 | **P1-4** | Trainer read of evidence | ✅ **REQUIRED** |
-| **P1-5** | ⚠️ **Parent projection extension** | ✅ **REQUIRED** — ⛔ **BLOCKED on `R-5` (`A-002`)** |
+| **P1-5** | ⚠️ **Parent projection extension** | ✅ **REQUIRED** — ✅ **`R-5` RESOLVED 2026-08-12; awaiting its own authorization** |
 | **P2-2** | ⚠️ **SCHEMA — terms** | ✅ **REQUIRED** (`C-6` `C-7` `C-14`) |
 | **P2-6** | ⚠️ **SCHEMA + STORAGE — lesson materials** | ✅ **REQUIRED** (`C-7`) |
 | **P2-9** | `D-2` host + a management cross-session read | ✅ **REQUIRED** (`C-8` `C-9`) |
@@ -710,7 +710,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | Item | State | Where |
 |---|---|---|
 | ⚠️ **`R-4a` — the reserved `C-4` collapse question** | `AWAITING_OPERATOR` | Blocks `P1-2`. `evidence.uploaded` and `evidence.attached` **appear to be one governed action**; `A-029` requires one event per action. **If collapsed, `16 → 19`.** ▶ **Live registry is still 16 and `A-057` is unimplemented, so nothing is baked in** |
-| ⛔ **`A-002` — parent evidence is Phase 2 work** | `AWAITING_OPERATOR`, **by design** | Blocks `P1-5`. ⚠️ **Deliberately not ruled** — it returns as **its own question** when Part 1 reaches it, not as a footnote to an evidence phase |
+| ✅ **`A-002` — RULED 2026-08-12** | `RESOLVED` | **Parent evidence access is authorized in Part 1.** ⚠️ It did return as its own question rather than as a footnote, which is why the ruling could state its own ground — **`D-5`, client-ratified, consent confirmed** — and could scope itself to parent EVIDENCE access alone |
 | ✅ **`P1-1b` — the `D-1` read** | `PASS` | `report_get_management_ratings`, nine in-transaction assertions, `prove:portal-1` exit 0 |
 | ✅ **`P1-1c` — the screen `19` frontend** | `PASS` | The full chain; nine surface legs. ▶ **`D-1` is COMPLETE end to end** |
 | ⚠️ **The silent-save reproduction is still owed a walk** | `OPEN` | Carry into §5. Console empty = the button never enabled · `submit-ignored` = not `ready` · `dispatching` with no server-log entry = a third possibility neither candidate covered. Steps in `BUILD_NOTES.md`; repeat on a `trainer_approved` report → Management **Edit wording** |
@@ -729,4 +729,4 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 
 ⚠️ **`PASS` is an evidence verdict; `Accepted` is the Operator's and only the Operator's.** A session never accepts its own work, and **code existing is not work being complete**.
 
-**`P1-1a`, `P1-1b` and `P1-1c` are `PASS` — executed and committed 2026-08-11, making `D-1` the first of the five portal decisions to reach a surface. ⚠️ `PASS` is the session evidence verdict; `Accepted` is the Operator's (§14.1, §15.6). Every other phase is `NOT_STARTED`, and `P1-2` (`C-7`) and `P1-5` (`A-002`) each carry a named open blocker.**
+**`P1-1a`, `P1-1b` and `P1-1c` are `PASS` — executed and committed 2026-08-11, making `D-1` the first of the five portal decisions to reach a surface. ⚠️ `PASS` is the session evidence verdict; `Accepted` is the Operator's (§14.1, §15.6). `P1-2` is `PASS` for its substrate with its **upload transport outstanding**, and `P1-5`'s blocker `A-002` is **RESOLVED** — it now awaits its own authorization rather than a ruling.**

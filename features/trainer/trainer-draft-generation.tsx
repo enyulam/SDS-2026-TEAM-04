@@ -11,14 +11,12 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import type {
-  DraftGenerationContextDto,
-  RatingLevel,
-  RequestDraftSuccess,
+  DraftGenerationContextDto,  RequestDraftSuccess,
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
-import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
+import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type FailureResult } from "./resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -191,12 +189,14 @@ const PANEL_PRESENTATION: Readonly<
  * DOM by the browser smoke rather than reasoned about. Colour is never the only carrier — every
  * tile states its level in text (`GLOBAL_UI_RULES` §7).
  */
-const RATING_TILE_STYLE: Readonly<Record<RatingLevel, string>> = {
-  beginning: "bg-rating-1-soft text-rating-1-on-soft",
-  developing: "bg-rating-2-soft text-rating-2-on-soft",
-  mastering: "bg-rating-3-soft text-rating-3-on-soft",
-  mastered: "bg-rating-4-soft text-rating-4-on-soft",
-};
+/*
+ * ⚠️ MOVED to `@/lib/frontend/fixtures/dimensions` on 2026-08-12, by Operator
+ * preference, when screen `19` was authorized to use the same treatment. It
+ * was declared IDENTICALLY here and in `trainer-report-review.tsx`, and `19`
+ * would have been a third copy. ▶ Two copies of a colour map is how one band
+ * silently acquires two colours on two screens showing the same assessment.
+ * ⛔ The values did not change; the tokens are the same ones.
+ */
 
 type ReportView = {
   readonly report: TrainerWorkingReportDto;

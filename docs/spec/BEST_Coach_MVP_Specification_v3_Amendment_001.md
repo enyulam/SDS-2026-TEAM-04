@@ -21,7 +21,7 @@ Precedence (highest first): **v3 → ratified amendments (this document) → `CL
 | Amendment | v3 section(s) / clause superseded | Other documents affected | Effect |
 |---|---|---|---|
 | A-001 | §21 "Evidence access" — "parents never receive evidence URLs" (absolute) | `CLAUDE.md` §6 (gated parent-evidence feature), §10 Phase 2 exit | Absolute prohibition → gated same-child access |
-| A-002 | §26 Phase 1 / Phase 2 boundary; §8 parent screens | `CLAUDE.md` §10 Phase 1/2; Plan Phase 1/2 | Phase 1 parent report text-only; evidence access is Phase 2 |
+| A-002 ✅ **AMENDED 2026-08-12** | §26 Phase 1 / Phase 2 boundary; §8 parent screens | `CLAUDE.md` §10 Phase 1/2; Plan Phase 1/2 | ~~Phase 1 parent report text-only; evidence access is Phase 2~~ ✅ **Parent EVIDENCE access moves to Part 1 (`P1-5`) by Operator ruling on `D-5`'s ratified premise.** ⛔ **Amended for parent evidence access ONLY** — every other phase boundary A-002 governs is unchanged, and every `A-001`/`A-003`/`A-004` gate applies in full |
 | A-003 | §26 Phase 2 exit — "a parent can never reach an evidence URL" | `CLAUDE.md` §10 Phase 2 exit; Plan Phase 2 exit | Absolute exit → gated exit (permitted vs prohibited paths) |
 | A-004 | §26 Phase 1 exit implications; Parent UAT | Plan §5.2 Parent UAT | UAT tests permitted linked-child access **and** prohibited paths |
 | A-005 | — (v3 §25 is tool-agnostic) | `CLAUDE.md` §10 pre-Phase-0; Plan Phase −1 | GitHub-first setup → local-only Git; remote optional/later |
@@ -70,10 +70,20 @@ This reconciles v3 §21 with the gated parent-evidence feature already described
 
 ## A-002 — Evidence phase ordering
 
-- **Phase 1** parent report is **text-only** (the prose panels in §8; no media).
-- Phase 1 may establish schema or typed service interfaces required later, but **must not expose evidence media to parents**.
-- **Phase 2** owns TA upload/re-upload, private storage, consent enforcement, scan status, evidence-gated approval, and signed-URL access.
-- **Actual parent evidence access is first implemented and tested in Phase 2**, never Phase 1.
+> ✅ **AMENDED 2026-08-12 BY OPERATOR RULING**, under an explicit bounded `CLAUDE.md` §12 authorization issued for that run. **PARENT EVIDENCE ACCESS IS AUTHORIZED IN PART 1** and is no longer deferred to Phase 2.
+>
+> **THE NEW GROUND, STATED EXPLICITLY.** `D-5` (`FINAL_MVP_PORTAL_DECISIONS.md`; Authority Lock §2.3) is **client-ratified** and its premise is that **all three roles — Management, the authoring Trainer and the linked Parent — can watch the clip**. **Consent is confirmed with the academy** (`C-2`: centre-level, no `consent_records` table). ▶ **In the Operator's words: a rule written before that decision existed should not outlive it.** Deferring the parent arm indefinitely would contradict the decision the client ratified, leaving `D-5` permanently two-thirds implemented.
+>
+> ⛔ **AMENDED FOR PARENT *EVIDENCE* ACCESS ONLY, AND FOR NOTHING ELSE A-002 COVERS.** **A-002's original phase-ordering reasoning has NOT lapsed** for anything else it governs. The discipline it expresses — that a capability is implemented and tested at the phase where its safeguards are actually exercisable, never earlier for convenience — is **undiminished and still binding**. This ruling moves **one capability** because a later ratified decision changed its premise; it is **not** a licence to pull any other deferred item forward, and every other phase boundary in this contract stands exactly as written.
+>
+> ⛔ **EVERY CONSTRAINT ON THE ACCESS IS UNCHANGED AND STILL ABSOLUTE.** A parent reaches **only their own linked learner's** clip, **only on a submitted report**, **through the same boundary the report text already uses** — every `A-001` gate applies in full, `A-003`'s prohibited-path proofs and `A-004`'s both-direction UAT come with it. **There is NO download control for any role, Parent included** (`D-5`), and no surface may claim technical impossibility. **`evidence.accessed` fires on every signed-URL mint** — ⚠️ **the only trace that a URL to a child's video ever existed, and it matters more now that `C-3` removed scanning.** ⛔ **`Q-27` DOES NOT MOVE: the parent still sees no ratings, in any form, on any surface, in any payload.**
+>
+> ⚠️ **This is not an implementation authorization by itself.** Plan phase **`P1-5`** is unblocked and requires its own explicit Operator authorization before any code.
+
+- ~~**Phase 1** parent report is **text-only** (the prose panels in §8; no media).~~ ✅ **SUPERSEDED 2026-08-12 for evidence media only.** The Phase 1 parent report **may carry the linked learner's evidence clip** under every gate above. **Its prose panels are otherwise unchanged**, and the four OD-4 panels remain the report's content model.
+- Phase 1 may establish schema or typed service interfaces required later, ~~but **must not expose evidence media to parents**~~ ✅ **and may now expose evidence media to a linked parent under `A-001`'s gates.** ⛔ **The clause's other half stands: nothing else deferred may be exposed early.**
+- **Phase 2** owns ~~TA upload/re-upload~~ *(the TA persona is deferred by `A-014`; the **Trainer** is the ruled uploader)*, private storage, ~~consent enforcement~~ *(centre-level under `C-2`; no per-object lookup)*, ~~scan status~~ ⛔ *(**gate REMOVED by `C-3`** — no scanning infrastructure exists and none will be built)*, evidence-gated approval, and ~~signed-URL access~~ ✅ *(**signed-URL access for the parent is now Part 1**)*. **The strikes in this bullet record rulings made elsewhere and change nothing on their own** — they are here so a reader does not act on a list four separate rulings have already overtaken.
+- ~~**Actual parent evidence access is first implemented and tested in Phase 2**, never Phase 1.~~ ✅ **SUPERSEDED 2026-08-12 BY OPERATOR RULING — THIS IS THE SENTENCE THE RULING REVERSES.** Parent evidence access is **implemented and tested in Part 1**, at plan phase **`P1-5`**. ⚠️ **"Implemented AND TESTED" survives intact and is the half that must not be lost**: `A-003`'s prohibited-path proofs and `A-004`'s **both-direction** UAT are conditions of the build, not follow-ups to it — **a permitted leg without its refusals, or refusals without a permitted leg, is the `S-8` shape and satisfies nothing.**
 
 ## A-003 — Corrected Phase 2 exit condition
 

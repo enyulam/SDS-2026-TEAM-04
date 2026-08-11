@@ -10,6 +10,7 @@ import { Icon, IconTile, type IconName } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
+import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
 import { REPORT_PANEL_CONFIG } from "@/features/trainer/report-panel-config";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -19,7 +20,6 @@ import {
   type CorrectionRequestDto,
   type DimensionCode,
   type ManagementReviewDto,
-  type RatingLevel,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 
@@ -219,12 +219,12 @@ const PANEL_PRESENTATION: Readonly<
  * ⚠️ Class Grade is a DIFFERENT vocabulary (Beginner / Intermediate /
  * Advanced) and must never be substituted here (A-054).
  */
-const RATING_LABELS: Readonly<Record<RatingLevel, string>> = {
-  beginning: "Beginning",
-  developing: "Developing",
-  mastering: "Mastering",
-  mastered: "Mastered",
-};
+/*
+ * ⚠️ REMOVED 2026-08-12. This surface declared its own label map; it now reads
+ * the SAME `RATING_DISPLAY_LABELS` the trainer surfaces read. A second label
+ * map for one ratified vocabulary (A-049) is how two screens end up disagreeing
+ * about what a band is called.
+ */
 
 type ActionFailure = Exclude<UiActionResult<unknown>, { outcome: "success" }>;
 
@@ -621,70 +621,11 @@ export function ManagementReportReview() {
         {/* Right rail — the frame's Report Details and approval stack, prohibited cards omitted. */}
         <aside className="grid content-start gap-5" aria-label="Report detail">
           {/*
-            ══════════════════════════════════════════════════════════════
-            ASSESSMENT SUMMARY — THE NINE PER-DIMENSION RATINGS.
-            ⛔ GOVERNANCE-MANDATED ADDITION. IT IS NOT DRIFT, AND A VISUAL
-               PASS MUST NOT REMOVE IT FOR FAILING TO MATCH THE FRAME.
-            ══════════════════════════════════════════════════════════════
-
-            Authority: D-1 (management may VIEW the nine, READ ONLY) ·
-            C-9 (report detail surfaces ONLY) · C-10 (ALL NINE, not the
-            frame's four). Instrument: FINAL_MVP_PORTAL_DECISIONS.md §C.
-
-            ⚠️ THE RATIFIED FRAME DRAWS A DIFFERENT THING. `reference/
-            Management - Student Report/` draws a "Performance Summary" of
-            FOUR dimensions — speech, tonality, eye contact, audience
-            awareness. C-10 ruled ALL NINE, because rendering four is a
-            SELECTION of assessment substance with no ratified basis, and
-            the four drawn are not a ratified subset of anything.
-
-            ▶ So this block diverges from the frame in BOTH directions: it
-              exists where the frame's version was previously omitted, and
-              it shows nine where the frame shows four. BOTH are RULED.
-              Recorded here, cited, so a later visual-acceptance pass reads
-              the divergence as EXPECTED / REQUIRED rather than as drift to
-              be corrected back toward the image.
-
-            ⛔ READ ONLY. There is no input, no select, no button and no
-               handler here, and none may be added. Management may VIEW,
-               never EDIT — an assessment-level disagreement is a RETURN TO
-               THE TRAINER (A-034, D-1), which is the control already
-               rendered further down this page.
-
-            ⛔ G-2 — NO ROLL-UP. No average, no headline band, no "Overall
-               Grade", no count of how many sit at each level. Nine pairs
-               are rendered as nine pairs. G-2 is a PERMANENT exclusion and
-               D-1 did not touch it: it lost one of its three grounds and
-               stands on the other two.
-
-            ⛔ Q-27 — this is a MANAGEMENT surface. Nothing here reaches a
-               Parent DTO, projection, RPC result or client payload, and
-               `prove:portal-1` proves the parent read returns zero rows for
-               this very report.
+            ⚠️ REPORT DETAILS SITS BEFORE THE RATINGS — Operator preference,
+            2026-08-12, matching the trainer surface exactly. That surface is
+            already proven and it is the treatment the Operator wants; a second
+            ordering for the same two blocks is drift, not a variant.
           */}
-          <section className="card p-5" aria-labelledby="assessment-summary-heading">
-            <h2 id="assessment-summary-heading">
-              <span className="text-[0.9375rem] font-semibold text-ink-strong">
-                Assessment Summary
-              </span>
-            </h2>
-            <p className="mt-1 text-[0.75rem] leading-5 text-ink">
-              The Trainer&rsquo;s nine ratings for this report, shown for review. Ratings cannot be
-              changed here &mdash; if one looks wrong, return the report to the Trainer.
-            </p>
-            <dl className="mt-3 divide-y divide-line text-[0.75rem]" data-testid="management-ratings">
-              {report.ratings.map((snapshot) => (
-                <div
-                  key={snapshot.dimensionCode}
-                  className="flex items-center justify-between gap-4 py-2"
-                >
-                  <dt className="text-ink">{snapshot.displayName}</dt>
-                  <dd className="font-semibold text-ink-strong">{RATING_LABELS[snapshot.rating]}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
           <section className="card p-5" aria-labelledby="report-details-heading">
             <h2 id="report-details-heading">
               <span className="text-[0.9375rem] font-semibold text-ink-strong">
@@ -765,6 +706,92 @@ export function ManagementReportReview() {
               not recorded anywhere in this product and is not shown; the assessment substance
               behind these panels is the Trainer’s and is not part of Management’s review.
             </p>
+          </section>
+
+          {/*
+            ══════════════════════════════════════════════════════════════
+            ASSESSMENT SUMMARY — THE NINE PER-DIMENSION RATINGS.
+            ⛔ GOVERNANCE-MANDATED ADDITION. IT IS NOT DRIFT, AND A VISUAL
+               PASS MUST NOT REMOVE IT FOR FAILING TO MATCH THE FRAME.
+            ══════════════════════════════════════════════════════════════
+
+            Authority: D-1 (management may VIEW the nine, READ ONLY) ·
+            C-9 (report detail surfaces ONLY) · C-10 (ALL NINE, not the
+            frame's four). Instrument: FINAL_MVP_PORTAL_DECISIONS.md §C.
+
+            ⚠️ THE RATIFIED FRAME DRAWS A DIFFERENT THING. `reference/
+            Management - Student Report/` draws a "Performance Summary" of
+            FOUR dimensions — speech, tonality, eye contact, audience
+            awareness. C-10 ruled ALL NINE, because rendering four is a
+            SELECTION of assessment substance with no ratified basis, and
+            the four drawn are not a ratified subset of anything.
+
+            ▶ So this block diverges from the frame in BOTH directions: it
+              exists where the frame's version was previously omitted, and
+              it shows nine where the frame shows four. BOTH are RULED.
+              Recorded here, cited, so a later visual-acceptance pass reads
+              the divergence as EXPECTED / REQUIRED rather than as drift to
+              be corrected back toward the image.
+
+            ⛔ READ ONLY. There is no input, no select, no button and no
+               handler here, and none may be added. Management may VIEW,
+               never EDIT — an assessment-level disagreement is a RETURN TO
+               THE TRAINER (A-034, D-1), which is the control already
+               rendered further down this page.
+
+            ⛔ G-2 — NO ROLL-UP. No average, no headline band, no "Overall
+               Grade", no count of how many sit at each level. Nine pairs
+               are rendered as nine pairs. G-2 is a PERMANENT exclusion and
+               D-1 did not touch it: it lost one of its three grounds and
+               stands on the other two.
+
+            ⛔ Q-27 — this is a MANAGEMENT surface. Nothing here reaches a
+               Parent DTO, projection, RPC result or client payload, and
+               `prove:portal-1` proves the parent read returns zero rows for
+               this very report.
+          */}
+          <section className="card p-5" aria-labelledby="assessment-summary-heading">
+            <h2 id="assessment-summary-heading">
+              <span className="text-[0.9375rem] font-semibold text-ink-strong">
+                Assessment Summary
+              </span>
+            </h2>
+            <p className="mt-1 text-[0.75rem] leading-5 text-ink">
+              The Trainer&rsquo;s nine ratings for this report, shown for review. Ratings cannot be
+              changed here &mdash; if one looks wrong, return the report to the Trainer.
+            </p>
+            {/*
+              ⚠️ THE SAME COLOURED TILE TREATMENT THE TRAINER'S PERFORMANCE
+              SUMMARY USES — Operator preference, 2026-08-12. The markup, the
+              tokens and the label map are the trainer surface's, imported
+              rather than re-authored: ONE visual language for one kind of
+              data. `RATING_TILE_STYLE` was extracted to
+              `lib/frontend/fixtures/dimensions` in the same pass so no third
+              copy exists.
+
+              ⛔ THE BAND NAME IS ON EVERY TILE AND MUST STAY. Colour
+              REINFORCES the band; it never carries it alone (WCAG SC 1.4.1).
+              Dropping the label to make the tiles look cleaner would make
+              colour the only carrier for four values.
+            */}
+            <ul className="mt-4 grid gap-2.5 sm:grid-cols-2" data-testid="management-ratings">
+              {report.ratings.map((snapshot) => (
+                <li
+                  key={snapshot.dimensionCode}
+                  className={`rounded-card px-3.5 py-3 ${RATING_TILE_STYLE[snapshot.rating]}`}
+                >
+                  <span className="block text-[0.5625rem] font-bold uppercase tracking-[0.06em] text-ink">
+                    {snapshot.displayName}
+                  </span>
+                  <span
+                    data-rating-level={snapshot.rating}
+                    className="mt-1 block text-[0.75rem] font-extrabold uppercase tracking-[0.02em]"
+                  >
+                    {RATING_DISPLAY_LABELS[snapshot.rating]}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* The frame's dark "Ready to approve?" panel — its "Save as draft" control omitted (P6). */}

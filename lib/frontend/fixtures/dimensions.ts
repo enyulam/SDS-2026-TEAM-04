@@ -136,3 +136,27 @@ export const GOVERNED_DIMENSIONS = [
     rubricAnchors: RUBRIC_ANCHORS,
   },
 ] as const satisfies readonly DimensionDto[];
+
+/**
+ * The tile treatment for a rating band — ONE visual language for this data,
+ * shared by every surface authorized to show it.
+ *
+ * ⚠️ EXTRACTED 2026-08-12 BY OPERATOR PREFERENCE. It was declared IDENTICALLY
+ * in `trainer-draft-generation.tsx` and `trainer-report-review.tsx`, and screen
+ * `19` was about to become a third site. ▶ Two copies of a colour map is how a
+ * band silently acquires two different colours on two screens showing the same
+ * assessment — so it is declared once, here, next to the labels it pairs with.
+ *
+ * ⛔ NO NEW COLOUR VALUES. These are the existing `rating-N-soft` tokens; the
+ * four bands keep exactly the colours they already had on the trainer surface.
+ *
+ * ⚠️ THE BAND NAME IS RENDERED ON EVERY TILE, ALWAYS. Colour REINFORCES the
+ * band; it never carries it alone (WCAG SC 1.4.1). A tile that drops its label
+ * to look cleaner breaks that, and the label is not decoration.
+ */
+export const RATING_TILE_STYLE: Readonly<Record<RatingLevel, string>> = {
+  beginning: "bg-rating-1-soft text-rating-1-on-soft",
+  developing: "bg-rating-2-soft text-rating-2-on-soft",
+  mastering: "bg-rating-3-soft text-rating-3-on-soft",
+  mastered: "bg-rating-4-soft text-rating-4-on-soft",
+};

@@ -151,12 +151,27 @@ check(
 );
 // NON-VACUITY for the absence scans below: the renderer must be present, or
 // "no edit control" is trivially true of a screen that renders nothing.
+// ⚠️ UPDATED 2026-08-12 for the tile treatment. The local `RATING_LABELS` map
+// is gone: this surface now reads the SAME `RATING_DISPLAY_LABELS` the trainer
+// surfaces read, so one ratified vocabulary has exactly one label source.
 check(
-  /RATING_LABELS\[snapshot\.rating\]/.test(screen),
+  /RATING_DISPLAY_LABELS\[snapshot\.rating\]/.test(screen),
   "the rendered value is the RATING itself -- so the absence checks below describe a real grid",
 );
-const block = (screen.match(/data-testid="management-ratings"[\s\S]*?<\/dl>/) ?? [""])[0];
-check(block.length > 0, "the ratings block was located for scanning");
+check(
+  /RATING_TILE_STYLE\[snapshot\.rating\]/.test(screen) && !/bg-rating-\d-soft/.test(screen),
+  "the tile colour comes from the SHARED map -- no second visual language and no new colour values",
+);
+// ⚠️ THIS MATCHER FIRED CORRECTLY ON 2026-08-12, AND IT IS WHY THE LEG BELOW IT
+// IS TRUSTWORTHY. It still expected `</dl>` after the list became a `<ul>` of
+// tiles, so it matched NOTHING -- and "carries no input or button" is TRIVIALLY
+// TRUE of an empty string. ▶ The READ-ONLY leg PASSED against a block that had
+// never been found. The located-for-scanning leg is the only reason anyone knew.
+const block = (screen.match(/data-testid="management-ratings"[\s\S]*?<\/ul>/) ?? [""])[0];
+check(
+  block.length > 0,
+  "the ratings block was LOCATED -- without this, every absence check below is true of an empty string",
+);
 check(
   !/<input|<select|<textarea|<button|onChange|onClick/.test(block),
   "the ratings grid carries NO input, select, textarea, button or handler -- READ ONLY (D-1)",

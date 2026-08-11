@@ -6498,3 +6498,65 @@ Plus **`FA-1` reproduces the defect** (`BC102` exactly) with **`FA-2` as its con
 
 **Gates:** `prove:f-attendance-init-1` **exit 0** · `prove:portal-2` **exit 0** · `prove:portal-1` **exit 0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
 **Next step:** ⛔ **STOPPED.**
+
+---
+
+## 2026-08-12 (third entry) — `A-002` ruled forward; the fifth stale-restatement instance; screen `19` tiles
+
+**Branch:** `develop`. **HEAD in:** `712f1d7` → **out:** this entry's commit.
+**Scope:** the `A-002` amendment and its propagation, a tree-wide sweep, and the screen `19` layout correction. ⛔ **`P1-5` NOT begun.**
+
+### `A-002` — parent evidence access is authorized in Part 1
+
+**New ground, stated in the clause:** `D-5` is **client-ratified** and its premise is that **all three roles watch the clip**; consent is confirmed with the academy. ▶ *"A rule written before that decision existed should not outlive it."*
+
+⛔ **Amended for parent EVIDENCE access only.** `A-002`'s phase-ordering reasoning is **undiminished** for everything else it governs, and nothing else deferred moves with it.
+
+⚠️ **"Implemented AND TESTED" was kept from the struck sentence deliberately, and the Operator confirmed it:** the ruling reversed the **phase ordering**, not the requirement that safeguards be exercisable. `A-003`'s prohibited-path proofs and `A-004`'s **both-direction** UAT are conditions of the build.
+
+### ⛔ THE FIFTH STALE-RESTATEMENT INSTANCE — AND THE FIRST IN `CLAUDE.md` ITSELF
+
+**`CLAUDE.md` §6 had been asserting the parent evidence projection was OUT OF SCOPE since the day it was ruled IN.** `D-5` put it in and `C-1` superseded Authority Lock §8.1 on 2026-08-11; `C-1`'s propagation reached **the Lock, §15 and `G-8`** and **missed the restatement**.
+
+▶ **THE SHAPE IS NOW ESTABLISHED: a ruling is propagated to the instrument that OWNS a rule and not to the documents that RESTATE it — and a restatement in a HIGHER-PRECEDENCE file silently outranks the corrected original.** `CLAUDE.md` is read first by every session, so a stale sentence there is the most expensive place one can survive.
+
+**Binding from here: a propagation run is not complete until the RESTATEMENTS have been swept across the tree** — not against the list the run was handed (the false-`CLEAN` lesson), and with a control proving the detector can fire.
+
+### The sweep — control first, tree-wide, 47 raw hits triaged
+
+**Five patterns**, each proven to fire against text containing the claim **before** any result was read. Scanned across the tree by extension, skipping `node_modules`/`.git`/`.next`/`worktrees`/the frozen demo.
+
+**Corrected (4 named + 3 found):** `CLAUDE.md` §10 Phase 1 and §6 · Implementation Plan `:304` and `:315` · `STATUS.md`'s `F-EVIDENCE-SCOPE-1` row and its evidence-phasing line · `parent-canonical-report.tsx`'s citation.
+
+⚠️ **`F-EVIDENCE-SCOPE-1` is resolved rather than deleted, and the distinction matters.** Its governance gap — *"class video is CLASS footage, so a per-child scoping decision has NOT been made"* — is **closed**: `D-5` made the subject the individual child and `P1-2` made it **structural**. ⛔ **But the "DO NOT IMPLEMENT" survives on its remaining ground, which is authorization** — `P1-5` is unblocked, not authorized.
+
+**Left alone by rule:** `UI_RECONCILIATION_BUILD_PLAN.md` (**`CLOSED — COMPLETE`**) · `UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` (*"authorizes nothing"*) · `BUILD_NOTES.md` and `DEMO_TO_MVP_MIGRATION.md` (**historical, append-only, never rewritten**).
+
+⛔ **TWO LIVE SITES WERE FOUND AND DELIBERATELY NOT TOUCHED — both §12-gated and neither named by the authorization:**
+
+1. **`FINAL_MVP_AUTHORITY_LOCK.md:202`** — *"A-001 is ARMED but UNACTIVATED for the parent surface. A-003's and A-004's permitted legs are BOTH STOOD DOWN"*. ⚠️ **The more serious of the two: the Lock OUTRANKS `CLAUDE.md`**, and this is a second `C-1` residue in the very instrument `C-1` amended.
+2. **`CLAUDE.md:82` (§1.1)** — *"the parent evidence projection is ruled OUT of the Final MVP (§8.1), so A-001's gates remain armed but unactivated"*.
+
+▶ **Reported rather than corrected, because §12 requires an instruction naming the exact files.** Both must be corrected before `P1-5`, or the phase starts against a contract that forbids it.
+
+### Screen `19` — the trainer surface's tile treatment, by Operator preference
+
+**Report Details now sits BEFORE the ratings**, and the plain list is the **same coloured tile treatment** the trainer's Performance Summary uses — same markup, same tokens, same label map.
+
+⚠️ **`RATING_TILE_STYLE` was EXTRACTED to `lib/frontend/fixtures/dimensions` rather than copied.** It was declared **identically** in two trainer files and `19` would have been a third. ▶ **Two copies of a colour map is how one band silently acquires two colours on two screens showing the same assessment.** The local `RATING_LABELS` map on `19` is gone too — one ratified vocabulary, one label source. ⛔ **No new colour values; the four bands keep exactly the colours they had.**
+
+⛔ **The band name stays on every tile.** Colour **reinforces**; it never carries alone (SC 1.4.1).
+
+### ⛔ A PROOF LEG PASSED AGAINST A BLOCK THAT WAS NEVER FOUND — and its companion caught it
+
+The block matcher still expected **`</dl>`** after the list became a **`<ul>`** of tiles, so it matched **nothing** — and *"carries no input, select, textarea, button or handler"* is **trivially true of an empty string**. ▶ **The READ-ONLY leg reported `PASS` against a block it had not located.**
+
+**The only reason this is known is the `block.length > 0` leg sitting beside it.** ⚠️ **A companion leg asserting the SUBJECT EXISTS is what makes an absence assertion mean anything** — the same family as `S-8` and as the two `NON-VACUITY` legs in `prove:portal-2`, arriving here through a **layout change** rather than a logic one. Both legs are now labelled so the dependency is visible from the output.
+
+### Also recorded
+
+- ⛔ **`P1-5` was NOT begun.** It needs: the parent arm on `evidence_list_for_report` and `evidence_record_access` (mirroring RPC-13 step for step), the signed-URL path, screen `33`, and migration assertion **`E9` retired deliberately** — it currently **fails the build** if a parent arm appears, which is exactly what it was for.
+- **No schema change this entry.** Census unchanged at **23 migrations · 28 tables · 49 functions**.
+
+**Gates:** `prove:hero-all` **17/17 by exit code** · `prove:portal-1` **exit 0** · `prove:portal-2` **exit 0** · `prove:f-attendance-init-1` **exit 0** · `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0**.
+**Next step:** ⛔ **STOPPED.**

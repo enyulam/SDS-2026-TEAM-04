@@ -61,6 +61,18 @@ import type { CanonicalReportDto, ReportPanelsDto } from "@/lib/frontend/contrac
  *     surface is ever activated, and A-003/A-004's REFUSAL legs remain mandatory meanwhile.
  *     So this region is not merely unbuilt here — it is DESCOPED, and adding any parent-facing
  *     evidence surface is a `CLAUDE.md` §12 stop-and-ask (see also `F-EVIDENCE-SCOPE-1`).
+ *
+ *     ⚠️ CITATION CORRECTED AGAIN 2026-08-12, AND THE PARAGRAPH ABOVE IS NOW HISTORICAL.
+ *     Operator ruling `D-5` (2026-08-11) put the parent evidence projection IN and ACTIVATED
+ *     A-001; `C-1` superseded Authority Lock §8.1; `A-002` was amended 2026-08-12 so parent
+ *     evidence access is PART 1 work, at plan phase `P1-5`. ▶ A-001's permitted leg is LIVE,
+ *     not stood down, and A-003/A-004 are now BOTH-DIRECTION requirements.
+ *     ⛔ THIS REGION IS STILL NOT BUILT, AND MUST NOT BE BUILT HERE UNTIL `P1-5` IS
+ *     AUTHORIZED — the reason changed from DESCOPED to UNBUILT-AND-SCHEDULED, which is why
+ *     the citation is corrected rather than the code. When it lands: linked child only,
+ *     submitted report only, short-TTL server-minted signed URL, NO download control for any
+ *     role, and `evidence.accessed` on every mint.
+ *     ⛔ Q-27 IS UNAFFECTED IN BOTH DIRECTIONS: this is media, and no rating reaches a parent.
  *     No such governed path exists, so the region is omitted
  *     rather than faked — an affordance no governed port method backs is never invented
  *     (GLOBAL_UI_RULES §10), and no media element is rendered on this surface at all.

@@ -12,13 +12,11 @@ import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import type {
   ChecklistDto,
-  DimensionCode,
-  RatingLevel,
-  TrainerApproveSuccess,
+  DimensionCode,  TrainerApproveSuccess,
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
-import { RATING_DISPLAY_LABELS } from "@/lib/frontend/fixtures/dimensions";
+import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type ResourceState } from "./resource-state";
@@ -195,12 +193,9 @@ const PANEL_PRESENTATION: Readonly<
  * WCAG 2.2 AA foreground/background pair from the F1 foundation, and each is re-measured in the
  * production DOM rather than reasoned about.
  */
-const RATING_TILE_STYLE: Readonly<Record<RatingLevel, string>> = {
-  beginning: "bg-rating-1-soft text-rating-1-on-soft",
-  developing: "bg-rating-2-soft text-rating-2-on-soft",
-  mastering: "bg-rating-3-soft text-rating-3-on-soft",
-  mastered: "bg-rating-4-soft text-rating-4-on-soft",
-};
+/* ⚠️ MOVED to `@/lib/frontend/fixtures/dimensions` on 2026-08-12 — see the note
+ * at the same place in `trainer-draft-generation.tsx`. One visual language for
+ * this data, declared once. The values did not change. */
 
 type ReportView = {
   readonly report: TrainerWorkingReportDto;
