@@ -7278,3 +7278,35 @@ The sweep was rebuilt to classify **LIVE / ANNOTATED / EXEMPT**, with a control 
 ### Files changed
 
 `FINAL_MVP_AUTHORITY_LOCK.md` · `FINAL_MVP_EXECUTION_PLAN.md` · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md` · `FINAL_MVP_HERO_CHAIN_RULINGS.md` · `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md` · `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` · `docs/plan/PORTAL_COMPLETION_PLAN.md` · `UI_REFERENCE_FINAL_MVP/08-trainer-ai-report-generation/implementation-notes.md` · `docs/progress/OPERATOR_HANDOFF.md` · this log.
+
+---
+
+## 2026-08-12 — PART 2 BEGUN · plan order established · `P2-1` measured at HEAD
+
+- **Branch:** `develop`. **Operator intent:** build the COMPLETE PLANNED PROTOTYPE — every screen in the ratified inventory with a properly integrated backend, **not a subset**. Autonomous, in plan order, committing at every phase boundary. ⚠️ **Every schema change requires explicit Operator authorization: state tables, columns, policies and grants, then STOP. `C-7`'s per-phase ruling stands.**
+
+### Plan order — `docs/plan/PORTAL_COMPLETION_PLAN.md` §7
+
+**23 buildable phases, `P2-1` … `P2-23`, dependency-ordered.** **`P2-24` (`28` Term Report) is DEFERRED by `C-11` — do not build**, and `A-044` is *"noted and unmet, deliberately"*.
+
+**Three substrates, each delivered by the phase that first needs it — never as an orphan infrastructure phase:** `D-3` terms at **P2-2** (`26`) · `D-4` lesson materials at **P2-6** (`14`) · `D-2` score at **P2-9** (`18`).
+
+**Known schema gates ahead, all `AWAITING_OPERATOR` under `R-7`/`C-7`:** **`P2-2`** and **`P2-6`** — plus **`P1-2`**, still blocked on **`R-4a`** (the `evidence.uploaded`/`evidence.attached` collapse question, registry `16 → 19` if collapsed) and `R-7`.
+
+### ⚠️ `P2-1` — `12` Management Classes — MEASURED AT HEAD, AND IT NEEDS NO SCHEMA
+
+**Measured, not read from the delta table:**
+
+- **49 public functions at HEAD; NONE provides a management class-list read.**
+- **But the RLS-scoped path already exists in full.** `SELECT` policies present: `class_grades_select_active_member` · `class_modules_select_management` · `class_sessions_select_management` · `enrolments_select_management` · `students_select_management` · `centre_memberships_select_management`. **Matching `authenticated` `SELECT` grants exist on all six tables.**
+- ⚠️ **Policy and grant are two separate layers and both were checked** — a present policy with no grant would have read as an RLS failure, which `A-030` names explicitly.
+
+▶ **Classification: `NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`. NOT `NEEDS NEW SCHEMA`.** **No migration, and therefore no Operator schema authorization is required for `P2-1`.**
+
+⚠️ **This is the plan's own warning realised: *"a delta table is a reading of a frame, not a measurement of the build"*** — Hero Phase 5 classified a rail `NEEDS NEW PROJECTION` when it already existed, and Phases 8 and 11 built nothing for the same reason. **Had `P2-1` been scoped from the frame, it would have requested a schema gate it does not need**, spending an Operator authorization on nothing.
+
+### Checkpoint
+
+**Stopped at a phase boundary BEFORE `P2-1` construction**, per the Operator's standing instruction for context exhaustion. **Nothing of `P2-1` is half-built** — the phase shape requires *"that screen COMPLETE — projection, server action, frontend, verification — before the next begins"*, and starting it here would have left exactly the partial state that rule exists to prevent.
+
+**Next permitted action:** build `P2-1` complete. No gate stands in front of it.

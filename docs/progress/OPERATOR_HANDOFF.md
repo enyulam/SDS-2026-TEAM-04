@@ -5,7 +5,7 @@
 > **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-12, at the Part 1 stop.
+**Regenerated:** 2026-08-12, at the **PART 2 KICKOFF** checkpoint — a phase boundary, before `P2-1`.
 
 ---
 
@@ -13,12 +13,12 @@
 
 | | |
 |---|---|
-| **HEAD** | **`4cfb57f`** — *docs: Part 1 verified on deployed dev; correct the G-05 file-size restatement* |
+| **HEAD** | **`05774a3`** — *docs: correct the ten stale 50 MiB sites and two lapsed limits in the handoff*. ⚠️ **Derived at `05774a3`; the commit CARRYING this file is its immediate successor** — a derived artifact cannot name its own SHA, so verify with `git log -1` |
 | **Branch** | `develop` |
 | **Tree** | **CLEAN** (`git status --porcelain -uall` empty) |
-| **Remote** | `origin` → `github.com/enyulam/best-coach-mvp` (**PRIVATE**) · `develop` = **`4cfb57f`** · `main` = **`5eb84bc`, UNTOUCHED** |
+| **Remote** | `origin` → `github.com/enyulam/best-coach-mvp` (**PRIVATE**) · `develop` = **`05774a3`** (pushed, verified from `origin`) · `main` = **`5eb84bc`, UNTOUCHED** |
 | **Tags** | `best-coach-part-1-complete` · `hero-feature-baseline` · `stage3-authenticated-green` |
-| **Worktrees** | **ONE** — the main checkout at `4cfb57f [develop]`. `worktrees/` does not exist |
+| **Worktrees** | **ONE** — the main checkout on `develop`. `worktrees/` does not exist |
 | **Migrations** | **25 on disk · 25 applied LOCAL · 25 applied HOSTED DEV** — ordered ledgers byte-identical |
 
 ## Environments
@@ -26,11 +26,27 @@
 | | |
 |---|---|
 | **Hosted dev DB** | `poblcfbxxzgarclchzkx` (Supabase, `ap-southeast-1`). 28 tables · 49 functions · 12 enums · 29 `public` policies · 1 `storage` policy · 3 `auth.users` |
-| **Deployed dev app** | **`https://best-coach-dev.vercel.app`** — Vercel `best-coach-dev`, production branch **`develop`**, latest production deployment **READY at `4cfb57f`** |
+| **Deployed dev app** | **`https://best-coach-dev.vercel.app`** — Vercel `best-coach-dev`, production branch **`develop`**, latest production deployment **READY at `0b7b547`**; a build for `05774a3` was triggered by its push |
 | ⛔ **FROZEN, OFF LIMITS** | `best-coach-mvp.vercel.app` (on `main`) and hosted `zjukuffiuzkbiblmnuwl`. Verified byte-identical to its captured baseline after every step this session |
 | **Fixtures (hosted)** | **Step 7F MINIMUM ONLY** — 1 learner, 1 session, 1 module, 9 ratings. The report is at `observation_saved`, `lock_version 4`, `report_versions 0` |
 
-## Current phase — Part 1
+## Current phase — PART 2, at the boundary before `P2-1`
+
+**Operator intent: the COMPLETE PLANNED PROTOTYPE** — every screen in the ratified inventory with an
+integrated backend, **not a subset**. Autonomous, in plan order (`PORTAL_COMPLETION_PLAN.md` §7),
+committing at every phase boundary. **23 buildable phases `P2-1`…`P2-23`; `P2-24` (`28` Term Report)
+is DEFERRED by `C-11`, with `A-044` noted and unmet deliberately.**
+
+⚠️ **`P2-1` (`12` Management Classes) IS MEASURED AND NEEDS NO SCHEMA.** Management `SELECT` policies
+**and** matching `authenticated` grants already exist on all six tables it reads. Classified
+`NEEDS NEW PROJECTION` + `NEEDS NEW SERVER ACTION`. **No migration, and no Operator schema gate in
+front of it** — scoping it from the frame instead would have spent an authorization on nothing.
+
+⛔ **Schema gates ahead, all `AWAITING_OPERATOR`:** `P2-2` and `P2-6` under `R-7`/`C-7`. `P1-2` is
+additionally blocked by `R-4a` — the `evidence.uploaded`/`evidence.attached` collapse question,
+registry **16 → 19** if collapsed — which also blocks `P1-3`, `P1-4` and `P1-5`.
+
+### Part 1 — verified, and its limits
 
 ✅ **VERIFIED END TO END ON THE DEPLOYED DEV ENVIRONMENT** by Operator walkthrough at `f2200e8`,
 hosted dev at 25 migrations: trainer start class → … → linked parent viewing the session report.
@@ -47,8 +63,10 @@ hosted dev at 25 migrations: trainer start class → … → linked parent viewi
 
 ## Which ending fired
 
-**Control handed back at a checkpoint.** Part 1 is verified and recorded; **Part 2 comes as its own
-Operator instruction.** No hard gate was hit at the stop, and context was sufficient.
+**Ending C — remaining context insufficient to safely begin AND finish the next phase.** Stopped at a
+phase boundary **before** `P2-1` construction. ⚠️ **Nothing of `P2-1` is half-built:** §3 requires each
+phase to deliver its screen COMPLETE — projection, server action, frontend, verification — before the
+next begins, so starting it here would have created exactly the partial state that rule prevents.
 
 ## Suites and proofs that RAN this session
 
@@ -108,7 +126,10 @@ Operator instruction.** No hard gate was hit at the stop, and context was suffic
 
 ## Next permitted action
 
-**Await the Operator's Part 2 instruction.** No autonomous continuation is authorized.
+**Build `P2-1` (`12` Management Classes) COMPLETE** — projection → server action → frontend →
+verification, in that order (§3: server-side precedes the frontend that consumes it). **No gate stands
+in front of it**, measured rather than assumed. **Then `P2-2`, which DOES hit a `C-7` schema gate and
+must STOP with its tables, columns, policies and grants stated.**
 
 **Prerequisites already satisfied:** tree clean · `develop` pushed and verified from `origin` ·
 `main` untouched · hosted dev schema-current · deployed dev app READY at `4cfb57f` · publication
