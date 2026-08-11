@@ -169,6 +169,19 @@ const ADJUDICATED = new Map([
       why: "A loopback address. 127.0.0.1 reaches nothing from outside the Operator's machine.",
     },
   ],
+  [
+    "BEST_COACH_HOSTED_SUPABASE_URL",
+    {
+      fingerprint: "30d675231b6e0e3e",
+      ruling: "TRUE NEGATIVE — Operator, 2026-08-12",
+      why:
+        "This is the public Supabase API URL for the development project. It is NEXT_PUBLIC_ by " +
+        "design, ships in the client bundle, and is carried by every browser request the app " +
+        "makes. It is an identifier, not a credential — knowing it grants nothing without a key. " +
+        "Adjudicated as the exact pinned URL, not as a class: a different project's URL, or the " +
+        "frozen demonstration project's, re-raises.",
+    },
+  ],
 ]);
 
 /**

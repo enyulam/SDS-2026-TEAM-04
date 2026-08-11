@@ -6990,3 +6990,65 @@ Baseline captured **before** any write and compared **after** Phase A. Identical
 - **Then Phase C:** `npm run prove:no-secrets` (any finding blocks) → push `develop` only → Vercel builds from git, so the deployed URL corresponds to a commit anyone can fetch.
 
 - **Commit:** none in this window. **Cleanup / rollback state:** no partial mutation; `best-coach-dev` is a created-but-undeployed project holding zero environment variables.
+
+---
+
+## 2026-08-12 — DEV DATABASE PASSWORD ROTATION · the credential-handling standing rule · identifier adjudication
+
+- **Track / workstream:** hosted dev environment (`best-coach-dev`). **Branch:** `develop`. **Worktree:** main (only).
+- **Starting HEAD:** `9d7758e` → **ending HEAD:** this commit.
+- **Scope:** rotate the dev database password after it was exposed, adopt a standing credential-handling rule, adjudicate one identifier finding, and re-run the publication gate.
+
+### ⛔ CREDENTIAL ROTATION — cause, and the generalisation
+
+**Cause.** `SUPABASE_DB_POOLED_URL` was supplied to a session **through chat**. It is a PostgreSQL connection string that embeds the database password and connects as the `postgres` **owner**. A conversation transcript is a durable record, so the value had to be treated as disclosed the moment it was pasted. **The Operator rotated the dev database password.**
+
+⚠️ **THE GENERALISATION, STATED BY THE OPERATOR AND RECORDED BECAUSE IT KEEPS RECURRING:**
+
+> **A connection string is a credential wearing a URL's clothes — and it has now been mishandled three times by two different parties.**
+
+▶ **Why this shape defeats the usual instincts.** Everything about a connection string reads as configuration rather than secret: it starts with a scheme, it names a host, it looks like something you paste into a config field, and its most sensitive component sits **in the middle of a longer string** rather than standing alone the way a key does. `CLAUDE.md` §11 already lists *"connection string"* among the values that may never be logged — the failure was never the absence of a rule, it was that **the value did not look like the thing the rule was about.** ⚠️ A shape-based scanner catches `sb_secret_*` and `sk-*` at a glance; a password embedded between `:` and `@` in a URL is caught only if something is looking for exactly that.
+
+### ✅ STANDING RULE — credential custody (Operator, 2026-08-12)
+
+> **Credentials go into files and dashboards BY THE OPERATOR. The session READS and VERIFIES. Never through chat, in either direction.**
+
+This **extends** `CLAUDE.md` §11's fixture-credential rule — *"Never request or transmit a password in chat, in either direction, and never accept one offered there"* — from fixture passwords to **every credential class**, and it names the custody model rather than only the prohibition: **placement is the Operator's, verification is the session's.**
+
+⚠️ **The cost of the rule is real and is accepted deliberately.** A value the session never holds is a value the session **cannot assert the contents of**. Verification degrades from *"the ref and the port are correct"* to *"the variable exists"*. **That is the trade, and it must be reported as a limit rather than papered over** — see the measured consequence below.
+
+### Verification performed — presence only, no value read or printed
+
+**`.env.local` `BEST_COACH_HOSTED_DB_URL` — ROTATION CONFIRMED.** Structural assertions only: present · carries the DEV ref · **frozen ref absent** · port **5432** (session pooler, correct for migrations) · port 6543 absent · scheme `postgresql://` · **and the specific password exposed in chat is NO LONGER PRESENT**. That last check is the one that actually proves rotation propagated locally, rather than proving only that a value exists.
+
+**`best-coach-dev` `SUPABASE_DB_POOLED_URL` — PRESENT, BUT MEASURABLY NOT REPLACED.** The variable exists, scoped Production + Preview. ⛔ **But `vercel env ls --json` reports `createdAt === updatedAt`, and the timestamp lies inside the 3.4-second monotonic sequence of the session's own Phase B write loop.** It has therefore never been modified since the session created it, and still carries the **pre-rotation password** — now a dead credential.
+
+▶ **This is the standing rule's first measured consequence, and it is the good kind.** Because the value is `Sensitive` and Operator-owned, the session **cannot read it to compare** — so the only available evidence was metadata. **Metadata was enough**: `createdAt === updatedAt` is a positive proof of *non-modification*, which is a stronger statement than "I could not confirm it changed". ⚠️ **Presence is not freshness, and a listing that shows a name proves only the name.**
+
+**Consequence if deployed as-is:** the build is unaffected — `SUPABASE_DB_POOLED_URL` is read at **runtime** by `HostedTrustedDraftStore`, not at build time. The failure would appear at the **last step of the AI drafting path**: provider call succeeds, grounding runs, then persistence dies — precisely the failure mode `docs/plan/DEPLOYMENT_GATE_PACKET.md` §1.7 was written to prevent. **Vercel applies environment changes only to NEW deployments**, so deploying before the value is replaced guarantees a second deployment. **The push and deploy were therefore HELD rather than spent.**
+
+### Identifier adjudication — `BEST_COACH_HOSTED_SUPABASE_URL`
+
+The previous run blocked on **2 unadjudicated identifier occurrences**, both introduced by commit `9d7758e`: the session had written the verification target as a **literal full URL** in the log rather than as `<dev-ref>`. The bare ref was already adjudicated, but **the register pins exact values**, so the URL form re-raised as a distinct string.
+
+⚠️ **It could not be fixed by editing.** The value was already inside a commit, so the working-tree hit and the **history** hit are two different problems; clearing the second needs a history rewrite, which `CLAUDE.md` §12 prohibits, and `git revert` leaves the blob reachable. **Editing was not an available path — the disposition was genuinely the Operator's.**
+
+**Operator ruling, recorded verbatim in `scripts/publication/prove-no-secrets.mjs` at the register:**
+
+- `BEST_COACH_HOSTED_SUPABASE_URL` · fingerprint `30d675231b6e0e3e` · **TRUE NEGATIVE — Operator, 2026-08-12**
+- *"This is the public Supabase API URL for the development project. It is NEXT_PUBLIC_ by design, ships in the client bundle, and is carried by every browser request the app makes. It is an identifier, not a credential — knowing it grants nothing without a key. Adjudicated as the exact pinned URL, not as a class: a different project's URL, or the frozen demonstration project's, re-raises."*
+
+⚠️ **Pinned, not classed.** The ruling covers one exact string. Repoint the variable and the finding **re-raises as unadjudicated** — which is the property that stops one ruling becoming standing permission for every URL-shaped value.
+
+**Lesson adopted:** write `<dev-ref>` in narrative records. A log entry describing a verification does not need the literal identifier to be useful, and the literal is what turns a clean gate red one commit later.
+
+### Files changed
+
+- `scripts/publication/prove-no-secrets.mjs` — one register entry added. **No credential is fingerprinted**; the adjudicated value is a public identifier already present in the repository in plaintext.
+- `docs/progress/BUILD_NOTES.md` — this entry.
+
+### Blockers / next
+
+- **AWAITING_OPERATOR** — replace `SUPABASE_DB_POOLED_URL` in `best-coach-dev` with the post-rotation value on port **6543**. Verified afterwards by `updatedAt > createdAt`, which is the only signal available for a value the session may not read.
+- **Then:** `npm run prove:no-secrets` → push `develop` → git-triggered build → confirm deployment target is **Production** (the behavioural proof that Production Branch = `develop` took) → fresh comparison of `best-coach-mvp` against the captured baseline.
+- **Migration or schema changes:** none. **Cleanup / rollback state:** no partial mutation.
