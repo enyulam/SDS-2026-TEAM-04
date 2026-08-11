@@ -7174,3 +7174,61 @@ The baseline was captured **before** the push, so this is a comparison rather th
 - **Deferred by explicit Operator instruction:** fixture reload and the broader §11 fixture expansion. The hosted fixture remains the **Step 7F minimum** — one learner, one session, one module — which is sufficient to render the schedule but **not** the broader shape Phase 1's continuity proof will need.
 - **Still never exercised in any environment:** the AI drafting path end-to-end — provider call, grounding verdict against real prose, and trusted-draft persistence through the pooled connection. **`B-G06-DET-1` remains untested against real provider output.**
 - **Next action is the Operator's:** walk the deployed application.
+
+---
+
+## 2026-08-12 — ✅ PART 1 VERIFIED END TO END ON THE DEPLOYED DEV ENVIRONMENT · the sixth stale-restatement instance
+
+- **Track / workstream:** hosted dev environment. **Branch:** `develop`. **Worktree:** main (only).
+- **Starting HEAD:** `26fe0af` → **ending HEAD:** this commit. **Environment:** unchanged — no migration, no fixture, no deploy in this window.
+
+### ✅ PART 1 VERIFIED — Operator walkthrough of the DEPLOYED system
+
+**The complete hero chain works on `https://best-coach-dev.vercel.app`** — trainer start class through to the linked parent viewing the session report. **Built commit `f2200e8`. Hosted dev at 25 migrations.**
+
+▶ **This is the strongest evidence class this project has produced for Part 1.** Every prior demonstration was local, scripted, or both; this is a **human walking the deployed system**, which is the only thing that exercises the real network boundary, the real Auth session, the real server-action transport and the real database together. **It is also the first time the chain has run anywhere other than the Operator's machine.**
+
+⚠️ **LIMITS — STATED, because a verification whose boundaries are not written down gets read later as broader than it was.**
+
+**1. POINT-IN-TIME.** It attests to **`f2200e8`** against the schema and fixture present on **2026-08-12**. **Any later commit, migration, fixture change or environment-variable change re-opens it.** It is not a standing guarantee, and **no later state inherits it** (`CLAUDE.md` §14.7 — an accepted gate reopens when the code, contract or environment changes).
+
+**2. ⛔ `CLAUDE.md` §10 PHASE 1 EXIT CONDITION (c) IS **NOT** DEMONSTRABLE ON HOSTED, AND IS **UNPROVEN**, NOT PASSED.** Condition (c) is *"a session's follow-up note appears as the next session's previous focus."* The hosted fixture is the **Step 7F minimum** — one learner, one session, one module — and `observations.follow_up_notes` was **measured NULL**. ▶ **So there is no note to carry, no second session to carry it to, and the AI draft prompt received no follow-up context.** ⚠️ **The walkthrough could not have exercised (c) even in principle**, and a reader must not infer it from *"the complete hero chain works"* — **the chain the walkthrough covered does not contain (c)**.
+
+**3. The broader §11 fixture remains deferred** — 2 trainers, 2 class modules, 3–4 learners per module, 2 parents, and **a second class session**. That expansion is precisely what condition (c) requires, and it is the gap between *"Part 1 works"* and *"Phase 1 exits"*.
+
+**Not in evidence and unchanged:** the grounding detector against real provider prose (**`B-G06-DET-1`**) is only as proven as the walkthrough's own drafts; no automated verdict was produced for it in this window.
+
+### ⛔ SIXTH STALE-RESTATEMENT INSTANCE — `CLAUDE.md`'s G-05 row
+
+**Corrected under a bounded Operator instruction naming this row**, by the ratified annotate-never-delete method.
+
+`CLAUDE.md` §1's Phase-0 ruling row recorded evidence file size as **50 MiB**. Operator ruling **`C-16`** superseded that, recording that *"`G-05`'s 50 MiB was chosen **without video in mind** — a lapsed premise, not a licence for the frame's number."*
+
+⚠️ **WHAT MAKES THIS INSTANCE DIFFERENT FROM THE FIRST FIVE — and worse.** The previous five were documents disagreeing with **other documents**. This one disagreed with **SHIPPED, EXECUTING SCHEMA**: `20260812090000_portal_d5_evidence_substrate.sql` enforces `104857600` in **three independent places** — a `CHECK (byte_size > 0 AND byte_size <= 104857600)`, the `evidence` bucket's `file_size_limit`, and **assertion `E4`, which fails the migration outright if the bucket limit is anything else**. ▶ **The highest-precedence file a session reads first contradicted a number the database will refuse to disagree with.** A session trusting `CLAUDE.md` would have built a 50 MiB client guard against a 100 MiB floor and called the mismatch a bug.
+
+⛔ **The frame's `500MB` is still NEVER IMPLEMENTED.** `C-16` raised the limit *"but NOT to 500 MB"*, so the visual-authority divergence recorded in `FINAL_MVP_HERO_CHAIN_RULINGS.md` is untouched by this correction.
+
+### The sweep — and its control caught the detector itself
+
+**23 raw hits across 12 tracked files**, over 687 tracked files.
+
+⚠️ **THE CONTROL FIRED ON MY OWN DETECTOR BEFORE ANY RESULT WAS REPORTED.** The first pattern was `/50\s*MiB|50\s*MB|…/`, which **matches the tail of "150 MiB"** and would have manufactured findings. The must-not-fire leg caught it and the sweep **refused to run**. Fixed by left-anchoring on `(?<![0-9])`. **Final control: 5 must-fire + 5 must-not-fire, all discriminating.**
+
+▶ **This is the fourth guard in this workstream to match the familiar token rather than the dangerous one** — after the key name, the credential shape and the URL scheme. **The difference here is that the control caught it instead of the Operator**, which is the entire argument for building the control first.
+
+**Classification of the 23 — only `CLAUDE.md` was edited; everything else is REPORTED for Operator disposition:**
+
+| Class | Sites |
+|---|---|
+| ✅ **Corrected (authorized)** | `CLAUDE.md:59`. **The hit persists by design** — annotate-never-delete preserves the struck figure |
+| ✅ **Correct as written, no change** | `FINAL_MVP_PORTAL_DECISIONS.md:177` (this **is** `C-16`) · `BUILD_NOTES.md:7164` (records 100 MiB as correct) · `supabase/config.toml:123` (**inside a COMMENTED-OUT example bucket**; the ACTIVE global already reads `100MiB`) |
+| ⛔ **STALE — NOT EDITED, needs its own authorization** | `FINAL_MVP_AUTHORITY_LOCK.md:271, 273, 774, 1353` — all four still describe the `500MB`/`50MiB` conflict as **UNRESOLVED / a pending Phase B ruling**, and `:1353` carries it as an open register row · `FINAL_MVP_EXECUTION_PLAN.md:1313-1314` — lists it as open decision #3 **and** claims `config.toml` "currently says `50MiB`", now doubly false · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md:423` — *"Four Phase B rulings remain"* · `FINAL_MVP_HERO_CHAIN_RULINGS.md:165` — *"is now the operative number"* · `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md:172,174` — the original `G-05` text, a **ruling instrument** whose text stays but which carries no supersession annotation · `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md:48` · `docs/plan/PORTAL_COMPLETION_PLAN.md:324` — asserts `config.toml` reads `50MiB` GLOBAL **"measured"**, and it now reads `100MiB` · `UI_REFERENCE_FINAL_MVP/08-…/implementation-notes.md:496` |
+| ⛔ **NEVER edited** | `docs/progress/BUILD_NOTES.md:5030` — the historical log is append-only and is never rewritten (`CLAUDE.md` §15.4), even where superseded |
+
+⚠️ **The bounded instruction authorized correcting `CLAUDE.md`'s row and SWEEPING for others — not correcting the others.** Editing a ruling instrument or the Authority Lock is a §12 gate in its own right, so the ten stale sites are **surfaced, classified and left untouched.** ▶ **`FINAL_MVP_AUTHORITY_LOCK.md:1353` is the one most likely to cause harm next**, because it presents a **settled** question as an **open register row**, and an open row invites a session to re-decide something already ruled.
+
+### Files changed
+
+- `CLAUDE.md` — the G-05 row, annotate-never-delete. **No other governance file edited.**
+- `docs/progress/STATUS.md` — snapshot updated: hosted at 25 migrations, the deployed dev environment, and the Part 1 verification with its three limits.
+- `docs/progress/BUILD_NOTES.md` — this entry. **No migration, no schema, no fixture, no deployment in this window.**
