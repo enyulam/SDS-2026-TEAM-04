@@ -6857,7 +6857,7 @@ Recorded together because they are the same discipline seen from both sides of t
 
 The first run reported **BLOCKED (65 + 13)**. Both halves were the instrument, not the repository:
 
-1. **`scanBlobs` called `scanText(content, "")`**, so `SHAPE_EXEMPT` could **never** match in the history pass. The two files whose entire purpose is to hold a key **shape** — `run-runtime-profile.mjs`'s `sb_publishable_synthetic_shape_fixture` and its matching `SECRET_SHAPED`, already adjudicated a **true negative** in `DEPLOYMENT_GATE_PACKET.md` — were exempt in the working tree and scanned in history. ▶ **A rule applied on one pass and not the other is not a rule**, and it is the same family as a leg whose name and measurement disagree. The path now travels with the blob.
+1. **`scanBlobs` called `scanText(content, "")`**, so `SHAPE_EXEMPT` could **never** match in the history pass. The two files whose entire purpose is to hold a key **shape** — `run-runtime-profile.mjs`'s `sb_publishable_` + `synthetic_shape_fixture` and its matching `SECRET_SHAPED`, already adjudicated a **true negative** in `DEPLOYMENT_GATE_PACKET.md` — were exempt in the working tree and scanned in history. ▶ **A rule applied on one pass and not the other is not a rule**, and it is the same family as a leg whose name and measurement disagree. The path now travels with the blob.
 2. **Every value in `.env.local` was treated as a credential.** All 65 exact-containment hits were a Supabase **project ref** or a **loopback URL** — values public by construction. ▶ **A gate that is permanently red is a gate people learn to bypass**, which is strictly worse than no gate. ⚠️ **So they are CLASSIFIED, not dropped:** an `IDENTIFIER` hit is still counted, still listed **by location**, and still reported for Operator disposition — separately, so a real key can never hide inside a crowd of benign matches.
 
 ### 6. ✅ THE VERCEL PRODUCTION BRANCH — AN OPERATOR-SUPPLIED FACT, WITH ITS SOURCE
@@ -6886,6 +6886,33 @@ The first run reported **BLOCKED (65 + 13)**. Both halves were the instrument, n
 
 ▶ **So the push would disclose it for the first time.** ⚠️ **It is not a credential** — a Supabase project ref *is* the subdomain of the public API URL every browser request already carries, and the project is protected by RLS and by keys, not by the ref being unguessable. **But "not a credential" and "not a disclosure" are different claims**, and only the first is mine to make. ⛔ **Held for the Operator under their own standing rule that ANY finding comes to them.**
 
-⚠️ **A false-VIOLATION worth recording, caught during the same verification pass.** The post-write encoding check reported **mojibake present** in `BUILD_NOTES.md`. It was pre-existing at HEAD on lines 1097, 1138 and 1734 — and all three are the **`Q-28` incident narrative QUOTING `â€"` as an example of what to look for**. ▶ **A detector firing on the prose that documents the defect**, which is the same shape as `prove:hero-10`'s bare `/evidence/i` and as `A-052`'s prohibited bare-word rating regex. The check was right to fire and the reading of it had to go one step further.
+#### 5c. ⛔ THE FALSE-VIOLATION FAMILY, TWICE MORE IN ONE PASS — AND THE SECOND ONE FIRED ON THIS VERY ENTRY
 
-**Next step:** ⛔ **STOPPED.** The scan's IDENTIFIER finding goes to the Operator before any push.
+**(1) The encoding check reported mojibake in `BUILD_NOTES.md`.** Pre-existing at HEAD, on lines 1097, 1138 and 1734 — all three the **`Q-28` incident narrative QUOTING `â€"` as an example of what to look for**. ⛔ **LEFT IN PLACE BY OPERATOR RULING, and the reason is recorded so it is not "fixed" later into something that no longer demonstrates what it describes.** ▶ **The corruption IS the exhibit.** Removing it would leave a paragraph about mojibake containing none.
+
+**(2) ⛔ THE SECRET SCANNER THEN BLOCKED ON SECTION 5a OF THIS ENTRY.** Naming the synthetic fixture in prose reproduced the literal `sb_publishable_` + `synthetic_shape_fixture`, whose suffix is 23 characters — so the shape pattern fired, correctly, on **the sentence explaining that the fixture is a true negative**.
+
+⚠️ **THE FIX WAS NOT TO EXEMPT `BUILD_NOTES.md`.** That is precisely where a careless paste would land, and a log the scanner cannot see is the worst possible blind spot. ▶ **The literal is SPLIT instead** — `sb_publishable_` + `synthetic_shape_fixture` — so the prose still names it and no longer *is* it.
+
+▶ **THIRD INSTANCE OF THIS FAMILY IN A SINGLE SESSION**, after `prove:hero-10`'s bare `/evidence/i` and the mojibake above, and the sharpest: **a detector firing on the document written to describe the previous instance.** It joins `A-052`'s prohibited bare-word rating regex and the keyword sweep that matched prose. ⚠️ **Every one of them was the detector working correctly** — the failure is always in reading a match as a verdict instead of as a question.
+
+⚠️ **AND THE FIX FOR (2) HAD TO BE FIXED, BY ITS OWN CONTROL.** Splitting the literal cleared the working tree but **not history**, where two commits already carried it. The first repair exempted the two *files* from shape matching — **the wrong shape of fix**, since `BUILD_NOTES.md` could never be exempted on those terms without creating the worst possible blind spot. ▶ **The exemption moved to the exact adjudicated STRING**, so every other key in those same files is still matched.
+
+⛔ **Then the string exemption's own control failed, and it was right to.** The first implementation was `text.split(lit).join(token)`, and a literal differing by **one trailing character** was still suppressed — because `…fixtureX` contains `…fixture` as a substring. ▶ **An exact-string exemption implemented by substring replacement is a PREFIX RULE WEARING AN EXACT-STRING LABEL**, and a real key beginning with the adjudicated text would have vanished silently. Fixed with boundary assertions on both sides. ⚠️ **Two legs in opposite directions now hold it**: the adjudicated literal is suppressed even in a non-exempt file, **and** a one-character variant still fires.
+
+### 5d. ✅ THE ADJUDICATION REGISTER — Operator rulings recorded IN THE INSTRUMENT
+
+**Both identifiers are ruled TRUE NEGATIVE by the Operator, 2026-08-12**, and the rulings live in `prove-no-secrets.mjs` itself so a future run **reports them as adjudicated rather than re-raising them**:
+
+| Value | Ruling |
+|---|---|
+| `BEST_COACH_HOSTED_PROJECT_REF` | A project ref **is** the subdomain of the public API URL every browser request already carries; the project is protected by **RLS and keys**, not by the ref being unguessable; the repository is private. ⚠️ **Redaction was considered and REJECTED** — history carries it in five commits, so redacting three documents would publish it anyway **while making the record dishonest about what was disclosed and when** |
+| `NEXT_PUBLIC_SUPABASE_URL` | A **loopback** address. `127.0.0.1` reaches nothing from outside the Operator's machine |
+
+⛔ **THE DISTINCTION THAT SETTLED IT, IN THE OPERATOR'S WORDS:** *"not a credential is yours, not a disclosure is mine."* ▶ The first is a technical claim a session can make; **the second is a risk acceptance only the Operator can make**, and it was made explicitly rather than inferred from silence.
+
+⚠️ **EACH ENTRY IS PINNED BY A TRUNCATED SHA-256 OF THE EXACT VALUE RULED ON.** Change the ref, repoint the URL, and the fingerprint stops matching and the finding **RE-RAISES as unadjudicated**. ▶ **A register that silently covered whatever happened to be in `.env.local` later would be worse than no register** — it would convert one ruling into standing permission. ⛔ **No CREDENTIAL is ever fingerprinted or hashed into that file**; both adjudicated values already appear in this repository in plaintext, so a hash of them discloses nothing new.
+
+**Final result: `npm run prove:no-secrets` — exit 0.** 293 commits · 1,947 blobs (136 MB) · 687 tracked files · **ZERO credential findings** · 71 adjudicated identifier occurrences · **all four controls fired**.
+
+**Next step:** push `develop` **only**, tag, confirm via `origin`, regenerate the handoff, **then STOP**.

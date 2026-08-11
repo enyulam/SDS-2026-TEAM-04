@@ -53,6 +53,7 @@
 
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -123,6 +124,69 @@ function loadLiveSecrets() {
  *    but it is reported as what it is, separately from a credential, so a
  *    real key can never hide inside a crowd of benign matches.
  */
+
+/**
+ * =====================================================================
+ * ⛔ THE ADJUDICATION REGISTER — Operator rulings, 2026-08-12
+ * =====================================================================
+ * An identifier that has been RULED a true negative must be reported AS
+ * ADJUDICATED on every later run. ▶ **Re-raising a settled finding every
+ * time is how a gate stops being read**, and silently dropping it is how a
+ * ruling becomes invisible to the next person. Neither: it is listed, with
+ * the ruling and the reason attached.
+ *
+ * ⚠️ EACH ENTRY IS PINNED TO THE EXACT VALUE THAT WAS ADJUDICATED, by a
+ *    truncated SHA-256. **If the value changes — a new project ref, a
+ *    repointed URL — the fingerprint stops matching and the finding
+ *    RE-RAISES as unadjudicated.** An adjudication that silently covered
+ *    whatever happened to be in `.env.local` later would be worse than no
+ *    adjudication at all.
+ *
+ * ⛔ FINGERPRINTING IS SAFE HERE AND NOWHERE ELSE. Both adjudicated values
+ *    are non-credentials that already appear in this repository in
+ *    plaintext, so a hash of them discloses nothing new. **No CREDENTIAL is
+ *    ever fingerprinted, recorded or hashed into this file.**
+ */
+const ADJUDICATED = new Map([
+  [
+    "BEST_COACH_HOSTED_PROJECT_REF",
+    {
+      fingerprint: "b3dc49bb09992fdc",
+      ruling: "TRUE NEGATIVE — Operator, 2026-08-12",
+      why:
+        "A project ref IS the subdomain of the public API URL every browser request already " +
+        "carries, and the project is protected by RLS and by keys, not by the ref being " +
+        "unguessable. The repository is private. ⚠️ Redaction was considered and REJECTED: " +
+        "history carries it in five commits, so redacting three documents would publish it " +
+        "anyway while making the record dishonest about what was disclosed and when.",
+    },
+  ],
+  [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    {
+      fingerprint: "e44fa46d488a2a55",
+      ruling: "TRUE NEGATIVE — Operator, 2026-08-12",
+      why: "A loopback address. 127.0.0.1 reaches nothing from outside the Operator's machine.",
+    },
+  ],
+]);
+
+/**
+ * ⛔ NOT EVERY VALUE IN `.env.local` IS A CREDENTIAL, AND TREATING THEM ALIKE
+ *    MAKES THE GATE USELESS.
+ *
+ * The first run of this scanner blocked on 65 exact-containment findings and
+ * EVERY ONE was a Supabase PROJECT REF or a LOOPBACK URL — values that are
+ * public by construction: a project ref IS the subdomain of the API URL every
+ * browser request already carries, and `NEXT_PUBLIC_*` is browser-visible by
+ * definition. ▶ **A gate that is permanently red is a gate people learn to
+ * bypass**, which is strictly worse than no gate at all.
+ *
+ * ⚠️ SO THEY ARE CLASSIFIED, NOT DROPPED. An IDENTIFIER hit is still counted,
+ *    still listed and still reported — and **a real key must never be able to
+ *    hide inside a crowd of benign matches**, which is what a 65-finding wall
+ *    of noise would have let it do. That is the better half of the fix.
+ */
 const IDENTIFIER_VARS = new Set([
   "BEST_COACH_HOSTED_PROJECT_REF", // 20-char ref; the subdomain of a public URL
   "NEXT_PUBLIC_SUPABASE_URL", // NEXT_PUBLIC_* is browser-visible by design
@@ -130,6 +194,18 @@ const IDENTIFIER_VARS = new Set([
 ]);
 
 const LIVE = loadLiveSecrets();
+
+/** Which adjudications still match the value they were ruled on. */
+const ADJUDICATION_STATE = new Map();
+for (const [name, entry] of ADJUDICATED) {
+  const live = LIVE.find((l) => l.name === name);
+  const fp = live ? createHash("sha256").update(live.value).digest("hex").slice(0, 16) : null;
+  ADJUDICATION_STATE.set(name, {
+    ...entry,
+    present: Boolean(live),
+    matches: fp === entry.fingerprint,
+  });
+}
 
 /**
  * ⛔ NAMED, NOT DEMONSTRATED: the ROTATED value.
@@ -162,21 +238,54 @@ const SHAPES = [
  * values still runs on it, because a real value pasted into the example
  * file is precisely the mistake this gate exists to catch.
  */
+const SHAPE_EXEMPT = new Set([".env.example", "scripts/publication/prove-no-secrets.mjs"]);
+
 /**
- * ⚠️ TWO MORE FILES HOLD DELIBERATE KEY-SHAPED LITERALS, and they were already
- * adjudicated a TRUE NEGATIVE by `docs/plan/DEPLOYMENT_GATE_PACKET.md`:
- * `run-runtime-profile.mjs` declares `sb_publishable_synthetic_shape_fixture`
- * and a matching `SECRET_SHAPED` constant so the runtime classifier can be
- * TESTED against a key shape without a key existing. Exempting them from SHAPE
- * matching is not a weakening — exact containment against the live values still
- * runs on them, and that is the check which would catch a real key pasted in.
+ * ⛔ ADJUDICATED BENIGN LITERALS — EXEMPT THE STRING, NEVER THE FILE.
+ *
+ * `run-runtime-profile.mjs` declares two deliberately key-SHAPED constants so
+ * the runtime classifier can be TESTED against a key shape without a key
+ * existing, and `DEPLOYMENT_GATE_PACKET.md` already adjudicated them a **true
+ * negative**. Prose that merely NAMES one — as this project's own build log
+ * did, and as `BUILD_NOTES.md` still does in history — reproduces the shape
+ * too.
+ *
+ * ⚠️ THE FIRST FIX WAS TO EXEMPT THE FILES, AND IT WAS THE WRONG SHAPE OF FIX.
+ *    A build log is exactly where a careless paste lands, and `BUILD_NOTES.md`
+ *    could never be exempted on those terms without creating the worst
+ *    possible blind spot. ▶ **Exempting an exact adjudicated STRING costs
+ *    nothing — every other key in those same files is still matched — whereas
+ *    exempting a FILE blinds the scanner to everything in it.**
+ *
+ * Each literal is replaced by an inert token before shape matching, never
+ * deleted, so two neighbouring fragments can never splice into a new match.
  */
-const SHAPE_EXEMPT = new Set([
-  ".env.example",
-  "scripts/publication/prove-no-secrets.mjs",
-  "scripts/tests/config/run-runtime-profile.mjs",
-  "docs/plan/DEPLOYMENT_GATE_PACKET.md",
-]);
+const BENIGN_LITERALS = [
+  "sb_publishable_synthetic_shape_fixture", // run-runtime-profile.mjs:53 — adjudicated
+  "sb_secret_synthetic_shape_fixture", // run-runtime-profile.mjs:54 — adjudicated
+];
+/**
+ * ⛔ THE BOUNDARY IS NOT DECORATION — ITS CONTROL CAUGHT A REAL DEFECT.
+ *
+ * The first implementation was `text.split(lit).join(token)`, and the
+ * one-character control failed immediately: `…fixtureX` still contains
+ * `…fixture` as a substring, so a REAL key that merely BEGAN with the
+ * adjudicated string would have been silently suppressed. ▶ **An exact-string
+ * exemption implemented by substring replacement is a PREFIX rule wearing an
+ * exact-string label** — precisely the kind of quiet widening this whole
+ * instrument exists to refuse.
+ *
+ * The literal is now neutralized only where it is NOT adjacent to a further
+ * key character on either side.
+ */
+const BENIGN_RE = BENIGN_LITERALS.map(
+  (lit) => new RegExp(`(?<![A-Za-z0-9_-])${lit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-z0-9_-])`, "g"),
+);
+const neutralize = (text) => {
+  let out = text;
+  for (const re of BENIGN_RE) out = out.replace(re, "<ADJUDICATED-BENIGN-LITERAL>");
+  return out;
+};
 
 function scanText(text, path) {
   const hits = [];
@@ -189,7 +298,8 @@ function scanText(text, path) {
     }
   }
   if (!SHAPE_EXEMPT.has(path)) {
-    for (const [label, re] of SHAPES) if (re.test(text)) hits.push({ kind: label, cls: "CREDENTIAL" });
+    const scannable = neutralize(text);
+    for (const [label, re] of SHAPES) if (re.test(scannable)) hits.push({ kind: label, cls: "CREDENTIAL" });
   }
   return hits;
 }
@@ -331,6 +441,24 @@ check(
 );
 check(!existsSync(probeFile), "the working-tree probe file no longer exists");
 
+/**
+ * ⛔ THE NEUTRALIZER NEEDS ITS OWN CONTROL. `BENIGN_LITERALS` suppresses a
+ * match, and anything that suppresses a match is a place a real key could
+ * hide. Two legs, in opposite directions:
+ *   . the adjudicated literal is SUPPRESSED — otherwise the exemption is dead
+ *     code and the earlier block was never actually explained;
+ *   . a NEIGHBOURING literal, differing by one character, still FIRES —
+ *     otherwise the exemption is a prefix rule wearing an exact-string label.
+ */
+check(
+  scanText(`const K = '${BENIGN_LITERALS[0]}'`, "some/other/file.mjs").length === 0,
+  "CONTROL (neutralizer): the ADJUDICATED literal is suppressed even in a file that is NOT shape-exempt",
+);
+check(
+  scanText(`const K = '${BENIGN_LITERALS[0]}X'`, "some/other/file.mjs").length > 0,
+  "CONTROL (neutralizer): a literal differing by ONE CHARACTER still FIRES — the exemption is an exact string, not a prefix",
+);
+
 // 4b. HISTORY — a scratch commit under a TEMPORARY REF. `develop` never moves.
 const TMP_REF = "refs/heads/_secret_scan_control";
 const blobSha = git(["hash-object", "-w", "--stdin"], { input: `password = ${PLANT}\n` }).stdout.trim();
@@ -396,12 +524,50 @@ if (credential.length > 0) {
   say("       PEM block, PAT or AWS key id, in the working tree or in ANY blob reachable from develop");
 }
 
-if (identifier.length > 0) {
-  const d = distinct(identifier);
+/**
+ * ⛔ AN ADJUDICATED FINDING IS STILL A FINDING — it is reported, with its
+ * ruling, and only its DISPOSITION differs. `varOf` recovers which needle a
+ * hit came from so the register can be applied to it.
+ */
+const varOf = (kind) => (kind.startsWith("LIVE VALUE of ") ? kind.slice("LIVE VALUE of ".length) : null);
+
+const settled = [];
+const unsettled = [];
+for (const f of identifier) {
+  const st = ADJUDICATION_STATE.get(varOf(f.kind) ?? "");
+  (st && st.present && st.matches ? settled : unsettled).push(f);
+}
+
+if (settled.length > 0) {
+  const d = distinct(settled);
   say("");
-  say(`⚠️ ${identifier.length} IDENTIFIER occurrence(s) across ${d.length} distinct location(s) — REPORTED, NOT a credential.`);
-  say("   A Supabase project ref IS the subdomain of a public API URL, and a NEXT_PUBLIC_* value is");
-  say("   browser-visible by design. ⛔ Listed because the disposition is the Operator's, not mine.");
+  say(`✅ ${settled.length} occurrence(s) across ${d.length} location(s) — ADJUDICATED TRUE NEGATIVE, not re-raised.`);
+  const names = [...new Set(settled.map((f) => varOf(f.kind)))];
+  for (const n of names) {
+    const st = ADJUDICATION_STATE.get(n);
+    say(`         ${n} — ${st.ruling}`);
+    say(`           ${st.why}`);
+  }
+  say("       ⚠️ Each is PINNED to the exact value ruled on. Change the value and it RE-RAISES.");
+}
+
+// ⚠️ An adjudication whose value has MOVED is not an adjudication. Reported
+// loudly rather than silently inherited, because a register that quietly
+// covers a NEW value is worse than no register.
+for (const [name, st] of ADJUDICATION_STATE) {
+  if (st.present && !st.matches) {
+    say("");
+    say(`⛔ ADJUDICATION STALE: \`${name}\`'s value no longer matches the one ruled on (${st.ruling}).`);
+    say("   The ruling does NOT carry to a value it was not made about. Re-raise to the Operator.");
+    blocked++;
+  }
+}
+
+if (unsettled.length > 0) {
+  const d = distinct(unsettled);
+  say("");
+  say(`⚠️ ${unsettled.length} UNADJUDICATED IDENTIFIER occurrence(s) across ${d.length} location(s) — NOT a credential, but not ruled either.`);
+  say("   ⛔ The disposition is the Operator's, not mine.");
   const byKind = new Map();
   for (const f of d) byKind.set(f.kind, (byKind.get(f.kind) ?? 0) + 1);
   for (const [k, n] of [...byKind]) say(`         ${k} — ${n} distinct location(s)`);
@@ -415,8 +581,10 @@ if (identifier.length > 0) {
 say("");
 if (blocked > 0) {
   say("RESULT: BLOCKED — the push does not proceed.");
-} else if (identifier.length > 0) {
-  say("RESULT: CLEAN OF CREDENTIALS — identifiers present and listed above for Operator disposition.");
+} else if (unsettled.length > 0) {
+  say("RESULT: CLEAN OF CREDENTIALS — UNADJUDICATED identifiers listed above for Operator disposition.");
+} else if (settled.length > 0) {
+  say("RESULT: CLEAN — zero credentials, and every identifier is an ADJUDICATED true negative.");
 } else {
   say("RESULT: CLEAN — the push gate is satisfied.");
 }
