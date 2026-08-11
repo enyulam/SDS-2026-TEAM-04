@@ -12,55 +12,88 @@
 | **Workspace** | **DEVELOPMENT CLONE**, branch **`develop`**. **NOT the demonstration workspace** |
 | **Local stack** | ✅ **`best-coach-dev` on 544xx** — api **54421** · db **54422** |
 | ⛔ **FROZEN, OFF LIMITS** | The demonstration workspace, its stack on **543xx**, hosted **`zjukuffiuzkbiblmnuwl`**, **`best-coach-mvp.vercel.app`** |
-| ⛔ **Git** | **No push. No merge. No `main`. `develop` only.** Nothing pushed |
+| ✅ **Git — PUSHED 2026-08-12** | **`develop` only.** ⛔ **`main` was NOT pushed and nothing was merged.** Confirmed **by querying `origin`**, not by trusting push output |
 
 ---
 
-## ✅ PART 1 IS COMPLETE
+## ✅ PART 1 IS COMPLETE — AND ITS GATE IS YOUR WALKTHROUGH, NOT A SUITE
 
-`P1-1a` · `P1-1b` · screen `19` · `F-ATTENDANCE-INIT-1` · `P1-2` · `P1-5` · **`P1-2b`**. **`D-1` and `D-5` are both complete end to end.** For `D-5` that is: substrate → **resumable upload** → **governed attach** → list → **removal** → parent arm → signed-URL path → screen `33`'s player.
+`P1-1a` · `P1-1b` · screen `19` · `F-ATTENDANCE-INIT-1` · `P1-2` · `P1-5` · `P1-2b` · **`P1-3`** · **`P1-4`**. **`D-1` and `D-5` are both live end to end across all three roles.** For `D-5`: substrate → **resumable upload** → **governed attach** → list → **removal** → parent arm → signed-URL path → **players on `08`, `10`, `19` and `33`**.
+
+**You walked all six stages on a fresh learner and every stage held:** roster (*"Present — not yet recorded"*, no Assess link) · assess (nine dimensions, **saves without the absent-then-present workaround**) · draft (clip **attaches and plays** on `08`) · trainer review (clip plays, the stale inert block gone) · management (nine tiles, Report Details above them, clip plays, **Approve & Submit works without having viewed it**) · parent (four panels, clip plays, **no download control, no ratings**).
 
 | | |
 |---|---|
-| **HEAD** | on `develop`, tree **clean** |
-| **Gates** | ✅ **`prove:portal-2b` exit 0** (17 SQL + 26 runner) · ✅ **`prove:portal-5` exit 0** (11 SQL + 23 runner, incl. the composed leg) · ✅ `prove:portal-5-composed` **0** · ✅ `prove:portal-1` **0** · ✅ `prove:portal-2` **0** · ✅ `prove:f-attendance-init-1` **0** · ✅ **`prove:hero-all` 17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0** |
-| **Database** | **25 migrations · 28 tables · 49 functions · 12 enums · 29 public policies · 1 storage policy · registry 19**. ⛔ **Neither `P1-5` nor `P1-2b` moved any of these** — each **replaced** functions and added nothing |
+| **origin/develop** | **`c348915`** — equal to local `HEAD`; tree **clean** |
+| **origin/main** | **`5eb84bc` — UNCHANGED** |
+| **Tag** | **`best-coach-part-1-complete`** → tag object `8423033`, dereferencing (`^{}`) to **`c348915`**. Annotated, on origin |
+| **Gates** | ✅ **`prove:no-secrets` exit 0** · ✅ `prove:portal-34` **0** (8 SQL + 24 runner) · ✅ `prove:portal-2b` **0** (17 SQL + 26 runner) · ✅ `prove:portal-5` **0** (11 SQL + 23 runner) · ✅ `prove:portal-5-composed` **0** · ✅ `prove:encoding` **0** · ✅ `prove:portal-1` **0** · ✅ `prove:portal-2` **0** · ✅ `prove:f-attendance-init-1` **0** · ✅ **`prove:hero-all` 17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0** |
+| **Database** | **25 migrations · 28 tables · 49 functions · 12 enums · 29 public policies · 1 storage policy · registry 19.** ⛔ **`P1-3` and `P1-4` added NO migration at all** — both are presentation-only over `P1-2`'s read path |
 
 ---
 
-## ⛔ THE ONE THING A GREEN RESULT MUST NOT OBSCURE
+## ✅ `A-004` IS NOW RUN — BY YOU, AND RECORDED AS YOURS
 
-**`A-004`'s both-direction Parent UAT is `NOT-RUN`. It is HUMAN and it is yours to perform.** Both runners print that beside their own `PASS`, so the two cannot be read as one. ⛔ **No session may report it as run.**
+**Reclassified `NOT-RUN` → OPERATOR-PERFORMED, both directions.** ▶ **PERMITTED:** the linked parent sees and plays their own learner's clip. ⛔ **REFUSAL:** nothing else was reachable.
 
-Alongside it: **`A-003`'s `unscanned` leg is `NOT APPLICABLE (C-3)`, never `PASS`** · **rendered capture is `NOT-RUN`** on screen `08`'s rebuilt region and screen `33`'s clip region — a green DOM-text proof is not a visual acceptance.
+⚠️ **Its limits are stated rather than assumed, because an over-read acceptance is worse than an honest `NOT-RUN`:** **point-in-time at this commit** · **does not cover hover, focus or responsive collapse** · **not a substitute for `A-003`'s automated prohibited-path legs**, which remain the machine-checked half.
 
----
-
-## ⛔ WHAT I FOUND IN MY OWN P1-5 WORK, AND YOU SHOULD KNOW ABOUT
-
-**`P1-5` shipped a broken parent path and its own proofs could not see it.** `listEvidenceCore` still refused `parent` in TypeScript, left over from when `A-002` was unruled. The parent arm existed in the database and was **reachable by nobody** — and since a failed clip read makes the whole report `unavailable`, **a linked parent would have been shown NO REPORT AT ALL**, not merely no clip.
-
-▶ **P1-5 proved the RPC (11 legs) and scanned the surface's text (11 more). Nothing ran the TypeScript between them.**
-
-Fixed, and there is now a leg that calls the **composed core** with real admin-minted sessions, spawned from inside `prove:portal-5` so it cannot be skipped. ⚠️ **I ran its control**: restoring the old guard turns it red, so it demonstrably catches the defect.
-
-**THE STANDING RULE:** a green RPC proof plus a green text scan is **not** a proof of the path between them.
+Still standing: ⛔ **`A-003`'s `unscanned` leg is `NOT APPLICABLE (C-3)`, never `PASS`** · **rendered capture is `NOT-RUN`** on every rebuilt evidence region — a green DOM-text proof is not a visual acceptance.
 
 ---
 
-## ▶ THE THINGS WORTH YOUR ATTENTION
+## ⛔ THE DEFECT THAT MATTERED MOST WOULD HAVE PASSED EVERY SUITE IN THIS PROJECT
 
-**The ADR-3 exception's boundary, stated where an implementer reads it.** The browser writes directly to storage — an **opaque object** · into a **private bucket** (no SELECT/UPDATE/DELETE policy for any role) · at a path it must **prove trainer authority over**, re-derived live from the path · **governed by nothing** until the server attaches it. ▶ **Until the attach it is bytes with a name.** A forged ticket buys nothing, and that is measured at the real endpoint (HTTP 403).
+**`F-ATTENDANCE-INIT-1` was found by your walkthrough.** Every suite passed throughout — because every suite reaches its subject through **`mint_isolated_pair`, and `mint_isolated_pair` seeds attendance.** ▶ **The fixtures made the broken state unreachable.**
 
-**Two defects the transport exposed in P1-2's own function.** A second clip **raised `23505`** instead of answering — an aborted transaction reads to a trainer exactly like a network fault. And the object lookup was **ambiguous**: the path shape admits `.mp4` and `.mov` under one evidence id, so ▶ **the attached clip would have been chosen by the query planner.** Ambiguity now fails closed, and a leg proves the `UNIQUE` constraint still refuses a direct owner-side INSERT — **the pre-check is a message; the schema is still the gate.**
+⚠️ **This is not an argument for fewer proofs. It is the boundary of what a fixture-built proof can see:** a harness that constructs its own subject can only measure states its constructor can produce. The six seeded walkthrough learners deliberately leave that row **unmaterialized**, so the path is now reachable by a test at all.
 
-**The ceiling is measured at the real TUS endpoint for the price of one small request** — the server checks the *declared* length, so proving 100 MiB does not cost 100 MB.
+---
+
+## ✅ THE PRE-PUBLICATION SECRET SCAN — `npm run prove:no-secrets`, EXIT 0
+
+**Written fresh in this repository** — the demonstration-push scanner lived in the other workspace, so **the controls carry the whole weight.**
+
+| | |
+|---|---|
+| Scanned | **293 commits · 1,947 blobs (136 MB) · 687 tracked files** |
+| ⛔ **CREDENTIAL findings** | **ZERO** |
+| Identifiers | **71 occurrences, both ADJUDICATED TRUE NEGATIVE by you** |
+| Controls | **all four FIRED** — working tree, history (scratch commit under a temp ref, ref deleted, `develop` never moved), and both neutralizer legs |
+
+⛔ **Exit status is interpreted, never assumed** — `status === null` exits 2. This project's false-`CLEAN` was a history search that **died unnoticed**. ⛔ **No credential is ever printed by any path**; a finding names the file, the commit and the kind, never the text.
+
+⚠️ **LIMIT, STATED:** the **rotated** `BEST_COACH_HOSTED_DB_URL` password is not held by this session and is covered by **SHAPE ONLY**. **Exact-containment coverage of the old value is NOT claimed.**
+
+**Your rulings are recorded in the instrument**, each **pinned by a truncated SHA-256 of the exact value ruled on** — change the value and it **re-raises**. ▶ *"Not a credential is yours, not a disclosure is mine."*
+
+---
+
+## ⚠️ THREE DEFECTS THE CONTROLS CAUGHT, IN SEQUENCE — ALL IN THE INSTRUMENT
+
+1. **`SHAPE_EXEMPT` was unreachable in the history pass**, because `scanBlobs` passed `""` as the path. ▶ **A rule applied on one pass and not the other is not a rule.**
+2. **Every `.env.local` value was treated as a credential**, making the gate permanently red on a project ref and a loopback URL. ▶ **A permanently-red gate is one people learn to bypass**, and **a real key must never be able to hide in a crowd of benign matches.**
+3. **The scanner then blocked on its own build-log entry**, which named the synthetic fixture and so reproduced its shape. ⚠️ **The first repair exempted the FILES — the wrong shape of fix**, since a build log is exactly where a careless paste lands. Moved to the exact adjudicated **string**; then **that** exemption's control failed, because substring replacement made it **a prefix rule wearing an exact-string label**. Fixed with boundary assertions, held by two legs in opposite directions.
+
+⛔ **The `BUILD_NOTES.md` mojibake is LEFT IN PLACE by your ruling**, and the reason is recorded so it is not "fixed" later into something that no longer demonstrates what it describes: **the corruption IS the exhibit.**
+
+---
+
+## ▶ THE OTHER THINGS WORTH YOUR ATTENTION
+
+**`C-5` governs the management player and the wording matters: VISIBILITY REQUIRED · ATTESTATION ABSENT · ENFORCED BY NOTHING.** No precondition on Approve & Submit, no management checklist item — `A-036`'s checklist stays a **trainer** instrument. **`P34-5` proves the non-gate by submitting a report whose clip was never accessed.**
+
+**A wrongly-cited prohibition was struck on screen `19`.** Its `P5` note claimed evidence sat outside management's read under `A-038`; both halves fail — the path exists with an explicit **management arm** built under `C-7`, and `A-038` governs assessment substance, not media. ▶ **A wrongly-cited prohibition is worse than a missing feature: the feature gets built, the prohibition gets defended.**
+
+**One shared player, three surfaces** (`components/ui/evidence-viewer.tsx`). Three copies of a `<video>` is how **one** quietly acquires a `download` attribute nobody re-checked. The no-download absence is measured **in the built client chunks**, not the source.
+
+**Vercel's production branch is `main`** — your dashboard verification, whose card states *"To update your Production Deployment, push to the `main` branch."* ⚠️ **A dashboard setting, not a repository file**, which is why no `vercel.json` records it. **Pushing `develop` created a preview and cannot move `best-coach-mvp.vercel.app`.**
 
 ---
 
 ## ⚠️ THE SWEEPER IS BUILT AND UNSCHEDULED — A DECISION, NOT AN OVERSIGHT
 
-`npm run sweep:evidence-orphans` reports by default and deletes only with `--delete`. ⛔ **No cron, queue, Edge Function or credentialed CI runner exists, and adding one is hosted work (§12).** A leg asserts **no surface and no module claims orphans are cleaned automatically**, and that the limitation is stated in the transport's own header.
+`npm run sweep:evidence-orphans` reports by default and deletes only with `--delete`. ⛔ **No cron, queue, Edge Function or credentialed CI runner exists, and adding one is hosted work (§12).** A leg asserts **no surface and no module claims orphans are cleaned automatically.**
 
 ---
 
@@ -68,10 +101,9 @@ Fixed, and there is now a leg that calls the **composed core** with real admin-m
 
 | # | Question | Blocks |
 |---|---|---|
-| **1** | **`A-004`'s both-direction Parent UAT** — yours to run, whenever you choose | ⛔ `A-004` stays `NOT-RUN` until you say otherwise |
-| **2** | **Part 2** — `D-2`, `D-3` and `D-4` are implemented nowhere and each needs its own authorization | everything after your manual walk |
+| **1** | **Part 2** — `D-2`, `D-3` and `D-4` are implemented nowhere and each needs its own authorization | everything after this point |
 
-✅ **Closed:** `A-002` ruled forward · `C-7` ruled · `R-4a` closed · `P1-2`'s transport built.
+✅ **Closed this run:** `A-004` **run** · the secret scan's identifiers **adjudicated** · `A-002` ruled forward · `C-7` ruled · `R-4a` closed · `P1-2b`, `P1-3`, `P1-4` built.
 
 ---
 
@@ -92,7 +124,8 @@ Fixed, and there is now a leg that calls the **composed core** with real admin-m
 - ⚠️ **Authority Lock §19.1's census reads `15 migrations · 36 functions`** against a live **25 · 49**. ✅ **You ruled *record, do not fix*.**
 - **`RENDERED CAPTURE` `NOT-RUN`** on every authenticated surface · **`NOT APPLICABLE (G-1)`** on the three unframed ones.
 - **Phase 8/11 gap stands** · **`test:integration` 47/3/3, exit 1** (suite staleness) · ⛔ **`09` refuses its canonical route** (`C2C-007`) · **`A-044` knowingly unmet for `28`**.
+- ⚠️ **`prove:hero-8/11` compare SHELLS** and are not evidence for the evidence surfaces.
 
 ## ▶ Next
 
-⛔ **NONE. STOPPED.** Part 1 is complete; you walk the chain manually before Part 2.
+⛔ **NONE. STOPPED.** **Part 2 comes as its own instruction.**
