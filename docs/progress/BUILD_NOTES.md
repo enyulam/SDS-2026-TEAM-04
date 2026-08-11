@@ -6843,7 +6843,7 @@ Recorded together because they are the same discipline seen from both sides of t
 | Blobs scanned | **1,941** (134 MB), `seen === blobs.length` asserted |
 | Tracked files scanned | **686** (29 MB) |
 | ⛔ **CREDENTIAL findings** | **ZERO** — no secret key, publishable key, API key, JWT, DB password, PEM block, PAT or AWS key id |
-| ⚠️ IDENTIFIER occurrences | **65** across **9** locations — two Supabase project refs and a loopback URL |
+| ⚠️ IDENTIFIER occurrences | **65** across **9** locations — and **exactly two values**: `BEST_COACH_HOSTED_PROJECT_REF` in **3 tracked documents**, and `NEXT_PUBLIC_SUPABASE_URL` (a **loopback** address, `http://127.0.0.1:…`) in `STATUS.md` |
 | CONTROL — working tree | ✅ **FIRED** on a planted `sb_secret_…`, probe removed |
 | CONTROL — history | ✅ **FIRED** on a planted secret in a scratch commit under a temp ref; ref deleted, `develop` never moved |
 
@@ -6872,4 +6872,20 @@ The first run reported **BLOCKED (65 + 13)**. Both halves were the instrument, n
 
 **Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No billable call, no dependency added.
 
-**Next step:** ⛔ **STOPPED.** The scan's IDENTIFIER findings go to the Operator before any push, under their own standing rule that **any** finding comes to them.
+#### 5b. ⚠️ WHAT THE IDENTIFIER FINDINGS ACTUALLY ARE, AND WHY ONE OF THEM IS NOT NOTHING
+
+⛔ **The frozen demonstration ref `zjukuffiuzkbiblmnuwl` is NOT among the findings.** It is not in `.env.local`, so it was never a needle — it is committed **deliberately**, as the guard needle `scripts/fixtures/hosted-target-guard.mjs` keys on, and it is **already on `origin/develop`**. Removing it would break the guard.
+
+**The dev hosted ref `poblcfbxxzgarclchzkx` is a different matter, and it is the one thing in this scan that is not already public:**
+
+| | |
+|---|---|
+| In the working tree | **3 tracked documents** — the two UI reconciliation adjudications and `STATUS.md` |
+| In `develop`'s history | **5 commits** touch it |
+| On `origin` | ⛔ **NO** — `git grep` on `origin/develop` returns **zero** files |
+
+▶ **So the push would disclose it for the first time.** ⚠️ **It is not a credential** — a Supabase project ref *is* the subdomain of the public API URL every browser request already carries, and the project is protected by RLS and by keys, not by the ref being unguessable. **But "not a credential" and "not a disclosure" are different claims**, and only the first is mine to make. ⛔ **Held for the Operator under their own standing rule that ANY finding comes to them.**
+
+⚠️ **A false-VIOLATION worth recording, caught during the same verification pass.** The post-write encoding check reported **mojibake present** in `BUILD_NOTES.md`. It was pre-existing at HEAD on lines 1097, 1138 and 1734 — and all three are the **`Q-28` incident narrative QUOTING `â€"` as an example of what to look for**. ▶ **A detector firing on the prose that documents the defect**, which is the same shape as `prove:hero-10`'s bare `/evidence/i` and as `A-052`'s prohibited bare-word rating regex. The check was right to fire and the reading of it had to go one step further.
+
+**Next step:** ⛔ **STOPPED.** The scan's IDENTIFIER finding goes to the Operator before any push.
