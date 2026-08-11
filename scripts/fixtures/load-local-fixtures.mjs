@@ -32,6 +32,7 @@
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
+import { findLostLiterals, nonAsciiLiterals } from './encoding-integrity.mjs'
 import { createRequire } from 'node:module'
 import os from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -652,8 +653,82 @@ function runSqlFile(relativePath, psqlVars = {}) {
     )
   }
 
+  assertNonAsciiSurvived(relativePath, sql)
+
   return result.stdout || ''
 }
+
+/**
+ * ⛔ BYTE-LEVEL ENCODING ASSERTION — Q-28, and it exists because this project
+ *    shipped corrupt fixture data for days without anyone registering it.
+ *
+ * TWO CLASS MODULE TITLES CARRIED A LITERAL `???` where an em dash belonged —
+ * three ASCII `?` (`3f 3f 3f`) standing in for the three UTF-8 bytes of
+ * `U+2014`. That is the signature of a DECODE-THEN-ENCODE round trip through
+ * a single-byte codepage: the file's bytes were read as Latin-1 and written
+ * back through a console encoding that had no glyph for the result.
+ *
+ * ⚠️ THE FIRST DIAGNOSIS BLAMED THIS LOADER AND THE MEASUREMENT REFUTED IT.
+ *    `runSqlFile` round-trips `U+2014` intact — proven by piping an em dash
+ *    through this exact `spawnSync` + `input` + `encoding: 'utf8'` mechanism
+ *    and reading `e28094` back out of `convert_to(…, 'UTF8')`. The corruption
+ *    entered by some other, manual route. ▶ **So the fix is not an encoding
+ *    change to a path that was already correct — it is an ASSERTION, because
+ *    a path that is clean today is not a guarantee and the next load may not
+ *    go through this function at all.**
+ *
+ * WHAT IT CHECKS. Every non-ASCII character the SQL file contains must be
+ * present in the database afterwards. It re-reads the catalogue rather than
+ * trusting the write: ⛔ **the load that corrupted those titles also reported
+ * success.**
+ */
+function assertNonAsciiSurvived(relativePath, sql) {
+  // Only the strings that carry non-ASCII are worth checking. Both this and
+  // the lost-literal decision live in `encoding-integrity.mjs` — a module
+  // with NO side effects, because importing THIS one runs `main()`.
+  const literals = nonAsciiLiterals(sql)
+
+  if (literals.length === 0) return
+
+  const probe = literals
+    .map((s) => `SELECT ${quoteSqlLiteral(s)}::text AS v`)
+    .join(' UNION ALL ')
+
+  const args = ['exec', '-i', DB_CONTAINER, ...PSQL_PREFIX, '-At']
+  const result = spawnSync('docker', args, {
+    input: `${probe};`,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    encoding: 'utf8',
+    windowsHide: true,
+    shell: false,
+  })
+
+  if (result.status !== 0) {
+    throw new SafeError(
+      `Encoding assertion could not run for scripts/fixtures/${relativePath}. ` +
+        'A round trip that cannot be measured is not a round trip that passed.',
+    )
+  }
+
+  const returned = (result.stdout || '').split(/\r?\n/).filter(Boolean)
+  const lost = findLostLiterals(literals, returned)
+
+  if (lost.length > 0) {
+    throw new SafeError(
+      `ENCODING CORRUPTION in scripts/fixtures/${relativePath}: ` +
+        `${lost.length} non-ASCII literal(s) did not survive the round trip. ` +
+        'This is the Q-28 class — a decode-then-encode pass through a single-byte ' +
+        'codepage turns each UTF-8 byte into `?`. Load the file through Node ' +
+        '(BOM-less UTF-8 on stdin), never through a shell pipe or PowerShell 5.1.',
+    )
+  }
+}
+
+/** Single-quote a literal for SQL. Never used on user input — fixture text only. */
+function quoteSqlLiteral(s) {
+  return `'${s.replace(/'/g, "''")}'`
+}
+
 
 /** Count fixture rows still present, using the ratified fixed UUIDs only. */
 function countExistingFixtureRows() {
