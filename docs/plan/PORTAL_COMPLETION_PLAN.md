@@ -321,7 +321,7 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 
 **Bucket `evidence` — private, created by migration** (`INSERT INTO storage.buckets`), carrying its own `file_size_limit = 104857600` and `allowed_mime_types = {video/mp4,video/quicktime}`. **No public bucket, ever.**
 
-⚠️ **`supabase/config.toml` currently reads `file_size_limit = "50MiB"` GLOBAL, and declares NO buckets** (the `[storage.buckets.images]` block is commented out) — **measured**. Two facts follow that decide the answer:
+⚠️ ~~**`supabase/config.toml` currently reads `file_size_limit = "50MiB"` GLOBAL, and declares NO buckets** (the `[storage.buckets.images]` block is commented out) — **measured**.~~ ✅ **CORRECTED 2026-08-12 under a bounded Operator instruction. THIS "MEASURED" CLAIM IS NOW FALSE and was the reason to correct it: `config.toml` reads `file_size_limit = "100MiB"` GLOBAL — the §4 proposal below was IMPLEMENTED. The only `50MiB` remaining in that file is inside the COMMENTED-OUT `[storage.buckets.images]` example block, which declares nothing.** ⚠️ **A stale measurement is worse than a stale opinion — "measured" is exactly the word a later reader trusts without re-checking, which is why this one is struck rather than quietly updated.** The `evidence` bucket IS now declared, by migration rather than by `config.toml`. Two facts follow that decided the answer:
 
 1. ⛔ **`config.toml` is LOCAL-DEV ONLY.** It does not travel to a hosted project. ▶ **A ceiling that exists only there is not a boundary** — the durable one is the `storage.buckets` **row**, which a migration creates and which applies wherever the migration is applied.
 2. **The global limit is a CAP, not a grant.** Raising it to `100MiB` widens nothing by itself — but it **removes the accidental 50 MiB backstop** currently sitting under every future bucket.
@@ -366,7 +366,7 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 1. ⛔ **The `storage.objects` INSERT policy** — the first client-direct write in the product (§5). **Required by `C-16`'s resumable condition**; there is no route satisfying both it and a strict reading of `ADR-3`. ▶ **This is the ruling that actually matters in this family.**
 2. **`UNIQUE (report_id)` — one clip per report.** `D-5` says *"tagged to exactly one session report"*, which constrains the clip's target, **not the count**. ▶ **One is recommended**: management *"views it"*, singular, and no frame answers which of several a parent would see. **Removal plus re-upload covers the correction case.**
 3. **Removal is Trainer-only and pre-`submitted`.** ⚠️ **The actor is NOT my choice — `CLAUDE.md` §6 already forbids a management write reaching evidence**, so management removal is ruled out independently of `D-5`. **The pre-`submitted` window IS a choice**: after submission a parent may already have seen the clip. **Recommended, and it needs your word.**
-4. **`config.toml`'s global `50MiB` → `100MiB`.** Local-dev only, but without it no local proof of the ceiling can run. ▶ **The durable ceiling is the bucket row**, and the invariant in §4 is what stops the raise from mattering elsewhere.
+4. ~~**`config.toml`'s global `50MiB` → `100MiB`.**~~ ✅ **DONE — `config.toml` reads `100MiB` (verified 2026-08-12).** Local-dev only, but without it no local proof of the ceiling can run. ▶ **The durable ceiling is the bucket row**, and the invariant in §4 is what stops the raise from mattering elsewhere.
 
 ##### 9 · What this family does NOT contain
 

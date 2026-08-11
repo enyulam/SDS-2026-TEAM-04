@@ -1310,8 +1310,10 @@ recovery procedure exists; long-lead Operator inputs are requested.
 - **Files/systems** — None.
 - **Owner** — Operator.
 - **Steps** — Present for ruling: 1) `scan_status` vocabulary (**no ratified vocabulary exists
-  anywhere**). 2) Retention period. 3) The **500MB vs 50MiB** conflict (`config.toml` currently
-  says `50MiB`). 4) A-038 reconciliation for Management evidence review. 5) **The `consent_records`
+  anywhere**). 2) Retention period. 3) ~~The **500MB vs 50MiB** conflict (`config.toml` currently
+  says `50MiB`).~~ ✅ **CLOSED — `C-16` ruled 100 MiB (`104857600`), 2026-08-11; corrected 2026-08-12
+  under a bounded Operator instruction. ⚠️ The parenthetical was DOUBLY false by the end: the
+  conflict was settled AND `config.toml`'s global now reads `100MiB`.** 4) A-038 reconciliation for Management evidence review. 5) **The `consent_records`
   instrument** — structurally mandatory the moment evidence media ships, because A-001 gate 2 means
   a written policy cannot gate a signed URL, and the table does not exist. 6) **Whether the Step 7H
   audit action registry may be extended for evidence — this requires an amendment.** 7) Whether

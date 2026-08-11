@@ -420,7 +420,7 @@ Columns: **ID · ISSUE · AUTHORITATIVE SOURCES · CONFLICTING SOURCES · CURREN
 - **Current implementation:** **nothing** — zero buckets, zero storage policies, zero tables, zero code
 - **Historical decision:** correctly absent; safeguards armed, nothing invented
 - **FINAL RULING:** **REQUIRED. Trainer uploads. Private hosted Supabase Storage, signed URLs only. Management review-only. PARENT PROJECTION RULED OUT** — the operator's condition ("unless the canonical PDFs explicitly require it") is **not met**; neither PDF mentions evidence at all. Consistent with A-002's text-only Phase 1 parent report; A-001 remains armed but unactivated.
-- **Operator decision required?** Resolved. Four Phase B rulings remain: `scan_status` vocabulary, retention period, 500MB vs 50MiB, A-038 reconciliation
+- **Operator decision required?** Resolved. ~~Four Phase B rulings remain: `scan_status` vocabulary, retention period, 500MB vs 50MiB, A-038 reconciliation~~ ✅ **CORRECTED 2026-08-12 under a bounded Operator instruction — this list is stale in three of its four items.** **`500MB vs 50MiB` is CLOSED** (`C-16` = 100 MiB). **`scan_status` is `NOT APPLICABLE`, not pending** (`C-3` removed the separate scan gate). **A-038 was reconciled** (`D-1` — management reads the nine ratings, READ ONLY). **Only the retention period remains open.**
 - **Affected documents:** Authority Lock §8, §21
 - **Affected screens:** 08, 10, 19 build it; **33 stays omitted**; 13 Class Health Summary is now unblocked
 - **Implementation impact:** largest single Phase B item — table, bucket, policies, 3 RPCs, module, port, UI, and the A-003 must-fail test matrix

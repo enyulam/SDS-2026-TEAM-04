@@ -45,7 +45,7 @@
 | **G-5** | Trainer name on a Parent surface | ✅ **YES, ALLOWED.** Parents know who teaches their child; withholding it is meaningless secrecy. The same datum is already disclosed on `29` and `06`. **It is not a rating and not derived from one** | Parent projections may carry the assigned trainer's display name |
 | **G-6** | Room / location | ✅ **YES.** One column, no governance weight | New schema in **Phase 0B** |
 | **G-7** | `Main:` / `Assist.` staff slots | ✅ **BUILD `Main:`** · ⛔ **LEAVE `Assist.` OUT.** The TA persona stays deferred (A-014); **do not extend `centre_membership_role`** | `Main:` from Phase 0A. `Assist.` becomes a `REGISTERED-OMISSION` on `05` |
-| **G-8** | Class video evidence | ⛔ **CONFIRMED OUT, unchanged** | `REGISTERED-OMISSION` on `08`. **The frame's "500MB" is never implemented**; G-05's 50 MiB governs if evidence is ever authorized elsewhere |
+| **G-8** | Class video evidence | ⛔ **CONFIRMED OUT, unchanged** | `REGISTERED-OMISSION` on `08`. **The frame's "500MB" is never implemented**; ~~G-05's 50 MiB governs if evidence is ever authorized elsewhere~~ ✅ **`C-16`'s 100 MiB governs — corrected 2026-08-12, bounded Operator instruction. Evidence WAS subsequently authorized elsewhere (`D-5`) and is SHIPPED; the `REGISTERED-OMISSION` on screen `08` is UNCHANGED — G-8 kept the uploader off THIS screen, and that omission stands** |
 
 **Screen `11` scope:** the Operator confirmed the earlier judgement — **Management completes the workflow without ever loading `/management`**, so `11` belongs to the portal plan and the per-report rating chip goes with it. **G-2 covers that chip's class inside the hero chain.**
 

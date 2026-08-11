@@ -7232,3 +7232,49 @@ The baseline was captured **before** the push, so this is a comparison rather th
 - `CLAUDE.md` — the G-05 row, annotate-never-delete. **No other governance file edited.**
 - `docs/progress/STATUS.md` — snapshot updated: hosted at 25 migrations, the deployed dev environment, and the Part 1 verification with its three limits.
 - `docs/progress/BUILD_NOTES.md` — this entry. **No migration, no schema, no fixture, no deployment in this window.**
+
+---
+
+## 2026-08-12 — the ten stale sites CORRECTED · two LAPSED LIMITS in the handoff itself
+
+- **Branch:** `develop`. **Scope:** governance corrections only. **No code, schema, fixture or deployment change.**
+
+### ⛔ THE HANDOFF CARRIED TWO LIMITS THAT HAD ALREADY LAPSED
+
+**Reported by the Operator.** `OPERATOR_HANDOFF.md` claimed (a) `SUPABASE_DB_POOLED_URL` was *"verified replaced, not verified working"* and (b) `report_evidence` had *"never held a row in any environment"*. **Both were true when written and false when read.**
+
+- **(a) is now VERIFIED WORKING** — the Operator drove the full chain on the deployed dev app, which **exercises the trusted-store write through that pooled URL**. Metadata only ever proved *modification*; **execution proves function.**
+- **(b) is FALSE** — a clip was attached **locally** during the Part 1 walkthrough. ⚠️ **Scope stated precisely: LOCAL. Hosted `report_evidence` was 0 rows when last measured, and no hosted evidence write is claimed.**
+
+⚠️ **THE IRONY, RECORDED BECAUSE IT IS THE POINT:** **a handoff deliberately written to LEAD WITH ITS LIMITS carried two limits that had already lapsed.** ▶ **Seventh instance of the stale-restatement shape — and the first inside the very artifact built to prevent it.** The cause is structural, not clerical: **the handoff was derived from canonical records written BEFORE the Operator's walkthrough finished, and derivation freezes at its source's timestamp.** H-8's *"strictly derived"* rule guarantees the handoff never *originates* a false fact; **it cannot guarantee its sources were current at the moment of derivation.** A derived artifact is only ever as fresh as its last derivation.
+
+### The ten stale sites — CORRECTED under a bounded Operator authorization naming all ten
+
+Annotate-never-delete throughout. **`C-16` (100 MiB, `104857600`) supersedes `G-05` (50 MiB).**
+
+| Site | Correction |
+|---|---|
+| **`FINAL_MVP_AUTHORITY_LOCK.md:1353`** | ⛔ **PRIORITY — it carried a SETTLED question as an OPEN register row.** Closed as **RULED**, not open. ▶ **An open register row is an active invitation to re-decide something already ruled** — the most dangerous stale form, because it does not merely mislead, it *solicits* rework |
+| `AUTHORITY_LOCK.md:271` | Conflict closed; ⚠️ **the sentence's actual point PRESERVED** — no frame-derived format/size source is ratified authority, and A-022 is untouched |
+| `AUTHORITY_LOCK.md:273` | Conflict closed; ⚠️ **its two other preconditions expressly left standing** — `scan_status` (now `NOT APPLICABLE` via `C-3`) and the absent `evidence_media` consent table (`C-2`, `G-05`) |
+| `AUTHORITY_LOCK.md:774` | *"must be resolved by ruling before implementation"* → **it was, and the shipped bucket carries the ruled values.** The precondition was satisfied, exactly as written |
+| `FINAL_MVP_EXECUTION_PLAN.md:1313-1314` | Open decision #3 closed. ⚠️ **Was DOUBLY false** — the conflict was settled *and* its `config.toml` parenthetical was wrong |
+| `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md:423` | *"Four Phase B rulings remain"* → **three of the four are closed**; only the retention period is open |
+| `FINAL_MVP_HERO_CHAIN_RULINGS.md:165` **and `:178`** | ⚠️ **`:178` was MISSED by the first pass and caught only by re-running the sweep.** Both corrected; **Ground 1 itself is untouched — the frame's `500 MB` is still never implemented, since `C-16` raised the limit *"but NOT to 500 MB"*** |
+| `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md:172,174` | Supersession banner added above; **the original ruling text is retained UNEDITED as the record of what was ruled on 2026-08-08.** ⛔ **A ruling instrument records what was ruled; it is annotated, never rewritten** |
+| `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md:48` · `UI_REFERENCE_FINAL_MVP/08-…:496` | Number corrected; ⛔ **both `REGISTERED-OMISSION`s on screen `08` PRESERVED AND CITED** — evidence was later authorized (`D-5`) and shipped, but **G-8 keeps the uploader off THIS screen** |
+| `docs/plan/PORTAL_COMPLETION_PLAN.md:324` **and `:369`** | The false **"measured"** claim struck — `config.toml` reads `100MiB` globally, and the only `50MiB` left there is a **commented-out example**. ⚠️ **A stale MEASUREMENT is worse than a stale opinion: "measured" is the word a later reader trusts without re-checking** |
+
+### ⚠️ "ZERO REMAINING" REQUIRED A DIFFERENT MEASUREMENT THAN THE ONE ASKED FOR
+
+⛔ **A raw string sweep CANNOT reach zero under annotate-never-delete, because the method PRESERVES the struck text.** The raw count in fact went **UP, 23 → 29**, and every added hit was a *correction*. ▶ **Reporting that as failure would be as wrong as reporting a raw zero as success** — the meaningful quantity is **LIVE stale assertions**, which needs classification, not counting.
+
+The sweep was rebuilt to classify **LIVE / ANNOTATED / EXEMPT**, with a control that plants one live claim and one annotated claim and **refuses to run unless it separates them**.
+
+**Final: `LIVE = 0` · `ANNOTATED = 21` · `EXEMPT = 7` · 687 tracked files · exit 0.**
+
+⚠️ **The classifier caught TWO of my own defects before reporting zero** — first `OPERATOR_HANDOFF.md:62`, still describing the earlier run; then my own *replacement* for that line, which embedded a typographic illustration whose `**` defeated the digit-anchor and **re-triggered the detector**. ▶ **The fix was to remove the literal, not to widen the classifier around it** — annotating a detector into silence is how a gate stops measuring.
+
+### Files changed
+
+`FINAL_MVP_AUTHORITY_LOCK.md` · `FINAL_MVP_EXECUTION_PLAN.md` · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md` · `FINAL_MVP_HERO_CHAIN_RULINGS.md` · `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md` · `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md` · `docs/plan/PORTAL_COMPLETION_PLAN.md` · `UI_REFERENCE_FINAL_MVP/08-trainer-ai-report-generation/implementation-notes.md` · `docs/progress/OPERATOR_HANDOFF.md` · this log.

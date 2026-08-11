@@ -493,7 +493,7 @@ Once Phase 0B/4 landed, that sentence was **false about lesson** — and, worse,
 
 **All preserved, and each is one line away from being reinstated by a later phase "matching the frame better"** — which plan §12 item 1 calls a phase **FAILURE** even when the result looks closer to the design:
 
-⛔ **Term** (G-4) · ⛔ **Overall Grade** (G-2) · ⛔ **the 500MB evidence uploader** (G-8 — *"the frame's 500MB is never implemented in any form"*; G-05 sets 50 MiB if evidence is ever authorized) · ⛔ **"Confirm & Submit"** and ⛔ **"Save as draft"** (A-033/A-036 — **the trainer approves and does not publish**, and the stored draft already exists via the governed store path, so a second save affordance would be an invented mutation) · ⛔ the frame's **four-tile** Performance Summary, still rendered across **all nine** governed snapshots (A-017).
+⛔ **Term** (G-4) · ⛔ **Overall Grade** (G-2) · ⛔ **the 500MB evidence uploader** (G-8 — *"the frame's 500MB is never implemented in any form"*; ~~G-05 sets 50 MiB if evidence is ever authorized~~ ✅ **`C-16` sets 100 MiB; corrected 2026-08-12, bounded Operator instruction. Evidence has since been authorized (`D-5`) and shipped — ⛔ but this `REGISTERED-OMISSION` is UNCHANGED: G-8 keeps the uploader off THIS screen**) · ⛔ **"Confirm & Submit"** and ⛔ **"Save as draft"** (A-033/A-036 — **the trainer approves and does not publish**, and the stored draft already exists via the governed store path, so a second save affordance would be an invented mutation) · ⛔ the frame's **four-tile** Performance Summary, still rendered across **all nine** governed snapshots (A-017).
 
 **`P6-5` additionally refuses term and roll-up at the DATA layer** — no such field exists on the session DTO to bind a row to.
 

@@ -162,7 +162,7 @@ The frame's `06` lesson strip draws **KEY FOCUS** chips (*Vocal projection · To
 > 
 > ⚠️ **The honest limitation is stated, not hidden:** streamed video is technically retrievable by a determined user with browser tooling. The product provides **no download affordance**; **it does not claim technical impossibility, and no surface may say otherwise.**
 > 
-> **Ground 1 survives and is now the operative number:** the frame's **500 MB** is still **never implemented** against `G-05`'s ruled **50 MiB**. **Ground 2 is discharged** — `D-5` is the authorization Amendment 008 withheld. **Ground 3's hero-slice exclusion stands as a statement about the HERO SLICE**, which is closed; `D-5` belongs to the PORTAL COMPLETION PLAN.
+> **Ground 1 survives and is now the operative number:** the frame's **500 MB** is still **never implemented** against ~~`G-05`'s ruled **50 MiB**~~ ✅ **`C-16`'s ruled 100 MiB (`104857600`) — corrected 2026-08-12 under a bounded Operator instruction. ⚠️ GROUND 1 ITSELF IS UNTOUCHED: the frame's `500 MB` is STILL never implemented, because `C-16` raised the limit *"but NOT to 500 MB"*. Only the number the frame is measured AGAINST changed.** **Ground 2 is discharged** — `D-5` is the authorization Amendment 008 withheld. **Ground 3's hero-slice exclusion stands as a statement about the HERO SLICE**, which is closed; `D-5` belongs to the PORTAL COMPLETION PLAN.
 > 
 > ⛔ **`A-014` IS UNCHANGED: the TA / `Assist.` persona stays deferred and `centre_membership_role` is NOT extended.** `D-5` is independent of it — the ruled uploader is the **Trainer**.
 > 
@@ -175,7 +175,7 @@ The frame's `06` lesson strip draws **KEY FOCUS** chips (*Vocal projection · To
 
 **Three grounds, the third decisive:**
 
-1. **A direct numeric contradiction.** The frame says **500 MB**; Operator ruling **G-05** sets **50 MiB**. The frame is visual authority with **no functional rank**, so the ruling wins — **and the divergence is recorded, never silently applied.** ⚠️ **The frame's "500MB" is never implemented in any form.**
+1. **A direct numeric contradiction.** The frame says **500 MB**; ~~Operator ruling **G-05** sets **50 MiB**~~ ✅ **operator ruling `C-16` sets 100 MiB (`104857600`) — corrected 2026-08-12, bounded Operator instruction; `G-05`'s 50 MiB is superseded. ⚠️ THE CONTRADICTION IS UNCHANGED IN KIND, only in magnitude: `C-16` raised the limit *"but NOT to 500 MB"*, so the frame's figure is still refused and the reasoning below stands verbatim.** The frame is visual authority with **no functional rank**, so the ruling wins — **and the divergence is recorded, never silently applied.** ⚠️ **The frame's "500MB" is never implemented in any form.**
 2. **Nothing is authorized to build.** Evidence media **is** a Final MVP requirement and the **Trainer is the ruled uploader** (Authority Lock §8, §8.1) — but **Amendment 008 ratified two audit action strings and expressly authorized no evidence schema, bucket, policy, grant, RPC, UI or migration.**
 3. ⚠️ **`FINAL_MVP_G06_GROUNDING_RULING.md` already ruled evidence media OUT of the hero slice**, with every A-001/A-003/A-004 safeguard intact and the Step 7H audit registry held at **16**.
 

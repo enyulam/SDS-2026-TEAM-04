@@ -59,7 +59,7 @@ Operator instruction.** No hard gate was hit at the stop, and context was suffic
 | `npm run fixtures:hosted-push --dry-run`, then live | **exit 0.** 8 migrations applied, each reporting its own in-file assertions (`H0A-1..7`, `H0B-1..10`, `H1-1..7`, `H7-1..8`, `D1-1..9`, `E1-E10`, `P5-1..5`, `T1..T5`) |
 | Post-push census vs local | **PASS** — 25/28/49/12, identical ordered ledgers |
 | `report_cancel_draft` (governed RPC) | **PASS** — `drafting`→`observation_saved`, `lock_version` 3→4, +1 audit event, 9 ratings and the observation intact |
-| 50 MiB restatement sweep | **PASS after its control caught the detector** — 23 hits / 12 files, 687 tracked files |
+| Evidence file-size restatement sweep | **PASS — ZERO LIVE STALE ASSERTIONS**, 687 tracked files. Classified: 21 ANNOTATED (struck in place, preserved by design) · 7 EXEMPT (append-only log · the superseding ruling itself · a commented-out config example) · **0 LIVE**. ⚠️ **A RAW count cannot reach zero under annotate-never-delete**, so the classifier carries a control proving it separates a live claim from an annotated one. Its first control caught the detector matching the tail of a one-hundred-and-fifty-MiB string |
 
 ## NOT-RUN this session, with reasons — never merged with the above
 
@@ -73,15 +73,12 @@ Operator instruction.** No hard gate was hit at the stop, and context was suffic
 
 ## Open gates · undiagnosed · unratified
 
-- ⛔ **Ten stale `50 MiB` restatements are RECORDED, NOT FIXED.** Only `CLAUDE.md`'s G-05 row was
-  authorized. **The clause preventing the fix:** `CLAUDE.md` §12 — editing ratified authority needs
-  its own bounded instruction naming the files. Sites: `FINAL_MVP_AUTHORITY_LOCK.md:271,273,774,1353` ·
-  `FINAL_MVP_EXECUTION_PLAN.md:1313-1314` · `FINAL_MVP_PHASE_A_GOVERNANCE_RECONCILIATION.md:423` ·
-  `FINAL_MVP_HERO_CHAIN_RULINGS.md:165` · `FINAL_MVP_PHASE0_OPERATOR_RULINGS.md:172,174` ·
-  `docs/plan/HERO_CHAIN_COMPLETION_PLAN.md:48` · `docs/plan/PORTAL_COMPLETION_PLAN.md:324` ·
-  `UI_REFERENCE_FINAL_MVP/08-…/implementation-notes.md:496`.
-  ▶ **`AUTHORITY_LOCK.md:1353` is the most dangerous**: it presents a **settled** question as an
-  **open register row**, which invites a session to re-decide what `C-16` already ruled.
+- ✅ **The ten stale `50 MiB` restatements are CORRECTED (2026-08-12, bounded Operator instruction
+  authorizing all ten).** Annotate-never-delete throughout. `AUTHORITY_LOCK.md:1353` — which carried
+  a **settled** question as an **OPEN register row**, inviting a session to re-decide what `C-16`
+  ruled — is **CLOSED as RULED**. `PORTAL_COMPLETION_PLAN.md:324`'s false **"measured"** claim is
+  struck: `config.toml` reads `100MiB` globally. **Zero live stale assertions remain**; raw string
+  hits persist **by design**, because annotate-never-delete preserves the struck text.
 - **`B-G06-DET-1`** — open, and untested against real provider prose by any automated harness.
 - **Standing credential-custody rule (Operator, 2026-08-12):** credentials go into files and
   dashboards **by the Operator**; the session reads and verifies; **never through chat, either
@@ -90,11 +87,21 @@ Operator instruction.** No hard gate was hit at the stop, and context was suffic
 
 ## Claims made earlier in this run that execution does NOT prove
 
-- **`SUPABASE_DB_POOLED_URL` is verified REPLACED, not verified WORKING.** `updatedAt > createdAt`
-  proves modification, not that the connection string is valid. **Only a real draft through the
-  deployed system proves that** — the Operator's walkthrough is the sole evidence it functions.
-- **`report_evidence` is 0 rows.** The evidence substrate is deployed but **no evidence object has
-  ever been written in any environment**.
+- ⛔ **TWO LIMITS THAT LAPSED BEFORE THIS FILE WAS FIRST READ — corrected 2026-08-12 on Operator
+  report.** ⚠️ **The irony is recorded deliberately: a handoff written to LEAD WITH ITS LIMITS
+  carried two limits that had ALREADY LAPSED at the moment of writing.** Both were true when
+  drafted and false when read — **the same stale-restatement shape this project has now caught
+  seven times, occurring inside the very artifact built to prevent it.** ▶ **The lesson is
+  structural, not clerical: an artifact is only as current as its LAST DERIVATION, and this one
+  was derived from records written before the Operator's walkthrough had finished.**
+  - ~~`SUPABASE_DB_POOLED_URL` is verified REPLACED, not verified WORKING.~~ ✅ **VERIFIED WORKING.**
+    The Operator drove the full chain on `best-coach-dev.vercel.app`, which **exercises the
+    trusted-store write through that pooled URL**. `updatedAt > createdAt` only ever proved
+    modification; **the walkthrough is the execution that proves the connection string functions.**
+  - ~~`report_evidence` is 0 rows … no evidence object has ever been written in any environment.~~
+    ✅ **FALSE — a clip was attached LOCALLY during the Part 1 walkthrough**, so the evidence
+    substrate has now been exercised end to end. ⚠️ **Scope, precisely: LOCAL. The HOSTED
+    `report_evidence` was 0 rows when last measured**, and no hosted evidence write is claimed.
 - The `pgdelta-target-ca.crt` error during the migration push is a **post-push catalogue-caching**
   failure, **not** a migration outcome — which is why the push was verified **by census, not by
   exit code**.

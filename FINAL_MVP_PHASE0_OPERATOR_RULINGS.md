@@ -169,7 +169,9 @@ Where the model requires a scan-state field, use a **truthful non-assertive stat
 
 **Do not create** `retention_policies` · `erasure_requests` · scheduled purge infrastructure. **Do not claim automated PDPA retention exists.** *(Consistent with `CLAUDE.md` §3.1's correction that no PDPA table exists and none may be created without an amendment.)*
 
-### 3. File size — **50 MiB per file**
+### 3. File size — ~~**50 MiB per file**~~ ✅ **SUPERSEDED BY `C-16` — 100 MiB per file**
+
+> ⛔ **SUPERSEDED 2026-08-11 by operator ruling `C-16`** (`FINAL_MVP_PORTAL_DECISIONS.md`); annotation added 2026-08-12 under a bounded Operator instruction. **The ruled maximum is 100 MiB (`104857600`).** `C-16`'s recorded reason: **`G-05`'s 50 MiB was chosen *"without video in mind — a lapsed premise, not a licence for the frame's number"***. ⛔ **`C-16` raised the limit "but NOT to 500 MB", so the refusal of the frame's figure below is PRESERVED and still binding.** The requirement to **enforce at the earliest practical boundaries** and to **prove oversize rejection** is likewise preserved and now applies at 100 MiB. **The original ruling text is retained below unedited, as the record of what was ruled on 2026-08-08.**
 
 **Maximum evidence object size: 50 MiB per file.** Keep the current safer posture; **do not raise it to 500 MB.** Enforce consistently at the earliest practical server/storage boundaries and **prove oversize rejection**. *(This resolves the recorded 500MB-vs-50MiB conflict in favour of the `config.toml` value already in place.)*
 
