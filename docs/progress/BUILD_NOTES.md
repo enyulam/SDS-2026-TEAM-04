@@ -7052,3 +7052,63 @@ The previous run blocked on **2 unadjudicated identifier occurrences**, both int
 - **AWAITING_OPERATOR** — replace `SUPABASE_DB_POOLED_URL` in `best-coach-dev` with the post-rotation value on port **6543**. Verified afterwards by `updatedAt > createdAt`, which is the only signal available for a value the session may not read.
 - **Then:** `npm run prove:no-secrets` → push `develop` → git-triggered build → confirm deployment target is **Production** (the behavioural proof that Production Branch = `develop` took) → fresh comparison of `best-coach-mvp` against the captured baseline.
 - **Migration or schema changes:** none. **Cleanup / rollback state:** no partial mutation.
+
+---
+
+## 2026-08-12 — `best-coach-dev` DEPLOYED · two standing verification disciplines
+
+- **Track / workstream:** hosted dev environment (`best-coach-dev`). **Branch:** `develop`. **Worktree:** main (only).
+- **Starting HEAD:** `f2200e8` → **ending HEAD:** this commit. **Pushed:** `develop` `10328ec` → `f2200e8`. **`main` untouched at `5eb84bc`**, confirmed by querying `origin` rather than trusting push output.
+
+### ✅ DEPLOYED — the second Vercel project is live on `develop`
+
+| | |
+|---|---|
+| Project | `best-coach-dev` · `prj_w5KUXbEf80lVtCYLAIbFCbV0QjI4` |
+| Deployment | `dpl_GAaPfT44oWq3vzrezhnExUh5Noau` |
+| URL | `https://best-coach-dev.vercel.app` |
+| **Target** | **`production`** |
+| **Commit built** | **`f2200e88288aa5c0ac4ffacfcfa189b2fe6c7ecb`** — byte-identical to the pushed `develop` tip |
+| Branch built | `develop`, from `enyulam/best-coach-mvp` |
+| Build | Queued → Building → **Ready**, 46+ output items, same route shape as the demonstration project |
+
+⚠️ **The Production Branch setting was proven BEHAVIOURALLY, because it is not CLI-readable.** `vercel project inspect` surfaces neither the connected repository nor the branch, so *"the setting took"* could not be verified by reading it. The proof used instead: a push to `develop` produced a deployment whose **`target` is `production`** and which carries the alias **`best-coach-dev-git-develop-…`**. ▶ **A behavioural proof was available precisely because a stated failure condition existed** — had the target come back `Preview`, the run was to stop. **A check with no failing branch would have proven nothing.**
+
+**Demonstration project — fresh comparison against the baseline captured before any write.** Identical on every field: `dpl_payTudZqPUm7kYs5sQ9PMDx6b2x1` → `best-coach-ldu3j6aan-…`, target `production`, status `Ready`, created Mon 10 Aug 2026 03:31:58 SGT, all three `…-git-main-…` aliases. Both aliases serve **HTTP 200**. **The frozen build is untouched, and the two projects now build different branches against different databases.**
+
+### ⛔ DISCIPLINE — "PRESENCE IS NOT FRESHNESS"
+
+**For a value the session may not read, METADATA IS THE ONLY SIGNAL — and it is sufficient if the right question is asked of it.**
+
+- A listing that shows a variable's **name** proves the name. It proves **nothing** about the value, and nothing about **when** the value was last written.
+- **`createdAt === updatedAt` is POSITIVE PROOF OF NON-MODIFICATION.** It is a strictly stronger statement than *"I could not confirm it changed"* — the first is a measurement, the second is an absence of one, and **only the first can block.**
+- The corroborating evidence matters as much as the equality: the timestamp sat inside the **monotonic sequence of the session's own write loop**, which identified not merely *that* it was unmodified but *which* write had last touched it.
+- **The control is the other seven variables.** They continued to report `createdAt === updatedAt` while the ninth moved — so the signal was shown to **discriminate**, rather than reporting movement everywhere or nowhere.
+
+▶ **This discipline is the direct cost of the custody rule, and it is what makes that rule affordable.** Handing credential placement to the Operator removes the session's ability to assert contents; without a metadata check, verification would degrade to *"a variable with that name exists"*, which is exactly the kind of green that hides a dead credential.
+
+⚠️ **Why it mattered here, concretely.** `SUPABASE_DB_POOLED_URL` is read at **RUNTIME** by `HostedTrustedDraftStore`, never at build time. A deployment made against the stale value would have **succeeded**, served pages, called the provider and run grounding — and then died at **persistence**, the last step. **A build-time gate cannot catch a runtime-only credential**, and a successful deployment is not evidence that one is valid.
+
+### ⛔ DISCIPLINE — A GUARD MUST MATCH THE DANGEROUS SHAPE, NOT THE FAMILIAR ONE
+
+The session's own pre-write guard fired on the literal `postgresql://` — **the scheme** — and so rejected a narrative sentence that merely named the scheme, while the shape it exists to catch is `user:password@`. ⚠️ **Both halves of that are failures, and the second is the serious one:** it produced a false positive on harmless prose *and* was never anchored to the component that carries the secret.
+
+**This is the same family as the two earlier catches in this workstream**, and the pattern is now explicit:
+
+| Guard | Matched | Should have matched |
+|---|---|---|
+| Env-var sourcing | the **key NAME** | the **value's target** |
+| Publication scanner | a **credential's shape** | also the **password embedded mid-URL** |
+| Pre-write guard | the **URL scheme** | the **`user:password@` segment** |
+
+▶ **Each matched the recognisable token rather than the dangerous one.** The fix is the same each time: **anchor the pattern to the component that carries the risk**, and **prove the detector fires** — the guard now plants a synthetic connection string and refuses to run at all if that control does not trip. **A guard that has never been seen to fail is not known to work.**
+
+### Files changed
+
+- `docs/progress/BUILD_NOTES.md` — this entry. **No migration or schema change.** No credential read, printed or written. Identifiers written as `<dev-ref>`.
+
+### Blockers / next
+
+- **None blocking.** `best-coach-dev` is live on `develop` against the dev database; `best-coach-mvp` remains on `main` against the frozen demonstration database.
+- ⚠️ **This commit is DELIBERATELY UNPUSHED.** Pushing it triggers a second production deployment of `best-coach-dev`, which would supersede the deployment reported above. **Push it with the next substantive change rather than spending a build on a docs-only commit** — or push deliberately, knowing a new deployment follows.
+- **Not performed, and reserved to the Operator:** walking the deployed application. The AI drafting path — provider call, grounding, and the trusted-draft persistence that consumes the rotated pooled URL — **has never been exercised in this environment** and remains unproven.
