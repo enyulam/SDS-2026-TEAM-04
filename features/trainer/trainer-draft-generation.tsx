@@ -12,13 +12,15 @@ import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import type {
   DraftGenerationContextDto,
-  ReportEvidenceClipDto,  RequestDraftSuccess,
+  ReportEvidenceClipDto,
+  RequestDraftSuccess,
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
 import { uploadEvidenceResumable } from "@/lib/frontend/evidence-upload";
+import { EvidenceClipPlayer } from "@/components/ui/evidence-viewer";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type FailureResult } from "./resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -1012,10 +1014,16 @@ function EvidenceAttachPanel({
               data-evidence-clip={clip.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-field border border-line bg-surface px-4 py-3"
             >
-              <span className="text-[0.78125rem] text-ink">
-                Recording attached · {clip.mediaType === "video/mp4" ? "MP4" : "MOV"} ·{" "}
-                {(clip.byteSize / (1024 * 1024)).toFixed(1)} MB
-              </span>
+              {/*
+                ⛔ THE DEFECT THE OPERATOR'S WALKTHROUGH ACTUALLY FOUND.
+                This region rendered "Recording attached · MP4 · 1.6 MB" and
+                a Remove control — and NO PLAYER. ▶ The one role that
+                uploads the clip was the one role that could not watch it,
+                while the parent surface had a player from the day P1-5
+                shipped. The attach persisted correctly; the surface simply
+                had no way to show what it had attached.
+              */}
+              <EvidenceClipPlayer clip={clip} mint={(id) => port.mintEvidenceViewUrl(id)} />
               {/*
                 ⛔ REMOVAL IS TRAINER-ONLY AND IS **NOT** LIMITED TO
                 PRE-SUBMITTED (Operator ruling). Removal WITHDRAWS media rather

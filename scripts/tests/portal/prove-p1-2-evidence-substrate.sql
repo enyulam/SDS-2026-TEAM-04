@@ -303,10 +303,23 @@ BEGIN
   PERFORM public.evidence_remove(v_ev);
   EXECUTE 'RESET ROLE';
 
+  -- ⚠️ SCOPED TO **THIS SUITE'S OWN CLIP**, AND IT WAS NOT BEFORE.
+  --
+  -- The original counted every `evidence.*` row in the table. That was
+  -- correct while the canonical database held none — and it went red the
+  -- moment the Operator's walkthrough attached two real clips, reporting
+  -- "5 written, expected 3" about events this suite never wrote.
+  -- ▶ **A leg that counts globally is measuring the world, not the thing it
+  --   is asserting about.** Same family as the before/after comparison whose
+  --   two sides were built by different code: the count was real, it just
+  --   wasn't a count of what the sentence claimed.
+  -- ⛔ Narrowed, NOT loosened: it still demands exactly three, and all three
+  --   must belong to this transaction's own evidence id.
   SELECT count(*) INTO v_n FROM public.audit_events
-   WHERE action IN ('evidence.attached', 'evidence.accessed', 'evidence.removed');
-  IF v_n = 3 THEN v_pass := v_pass + 1; RAISE NOTICE 'PASS P2a-12a -- all THREE new strings were accepted and written (non-vacuity for the verify leg)';
-  ELSE v_fail := v_fail + 1; RAISE WARNING 'FAIL P2a-12a -- % evidence events written, expected 3', v_n; END IF;
+   WHERE action IN ('evidence.attached', 'evidence.accessed', 'evidence.removed')
+     AND target_id = v_ev;
+  IF v_n = 3 THEN v_pass := v_pass + 1; RAISE NOTICE 'PASS P2a-12a -- all THREE new strings were accepted and written FOR THIS SUITE''S OWN CLIP (non-vacuity for the verify leg)';
+  ELSE v_fail := v_fail + 1; RAISE WARNING 'FAIL P2a-12a -- % evidence events written for this clip, expected 3', v_n; END IF;
 
   SELECT v.ok INTO v_ok FROM public.audit_verify_chain(v_centre) v;
   IF v_ok THEN v_pass := v_pass + 1; RAISE NOTICE 'PASS P2a-12b -- audit_verify_chain ACCEPTS a chain containing all three new actions';

@@ -104,7 +104,29 @@ const PROHIBITED = {
   "a Performance Summary (R-B5, Q-27 class)": /performance summary/i,
   "per-dimension ratings (A-038)": /ratings\[|dimensionRatings|ratingFor|competencyRating/i,
   "trainer notes (R-B5)": /coachNotes|trainerNotes|followUpNotes/i,
-  "evidence (R-B5, G-8)": /evidence/i,
+  /*
+   * ⚠️ THIS PIN MOVED AT P1-3, AND IT WAS REWRITTEN RATHER THAN DELETED.
+   *
+   * It read `"evidence (R-B5, G-8)": /evidence/i` — a bare word match on the
+   * whole surface — and it was CORRECT while no governed evidence read path
+   * existed. `P1-2` shipped one, `C-7` authorized its MANAGEMENT ARM, and
+   * `C-5` requires the clip be VISIBLE here before Approve & Submit. So the
+   * leg would now fail for exactly the right reason, which is precisely when
+   * deleting a leg quietly loses a measurement.
+   *
+   * ⛔ WHAT G-8 ACTUALLY REFUSES IS **CLASS FOOTAGE**, and that never ends.
+   *   The pin therefore narrows to the frame's class framing and its 500 MB
+   *   figure — `REGISTERED-OMISSION` — rather than to the word "evidence",
+   *   which now legitimately appears on this surface.
+   *
+   * ⚠️ A bare `/evidence/i` was always the weaker instrument anyway: it is
+   *   the same shape as the keyword sweep that matched prose, and it would
+   *   have fired on a comment explaining why evidence is absent.
+   */
+  "CLASS video evidence framing (G-8, and it never ends)": /class\s+video\s+evidence/i,
+  "the frame's 500 MB ceiling (C-16 ruled 100 MiB)": /500\s*MB/i,
+  "an evidence upload or removal control (CLAUDE.md §6 — management may view, never touch)":
+    /createEvidenceUploadTicket|confirmEvidenceAttach|removeEvidence|uploadEvidenceResumable/,
   "attendance (R-B5)": /attendance|isPresent/i,
   "Save as draft (R-B5)": /save as draft|saveDraft/i,
 };

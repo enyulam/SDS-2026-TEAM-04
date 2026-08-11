@@ -11,6 +11,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
+import { EvidenceRegion } from "@/components/ui/evidence-viewer";
 import { REPORT_PANEL_CONFIG } from "@/features/trainer/report-panel-config";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -20,6 +21,7 @@ import {
   type CorrectionRequestDto,
   type DimensionCode,
   type ManagementReviewDto,
+  type ReportEvidenceClipDto,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 
@@ -95,11 +97,28 @@ import type { UiActionResult } from "@/lib/frontend/contracts/result";
  *     UNRESOLVED (A-014)". True when written, SUPERSEDED 2026-08-08: evidence media IS a Final
  *     MVP requirement and the Operator named the TRAINER as the uploader
  *     (`FINAL_MVP_AUTHORITY_LOCK.md` §8) — and expressly NEVER Management (`CLAUDE.md` §1.1,
- *     §6). ⚠️ THE OMISSION HERE DOES NOT DEPEND ON THAT CITATION AND IS UNAFFECTED BY IT: no
- *     governed evidence read path exists — but even if one did,
- *     evidence and attendance substance are outside Management's read (A-038). Screen 10 keeps
- *     this region INERT for the Trainer; here it is OMITTED OUTRIGHT, because inert-with-reason
- *     is the treatment for an unbacked affordance, not for a prohibited one.
+ *     §6) as the UPLOADER, which is unchanged and still absolute.
+ *
+ *     ~~"⚠️ THE OMISSION HERE DOES NOT DEPEND ON THAT CITATION AND IS UNAFFECTED BY IT: no
+ *     governed evidence read path exists — but even if one did, evidence and attendance
+ *     substance are outside Management's read (A-038). Screen 10 keeps this region INERT for the
+ *     Trainer; here it is OMITTED OUTRIGHT, because inert-with-reason is the treatment for an
+ *     unbacked affordance, not for a prohibited one."~~
+ *     ⛔ STRUCK 2026-08-12 AT P1-3. ⚠️ **IT WAS WRONG ON THE RECORD, AND WRONG IN THE MOST
+ *     EXPENSIVE WAY: IT CALLED A PERMITTED READ PROHIBITED.** Both of its claims fail.
+ *       (1) A governed evidence read path DOES exist — `evidence_list_for_report`, shipped at
+ *           P1-2, and it carries an EXPLICIT MANAGEMENT ARM built under `C-7` precisely because
+ *           management must SEE the clip before Approve & Submit.
+ *       (2) `A-038` does not bar it. `A-038` governs what management may read of ASSESSMENT
+ *           SUBSTANCE and pre-approval draft content; `D-5`'s premise is that all three roles
+ *           watch the clip, and `C-5` states the management requirement in terms of VISIBILITY.
+ *     ▶ **A wrongly-cited prohibition is worse than a missing feature**: the missing feature gets
+ *     built, while the prohibition gets defended by the next reader. Preserved rather than
+ *     deleted so that defence cannot be mounted again from the record.
+ *     ⛔ WHAT IS UNCHANGED: management may VIEW and may NOT touch — no attach, no remove, no
+ *     download. That is `CLAUDE.md` §6, and it is not a `D-5` choice.
+ *     ⛔ ATTENDANCE SUBSTANCE REMAINS OUTSIDE MANAGEMENT'S READ. Only the evidence half of the
+ *     struck claim is corrected; the attendance half stands.
  *  P6 "Save as draft". No governed Management draft state exists — the eight authorized
  *     `report_status` values contain none (A-036), and the only Management write to content is
  *     the bounded wording save on the `/edit` sub-surface. A control implying a private
@@ -315,9 +334,26 @@ export function ManagementReportReview() {
   const [working, setWorking] = useState(false);
   const [actionFailure, setActionFailure] = useState<ActionFailure | null>(null);
   const [completed, setCompleted] = useState<"returned" | "submitted" | null>(null);
+  /** ⛔ P1-3. `null` = the read FAILED; `[]` = no clip. See the effect below. */
+  const [evidenceClips, setEvidenceClips] = useState<readonly ReportEvidenceClipDto[] | null>(null);
 
   useEffect(() => {
     let active = true;
+    /*
+     * ⛔ P1-3. The clip read runs BESIDE the review read and a failure here
+     * does NOT fail the review. It is a separate governed read with its own
+     * gate; collapsing them would let a refused clip read hide the report
+     * management came to review.
+     *
+     * ⚠️ `null` means THE READ FAILED, not "no clip" (Q-7). On THIS surface
+     * the distinction is the sharper one: a reviewer shown "no recording
+     * attached" when the read was merely refused would approve believing
+     * there was no evidence to look at.
+     */
+    void port.listReportEvidence(params.reportId).then((result) => {
+      if (!active) return;
+      setEvidenceClips(result.outcome === "success" ? result.data : null);
+    });
     void Promise.all([
       port.getManagementReview(params.reportId),
       port.listManagementPendingReviews(),
@@ -793,6 +829,37 @@ export function ManagementReportReview() {
               ))}
             </ul>
           </section>
+
+          {/*
+            ✅ P1-3 — BUILT 2026-08-12. `D-5`'s per-child clip, on the surface
+            where management performs the final quality review.
+
+            ⛔ `C-5` GOVERNS THE SHAPE, AND THE WORDING MATTERS: **VISIBILITY
+               IS REQUIRED · ATTESTATION IS ABSENT · IT IS ENFORCED BY
+               NOTHING.** The clip must be VISIBLE here before Approve &
+               Submit. ⚠️ NO server-side precondition is added to
+               `report_management_approve_and_submit`, and NO management
+               checklist item exists — `A-036`'s three-item Quality Checklist
+               is a TRAINER instrument and stays trainer-only.
+               ▶ **RENDERING THIS REGION SATISFIES NOTHING.** A later reader
+               must not take it for a gate, and `prove:portal-3` asserts the
+               non-gate EXPLICITLY — an unasserted non-gate is how a phantom
+               gate gets built later, and this project has four recorded
+               instances of a rule being "completed" because its status was
+               ambiguous.
+
+            ⛔ MANAGEMENT MAY VIEW AND MAY NOT TOUCH. No attach control, no
+               remove control, no download. `CLAUDE.md` §6 forbids any
+               management write reaching evidence, and that is not a `D-5`
+               choice — an assessment-level disagreement is a RETURN TO THE
+               TRAINER.
+          */}
+          <EvidenceRegion
+            clips={evidenceClips}
+            mint={(id) => port.mintEvidenceViewUrl(id)}
+            headingId="management-evidence-heading"
+            emptyLabel="No recording is attached to this report."
+          />
 
           {/* The frame's dark "Ready to approve?" panel — its "Save as draft" control omitted (P6). */}
           <section

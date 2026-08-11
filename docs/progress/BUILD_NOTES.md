@@ -6700,3 +6700,82 @@ Also: `CREATE OR REPLACE` **cannot add an OUT parameter** (it changes the return
 **Blockers:** none opened. **Part 1 is complete.**
 
 **Next step:** ⛔ **STOPPED by Operator instruction.** The Operator walks the chain manually before Part 2.
+
+
+---
+
+## 2026-08-12 — WALKTHROUGH RESPONSE: fixture seed · `Q-28` repair · `P1-3` · `P1-4`
+
+**Track:** `docs/plan/PORTAL_COMPLETION_PLAN.md` Part 1. **Branch:** `develop`, main worktree.
+**Starting HEAD:** `1624ef8`.
+
+### 1. The Operator's hypothesis was refuted by measurement, and that is recorded as such
+
+The walkthrough reported *"the attach does not persist"* and reasoned that **"Recording attached" is client state, not a read-back.** ⛔ **Both halves were wrong, and the measurement said so:**
+
+| Measured | Result |
+|---|---|
+| `report_evidence` row for `5e180d11-…` | ✅ present — `video/mp4`, 1,638,675 bytes |
+| `evidence.attached` audit events | ✅ 2 |
+| Storage object at the derived path | ✅ present, mimetype and size matching the row |
+| Is the panel a read-back? | ✅ yes — `confirmEvidenceAttach` → `listReportEvidence`, rendered from the reply |
+
+▶ **The whole governed chain worked.** The real defect was smaller and entirely mine: **I built an attach control with no player.** `grep -c "<video"` on screen `08` returned **0**, and `mintEvidenceViewUrl` was consumed by **one** surface — the parent report. **The role that uploads the clip was the only role that could not watch it.**
+
+⚠️ **Recorded because the shape recurs:** a correct governed write plus a surface that cannot show its result reads, from the outside, exactly like a failed write. **The Operator's inference was reasonable from what the screen showed.**
+
+### 2. "P1-3 and P1-4 were folded in" — no such claim exists anywhere
+
+The walkthrough said both had been reported as folded in. A `grep` across `STATUS.md` and `OPERATOR_HANDOFF.md` returns **nothing**, and the plan lists both as **`✅ REQUIRED`**. ▶ **They were never claimed done and were never done — a coverage gap, not a regression.** Reported as such rather than accepting the framing, and the Operator confirmed the framing was theirs.
+
+### 3. The learner seed
+
+Six clean learners across Modules B and C; **seven** parent links — the six plus **Fixture Student Seven**, whose *submitted* report already carried a clip and was reachable by no parent, which is exactly why stage 6 could not be walked. ⛔ **No attendance row, deliberately**: `A-018` materializes Present lazily and `F-ATTENDANCE-INIT-1` lives on that path, so seeding one would hide the case these learners exist to exercise. No report, no observation, no audit event.
+
+Three names carry deliberate non-ASCII (`Zoë`, `Núria`, `Søren`) so the seed is **its own encoding canary**, on data the walkthrough actually reads.
+
+### 4. `Q-28` — and my Finding 3 attribution was wrong
+
+I reported *"the fixture loader is corrupting non-ASCII"*. ⛔ **Measurement refuted it.** `runSqlFile` round-trips `U+2014` intact through its exact `spawnSync` + string-input + `utf8` mechanism — `e28094` read back out of `convert_to(…, 'UTF8')`. The corruption entered by some **manual** route.
+
+▶ **So the fix is an ASSERTION, not an encoding change to a path that was already correct.** A path that is clean today is not a guarantee, and the next load may not go through that function at all. The assertion re-reads every non-ASCII literal from the catalogue **after** the load — because **the load that corrupted those titles also reported success.** Both titles repaired and byte-verified.
+
+⛔ **IMPORTING THE LOADER RUNS IT — a hazard I introduced and then removed.** `prove:encoding` first imported the decision function from `load-local-fixtures.mjs`, which calls `main()` at module scope: **the fixture loader executed**, capturing the local API URL and service-role key before the proof's own output appeared. **Nothing was destroyed, and that was luck rather than design** — its other path tears down the three synthetic Auth identities only the Operator can recreate, and would have taken the six new learners with it. The decision moved to `scripts/fixtures/encoding-integrity.mjs`, which does nothing on import. ▶ **A module that DOES something on import is not a library, and reaching into one for a single function is how a harness acquires a destructive side effect nobody wrote down.**
+
+⚠️ **The control had to move too.** A first attempt set `client_encoding` to `LATIN1` expecting mangling — and the literal came back **intact**, further evidence this path is not the culprit. **But a control that cannot produce the failure state proves nothing**, so it now drives the decision function directly and requires it to answer LOST.
+
+### 5. `P1-4` — the trainer player, and the defect the walkthrough actually found
+
+The trainer review surface's pre-`P1-2` inert block is **struck and preserved**. It read *"No class video evidence is available in this workspace… no governed evidence record or upload path exists yet."* ▶ **Every clause was true when written and every clause is now false** — the record shipped at `P1-2`, the upload path at `P1-2b`. **Third phase running for the file-scope restatement defect**, and the most consequential form of it: an honest inert region outlives its reason and reads to the next person as a governance gap.
+
+Screen `08` gained the player it never had.
+
+### 6. `P1-3` — the management player, and a wrongly-cited prohibition
+
+⛔ **`C-5` governs and the wording matters: VISIBILITY IS REQUIRED · ATTESTATION IS ABSENT · IT IS ENFORCED BY NOTHING.** No server-side precondition was added to `report_management_approve_and_submit`, and no management checklist item exists — `A-036`'s checklist stays a **trainer** instrument. `P34-5` proves the non-gate by **submitting a report whose clip was never accessed**, with `P34-6` confirming zero `evidence.accessed` rows existed at that moment.
+
+**The `P5` note's claim was wrong on the record and is struck.** It said *"no governed evidence read path exists — but even if one did, evidence … [is] outside Management's read (A-038)"*. Both halves fail: the path exists (`evidence_list_for_report`, with an explicit **management arm** built under `C-7`), and `A-038` governs assessment substance rather than media. ▶ **A wrongly-cited prohibition is worse than a missing feature: the missing feature gets built, while the prohibition gets defended by the next reader.**
+
+**One shared player, three surfaces** (`components/ui/evidence-viewer.tsx`). ▶ Three copies of a `<video>` is exactly how **one** of them quietly acquires a `download` attribute nobody re-checked — the same reasoning that extracted `RATING_TILE_STYLE` one phase earlier. A leg asserts each surface declares **no `<video>` of its own**.
+
+### 7. Two pins fired, both rightly, and both were REWRITTEN rather than loosened
+
+1. **`P2a-12a`** counted **every** `evidence.*` row in the table. Correct while the canonical database held none; it went red the moment the walkthrough attached two real clips, reporting *"5 written, expected 3"* about events the suite never wrote. ▶ **A leg that counts globally is measuring the world, not the thing it asserts about.** Narrowed to its own evidence id — **still exactly three**.
+2. **`prove:hero-10`'s `"evidence (R-B5, G-8)": /evidence/i`** — a bare word match, correct while no read path existed. `G-8` refuses **class footage**, which never ends; it does not refuse `D-5`'s per-child clip, which `C-5` requires visible. Replaced by three narrower pins: the **class framing**, the frame's **500 MB**, and **any upload/removal control** on a management surface. ⚠️ The bare match was the weaker instrument anyway — it would have fired on a comment explaining why evidence was absent.
+
+### 8. ⛔ NOT RUN, AND NOT CLAIMED
+
+- **`A-004`'s both-direction Parent UAT — `NOT-RUN`. HUMAN, the Operator's.** Every runner prints this beside its own green result.
+- **`A-003`'s `unscanned` leg — `NOT APPLICABLE (C-3)`.**
+- **Rendered capture — `NOT-RUN`** on all three rebuilt evidence regions.
+- ⚠️ **`prove:hero-8/11` compare SHELLS** and would pass unchanged if either editor could not save at all. **They are not evidence for these surfaces and are not cited as such.**
+
+**Files changed:** `scripts/fixtures/{seed-walkthrough-learners.mjs,encoding-integrity.mjs}` (new) · `scripts/fixtures/load-local-fixtures.mjs` · `scripts/tests/portal/{prove-encoding-integrity.mjs,prove-p1-34-evidence-review.sql,prove-p1-34-evidence-review.mjs}` (new) · `scripts/tests/portal/prove-p1-2-evidence-substrate.sql` · `scripts/tests/hero/prove-10-management-student-report.mjs` · `components/ui/evidence-viewer.tsx` (new) · `features/trainer/{trainer-draft-generation,trainer-report-review}.tsx` · `features/management/management-report-review.tsx` · `package.json`.
+
+**Migration / schema:** ⛔ **NONE.** `P1-3` and `P1-4` are `PRESENTATION-ONLY` over `P1-2`'s read path. Census unmoved — **25 migrations · 28 tables · 49 functions · 12 enums · 29 policies · registry 19**.
+
+**Gates:** `prove:portal-34` **exit 0** (8 SQL + 24 runner) · `prove:encoding` **0** · `prove:portal-2b` **0** · `prove:portal-5` **0** · `prove:portal-2` **0** · `prove:portal-1` **0** · `prove:f-attendance-init-1` **0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** · `build` **0**.
+
+**Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No push, no billable call, no dependency added.
+
+**Next step:** ⛔ **STOPPED by Operator instruction.** The Operator re-walks before Part 2.

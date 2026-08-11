@@ -10,9 +10,12 @@ import { Icon, IconTile, type IconName } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
+import { EvidenceRegion } from "@/components/ui/evidence-viewer";
 import type {
   ChecklistDto,
-  DimensionCode,  TrainerApproveSuccess,
+  DimensionCode,
+  ReportEvidenceClipDto,
+  TrainerApproveSuccess,
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
@@ -216,7 +219,15 @@ export function TrainerReportReview() {
   const [approvalResult, setApprovalResult] = useState<
     UiActionResult<TrainerApproveSuccess> | null
   >(null);
-  const evidenceNoteId = useId();
+  /*
+   * ⛔ P1-4 — the attached clip, read through P1-2's governed path.
+   *
+   * ⚠️ `null` means THE READ FAILED, not "no clip" (Q-7). The two render
+   * differently and must: telling a trainer nothing is attached when the
+   * read was refused is how a reviewer approves a report believing there is
+   * no evidence to check.
+   */
+  const [evidenceClips, setEvidenceClips] = useState<readonly ReportEvidenceClipDto[] | null>(null);
 
   /*
    * HERO PHASE 7 / `F-S6-REVIEW-1` — the editable follow-up note.
@@ -238,6 +249,16 @@ export function TrainerReportReview() {
 
   useEffect(() => {
     let active = true;
+    /*
+     * ⚠️ THE CLIP READ RUNS BESIDE THE REPORT READ, NOT INSIDE IT, and a
+     * failure here does NOT fail the report. Evidence is a separate governed
+     * read with its own gate; collapsing the two would mean a refused clip
+     * read hid the assessment the trainer came to approve.
+     */
+    void port.listReportEvidence(params.reportId).then((result) => {
+      if (!active) return;
+      setEvidenceClips(result.outcome === "success" ? result.data : null);
+    });
     void Promise.all([
       port.getTrainerWorkingReport(params.reportId),
       port.listTrainerSessions(),
@@ -543,42 +564,31 @@ export function TrainerReportReview() {
             </div>
           </section>
 
-          {/* D3 — frame region kept, rendered inert. No uploader and no metadata invented. */}
-          <section className="card p-5 sm:p-6" aria-labelledby="class-video-evidence-heading">
-            <h2 id="class-video-evidence-heading">
-              <span className="text-card-title font-extrabold text-ink-strong">
-                Class Video Evidence
-              </span>
-            </h2>
-            <p className="mt-1 text-small text-neutral-on">
-              Session recording from this class
-            </p>
-            <div
-              data-evidence-state="unavailable"
-              className="mt-4 grid min-h-44 place-items-center rounded-panel border border-dashed border-line-strong bg-surface-muted px-6 py-10 text-center"
-            >
-              <div>
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby={evidenceNoteId}
-                  className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-body font-bold text-ink-subtle"
-                >
-                  Play session recording
-                  <Icon name="chevronRight" size={16} />
-                </button>
-                <p
-                  id={evidenceNoteId}
-                  className="mx-auto mt-3 max-w-md text-small leading-6 text-ink"
-                >
-                  No class video evidence is available in this workspace. Evidence capture is a
-                  required part of the final product and the Trainer is the person who will
-                  upload it, but no governed evidence record or upload path exists yet — so this
-                  control is inactive rather than simulated.
-                </p>
-              </div>
-            </div>
-          </section>
+          {/*
+            ✅ P1-4 — BUILT 2026-08-12. The inert block that stood here is
+            STRUCK AND PRESERVED in this file's D3 header note. It read:
+            "No class video evidence is available in this workspace… no
+            governed evidence record or upload path exists yet — so this
+            control is inactive rather than simulated."
+
+            ⛔ EVERY CLAUSE OF IT WAS TRUE WHEN WRITTEN AND EVERY CLAUSE IS
+            NOW FALSE. The record shipped at P1-2, the upload path at P1-2b.
+            ▶ This is the file-scope restatement defect for the third time
+            in three phases: an honest inert region outlives the reason it
+            was inert, and reads to the next person as a governance gap
+            rather than as stale copy.
+
+            ⛔ THE HEADING IS NOT THE FRAME'S, AND THAT IS PERMANENT. `G-8`
+            refused CLASS footage; `D-5` authorizes PER-CHILD evidence. The
+            frame's "Class Video Evidence" and its 500 MB are
+            `REGISTERED-OMISSION` and never end.
+          */}
+          <EvidenceRegion
+            clips={evidenceClips}
+            mint={(id) => port.mintEvidenceViewUrl(id)}
+            headingId="child-video-evidence-heading"
+            emptyLabel="No recording is attached to this report yet."
+          />
 
           {/* D7 — governed, Trainer-only, and drawn nowhere in the frame. */}
           <section className="card p-5 sm:p-6" aria-labelledby="coach-notes-heading">
