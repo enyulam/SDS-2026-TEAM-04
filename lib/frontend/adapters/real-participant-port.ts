@@ -46,6 +46,11 @@ import type {
   AvailabilityStateDto,
   CanonicalReportDto,
   EvidenceViewUrlDto,
+  EvidenceUploadTicketDto,
+  EvidenceUploadTicketInput,
+  EvidenceAttachSuccess,
+  EvidenceAttachInput,
+  ReportEvidenceClipDto,
   DimensionDto,
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
@@ -84,6 +89,10 @@ import {
   adapterGetAssessmentDraft,
   adapterGetCanonicalReport,
   adapterMintEvidenceViewUrl,
+  adapterCreateEvidenceUploadTicket,
+  adapterConfirmEvidenceAttach,
+  adapterRemoveEvidence,
+  adapterListReportEvidence,
   adapterGetDimensions,
   adapterGetDraftGenerationContext,
   adapterGetManagementReview,
@@ -231,6 +240,34 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
      */
     mintEvidenceViewUrl(evidenceId: string): Promise<UiActionResult<EvidenceViewUrlDto>> {
       return guard(() => adapterMintEvidenceViewUrl(evidenceId));
+    },
+
+    /*
+     * ⛔ P1-2b. The bytes do NOT pass through these bindings — they go from
+     * the browser straight to storage under the one RLS INSERT policy
+     * (). ▶ What crosses HERE is the ticket,
+     * the governed attach, the governed removal and the list.
+     */
+    createEvidenceUploadTicket(
+      input: EvidenceUploadTicketInput,
+    ): Promise<UiActionResult<EvidenceUploadTicketDto>> {
+      return guard(() => adapterCreateEvidenceUploadTicket(input));
+    },
+
+    confirmEvidenceAttach(
+      input: EvidenceAttachInput,
+    ): Promise<UiActionResult<EvidenceAttachSuccess>> {
+      return guard(() => adapterConfirmEvidenceAttach(input));
+    },
+
+    removeEvidence(evidenceId: string): Promise<UiActionResult<{ readonly removed: boolean }>> {
+      return guard(() => adapterRemoveEvidence(evidenceId));
+    },
+
+    listReportEvidence(
+      reportId: string,
+    ): Promise<UiActionResult<readonly ReportEvidenceClipDto[]>> {
+      return guard(() => adapterListReportEvidence(reportId));
     },
 
     // ---- writes ------------------------------------------------------

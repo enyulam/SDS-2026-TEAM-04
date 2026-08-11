@@ -6631,3 +6631,72 @@ Added to the false-verdict family: **the read-only leg that passed against an em
 **Blockers:** none opened. **`A-002` closed as a blocker on `P1-5` by the 2026-08-12 ruling.**
 
 **Next step:** ⛔ **STOPPED by Operator instruction.**
+
+
+---
+
+## 2026-08-12 — `P1-2b` UPLOAD TRANSPORT · a broken parent path found in `P1-5` · two standing disciplines
+
+**Track / workstream:** `docs/plan/PORTAL_COMPLETION_PLAN.md` Part 1, phase `P1-2b` — **the last piece of Part 1**. **Branch:** `develop`, main worktree, no parallel writer.
+**Starting HEAD:** `eab8c5d`.
+
+### 1. Two standing disciplines, recorded at Operator instruction
+
+**(a) THE RESTATEMENT DEFECT AT FILE SCOPE.** The sharpest instance found so far is a comment **forty lines below the region it declares omitted, in the same commit that built it** (`features/parent/parent-canonical-report.tsx`, P1-5). ▶ **The defect does not need two documents. One file is enough** — a header or a nearby comment restates what a distant block now contradicts, and **the header is the first thing a later reader trusts and the last thing an implementer remembers to update**. This phase found the same shape again in `features/trainer/trainer-draft-generation.tsx` (its `D3` note still said the transport was unbuilt) and twice in `server/modules/evidence/projections.ts` (both still said A-002 was unruled). All three struck in place, never deleted. **Binding: when a phase changes what a file does, its own prose is part of the change surface.**
+
+**(b) A SWEEP'S OUTPUT IS READ IN FULL OR COUNTED MECHANICALLY — NEVER SKIMMED.** In the previous run my sweep was correct and my **reading** of it was not: I read the first sixty lines of its output and reported from that, and nine live sites survived. ▶ **An instrument that reports more than you read has not been read.** Binding: either consume the whole output, or make the instrument emit a **count and a verdict** the reader cannot partially consume. This sits beside *a check that cannot fail is not a check* and *both sides of a comparison must be built by the same measuring code* — three ways for a green result to be worth nothing.
+
+### 2. `P1-2b` — the transport
+
+**Migration `supabase/migrations/20260812200000_portal_p1_2b_upload_transport.sql`** — ⛔ **it replaces ONE function and adds nothing**: no table, enum, column, policy, grant or audit string. Census unmoved at **28 tables · 12 enums · 49 functions · 29 policies · registry 19**, asserted in-migration (`T4`).
+
+**The transport itself.** A minimal TUS client written against Supabase's resumable endpoint (`lib/frontend/evidence-upload.ts`) — ⚠️ **no dependency added**; TUS is an HTTP protocol and `fetch` is enough. 6 MiB parts (required, not chosen), `x-upsert: false`, and **resumption that asks the SERVER for the offset** rather than trusting a local one, because a disagreement between the two uploads a corrupt object *successfully*.
+
+**⛔ THE ADR-3 EXCEPTION, AND ITS EXACT BOUNDARY.** The browser writes directly to storage — the only governed-adjacent client write in this project. What it can write: an **opaque object** · into a **private bucket** (no SELECT/UPDATE/DELETE policy for any role) · at a path it must **prove trainer authority over**, re-derived live *from the path itself* · **governed by nothing** until the server attaches it. ▶ **Until the attach it is bytes with a name.** The ticket is an identity and a path and **not a capability** — `T2a-2` measures a forged path against a report the trainer does not reach and gets HTTP 403 at the real endpoint.
+
+**Two defects the transport exposed in `P1-2`'s own function, both fixed here.** **(1)** a second clip **raised `23505`** rather than answering: the structural `UNIQUE (report_id)` was right, the bare `INSERT` reaching it was not, and an aborted transaction reads to a trainer exactly like a network fault — the same reasoning that put the size ceiling on the page. **(2)** the object was found by `LIKE` with a bare `SELECT … INTO`, and the path shape admits **both `.mp4` and `.mov`** under one evidence id — ▶ **the attached clip would have been chosen by the query planner.** Ambiguity now **fails closed**. ⛔ `T2a-7b` proves the constraint still refuses a **direct owner-side INSERT**, so the new pre-check is a *message* and the schema is still the *gate*.
+
+**⛔ The reason code discloses only after authorization succeeds.** Every authorization failure collapses to one `not_permitted`; `T2a-12` proves an unauthorized caller learns nothing while an authorized one gets a specific reason. **A diagnostic for someone already proven to be the authoring trainer is not a probe.**
+
+### 3. ⛔ `P1-5` SHIPPED A BROKEN PARENT PATH, AND ITS OWN PROOFS COULD NOT SEE IT
+
+`listEvidenceCore` still carried `role !== trainer && role !== management → unauthorized` from the phase when `A-002` was unruled. The parent arm existed in the database and was **reachable by nobody** — and because `adapterGetCanonicalReport` turns a failed clip read into `unavailable`, **a linked parent would have been shown NO REPORT AT ALL**, not merely no clip.
+
+▶ **`P1-5` proved the RPC (11 SQL legs) and scanned the surface's text (11 more). NOTHING RAN THE TYPESCRIPT BETWEEN THEM** — and that is precisely where the defect lived.
+
+Fixed, and `scripts/tests/portal/prove-p1-5-composed-parent-read.mjs` now calls the **composed core** with real admin-minted sessions for parent and trainer, plus an unlinked-learner control proving the gate is still the RPC's. ⚠️ **It is spawned from inside `prove:portal-5`**, because a separate npm script is a thing someone forgets to run. ⚠️ **Its own control was executed**: restoring the original guard turns the leg red, so it demonstrably catches the defect it was written for.
+
+**THE STANDING RULE:** ▶ **a green RPC proof plus a green text scan is not a proof of the path between them.** A stale guard in a **caller** silently outranks the corrected function beneath it — the restatement defect one layer down, in code. **Where a phase adds an arm to an RPC, a leg must call the composed core with a real session of that role.**
+
+### 4. Proofs
+
+**`prove-p1-2b-upload-transport.sql` — 17 legs, every refusal with a control:** the policy **admits** the authoring trainer (non-vacuity first) · refuses the same trainer at an unreachable report's path · refuses **management** at the very path a trainer was admitted to · refuses a malformed path **as a clean `false`**, not a cast error escaping a policy · refuses attach on a **submitted** report · the **ceiling** fires one byte over 100 MiB with **exactly 100 MiB accepted** as its control · a **second clip** refused with an actionable reason **and** the constraint proven separately · **exactly one** `evidence.attached` · an **abandoned upload attaches nothing** · **ambiguity fails closed** with a one-object control · **removal works post-submitted** with management refused · **no disclosure**.
+
+**`prove-p1-2b-upload-transport.mjs` — 26 checks, against the RUNNING storage service** with admin-minted sessions (**never a sign-in proof**): the per-bucket ceiling fires at the TUS endpoint **on the declared length** (HTTP 413) — ⚠️ **one small request, not a 100 MB body** · a foreign path 403 · a **parent** 403 at the path a trainer is admitted to · the **permitted leg** creates (201) and the bytes transfer (204) · and then, measured at the catalogue, **the object exists, the governed row does not, and no audit event was emitted**.
+
+### 5. ⛔ NOT RUN, AND NOT CLAIMED
+
+- **`A-004`'s both-direction Parent UAT — `NOT-RUN`. HUMAN, and the Operator's to perform.** Both runners print this beside their own green result. ⛔ **No session may report it as run.**
+- **`A-003`'s `unscanned` leg — `NOT APPLICABLE (C-3)`**, never `PASS`. The C-3 text remains permanently visible on the upload surface and a leg asserts it survived the transport landing.
+- **Rendered capture on screen `08`'s rebuilt region and screen `33`'s clip region — `NOT-RUN`.**
+- ⛔ **The orphan sweeper is BUILT and UNSCHEDULED.** A leg asserts **no surface and no module claims orphans are cleaned automatically**, and that the limitation is stated in the transport's own header. Automating it is hosted work (§12).
+
+### 6. Failures and recovery — three refusals, and no fix was a weakening
+
+1. **The append-only trigger refused my own test's `DELETE` on `audit_events`** — correctly, and even for `postgres`. Fixed by giving that leg its **own untouched fixture pair** so it never needs to undo an audited act.
+2. **`storage.protect_delete()` refuses a direct `DELETE` on `storage.objects`**, not only on `storage.buckets` (which is what P1-2 found). Fixed by making the control a **second evidence id** rather than a deletion.
+3. **`class_session_assignments_active_timestamp_chk`** refused a deactivation that set only the flag — `is_active` and `unassigned_at` move together, because a deactivated assignment that cannot say *when* it stopped is not a record.
+
+Also: `CREATE OR REPLACE` **cannot add an OUT parameter** (it changes the return type) — hence `DROP` then `CREATE`, and ⚠️ **a `DROP` takes the grant with it**, so `T5` re-measures `EXECUTE` from the catalogue rather than trusting the statement ran. And `pg_get_function_identity_arguments` **was the wrong instrument** for the signature leg: it returns the OUT parameters too, so it would have measured the one thing this migration deliberately changes while claiming to measure the one thing it must not.
+
+**Files changed:** `supabase/migrations/20260812200000_portal_p1_2b_upload_transport.sql` (new) · `scripts/tests/portal/prove-p1-2b-upload-transport.{sql,mjs}` (new) · `scripts/tests/portal/prove-p1-5-composed-parent-read.mjs` (new) · `scripts/tests/portal/prove-p1-5-parent-evidence.mjs` · `lib/frontend/evidence-upload.ts` (new) · `server/modules/evidence/projections.ts` · `server/modules/integration-adapter/{adapter-dtos,participant-actions}.ts` · `lib/frontend/{contracts/physical-test,physical-test-port,adapters/real-participant-port,fixtures/physical-test-fixture}.ts` · `features/trainer/trainer-draft-generation.tsx` · `package.json` · `docs/progress/STATUS.md`.
+
+**Gates:** `prove:portal-2b` **exit 0** (17 SQL + 26 runner) · `prove:portal-5` **exit 0** (11 SQL + 23 runner, incl. the composed leg) · `prove:portal-5-composed` **exit 0** · `prove:portal-1` **0** · `prove:portal-2` **0** · `prove:f-attendance-init-1` **0** · `prove:hero-all` **17/17 by exit code** · `tsc` **0** · `eslint` **0 errors** (2 pre-existing warnings) · `build` **0**.
+
+**Migration / schema:** one migration applied locally (`supabase migration up`, ⛔ never `db reset`). Census **unmoved**.
+
+**Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No remote, no push, no billable call, no new dependency.
+
+**Blockers:** none opened. **Part 1 is complete.**
+
+**Next step:** ⛔ **STOPPED by Operator instruction.** The Operator walks the chain manually before Part 2.

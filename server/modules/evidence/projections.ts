@@ -2,12 +2,14 @@
  * Evidence read/write projections — D-5's per-child, per-session video
  * evidence, phase P1-2.
  *
- * ⛔ THE PARENT ARM DOES NOT EXIST HERE, DELIBERATELY. A-002 is UNRULED and
- * the Operator reserved it for P1-5. Building an unreachable parent branch
- * now is the S-8 shape exactly: it looks proven because the legs around it
- * pass, while the one path that matters has never returned a row. When A-002
- * is ruled, the arm is added to `evidence_list_for_report` and to this file
- * together, with its own permit leg.
+ * ~~⛔ THE PARENT ARM DOES NOT EXIST HERE, DELIBERATELY. A-002 is UNRULED and
+ * the Operator reserved it for P1-5.~~ ✅ **STRUCK 2026-08-12 — A-002 WAS RULED
+ * FORWARD AND P1-5 BUILT THE ARM.** It was added to `evidence_list_for_report`
+ * and to this file together, with its own permit leg, exactly as the struck
+ * text said it would be. ⚠️ Preserved rather than deleted because the reason
+ * it gave is still the standing rule: **building an unreachable branch is the
+ * S-8 shape** — it looks proven because the legs around it pass, while the one
+ * path that matters has never returned a row.
  *
  * ⛔ NO STORAGE PATH CROSSES THIS BOUNDARY OUTWARD. `evidence_list_for_report`
  * returns none, and `evidence_record_access` returns only the report id and
@@ -96,18 +98,23 @@ export async function listEvidenceCore(
    * D-5 gives this read to the authoring trainer AND to management (which
    * must VIEW the clip before Approve & Submit).
    *
-   * ⛔ THE ROLE CHECK HERE IS NOT THE AUTHORIZATION. It refuses `parent`
-   * early so no parent request ever reaches the RPC — A-002 is unruled and
-   * there is no parent arm to reach. The real gate is the RPC's own live
-   * predicate, which resolves session assignment and centre membership in
-   * the database on every call (ADR-4). Deleting this check would not widen
-   * access; it would only make a parent's refusal arrive later.
+   * ⛔ THE ROLE CHECK HERE IS NOT THE AUTHORIZATION. The real gate is the
+   * RPC's own live predicate, which resolves session assignment, centre
+   * membership and — since P1-5 — the parent link and the submitted-report
+   * condition, in the database on every call (ADR-4).
+   *
+   * ⚠️ IT ADMITS `parent` NOW, AND THAT IS A CORRECTION, NOT A WIDENING.
+   * ~~It refused `parent` early because A-002 was unruled and there was no
+   * parent arm to reach.~~ A-002 was ruled forward on 2026-08-12 and P1-5
+   * built the arm; leaving the early refusal here would have made this
+   * function the one place a permitted parent read still died — ▶ **a stale
+   * guard in a caller silently outranking the corrected RPC beneath it**,
+   * which is the restatement defect wearing a different hat.
+   * ⛔ THE PARENT'S GATE IS THE RPC'S, AND IT IS STRICTLY NARROWER than this
+   * check: linked learner only, submitted report only.
    */
   const guard = await resolveSessionIdentity(client);
   if (guard.outcome !== "success") return guard;
-  if (guard.data.role !== "trainer" && guard.data.role !== "management") {
-    return { outcome: "unauthorized" };
-  }
 
   const rows = await readRows<EvidenceRow>("listEvidenceCore:evidence_list_for_report", () =>
     client.rpc("evidence_list_for_report", {
@@ -190,4 +197,164 @@ export async function mintEvidenceViewUrlCore(
     outcome: "success",
     data: { url: signed.data.signedUrl, expiresInSeconds: EVIDENCE_URL_TTL_SECONDS },
   };
+}
+
+// =====================================================================
+// P1-2b — THE UPLOAD TRANSPORT.
+// =====================================================================
+
+/**
+ * ⚠️ SUPABASE'S RESUMABLE ENDPOINT REQUIRES EXACTLY 6 MiB CHUNKS for every
+ * part but the last. This is not a tuning knob: a different size is rejected
+ * by the TUS server, so it is stated once here and consumed by the client.
+ */
+export const EVIDENCE_UPLOAD_CHUNK_BYTES = 6 * 1024 * 1024;
+
+export const EVIDENCE_MEDIA_TYPES: readonly string[] = ["video/mp4", "video/quicktime"];
+
+export type EvidenceUploadTicket = {
+  readonly evidenceId: string;
+  readonly reportId: string;
+  readonly bucket: string;
+  readonly objectPath: string;
+  readonly maxBytes: number;
+  readonly chunkBytes: number;
+};
+
+/**
+ * ⛔ A TICKET IS AN IDENTITY AND A PATH. IT IS NOT AN AUTHORIZATION.
+ *
+ * This mints the evidence id and derives the object key server-side, so the
+ * client never chooses either. But nothing here is what stops an unauthorized
+ * upload: ▶ **a forged ticket buys nothing**, because `storage.objects`' one
+ * INSERT policy re-derives trainer authority over the report named in the
+ * FIRST PATH SEGMENT, live, on the actual INSERT (ADR-4).
+ *
+ * ⚠️ THE CHECKS BELOW ARE THERE TO FAIL EARLY AND SAY WHY. Deleting them would
+ * not widen access; it would only move a refusal from a clear message to an
+ * opaque storage error after a 100 MB upload has already run.
+ *
+ * ⛔ THE ADR-3 EXCEPTION LIVES HERE, AND THIS IS ITS EXACT SHAPE. The browser
+ * writes DIRECTLY to storage under RLS — the only governed-adjacent client
+ * write in the project. What it can write is bounded to: an OPAQUE OBJECT ·
+ * into a PRIVATE bucket (no SELECT/UPDATE/DELETE policy exists for any role) ·
+ * at a path it must prove TRAINER AUTHORITY over · GOVERNED BY NOTHING until
+ * `evidence_attach_confirm` attaches it. Until that call the object is
+ * referenced by no row and reachable by no read path — it is bytes with a
+ * name. **The governed act is the attach, and the attach is server-side.**
+ */
+export async function createEvidenceUploadTicketCore(
+  client: SupabaseClient,
+  reportId: string,
+  mediaType: string,
+  byteSize: number,
+): Promise<ActionResult<EvidenceUploadTicket>> {
+  const guard = await resolveSessionIdentity(client);
+  if (guard.outcome !== "success") return guard;
+  // Trainer only (D-5). Management may never attach — `CLAUDE.md` §6 forbids a
+  // management write reaching evidence, and that is not a D-5 choice.
+  if (guard.data.role !== "trainer") return { outcome: "unauthorized" };
+
+  if (!EVIDENCE_MEDIA_TYPES.includes(mediaType)) return { outcome: "unavailable" };
+  if (!Number.isInteger(byteSize) || byteSize <= 0 || byteSize > EVIDENCE_MAX_BYTES) {
+    return { outcome: "unavailable" };
+  }
+
+  // ⛔ The evidence id is minted HERE. A client-chosen id could be aimed at
+  // another report's key space; the path is derived from this pair and nothing
+  // else, and the policy parses the report id back out of it.
+  const evidenceId = globalThis.crypto.randomUUID();
+  const objectPath = evidenceObjectPath(reportId, evidenceId, mediaType);
+  if (!objectPath) return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      evidenceId,
+      reportId,
+      bucket: EVIDENCE_BUCKET,
+      objectPath,
+      maxBytes: EVIDENCE_MAX_BYTES,
+      chunkBytes: EVIDENCE_UPLOAD_CHUNK_BYTES,
+    },
+  };
+}
+
+/**
+ * The governed attach. ⛔ THIS is the act that makes an uploaded object into
+ * evidence — the upload before it created nothing governed at all.
+ *
+ * ⚠️ THE REASON IS DISCLOSED ONLY AFTER AUTHORIZATION SUCCEEDS. Every
+ * authorization failure collapses to `not_permitted` inside the RPC, so a
+ * caller never learns whether a report exists or merely lies beyond them. The
+ * discriminating reasons (`already_attached`, `too_large`, `object_missing`,
+ * `object_ambiguous`, `unsupported_type`) are diagnostics for someone already
+ * proven to be the authoring trainer — the same principle that put the size
+ * ceiling on the surface: a trainer who cannot tell why an upload failed will
+ * retry it.
+ */
+export type EvidenceAttachOutcome = {
+  readonly attached: boolean;
+  readonly reason: string;
+};
+
+export async function confirmEvidenceAttachCore(
+  client: SupabaseClient,
+  reportId: string,
+  evidenceId: string,
+): Promise<ActionResult<EvidenceAttachOutcome>> {
+  const guard = await resolveSessionIdentity(client);
+  if (guard.outcome !== "success") return guard;
+
+  const { data, error } = await client.rpc("evidence_attach_confirm", {
+    p_report_id: reportId,
+    p_evidence_id: evidenceId,
+  });
+  if (error) return { outcome: "unavailable" };
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: { attached: row.o_attached === true, reason: String(row.o_reason ?? "not_permitted") },
+  };
+}
+
+/**
+ * Withdraw evidence. ⛔ TRAINER ONLY, AND NOT LIMITED TO PRE-SUBMITTED
+ * (Operator ruling) — removal WITHDRAWS media rather than editing an approved
+ * artefact, and a wrong clip that reached a parent must be pullable.
+ *
+ * ⚠️ ROW FIRST, OBJECT SECOND, AND THE ORDER IS DELIBERATE. The RPC deletes
+ * the row and returns the path; the object is deleted afterwards with the
+ * elevated client, because removing the backing file needs the Storage API.
+ * A dangling ROW pointing at a deleted object would be worse than an orphaned
+ * OBJECT pointing at nothing — and the sweeper collects the latter.
+ *
+ * ⛔ A FAILED OBJECT DELETE DOES NOT UNDO THE REMOVAL. The governed fact is
+ * "this evidence is withdrawn", and that fact is committed with its audit
+ * event before the file is touched. Reporting failure here would tell the
+ * trainer the clip is still attached when it is not.
+ */
+export async function removeEvidenceCore(
+  client: SupabaseClient,
+  elevated: SupabaseClient,
+  evidenceId: string,
+): Promise<ActionResult<{ readonly removed: boolean }>> {
+  const guard = await resolveSessionIdentity(client);
+  if (guard.outcome !== "success") return guard;
+  if (guard.data.role !== "trainer") return { outcome: "unauthorized" };
+
+  const { data, error } = await client.rpc("evidence_remove", { p_evidence_id: evidenceId });
+  if (error) return { outcome: "unavailable" };
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || row.o_removed !== true) return { outcome: "unauthorized" };
+
+  if (typeof row.o_object_path === "string" && row.o_object_path.length > 0) {
+    await elevated.storage.from(EVIDENCE_BUCKET).remove([row.o_object_path]);
+  }
+
+  return { outcome: "success", data: { removed: true } };
 }

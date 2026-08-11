@@ -3,6 +3,11 @@ import type {
   AssessmentDraftDto,
   CanonicalReportDto,
   EvidenceViewUrlDto,
+  EvidenceUploadTicketDto,
+  EvidenceUploadTicketInput,
+  EvidenceAttachSuccess,
+  EvidenceAttachInput,
+  ReportEvidenceClipDto,
   DimensionDto,
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
@@ -121,6 +126,32 @@ export interface PhysicalTestPort {
    * Returns a URL — never a storage path (A-001 gate 7), never a download (D-5).
    */
   mintEvidenceViewUrl(evidenceId: string): Promise<UiActionResult<EvidenceViewUrlDto>>;
+
+  /**
+   * ⛔ P1-2b — THE UPLOAD TRANSPORT. Four members, and the split between them
+   * is the governance boundary, not a convenience.
+   *
+   * `createEvidenceUploadTicket` mints an id and derives a path — it authorizes
+   * nothing. The bytes then go DIRECTLY from the browser to storage under the
+   * one RLS INSERT policy (the bounded ADR-3 exception), where trainer
+   * authority over the report in the path is re-derived live. `confirmEvidenceAttach`
+   * is the GOVERNED ACT: until it succeeds the object is referenced by no row,
+   * reachable by no read path, and is simply bytes with a name.
+   *
+   * ⚠️ `listReportEvidence` takes a REPORT ID ALONE. The session/student pair
+   * is resolved server-side through the governed resolver, so a caller cannot
+   * pair a report it may read with a learner it may not.
+   */
+  createEvidenceUploadTicket(
+    input: EvidenceUploadTicketInput,
+  ): Promise<UiActionResult<EvidenceUploadTicketDto>>;
+  confirmEvidenceAttach(
+    input: EvidenceAttachInput,
+  ): Promise<UiActionResult<EvidenceAttachSuccess>>;
+  removeEvidence(evidenceId: string): Promise<UiActionResult<{ readonly removed: boolean }>>;
+  listReportEvidence(
+    reportId: string,
+  ): Promise<UiActionResult<readonly ReportEvidenceClipDto[]>>;
 
   /**
    * A-018's governed Trainer Present/Absent control, and the FIRST governed

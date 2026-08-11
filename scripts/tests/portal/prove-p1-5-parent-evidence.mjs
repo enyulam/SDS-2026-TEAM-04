@@ -272,6 +272,30 @@ check(
   "CONTROL: the rating-vocabulary pattern FIRES against text that contains a label",
 );
 
+// ---------------------------------------------------------------------
+// ⛔ THE COMPOSED SERVER PATH. Spawned from here rather than left as its own
+// script, because THIS suite is the one that shipped without it: P1-5 proved
+// the RPC and scanned the surface, and nothing ran the TypeScript in between
+// — where the defect actually was. A separate npm script is a thing someone
+// forgets to run; a leg inside the suite it protects is not.
+// ---------------------------------------------------------------------
+const composed = spawnSync(
+  process.execPath,
+  [
+    "--conditions=react-server",
+    "--import", "./scripts/tests/integration/alias-loader.mjs",
+    join(ROOT, "scripts", "tests", "portal", "prove-p1-5-composed-parent-read.mjs"),
+  ],
+  { cwd: ROOT, encoding: "utf8", shell: false, env: process.env },
+);
+for (const line of `${composed.stdout}`.split(/\r?\n/)) {
+  if (/^(PASS|FAIL)/.test(line)) console.log(`  ${line}`);
+}
+check(
+  composed.status === 0,
+  "THE COMPOSED SERVER PATH RUNS: a linked parent reaches the clip through the actual TypeScript, not only through the RPC",
+);
+
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);
 console.log(
   "\nNOT-RUN, and NOT claimed by this runner:\n" +

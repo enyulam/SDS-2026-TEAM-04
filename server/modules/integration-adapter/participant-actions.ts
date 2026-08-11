@@ -70,7 +70,13 @@ import {
   listManagementSubmittedCore,
 } from "@/server/modules/management-view/projections";
 import { createElevatedSupabaseClient } from "@/server/platform/supabase/elevated";
-import { listEvidenceCore as listEvidenceForParentCore, mintEvidenceViewUrlCore } from "@/server/modules/evidence/projections";
+import {
+  listEvidenceCore as listEvidenceForParentCore,
+  mintEvidenceViewUrlCore,
+  createEvidenceUploadTicketCore,
+  confirmEvidenceAttachCore,
+  removeEvidenceCore,
+} from "@/server/modules/evidence/projections";
 import {
   getCanonicalReportCore,
   getParentAvailabilityCore,
@@ -129,6 +135,9 @@ import type {
   AdapterTrainerWorkingReportDto,
   AdapterUpdateTrainerChecklistInput,
   AdapterSaveFollowUpNotesInput,
+  AdapterEvidenceUploadTicketDto,
+  AdapterEvidenceAttachSuccess,
+  AdapterReportEvidenceClipDto,
 } from "@/server/modules/integration-adapter/adapter-dtos";
 
 // ---------------------------------------------------------------------
@@ -1245,4 +1254,69 @@ export async function adapterMintEvidenceViewUrl(
     createElevatedSupabaseClient(),
     evidenceId,
   );
+}
+
+// ---------------------------------------------------------------------
+// ⛔ P1-2b — THE UPLOAD TRANSPORT'S THREE WRITES AND ONE READ.
+//
+// The bytes themselves do NOT pass through this file. They go directly from
+// the browser to storage under the one RLS INSERT policy — the bounded ADR-3
+// exception D-5 needs, because a 100 MB body relayed through a Server Action
+// is neither resumable nor within the framework's request limits.
+//
+// ▶ WHAT THAT EXCEPTION LETS A CLIENT WRITE, EXACTLY: an OPAQUE OBJECT · into
+//   a PRIVATE bucket (no SELECT/UPDATE/DELETE policy exists for any role) · at
+//   a path it must prove TRAINER AUTHORITY over · GOVERNED BY NOTHING until
+//   `confirmEvidenceAttach` attaches it. The governed act is the attach, and
+//   the attach is here, server-side, in one transaction with its audit event.
+// ---------------------------------------------------------------------
+
+export async function adapterCreateEvidenceUploadTicket(
+  input: { readonly reportId: string; readonly mediaType: string; readonly byteSize: number },
+): Promise<ActionResult<AdapterEvidenceUploadTicketDto>> {
+  return createEvidenceUploadTicketCore(
+    await createRequestSupabaseClient(),
+    input.reportId,
+    input.mediaType,
+    input.byteSize,
+  );
+}
+
+export async function adapterConfirmEvidenceAttach(
+  input: { readonly reportId: string; readonly evidenceId: string },
+): Promise<ActionResult<AdapterEvidenceAttachSuccess>> {
+  return confirmEvidenceAttachCore(
+    await createRequestSupabaseClient(),
+    input.reportId,
+    input.evidenceId,
+  );
+}
+
+/**
+ * ⛔ TRAINER ONLY, AND NOT LIMITED TO PRE-SUBMITTED (Operator ruling).
+ * Management may never remove — that is `CLAUDE.md` §6, not a D-5 choice.
+ */
+export async function adapterRemoveEvidence(
+  evidenceId: string,
+): Promise<ActionResult<{ readonly removed: boolean }>> {
+  return removeEvidenceCore(
+    await createRequestSupabaseClient(),
+    createElevatedSupabaseClient(),
+    evidenceId,
+  );
+}
+
+/**
+ * ⚠️ REPORT-KEYED, LIKE EVERY OTHER REPORT READ ON THIS SURFACE. The client
+ * sends a report id and nothing else; the session/student pair is resolved
+ * server-side through the governed resolver (R-22), so a caller cannot pair a
+ * report it may read with a learner it may not.
+ */
+export async function adapterListReportEvidence(
+  reportId: string,
+): Promise<ActionResult<readonly AdapterReportEvidenceClipDto[]>> {
+  const client = await createRequestSupabaseClient();
+  const context = await resolveReportContextCore(client, reportId);
+  if (context.outcome !== "success") return context;
+  return listEvidenceForParentCore(client, context.data.sessionId, context.data.studentId);
 }

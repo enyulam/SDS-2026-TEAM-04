@@ -330,6 +330,33 @@ export interface AdapterCanonicalReportDto {
   readonly evidence: readonly AdapterEvidenceClipDto[];
 }
 
+/**
+ * ⛔ P1-2b — the upload ticket. An identity and a path, NOT an authorization:
+ * the `storage.objects` INSERT policy re-derives trainer authority over the
+ * report named in the first path segment, live, on the actual INSERT.
+ */
+export interface AdapterEvidenceUploadTicketDto {
+  readonly evidenceId: string;
+  readonly reportId: string;
+  readonly bucket: string;
+  readonly objectPath: string;
+  readonly maxBytes: number;
+  readonly chunkBytes: number;
+}
+
+export interface AdapterEvidenceAttachSuccess {
+  readonly attached: boolean;
+  /** Discriminates ONLY after authorization succeeds; otherwise `not_permitted`. */
+  readonly reason: string;
+}
+
+export interface AdapterReportEvidenceClipDto {
+  readonly id: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+  readonly createdAt: string;
+}
+
 export type AdapterAvailabilityStateDto = "available" | "none_yet" | "linked_unavailable";
 
 export interface AdapterDraftGenerationContextDto {

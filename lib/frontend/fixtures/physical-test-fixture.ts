@@ -7,6 +7,9 @@ import {
   type CanonicalReportContextDto,
   type CanonicalReportDto,
   type EvidenceViewUrlDto,
+  type EvidenceUploadTicketDto,
+  type EvidenceAttachSuccess,
+  type ReportEvidenceClipDto,
   type ChecklistDto,
   type CorrectionRequestDto,
   type DimensionCode,
@@ -1168,6 +1171,41 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
   async mintEvidenceViewUrl(): Promise<UiActionResult<EvidenceViewUrlDto>> {
     await delay(120);
     return { outcome: "unavailable" };
+  }
+
+  /*
+   * ⛔ P1-2b — THE FIXTURE UPLOADS NOTHING, AND THAT IS THE ONLY HONEST
+   * ANSWER IT CAN GIVE.
+   *
+   * A fixture ticket would be a path into a real private bucket that the
+   * fixture cannot write to, and a fixture "attach" would report a governed
+   * act — with its `evidence.attached` audit event — that never happened. ▶ A
+   * simulated success on an AUDITED write is strictly worse than a refusal:
+   * it teaches the operator the transport works on a path that recorded
+   * nothing.
+   *
+   * ⚠️ `listReportEvidence` returns an EMPTY LIST rather than `unavailable`,
+   * because "this fixture report has no clip" is TRUE — where the three above
+   * would each be a claim about an action, and no action occurred.
+   */
+  async createEvidenceUploadTicket(): Promise<UiActionResult<EvidenceUploadTicketDto>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async confirmEvidenceAttach(): Promise<UiActionResult<EvidenceAttachSuccess>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async removeEvidence(): Promise<UiActionResult<{ readonly removed: boolean }>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async listReportEvidence(): Promise<UiActionResult<readonly ReportEvidenceClipDto[]>> {
+    await delay(80);
+    return { outcome: "success", data: [] };
   }
 
   async getCanonicalReport(

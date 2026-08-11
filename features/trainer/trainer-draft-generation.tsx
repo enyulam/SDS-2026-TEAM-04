@@ -11,12 +11,14 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import type {
-  DraftGenerationContextDto,  RequestDraftSuccess,
+  DraftGenerationContextDto,
+  ReportEvidenceClipDto,  RequestDraftSuccess,
   TrainerSessionSummaryDto,
   TrainerWorkingReportDto,
 } from "@/lib/frontend/contracts/physical-test";
 import type { UiActionResult } from "@/lib/frontend/contracts/result";
 import { RATING_DISPLAY_LABELS, RATING_TILE_STYLE } from "@/lib/frontend/fixtures/dimensions";
+import { uploadEvidenceResumable } from "@/lib/frontend/evidence-upload";
 import { REPORT_PANEL_CONFIG } from "./report-panel-config";
 import { asFailure, type FailureResult } from "./resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -103,15 +105,22 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
  *     2026-08-08: evidence media IS a Final MVP requirement and the Operator — not an agent —
  *     named the TRAINER as the uploader (`FINAL_MVP_AUTHORITY_LOCK.md` §8; `CLAUDE.md` §1.1).
  *     A-014's prohibition on INVENTING an uploader is discharged, because one was RULED.
- *     THE TREATMENT BELOW IS UNCHANGED, and the reason it survives is now the accurate one:
- *     the evidence schema is excluded from the Step 7E boundary, `PhysicalTestPort` exposes NO
- *     upload or evidence-read path, `Evidence Pending` is deliberately not a stored status
- *     (A-036), and implementation is Phase B. So the affordance still has no governed backing —
- *     it is unbuilt, not undecided.
- *     The region is KEPT with the frame's label and rendered INERT with a visible,
- *     programmatically associated reason — the F-04 D1 / F-11 "Send Reminder to Trainer"
- *     treatment. NO UPLOADER IS INVENTED and the frame's format/size limits are omitted rather
- *     than fabricated, because they would be an unratified policy.
+ *
+ *     ~~"THE TREATMENT BELOW IS UNCHANGED … the evidence schema is excluded from the Step 7E
+ *     boundary, `PhysicalTestPort` exposes NO upload or evidence-read path … implementation is
+ *     Phase B. So the affordance still has no governed backing — it is unbuilt, not undecided.
+ *     The region is KEPT with the frame's label and rendered INERT …"~~
+ *     ✅ STRUCK 2026-08-12 AT P1-2b AND PRESERVED. Every clause of it was true when written and
+ *     is now false: the schema shipped at P1-2, the port carries four evidence members, and the
+ *     transport is BUILT. ⛔ THIS IS THE RESTATEMENT DEFECT AT FILE SCOPE — the exact shape the
+ *     Operator named on `parent-canonical-report.tsx`, where a comment declared a region omitted
+ *     forty lines below the commit that built it. ▶ **A file's own header is the first thing a
+ *     later reader trusts, and the last thing an implementer remembers to update.**
+ *
+ *     WHAT IS UNCHANGED AND STILL BINDING: the frame's "Class Video Evidence" heading and its
+ *     "up to 500MB each" are STILL NOT BUILT — G-8 refused CLASS footage and C-16 ruled 100 MiB.
+ *     `REGISTERED-OMISSION`: those two never end. What was built is D-5's PER-CHILD clip, under
+ *     its own heading, with the ratified ceiling named on the page.
  *  D4 Report Details rows "Lesson" and "Term". ✅ THE LESSON HALF IS DISCHARGED AT HERO
  *     PHASE 6. It recorded that no lesson-number or lesson-title field existed on any
  *     governed Trainer projection — correct when written, and deliberately not invented
@@ -585,31 +594,15 @@ export function TrainerDraftGeneration() {
               One recording of this learner&rsquo;s own presentation turn, attached to this
               session&rsquo;s report. MP4 or MOV, up to 100 MB.
             </p>
-            <div
-              data-evidence-state="transport-not-built"
-              className="mt-4 grid min-h-44 place-items-center rounded-panel border border-dashed border-line-strong bg-surface-muted px-6 py-10 text-center"
-            >
-              <div>
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby={evidenceNoteId}
-                  className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-[0.78125rem] font-semibold text-ink-subtle"
-                >
-                  Attach this learner&rsquo;s recording
-                  <Icon name="chevronRight" size={16} />
-                </button>
-                <p
-                  id={evidenceNoteId}
-                  className="mx-auto mt-3 max-w-md text-small leading-6 text-ink"
-                >
-                  The governed evidence substrate is built — table, private bucket, upload policy
-                  and the attach, list, access and remove operations. The resumable upload
-                  transport this control needs is not built yet, so the control is inert rather
-                  than simulated.
-                </p>
-              </div>
-            </div>
+            {/*
+              ✅ P1-2b — BUILT 2026-08-12. ~~`data-evidence-state="transport-not-built"`,
+              an inert button and a note reading "The resumable upload transport
+              this control needs is not built yet, so the control is inert rather
+              than simulated."~~ ⛔ STRUCK AND PRESERVED: it was TRUE and it was
+              the right thing to render while it was true — an inert control with
+              a stated reason beats a simulated one. The transport now exists.
+            */}
+            <EvidenceAttachPanel reportId={context.reportId} noteId={evidenceNoteId} />
 
             {/*
               ⛔ C-3, MANDATORY UI TEXT, AND PART OF THIS PHASE'S ACCEPTANCE.
@@ -865,4 +858,237 @@ function formatDate(date: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${date}T00:00:00Z`));
+}
+
+/**
+ * ⛔ P1-2b — THE TRAINER'S ATTACH CONTROL.
+ *
+ * FOUR STEPS, AND THE SPLIT BETWEEN THEM IS THE GOVERNANCE BOUNDARY:
+ *   1. the server mints a ticket — an id and a path, and NOT an authorization;
+ *   2. the bytes go DIRECTLY to storage under the one RLS INSERT policy, which
+ *      re-derives trainer authority over the report in the path (ADR-4);
+ *   3. `confirmEvidenceAttach` is the GOVERNED ACT — it emits
+ *      `evidence.attached` in the same transaction as the row;
+ *   4. only then does the clip exist for any reader.
+ *
+ * ⚠️ THE UI NEVER REPORTS SUCCESS BEFORE STEP 3. An uploaded object that was
+ * not attached is bytes with a name: no row, no audit event, no read path.
+ * Telling the trainer "attached" after step 2 would be the affordance-without-
+ * a-backing this project refuses — and here it would also be a claim about an
+ * AUDITED act that never happened.
+ *
+ * ⚠️ THE REFUSAL REASONS ARE SHOWN, DELIBERATELY. The RPC discriminates only
+ * AFTER it has proven the caller is the authoring trainer; every authorization
+ * failure collapses to one undifferentiated `not_permitted`. Surfacing the
+ * rest is the same principle that put the size ceiling on this page: a trainer
+ * who cannot tell why an upload failed will retry it, which is the worst
+ * outcome on a classroom network.
+ */
+const ATTACH_REASON_COPY: Readonly<Record<string, string>> = {
+  already_attached:
+    "This report already has a recording. Remove the existing one before attaching another.",
+  too_large: "That file is larger than 100 MB.",
+  unsupported_type: "That file is not an MP4 or MOV.",
+  object_missing: "The upload did not finish. Try attaching the recording again.",
+  object_ambiguous:
+    "More than one uploaded file matches this attempt. Try attaching the recording again.",
+  not_permitted: "This recording cannot be attached to this report.",
+};
+
+function EvidenceAttachPanel({
+  reportId,
+  noteId,
+}: {
+  readonly reportId: string;
+  readonly noteId: string;
+}) {
+  const port = usePhysicalTestPort();
+  const inputId = useId();
+  const [clips, setClips] = useState<readonly ReportEvidenceClipDto[] | null>(null);
+  const [busy, setBusy] = useState<"idle" | "uploading" | "attaching" | "removing">("idle");
+  const [sent, setSent] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    const result = await port.listReportEvidence(reportId);
+    // ⚠️ Q-7: a rejected read is NOT an empty list. `null` renders as "cannot
+    // be shown", never as "no recording attached" — the two are different
+    // facts and the second one invites an upload that will then be refused.
+    setClips(result.outcome === "success" ? result.data : null);
+  }, [port, reportId]);
+
+  // The project's established load pattern: the effect starts the read and an
+  // `active` flag discards a late reply, so an unmounted panel never writes
+  // state and a stale reply never overwrites a fresher one.
+  useEffect(() => {
+    let active = true;
+    void port.listReportEvidence(reportId).then((result) => {
+      if (!active) return;
+      setClips(result.outcome === "success" ? result.data : null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [port, reportId]);
+
+  async function attach(file: File) {
+    setMessage(null);
+    setBusy("uploading");
+    setSent(0);
+    setTotal(file.size);
+
+    const ticket = await port.createEvidenceUploadTicket({
+      reportId,
+      mediaType: file.type,
+      byteSize: file.size,
+    });
+    if (ticket.outcome !== "success") {
+      setBusy("idle");
+      setMessage("This recording cannot be attached to this report.");
+      return;
+    }
+
+    const uploaded = await uploadEvidenceResumable(file, ticket.data, (p) => {
+      setSent(p.sentBytes);
+    });
+    if (uploaded.outcome !== "success") {
+      setBusy("idle");
+      // ⛔ A REFUSAL AND A NETWORK FAILURE READ DIFFERENTLY, because retrying
+      // is right for one and wrong for the other.
+      setMessage(
+        uploaded.outcome === "refused"
+          ? "That recording was refused. Check it is an MP4 or MOV under 100 MB."
+          : "The upload did not complete. Check your connection and try again.",
+      );
+      return;
+    }
+
+    setBusy("attaching");
+    const confirmed = await port.confirmEvidenceAttach({
+      reportId,
+      evidenceId: ticket.data.evidenceId,
+    });
+    setBusy("idle");
+    if (confirmed.outcome !== "success") {
+      setMessage("This recording cannot be attached to this report.");
+      return;
+    }
+    if (!confirmed.data.attached) {
+      setMessage(ATTACH_REASON_COPY[confirmed.data.reason] ?? ATTACH_REASON_COPY.not_permitted);
+      return;
+    }
+    await refresh();
+  }
+
+  async function remove(evidenceId: string) {
+    setMessage(null);
+    setBusy("removing");
+    const result = await port.removeEvidence(evidenceId);
+    setBusy("idle");
+    if (result.outcome !== "success") {
+      setMessage("This recording could not be removed.");
+      return;
+    }
+    await refresh();
+  }
+
+  const working = busy !== "idle";
+
+  return (
+    <div
+      data-evidence-state={clips === null ? "unavailable" : clips.length > 0 ? "attached" : "empty"}
+      className="mt-4 rounded-panel border border-dashed border-line-strong bg-surface-muted px-6 py-8"
+    >
+      {clips === null ? (
+        <p className="text-center text-small leading-6 text-ink">
+          Attached recordings cannot be shown right now.
+        </p>
+      ) : clips.length > 0 ? (
+        <ul className="grid gap-3">
+          {clips.map((clip) => (
+            <li
+              key={clip.id}
+              data-evidence-clip={clip.id}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-field border border-line bg-surface px-4 py-3"
+            >
+              <span className="text-[0.78125rem] text-ink">
+                Recording attached · {clip.mediaType === "video/mp4" ? "MP4" : "MOV"} ·{" "}
+                {(clip.byteSize / (1024 * 1024)).toFixed(1)} MB
+              </span>
+              {/*
+                ⛔ REMOVAL IS TRAINER-ONLY AND IS **NOT** LIMITED TO
+                PRE-SUBMITTED (Operator ruling). Removal WITHDRAWS media rather
+                than editing an approved artefact — and if a wrong clip has
+                reached a parent, the trainer must be able to pull it. Gating
+                this control on status would take that away exactly when it
+                matters most.
+              */}
+              <button
+                type="button"
+                data-evidence-remove={clip.id}
+                onClick={() => void remove(clip.id)}
+                disabled={working}
+                className="inline-flex min-h-11 items-center rounded-field border border-line bg-surface px-4 py-2 text-[0.78125rem] font-semibold text-ink disabled:opacity-60"
+              >
+                {busy === "removing" ? "Removing…" : "Remove recording"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="text-center">
+          <label
+            htmlFor={inputId}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-field border border-line bg-surface px-4 py-2.5 text-[0.78125rem] font-semibold text-ink"
+          >
+            Attach this learner&rsquo;s recording
+            <Icon name="chevronRight" size={16} />
+          </label>
+          <input
+            id={inputId}
+            type="file"
+            accept="video/mp4,video/quicktime"
+            aria-describedby={noteId}
+            disabled={working}
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              // The input is cleared so re-selecting the same file re-fires.
+              event.target.value = "";
+              if (file) void attach(file);
+            }}
+          />
+          <p id={noteId} className="mx-auto mt-3 max-w-md text-small leading-6 text-ink">
+            One recording of this learner&rsquo;s own presentation turn. MP4 or MOV, up to 100 MB.
+            Large uploads resume automatically if the connection drops.
+          </p>
+        </div>
+      )}
+
+      {working && (
+        <p
+          data-evidence-progress={busy}
+          aria-live="polite"
+          className="mt-4 text-center text-small leading-6 text-ink"
+        >
+          {busy === "uploading"
+            ? `Uploading… ${total > 0 ? Math.floor((sent / total) * 100) : 0}%`
+            : busy === "attaching"
+              ? "Attaching the recording to this report…"
+              : "Removing…"}
+        </p>
+      )}
+
+      {message && (
+        <p
+          data-evidence-message="refusal"
+          role="status"
+          className="mt-4 text-center text-small leading-6 text-ink-strong"
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  );
 }

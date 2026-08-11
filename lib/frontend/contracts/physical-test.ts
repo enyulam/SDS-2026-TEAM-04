@@ -388,6 +388,59 @@ export type EvidenceViewUrlDto = {
   readonly expiresInSeconds: number;
 };
 
+/**
+ * ⛔ P1-2b — THE UPLOAD TICKET. An identity and a path, and NOT an
+ * authorization.
+ *
+ * The server mints `evidenceId` and derives `objectPath` from it, so the
+ * client chooses neither. ▶ **A forged ticket buys nothing**: the one
+ * `storage.objects` INSERT policy re-derives trainer authority over the report
+ * named in the FIRST PATH SEGMENT, live, on the actual INSERT (ADR-4).
+ *
+ * ⚠️ `chunkBytes` is not a tuning knob — Supabase's resumable endpoint
+ * requires exactly 6 MiB parts for every chunk but the last.
+ */
+export type EvidenceUploadTicketDto = {
+  readonly evidenceId: string;
+  readonly reportId: string;
+  readonly bucket: string;
+  readonly objectPath: string;
+  readonly maxBytes: number;
+  readonly chunkBytes: number;
+};
+
+/**
+ * ⛔ THE GOVERNED ACT IS THE ATTACH, NOT THE UPLOAD. Until this succeeds the
+ * uploaded object is referenced by no row and reachable by no read path.
+ *
+ * ⚠️ `reason` discriminates ONLY after authorization has already succeeded —
+ * every authorization failure collapses to `not_permitted` inside the RPC, so
+ * a caller never learns whether a report exists or merely lies beyond them.
+ */
+export type EvidenceAttachSuccess = {
+  readonly attached: boolean;
+  readonly reason: string;
+};
+
+export type EvidenceUploadTicketInput = {
+  readonly reportId: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+};
+
+export type EvidenceAttachInput = {
+  readonly reportId: string;
+  readonly evidenceId: string;
+};
+
+/** The trainer's own view of what is attached. Carries NO storage path. */
+export type ReportEvidenceClipDto = {
+  readonly id: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+  readonly createdAt: string;
+};
+
 export type AvailabilityStateDto =
   | "available"
   | "none_yet"
