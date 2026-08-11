@@ -6779,3 +6779,97 @@ Screen `08` gained the player it never had.
 **Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No push, no billable call, no dependency added.
 
 **Next step:** ⛔ **STOPPED by Operator instruction.** The Operator re-walks before Part 2.
+
+---
+
+## 2026-08-12 — PART 1 COMPLETE, gated by an OPERATOR MANUAL RE-WALK · `A-004` RUN · the pre-publication secret scan
+
+**Track:** `docs/plan/PORTAL_COMPLETION_PLAN.md` Part 1 — **CLOSED**. **Branch:** `develop`, main worktree. **Starting HEAD:** `658d597`.
+
+### 1. ✅ PART 1 IS COMPLETE, AND ITS GATE IS A HUMAN WALKTHROUGH — NOT A SUITE
+
+The Operator walked **all six stages on a fresh learner** and every stage held:
+
+| Stage | Result |
+|---|---|
+| 1 · Roster | *"Present — not yet recorded"*, no Assess link, *"Confirm _ present"* |
+| 2 · Assess | nine dimensions, both note fields, **save succeeds without the absent-then-present workaround** |
+| 3 · Draft | clip **attaches AND plays** on screen `08` |
+| 4 · Trainer review | clip plays; the stale inert block is **gone** |
+| 5 · Management | nine coloured tiles, Report Details above them, clip plays, **Approve & Submit works without having viewed it** |
+| 6 · Parent | four panels, clip plays, **no download control, no ratings** |
+
+⛔ **THE GATE IS THE WALKTHROUGH, AND THAT IS RECORDED DELIBERATELY.** `D-1` and `D-5` are live end to end across all three roles, `F-ATTENDANCE-INIT-1` is fixed, and **every one of those facts was confirmed by a human operating the product** rather than by a green runner.
+
+### 2. ⛔ THE DEFECT THAT MATTERED MOST WOULD HAVE PASSED EVERY SUITE IN THIS PROJECT
+
+**`F-ATTENDANCE-INIT-1` was found by manual walkthrough.** A learner with no `attendance` row could never be assessed: `A-018` materializes Present **lazily**, so the roster showed the learner as present while the Assess path required a row that did not exist. ▶ **Every suite passed throughout**, because every suite reaches its subject through `mint_isolated_pair`, and **`mint_isolated_pair` seeds attendance**. The fixtures made the broken state unreachable.
+
+⚠️ **This is not an argument for fewer proofs — it is the boundary of what a proof built on a fixture can see.** A harness that constructs its own subject can only ever measure states its constructor can produce. The six seeded walkthrough learners exist precisely to leave that row **unmaterialized**, so the path is now reachable by a test at all. **Recorded as a standing limitation of the suite family, not as a one-off.**
+
+### 3. ✅ `A-004` RECLASSIFIED — `NOT-RUN` → **OPERATOR-PERFORMED, BOTH DIRECTIONS**
+
+`A-004` requires a **both-direction** Parent UAT and it has stood at `NOT-RUN` since ratification, because it is **HUMAN evidence and no session may report it as run**. The Operator has now run it:
+
+- ▶ **PERMITTED leg:** the linked parent **sees and plays** their own learner's clip on the submitted report.
+- ⛔ **REFUSAL leg:** *"nothing else was reachable."*
+
+⚠️ **ITS LIMITS ARE STATED RATHER THAN LEFT TO BE ASSUMED, because an over-read acceptance is worse than an honest `NOT-RUN`:**
+
+- it is **point-in-time at this commit** and does not carry forward to a later surface change;
+- it does **not** cover **hover, focus, or responsive collapse** — the three states a click-through does not exercise;
+- it is **not** a substitute for `A-003`'s automated prohibited-path legs, which remain the machine-checked half and are unchanged.
+
+⛔ **`A-003`'s `unscanned` leg remains `NOT APPLICABLE (C-3)`, never `PASS`.**
+
+### 4. ⛔ TWO WITHDRAWN ATTRIBUTIONS — BOTH REFUTED BY MEASUREMENT, NEITHER BY ARGUMENT
+
+Recorded together because they are the same discipline seen from both sides of the conversation.
+
+| Stated cause | Who stated it | What the measurement said |
+|---|---|---|
+| *"The fixture loader is corrupting non-ASCII"* (`Q-28` Finding 3) | **Me** | ⛔ **REFUTED.** `runSqlFile` round-trips `U+2014` intact through its exact `spawnSync` + string-input + `utf8` mechanism — `e28094` read back out of `convert_to(…, 'UTF8')`. The corruption entered by a **manual** route. ▶ So the fix became an **assertion**, not an encoding change to a path that was already correct |
+| *"'Recording attached' is client state, not a read-back"* | **The Operator** | ⛔ **REFUTED.** The `report_evidence` row, the storage object and **two** `evidence.attached` events were all present, and the panel renders from a real `listReportEvidence` reply. The governed chain worked; the missing thing was a **player** |
+
+▶ **Neither was settled by whoever argued better.** Both were settled by going and measuring the thing, and in both cases the person who stated the cause was the one who withdrew it. ⚠️ **The second is the more instructive:** the Operator's inference was entirely reasonable from what the screen showed — a correct governed write with no surface able to display its result reads, from outside, **exactly** like a failed write.
+
+### 5. ✅ THE PRE-PUBLICATION SECRET SCAN — `npm run prove:no-secrets`
+
+**It has never existed in this repository.** The one used for the demonstration push lived in the other workspace, so there was no prior instrument to re-run and nothing to inherit confidence from — ▶ **the control carries the whole weight.**
+
+| Measured | Result |
+|---|---|
+| Commits scanned (reachable from `develop`) | **291** |
+| Blobs scanned | **1,941** (134 MB), `seen === blobs.length` asserted |
+| Tracked files scanned | **686** (29 MB) |
+| ⛔ **CREDENTIAL findings** | **ZERO** — no secret key, publishable key, API key, JWT, DB password, PEM block, PAT or AWS key id |
+| ⚠️ IDENTIFIER occurrences | **65** across **9** locations — two Supabase project refs and a loopback URL |
+| CONTROL — working tree | ✅ **FIRED** on a planted `sb_secret_…`, probe removed |
+| CONTROL — history | ✅ **FIRED** on a planted secret in a scratch commit under a temp ref; ref deleted, `develop` never moved |
+
+⛔ **EXIT STATUS IS INTERPRETED, NEVER ASSUMED.** `status === null` — the process never starting, or being killed — exits 2 immediately. ▶ **This project's false-`CLEAN` instance was a history search that died unnoticed and read as no-match**, so a scan that cannot distinguish *"found nothing"* from *"did not run"* is not a scan. The commit and blob counts are printed for the same reason: a run that dies halfway cannot report clean, because the counts would not add up.
+
+⛔ **NO CREDENTIAL IS EVER PRINTED, BY ANY PATH.** Live values are read from `.env.local` into process memory only. A finding names the **file**, the **commit** and the **kind** — never the matched text. ⚠️ **This project has already had one filtering-after-the-fact failure**, so the discipline is that the credential-bearing string never reaches a stream at all.
+
+⚠️ **LIMIT, STATED RATHER THAN IMPLIED:** `BEST_COACH_HOSTED_DB_URL`'s password was **rotated after an exposure**, and the **previous** value is not in my record and is not derivable. It is covered by **SHAPE ONLY** (`postgres://user:pass@`, which matches any password). ⛔ **Exact-containment coverage of the rotated value is NOT claimed**, and the result must be read with that limit.
+
+#### 5a. ⛔ AN INSTRUMENT DEFECT THE FIRST RUN EXPOSED, AND A CLASSIFICATION THE FIRST RUN LACKED
+
+The first run reported **BLOCKED (65 + 13)**. Both halves were the instrument, not the repository:
+
+1. **`scanBlobs` called `scanText(content, "")`**, so `SHAPE_EXEMPT` could **never** match in the history pass. The two files whose entire purpose is to hold a key **shape** — `run-runtime-profile.mjs`'s `sb_publishable_synthetic_shape_fixture` and its matching `SECRET_SHAPED`, already adjudicated a **true negative** in `DEPLOYMENT_GATE_PACKET.md` — were exempt in the working tree and scanned in history. ▶ **A rule applied on one pass and not the other is not a rule**, and it is the same family as a leg whose name and measurement disagree. The path now travels with the blob.
+2. **Every value in `.env.local` was treated as a credential.** All 65 exact-containment hits were a Supabase **project ref** or a **loopback URL** — values public by construction. ▶ **A gate that is permanently red is a gate people learn to bypass**, which is strictly worse than no gate. ⚠️ **So they are CLASSIFIED, not dropped:** an `IDENTIFIER` hit is still counted, still listed **by location**, and still reported for Operator disposition — separately, so a real key can never hide inside a crowd of benign matches.
+
+### 6. ✅ THE VERCEL PRODUCTION BRANCH — AN OPERATOR-SUPPLIED FACT, WITH ITS SOURCE
+
+**The production branch is `main`.** ▶ **Verified by the Operator in the Vercel dashboard**, whose deployment card states *"To update your Production Deployment, push to the `main` branch."*
+
+⚠️ **It is a DASHBOARD SETTING, NOT A REPOSITORY FILE**, which is why no `vercel.json` records it and why **no amount of reading this repository could have established it.** Consequence: **pushing `develop` creates a preview deployment and cannot move `best-coach-mvp.vercel.app`.** Recorded with its source because a fact that lives only outside the repository is exactly the kind that gets re-derived wrongly by the next session.
+
+**Files changed:** `scripts/publication/prove-no-secrets.mjs` (new) · `package.json` · `docs/progress/{STATUS.md,BUILD_NOTES.md}`.
+
+**Migration / schema:** ⛔ **NONE.** Census unmoved — **25 migrations · 28 tables · 49 functions · 12 enums · 29 policies · registry 19**.
+
+**Environment:** local Supabase only. ⛔ **The hosted demonstration project was not touched.** No billable call, no dependency added.
+
+**Next step:** ⛔ **STOPPED.** The scan's IDENTIFIER findings go to the Operator before any push, under their own standing rule that **any** finding comes to them.
