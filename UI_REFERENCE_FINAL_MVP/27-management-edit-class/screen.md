@@ -15,8 +15,8 @@
 | Role | Management |
 | Folder | `27-management-edit-class` |
 | Canonical route | `/management/classes/[classModuleId]/edit` |
-| Current implemented route | â€” (no implemented route) |
-| Route-compatibility treatment | Not applicable â€” no implemented route |
+| Current implemented route | ~~â€” (no implemented route)~~ ✅ **`/management/classes/[classModuleId]/edit`** - created 2026-08-13, plan phase `P2-3`, at the CANONICAL path. No other route was moved, renamed, redirected or aliased. ⚠️ The dynamic segment is named `classModuleId` because the entity is the CLASS MODULE (`A-016`); `classId` would put a prohibited `classes` entity back into the URL. |
+| Route-compatibility treatment | ~~Not applicable â€” no implemented route~~ **Not applicable - the implemented route IS the canonical route.** |
 | Figma file key | `sSY1TYw3jyVlZDy8V2Mu7g` |
 | Figma file name | `SDS-dashboard` |
 | Figma node | `545:9` |

@@ -64,6 +64,8 @@ import {
 } from "@/server/modules/report-workflow/trainer-projections";
 import {
   createManagementClassCore,
+  readManagementClassForEditCore,
+  updateManagementClassCore,
   getManagementRatingsCore,
   getManagementReviewCandidateCore,
   listManagementClassesCore,
@@ -113,6 +115,9 @@ import type {
   AdapterManagementApproveAndSubmitInput,
   AdapterManagementApproveAndSubmitSuccess,
   AdapterAddClassOptionsDto,
+  AdapterClassEditDto,
+  AdapterClassUpdateOutcomeDto,
+  AdapterUpdateClassInput,
   AdapterClassCreationOutcomeDto,
   AdapterCreateClassInput,
   AdapterManagementClassListDto,
@@ -793,6 +798,71 @@ export async function adapterCreateManagementClass(
       sessionsRequested: result.data.sessionsRequested,
       sessionsCreated: result.data.sessionsCreated,
       sessionsAssigned: result.data.sessionsAssigned,
+      reason: result.data.reason,
+    },
+  };
+}
+
+/**
+ * P2-3 — screen `27` Edit Class: the read. Same allow-list mapper, one field
+ * at a time, so a column added to `class_sessions` later does NOT reach the
+ * client until someone names it here.
+ */
+export async function adapterReadClassForEdit(
+  classModuleId: string,
+): Promise<ActionResult<AdapterClassEditDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementClassForEditCore(client, classModuleId);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      classModuleId: result.data.classModuleId,
+      title: result.data.title,
+      classGradeId: result.data.classGradeId,
+      trainerMembershipId: result.data.trainerMembershipId,
+      sessions: result.data.sessions.map((session) => ({
+        classSessionId: session.classSessionId,
+        sessionDate: session.sessionDate,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        room: session.room,
+        termId: session.termId,
+        trainerDisplayName: session.trainerDisplayName,
+      })),
+    },
+  };
+}
+
+/**
+ * P2-3 — the governed edit.
+ *
+ * ⛔ THE INPUT IS RE-BUILT FIELD BY FIELD. There is no field here that could
+ * carry a session removal, an unassign, a class code, a capacity or a
+ * programme — the three refusals are held by the TYPE, not only by prose.
+ */
+export async function adapterUpdateManagementClass(
+  input: AdapterUpdateClassInput,
+): Promise<ActionResult<AdapterClassUpdateOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await updateManagementClassCore(client, {
+    classModuleId: input.classModuleId,
+    classGradeId: input.classGradeId,
+    title: input.title,
+    termId: input.termId,
+    room: input.room,
+    startTime: input.startTime,
+    endTime: input.endTime,
+    trainerMembershipId: input.trainerMembershipId,
+  });
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      moduleChanged: result.data.moduleChanged,
+      sessionsChanged: result.data.sessionsChanged,
+      sessionsTotal: result.data.sessionsTotal,
+      trainerChanged: result.data.trainerChanged,
       reason: result.data.reason,
     },
   };

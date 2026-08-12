@@ -223,17 +223,25 @@ check(
   `P21a-13 the portal navigation suite exits 0 with the new route (exit ${nav.status}) -- exactly one active rail item on /management/classes`,
 );
 /*
- * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2` AND WAS REWRITTEN, NOT DELETED. Screen
- * `26` shipped at `/management/classes/add-class`, so the app tree really does
- * carry one more route. ▶ The property this leg protects is unchanged and is
- * why it stays an EXACT number rather than a `>=`: the nav census must be
- * READING the tree, and a floor would keep passing if it silently stopped.
- * Every new screen deliberately edits this line — that is the ratchet, not
- * friction.
+ * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, THEN 17 → 18 AT `P2-3`, AND WAS REWRITTEN
+ * EACH TIME RATHER THAN DELETED. Screen `26` shipped at
+ * `/management/classes/add-class` and screen `27` at
+ * `/management/classes/[classModuleId]/edit`, so the app tree really does carry
+ * two more routes than it did at `P2-1`. ▶ The property this leg protects is
+ * unchanged and is why it stays an EXACT number rather than a `>=`: the nav
+ * census must be READING the tree, and a floor would keep passing if it
+ * silently stopped. Every new screen deliberately edits this line — that is the
+ * ratchet, not friction.
+ *
+ * ⛔ THIS IS A ROUTE CENSUS, NOT A PROJECT CENSUS. It moves when a route ships
+ * and for no other reason; the four "nothing was added" schema invariants live
+ * in each phase's own suite, and the single global FUNCTION ratchet lives in
+ * `prove-2-parent-report-list.sql` `P2-6`. A ratchet in five places is five
+ * chances to relax the wrong one.
  */
 check(
-  /all 17 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 17 routes from the app tree (16 + screen `26` at P2-2) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 18 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 18 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

@@ -18,7 +18,10 @@ import {
   type ManagementApproveAndSubmitInput,
   type ManagementApproveAndSubmitSuccess,
   type AddClassOptionsDto,
+  type ClassEditDto,
+  type ClassUpdateOutcomeDto,
   type TermOptionDto,
+  type UpdateClassInput,
   type ClassCreationOutcomeDto,
   type CreateClassInput,
   type ManagementClassListDto,
@@ -1232,6 +1235,88 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         // for.
         sessionsAssigned: input.trainerMembershipId ? requested : 0,
         reason: "created",
+      },
+    };
+  }
+
+  /**
+   * P2-3 — the deterministic mirror of the edit read.
+   *
+   * ⚠️ IT DERIVES FROM `SESSIONS`, so the module it returns is one the class
+   * list also shows — a fixture whose edit surface described a module the list
+   * did not contain would let a screen pass against data no other screen has.
+   *
+   * ⛔ `trainerMembershipId` is pre-selected ONLY when every session of the
+   * module names the same trainer, mirroring the real read: `A-016` puts
+   * assignment at session level, and proposing one name over a mixed
+   * arrangement would offer to overwrite something never shown.
+   */
+  async readClassForEdit(classModuleId: string): Promise<UiActionResult<ClassEditDto>> {
+    await delay(220);
+    const owned = SESSIONS.filter((session) => session.classModuleId === classModuleId);
+    if (owned.length === 0) return { outcome: "unavailable" };
+    const grade = FIXTURE_CLASS_GRADES.find((item) => item.displayName === owned[0].classGrade);
+    const names = [...new Set(owned.map((session) => session.trainerName).filter(Boolean))];
+    const unanimous = names.length === 1 && owned.every((session) => session.trainerName);
+    return {
+      outcome: "success",
+      data: {
+        classModuleId,
+        title: owned[0].moduleName,
+        classGradeId: `grade-${grade?.code ?? "beginner"}`,
+        trainerMembershipId: unanimous
+          ? `membership-${(names[0] as string).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
+          : null,
+        sessions: owned.map((session) => ({
+          classSessionId: session.sessionId,
+          sessionDate: session.date,
+          startTime: session.startTime || null,
+          endTime: session.endTime || null,
+          room: session.room ?? null,
+          termId: FIXTURE_TERMS[0].termId,
+          trainerDisplayName: session.trainerName ?? null,
+        })),
+      },
+    };
+  }
+
+  /**
+   * P2-3 — the deterministic mirror of the governed edit.
+   *
+   * ⛔ IT PERSISTS NOTHING, and reports the counts the real path WOULD
+   * produce. ⚠️ It reproduces `unchanged` faithfully: a mirror that always
+   * claimed success would let the surface's "nothing to save" branch go
+   * permanently unexercised.
+   */
+  async updateManagementClass(
+    input: UpdateClassInput,
+  ): Promise<UiActionResult<ClassUpdateOutcomeDto>> {
+    await delay(300);
+    const title = input.title.trim();
+    if (title === "") {
+      return {
+        outcome: "validation",
+        message: "Enter a class name.",
+        fields: [{ path: "title", message: "Enter a class name." }],
+      };
+    }
+    const owned = SESSIONS.filter((session) => session.classModuleId === input.classModuleId);
+    if (owned.length === 0) return { outcome: "unavailable" };
+    const moduleChanged = title !== owned[0].moduleName;
+    const sessionsChanged = owned.filter(
+      (session) =>
+        (session.room ?? null) !== input.room ||
+        (session.startTime || null) !== input.startTime ||
+        (session.endTime || null) !== input.endTime,
+    ).length;
+    return {
+      outcome: "success",
+      data: {
+        moduleChanged,
+        sessionsChanged,
+        sessionsTotal: owned.length,
+        trainerChanged: false,
+        reason: moduleChanged || sessionsChanged > 0 ? "updated" : "unchanged",
       },
     };
   }

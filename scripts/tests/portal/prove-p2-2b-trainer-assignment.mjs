@@ -35,6 +35,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
+import { uncalledFunctions } from "./rpc-call-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -49,18 +50,6 @@ const S = (name) => join(ROOT, "scripts", "tests", "portal", name);
 const SUITE = S("prove-p2-2b-trainer-assignment.sql");
 const MIGRATION = M("20260813120000_portal_p2_2b_trainer_assignment.sql");
 
-/*
- * ⚠️ THE WHOLE `P2-2` FAMILY, EACH MIGRATION PAIRED WITH THE SUITE THAT MUST
- * EXERCISE IT. The terms substrate is here deliberately: it creates NO
- * function, and the rule must be satisfiable by "there is nothing to call"
- * as well as by "everything is called" -- otherwise it would push future
- * phases toward adding a function just to have one.
- */
-const FAMILY = [
-  { migration: M("20260812230000_portal_d3_terms_substrate.sql"), suite: S("prove-p2-2-terms-substrate.sql") },
-  { migration: M("20260813090000_portal_p2_2_class_creation.sql"), suite: S("prove-p2-2-class-creation.sql") },
-  { migration: MIGRATION, suite: SUITE },
-];
 
 const COUNTS = `SELECT (SELECT count(*) FROM public.class_session_assignments)
   || '|' || (SELECT count(*) FROM public.centre_memberships)
@@ -105,49 +94,52 @@ check(
   `the database is UNMOVED and was actually read (${before} -> ${after}) -- the suite planted an account, a membership and real assignments, and rolled all of them back`,
 );
 
+/*
+ * ⚠️ THIS PINNED ALL SIX FIGURES AND FIRED WHEN `P2-3` LEGITIMATELY MOVED
+ * THE REGISTRY TO 21 — the same defect as the earlier census pins, and it
+ * reached the REGISTRY figure too, which the first split had left exact
+ * because it looked like a true invariant. ▶ It is not: it is an invariant
+ * *for this phase*, and a phase-scoped claim written as a global total is a
+ * claim about every future phase.
+ *
+ * ▶ What this phase actually claims is asserted instead: the three
+ * structural invariants are exact, and THIS MIGRATION DECLARES NO REGISTRY AT
+ * ALL, which is checked against the FILE below (`P24a-0`) and cannot go stale.
+ */
 const census = psql(["-c", CENSUS]).stdout.trim();
+const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  census === "28|29|52|12|30|19",
-  `the census moved by EXACTLY one migration and one function: 28 | 29 tables | 52 functions (51 + the assignment RPC) | 12 enums | 30 policies | ⛔ registry STILL 19 (measured: ${census})`,
+  tables === "29" && enums === "12" && policies === "30",
+  `the three structural INVARIANTS are unmoved: 29 tables | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies}). Reported, not pinned: ${migrations} migrations, ${functions} functions, registry ${registry}`,
 );
 
 // ---------------------------------------------------------------------
 // ⛔ THE STANDING RULE, MECHANIZED.
 // ---------------------------------------------------------------------
-const CREATE_FN = /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z0-9_]+)\s*\(/gi;
-const uncalled = [];
-let declared = 0;
-for (const { migration, suite } of FAMILY) {
-  const sql = readFileSync(migration, "utf8");
-  const proof = readFileSync(suite, "utf8");
-  for (const match of sql.matchAll(CREATE_FN)) {
-    declared += 1;
-    // A CALL is the function name followed by an open paren, anywhere in the
-    // suite -- `SELECT ... FROM public.f(` or `PERFORM public.f(`.
-    if (!new RegExp(`public\\.${match[1]}\\s*\\(`).test(proof)) uncalled.push(match[1]);
-  }
-}
+/*
+ * ⚠️ THE DETECTOR AND ITS PAIRING NOW LIVE IN `rpc-call-rule.mjs`, not here.
+ * It was declared inline in this file first; `P2-3` needed the same rule, and
+ * two copies of a rule is how one of them silently stops enforcing it — the
+ * reason the rating colour map was extracted at screen `19`.
+ */
+const { declared, uncalled } = uncalledFunctions(ROOT);
 check(
   uncalled.length === 0,
-  `P24a-CALL ⛔ THE STANDING RULE: all ${declared} function(s) created by the P2-2 family are CALLED by their paired proof suite, not merely inspected -- a structural assertion cannot prove a function RUNS (Operator, 2026-08-13)${uncalled.length ? ` · UNCALLED: ${uncalled.join(", ")}` : ""}`,
+  `P24a-CALL ⛔ THE STANDING RULE: all ${declared} function(s) declared by the portal migrations are CALLED by their paired proof suite, not merely inspected -- a structural assertion cannot prove a function RUNS (Operator, 2026-08-13)${uncalled.length ? ` · UNCALLED: ${uncalled.join(", ")}` : ""}`,
 );
 
 /*
- * ⚠️ ITS CONTROL, and the leg that makes P24a-CALL mean anything. The
- * detector is run against a suite that CANNOT contain the calls -- this
- * runner's own source. If it reports zero uncalled functions there too, it
- * is matching nothing and the assertion above is worthless.
+ * ⚠️ ITS CONTROL. The same detector, pointed at a pairing that CANNOT hold
+ * the calls, must report every function uncalled. Without it, "all functions
+ * are called" is equally true of a matcher that matches nothing — the
+ * false-`CLEAN` shape this project has been bitten by four times.
  */
-const controlSubject = readFileSync(fileURLToPath(import.meta.url), "utf8");
-let controlUncalled = 0;
-for (const { migration } of FAMILY) {
-  for (const match of readFileSync(migration, "utf8").matchAll(CREATE_FN)) {
-    if (!new RegExp(`public\\.${match[1]}\\s*\\(`).test(controlSubject)) controlUncalled += 1;
-  }
-}
+const { declared: controlDeclared, uncalled: controlUncalled } = uncalledFunctions(ROOT, [
+  { migration: "20260813120000_portal_p2_2b_trainer_assignment.sql", suite: "prove-p2-2-terms-substrate.sql" },
+]);
 check(
-  declared > 0 && controlUncalled === declared,
-  `P24a-CALLc CONTROL: the SAME detector reports all ${declared} function(s) UNCALLED when pointed at a file that cannot contain the calls (${controlUncalled}/${declared}) -- so the leg above is a measurement, not a query that matches nothing`,
+  controlDeclared === 1 && controlUncalled.length === 1,
+  `P24a-CALLc CONTROL: the SAME detector reports this migration's function UNCALLED when pointed at a suite that cannot contain the call (${controlUncalled.length}/${controlDeclared})`,
 );
 
 // ---------------------------------------------------------------------
@@ -156,9 +148,14 @@ check(
 const migration = readFileSync(MIGRATION, "utf8");
 
 check(
+  !/CREATE OR REPLACE FUNCTION public\.audit_action_registry/i.test(migration),
+  "P24a-0 ⛔ THE FILE-LEVEL CLAIM, and it cannot go stale: this migration DECLARES NO REGISTRY. Asserted against the FILE rather than against a global count, because the count belongs to whichever phase last changed it -- P2-3 legitimately moved it to 21",
+);
+
+check(
   /registry is NOT\s+--\s+EXTENDED|registry is \*\*NOT\s*\n--\s*EXTENDED|\*\*The registry is NOT/i.test(migration) &&
     /assertion A-3/.test(migration),
-  "P24a-1 ⛔ the migration states that the registry is NOT extended AND carries assertion A-3, which fails the build if it is no longer 19 or if admin.trainer_assigned is absent",
+  "P24a-1 ⛔ the migration states that the registry is NOT extended AND carries assertion A-3, which fails its OWN build if admin.trainer_assigned is absent",
 );
 
 check(

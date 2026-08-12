@@ -14,7 +14,10 @@ import type {
   ManagementApproveAndSubmitSuccess,
   AddClassOptionsDto,
   ClassCreationOutcomeDto,
+  ClassEditDto,
+  ClassUpdateOutcomeDto,
   CreateClassInput,
+  UpdateClassInput,
   ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
@@ -148,6 +151,20 @@ export interface PhysicalTestPort {
   createManagementClass(
     input: CreateClassInput,
   ): Promise<UiActionResult<ClassCreationOutcomeDto>>;
+  /**
+   * P2-3 — screen `27` Edit Class. Module-keyed; the centre is server-derived,
+   * and a module outside it resolves to the same non-disclosing `unavailable`
+   * a missing one does.
+   */
+  readClassForEdit(classModuleId: string): Promise<UiActionResult<ClassEditDto>>;
+  /**
+   * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
+   * one: the input type carries no session removal and no unassign, because
+   * both need audit strings that do not exist.
+   */
+  updateManagementClass(
+    input: UpdateClassInput,
+  ): Promise<UiActionResult<ClassUpdateOutcomeDto>>;
   getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>>;
   listParentSubmittedReports(): Promise<
     UiActionResult<readonly ParentReportListItemDto[]>

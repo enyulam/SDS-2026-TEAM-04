@@ -238,15 +238,29 @@ BEGIN
 
   -- P23-10 -- ⛔ EXACTLY TWO ACTION STRINGS.
   SELECT count(DISTINCT action) INTO v_n FROM public.audit_events WHERE seq_no > v_seq0;
+  /*
+   * ⚠️ THE REGISTRY TOTAL WAS PINNED AT 19 HERE AND IS NOT ANY MORE. REWRITTEN,
+   * NOT DELETED. `P2-3` was authorized to add `admin.module_updated` and
+   * `admin.session_updated`, moving the registry 19 → 21 — and this leg fired,
+   * because a `P2-2` suite was asserting a GLOBAL total that measures every
+   * OTHER phase's behaviour rather than its own.
+   *
+   * ▶ THE RULE, THE SAME ONE `P24a-0` ALREADY CARRIES: a phase-scoped claim
+   * must not be written as a global absolute. What `P2-2` actually claims is
+   * that IT added no string — proved by the two it names being present and by
+   * `P23a-0` asserting its migration declares no registry at all. The total is
+   * REPORTED so a reader still sees it move.
+   */
   IF v_n = 2
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 19
+     AND 'admin.module_created' = ANY (public.audit_action_registry())
+     AND 'admin.session_created' = ANY (public.audit_action_registry())
      AND NOT EXISTS (SELECT 1 FROM public.audit_events
                       WHERE seq_no > v_seq0
                         AND action NOT IN ('admin.module_created','admin.session_created'))
   THEN
-    RAISE NOTICE 'PASS P23-10  this entire suite emitted EXACTLY the two strings the Operator named, the registry is still 19, and no action produced a second event (A-029)';
+    RAISE NOTICE 'PASS P23-10  this entire suite emitted EXACTLY the two strings the Operator named, both are still in the registry (now % strings, reported not pinned), and no action produced a second event (A-029)', pg_catalog.array_length(public.audit_action_registry(), 1);
   ELSE
-    RAISE NOTICE 'FAIL P23-10  % distinct action(s) emitted; registry %', v_n, pg_catalog.array_length(public.audit_action_registry(), 1);
+    RAISE NOTICE 'FAIL P23-10  % distinct action(s) emitted; one of the two P2-2 strings is missing from the % -string registry', v_n, pg_catalog.array_length(public.audit_action_registry(), 1);
   END IF;
 
   -- P23-11 -- ⛔ THE TERMS WRITE SURFACE IS STILL ZERO.

@@ -114,9 +114,27 @@ check(
  */
 const census = psql(["-c", CENSUS]).stdout.trim();
 const [migrations, tables, functions, enums, policies, registry] = census.split("|");
+/*
+ * ⚠️ THE REGISTRY WAS ONE OF THE FOUR AND IS NOT ANY MORE — REWRITTEN, NOT
+ * DELETED, AND THE REASON MATTERS MORE THAN THE EDIT. `P2-3` was authorized to
+ * add `admin.module_updated` and `admin.session_updated`, moving the registry
+ * 19 → 21, and this leg fired: a `P2-2` suite was pinning a GLOBAL total that
+ * measures every OTHER phase's behaviour rather than its own. That is the SAME
+ * defect one level down from the one this comment block was written to fix.
+ *
+ * ▶ WHAT `P2-2` ACTUALLY CLAIMS is that IT added no string, and that is now
+ * proved TWICE against things `P2-3` cannot move: `P23-10` asserts both of its
+ * strings are still registered, and `P23a-0` asserts its MIGRATION FILE
+ * declares no registry at all. The total is REPORTED so a reader still sees it
+ * move.
+ *
+ * ⛔ THREE NUMERIC INVARIANTS REMAIN PINNED because tables, enums and policies
+ * are genuinely untouched by every phase so far — and a phase that adds one
+ * SHOULD break this.
+ */
 check(
-  tables === "29" && enums === "12" && policies === "30" && registry === "19",
-  `the four INVARIANTS this phase claims are unmoved: 29 tables | 12 enums | 30 policies | ⛔ audit registry 19 (measured ${tables} | ${enums} | ${policies} | ${registry}). Reported, not pinned, because they grow with every phase: ${migrations} migrations, ${functions} functions`,
+  tables === "29" && enums === "12" && policies === "30",
+  `the structural INVARIANTS this phase claims are unmoved: 29 tables | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies}). Reported, not pinned, because they grow with authorized phases: ${migrations} migrations, ${functions} functions, audit registry ${registry}`,
 );
 
 // ---------------------------------------------------------------------
@@ -124,6 +142,27 @@ check(
 // about the file it is exercising.
 // ---------------------------------------------------------------------
 const migration = readFileSync(MIGRATION, "utf8");
+
+/*
+ * ⚠️ FIRST DRAFT ASSERTED THE FILE NEVER MENTIONS THE REGISTRY AT ALL, AND
+ * IT FAILED — correctly. This migration READS the registry in an apply-time
+ * assertion (`array_length(...) <> 19`), which was TRUE when it applied and is
+ * a historical record of that moment. ⛔ AN APPLIED MIGRATION IS NOT EDITED TO
+ * MAKE A LATER TEST PASS: the assertion already ran, and rewriting it would
+ * falsify what `P2-2` actually checked. The leg was narrowed to the claim that
+ * was always meant — DECLARES, not MENTIONS.
+ */
+check(
+  !/CREATE OR REPLACE FUNCTION public\.audit_action_registry/i.test(migration),
+  "P23a-0 ⛔ THE FILE-LEVEL CLAIM, AND IT CANNOT GO STALE: this migration DECLARES NO REGISTRY, so P2-2 provably added no audit string. Asserted against the FILE rather than against a global count, because the count belongs to whichever phase last changed it -- P2-3 legitimately moved it to 21",
+);
+
+check(
+  /CREATE OR REPLACE FUNCTION public\.audit_action_registry/i.test(
+    readFileSync(MIGRATION.replace(/20260813090000_portal_p2_2_class_creation/, "20260813150000_portal_p2_3_class_edit"), "utf8"),
+  ),
+  "P23a-0c CONTROL: the SAME detector MATCHES P2-3's migration, which really does declare the registry -- so P23a-0 above is a measurement and not a pattern that can never fire",
+);
 
 check(
   /assertion C-8 failed/.test(migration) && /class_session_assignments/.test(migration) && /trainer_assigned/.test(migration),

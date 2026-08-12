@@ -44,6 +44,13 @@ import {
   type ClassListDto,
 } from "@/server/modules/class-session/class-list-projections";
 import {
+  readClassForEditCore,
+  updateClassCore,
+  type ClassEditDto,
+  type ClassUpdateOutcome,
+  type UpdateClassInput,
+} from "@/server/modules/class-session/class-edit";
+import {
   createClassCore,
   readAddClassOptionsCore,
   type AddClassOptionsDto,
@@ -536,6 +543,43 @@ export async function createManagementClassCore(
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
   return createClassCore(client, input);
+}
+
+/**
+ * P2-3 — screen `27` Edit Class: the read.
+ *
+ * ⛔ A MODULE THAT DOES NOT EXIST AND ONE OUTSIDE THIS CENTRE RESOLVE TO THE
+ * SAME `unavailable`. The read is RLS-scoped, so the two are already
+ * indistinguishable at the database; this keeps them indistinguishable at the
+ * surface too.
+ */
+export async function readManagementClassForEditCore(
+  client: SupabaseClient,
+  classModuleId: string,
+): Promise<ActionResult<ClassEditDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const found = await readClassForEditCore(client, classModuleId);
+  if (!found.ok) return { outcome: "unavailable" };
+  if (!found.rows) return { outcome: "unavailable" };
+  return { outcome: "success", data: found.rows };
+}
+
+/**
+ * P2-3 — the governed edit.
+ *
+ * ⛔ THE ROLE GATE IS DEFENCE IN DEPTH. Both update RPCs re-resolve exactly
+ * one ACTIVE `management` membership inside the same transaction as the write
+ * and refuse anything else with one non-disclosing string.
+ */
+export async function updateManagementClassCore(
+  client: SupabaseClient,
+  input: UpdateClassInput,
+): Promise<ActionResult<ClassUpdateOutcome>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+  return updateClassCore(client, input);
 }
 
 // ---------------------------------------------------------------------

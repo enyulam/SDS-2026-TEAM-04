@@ -130,6 +130,13 @@ const CHROME_PATH = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrom
 
 const FIXTURE_SESSION = 'c5000000-0000-4000-8000-000000000001'
 const FIXTURE_STUDENT = 'c2000000-0000-4000-8000-000000000001'
+/*
+ * P2-3 — screen `27` Edit Class is MODULE-keyed and needs the module that owns
+ * `FIXTURE_SESSION`. ⚠️ It is RESOLVED FROM THE DATABASE (`FIXTURE_MODULE`
+ * below) rather than written here as a fourth literal: a hand-copied UUID that
+ * drifted out of the fixture would render the `unavailable` panel, and the leg
+ * would then measure the NOT-FOUND path while claiming to measure the edit form.
+ */
 const SUB = {
   management: 'd0000000-0000-4000-8000-000000000001',
   trainer: 'd0000000-0000-4000-8000-000000000002',
@@ -466,7 +473,28 @@ function probeGovernedState() {
  * would make an unmeasured state look like a measured one -- exactly the
  * shape this file's own S-8 lineage warns about.
  */
+/*
+ * ⚠️ SAME NULL DISCIPLINE AS `probeGovernedState`. A failed resolve returns
+ * `null` and the surfaces that need it are recorded `NOT-RUN` — never pointed at
+ * a guessed UUID, which would silently turn an edit-form proof into a proof of
+ * the not-found panel.
+ */
+function probeFixtureModule() {
+  const sql =
+    'SELECT m.id FROM public.class_modules m JOIN public.class_sessions s'
+    + ` ON s.class_module_id = m.id WHERE s.id = '${FIXTURE_SESSION}' LIMIT 1;`
+  const r = spawnSync(
+    'docker',
+    ['exec', '-i', DB_CONTAINER, 'psql', '--no-psqlrc', '-U', 'postgres', '-d', 'postgres', '-At', '-c', sql],
+    { encoding: 'utf8', shell: false },
+  )
+  if (r.status !== 0) return null
+  const id = r.stdout.trim()
+  return /^[0-9a-f-]{36}$/i.test(id) ? id : null
+}
+
 const STATE = probeGovernedState()
+const FIXTURE_MODULE = probeFixtureModule()
 
 const CHAIN = {
   trainer: [
@@ -541,6 +569,44 @@ const CHAIN = {
         'Actively enrolled in this Class Module',
       ],
     },
+    {
+      /*
+       * P2-2 — screen `26` Management Add Class. ⛔ ITS FIRST RENDERED PROOF.
+       *
+       * ⚠️ A GET ONLY. It paints the form and its OPTIONS — Class Grades and
+       * Terms really resolved through the projection — and proves NOTHING about
+       * the create RPCs, which are server actions and belong on the disposable
+       * stack. The strings below are chosen to be DATA rather than chrome for
+       * exactly that reason: `Beginner` cannot appear unless the read reached
+       * real `class_grades` rows.
+       */
+      id: 'S3-M3',
+      path: '/management/classes/add-class',
+      loading: 'Loading class options',
+      data: ['Add Class', 'Class Details', 'Beginner', 'Assigned Trainer'],
+    },
+    ...(FIXTURE_MODULE === null
+      ? []
+      : [
+          {
+            /*
+             * P2-3 — screen `27` Management Edit Class. ⛔ ITS FIRST RENDERED PROOF.
+             *
+             * ⚠️ THE MODULE TITLE IS THE LOAD-BEARING STRING. It is not chrome: it
+             * can only appear if `readClassForEdit` resolved the real module behind
+             * `FIXTURE_SESSION` and the form seeded from it. A form painting its
+             * labels over a failed read would still match every other string here.
+             *
+             * ⛔ THE THREE REFUSALS ARE MEASURED ON THE PAINTED PAGE by
+             * `S3-M4-refusals`, which is strictly stronger than a source scan — a
+             * component could import a forbidden control from elsewhere.
+             */
+            id: 'S3-M4',
+            path: `/management/classes/${FIXTURE_MODULE}/edit`,
+            loading: 'Loading class',
+            data: ['Edit Class', 'Fixture Module A', 'Schedule', 'Assigned Trainer'],
+          },
+        ]),
     {
       id: 'S3-M1',
       path: '/management/reports',
@@ -749,6 +815,55 @@ async function main() {
                 fail('S3-M2-omissions', 'the control failed: the ratified `Beginner` tab did not render, so the five absences are uninterpretable')
               } else {
                 pass('S3-M2-omissions', 'screen 12 renders the ratified `Beginner` tab and NONE of `Asst.` / `Assist` / `Lessons done` / `Junior` / `Overall Grade` — the three registered omissions and G-2, measured on the painted page')
+              }
+            }
+          }
+
+          /*
+           * P2-3 — SCREEN `27`'s THREE REFUSALS, MEASURED ON THE PAINTED PAGE.
+           *
+           * ⛔ Each removes a control the frame DRAWS, and each removal is a
+           * governance decision rather than unfinished work:
+           *   1. the Sun–Sat DAY STRIP — changing meeting days REMOVES sessions
+           *      and no cancel/delete audit string was ratified;
+           *   2. UNASSIGN — leaving a session with nobody is a different action
+           *      with no string (reassignment works);
+           *   3. `Class code` / `Capacity` / `Program` — `C-14`, and programme
+           *      has no entity under `A-016`.
+           *
+           * ⚠️ A SOURCE SCAN CANNOT MAKE THIS CLAIM: a component could import a
+           * day-strip control from elsewhere. The painted page can.
+           */
+          if (id === 'S3-M4') {
+            if (text === null) {
+              notRun('S3-M4-refusals', 'the edit surface did not render, so its three refusals were not measured')
+            } else {
+              const banned = ['Class code', 'Capacity', 'Program', 'Unassign', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+              const present = banned.filter((b) => text.includes(b))
+              /*
+               * ⚠️ THE DETECTOR'S OWN CONTROL, against the strings the FRAME
+               * itself draws. *Did the page paint?* and *can the matcher fire?*
+               * are different questions — the `S3-M2-omissions` lesson, applied
+               * to a different screen rather than assumed to carry over.
+               */
+              const probe =
+                'Class code JPS-01 · Capacity 12 · Program Public Speaking · Unassign · Sun Mon Tue Wed Thu Fri Sat'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M4-refusals', 'the refusal detector did not match the strings the FRAME itself draws — every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M4-refusals', `screen 27 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} — each is a REFUSED control`)
+              } else if (!text.includes('Save Class') || !text.includes('Sessions (')) {
+                /*
+                 * ⚠️ THE CONTROL. Without it, "none of the nine appeared" is
+                 * equally true of a blank page. `Save Class` proves the FORM
+                 * painted, and `Sessions (` proves the READ-ONLY date list that
+                 * REPLACED the day strip painted — so the strip's absence is a
+                 * measured refusal rather than a surface that failed to load.
+                 */
+                fail('S3-M4-refusals', 'the control failed: `Save Class` and/or the read-only `Sessions (n)` list did not render, so the nine absences are uninterpretable')
+              } else {
+                pass('S3-M4-refusals', 'screen 27 renders `Save Class` and the read-only `Sessions (n)` list, and NONE of `Class code` / `Capacity` / `Program` / `Unassign` / the Mon–Fri day strip — the three refusals, measured on the painted page')
               }
             }
           }

@@ -123,6 +123,13 @@ const EXPECTED_BY_ROUTE = new Map([
    * items — the exact `C2C-002` defect, in the same file.
    */
   ["/management/classes/add-class", { role: "management", label: "Classes" }],
+  /*
+   * P2-3 — screen `27`, at a DYNAMIC segment. ⚠️ This row is not a duplicate of
+   * the one above: `add-class` is a literal child, `[classModuleId]/edit` is a
+   * PARAMETERISED one, and a prefix matcher that handled the first could still
+   * mishandle the second. Both are checked because both are reachable.
+   */
+  ["/management/classes/[classModuleId]/edit", { role: "management", label: "Classes" }],
   ["/management/reports", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],

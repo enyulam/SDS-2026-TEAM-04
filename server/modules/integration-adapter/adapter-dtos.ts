@@ -351,6 +351,55 @@ export interface AdapterCreateClassInput {
  * governed state: a session that exists with no trainer is usable, and the
  * surface must be able to say exactly that.
  */
+/**
+ * P2-3 — screen `27` Edit Class.
+ *
+ * ⛔ NO `dayOfWeek`, NO `sessionIds` TO REMOVE, AND NO UNASSIGN FLAG. `27`
+ * can CHANGE a class; it cannot DESTROY one. Removing a session needs a
+ * cancel/delete audit string that does not exist, and a session may already
+ * carry attendance, an observation or a submitted report.
+ *
+ * ⛔ NO `classCode`, `capacity` or `programme` (`C-14`, `A-016`), and no TA
+ * slot (`A-014`, `G-7`).
+ */
+export interface AdapterEditableSessionDto {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly room: string | null;
+  readonly termId: string | null;
+  readonly trainerDisplayName: string | null;
+}
+
+export interface AdapterClassEditDto {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeId: string;
+  readonly sessions: readonly AdapterEditableSessionDto[];
+  readonly trainerMembershipId: string | null;
+}
+
+export interface AdapterUpdateClassInput {
+  readonly classModuleId: string;
+  readonly classGradeId: string;
+  readonly title: string;
+  readonly termId: string | null;
+  readonly room: string | null;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly trainerMembershipId: string | null;
+}
+
+/** ⚠️ `unchanged` is a REAL outcome and reaches the surface as one. */
+export interface AdapterClassUpdateOutcomeDto {
+  readonly moduleChanged: boolean;
+  readonly sessionsChanged: number;
+  readonly sessionsTotal: number;
+  readonly trainerChanged: boolean;
+  readonly reason: string;
+}
+
 export interface AdapterClassCreationOutcomeDto {
   readonly classModuleId: string;
   readonly sessionsRequested: number;

@@ -57,7 +57,10 @@ import type {
   ManagementApproveAndSubmitSuccess,
   AddClassOptionsDto,
   ClassCreationOutcomeDto,
+  ClassEditDto,
+  ClassUpdateOutcomeDto,
   CreateClassInput,
+  UpdateClassInput,
   ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
@@ -106,6 +109,8 @@ import {
   adapterGetTrainerWorkingReport,
   adapterGetManagementSubmittedReport,
   adapterCreateManagementClass,
+  adapterReadClassForEdit,
+  adapterUpdateManagementClass,
   adapterListManagementClasses,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
@@ -244,6 +249,18 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       input: CreateClassInput,
     ): Promise<UiActionResult<ClassCreationOutcomeDto>> {
       return guard(() => adapterCreateManagementClass(input));
+    },
+
+    /** P2-3 — screen `27`. Module-keyed; the centre is server-derived. */
+    readClassForEdit(classModuleId: string): Promise<UiActionResult<ClassEditDto>> {
+      return guard(() => adapterReadClassForEdit(classModuleId));
+    },
+
+    /** P2-3 — the governed edit. Carries no removal and no unassign. */
+    updateManagementClass(
+      input: UpdateClassInput,
+    ): Promise<UiActionResult<ClassUpdateOutcomeDto>> {
+      return guard(() => adapterUpdateManagementClass(input));
     },
 
     getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>> {

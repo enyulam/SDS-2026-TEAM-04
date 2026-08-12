@@ -22,6 +22,15 @@ It schedules the five client-ratified portal decisions **`D-1` … `D-5`** toget
 
 ## 1. Position, measured at HEAD — not read from a document
 
+> ⚠️ **THIS TABLE IS THE 2026-08-11 SNAPSHOT AT `8d52121`, AND IT IS NOT CURRENT.** Annotated 2026-08-13 at the
+> `P2-3` boundary. It was **correct when measured** and is kept as the starting position the plan was built from — but
+> the heading says *"measured at HEAD"*, and a fresh reader takes that as **now**. ▶ **That is the stale-restatement
+> shape this project has been bitten by repeatedly**, so it is labelled rather than left to be discovered.
+>
+> **Measured 2026-08-13 at the `P2-3` boundary:** routes **18** · migrations · tables · functions **29 · 29 · 54** ·
+> enums **12** · policies **30** · audit registry **21** · storage buckets **1** (`evidence`, `P1-2`). **Take current
+> state from `STATUS.md` and from a live measurement, never from this table.**
+
 | Measurement | Value |
 |---|---|
 | Routes (`page.tsx`) | **17** |
@@ -101,7 +110,7 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 |---|---|---|---|
 | ~~**`R-4a`**~~ **CLEARED** | ✅ **RULED — `C-4` COLLAPSE RULING, 2026-08-11. NOT OPEN.** Corrected 2026-08-12 under a bounded Operator instruction. **`evidence.uploaded` and `evidence.attached` ARE ONE governed action** — no authorized workflow leaves an object unattached, so **the upload IS the attach**; `A-029`’s one-event-per-action rule is what forced the collapse. **Registry `16 → 19` — `evidence.attached` · `evidence.accessed` · `evidence.removed`**, measured live at HEAD. ⛔ **`P1-2`, `P1-3`, `P1-4` and `P1-5` are NOT blocked — all four are BUILT and Operator-walked across all three roles, locally and on the deployed dev environment.** ~~⚠️ **The `C-4` collapse question is RESERVED to the Operator.**~~ `evidence.uploaded` and `evidence.attached` **appear to be one governed action** — `D-5` has the Trainer upload at assessment time with the object already tagged to exactly one report and never movable, so **the upload IS the attach**. ⛔ **`A-029` requires one event per governed action**, a rule `A-057`'s own table lists as preserved. ~~**If collapsed, the registry is `16 → 19`.** ▶ **Nothing is baked in — the live registry is still 16 and `A-057` has never been implemented**~~ ⛔ **THAT SENTENCE IS NOW FALSE ON BOTH COUNTS — corrected 2026-08-12.** The **live registry is 19**, measured at HEAD, and **`A-057` IS implemented**. ⚠️ **This is the SECOND HALF of a fact recorded TWICE IN ONE ROW** — the front of the row was corrected while this tail was not. **A reader correcting such a row has already seen the other half and does not re-read it**, which makes the same-row case the hardest of all. | ~~⛔ **`P1-2`**~~ **NOTHING — CLEARED** | ~~`AWAITING_OPERATOR`~~ ✅ **RULED 2026-08-11** |
 | **`R-5`** | ~~**`A-002`** — *"actual parent evidence access is first implemented and tested in **Phase 2**, never Phase 1"*~~ ✅ **RULED 2026-08-12: PARENT EVIDENCE ACCESS IS AUTHORIZED IN PART 1.** The new ground is `D-5` — **client-ratified**, its premise is that **all three roles watch the clip**, and consent is confirmed. ▶ *"A rule written before that decision existed should not outlive it."* ⛔ **Amended for parent EVIDENCE access ONLY**; every other phase boundary `A-002` governs is unchanged, and every `A-001`/`A-003`/`A-004` gate applies in full | ✅ **`P1-5` UNBLOCKED** | `RESOLVED` — ⚠️ the ruling unblocks the phase; **`P1-5` still needs its own explicit authorization** |
-| **`R-7`** | **`C-7` per-phase table authorizations not yet given** | ~~⛔ **`P1-2` `P2-2` `P2-6`**~~ ⛔ **`P2-6` ONLY** — `P1-2` was given 2026-08-12 and `P2-2` was given 2026-08-12/13 (**decision 1 option (c)** for terms, then **reading B** for the create path), both **BUILT AND PROVEN**. ⚠️ **Corrected 2026-08-13 at the `P2-2` boundary under §15.8.1**, which requires an OPEN item to be re-verified against current state before it is carried into a handoff — *a stale blocker does not merely mislead, it stops work that was never blocked* | `AWAITING_OPERATOR` — **for `P2-6`**. ⛔ **A separate item is now owed for `P2-2`: the `admin.trainer_assigned` audit string** |
+| **`R-7`** | **`C-7` per-phase table authorizations not yet given** | ~~⛔ **`P1-2` `P2-2` `P2-6`**~~ ⛔ **`P2-6` ONLY** — `P1-2` was given 2026-08-12 and `P2-2` was given 2026-08-12/13 (**decision 1 option (c)** for terms, then **reading B** for the create path), both **BUILT AND PROVEN**. ⚠️ **Corrected 2026-08-13 at the `P2-2` boundary under §15.8.1**, which requires an OPEN item to be re-verified against current state before it is carried into a handoff — *a stale blocker does not merely mislead, it stops work that was never blocked* | `AWAITING_OPERATOR` — **for `P2-6`**. ~~⛔ **A separate item is now owed for `P2-2`: the `admin.trainer_assigned` audit string**~~ ✅ **DISCHARGED 2026-08-13 at `P2-2b`** — the string was **already ratified at Step 7H** and simply never written; the Operator's *"CHECK BEFORE ASKING"* ruling settled it and `admin_assign_session_trainer` shipped with the registry **unmoved at 19**. ⚠️ **Found by the §15.8.1 sweep at the `P2-3` boundary: the ROW HEAD had been corrected while its TAIL still owed a discharged item** — the same-row shape already recorded once in §10, and the hardest to catch, because a reader who has just corrected the front of a row does not re-read the back of it. ⛔ **`P2-3`'s own two strings were a SEPARATE authorization, given with the count stated in advance, and are NOT this item** |
 | ~~`R-12`~~ | ✅ **RULED** — both ratified marking states, distinguishably; no third state. §6.1 | `P2-23` | **CLEARED** |
 | ~~`R-14`~~ | ✅ **RULED** — six omitted; six fields ratified. §6.3 | — | **CLEARED** |
 | ~~`R-16`~~ | ✅ **RULED** — `100 MiB`, per-bucket, resumable required. §6.4 | — | **CLEARED** |
@@ -621,7 +630,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 |---|---|---|---|---|
 | **P2-1** | `12` Management Classes | Class-list projection, level tabs | — | — · ✅ **BUILT AND PROVEN 2026-08-12** at `/management/classes`. ⛔ **No migration** — policy AND grant already present on all eight relations, both layers measured at HEAD (`P21-3`). Three `REGISTERED-OMISSION`s, each with a controlled detector |
 | **P2-2** | `26` Add Class | ⚠️ **`D-3` terms substrate** + class creation | P2-1 | `C-6` `C-7` `C-14` · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/add-class`, in **two** migrations — the terms substrate (read-only, seeded, zero functions) and **two** create RPCs on the **already-ratified** `admin.module_created` / `admin.session_created`. ⛔ **Registry UNMOVED at 19**, zero new table/enum/policy/write grant. ⛔ **Trainer assignment STOPPED** — needs a third string; enforced by migration assertion `C-8` |
-| **P2-3** | `27` Edit Class | Class edit write path | P2-2 | `C-14` |
+| **P2-3** | `27` Edit Class | Class edit write path | P2-2 | `C-14` · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/[classModuleId]/edit`. Two update RPCs; **audit registry 19 → 21** on `admin.module_updated` and `admin.session_updated`, the exact two authorized with the count stated in advance; zero new table/enum/policy/write grant. ⛔ **THREE REFUSALS** — no day strip, no unassign, no class code/capacity/programme — each with its reason and its lift condition recorded in the `P2-3` section below. ⚠️ **No ratified frame draws an inbound control to `27`**; none was invented |
 | **P2-4** | `13` Class Overview | Class summary, lesson timeline, **+ Class Health Summary** | P2-1 | `C-17` (`GC-9`) |
 | **P2-5** | `25` Management Schedule | Centre calendar as a **projection** of class sessions | P2-2 | `GC-13` — no `Showcase`, no duplicated event record |
 | **P2-6** | `14` Lesson Plan Management | ⚠️ **`D-4` materials substrate** + Management upload | P2-4, P2-2 | `C-7`; Lock §8.2 — **separate bucket, separate policies** |
@@ -852,6 +861,111 @@ The `P2-2` phase suites pinned **all six** whole-database census figures as one 
 | **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed — no screenshot of any kind was captured |
 
 
+
+---
+
+## `P2-3` · screen `27` Management Edit Class — ✅ **COMPLETE 2026-08-13**
+
+**Operator authorization:** *"APPROVED — two strings, registry 19 → 21, exactly as stated … I am authorizing the class of change, not an open budget."*
+
+**Migration `20260813150000_portal_p2_3_class_edit.sql`** — two `SECURITY DEFINER` RPCs,
+`admin_update_class_module` and `admin_update_class_session`; **audit registry 19 → 21**;
+**zero** new table, column, enum or policy, **zero** write policy, **zero** write grant.
+Census `29·29·52` → `29·29·54`; **tables, enums and policies unmoved**.
+
+`A-057` was amended in the **`C-4` shape** at the **single** declaration site, and assertion
+`U-3` re-proves no second site exists. Assertion `U-2` **fails the build if any of six
+unauthorized neighbouring strings appears**, `U-5` if either RPC deletes, deactivates or
+reaches trainer assignment, and `U-6` if either mentions a report, rating or observation.
+
+### ⛔ THE THREE REFUSALS — THE MORE VALUABLE HALF OF THIS PHASE
+
+**Operator:** *"Recording them explicitly — especially the day strip, where changing which
+weekdays a class meets means destroying sessions with no ratified string — is what stops a
+later phase building the control and quietly not wiring it. Keep all three with their reasons
+in the plan, not only in this report."*
+
+| # | Refused | Why, and what would be needed to lift it |
+|---|---|---|
+| **1** | **The Sun–Sat DAY STRIP.** ⛔ **ABSENT, not present-and-disabled** | Changing which weekdays a class meets means **REMOVING sessions**, and **no cancel or delete audit string was ratified**. A session may already carry attendance, an observation or a **submitted report**, so destroying one is a governed act that must be recorded — and nothing can record it. ▶ **A greyed chip reads as "not wired yet"; this is "not permitted", and the two must not look alike.** The existing dates are listed **read-only** with the reason stated on the surface, so the schedule stays legible. **To lift:** a ratified session-cancellation action string and its governed RPC |
+| **2** | **UNASSIGN** — the frame's `-` beside the trainer | Leaving a session with **nobody** is a different governed action with **no ratified string**. ⚠️ Choosing a **DIFFERENT** trainer is **reassignment** and works, through the `P2-2b` RPC on `admin.trainer_assigned`. **To lift:** a ratified unassignment string |
+| **3** | **`Class code`, `Capacity`, `Program`** | `C-14` omits all three. "Programme" additionally has **no entity**, and `A-016` forbids a hidden `classes` entity between Class Grade and Class Module. **To lift:** an Operator ruling adding fields to `C-14`'s six — and, for programme, a schema authorization |
+
+### ⚠️ AN OPERATOR-SUPPLIED PREMISE REFUTED BY MEASUREMENT — THE THIRD
+
+The instruction said *"extend **BOTH** declaration sites in one migration"*. **There is one.**
+`P1-2` consolidated them into `public.audit_action_registry()`, read by `audit_append_event`
+and `audit_verify_chain`. **Operator:** *"MY PREMISE WAS STALE and you were right to say so
+… Record it as an operator-supplied premise refuted by measurement — that is now the third."*
+The single site was extended, with an assertion that **no second exists**.
+
+### ⚠️ NO RATIFIED FRAME DRAWS AN INBOUND CONTROL TO `27` — REPORTED, NOT INVENTED
+
+`Management - Classes` states *"Selecting a class card opens `Management - Class Overview`"*,
+and `Management - Class Overview` names **no Edit control at all**. **No Edit affordance was
+added to screen `12`**: inventing a navigation control the frames do not draw is the same
+error class as inferring schema from a frame (`A-022`, §7.2). `27` is reached at its canonical
+route. ▶ **Operator question, recorded as a dependency.**
+
+### Other recorded divergences
+
+- The frame's breadcrumb `Classes / Junior Public Speaking / Edit` — **`Junior` is a class
+  code**, omitted by `C-14`, so the breadcrumb carries the module title alone.
+- `Room` / `Start time` / `End time` drawn as dropdowns, built as free inputs — the `P2-2`
+  reasoning, unchanged. `Term` and `Level` **are** selects; both are backed by real rows.
+- **Room, times and term apply across EVERY session; each session keeps its own DATE.**
+  Rewriting the dates too would collapse a term into a single day.
+- A field seeds **only where every session agrees**; otherwise it renders **empty**, so a save
+  cannot silently flatten an arrangement the form never displayed. Same rule for the trainer.
+- **`unchanged` is reported as itself** — a governed no-op emits nothing (`A-029`), so
+  claiming "saved" would assert an audit record that deliberately does not exist.
+
+### ⛔ THE PHASE-SCOPED-CLAIM DEFECT, FOUND THREE MORE TIMES
+
+The registry moving 19 → 21 fired **three** suites — `P2-2`'s create suite, the terms
+substrate and `P2-2b` — each pinning the registry **TOTAL**. ▶ **A phase-scoped claim
+written as a global absolute measures every OTHER phase's behaviour.** All three now assert
+only what their own phase did: its strings present, and its **migration file** declaring no
+registry, each with a **control** proving the detector fires. Totals are **reported**. The one
+surviving global ratchet is `hero-2`'s `P2-6` (**52 → 54**), where moving the number requires
+naming the authorization.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-3` | ✅ **exit 0** — 12 SQL legs + runner checks, including **chain verification accepting both new strings** and its **non-vacuity control** proving the verified chain really contains them |
+| `prove:portal-p2-2-create` · `-p2-2` · `-p2-2b` · `-p2-1` · `-p2-1-composed` · `-1` · `-2` · `-2b` · `-5` · `-5-composed` · `-34` · `f-attendance-init-1` | ✅ **all exit 0** |
+| `prove:hero-all` | ✅ **exit 0** — after `P2-6` fired at `52 → 54` and was **updated with its reason, never relaxed** |
+| `tsc` · `eslint` · `next build` · nav suite · `test:integration` · `test:g06-grounding` · `prove:encoding` · `prove:no-secrets` · `prove:serving-discipline` · `prove:stage2-routes` · the four guard suites | ✅ **all 0** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 31 PASS · 0 FAIL · 2 `NOT-RUN`.** ⚠️ **THE OPERATOR HAD ALREADY CLEARED PORT 3000**, which the §15.8.1 sweep found by measuring (`netstat` no listener; PID `46348` gone) rather than by carrying the limit forward. ✅ **`S3-M3-r` and `S3-M4-r` are the FIRST RENDERED PROOFS of screens `26` and `27`**, and **`S3-M4-refusals` measures all three refusals ON THE PAINTED PAGE** — strictly stronger than a source scan, with a control requiring the detector to match the frame's own strings |
+| **VISUAL acceptance, screens `26` and `27`** | ⛔ **`NOT-RUN`** on both, and not claimed. ⚠️ **A rendered DOM-text proof is NOT a visual acceptance** — it says the surface paints its data and nothing about layout or fidelity to the frame |
+| `test:continuity` | ⛔ **`NOT-RUN`** — blocked at `CONT-A0` by `B-STAGE3-2`, as already recorded |
+| `test:exit-condition-b` | ⛔ **`NOT-RUN`** — refused at `XB-PRE` because the canonical database is not pristine. **A downstream consequence of the OPEN, `OPERATOR-ONLY` blocker `B-STAGE3-2`**, not a `P2-3` regression: nothing was provisioned |
+| `test:runtime-profile` | ⛔ **`FAIL` — PRE-EXISTING, NEW FINDING, NOT FIXED HERE.** See `B-P2-3-1` below |
+
+### ⛔ `B-P2-3-1` — A GUARD THAT HAS BEEN FAILING SINCE PART 1 AND HAD NEVER BEEN RUN
+
+`T-P44` in `scripts/tests/config/run-runtime-profile.mjs` pins that
+**`lib/supabase/browser.ts` is imported by NOTHING** and that `lib/supabase/public-config.ts`
+is imported by exactly four permitted modules — *"if a future client component imported it, a
+disposable build would inline the disposable URL and publishable key straight into a browser
+bundle"*.
+
+⚠️ **`P1-2b`'s `lib/frontend/evidence-upload.ts` imports BOTH** (commit `1624ef8`,
+2026-08-12). **Measured, not argued:** that file and the runner are **byte-identical at HEAD
+and in the working tree** (`git diff HEAD --stat` empty), so the failure **reproduces at
+`62ee67b`** and is **not** caused by `P2-3`. `runtime-profile` appears **nowhere** in
+`STATUS.md` and only once, incidentally, in `BUILD_NOTES.md` — **it has never been recorded as
+run**, which is why a guard written to catch exactly this went unnoticed.
+
+⛔ **NOT FIXED, DELIBERATELY.** Extending the permitted-importer list **changes a security
+guard** (§12: *"changes an authorization or security contract"*) and is **outside `P2-3`'s
+authorization**. ▶ The likely correct disposition is that `T-P44`'s **premise was superseded
+by `D-5`/`P1-2b`** — a browser-side resumable upload genuinely needs the Supabase URL and
+publishable key — but "the guard's premise lapsed" is exactly the shape that must be
+**ruled, not inferred by the session that trips over it**. **Operator decision required.**
+
 ---
 
 ## 8. ⛔ STANDING PROHIBITIONS — carried unchanged
@@ -918,6 +1032,9 @@ The `P2-2` phase suites pinned **all six** whole-database census figures as one 
 | ⚠️ **The Phase 8/11 gap** | `OPEN` | Structural consistency is **neither a visual nor a functional acceptance** |
 | ⛔ **`09` refuses its canonical route** (`C2C-007`) | `OPEN`, measured | `P2-21`, first |
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
+| ⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN** | `OPEN` · **NEW 2026-08-13** · **Operator decision required** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section |
+| ⚠️ **No ratified frame draws an inbound control to screen `27`** | `OPEN` · **NEW 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ▶ Likely resolved when `13` ships at `P2-4` — but **which surface hosts the control is an Operator question**, not a session's |
+| ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All three Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), plus `S3-M2-omissions` and `S3-M4-refusals` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance stays `NOT-RUN` on all three**, and a DOM-text proof never becomes one |
 
 ---
 

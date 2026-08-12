@@ -89,10 +89,21 @@ BEGIN
   IF v_n = 1 AND v_session IS NOT NULL AND v_trainer1 IS NOT NULL
      AND EXISTS (SELECT 1 FROM public.class_session_assignments a
                   WHERE a.class_session_id = v_session AND a.is_active)
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 19
      AND 'admin.trainer_assigned' = ANY (public.audit_action_registry())
   THEN
-    RAISE NOTICE 'PASS P24-1  NON-VACUITY: the RPC is authenticated-executable, the session and an ACTIVE trainer exist, an assignment is already in place, and admin.trainer_assigned is in a registry of 19 -- ALREADY RATIFIED at Step 7H, never extended here';
+    /*
+     * ⚠️ THIS LEG PINNED THE REGISTRY AT 19 AND FIRED WHEN `P2-3` MOVED IT
+     * TO 21 -- LEGITIMATELY, under its own Operator authorization. ▶ THE SAME
+     * DEFECT AS THE CENSUS PINS, ONE LEVEL DOWN: this phase's claim is
+     * *"I extended NOTHING"*, and expressing it as a GLOBAL TOTAL made it a
+     * claim about every future phase instead.
+     *
+     * ▶ The claim is now stated as what it actually is: the string this phase
+     * writes IS in the registry, and this phase's own migration declares no
+     * registry at all -- which the runner asserts against the FILE. The TOTAL
+     * belongs to whichever phase last changed it, and is pinned there.
+     */
+    RAISE NOTICE 'PASS P24-1  NON-VACUITY: the RPC is authenticated-executable, the session and an ACTIVE trainer exist, an assignment is already in place, and admin.trainer_assigned IS in the registry -- ALREADY RATIFIED at Step 7H, and NOT extended by this phase';
   ELSE
     RAISE NOTICE 'FAIL P24-1  grants=%, session=%, trainer=%', v_n, v_session IS NOT NULL, v_trainer1 IS NOT NULL;
   END IF;
@@ -216,11 +227,10 @@ BEGIN
   IF v_n = 1
      AND NOT EXISTS (SELECT 1 FROM public.audit_events
                       WHERE seq_no > v_seq0 AND action <> 'admin.trainer_assigned')
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 19
   THEN
-    RAISE NOTICE 'PASS P24-8  this entire suite emitted EXACTLY ONE action string and the registry is STILL 19 -- this phase extends nothing, because admin.trainer_assigned was ratified at Step 7H and had simply never had a writer';
+    RAISE NOTICE 'PASS P24-8  this entire suite emitted EXACTLY ONE action string, and it is one Step 7H ratified and nobody had ever written -- this phase extends the registry by nothing. The TOTAL is deliberately NOT asserted here: it is not this phase''s to own';
   ELSE
-    RAISE NOTICE 'FAIL P24-8  % distinct action(s); registry %', v_n, pg_catalog.array_length(public.audit_action_registry(), 1);
+    RAISE NOTICE 'FAIL P24-8  % distinct action(s) emitted', v_n;
   END IF;
 
   -- P24-9 -- ⛔ ZERO WRITE SURFACE, BOTH TABLES.

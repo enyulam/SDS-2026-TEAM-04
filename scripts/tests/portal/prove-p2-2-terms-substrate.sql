@@ -24,7 +24,7 @@
 --   P22-4  ⛔ NO BACKFILL. `term_id` is nullable and every pre-existing
 --          session still carries NULL.
 --   P22-5  ⛔ NO GOVERNED ACTION WAS CREATED. No term function, no term
---          audit string, registry still 19, enums still 12.
+--          audit string in the registry however long it grows, enums 12.
 --   P22-6  ⛔ D-3'S BOUNDARY, MADE STRUCTURAL. No column on `terms` could
 --          carry a report, a rating, a score or a roll-up -- the drift
 --          toward term REPORTS that `G-4` and `C-11` both refuse.
@@ -125,14 +125,25 @@ BEGIN
   SELECT count(*) INTO v_n
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public' AND p.proname ILIKE '%term%';
+  /*
+   * ⚠️ THE REGISTRY TOTAL WAS PINNED AT 19 HERE AND IS NOT ANY MORE.
+   * REWRITTEN, NOT DELETED. `P2-3` was authorized to add
+   * `admin.module_updated` and `admin.session_updated`, moving it 19 → 21,
+   * and this leg fired — a TERMS suite asserting a GLOBAL total measures
+   * every other phase's behaviour rather than its own.
+   *
+   * ▶ WHAT THIS PHASE ACTUALLY CLAIMS is that NO TERM ACTION EXISTS, and
+   * that is what the surviving `LIKE '%term%'` clause measures directly. It
+   * stays true however many strings later phases add, which is precisely why
+   * it is the right assertion and the count never was.
+   */
   IF v_n = 0
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 19
      AND NOT EXISTS (SELECT 1 FROM pg_catalog.unnest(public.audit_action_registry()) x WHERE x LIKE '%term%')
      AND (SELECT count(DISTINCT t.typname) FROM pg_catalog.pg_type t
             JOIN pg_catalog.pg_namespace n2 ON n2.oid = t.typnamespace
            WHERE n2.nspname='public' AND t.typtype='e') = 12
   THEN
-    RAISE NOTICE 'PASS P22-5  terms are SEEDED, not created: no term function, no term audit string, registry 19, enums 12. A-029 is satisfied by there being NO governed action';
+    RAISE NOTICE 'PASS P22-5  terms are SEEDED, not created: no term function, NO TERM AUDIT STRING among the % registered, enums 12. A-029 is satisfied by there being NO governed action', pg_catalog.array_length(public.audit_action_registry(), 1);
   ELSE
     RAISE NOTICE 'FAIL P22-5  % term function(s); registry %', v_n, pg_catalog.array_length(public.audit_action_registry(), 1);
   END IF;

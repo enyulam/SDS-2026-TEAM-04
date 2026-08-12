@@ -393,6 +393,61 @@ export type CreateClassInput = {
  * `sessionsCreated` for the same reason: a session that exists with no
  * trainer is usable, and collapsing the counts would hide it.
  */
+/**
+ * P2-3 — screen `27` Edit Class.
+ *
+ * ⛔ THE THREE REFUSALS ARE HELD BY THIS TYPE. There is no field for
+ * removing a session, none for unassigning a trainer, and none for a class
+ * code, capacity or programme — so the surface cannot send any of them even
+ * by mistake. Removing a session needs a cancel/delete audit string that does
+ * not exist, and a session may already carry attendance, an observation or a
+ * submitted report.
+ */
+export type EditableSessionDto = {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly room: string | null;
+  readonly termId: string | null;
+  readonly trainerDisplayName: string | null;
+};
+
+export type ClassEditDto = {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeId: string;
+  readonly sessions: readonly EditableSessionDto[];
+  /**
+   * ⚠️ NULL unless EVERY session agrees on one trainer. `A-016` puts
+   * assignment at session level, so a module can legitimately carry different
+   * trainers on different sessions; `27` reassigns the whole module at once,
+   * and pre-selecting one name over a mixed arrangement would propose
+   * overwriting something the form never showed.
+   */
+  readonly trainerMembershipId: string | null;
+};
+
+export type UpdateClassInput = {
+  readonly classModuleId: string;
+  readonly classGradeId: string;
+  readonly title: string;
+  readonly termId: string | null;
+  readonly room: string | null;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly trainerMembershipId: string | null;
+};
+
+/** ⚠️ `unchanged` is a REAL outcome: the surface says so rather than claiming an edit. */
+export type ClassUpdateOutcomeDto = {
+  readonly moduleChanged: boolean;
+  readonly sessionsChanged: number;
+  readonly sessionsTotal: number;
+  readonly trainerChanged: boolean;
+  readonly reason: string;
+};
+
 export type ClassCreationOutcomeDto = {
   readonly classModuleId: string;
   readonly sessionsRequested: number;

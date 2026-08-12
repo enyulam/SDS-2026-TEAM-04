@@ -7746,3 +7746,140 @@ The `P2-2` suites pinned all six census figures as one exact string, and **fired
 | `prove:stage3-authenticated` | ⛔ **`NOT-RUN`** — the Operator-owned `next dev` still held the directory at this boundary. They have offered to stop it; **the next boundary is when it is needed** |
 | **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed |
 | Census | **28 migrations · 29 tables · 52 functions · 12 enums · 30 policies · registry 19** |
+
+---
+
+## 2026-08-13 — `P2-3` · screen `27` Management Edit Class · the class-edit write path
+
+**Branch/worktree:** `develop`, main worktree (the DEVELOPMENT clone). **Starting HEAD:** `62ee67b`.
+**Authorization:** Operator, 2026-08-13 — *"APPROVED — two strings, registry 19 → 21, exactly as stated … I am authorizing the class of change, not an open budget."* · *"BUILD P2-3 and continue in plan order."*
+
+### What shipped
+
+`supabase/migrations/20260813150000_portal_p2_3_class_edit.sql` — two `SECURITY DEFINER` RPCs,
+`admin_update_class_module` and `admin_update_class_session`, plus the amended registry.
+**Audit registry 19 → 21** on exactly `admin.module_updated` and `admin.session_updated`, the two
+strings named **before** the migration was written. **Zero** new table, column, enum or policy;
+**zero** write policy; **zero** write grant — the governed-write pattern is unchanged, which is
+why *"zero write policies, zero write grants"* survives a phase whose whole purpose is to write.
+
+Then the full spine: `server/modules/class-session/class-edit.ts` →
+`server/modules/management-view/projections.ts` → adapter DTOs + server actions → the
+`PhysicalTestPort` interface → the real participant port **and** the deterministic fixture →
+`features/management/management-edit-class.tsx` →
+`app/(portals)/management/classes/[classModuleId]/edit/page.tsx`, the **canonical** route.
+The dynamic segment is `classModuleId`, not `classId`: the entity is the **Class Module**
+(`A-016`), and `classId` would put a prohibited `classes` entity back into the URL.
+
+### ⛔ The three refusals — the more valuable half of this phase
+
+**Operator:** *"The three refusals are the more valuable half … Keep all three with their reasons
+in the plan, not only in this report."* They are in `PORTAL_COMPLETION_PLAN.md` §`P2-3`, each with
+its **lift condition**. In summary:
+
+1. **The Sun–Sat day strip is NOT built** — changing which weekdays a class meets means
+   **removing sessions**, and **no cancel or delete audit string was ratified**. A session may
+   already carry attendance, an observation or a submitted report. ⛔ **ABSENT, not
+   present-and-disabled**: a greyed chip reads as *"not wired yet"*, this reads as *"not
+   permitted"*, and the two must not look alike. The dates are listed **read-only** with the
+   reason on the surface.
+2. **No unassign** — leaving a session with nobody is a different action with no string.
+   Choosing a **different** trainer is reassignment and works, via `P2-2b`.
+3. **No `Class code` / `Capacity` / `Program`** — `C-14` omits all three; *"programme"* has no
+   entity (`A-016`).
+
+### ⚠️ An operator-supplied premise refuted by measurement — the third
+
+The instruction said *"extend **BOTH** declaration sites in one migration"*. **There is one.**
+`P1-2` consolidated them into `public.audit_action_registry()`, read by `audit_append_event` and
+`audit_verify_chain`; the instruction was true at Step 7H and is not now. The single site was
+extended and assertion `U-3` proves **no second exists** — which is what the instruction was
+protecting. **Operator confirmed:** *"MY PREMISE WAS STALE and you were right to say so."*
+
+### ⚠️ No ratified frame draws an inbound control to `27` — reported, not invented
+
+`Management - Classes` states *"Selecting a class card opens `Management - Class Overview`"*, and
+`Management - Class Overview` names **no Edit control at all** (a search for `dit` across its note
+matches nothing). ⛔ **No Edit affordance was added to screen `12`.** Inventing a navigation
+control the frames do not draw is the same error class as inferring schema from a frame (`A-022`,
+§7.2). `27` is reached at its canonical route; the render leg will use it. **Recorded as an
+Operator question.**
+
+### ⛔ The phase-scoped-claim defect, found three more times in one boundary
+
+The registry legitimately moving 19 → 21 fired **three** suites — `P2-2`'s create suite, the terms
+substrate, and `P2-2b`. Every one pinned the registry **TOTAL**. ▶ **A phase-scoped claim written
+as a global absolute measures every OTHER phase's behaviour**, and this is the same defect one
+level down from the census split made at `P2-2b` — which is itself the third consecutive boundary
+it has appeared at.
+
+All three were **re-derived**, not renumbered: each now asserts (a) that **its own** strings are
+still registered and (b) that **its own migration file declares no registry**, each with a
+**control** proving the detector can fire. Totals are **reported**. `P2-2`'s first attempt at (b)
+asserted the file never *mentions* the registry and **failed correctly** — the migration **reads**
+it in an apply-time assertion that was **true when it applied**. ⛔ **An applied migration is not
+edited to make a later test pass**; the leg was narrowed to `DECLARES`, which is what was always
+meant. One global ratchet survives: `hero-2`'s `P2-6`, **52 → 54**.
+
+### ⛔ `B-P2-3-1` — a guard that has been failing since Part 1 and had never been run
+
+`test:runtime-profile` `T-P44` pins that `lib/supabase/browser.ts` is imported by **nothing** and
+that `lib/supabase/public-config.ts` has exactly four permitted importers — its stated reason
+being *"if a future client component imported it, a disposable build would inline the disposable
+URL and publishable key straight into a browser bundle"*.
+
+⚠️ **`P1-2b`'s `lib/frontend/evidence-upload.ts` imports BOTH** (commit `1624ef8`, 2026-08-12).
+**Measured, not argued:** `git diff HEAD --stat` over that file, the runner, `public-config.ts` and
+`browser.ts` is **empty**, so all four are byte-identical at HEAD and the failure **reproduces at
+`62ee67b`**. It is **not** a `P2-3` regression. `runtime-profile` appears **nowhere** in
+`STATUS.md` and only once, incidentally, in this log — **it has never been recorded as run**,
+which is how a guard written to catch exactly this went unnoticed.
+
+⛔ **NOT FIXED, deliberately.** Extending a security guard's allow-list is a §12 stop-and-ask, and
+*"the guard's premise was superseded by `D-5`"* is exactly the kind of claim that must be **ruled,
+not inferred by the session that tripped over it**. **Operator decision required.**
+
+### Two other suites, correctly classified as `NOT-RUN` rather than `FAIL`
+
+- `test:continuity` — blocked at `CONT-A0` by the open `OPERATOR-ONLY` blocker `B-STAGE3-2`,
+  already recorded in `STATUS.md`.
+- `test:exit-condition-b` — refused at `XB-PRE` because the canonical database is not pristine
+  (`report_versions|audit_events|reports = 22|98|11`). **Nothing was provisioned.** This is a
+  downstream consequence of `B-STAGE3-2`, not of this phase: every suite here rolls back, proved
+  by their own before/after legs.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-3` | ✅ **exit 0** — 12 SQL legs + runner checks, including **chain verification accepting both new strings** and its **non-vacuity control** proving the verified chain really contains them |
+| `prove:portal-p2-2-create` · `-p2-2` · `-p2-2b` · `-p2-1` · `-p2-1-composed` · `-1` · `-2` · `-2b` · `-5` · `-5-composed` · `-34` · `f-attendance-init-1` | ✅ **all exit 0** |
+| `prove:hero-all` | ✅ **exit 0** — after `P2-6` fired at `52 → 54` and was updated **with its reason** |
+| `tsc` · `eslint` · `next build` · nav suite · `test:integration` · `test:g06-grounding` · `prove:encoding` · `prove:no-secrets` · `prove:serving-discipline` · `prove:stage2-routes` · `prove:production-fixture-guard` · `prove:trusted-store-acl` · `prove:trusted-transport-selection` · `prove:hosted-target-guard` | ✅ **all 0** |
+| `test:runtime-profile` | ⛔ **FAIL — pre-existing, `B-P2-3-1`, not fixed here** |
+| `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — both blocked by `B-STAGE3-2` |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 31 PASS · 0 FAIL · 2 `NOT-RUN`.** ⚠️ **THE OPERATOR HAD ALREADY CLEARED PORT 3000**, which the §15.8.1 sweep found by measuring (`netstat` no listener; PID `46348` gone) rather than by carrying the limit forward. ✅ **`S3-M3-r` and `S3-M4-r` are the FIRST RENDERED PROOFS of screens `26` and `27`**, and **`S3-M4-refusals` measures all three refusals ON THE PAINTED PAGE** — strictly stronger than a source scan, with a control requiring the detector to match the frame's own strings |
+| **RENDERED proof, screens `12`, `26`, `27`** | ✅ **ALL THREE, this run** — `S3-M2-r`, `S3-M3-r`, `S3-M4-r`. ⛔ **VISUAL acceptance remains `NOT-RUN` on all three** and is not claimed |
+| Census, measured | **29 migrations · 29 tables · 54 functions · 12 enums · 30 policies · 1 storage bucket · registry 21** |
+
+### ✅ THE §15.8.1 SWEEP FOUND THREE LAPSED ITEMS, AND ONE OF THEM WAS BLOCKING WORK
+
+Run before regenerating the handoff, against **current state** rather than against the previous
+handoff:
+
+1. **Port 3000 was ALREADY CLEAR.** `netstat` showed **no listener** and PID `46348` **is gone** —
+   the Operator had killed it. ▶ **Carrying that limit forward would have deferred the rendered
+   proof for no reason**, which is precisely the *"a stale blocker stops work that was never
+   blocked"* shape. Screens `26` and `27` got their first rendered proof in this same run.
+2. **`62ee67b` was NOT pushed.** The previous record said `origin/develop` = `62ee67b`; measured,
+   `git rev-list --left-right --count develop...origin/develop` = **`1 0`**, so origin sat at
+   `29f1668` and `P2-2b` was **local only**. Recorded as measured, and pushed at this boundary.
+3. **`R-7`'s tail was stale** — it still owed *"a separate item for `P2-2`: the
+   `admin.trainer_assigned` audit string"*, which `P2-2b` discharged on 2026-08-13. **Corrected in
+   the SOURCE record first**, then derived.
+
+⚠️ **All three were corrected in their source records BEFORE the handoff was derived.**
+Correcting only the handoff reproduces the defect, because the next derivation reads the source
+again.
+
+**Next step:** `B-P2-3-1` needs a ruling; then `P2-4` (`13` Class Overview) in plan order.

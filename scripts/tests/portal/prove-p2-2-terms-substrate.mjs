@@ -100,10 +100,16 @@ check(
  * catch.
  *
  * ▶ THE SPLIT INSTEAD:
- *   * THIS suite asserts, EXACTLY, the four figures that must NOT move when
- *     any phase lands — tables, enums, policies and the audit registry.
- *     Those are "nothing was added" invariants and they are this phase's own
- *     claim. A later phase adding a table SHOULD break this.
+ *   * THIS suite asserts, EXACTLY, the figures that must NOT move when any
+ *     phase lands — tables, enums and policies. Those are "nothing was
+ *     added" invariants and they are this phase's own claim. A later phase
+ *     adding a table SHOULD break this.
+ *   * ⚠️ THE AUDIT REGISTRY WAS THE FOURTH AND IS NOT ANY MORE. `P2-3` was
+ *     authorized to move it 19 → 21 and this leg fired, which is the SAME
+ *     defect one level down from the one this block was written to fix: a
+ *     phase-scoped claim written as a global absolute. What THIS phase claims
+ *     is that no TERM action exists, and `P22-5` measures exactly that — a
+ *     claim that stays true however many unrelated strings are added.
  *   * The migration and function TOTALS are REPORTED, not pinned, because
  *     they legitimately grow with every phase.
  *   * ⛔ THE GLOBAL FUNCTION RATCHET STILL EXISTS, in exactly ONE place —
@@ -114,8 +120,8 @@ check(
 const census = psql(["-c", CENSUS]).stdout.trim();
 const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  tables === "29" && enums === "12" && policies === "30" && registry === "19",
-  `the four INVARIANTS are unmoved: 29 tables | 12 enums | 30 policies (terms' ONE SELECT policy is already counted here) | ⛔ audit registry 19 (measured ${tables} | ${enums} | ${policies} | ${registry}). Reported: ${migrations} migrations, ${functions} functions — ⚠️ the TERMS migration itself contributed ZERO functions, which P22a-4 asserts against the file, because a whole-database total can no longer make that claim once a second migration lands beside it`,
+  tables === "29" && enums === "12" && policies === "30",
+  `the structural INVARIANTS are unmoved: 29 tables | 12 enums | 30 policies (terms’ ONE SELECT policy is already counted here) (measured ${tables} | ${enums} | ${policies}). Reported, not pinned: ${migrations} migrations, ${functions} functions, audit registry ${registry} — ⚠️ the TERMS migration itself contributed ZERO functions, which P22a-4 asserts against the file, because a whole-database total can no longer make that claim once a second migration lands beside it`,
 );
 
 // ---------------------------------------------------------------------
