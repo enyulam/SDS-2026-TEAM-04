@@ -1210,6 +1210,47 @@ handful of strings appear on a painted page, which is true of almost any arrange
 4. **Every claim names its artefact.** *"the `.png` shows …"*, *"the `.html` computes …"*,
    *"the note lists …"*. A claim that cannot name one is not a measurement.
 
+### ✅ §12.1 — `prove:artefact-read`, THE MECHANICAL GATE (Operator ruling, 2026-08-13)
+
+> *"The rule was in §3 of the plan you were executing, and no proof measures §3 compliance.
+> That is the gap. CLOSE IT FIRST … A phase must be able to DEMONSTRATE it opened the `.png`,
+> the `.html` and the numbered pack's `screen.md` — NOT ASSERT IT."*
+
+⛔ **THE DEFECT WAS COMPLIANCE, NOT DOCUMENTATION.** §3 already required all three artefacts.
+Four phases each reported complete with a full gate table and were accepted. **Nothing measured
+the requirement**, so it survived four phases running.
+
+**`prove:artefact-read` is added to EVERY phase's gate from here.** Each rebuilt screen carries
+an ```` ```artefact-read ```` block in its numbered pack's `implementation-notes.md`, naming the
+reference pack, the component file(s), a set of **computed values** and one **exact quotation**
+from `screen.md`. The suite then measures, per screen:
+
+| Leg | What it measures |
+|---|---|
+| `AR-3` | every cited value occurs **literally** in that pack's `.html` — you cannot cite a substring of a file you did not open |
+| `AR-4` | **≥6 distinct**, **≥2 FRACTIONAL** (`1.30px`, `9.50px`, `2.40px`), and **none obtainable from the prose `.md`** — this is the leg that would have caught the defect |
+| `AR-5` | every cited value is **USED in the component**, with **comments stripped first**, so *"used"* cannot degenerate into *"quoted"* |
+| `AR-6` | the `screen.md` quotation is verified **at source** |
+| `AR-7a…f` | **six controls** — a fabricated value, an all-integer set, a rounding attempt and a comment-only value must each be **REJECTED**, and a real value **ACCEPTED** |
+| `AR-8` | `MEASURED` and `UNMEASURED` are disjoint and **every one of the 36 governed packs is accounted for** |
+
+⛔ **WHAT IT CANNOT PROVE, STATED RATHER THAN PAPERED OVER: the `.png`.** An image leaves no
+derivable textual residue; `atime` proves *"something touched the file"*, never *"a session
+looked at it"*; and a declaration would be exactly the *"check that only records a claim"* the
+Operator refused. ▶ **The honest bound:** this corpus's `.html` is a full render of the same
+frame, so proving the `.html` was read covers the frame's **content and geometry**. What stays
+unproven is narrow and real — the `.png` is the **tie-break authority where render and image
+disagree** (font fallback, clipping, overflow). **The suite prints this limit on every run.**
+
+⛔ **NOT BACK-FILLED.** Screens built before the rule sit in `UNMEASURED` and are given **no
+citations**. Back-filling would mean opening the `.html` **today** and recording it as though
+the building phase had — **fabricating a historical record**, the precise failure the rule
+exists to prevent. A screen leaves `UNMEASURED` only by being **built or rebuilt** under it.
+
+⚠️ **`AR-1` FAILS AT AN INTERMEDIATE SCREEN BOUNDARY, BY CONSTRUCTION**, until all four
+Authorization-A screens carry a block. That is reported as *"screen N green, AR-1 outstanding"*
+at each commit — **never** as a green suite.
+
 ---
 
 ## 11. Completion states

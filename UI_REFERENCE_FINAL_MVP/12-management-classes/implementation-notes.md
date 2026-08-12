@@ -110,3 +110,78 @@ Acceptance status:             PASS — session evidence verdict. ⚠️ `Accept
 **No rating, roll-up, average or Overall Grade, ever.** `12` is a **LIST** surface: `C-9` confines `D-1`'s nine per-dimension ratings to report **DETAIL** surfaces, because ratings on a list *"invite comparison between children"*; `G-2` excludes any roll-up on **every** surface, permanently. The exclusion is **structural, not cosmetic** — the DTO carries no field that could hold one (asserted as an exact field set by `P21c-7`), and at HEAD the rating relations carry **zero client grants of any kind** (`P21-8`), so no direct read on this screen could reach one even if a later edit asked it to.
 
 **No term chip and no term filter.** `D-3` permits terms as **scheduling structure grouping SESSIONS** (`C-6`) and schedules them at `P2-2`. Until then no term entity exists, and an inert chip advertising one would promise a filter that does not.
+
+---
+
+### 2026-08-13 - REBUILT to the frame, Operator AUTHORIZATION A
+
+```
+Timestamp (Asia/Singapore):    2026-08-13
+Source branch:                 develop  (DEVELOPMENT CLONE)
+Starting commit:               5cd22dc
+Screen ID:                     12
+Existing route audited:        /management/classes - UNCHANGED. Nothing moved, renamed,
+                               redirected or aliased.
+Components replaced:           features/management/management-classes.tsx (layout rebuilt)
+Components created:            ClassCard, OverflowMenu (same file); Avatar sizes `mini`/`tile`
+                               and shape `tile`, all three MEASURED FROM THE FRAME
+DTO and port changes:          NONE - no projection, contract, port or fixture change
+Backend dependencies:          NONE
+Validation:                    tsc 0 | eslint 0 | next build 0 | prove:artefact-read 0
+                               | prove:portal-p2-1 0 | prove:portal-p2-1-composed 0
+VISUAL acceptance:             NOT-RUN - and see below: it could not previously have PASSED
+Acceptance status:             PASS claimed on evidence; `Accepted` is Operator-set only
+```
+
+#### Why it was rebuilt
+
+The original layout was derived from `reference/Management - Classes/Management - Classes.md`
+- a **prose note**. The `.png` and the `.html` were **never opened**, although
+`PORTAL_COMPLETION_PLAN.md` §3 already required all three artefacts. Two symptoms in this one
+file: a `View class overview` **button the frame does not draw**, and a reported finding that
+screen `13` "draws no Edit control", which was a `grep` over prose and is **false**.
+
+#### What the artefacts say, per artefact
+
+* **`.png`** - one `space-between` toolbar row (heading + count pill left; four level pills and
+  `+ Add Class` right); a 3-column card grid; each card carries a square programme chip, title,
+  grade, a `···` glyph top-right, a trainer row, a 1px divider, and a **two-slot footer**.
+* **`.html`** - card `border-radius: 16px`, `padding: 16px 18px`, inner `gap: 13px`; grid
+  `gap: 20px`; chip `44px` square at `border-radius: 13px`, `font-size: 15px`; trainer chip
+  `24px` circular at `font-size: 9.50px`; level pill `padding: 9px 14px` with
+  `outline: 1.30px`; `Add Class` at `border-radius: 11px`, `gap: 7px`, `font-size: 13px`;
+  overflow dots `2.40px`; divider `height: 1px`.
+* **`screen.md`** (numbered pack) - the governed record: canonical route, node `442:9`, the
+  A-016 prohibition on a hidden `classes` entity, and the A-026/A-054 Class Grade rules.
+
+⚠️ **The Operator's brief cited `13px radius` and `2px gaps` for the grid.** Measured, those
+values are real but belong to **other elements**: `13px` is the chip radius and the card's
+inner column gap, `2px` is the label/value stack gap, and the grid gap is **`20px`** with a
+card radius of **`16px`**. Built to the measured values.
+
+#### ⛔ VISUAL acceptance was not merely `NOT-RUN`
+
+Before this rebuild **there was no basis on which it could pass**, because the layout was never
+derived from the artefact that defines it. It remains `NOT-RUN` now, and a rendered DOM-text
+proof never becomes one.
+
+#### The `···` menu opens to nothing
+
+The frame draws the glyph and defines **no items**. Operator ruling: build the affordance, and
+where its contents are undefined by the frame it opens to nothing rather than to invented
+items. The control is real, focusable and dismissible, and says so in words.
+
+#### Artefact-read citation - verified by `prove:artefact-read`
+
+```artefact-read
+screen: 12
+pack: Management - Classes
+component: features/management/management-classes.tsx, components/ui/avatar.tsx
+html-values: 16px, 13px, 18px, 20px, 11px, 1.30px, 9.50px, 2.40px
+screen-md-quote: Management list over Class Modules under their Class Grades.
+```
+
+⚠️ **`AR-3`/`AR-5` fail if any cited value is absent from `Management - Classes.html` or unused
+in the component; `AR-4` fails unless at least two are FRACTIONAL and none is obtainable from
+the prose note.** ⛔ The `.png` is **not mechanically provable** and this citation does not
+claim it is - see `scripts/tests/portal/artefact-read-rule.mjs`.

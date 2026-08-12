@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -12,16 +11,32 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 import type { ManagementClassListDto } from "@/lib/frontend/contracts/physical-test";
 
 /**
- * Screen 12 — Management Classes (PORTAL COMPLETION PLAN phase `P2-1`).
- *
- * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Management - Classes/`
- * (Amendment 007 A-056, which supersedes the A-045 ordering). This pack carries NO local
- * `reference.png`, and that absence is NOT a missing reference and NOT a reason to re-export
- * from live Figma (`CLAUDE.md` §7.4). The pack's own prohibitions live in
- * `UI_REFERENCE_FINAL_MVP/12-management-classes/screen.md` and `implementation-notes.md`.
+ * Screen 12 — Management Classes (PORTAL COMPLETION PLAN phase `P2-1`;
+ * REBUILT 2026-08-13 under Operator AUTHORIZATION A).
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ FIVE PLACES THIS SURFACE DEPARTS FROM THE FRAME. EVERY ONE IS RULED, NOT DRIFT
+ * ⛔ WHY THIS FILE WAS REBUILT — THE METHOD DEFECT, NOT A TASTE CHANGE
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * The first build derived its layout from `reference/Management - Classes/…​.md` — a PROSE
+ * NOTE. The `.png` and the `.html` were never opened. `PORTAL_COMPLETION_PLAN.md` §3 already
+ * required all three artefacts; nothing measured that requirement, so it went unnoticed for
+ * four consecutive phases (`CLAUDE.md` §7.4.1, plan §12). ▶ Two symptoms in this one file: a
+ * `View class overview` BUTTON that the frame does not draw, and a reported finding that
+ * another screen's Edit control "did not exist" — both `grep`s over prose.
+ *
+ * ⚠️ EVERY GEOMETRIC VALUE BELOW IS CITED FROM `Management - Classes.html` and is verified by
+ * `prove:artefact-read`, which fails if a cited value is absent from that file or unused here.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⚠️ WHAT THE `.png` DRAWS (artefact: `Management - Classes.png`)
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * One `space-between` toolbar row — `All Classes` + a count pill on the left, the four level
+ * pills and `+ Add Class` on the RIGHT OF THE SAME ROW. Then a 3-column card grid. Each card:
+ * a square programme chip + title + grade, a `···` overflow glyph top-right, a trainer row, a
+ * 1px divider, and a two-slot footer (`32 / Students` · `8 / 12 / Lessons done`).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ FIVE DEPARTURES FROM THE FRAME. EVERY ONE IS RULED, NOT DRIFT
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  *
  * 1. ⛔ THE FRAME'S LEVEL TAB READS `Junior`. IT IS NOT BUILT, AND `Beginner` IS NOT A
@@ -29,45 +44,35 @@ import type { ManagementClassListDto } from "@/lib/frontend/contracts/physical-t
  *    `Advanced` (`A-016`; `A-026`/`A-054`), fixed by three deterministic seed rows, and
  *    `A-054` expressly prohibits global keyword replacement over this vocabulary — each
  *    occurrence is classified by CONTEXT. This is a Class Grade context, so governance wins.
- *    ⚠️ The tabs below are READ FROM THE DATABASE, never from a literal in this file, so a
- *    fourth value cannot appear here even by editing this component.
+ *    ⚠️ The tabs are READ FROM THE DATABASE, never from a literal in this file, so a fourth
+ *    value cannot appear here even by editing this component.
  *
- * 2. ⛔ THE FRAME DRAWS `Asst. <name>` ON EVERY CARD. IT IS A TEACHING ASSISTANT FIELD AND IS
- *    PROHIBITED — `A-014` defers the TA persona and `G-7` binds `centre_membership_role`
- *    against extension, so an assistant slot cannot be persisted at all. It is a
- *    `REGISTERED-OMISSION` and IT NEVER ENDS: it is not waiting on data, a design or a phase.
- *    Its absence is `EXPECTED / REQUIRED`, never a visual regression.
+ * 2. ⛔ THE FRAME DRAWS `Asst. <name>` ON THE RIGHT OF EVERY CARD'S TRAINER ROW. IT IS A
+ *    TEACHING ASSISTANT FIELD AND IS PROHIBITED — `A-014` defers the TA persona and `G-7`
+ *    binds `centre_membership_role` against extension, so an assistant slot cannot be
+ *    persisted at all. `REGISTERED-OMISSION`, and IT NEVER ENDS: it waits on no data, no
+ *    design and no phase. Its absence is `EXPECTED / REQUIRED`, never a visual regression.
  *
- * 3. ⚠️ THE FRAME DRAWS `X / 12 Lessons done`. It needs lesson data that does not exist at
- *    HEAD; it arrives with `D-3`/`D-4` at `P2-2`/`P2-6`. `REGISTERED-OMISSION`, ENDS WHEN
- *    THAT DATA ARRIVES. ⛔ Inventing a denominator now would be schema by inference from a
- *    frame (`A-022`) — and a `0 / 12` rendered from nothing is a fabricated fact, not a
- *    placeholder.
+ * 3. ⚠️ THE FRAME'S FOOTER HAS TWO SLOTS; ONLY THE LEFT ONE IS BUILT. `8 / 12 Lessons done`
+ *    needs lesson-completion data that does not exist at HEAD; it arrives with its own phase
+ *    (Operator AUTHORIZATION B). `REGISTERED-OMISSION`, ENDS WHEN THAT DATA ARRIVES. ⛔ A
+ *    `0 / 12` rendered from nothing is a fabricated fact, not a placeholder, and inventing a
+ *    denominator would be schema by inference from a frame (`A-022`). ▶ The `Students` stat
+ *    keeps the frame's FOOTER POSITION — below the divider, value over caption.
  *
  * 4. ⚠️ ONE TRAINER PER CARD IS NOT A GOVERNED FACT. `A-016` makes trainer assignment
  *    authoritative at CLASS-SESSION level; there is no module-level trainer column and
- *    inventing one is prohibited. The card therefore names the DISTINCT trainers actually
- *    assigned across that module's sessions. Where that is one name it reads as the frame
- *    does; where it is more, all are shown. ⛔ A second name is a second SESSION'S trainer —
- *    never an assistant (see 2).
+ *    inventing one is prohibited. The card names the DISTINCT trainers actually assigned
+ *    across that module's sessions. Where that is one name it reads as the frame does; where
+ *    it is more, all are shown. ⛔ A second name is a second SESSION'S trainer — never an
+ *    assistant (see 2).
  *
- * 5. ~~⚠️ THE CARD'S OWN DESTINATION IS INERT, NOT MISSING. A card opens screen `13` Class
- *    Overview (`P2-4`), whose route does not exist at HEAD~~ ✅ **THE CARD IS NOW LIVE —
- *    screen `13` shipped at `P2-4` (2026-08-13)**, at `/management/classes/[classModuleId]`.
- *    ⚠️ REWRITTEN, NOT DELETED: the rule it stated still governs, and it governed correctly
- *    here. A link to a route that 404s would be worse than an inert control with a stated
- *    reason — the same treatment `29`'s "Send Reminder to Trainer" already carries. ▶ The
- *    control went live when its TARGET became real, which is exactly the condition the inert
- *    treatment was chosen for, not a relaxed rule. Second instance after `Add Class` at `P2-2`.
- *
- *    ⛔ **AND STILL NO EDIT AFFORDANCE.** No ratified frame draws one to screen `27`, and the
- *    Operator ruled that a **DESIGN GAP, not a build gap**. Do not add one to this card.
- *
- *    ✅ `Add Class` IS NOW LIVE — screen `26` shipped at `P2-2`. ⚠️ The clause above read
- *    *"`Add Class` AND THE CARD'S OWN DESTINATION ARE INERT"*; it was REWRITTEN rather than
- *    deleted, because the rule it states still governs the card and will govern `Add Class`
- *    again for nothing. ▶ The control became live when its target became real, which is
- *    exactly the condition the original clause named.
+ * 5. ⛔ THE `···` MENU OPENS TO NOTHING, DELIBERATELY. The frame draws the GLYPH and defines
+ *    NO ITEMS — no labels, no targets, no states. Operator ruling: *"build the affordance,
+ *    and if its contents are undefined by the frame, it opens to nothing rather than to
+ *    invented items."* So the control is real and operable, and it says plainly that the
+ *    frame defines no actions. ⚠️ It is NOT the inbound route to screen `27` Edit Class:
+ *    `13`'s header card carries that control, per `13`'s own frame.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⛔ NOTHING ON THIS SURFACE IS AN ASSESSMENT FACT, AND NOTHING MAY BECOME ONE
@@ -79,16 +84,14 @@ import type { ManagementClassListDto } from "@/lib/frontend/contracts/physical-t
  * in this client, because hiding a value the client already holds is not a boundary.
  *
  * ⛔ There is no term chip and no term filter. `D-3` permits terms as SCHEDULING STRUCTURE
- * grouping SESSIONS (`C-6`) and schedules them at `P2-2`; until that phase ships there is no
- * term entity, and an inert chip advertising one would promise a filter that does not exist.
+ * grouping SESSIONS (`C-6`); until a term surface ships, an inert chip would advertise a
+ * filter that does not exist.
  */
-
-type LevelFilter = string;
 
 export function ManagementClasses() {
   const port = usePhysicalTestPort();
   const filterLabelId = useId();
-  const [level, setLevel] = useState<LevelFilter>("");
+  const [level, setLevel] = useState<string>("");
   const [state, setState] = useState<ResourceState<ManagementClassListDto>>({ kind: "loading" });
 
   useEffect(() => {
@@ -110,9 +113,9 @@ export function ManagementClasses() {
 
   /*
    * ⚠️ THE TAB COUNTS ARE DERIVED FROM THE CARDS THIS CALLER ALREADY RECEIVED,
-   * never from a separate count query. The same property the `29` class filter
-   * relies on: a tab cannot report the existence of a class this management
-   * account may not see, so the control can neither disclose nor probe.
+   * never from a separate count query. A tab cannot report the existence of a
+   * class this management account may not see, so the control can neither
+   * disclose nor probe.
    */
   const countsByGrade = useMemo(() => {
     const counts = new Map<string, number>();
@@ -146,63 +149,54 @@ export function ManagementClasses() {
 
   return (
     <div className="page-grid">
-      <div>
-        <PageHeading title="Classes" />
-        <p className="mt-0.5 max-w-2xl text-small leading-5 text-ink">
-          Every Class Module running at this centre, grouped by Class Grade.
-        </p>
-      </div>
+      <PageHeading title="Classes" />
 
-      <section aria-labelledby={filterLabelId} className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 id={filterLabelId} className="text-section-title font-extrabold text-ink-strong">
+      {/*
+        The frame's ONE toolbar row: heading + count pill on the left, level pills and
+        `Add Class` on the right of the same row (`justify-content: space-between`).
+        It wraps on narrow viewports rather than overflowing — the frame is drawn at one
+        width and defines no small-viewport variant, so wrapping is the honest degradation.
+      */}
+      <section
+        aria-labelledby={filterLabelId}
+        className="flex flex-wrap items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-[10px]">
+          <h2 id={filterLabelId} className="text-[17px] font-bold leading-6 text-ink-strong">
             All Classes
           </h2>
-          <Badge tone="neutral">
+          <span className="rounded-full bg-brand-100 px-[10px] py-1 text-[11px] font-semibold text-brand-800">
             {total} {total === 1 ? "class" : "classes"}
-          </Badge>
+          </span>
+        </div>
 
+        <div className="flex flex-wrap items-center gap-[10px]">
           {/*
-            ✅ `Add Class` IS LIVE AT `P2-2` — screen `26` ships at its canonical route
-            `/management/classes/add-class`. It rendered inert until that route existed, which
-            is the condition the inert treatment was chosen for, not a rule that was relaxed.
+            ⛔ The options come from `class_grades` — the three ratified Class Grades
+            (`A-016`) — so this control cannot name a level the academy does not have, and the
+            frame's `Junior` is absent because it is not one of them.
           */}
+          <div role="group" aria-label="Filter classes by Class Grade" className="flex flex-wrap items-center gap-[10px]">
+            <LevelTab label="All levels" count={total} selected={level === ""} onSelect={() => setLevel("")} />
+            {data.grades.map((grade) => (
+              <LevelTab
+                key={grade.code}
+                label={grade.displayName}
+                count={countsByGrade.get(grade.code) ?? 0}
+                selected={level === grade.code}
+                onSelect={() => setLevel(grade.code)}
+              />
+            ))}
+          </div>
+
+          {/* ✅ LIVE since `P2-2` — screen `26` exists at this canonical route. */}
           <Link
             href="/management/classes/add-class"
-            className="inline-flex min-h-11 items-center gap-1 rounded-field border border-transparent bg-brand-700 px-3.5 py-2 text-[0.78125rem] font-semibold text-white hover:bg-brand-800 sm:ms-auto"
+            className="inline-flex min-h-11 items-center gap-[7px] rounded-[11px] bg-brand-700 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-brand-800"
           >
             <span aria-hidden="true">+</span> Add Class
           </Link>
         </div>
-
-        {/*
-          The frame's level tabs. ⛔ The options come from `class_grades` — the three ratified
-          Class Grades (`A-016`) — so this control cannot name a level the academy does not
-          have, and the frame's `Junior` is absent because it is not one of them.
-        */}
-        <div role="group" aria-label="Filter classes by Class Grade" className="flex flex-wrap gap-2">
-          <LevelTab
-            label="All levels"
-            count={total}
-            selected={level === ""}
-            onSelect={() => setLevel("")}
-          />
-          {data.grades.map((grade) => (
-            <LevelTab
-              key={grade.code}
-              label={grade.displayName}
-              count={countsByGrade.get(grade.code) ?? 0}
-              selected={level === grade.code}
-              onSelect={() => setLevel(grade.code)}
-            />
-          ))}
-        </div>
-
-        <p id={`${filterLabelId}-note`} className="text-small text-ink">
-          The level filter narrows the classes already listed below and reaches no other class.
-          Opening a class overview arrives with its own screen; that control stays inert here
-          rather than pretending to work.
-        </p>
       </section>
 
       {visible.length === 0 ? (
@@ -217,68 +211,16 @@ export function ManagementClasses() {
           </p>
         </section>
       ) : (
-        <section aria-label="Class modules" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section aria-label="Class modules" className="grid gap-[20px] sm:grid-cols-2 xl:grid-cols-3">
           {visible.map((row) => (
-            <article key={row.classModuleId} className="card flex flex-col gap-4 px-5 py-[18px]">
-              {/*
-                ⛔ THE `View class overview` BUTTON ADDED HERE ON 2026-08-13 WAS REMOVED THE SAME
-                DAY, BY OPERATOR RULING: **it is an INVENTION.** The `.png` draws no such control
-                — the card's affordance is **the card itself plus a `···` overflow menu**, and I
-                added a button the frame does not have while simultaneously reporting that
-                another screen's Edit control did not exist. ▶ Both errors have ONE cause: the
-                layout was derived from the pack's prose `.md` note and the `.png` was never
-                opened (`CLAUDE.md` §7.4.1).
-
-                ⚠️ THE CARD IS THEREFORE STILL NOT WIRED TO SCREEN `13`, which IS built and IS
-                live at `/management/classes/[classModuleId]`. That is deliberate: the correct
-                affordance is a REBUILD of this card to the frame, and the Operator rules the
-                rebuild. Adding a second wrong control in the meantime would compound it.
-              */}
-              <div className="flex items-start gap-3">
-                {/*
-                  The frame's `PS` / `SD` chip. It is INITIALS DERIVED FROM THE TITLE by the
-                  shared `Avatar` primitive — presentation, not a stored abbreviation. ⛔ There
-                  is no "programme" entity and none may be introduced: `C-14` records that
-                  programme has no entity, and `A-016` forbids a hidden `classes` entity
-                  between Class Grade and Class Module.
-                */}
-                <Avatar displayName={row.title} size="medium" shape="square" />
-                <div className="min-w-0">
-                  <h3 className="text-[0.9375rem] font-bold leading-5 text-ink-strong">
-                    {row.title}
-                  </h3>
-                  <p className="mt-1">
-                    <Badge tone="info">{row.classGradeLabel}</Badge>
-                  </p>
-                </div>
-              </div>
-
-              {/*
-                ⛔ NULL MEANS NOT RECORDED — THE ELEMENT IS OMITTED (hero 0B). A module with no
-                readable trainer renders no trainer row at all: never a dash, never "TBC",
-                never "Unassigned", because none of those was established.
-              */}
-              {row.trainerDisplayNames.length > 0 && (
-                <ul className="flex flex-col gap-2">
-                  {row.trainerDisplayNames.map((name) => (
-                    <li key={name} className="flex items-center gap-2.5">
-                      <Avatar displayName={name} size="small" />
-                      <span className="text-[0.78125rem] font-medium text-ink-strong">{name}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <p className="mt-auto border-t border-line pt-3 text-[0.75rem] text-ink">
-                <span className="text-[1.0625rem] font-bold text-ink-strong">
-                  {row.activeStudentCount}
-                </span>{" "}
-                {row.activeStudentCount === 1 ? "Student" : "Students"}
-                <span className="block text-[0.6875rem] text-neutral-on">
-                  Actively enrolled in this Class Module
-                </span>
-              </p>
-            </article>
+            <ClassCard
+              key={row.classModuleId}
+              classModuleId={row.classModuleId}
+              title={row.title}
+              gradeLabel={row.classGradeLabel}
+              trainerDisplayNames={row.trainerDisplayNames}
+              activeStudentCount={row.activeStudentCount}
+            />
           ))}
         </section>
       )}
@@ -287,7 +229,150 @@ export function ManagementClasses() {
 }
 
 /**
- * One level tab.
+ * One class card, built to `Management - Classes.html`.
+ *
+ * ⚠️ THE WHOLE CARD IS THE AFFORDANCE — the frame draws no button, and the note's own
+ * behaviour line is *"Selecting a class card opens `Management - Class Overview`"*. It is
+ * implemented as a STRETCHED LINK on the title rather than by wrapping the card in an `<a>`:
+ * the `···` control must remain independently operable, and a `<button>` nested inside an
+ * `<a>` is invalid HTML and unusable by keyboard.
+ */
+function ClassCard({
+  classModuleId,
+  title,
+  gradeLabel,
+  trainerDisplayNames,
+  activeStudentCount,
+}: {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly gradeLabel: string;
+  readonly trainerDisplayNames: readonly string[];
+  readonly activeStudentCount: number;
+}) {
+  return (
+    <article className="relative flex flex-col gap-[13px] rounded-[16px] border border-line bg-surface px-[18px] py-4 shadow-[var(--shadow-card)] focus-within:border-brand-700 hover:border-brand-700">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-[11px]">
+          {/*
+            The frame's `PS` / `SD` chip — INITIALS DERIVED FROM THE TITLE by the shared
+            `Avatar` primitive, presentation only. ⛔ There is no "programme" entity and none
+            may be introduced: `C-14` records that programme has no entity, and `A-016`
+            forbids a hidden `classes` entity between Class Grade and Class Module.
+          */}
+          <Avatar displayName={title} size="tile" shape="tile" />
+          <div className="min-w-0">
+            <h3 className="truncate text-[14px] font-semibold leading-5 text-ink-strong">
+              <Link
+                href={`/management/classes/${classModuleId}`}
+                className="after:absolute after:inset-0 after:content-[''] focus:outline-none"
+              >
+                {title}
+              </Link>
+            </h3>
+            <p className="mt-[2px] text-[11px] text-ink-subtle">{gradeLabel}</p>
+          </div>
+        </div>
+        <OverflowMenu label={title} />
+      </div>
+
+      {/*
+        ⛔ NULL MEANS NOT RECORDED — THE ELEMENT IS OMITTED (hero 0B). A module with no
+        readable trainer renders no trainer row at all: never a dash, never "TBC", never
+        "Unassigned", because none of those was established.
+        ⛔ The frame's right-hand `Asst. <name>` slot is absent by ruling — see departure 2.
+      */}
+      {trainerDisplayNames.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {trainerDisplayNames.map((name) => (
+            <li key={name} className="flex items-center gap-2">
+              <Avatar displayName={name} size="mini" />
+              <span className="text-[12px] font-medium text-ink-muted">{name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* The frame's 1px hairline, `background: var(--border-subtle, #EDEFF4)`. */}
+      <div className="mt-auto h-px bg-line" />
+
+      <div className="flex items-start justify-between">
+        <p className="flex flex-col gap-[2px]">
+          <span className="text-[15px] font-bold leading-none text-ink-strong">
+            {activeStudentCount}
+          </span>
+          <span className="text-[10px] font-medium text-ink-subtle">Students</span>
+          <span className="sr-only">actively enrolled in this Class Module</span>
+        </p>
+        {/* ⛔ The frame's second footer slot (`Lessons done`) is a REGISTERED-OMISSION — departure 3. */}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * The frame's `···` glyph — three `2.40px` dots in an `18px` box.
+ *
+ * ⛔ IT OPENS TO NOTHING, AND THAT IS THE POINT. The frame draws the glyph and defines no
+ * items; inventing one would be exactly the error this rebuild exists to correct. The menu is
+ * real, focusable and dismissible, and states plainly that the ratified frame defines no
+ * actions for it.
+ */
+function OverflowMenu({ label }: { readonly label: string }) {
+  const [open, setOpen] = useState(false);
+  const menuId = useId();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    const onClick = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClick);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative z-10 shrink-0">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        aria-label={`More options for ${label}`}
+        onClick={() => setOpen((value) => !value)}
+        className="grid size-11 place-items-center rounded-full text-ink-subtle hover:bg-surface-muted"
+      >
+        <span aria-hidden="true" className="flex w-[18px] items-center justify-center gap-[2.4px]">
+          <span className="size-[2.4px] rounded-full bg-current" />
+          <span className="size-[2.4px] rounded-full bg-current" />
+          <span className="size-[2.4px] rounded-full bg-current" />
+        </span>
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label={`More options for ${label}`}
+          className="absolute end-0 z-20 mt-1 w-64 rounded-[11px] border border-line bg-surface p-3 text-[11px] leading-4 text-ink shadow-[var(--shadow-card)]"
+        >
+          The ratified frame defines no actions for this menu, so none is offered.
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * One level tab, at the frame's pill geometry (`padding: 9px 14px`, `border-radius: 999px`,
+ * `outline: 1.30px #EDEFF4`, `font-size: 12px`).
  *
  * `aria-pressed` rather than a `tablist`: these are FILTER TOGGLES over one list, not tabs
  * over separate panels, and announcing them as tabs would promise a panel switch that does
@@ -310,17 +395,15 @@ function LevelTab({
       type="button"
       aria-pressed={selected}
       onClick={onSelect}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-small font-medium ${
+      className={`inline-flex min-h-11 items-center gap-2 rounded-full border-[1.3px] px-3.5 py-2 text-[12px] font-semibold ${
         selected
           ? "border-brand-700 bg-brand-700 text-white"
-          : "border-line bg-surface text-ink-strong hover:border-brand-700"
+          : "border-line bg-surface text-ink-muted hover:border-brand-700"
       }`}
     >
       {label}
       <span className={selected ? "text-white/80" : "text-neutral-on"}>{count}</span>
-      <span className="sr-only">
-        {count === 1 ? "class" : "classes"}
-      </span>
+      <span className="sr-only">{count === 1 ? "class" : "classes"}</span>
     </button>
   );
 }

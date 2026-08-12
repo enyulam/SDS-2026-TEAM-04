@@ -15,10 +15,25 @@ const palette = [
   "bg-neutral-soft text-neutral-on",
 ] as const;
 
+/*
+ * `mini` and `tile` are MEASURED FROM THE FRAMES, not chosen:
+ * `Management - Classes.html` draws the class chip at `44px` square with
+ * `font-size: 15px`, and the trainer chip at `24px` circular with
+ * `font-size: 9.50px`. They are additive — no existing call site changes.
+ */
 const sizes = {
+  mini: "size-6 text-[9.5px]",
   small: "size-8 text-micro",
   medium: "size-10 text-small",
+  tile: "size-11 text-[15px]",
   large: "size-12 text-body",
+} as const;
+
+/** `tile` is the frame's `border-radius: 13px` class chip, not `rounded-xl`. */
+const shapes = {
+  circle: "rounded-full",
+  square: "rounded-xl",
+  tile: "rounded-[13px]",
 } as const;
 
 /** Deterministic, order-independent tint selection. Carries no meaning and no status. */
@@ -46,7 +61,7 @@ export function Avatar({
 }: {
   readonly displayName: string;
   readonly size?: keyof typeof sizes;
-  readonly shape?: "circle" | "square";
+  readonly shape?: keyof typeof shapes;
   /** Inert presentation for rows the current role cannot act on. */
   readonly muted?: boolean;
   readonly className?: string;
@@ -56,9 +71,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center font-bold ${
-        shape === "circle" ? "rounded-full" : "rounded-xl"
-      } ${sizes[size]} ${tint} ${className}`}
+      className={`grid shrink-0 place-items-center font-bold ${shapes[shape]} ${sizes[size]} ${tint} ${className}`}
     >
       {initials}
     </span>

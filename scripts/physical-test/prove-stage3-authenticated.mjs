@@ -561,13 +561,18 @@ const CHAIN = {
       id: 'S3-M2',
       path: '/management/classes',
       loading: 'Loading centre classes',
-      data: [
-        'Every Class Module running at this centre',
-        'All Classes',
-        'All levels',
-        'Beginner',
-        'Actively enrolled in this Class Module',
-      ],
+      /*
+       * ⚠️ TWO PINS MOVED 2026-08-13 AT THE AUTHORIZATION-A REBUILD, AND ARE
+       * REWRITTEN HERE RATHER THAN DELETED. `Every Class Module running at
+       * this centre` and `Actively enrolled in this Class Module` were
+       * INVENTED COPY — the `.png` draws neither: the header carries the
+       * breadcrumb and `Classes`, and the footer stat is `32` over the
+       * caption `Students`. ▶ Pinning invented copy made the leg green while
+       * measuring the opposite of faithfulness to the frame. The replacements
+       * are strings the FRAME ITSELF DRAWS, so the pin now fails if the page
+       * stops matching the frame instead of failing if it starts.
+       */
+      data: ['All Classes', 'All levels', 'Beginner', 'Add Class', 'Students'],
     },
     {
       /*
