@@ -121,6 +121,27 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
        * (`29-management-reports/screen.md:18`) — and no second route exists or
        * may be created for them.
        */
+      /*
+       * P2-1 — screen `12` Management Classes, at its canonical route.
+       *
+       * ⚠️ `exact: true` and NO `owns`. The class OVERVIEW (screen `13`) and
+       * class CREATION (screen `26`) are separate screens in later phases, and
+       * declaring ownership of a sub-tree that does not exist yet would be a
+       * claim about routes this build does not ship. Ownership is DECLARED per
+       * item, never inferred — and it is declared when the sub-route lands.
+       *
+       * ⛔ The frame's rail also draws Students, Trainers and Schedule. Those
+       * are screens `17`, `23` and `25` — later phases with no shipped route,
+       * and a rail item pointing at a 404 is worse than an absent one. They
+       * arrive with their screens.
+       */
+      {
+        href: "/management/classes",
+        label: "Classes",
+        path: "/management/classes",
+        exact: true,
+        icon: "calendar",
+      },
       {
         href: "/management/reports",
         label: "Reports",

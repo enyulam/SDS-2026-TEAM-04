@@ -15,8 +15,8 @@
 | Role | Management |
 | Folder | `12-management-classes` |
 | Canonical route | `/management/classes` |
-| Current implemented route | â€” (no implemented route) |
-| Route-compatibility treatment | Not applicable â€” no implemented route |
+| Current implemented route | ~~â€” (no implemented route)~~ ✅ **`/management/classes` — BUILT 2026-08-12, plan phase `P2-1`, at the CANONICAL route above.** No route was moved, renamed, redirected or aliased. |
+| Route-compatibility treatment | Not applicable — the route was CREATED at its canonical path, so there is nothing to reconcile |
 | Figma file key | `sSY1TYw3jyVlZDy8V2Mu7g` |
 | Figma file name | `SDS-dashboard` |
 | Figma node | `442:9` |
@@ -85,11 +85,11 @@ Management list over Class Modules under their Class Grades.
 
 | Field | Value |
 |---|---|
-| Current implementation status | `Not implemented` |
+| Current implementation status | ~~`Not implemented`~~ ✅ **`Implemented` — 2026-08-12 (`P2-1`).** Projection · server action · frontend · verification. ⛔ **NO migration and no Operator schema authorization was required** — a management SELECT policy AND a matching `authenticated` SELECT grant already exist on all eight relations this screen reads, **measured at HEAD** (both layers, separately — `A-030`). See `implementation-notes.md`. |
 
 ### Existing functionality to preserve
 
-Nothing exists to preserve.
+~~Nothing exists to preserve.~~ ✅ **As of 2026-08-12 there is: the `/management/classes` route, its RLS-scoped class-module list projection, and its three `REGISTERED-OMISSION`s.** ⛔ The omissions are part of what must be preserved — removing one is a governance change, not a visual fix.
 
 ### Allowed frontend expansion
 
@@ -109,7 +109,7 @@ Missing backend or governance requirements are **recorded, never invented**.
 
 ### Backend
 
-**Missing** â€” no class-module list projection.
+~~**Missing** — no class-module list projection.~~ ✅ **DELIVERED 2026-08-12 (`P2-1`).** `listClassModulesCore` → `listManagementClassesCore` → `adapterListManagementClasses` → the port → the screen. It reads over the caller's OWN credential under the Step 7G management policies; **no new RPC, policy, grant, column or table was created.**
 
 ### Governance
 
@@ -172,11 +172,11 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 | `reference.png` present (local duplicate only) | No — **the current reference lives in `/reference/`; this is not a gap** |
 | Native dimensions recorded | No |
 | Figma context retrieved | No |
-| Existing route audited | No |
+| Existing route audited | ~~No~~ ✅ **Yes — there was none; the canonical route was created (`P2-1`)** |
 | `implementation-before.png` captured | No |
 | `implementation-after.png` captured | No |
-| Visual acceptance | Not started |
-| Functional acceptance | Not started |
+| Visual acceptance | **Not started** — ⛔ **RENDERED CAPTURE is `NOT-RUN`** on every authenticated surface (`PORTAL_COMPLETION_PLAN.md` §10) and this checkpoint does not close it. A green DOM-text proof is not a visual acceptance |
+| Functional acceptance | ~~Not started~~ ✅ **PASS (session evidence verdict)** — `prove:portal-p2-1` (9 SQL + 20 runner) and `prove:portal-p2-1-composed` (9 checks), both exit 0; `prove:hero-all` 17/17. ⚠️ **`Accepted` is the Operator's and only the Operator's** |
 | Privacy and security acceptance | Not started |
 | Implementation checkpoint committed | No |
 | Blocking dependency raised | None recorded |

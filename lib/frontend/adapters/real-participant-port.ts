@@ -55,6 +55,7 @@ import type {
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
   ManagementApproveAndSubmitSuccess,
+  ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -101,6 +102,7 @@ import {
   adapterGetSessionUser,
   adapterGetTrainerWorkingReport,
   adapterGetManagementSubmittedReport,
+  adapterListManagementClasses,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
   adapterListManagementSubmittedReports,
@@ -216,6 +218,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** Report-keyed: as above. */
     getManagementReview(reportId: string): Promise<UiActionResult<ManagementReviewDto>> {
       return guard(() => adapterGetManagementReview(reportId));
+    },
+
+    /** P2-1 — screen `12`. No parameter: the centre is server-derived. */
+    listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>> {
+      return guard(() => adapterListManagementClasses());
     },
 
     getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>> {

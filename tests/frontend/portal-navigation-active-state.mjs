@@ -113,6 +113,9 @@ const EXPECTED_BY_ROUTE = new Map([
   ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Returned reports" }],
   // Management.
   ["/management", { role: "management", label: "Dashboard" }],
+  // P2-1 — screen `12` at its canonical route. Its rail item is `exact`, so
+  // this expectation is also what proves Dashboard does NOT light up here.
+  ["/management/classes", { role: "management", label: "Classes" }],
   ["/management/reports", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],

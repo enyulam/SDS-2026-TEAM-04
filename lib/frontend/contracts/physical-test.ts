@@ -263,6 +263,51 @@ export type ManagementQueueRowDto = {
   readonly submittedAt?: string;
 };
 
+/**
+ * P2-1 — screen `12` Management Classes.
+ *
+ * ⛔ THREE OMISSIONS ARE RULED, AND EACH IS RECORDED WHERE A LATER PASS WOULD
+ * LOOK FOR IT:
+ *  - the frame's `Asst. <name>` slot is a Teaching Assistant field, PROHIBITED
+ *    by `A-014`/`G-7` (`centre_membership_role` is not extended). It NEVER
+ *    ends and there is no DTO field for it.
+ *  - the frame's `X / 12 Lessons done` needs lesson data that does not exist
+ *    at HEAD. It is a `REGISTERED-OMISSION` that ENDS WHEN `D-3`/`D-4` DATA
+ *    ARRIVES (`P2-2`/`P2-6`) — not a field to invent now (`A-022`).
+ *  - the frame's level tab reads `Junior`. The ratified Class Grade vocabulary
+ *    is `Beginner` / `Intermediate` / `Advanced` (`A-016`, `A-054`), and the
+ *    tabs are read from the seeded `class_grades` rows, never from the frame.
+ *
+ * ⛔ NO RATING, ROLL-UP OR REPORT STATUS. `12` is a LIST surface: `C-9` bars
+ * per-dimension ratings there and `G-2` bars a roll-up everywhere.
+ */
+export type ClassGradeOptionDto = {
+  readonly code: string;
+  readonly displayName: string;
+  readonly sortOrder: number;
+};
+
+export type ManagementClassSummaryDto = {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeCode: string;
+  readonly classGradeLabel: string;
+  readonly classGradeSortOrder: number;
+  readonly activeStudentCount: number;
+  /**
+   * The DISTINCT trainers assigned across this module's sessions.
+   * ⛔ Plural because `A-016` makes assignment authoritative at CLASS-SESSION
+   * level — there is no module-level trainer field, and a second name means a
+   * second session's trainer, never an assistant.
+   */
+  readonly trainerDisplayNames: readonly string[];
+};
+
+export type ManagementClassListDto = {
+  readonly grades: readonly ClassGradeOptionDto[];
+  readonly classes: readonly ManagementClassSummaryDto[];
+};
+
 export type ManagementReviewDto = {
   /**
    * D-1 / C-10 — THE NINE PER-DIMENSION RATINGS, READ ONLY.

@@ -65,6 +65,7 @@ import {
 import {
   getManagementRatingsCore,
   getManagementReviewCandidateCore,
+  listManagementClassesCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
@@ -109,6 +110,7 @@ import type {
   AdapterIssueScope,
   AdapterManagementApproveAndSubmitInput,
   AdapterManagementApproveAndSubmitSuccess,
+  AdapterManagementClassListDto,
   AdapterManagementEditWordingInput,
   AdapterManagementEditWordingSuccess,
   AdapterManagementQueueRowDto,
@@ -671,6 +673,43 @@ export async function adapterListManagementSubmittedReports(): Promise<
   const result = await listManagementSubmittedCore(client);
   if (result.outcome !== "success") return result;
   return { outcome: "success", data: narrowQueueRows(result.data, new Set(["submitted"])) };
+}
+
+/**
+ * P2-1 — screen `12` Management Classes.
+ *
+ * ⚠️ THE MAPPER IS AN ALLOW-LIST, ONE FIELD AT A TIME, exactly like
+ * `narrowQueueRows` above and for the same reason: a field the projection
+ * grows later does NOT reach the client until someone names it here.
+ * Spreading `...row` to save eight lines would destroy that property, and it
+ * is the property that keeps a rating out of a LIST surface (`C-9`) by
+ * construction rather than by review.
+ */
+export async function adapterListManagementClasses(): Promise<
+  ActionResult<AdapterManagementClassListDto>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listManagementClassesCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      grades: result.data.grades.map((grade) => ({
+        code: grade.code,
+        displayName: grade.displayName,
+        sortOrder: grade.sortOrder,
+      })),
+      classes: result.data.classes.map((row) => ({
+        classModuleId: row.classModuleId,
+        title: row.title,
+        classGradeCode: row.classGradeCode,
+        classGradeLabel: row.classGradeLabel,
+        classGradeSortOrder: row.classGradeSortOrder,
+        activeStudentCount: row.activeStudentCount,
+        trainerDisplayNames: [...row.trainerDisplayNames],
+      })),
+    },
+  };
 }
 
 /**

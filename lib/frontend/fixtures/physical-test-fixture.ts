@@ -14,8 +14,11 @@ import {
   type CorrectionRequestDto,
   type DimensionCode,
   type DraftGenerationContextDto,
+  type ClassGradeOptionDto,
   type ManagementApproveAndSubmitInput,
   type ManagementApproveAndSubmitSuccess,
+  type ManagementClassListDto,
+  type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
   type ManagementQueueRowDto,
@@ -237,6 +240,25 @@ function fixtureQueueContext(session: FixtureSession) {
     ...(session.trainerName ? { trainerDisplayName: session.trainerName } : {}),
   };
 }
+
+/**
+ * P2-1 — the three ratified Class Grades, in their seeded order.
+ *
+ * ⛔ EXACTLY THESE THREE. `A-016` fixes the vocabulary at `Beginner` /
+ * `Intermediate` / `Advanced` and says NO FOURTH VALUE IS CREATABLE; these
+ * mirror the three deterministic `class_grades` seed rows (§6.1), code,
+ * display name and sort order alike.
+ *
+ * ⛔ THE FRAME'S `Junior` IS NOT ONE OF THEM AND IS NOT A SYNONYM FOR ONE.
+ * `A-054` prohibits global keyword replacement over this vocabulary and
+ * requires each occurrence be classified by context — this is a Class Grade
+ * occurrence, so governance wins and the tab reads `Beginner`.
+ */
+const FIXTURE_CLASS_GRADES: readonly ClassGradeOptionDto[] = [
+  { code: "beginner", displayName: "Beginner", sortOrder: 1 },
+  { code: "intermediate", displayName: "Intermediate", sortOrder: 2 },
+  { code: "advanced", displayName: "Advanced", sortOrder: 3 },
+];
 
 const SESSIONS: readonly FixtureSession[] = [
   {
@@ -1041,6 +1063,60 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
     }
     rows.sort((a, b) => (a.submittedAt ?? "") < (b.submittedAt ?? "") ? 1 : -1);
     return { outcome: "success", data: rows };
+  }
+
+  /**
+   * P2-1 — the deterministic mirror of `listManagementClassesCore`.
+   *
+   * ⚠️ IT DERIVES THE CARDS FROM THE SESSIONS, exactly as the server derives
+   * them from `class_sessions` / `enrolments` / `class_session_assignments`.
+   * Nothing module-level is stored here either, because `A-016` puts trainer
+   * assignment at CLASS-SESSION level and there is no module-level trainer
+   * fact to mirror.
+   *
+   * ⚠️ THE `Advanced` GRADE HAS NO MODULE IN THIS FIXTURE, DELIBERATELY. A
+   * level tab with zero cards is a real rendering case, and a fixture in which
+   * every tab is populated cannot exercise the empty-tab path at all.
+   */
+  async listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>> {
+    await delay(240);
+    const byModule = new Map<
+      string,
+      { title: string; grade: FixtureSession["classGrade"]; students: Set<string>; trainers: Set<string> }
+    >();
+    for (const session of SESSIONS) {
+      const entry =
+        byModule.get(session.classModuleId) ??
+        {
+          title: session.moduleName,
+          grade: session.classGrade,
+          students: new Set<string>(),
+          trainers: new Set<string>(),
+        };
+      for (const student of session.students) entry.students.add(student.studentId);
+      // An unassigned session contributes NO name — never a blank chip.
+      if (session.trainerName) entry.trainers.add(session.trainerName);
+      byModule.set(session.classModuleId, entry);
+    }
+
+    const classes: ManagementClassSummaryDto[] = [];
+    for (const [classModuleId, entry] of byModule) {
+      const grade = FIXTURE_CLASS_GRADES.find((item) => item.displayName === entry.grade);
+      if (!grade) continue;
+      classes.push({
+        classModuleId,
+        title: entry.title,
+        classGradeCode: grade.code,
+        classGradeLabel: grade.displayName,
+        classGradeSortOrder: grade.sortOrder,
+        activeStudentCount: entry.students.size,
+        trainerDisplayNames: [...entry.trainers].sort(),
+      });
+    }
+    classes.sort(
+      (a, b) => a.classGradeSortOrder - b.classGradeSortOrder || a.title.localeCompare(b.title),
+    );
+    return { outcome: "success", data: { grades: FIXTURE_CLASS_GRADES, classes } };
   }
 
   /**

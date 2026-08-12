@@ -236,8 +236,23 @@ BEGIN
   SELECT o_authorized INTO v_ok FROM public.evidence_record_access(v_ev);
   EXECUTE 'RESET ROLE';
   SELECT count(*) INTO v_a1 FROM public.audit_events;
+  -- ⛔ NARROWED TO THIS SUITE'S OWN EVIDENCE ID -- 2026-08-12, at P2-1.
+  --
+  -- It counted EVERY `evidence.accessed` row with actor_role `parent` in the
+  -- whole table, and went red the moment the Operator played a clip as a
+  -- parent during the local walkthrough (a committed row dated 2026-08-11
+  -- 18:16Z). ▶ A LEG THAT COUNTS GLOBALLY IS MEASURING THE WORLD, NOT THE
+  -- THING IT ASSERTS ABOUT: it reported "2" about events it never wrote.
+  --
+  -- ⚠️ SECOND INSTANCE OF THIS EXACT SHAPE. `P2a-12a` was narrowed for the
+  -- same reason when the walkthrough attached two real clips. The remedy is
+  -- the same and it is a TIGHTENING, not a loosening: the assertion is still
+  -- EXACTLY ONE, and it is now exactly one FOR THE MINT THIS LEG PERFORMED.
+  -- ⛔ It was NOT relaxed to a range, and the failure was NOT caused by P2-1,
+  -- which writes nothing and touches no evidence path.
   SELECT count(*) INTO v_n FROM public.audit_events e
-   WHERE e.action = 'evidence.accessed' AND e.actor_role = 'parent';
+   WHERE e.action = 'evidence.accessed' AND e.actor_role = 'parent'
+     AND e.target_id = v_ev;
   IF v_ok AND (v_a1 - v_a0) = 1 AND v_n = 1 THEN
     v_pass := v_pass + 1; RAISE NOTICE 'PASS P5a-8 -- CONTROL: a PERMITTED parent mint emits EXACTLY ONE evidence.accessed, actor_role parent';
   ELSE

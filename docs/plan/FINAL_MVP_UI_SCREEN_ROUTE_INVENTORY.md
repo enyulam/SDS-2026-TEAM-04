@@ -199,7 +199,7 @@ The three login screens **must not**:
 | ID | Final visual status | Current implementation status | 48-hour core slice | Physical-test flow order | Implementation gap classification |
 |---|---|---|---|---|---|
 | 11 | Final | `Partially implemented` | No | — | `Post-48-hour final-MVP scope` — a management landing surface exists at a non-canonical route |
-| 12 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` |
+| 12 | Final | ~~`Not implemented`~~ ✅ **`Implemented` — 2026-08-12, plan phase `P2-1`** | No | — | ~~`Post-48-hour final-MVP scope`~~ ✅ **BUILT at its canonical route `/management/classes`.** Projection + server action + frontend + verification (`prove:portal-p2-1`, `prove:portal-p2-1-composed`). ⛔ **NO migration** — a management SELECT policy and a matching `authenticated` grant already existed on all eight relations, MEASURED at HEAD (leg `P21-3`). Three `REGISTERED-OMISSION`s: `Asst.` (never ends), `X / 12 Lessons done` (ends at `P2-2`/`P2-6`), the frame's `Junior` tab (never ends) |
 | 13 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` — its per-row status gating is fully ratified (`CLAUDE.md` §6, A-038) and must be built to that rule, not inferred from the frame |
 | 14 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` **+ `Backend dependency missing`** — no lesson-plan schema, RPC or governance |
 | 15 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` **+ `Backend dependency missing`** — no session-level statistics projection |
@@ -223,7 +223,7 @@ The three login screens **must not**:
 | ID | Backend dependency | Screenshot status | Current frontend route | Compatibility treatment |
 |---|---|---|---|---|
 | 11 | Centre-scoped summary projection — **not delivered**; the current landing surface reads the queue projections | Not captured — pack pending | `/management` | **Preserve existing route as redirect** — `/management` redirects to `/management/dashboard` |
-| 12 | **Missing** — no class-module list projection | Not captured — pack pending | — | Not applicable |
+| 12 | ~~**Missing** — no class-module list projection~~ ✅ **DELIVERED 2026-08-12 (`P2-1`)** — `listClassModulesCore` (class-session) + `listManagementClassesCore` (management-view) + `adapterListManagementClasses`. ⛔ **RLS-scoped over the caller's own credential; no new RPC, policy, grant or table** | ⛔ **NOT CAPTURED — RENDERED CAPTURE stays `NOT-RUN`** on every authenticated surface (`PORTAL_COMPLETION_PLAN.md` §10). A green DOM-text proof is not a visual acceptance | ✅ `/management/classes` — **the canonical route** | Not applicable — the route was CREATED at its canonical path; nothing was moved, renamed or aliased |
 | 13 | **Missing** — no class-overview projection; per-row status gating ratified but unbuilt | Not captured — pack pending | — | Not applicable |
 | 14 | **Missing** — no lesson-plan schema or RPC | Not captured — pack pending | — | Not applicable |
 | 15 | **Missing** — no lesson-statistics projection | Not captured — pack pending | — | Not applicable |

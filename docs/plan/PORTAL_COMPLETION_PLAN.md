@@ -497,7 +497,7 @@ Each phase carries: **frame** read in full (the `/reference/` `.png`, its `.html
 | **learner name** | ✅ `students.full_name` |
 | **class** | ✅ `class_modules.title` + `class_grades` |
 | **trainer** | ✅ `class_session_assignments` → `accounts.display_name` |
-| **enrolment date** | ⚠️ **needs a column** — `enrolments` exists; no dated enrolment field measured |
+| **enrolment date** | ~~⚠️ **needs a column** — `enrolments` exists; no dated enrolment field measured~~ ✅ **CORRECTED 2026-08-12 BY MEASUREMENT AT `P2-1`: THE COLUMN ALREADY EXISTS.** `public.enrolments.enrolled_at` is `timestamptz NOT NULL`, measured against `information_schema.columns`. ⚠️ **The original was a stale MEASUREMENT, not a stale opinion** — *"no dated enrolment field measured"* is the wording a later reader trusts without re-checking, and `P2-12`/`P2-13` would have requested a schema authorization for a column that is already there. ⛔ **Ratifying the FIELD is still separate from having the COLUMN**, and guardian name/contact genuinely do need theirs |
 | **guardian name** | ⛔ **NEEDS A COLUMN** |
 | **guardian contact** | ⛔ **NEEDS A COLUMN** |
 
@@ -619,7 +619,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 
 | # | Screen | Delivers | Depends on | Gated by |
 |---|---|---|---|---|
-| **P2-1** | `12` Management Classes | Class-list projection, level tabs | — | — |
+| **P2-1** | `12` Management Classes | Class-list projection, level tabs | — | — · ✅ **BUILT AND PROVEN 2026-08-12** at `/management/classes`. ⛔ **No migration** — policy AND grant already present on all eight relations, both layers measured at HEAD (`P21-3`). Three `REGISTERED-OMISSION`s, each with a controlled detector |
 | **P2-2** | `26` Add Class | ⚠️ **`D-3` terms substrate** + class creation | P2-1 | `C-6` `C-7` `C-14` |
 | **P2-3** | `27` Edit Class | Class edit write path | P2-2 | `C-14` |
 | **P2-4** | `13` Class Overview | Class summary, lesson timeline, **+ Class Health Summary** | P2-1 | `C-17` (`GC-9`) |
@@ -715,7 +715,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | ✅ **`P1-1c` — the screen `19` frontend** | `PASS` | The full chain; nine surface legs. ▶ **`D-1` is COMPLETE end to end** |
 | ⚠️ **The silent-save reproduction is still owed a walk** | `OPEN` | Carry into §5. Console empty = the button never enabled · `submit-ignored` = not `ready` · `dispatching` with no server-log entry = a third possibility neither candidate covered. Steps in `BUILD_NOTES.md`; repeat on a `trainer_approved` report → Management **Edit wording** |
 | ✅ **The `A-038` / `GC-6` reconciliation** | **SCHEDULED** | `P1-1`, measured scope at §6.5 — **15 locations, 4 of them live source** |
-| ⚠️ **`test:integration` 47/3/3, exit 1** | `OPEN` | `INT-A5`/`INT-Q27` are **suite staleness, product correct**; ⛔ `run-integration.mjs:517` calls `pass("INT-A5")` **unconditionally** after both `fail()`s. Fix before Part 2 so the suite can gate |
+| ⚠️ **`test:integration` exit 1 — AND `prove:stage3-authenticated` exit 1, ONE ROOT CAUSE** | `OPEN`, **re-measured 2026-08-12 at `P2-1`** | `INT-A5` ×2, `INT-Q27`, `S3-M1-r`, `S3-P1-r`, `S3-P2-r`. ▶ **Both suites are pinned to an EMPTY-FIXTURE state the Operator's walkthrough legitimately moved** — *suite staleness, product correct*, and **neither was caused by `P2-1`**, which writes nothing. `INT-Q27` additionally expects a Parent DTO without the `context` key hero Phase 1 added. ⛔ ~~`run-integration.mjs:517` calls `pass("INT-A5")` **unconditionally** after both `fail()`s~~ ✅ **THAT NOTE IS ITSELF STALE — measured at HEAD, the block is guarded by `failuresBefore` and prints no `PASS` when it fails.** The instrument defect is closed; the two `INT-A5` failures are real and are fixture staleness. ⚠️ **`stage3` is the project's ONLY harness that renders an AUTHENTICATED surface**, so repairing it is also the precondition for giving any new screen a real render leg. **Scheduled as one bounded unit before `P2-2`** |
 | ⚠️ **`RENDERED CAPTURE` `NOT-RUN` on every authenticated surface** | `OPEN` | Not closed by any phase unless one runs a capture |
 | ⚠️ **The Phase 8/11 gap** | `OPEN` | Structural consistency is **neither a visual nor a functional acceptance** |
 | ⛔ **`09` refuses its canonical route** (`C2C-007`) | `OPEN`, measured | `P2-21`, first |

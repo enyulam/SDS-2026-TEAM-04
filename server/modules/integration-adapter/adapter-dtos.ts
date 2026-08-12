@@ -252,6 +252,42 @@ export interface AdapterManagementQueueRowDto {
   readonly submittedAt?: string;
 }
 
+/**
+ * P2-1 — screen `12` Management Classes.
+ *
+ * ⛔ IDENTITY, ENROLMENT AND STAFFING FACTS ONLY. There is no rating field, no
+ * roll-up, no report status, no term and no lesson-progress field, and none
+ * may be added: `C-9` confines `D-1` to report DETAIL surfaces, `G-2` excludes
+ * a roll-up everywhere, `C-6`/`D-3` place terms at `P2-2`, and the frame's
+ * `X / 12 Lessons done` is a `REGISTERED-OMISSION` awaiting data that does not
+ * exist yet.
+ *
+ * ⛔ `trainerDisplayNames` is the DISTINCT SET of trainers assigned across the
+ * module's sessions (`A-016` — assignment is authoritative at session level).
+ * It is NOT the frame's `Asst.` slot, which is a TA field prohibited by
+ * `A-014`/`G-7` and omitted permanently.
+ */
+export interface AdapterClassGradeOptionDto {
+  readonly code: string;
+  readonly displayName: string;
+  readonly sortOrder: number;
+}
+
+export interface AdapterManagementClassSummaryDto {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeCode: string;
+  readonly classGradeLabel: string;
+  readonly classGradeSortOrder: number;
+  readonly activeStudentCount: number;
+  readonly trainerDisplayNames: readonly string[];
+}
+
+export interface AdapterManagementClassListDto {
+  readonly grades: readonly AdapterClassGradeOptionDto[];
+  readonly classes: readonly AdapterManagementClassSummaryDto[];
+}
+
 export interface AdapterRatingSnapshotDto {
   readonly dimensionCode: AdapterDimensionCode;
   readonly displayName: string;

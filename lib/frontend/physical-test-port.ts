@@ -12,6 +12,7 @@ import type {
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
   ManagementApproveAndSubmitSuccess,
+  ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -108,6 +109,17 @@ export interface PhysicalTestPort {
   getManagementReview(
     reportId: string,
   ): Promise<UiActionResult<ManagementReviewDto>>;
+  /**
+   * P2-1 — screen `12` Management Classes. Takes NO parameter: the centre is
+   * derived server-side from the caller's live active management membership,
+   * exactly as the three queue reads do, so a caller cannot aim this at a
+   * centre it does not hold.
+   *
+   * ⛔ It returns identity, enrolment and staffing facts only — no rating
+   * (`C-9`), no roll-up (`G-2`), no term (`C-6`/`D-3`) and no lesson progress
+   * (`REGISTERED-OMISSION`, ends when that data arrives).
+   */
+  listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>>;
   getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>>;
   listParentSubmittedReports(): Promise<
     UiActionResult<readonly ParentReportListItemDto[]>

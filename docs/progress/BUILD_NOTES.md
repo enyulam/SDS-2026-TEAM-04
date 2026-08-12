@@ -7356,3 +7356,82 @@ Four requirements: **re-verify** every open item, blocker and limit against curr
 ### Checkpoint
 
 **Stopped BEFORE writing `P2-1` code.** §3 requires the phase to deliver its screen COMPLETE — projection, server action, frontend, verification — before the next begins; **remaining context could not finish and verify it**, and a partial build is exactly what that rule prevents. **Nothing of `P2-1` is half-built.** The frame read, the three divergences and the delta classification are the phase's analysis step and are recorded above, so the next session starts from measurement rather than from the frame.
+
+---
+
+## 2026-08-12 — `P2-1` BUILT AND PROVEN · screen `12` Management Classes · a stale global-count leg · a tree-wide encoding finding
+
+- **Branch:** `develop`. **Starting HEAD:** `b3bd814`. **Scope:** plan phase `P2-1` only, delivered complete — projection → server action → frontend → verification, in that order (§3). ⛔ **No migration, and no schema authorization requested or required.**
+
+### ✅ `P2-1` — `12` Management Classes, at its canonical route `/management/classes`
+
+**The chain, end to end:** `listClassModulesCore` (class-session — the module that OWNS these tables, §9 rule 1) → `listManagementClassesCore` (management-view — the role gate and the DTO) → `adapterListManagementClasses` → `ManagementClassListDto` → the port → the deterministic fixture → `management-classes.tsx`. **The same spine every proven surface uses; no new pathway was invented.**
+
+⛔ **NO MIGRATION, AND THE CLAIM IS ITSELF A PROOF LEG.** A management `SELECT` policy **and** a matching `authenticated` `SELECT` grant already exist on all eight relations this screen reads. ⚠️ **Both layers measured separately** — a present policy with no grant reads as an RLS failure, which `A-030` names explicitly. `P21-3` re-measures it on every run rather than citing the previous session's measurement.
+
+### ⛔ THE THREE RULED OMISSIONS, AND THE TWO DEPARTURES THAT ARE NOT DEFECTS
+
+| # | The frame draws | Disposition | Ends? |
+|---|---|---|---|
+| 1 | `Asst. <name>` | ⛔ **PROHIBITED** — a TA field; `A-014` defers the persona, `G-7` binds `centre_membership_role` against extension | **NEVER** |
+| 2 | `X / 12 Lessons done` | ⚠️ **NOT BUILT** — needs `D-3`/`D-4` data. A denominator invented now is a fabricated fact (`A-022`) | **ENDS at `P2-2`/`P2-6`** |
+| 3 | The level tab `Junior` | ⛔ **NOT BUILT, and `Beginner` is not a relabel of it** (`A-016`, `A-054`) | **NEVER** |
+
+▶ **Each is asserted by a leg whose detector carries a CONTROL that must match the frame's own string** — `P21a-1/1c`, `-2/2c`, `-3/3c`. A scan proving a token absent is trivially satisfied by a file it never read.
+
+⚠️ **ONE TRAINER PER CARD IS NOT A GOVERNED FACT.** `A-016` makes trainer assignment authoritative at **class-session** level; there is no module-level trainer column and inventing one is prohibited. The card names the **distinct trainers actually assigned across that module's sessions** — a derivation over governed facts, never a new module-level fact. ⛔ A second name is a second **session's** trainer, never an assistant.
+
+⚠️ **`Add Class` AND THE CARD'S DESTINATION ARE INERT, NOT MISSING.** They target screens `26` (`P2-2`) and `13` (`P2-4`). ▶ **A link to a route that 404s is worse than an inert control with a stated reason** — the treatment `29`'s "Send Reminder to Trainer" already carries.
+
+### ⛔ WHY THE SPINE FAILS CLOSED AND THE TRAINER CHAIN FAILS SOFT
+
+Grades, modules and enrolments are the **substance**: "no classes" and "6 classes" are **both positive claims**, and a rejected read must never be rendered as the first (`Q-7`). All three return `{ ok: false }` and the gate reports `unavailable`. ▶ **The trainer-name chain fails SOFT** — the same asymmetry `decorateQueueRows` already makes: **losing a class from a list that claims to be the centre's classes is a governance failure; losing a name is a cosmetic one.** A module with no readable trainer renders **no trainer element at all** — never a dash, never "Unassigned" (hero 0B: `NULL` means NOT RECORDED, omit the element).
+
+### ⛔ MY OWN SPREAD DETECTOR WENT RED ON CORRECT CODE, AND IT IS RECORDED RATHER THAN QUIETLY NARROWED
+
+`P21a-11`'s first form was a bare `...row` word-boundary match. It matched **`[...row.trainerDisplayNames]`** — an **array copy**, the exact opposite of the object spread it hunts. ▶ **A search is evidence about the code only once it is proven DISCRIMINATING, and this one proved it by failing on a file that was already right.** Narrowed to an object-spread shape **with a control (`P21a-11c`) asserting it matches both object-spread forms and does NOT match the array copy that made its first form fire.**
+
+### ⛔ `prove:portal-5` WAS RED BEFORE THIS PHASE, FOR THE SECOND INSTANCE OF A KNOWN SHAPE
+
+`P5a-8` counted **every** `evidence.accessed` row with `actor_role = 'parent'` **in the whole table** and expected exactly one. It reported `parent-events=2`.
+
+▶ **MEASURED, NOT ASSUMED: a committed parent access dated `2026-08-11 18:16Z` already exists** — the Operator's own local walkthrough, before this session began. `P2-1` writes nothing (`P21a-4` measures the database unmoved) and touches no evidence path, so **the failure predates it entirely.**
+
+⚠️ **SECOND INSTANCE OF *a leg that counts globally is measuring the world, not the thing it asserts about*.** `P2a-12a` was narrowed for the same reason when the walkthrough attached two real clips. ⛔ **The remedy is a TIGHTENING, not a loosening**: still exactly one, now scoped to `target_id = v_ev`, the mint this leg itself performed. **Not relaxed to a range.**
+
+### ⚠️ TWO SUITES ARE RED FOR ONE ROOT CAUSE, BOTH PRE-EXISTING, NEITHER A PRODUCT DEFECT
+
+| Suite | Failing legs | Cause |
+|---|---|---|
+| `npm run test:integration` | `INT-A5` ×2, `INT-Q27` | pinned to an **empty-fixture** state the Operator's walkthrough legitimately moved; `INT-Q27` expects a Parent DTO without the `context` key hero Phase 1 added |
+| `npm run prove:stage3-authenticated` | `S3-M1-r`, `S3-P1-r`, `S3-P2-r` | the same cause: `"No reports waiting"`, `"No reports available yet"` and the parent refusal copy no longer match a fixture that now holds submitted reports |
+
+⛔ **NEITHER IS CLAIMED AS PASSING AND NEITHER IS CAUSED BY `P2-1`.** ⚠️ The plan's own carried item says *"fix before Part 2 so the suite can gate"* (§10) — it is **scheduled as the next bounded unit, not folded into this phase's commit.** ▶ **`stage3` is the project's only harness that renders an AUTHENTICATED surface, so repairing it is also the precondition for giving screen `12` a real render leg** — which is why the two travel together.
+
+⛔ **`PORTAL_COMPLETION_PLAN.md` §10's note that `run-integration.mjs` *"calls `pass("INT-A5")` unconditionally"* IS ITSELF STALE** — measured at HEAD, the block is guarded by `failuresBefore` and prints no `PASS` when it fails. The two `INT-A5` failures are real; the instrument defect it describes is already closed.
+
+### ⚠️ A TREE-WIDE ENCODING FINDING — MEASURED, DELIBERATELY NOT REPAIRED
+
+**41 tracked files carry 136 pre-existing mojibake sequences** (a double-encoded em dash), including **every one of the 36 UI pack `screen.md` files** and **`CLAUDE.md` itself (2)**. It is the `Q-28` family at scaffold scale: the packs were generated by a writer that produced it.
+
+⛔ **NOT REPAIRED HERE, and that is a scope decision rather than an oversight.** Repairing 41 governed files is its own bounded run, and **`CLAUDE.md` is ratified authority whose editing needs a bounded §12 authorization**. **Recorded for the Operator.**
+
+⚠️ **One divergence recorded so it is not later mistaken for drift:** where `12-management-classes/screen.md` struck a corrupt line, the struck text was re-written with a correct em dash rather than preserving the corrupt bytes. The meaning is preserved exactly; the corruption is not, and preserving corrupt bytes carries no evidentiary value.
+
+### Gates this phase
+
+| Gate | Result |
+|---|---|
+| `npm run prove:portal-p2-1` | ✅ **exit 0** — 9 SQL legs + 20 runner checks, non-vacuity first, every absence leg controlled |
+| `npm run prove:portal-p2-1-composed` | ✅ **exit 0** — 9 checks. **The composed core RUN with real admin-minted sessions for all three roles**, because a green data proof plus a green source scan is not a proof of the path between them (the `P1-5` lesson) |
+| `npm run prove:hero-all` | ✅ **17/17 by exit code** |
+| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · f-attendance-init-1` | ✅ **all exit 0** (`portal-5` after the `P5a-8` narrowing above) |
+| `npm run prove:stage2-routes` | ✅ **exit 0** |
+| `tsc` · `eslint` · `next build` | ✅ **0 · 0 errors (3 pre-existing warnings) · 0** |
+| `npm run test:integration` · `npm run prove:stage3-authenticated` | ⛔ **RED, PRE-EXISTING, diagnosed above — NOT claimed** |
+| **RENDERED CAPTURE on screen `12`** | ⛔ **`NOT-RUN`.** A green DOM-text proof is not a visual acceptance |
+| Database | ⛔ **UNMOVED** — the same five-relation count before and after, with the suite proven to have actually read it. **25 migrations · 28 tables · 49 functions · 12 enums · 29 policies · audit registry 19, all unchanged** |
+
+### Checkpoint
+
+**Committed at the phase boundary, never mid-phase.** ⛔ **`P2-2` (`26` Add Class) HITS THE `C-7` SCHEMA GATE** — `D-3` terms plus class creation — and must **STOP with its tables, columns, policies and grants stated** before any migration is written.

@@ -39,6 +39,10 @@ import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { getSessionContextsCore } from "@/server/modules/class-session/session-context-projections";
 import { getSessionStaffIdentitiesCore } from "@/server/modules/class-session/staff-projections";
+import {
+  listClassModulesCore,
+  type ClassListDto,
+} from "@/server/modules/class-session/class-list-projections";
 import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import type { DimensionCode, RatingLevel } from "@/server/modules/framework/dimensions";
 import {
@@ -436,6 +440,47 @@ export async function listManagementSubmittedCore(
   const listed = await listManagementSubmittedFromRpc(client);
   if (listed.outcome !== "success") return listed;
   return { outcome: "success", data: await decorateQueueRows(client, listed.data) };
+}
+
+// ---------------------------------------------------------------------
+// P2-1 — screen `12` Management Classes
+// ---------------------------------------------------------------------
+/**
+ * The centre's Class Modules, grouped by Class Grade.
+ *
+ * ⚠️ THE ROLE GATE HERE IS A PRESENTATION IMPROVEMENT, NOT THE SECURITY
+ * BOUNDARY — the same statement `listManagementSubmittedCore` makes above it.
+ * It turns a wrong-role caller's list into the contract's `unauthorized`
+ * outcome; RLS decides independently, per row, inside the database, and a
+ * trainer or parent reaching `listClassModulesCore` directly still sees only
+ * what their own policies admit.
+ *
+ * ⛔ NOTHING ON THIS SURFACE IS AN ASSESSMENT FACT. `ClassListDto` carries no
+ * rating, roll-up, average, observation, attendance value, evidence reference,
+ * trainer note, checklist value, content hash or report status — `C-9` bars
+ * per-dimension ratings from a LIST surface and `G-2` bars a roll-up from
+ * every surface, so there is no field one could arrive in.
+ *
+ * ⛔ NO TERM FIELD (`D-3` schedules terms at `P2-2`, grouping SESSIONS under
+ * `C-6`), and ⛔ NO LESSON PROGRESS FIELD — the frame's `X / 12 Lessons done`
+ * needs lesson data that does not exist at HEAD. It is a `REGISTERED-OMISSION`
+ * that ENDS WHEN THAT DATA ARRIVES, and inventing a denominator now would be
+ * schema by inference from a frame (`A-022`).
+ */
+export async function listManagementClassesCore(
+  client: SupabaseClient,
+): Promise<ActionResult<ClassListDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const listed = await listClassModulesCore(client);
+  /*
+   * ⛔ A REJECTED READ IS NEVER AN EMPTY ACADEMY. Success-with-zero-rows here
+   * renders "No classes yet" — a positive claim that this centre runs none.
+   * `Q-7`: the two are different values and only one of them was observed.
+   */
+  if (!listed.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: listed.rows };
 }
 
 // ---------------------------------------------------------------------
