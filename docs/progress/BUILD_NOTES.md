@@ -8049,3 +8049,65 @@ the right shape rather than merely blocking the wrong one.
 | Census, measured | **30 migrations · 29 tables · 56 functions · 12 enums · 30 policies · 1 bucket · registry 21** |
 
 **Next step:** the Operator walks screens `12`, `13`, `26` and `27` before `P2-5`.
+
+---
+
+## 2026-08-13 — ⛔ METHOD DEFECT: four layouts derived from prose notes, never from the frames
+
+**Branch:** `develop`. **HEAD at discovery:** `ebb82f1`. **No code was changed by this entry.**
+
+### The question that found it
+
+The Operator asked, per screen, which artefacts were actually READ when building `12`, `13` and
+`26`, and which was PRIMARY — observing that the Edit-control miss *"suggests the note was
+primary: it lists only the two footer controls, while the frame draws an Edit button in the
+header card"*, and that if so **the structural divergence follows naturally rather than being a
+series of separate lapses**.
+
+### The answer, measured
+
+For screen `13` — built in the same session, so recall is exact:
+
+* `reference/Management - Class Overview/*.png` — **NOT READ**
+* `reference/Management - Class Overview/*.html` — **NOT READ**
+* `13-management-class-overview/screen.md` — **NOT READ** (opened only to patch identity rows
+  by regex)
+* **PRIMARY: the pack's prose `.md` note**, and it was the *only* artefact read.
+
+Screen `27` the same. Screens `12` and `26` were built before the context boundary and **could
+not be recalled** — and were **deliberately not reconstructed from the code comments left in
+those files**, because comments record CONCLUSIONS, not what was opened, and treating them as
+evidence of one's own sources is the same move that produced the error.
+
+### ⛔ Consequence 1 — findings about "the frame" were findings about a note
+
+*"Screen `13` draws no Edit control"* was a `grep` for `dit` **over prose**. ⛔ **It is FALSE.**
+The Operator read the frame; `Edit class` sits in the **header card, top-right**, beside
+ASSIGNED TRAINER and ASSISTANT. Confirmed afterwards in the `.png`.
+
+Withdrawn with it: the `27` day strip, the unassign control and the field inventory **as frame
+evidence**. ⚠️ Their GOVERNANCE reasoning stands — no cancel/delete audit string exists, no
+unassign string exists, `C-14` omits the three fields — but none of that was ever a measurement
+of a frame, and it must not be cited as one.
+
+### ⛔ Consequence 2 — VISUAL acceptance was not merely `NOT-RUN`
+
+Reported as `NOT-RUN` at every boundary. **Understated.** There was **no basis on which it could
+pass**. `NOT-RUN` says the check was not performed; the truth was that it **could not have been
+passed**.
+
+### The standing rule
+
+Recorded at `PORTAL_COMPLETION_PLAN.md` **§12**: a layout is derived from the `.png` and the
+`.html`; a `.md` note describes CONTENT and is **never** a source for GEOMETRY; any *"the frame
+draws X"* / *"draws no X"* claim requires the `.png`; **every claim names its artefact**.
+
+▶ **Why the `.html` specifically:** it is the only artefact carrying computed values — spacing,
+type scale, grid structure, column counts, radii. Measured now: all four frames are **1440px**
+wide with a **250px** sidebar; `12`'s cards are **~326–329px** in a **3-column** grid; `26`/`27`
+share an identical layout at **10px** field radius with a **230px** third column; `13` uses a
+**12px** card radius with **999px** pills.
+
+**Next:** a read-only re-measurement of all four screens against `.png` AND `.html` is reported
+to the Operator, classified per element as `REGISTERED-OMISSION` / `BLOCKED` / `TRUE-DRIFT`.
+⏸ **`P2-5` is held.** The Operator rules the rebuild before anything is written.

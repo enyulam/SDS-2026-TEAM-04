@@ -1135,8 +1135,67 @@ inert treatment was chosen for.
 | ⛔ **`09` refuses its canonical route** (`C2C-007`) | `OPEN`, measured | `P2-21`, first |
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
 | ~~⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN**~~ ✅ **CLOSED** | ~~`OPEN` · **Operator decision required**~~ ✅ **RULED 2026-08-13** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section. ✅ **RULED AND CLOSED 2026-08-13 — BOUNDED §12 AUTHORIZATION.** The Operator authorized extending the allow-list **for `evidence-upload.ts` SPECIFICALLY, not as a class**, on the ground that **the premise lapsed BY AUTHORIZATION, NOT BY DRIFT**: `T-P44` pinned those modules as unimported when nothing imported them, and `D-5`'s client-direct upload — a bounded **ADR-3 exception** — legitimately does. ⛔ **Any other module importing either one still fails**, proved TWICE: `T-P44c` plants a synthetic module and requires **both detectors to see it and both allow-lists to reject it** while the one authorized module is **admitted**; and a **real file was planted on disk**, measured **exit 1**, and removed, with **exit 0** after. ⚠️ **The control shares the LIVE sets and regexes** — the first draft gave it private copies, which is the very defect its own comment warned about. ▶ **Operator: *"A guard whose premise lapsed still needs a ruling, because 'the premise lapsed' is exactly what someone says when they want the guard out of the way."*** |
-| ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ✅ **OPERATOR RULING: *WAIT FOR SCREEN `13`.*** ⛔ **Do not invent an affordance on `12`** — building it would invent a visible element the frame lacks, *"the same rule that gave screen `33` no trainer row"*. ⚠️ **`P2-4` must REPORT WHAT `13`'s FRAME ACTUALLY DRAWS**, and the Operator rules where Edit lives. ⛔ **If `13` draws no Edit control either, THAT IS A FINDING and comes to the Operator as one** — it is **not** resolved by placing the control wherever it seems natural |
-| ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All FOUR Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), `13` (`S3-M5-r`), plus `S3-M2-omissions`, `S3-M4-refusals` and `S3-M5-bars` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance stays `NOT-RUN` on all four**, and a DOM-text proof never becomes one |
+| ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ~~✅ **OPERATOR RULING: WAIT FOR SCREEN `13`** … ⛔ **If `13` draws no Edit control either, THAT IS A FINDING**~~ ⛔ **THE PREMISE WAS FALSE AND THE FINDING IS WITHDRAWN — 2026-08-13.** **`Edit class` IS in frame `13`'s HEADER CARD**, top-right, beside ASSIGNED TRAINER and ASSISTANT. The *"no inbound affordance"* report was a `grep` over the pack's **prose note**, never a reading of the frame (§12). ▶ **This is `TRUE-DRIFT`, not a design gap**: the control is drawn and simply was not built. The Operator rules the rebuild |
+| ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All FOUR Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), `13` (`S3-M5-r`), plus `S3-M2-omissions`, `S3-M4-refusals` and `S3-M5-bars` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance on all four was NOT MERELY `NOT-RUN` — THERE WAS NO BASIS ON WHICH IT COULD PASS**, because every one of these layouts was derived from a prose note rather than from the `.png`/`.html` (§12). A DOM-text proof never becomes a visual acceptance, and in this case it was not even evidence toward one |
+
+---
+
+## 12. ⛔ STANDING RULE — A LAYOUT IS DERIVED FROM THE `.png` AND THE `.html`, NEVER FROM A NOTE
+
+**Operator ruling, 2026-08-13**, after the defect below was measured and admitted.
+
+> **A layout is derived from the reference `.png` and `.html`. A `.md` note describes CONTENT and
+> is never a source for GEOMETRY. Any statement of the form *"the frame draws X"* or *"the frame
+> draws no X"* requires the `.png`; a note cannot support either claim. State which artefact a
+> claim rests on when you make it.**
+
+### What happened
+
+Screens `12`, `13`, `26` and `27` had their layouts derived from
+`reference/<pack>/<pack>.md` — **prose notes**. The `.png` and the `.html` were **never opened**
+for any of them. ⚠️ Confirmed by the building session on direct question, including for the two
+screens where it could not recall its sources and **refused to reconstruct them from its own
+code comments**, which record conclusions rather than what was read.
+
+### ⛔ CONSEQUENCE 1 — FINDINGS ABOUT "THE FRAME" WERE FINDINGS ABOUT A NOTE. WITHDRAWN.
+
+Every claim below was reported as a measurement of a frame and was a `grep` over prose. **All are
+withdrawn.** They are not merely unproven — at least one is **false**:
+
+| Withdrawn claim | Status |
+|---|---|
+| *"No ratified frame draws an inbound control to `27`"* · *"screen `13` draws no Edit control either"* · the **DESIGN GAP** disposition built on them | ⛔ **FALSE.** The Operator read the frame: **`Edit class` is in frame `13`'s HEADER CARD**, top-right. Confirmed in the `.png` by the building session |
+| The `27` **day strip**, **unassign** control and **field inventory** as *"what the frame draws"* | ⛔ **WITHDRAWN AS FRAME EVIDENCE.** The underlying GOVERNANCE reasoning (no cancel/delete audit string; no unassign string; `C-14`) is untouched — but it was never a measurement of the frame, and must not be cited as one |
+| Screen `26`'s *"the frame enumerates no options, so a `<select>` would invent one"* | ⛔ **WITHDRAWN AS FRAME EVIDENCE**, pending re-measurement against the `.png`/`.html` |
+
+⚠️ **The `S3-M4-refusals` and `S3-M5-bars` legs remain VALID as statements about the BUILD** —
+they measure what the painted page contains. They were **never** evidence about the frame, and
+any wording implying otherwise is withdrawn with the claims above.
+
+### ⛔ CONSEQUENCE 2 — VISUAL ACCEPTANCE WAS NOT MERELY `NOT-RUN`
+
+It has been reported as `NOT-RUN` at every boundary. That was **understated**. For these four
+screens **there was no basis on which it could pass**, because the layout was never derived from
+the artefact that defines it. ▶ `NOT-RUN` implies *"the check has not been performed"*; the
+truth was *"the check could not have been passed"*. **Restated wherever it appears.**
+
+### Why the `.html` specifically
+
+It is the **only artefact carrying computed values** — spacing, type scale, grid structure,
+column counts, radii. A layout built without it **cannot be faithful except by accident**, and
+no proof this project runs would detect the difference: a rendered DOM-text leg asserts that a
+handful of strings appear on a painted page, which is true of almost any arrangement of them.
+
+### The rule, operationally
+
+1. **Open the `.png` first.** It is the only artefact that can support *"the frame draws X"* or
+   *"the frame draws no X"*.
+2. **Open the `.html` before writing layout.** Grid, columns, spacing and type scale come from
+   there, never from a description.
+3. **The `.md` note is a CONTENT checklist**, useful for *"is this element accounted for"* and
+   **never** for *"where does it sit and how big is it"*.
+4. **Every claim names its artefact.** *"the `.png` shows …"*, *"the `.html` computes …"*,
+   *"the note lists …"*. A claim that cannot name one is not a measurement.
 
 ---
 
