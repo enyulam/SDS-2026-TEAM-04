@@ -265,7 +265,19 @@ BEGIN
   -- status or correction field could have been slipped onto the list row
   -- through the shared read.
   --
-  -- ⚠️ THE FUNCTION COUNT MOVED 43 -> 49 ON 2026-08-12, AND THE SIX ARE NAMED.
+  -- ⚠️ THE FUNCTION COUNT MOVED 49 -> 51 ON 2026-08-13, AND THE TWO ARE NAMED.
+  -- Portal phase P2-2 (migration `20260813090000`, screen `26` Add Class,
+  -- under the C-7 per-phase ruling read as reading B) added exactly two:
+  -- `admin_create_class_module` and `admin_create_class_session`. Both are
+  -- MANAGEMENT-ONLY governed writes firing the two already-ratified audit
+  -- strings `admin.module_created` and `admin.session_created`.
+  -- ⛔ NEITHER IS PARENT-REACHABLE and neither touches a report, a rating or
+  -- an observation -- the migration's own assertion `C-9` fails the build if
+  -- either ever mentions one -- so this suite's subject, what a PARENT can
+  -- read, is untouched and the context field-set assertion below is still
+  -- exactly 7. ⛔ UPDATED WITH ITS REASON, NEVER RELAXED.
+  --
+  -- ⚠️ THE FUNCTION COUNT PREVIOUSLY MOVED 43 -> 49 ON 2026-08-12, AND THE SIX ARE NAMED.
   -- Portal phase P1-2 (migration `20260812090000`, D-5 evidence substrate,
   -- under the C-7 table-family ruling) added: `audit_action_registry`,
   -- `app_trainer_may_attach_evidence`, `evidence_attach_confirm`,
@@ -308,12 +320,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 49 THEN
+  IF v_n = 1 AND v_listed = 51 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 49 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 the six named above) and the context return set is still exactly 7';
+    RAISE NOTICE 'PASS P2-6 -- 51 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 six, P2-2 the two named above) and the context return set is still exactly 7';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 49) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 51) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

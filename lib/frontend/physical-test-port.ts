@@ -12,6 +12,9 @@ import type {
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
   ManagementApproveAndSubmitSuccess,
+  AddClassOptionsDto,
+  ClassCreationOutcomeDto,
+  CreateClassInput,
   ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
@@ -120,6 +123,29 @@ export interface PhysicalTestPort {
    * (`REGISTERED-OMISSION`, ends when that data arrives).
    */
   listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>>;
+  /**
+   * P2-2 — screen `26` Add Class. Also takes NO parameter, for the same
+   * reason: the centre is server-derived from the caller's live active
+   * management membership.
+   */
+  readAddClassOptions(): Promise<UiActionResult<AddClassOptionsDto>>;
+  /**
+   * P2-2 — the governed create.
+   *
+   * ⛔ THE INPUT CARRIES NO TRAINER. Assignment needs a third audit string
+   * (`admin.trainer_assigned`) the Operator did not name for this phase, so
+   * the surface cannot send one — the STOP is in the type, not only in prose.
+   *
+   * ⛔ AND NO CLASS CODE, CAPACITY OR PROGRAMME (`C-14`, `A-016`).
+   *
+   * ⚠️ The weekday strip is a GENERATOR (`C-14`): this expands into one
+   * governed transaction per dated session, each with its own audit event.
+   * NO RECURRENCE RULE IS STORED and no duplicated calendar record is created
+   * (`A-047`) — calendars are projections of these session rows.
+   */
+  createManagementClass(
+    input: CreateClassInput,
+  ): Promise<UiActionResult<ClassCreationOutcomeDto>>;
   getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>>;
   listParentSubmittedReports(): Promise<
     UiActionResult<readonly ParentReportListItemDto[]>

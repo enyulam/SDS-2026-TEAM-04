@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -50,11 +51,16 @@ import type { ManagementClassListDto } from "@/lib/frontend/contracts/physical-t
  *    does; where it is more, all are shown. ⛔ A second name is a second SESSION'S trainer —
  *    never an assistant (see 2).
  *
- * 5. ⚠️ `Add Class` AND THE CARD'S OWN DESTINATION ARE INERT, NOT MISSING. `Add Class`
- *    targets screen `26` (`P2-2`) and a card opens screen `13` Class Overview (`P2-4`).
- *    Neither route exists at HEAD, and one screen per phase is the plan's rule (§3). A link
- *    to a route that 404s would be worse than an inert control with a stated reason — the
- *    same treatment `29`'s "Send Reminder to Trainer" already carries.
+ * 5. ⚠️ THE CARD'S OWN DESTINATION IS INERT, NOT MISSING. A card opens screen `13` Class
+ *    Overview (`P2-4`), whose route does not exist at HEAD, and one screen per phase is the
+ *    plan's rule (§3). A link to a route that 404s would be worse than an inert control with
+ *    a stated reason — the same treatment `29`'s "Send Reminder to Trainer" already carries.
+ *
+ *    ✅ `Add Class` IS NOW LIVE — screen `26` shipped at `P2-2`. ⚠️ The clause above read
+ *    *"`Add Class` AND THE CARD'S OWN DESTINATION ARE INERT"*; it was REWRITTEN rather than
+ *    deleted, because the rule it states still governs the card and will govern `Add Class`
+ *    again for nothing. ▶ The control became live when its target became real, which is
+ *    exactly the condition the original clause named.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⛔ NOTHING ON THIS SURFACE IS AN ASSESSMENT FACT, AND NOTHING MAY BECOME ONE
@@ -150,17 +156,16 @@ export function ManagementClasses() {
           </Badge>
 
           {/*
-            ⚠️ `Add Class` renders INERT and says why. Screen `26` is phase `P2-2`; a link to a
-            route that does not exist would 404, and one screen per phase is the plan's rule.
+            ✅ `Add Class` IS LIVE AT `P2-2` — screen `26` ships at its canonical route
+            `/management/classes/add-class`. It rendered inert until that route existed, which
+            is the condition the inert treatment was chosen for, not a rule that was relaxed.
           */}
-          <button
-            type="button"
-            disabled
-            aria-describedby={`${filterLabelId}-note`}
-            className="inline-flex min-h-11 cursor-not-allowed items-center gap-1 rounded-field border border-line bg-surface-muted px-3.5 py-2 text-[0.78125rem] font-semibold text-ink-subtle sm:ms-auto"
+          <Link
+            href="/management/classes/add-class"
+            className="inline-flex min-h-11 items-center gap-1 rounded-field border border-transparent bg-brand-700 px-3.5 py-2 text-[0.78125rem] font-semibold text-white hover:bg-brand-800 sm:ms-auto"
           >
             <span aria-hidden="true">+</span> Add Class
-          </button>
+          </Link>
         </div>
 
         {/*
@@ -188,8 +193,8 @@ export function ManagementClasses() {
 
         <p id={`${filterLabelId}-note`} className="text-small text-ink">
           The level filter narrows the classes already listed below and reaches no other class.
-          Creating a class and opening a class overview arrive with their own screens; the
-          controls stay inert here rather than pretending to work.
+          Opening a class overview arrives with its own screen; that control stays inert here
+          rather than pretending to work.
         </p>
       </section>
 

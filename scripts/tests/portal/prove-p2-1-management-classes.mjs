@@ -222,9 +222,18 @@ check(
   nav.status === 0,
   `P21a-13 the portal navigation suite exits 0 with the new route (exit ${nav.status}) -- exactly one active rail item on /management/classes`,
 );
+/*
+ * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2` AND WAS REWRITTEN, NOT DELETED. Screen
+ * `26` shipped at `/management/classes/add-class`, so the app tree really does
+ * carry one more route. ▶ The property this leg protects is unchanged and is
+ * why it stays an EXACT number rather than a `>=`: the nav census must be
+ * READING the tree, and a floor would keep passing if it silently stopped.
+ * Every new screen deliberately edits this line — that is the ratchet, not
+ * friction.
+ */
 check(
-  /all 16 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 16 routes from the app tree -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 17 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 17 routes from the app tree (16 + screen `26` at P2-2) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

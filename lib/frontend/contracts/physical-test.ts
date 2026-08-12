@@ -308,6 +308,79 @@ export type ManagementClassListDto = {
   readonly classes: readonly ManagementClassSummaryDto[];
 };
 
+/**
+ * P2-2 — screen `26` Management Add Class.
+ *
+ * ⛔ FIVE THINGS THE FRAME DRAWS THAT THIS SHAPE DELIBERATELY CANNOT CARRY:
+ *  - `Class code` and `Capacity` — omitted by `C-14`.
+ *  - `Program` — "programme" has NO ENTITY, and adding one would be a hidden
+ *    `classes` entity between Class Grade and Class Module (`A-016`). The
+ *    class's name IS the Class Module title.
+ *  - `Assigned Trainer` — assignment emits `admin.trainer_assigned`, a THIRD
+ *    audit string the Operator did not name when authorizing this phase on
+ *    `admin.module_created` and `admin.session_created`. ⛔ STOPPED and
+ *    stated, not half-built. A session with no assignment is a REAL governed
+ *    state, and `12` already renders one without a trainer name.
+ *  - the `.md`'s `Trainer Assistant (TA)` slot — PROHIBITED (`A-014`, `G-7`),
+ *    a `REGISTERED-OMISSION` that NEVER ENDS.
+ *
+ * ⚠️ TWO CONTROLS THE FRAME DRAWS AS DROPDOWNS ARE BUILT AS FREE INPUTS, AND
+ * THE DIVERGENCE IS RECORDED RATHER THAN RESOLVED: `Room` and the two times.
+ * The frame is a static render — it shows ONE value in each, and enumerates
+ * no options. `room` is a plain descriptive column with no vocabulary
+ * anywhere in the schema or in any ruling, so a `<select>` would require
+ * INVENTING a room inventory (an entity `A-016` does not have); the times
+ * likewise would require inventing a slot vocabulary. ▶ A text/time input
+ * preserves the field and invents nothing. `Term` and `Level` ARE selects,
+ * because both are backed by real seeded rows.
+ */
+export type ClassGradeChoiceDto = {
+  readonly classGradeId: string;
+  readonly code: string;
+  readonly displayName: string;
+  readonly sortOrder: number;
+};
+
+/**
+ * ⚠️ `label` IS ONE FIELD. Every frame that mentions a term renders a single
+ * string (`"Term 1, 2035"`), so splitting it into a number and a year would
+ * invent a structure no frame shows and no rule requires (`D-3`).
+ */
+export type TermOptionDto = {
+  readonly termId: string;
+  readonly label: string;
+  readonly startsOn: string;
+  readonly endsOn: string;
+};
+
+export type AddClassOptionsDto = {
+  readonly grades: readonly ClassGradeChoiceDto[];
+  readonly terms: readonly TermOptionDto[];
+};
+
+export type CreateClassInput = {
+  readonly classGradeId: string;
+  readonly title: string;
+  readonly termId: string | null;
+  readonly room: string | null;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  /** `0` = Sunday … `6` = Saturday, matching the frame's Sun–Sat strip. */
+  readonly weekdays: readonly number[];
+};
+
+/**
+ * ⚠️ THE PARTIAL RESULT IS REPORTED, NOT COLLAPSED. One call creates one
+ * dated session, so ten committed sessions under a failed eleventh are real
+ * governed state — a "failed" banner over them would be a lie.
+ */
+export type ClassCreationOutcomeDto = {
+  readonly classModuleId: string;
+  readonly sessionsRequested: number;
+  readonly sessionsCreated: number;
+  readonly reason: string;
+};
+
 export type ManagementReviewDto = {
   /**
    * D-1 / C-10 — THE NINE PER-DIMENSION RATINGS, READ ONLY.

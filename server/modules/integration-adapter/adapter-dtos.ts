@@ -288,6 +288,63 @@ export interface AdapterManagementClassListDto {
   readonly classes: readonly AdapterManagementClassSummaryDto[];
 }
 
+/**
+ * P2-2 — screen `26` Add Class.
+ *
+ * ⛔ NOTHING HERE IS AN ASSESSMENT FACT, AND THERE IS NO FIELD ONE COULD
+ * ARRIVE IN: no rating, roll-up, observation, attendance value, evidence
+ * reference, trainer note, checklist value, content hash or report status.
+ *
+ * ⛔ AND NOTHING HERE IS A TRAINER ASSIGNMENT. The frame's `Assigned Trainer`
+ * section is STOPPED at this phase — it emits `admin.trainer_assigned`, a
+ * third audit string the Operator did not name. There is deliberately no
+ * `trainerMembershipId` on the input, so the surface cannot send one.
+ *
+ * ⛔ NO `classCode`, NO `capacity`, NO `programme` (`C-14`; `A-016`), and NO
+ * TA field (`A-014`, `G-7`).
+ */
+export interface AdapterClassGradeChoiceDto {
+  readonly classGradeId: string;
+  readonly code: string;
+  readonly displayName: string;
+  readonly sortOrder: number;
+}
+
+export interface AdapterTermOptionDto {
+  readonly termId: string;
+  readonly label: string;
+  readonly startsOn: string;
+  readonly endsOn: string;
+}
+
+export interface AdapterAddClassOptionsDto {
+  readonly grades: readonly AdapterClassGradeChoiceDto[];
+  readonly terms: readonly AdapterTermOptionDto[];
+}
+
+export interface AdapterCreateClassInput {
+  readonly classGradeId: string;
+  readonly title: string;
+  readonly termId: string | null;
+  readonly room: string | null;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  /** `0` = Sunday … `6` = Saturday, matching the frame's Sun–Sat strip. */
+  readonly weekdays: readonly number[];
+}
+
+/**
+ * ⚠️ `sessionsRequested` VS `sessionsCreated` is reported rather than
+ * collapsed into a boolean: one call creates one dated session, so a partial
+ * result is real governed state and the surface must be able to say so.
+ */
+export interface AdapterClassCreationOutcomeDto {
+  readonly classModuleId: string;
+  readonly sessionsRequested: number;
+  readonly sessionsCreated: number;
+  readonly reason: string;
+}
+
 export interface AdapterRatingSnapshotDto {
   readonly dimensionCode: AdapterDimensionCode;
   readonly displayName: string;

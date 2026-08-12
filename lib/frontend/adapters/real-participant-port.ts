@@ -55,6 +55,9 @@ import type {
   DraftGenerationContextDto,
   ManagementApproveAndSubmitInput,
   ManagementApproveAndSubmitSuccess,
+  AddClassOptionsDto,
+  ClassCreationOutcomeDto,
+  CreateClassInput,
   ManagementClassListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
@@ -102,7 +105,9 @@ import {
   adapterGetSessionUser,
   adapterGetTrainerWorkingReport,
   adapterGetManagementSubmittedReport,
+  adapterCreateManagementClass,
   adapterListManagementClasses,
+  adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
   adapterListManagementSubmittedReports,
@@ -223,6 +228,22 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** P2-1 — screen `12`. No parameter: the centre is server-derived. */
     listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>> {
       return guard(() => adapterListManagementClasses());
+    },
+
+    /** P2-2 — screen `26`. Same: no parameter, centre server-derived. */
+    readAddClassOptions(): Promise<UiActionResult<AddClassOptionsDto>> {
+      return guard(() => adapterReadAddClassOptions());
+    },
+
+    /**
+     * P2-2 — the governed create. ⛔ Carries no trainer, no class code, no
+     * capacity and no programme, because the input type has nowhere to put
+     * one.
+     */
+    createManagementClass(
+      input: CreateClassInput,
+    ): Promise<UiActionResult<ClassCreationOutcomeDto>> {
+      return guard(() => adapterCreateManagementClass(input));
     },
 
     getParentAvailability(): Promise<UiActionResult<AvailabilityStateDto>> {

@@ -213,7 +213,7 @@ The three login screens **must not**:
 | 23 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` |
 | 24 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` **+ `Governance decision missing`** — exact trainer-profile field inventory UNRESOLVED |
 | 25 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` — the calendar is a **projection** of class-session records; no duplicated event table may be created (A-016) |
-| 26 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` **+ `Governance decision missing`** — exact Create Class field inventory UNRESOLVED and flagged schema-relevant |
+| 26 | Final | ~~`Not implemented`~~ ✅ **`Implemented`** — 2026-08-13, plan phase `P2-2`, at the canonical route `/management/classes/add-class` | No | — | `Post-48-hour final-MVP scope` — ~~**+ `Governance decision missing`** — exact Create Class field inventory UNRESOLVED and flagged schema-relevant~~ ✅ **THE FIELD INVENTORY IS RULED**: `C-14` omits `Class code`, `Capacity` and `programme` and makes a recurring pattern *"a generator, not a stored schedule"*; `C-6`/`D-3` place terms as SCHEDULING STRUCTURE with no lessons entity; `A-014`/`G-7` bar the TA slot. ⛔ **ONE ITEM IS STILL OWED TO THE OPERATOR** — trainer assignment needs `admin.trainer_assigned`, a THIRD audit string this phase's authorization did not name, and it is **STOPPED**, enforced by migration assertion `C-8` |
 | 27 | Final | `Not implemented` | No | — | `Post-48-hour final-MVP scope` |
 | 28 | Final | `Not implemented` | No | — | **`Governance decision missing`** — term-report **generation is explicitly out of MVP scope** (`CLAUDE.md` §5, §8; spec §28). Separately governed before implementation |
 | 29 | Final | `Implemented but visually unaligned` | **Yes** | **8** | Canonical route satisfied; visual reconciliation outstanding |
@@ -237,7 +237,7 @@ The three login screens **must not**:
 | 23 | **Missing** — no trainer-list projection | Not captured — pack pending | — | Not applicable |
 | 24 | **Missing** — no trainer-creation/invitation write path | Not captured — pack pending | — | Not applicable |
 | 25 | **Missing** — no management calendar projection | Not captured — pack pending | — | Not applicable |
-| 26 | **Missing** — no class-module creation write path | Not captured — pack pending | — | Not applicable |
+| 26 | ~~**Missing** — no class-module creation write path~~ ✅ **DELIVERED 2026-08-13** — two reviewed `SECURITY DEFINER` RPCs (`admin_create_class_module`, `admin_create_class_session`) firing the two already-ratified audit strings; **ZERO tables, columns, enums, policies or client write grants; registry UNMOVED at 19**. ⛔ Trainer assignment **STOPPED** — needs a third string | ⛔ **NOT CAPTURED — VISUAL acceptance is `NOT-RUN` and not claimed** | — | Not applicable |
 | 27 | **Missing** — no class-module edit write path | Not captured — pack pending | — | Not applicable |
 | 28 | **Missing** — no term-report instrument, generator, schema or governance | Not captured — pack pending | — | Not applicable — **separately governed** |
 | 29 | Management pending-review and correction-tracking queues (R-6, R-7) — **delivered** (`server/modules/management-view/projections.ts`) | Not captured — **required immediately** | `/management/reports` (`?status=trainer_approved`, `?status=needs_edit`) | **No route mismatch** — canonical route satisfied |
@@ -354,7 +354,7 @@ The remaining **24 portal screens** remain **required for the final MVP** but ar
 | 17 | 23 | Management Trainers | — |
 | 18 | 24 | Management Add Trainer | `Governance decision missing` |
 | 19 | 25 | Management Schedule | — |
-| 20 | 26 | Management Add Class | `Governance decision missing` |
+| 20 | 26 | Management Add Class | ~~`Governance decision missing`~~ ✅ **RULED** (`C-14`, `C-6`/`D-3`, `A-014`/`G-7`) and **BUILT 2026-08-13**. ⛔ One item owed: the trainer-assignment audit string |
 | 21 | 27 | Management Edit Class | — |
 | 22 | 28 | Management Term Report | `Governance decision missing` — separately governed |
 | 23 | 30 | Parent Dashboard | Partially implemented at `/parent` |

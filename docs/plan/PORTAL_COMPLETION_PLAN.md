@@ -620,7 +620,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | # | Screen | Delivers | Depends on | Gated by |
 |---|---|---|---|---|
 | **P2-1** | `12` Management Classes | Class-list projection, level tabs | — | — · ✅ **BUILT AND PROVEN 2026-08-12** at `/management/classes`. ⛔ **No migration** — policy AND grant already present on all eight relations, both layers measured at HEAD (`P21-3`). Three `REGISTERED-OMISSION`s, each with a controlled detector |
-| **P2-2** | `26` Add Class | ⚠️ **`D-3` terms substrate** + class creation | P2-1 | `C-6` `C-7` `C-14` |
+| **P2-2** | `26` Add Class | ⚠️ **`D-3` terms substrate** + class creation | P2-1 | `C-6` `C-7` `C-14` · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/add-class`, in **two** migrations — the terms substrate (read-only, seeded, zero functions) and **two** create RPCs on the **already-ratified** `admin.module_created` / `admin.session_created`. ⛔ **Registry UNMOVED at 19**, zero new table/enum/policy/write grant. ⛔ **Trainer assignment STOPPED** — needs a third string; enforced by migration assertion `C-8` |
 | **P2-3** | `27` Edit Class | Class edit write path | P2-2 | `C-14` |
 | **P2-4** | `13` Class Overview | Class summary, lesson timeline, **+ Class Health Summary** | P2-1 | `C-17` (`GC-9`) |
 | **P2-5** | `25` Management Schedule | Centre calendar as a **projection** of class sessions | P2-2 | `GC-13` — no `Showcase`, no duplicated event record |
@@ -767,6 +767,59 @@ The same ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read*
 
 ---
 
+### ✅ `P2-2` COMPLETE — 2026-08-13. READING **B**, RULED BY THE OPERATOR
+
+**Operator ruling, 2026-08-12:** *"READING B. My ruling was ambiguous and your stop was right. The enumerated zeros scoped the TERMS family… BUILD `P2-2` — screen `26` Add Class — on the already-ratified `admin.module_created` and `admin.session_created`."*
+
+#### ⚠️ THE AMBIGUITY ITSELF, RECORDED — NOT ONLY ITS RESOLUTION
+
+The Operator asked for this expressly: *"RECORD THE AMBIGUITY, not just the resolution. A ruling that scopes a prohibition to one subject and an instruction to another, in one message, is the operator-side instance of the same defect the disciplines describe."*
+
+▶ **THE SHAPE:** one message carried a **categorical-sounding prohibition** (*"NO WRITE PATH ANYWHERE"*) written while thinking about **terms**, and an **instruction** (*"BUILD `P2-2` COMPLETE"*) about a phase whose screen **is a create form**. Each half was correct about its own subject. **Neither half said which subject it was about**, and the reader cannot recover a scope that was never written down.
+
+⛔ **IT IS THE SAME DEFECT AS `D-28`, ON THE OTHER SIDE OF THE CONVERSATION** — a claim whose *stated* scope is wider than its *intended* scope, propagated into a place that reads it as governing. **Recorded because the corpus's stale-restatement register would otherwise contain only agent-side instances**, which would make the pattern look like an agent failure mode rather than a property of how rules travel.
+
+✅ **AND THE HANDLING WAS RIGHT ON ITS OWN TERMS.** The stop cost one phase-boundary round trip. Building reading (B) wrongly would have created the product's first governed administrative write path under a ruling whose plain words forbade one.
+
+#### What shipped
+
+**Migration `20260813090000_portal_p2_2_class_creation.sql`** — exactly **two** reviewed `SECURITY DEFINER` RPCs:
+
+| RPC | Fires | Gate |
+|---|---|---|
+| `admin_create_class_module(p_class_grade_id, p_title)` | `admin.module_created` | exactly one ACTIVE `management` membership, `HAVING count(*) = 1` · the grade re-resolved **inside the caller's own centre** |
+| `admin_create_class_session(p_class_module_id, p_session_date, p_starts_at, p_ends_at, p_room, p_term_id)` | `admin.session_created` | the same gate · module **and term** re-resolved inside the caller's centre |
+
+⛔ **ZERO** tables, columns, enums, policies or client write grants. ⛔ **The audit registry is UNMOVED at 19** — both strings were ratified at Step 7H and had simply never had a writer. **Census `26·29·49·12·30·19` → `27·29·51·12·30·19`**, moving by exactly the two functions.
+
+▶ **THIS IS WHY READING (B) IS CONSISTENT WITH THE ENUMERATED ZEROS RATHER THAN AN EXCEPTION TO THEM:** a `SECURITY DEFINER` RPC needs **no write policy and no write grant**. The owner writes; the caller holds only `EXECUTE`. Migration assertion `C-7` re-proves the terms write surface is still zero, **inside the very migration that introduced the first administrative write path**.
+
+#### ⛔ ONE THING IS STOPPED, AND THE STOP IS STRUCTURAL
+
+**Trainer assignment needs `admin.trainer_assigned` — a THIRD audit string the Operator did not name.** Their instruction was explicit: *"If class creation needs anything beyond those two strings and the existing tables, state it and stop."* It does, so it is **stated and stopped**.
+
+⚠️ **The stop is not prose.** Migration assertion **`C-8` fails the build** if either RPC ever references `class_session_assignments` or names `admin.trainer_assigned`, and suite leg **`P23-9` measures it at RUNTIME** — after a module and two sessions were really created, `class_session_assignments` is unmoved and zero such events exist. ▶ **A stop recorded only in a comment is a stop the next phase edits away.**
+
+✅ **A session created with no assignment is a REAL GOVERNED STATE**, not a broken one — `staff-projections.ts` already documents *"a session created but not yet assigned"*, and screen `12` already renders a module with no trainer name.
+
+#### ⚠️ ONE RECORDED CONTROL-TYPE DIVERGENCE FROM THE FRAME
+
+`Room`, `Start time` and `End time` are **drawn as dropdowns and built as free inputs**. The frame is a static render: it shows one value in each and **enumerates no options**, and no ruling, table or seed establishes a room inventory or a time-slot vocabulary anywhere. ▶ A `<select>` would require **inventing** one — schema by inference from a frame (`A-022`). `Term` and `Level` **are** selects, because both are backed by real rows.
+
+#### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-2-create` | ✅ **exit 0** — 11 SQL legs + 5 runner checks. Non-vacuity first; **denials before the permit control**; non-disclosure proved by an AUTHORIZED caller receiving the same string an unauthorized one did; the stop measured at runtime |
+| `prove:portal-p2-2` · `prove:portal-p2-1` · `-p2-1-composed` · `-1` · `-2` · `-2b` · `-5` · `-34` · `-5-composed` · `f-attendance-init-1` | ✅ **all exit 0** |
+| `prove:hero-all` | ✅ **17/17** — after `hero-2`'s `P2-6` census ratchet fired at `49 → 51` and was **updated with its reason, never relaxed** |
+| `prove:encoding` · `test:integration` · `tsc` · `eslint` · `next build` · nav suite | ✅ **0 · 0 · 0 · 0 errors · 0 · 0** |
+| `prove:stage3-authenticated` | ⛔ **`NOT-RUN`, not `FAIL`** — an Operator-owned `next dev` (PID `46348`) holds this directory and Next 16 refuses a second. **The cause was reproduced directly**, so it is not this phase's code, and the process was **NOT killed** |
+| **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed — no screenshot of any kind was captured |
+
+
+---
+
 ## 8. ⛔ STANDING PROHIBITIONS — carried unchanged
 
 | # | Prohibition | Source |
@@ -804,7 +857,7 @@ The same ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read*
 | **P1-3** | Management read of evidence; ⛔ **no transition-guard change** (`C-5`) | ✅ **REQUIRED** |
 | **P1-4** | Trainer read of evidence | ✅ **REQUIRED** |
 | **P1-5** | ⚠️ **Parent projection extension** | ✅ **REQUIRED** — ✅ **`R-5` RESOLVED 2026-08-12; awaiting its own authorization** |
-| **P2-2** | ⚠️ **SCHEMA — terms** | ✅ **REQUIRED** (`C-6` `C-7` `C-14`) |
+| **P2-2** | ⚠️ **SCHEMA — terms** + the two create RPCs | ✅ **REQUIRED** (`C-6` `C-7` `C-14`) · ✅ **GIVEN AND DISCHARGED 2026-08-12/13** — decision 1 option (c) for terms, then reading **B** for the create path. ⛔ A **third** audit string for trainer assignment is **NOT** given and is stopped |
 | **P2-6** | ⚠️ **SCHEMA + STORAGE — lesson materials** | ✅ **REQUIRED** (`C-7`) |
 | **P2-9** | `D-2` host + a management cross-session read | ✅ **REQUIRED** (`C-8` `C-9`) |
 | **P2-3 · 11 · 12 · 13 · 14** | ⚠️ **New governed WRITE paths** | ✅ **REQUIRED** each (`C-14`) |

@@ -113,9 +113,16 @@ const EXPECTED_BY_ROUTE = new Map([
   ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Returned reports" }],
   // Management.
   ["/management", { role: "management", label: "Dashboard" }],
-  // P2-1 — screen `12` at its canonical route. Its rail item is `exact`, so
-  // this expectation is also what proves Dashboard does NOT light up here.
+  // P2-1 — screen `12` at its canonical route. This expectation is also what
+  // proves Dashboard does NOT light up here.
   ["/management/classes", { role: "management", label: "Classes" }],
+  /*
+   * P2-2 — screen `26`. ⚠️ THE RAIL ITEM DROPPED `exact` WHEN THIS ROUTE
+   * SHIPPED, and this row is the leg that makes the change measured rather
+   * than assumed: under the old `exact: true` it would resolve to ZERO active
+   * items — the exact `C2C-002` defect, in the same file.
+   */
+  ["/management/classes/add-class", { role: "management", label: "Classes" }],
   ["/management/reports", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],

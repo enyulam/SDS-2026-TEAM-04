@@ -84,12 +84,23 @@ check(
 );
 
 // ---------------------------------------------------------------------
-// The census, against the figure the C-7 proposal committed to in advance.
+// The census.
 // ---------------------------------------------------------------------
+// ⚠️ THE PIN MOVED, AND IT WAS REWRITTEN RATHER THAN DELETED. It read
+// `26|29|49|12|30|19` -- the figure the `C-7` proposal committed to in
+// advance, and exactly right at the terms commit. The Operator then ruled
+// reading B, and `20260813090000_portal_p2_2_class_creation.sql` added ONE
+// migration and TWO create RPCs.
+//
+// ▶ WHAT THIS LEG ACTUALLY PROTECTS is unchanged and is the part worth
+//   keeping: the TERMS migration itself contributed nothing but its table
+//   -- no function, no enum, no extra policy -- and `P22a-4` asserts that
+//   against the file, which is the claim a whole-database census can no
+//   longer make on its own once a second migration lands beside it.
 const census = psql(["-c", CENSUS]).stdout.trim();
 check(
-  census === "26|29|49|12|30|19",
-  `the census landed EXACTLY where the C-7 proposal said it would: 26 migrations | 29 tables | 49 functions | 12 enums | 30 policies | registry 19 (measured: ${census})`,
+  census === "27|29|51|12|30|19",
+  `the census is where the two P2-2 migrations together said it would be: 27 migrations | 29 tables | 51 functions (49 + the two create RPCs; terms added ZERO) | 12 enums | 30 policies (terms' one SELECT policy was already counted) | registry 19 (measured: ${census})`,
 );
 
 // ---------------------------------------------------------------------

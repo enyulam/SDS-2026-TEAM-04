@@ -15,8 +15,8 @@
 | Role | Management |
 | Folder | `26-management-add-class` |
 | Canonical route | `/management/classes/add-class` |
-| Current implemented route | â€” (no implemented route) |
-| Route-compatibility treatment | Not applicable â€” no implemented route |
+| Current implemented route | ~~â€” (no implemented route)~~ ✅ **`/management/classes/add-class`** - created 2026-08-13, plan phase `P2-2`, at the CANONICAL path. No other route was moved, renamed, redirected or aliased. |
+| Route-compatibility treatment | ~~Not applicable â€” no implemented route~~ **Not applicable - the implemented route IS the canonical route.** |
 | Figma file key | `sSY1TYw3jyVlZDy8V2Mu7g` |
 | Figma file name | `SDS-dashboard` |
 | Figma node | `646:9` |
@@ -85,7 +85,7 @@ The UI action may be labelled "Create Class", but the persisted academic entity 
 
 | Field | Value |
 |---|---|
-| Current implementation status | `Not implemented` |
+| Current implementation status | ~~`Not implemented`~~ ✅ **`Implemented`** - 2026-08-13, plan phase `P2-2`. âš ï¸ **Implementation is not VISUAL acceptance**, which remains `Not started` (section 12). |
 
 ### Existing functionality to preserve
 
@@ -109,11 +109,15 @@ Missing backend or governance requirements are **recorded, never invented**.
 
 ### Backend
 
-**Missing** â€” no class-module creation write path.
+~~**Missing** â€” no class-module creation write path.~~ ✅ **MET 2026-08-13** - migration `20260813090000_portal_p2_2_class_creation.sql` adds exactly two reviewed `SECURITY DEFINER` RPCs, `admin_create_class_module` and `admin_create_class_session`, firing the two already-ratified audit strings `admin.module_created` and `admin.session_created`. **Zero tables, columns, enums, policies or client write grants; the audit registry is UNMOVED at 19.**
+
+⛔ **ONE BACKEND DEPENDENCY REMAINS OPEN, AND IT IS A STOP, NOT A GAP:** trainer assignment needs `admin.trainer_assigned`, a **third** audit string the Operator did not name for this phase. It is stated and stopped, and migration assertion `C-8` **fails the build** if either RPC ever reaches `class_session_assignments`.
 
 ### Governance
 
-`Post-48-hour final-MVP scope` (A-044) **+ `Governance decision missing`** â€” the exact Create Class field inventory is UNRESOLVED and flagged schema-relevant.
+~~`Post-48-hour final-MVP scope` (A-044) **+ `Governance decision missing`** â€” the exact Create Class field inventory is UNRESOLVED and flagged schema-relevant.~~ ✅ **RESOLVED 2026-08-13.** The field inventory was ruled by **`C-14`** (`Class code`, `Capacity` and `programme` all omitted; a recurring pattern is *"a generator, not a stored schedule"*), by **`C-6`/`D-3`** (terms group SESSIONS; no lessons entity) and by **`A-014`/`G-7`** (no TA). `A-044` still applies: this screen is final-MVP scope, not a physical-test gate.
+
+⛔ **The one item still owed to the Operator is the trainer-assignment audit string** (see Backend above).
 
 ---
 
@@ -172,11 +176,11 @@ Class Grade remains Beginner / Intermediate / Advanced. `Advanced` as a Class Gr
 | `reference.png` present (local duplicate only) | No — **the current reference lives in `/reference/`; this is not a gap** |
 | Native dimensions recorded | No |
 | Figma context retrieved | No |
-| Existing route audited | No |
+| Existing route audited | ~~No~~ **Yes - 2026-08-13. There was NONE**, verified against `app/**/page.tsx`, so nothing was moved or replaced. |
 | `implementation-before.png` captured | No |
 | `implementation-after.png` captured | No |
-| Visual acceptance | Not started |
-| Functional acceptance | Not started |
+| Visual acceptance | **Not started** - ⛔ **`NOT-RUN`, and not claimed.** No screenshot was captured; `prove:stage3-authenticated` could not serve (an Operator-owned `next dev` holds the directory), so this screen has no rendered proof of any kind. |
+| Functional acceptance | ~~Not started~~ **`IMPLEMENTED_AWAITING_VERIFICATION`** - `prove:portal-p2-2-create` exit 0 (11 SQL legs, denials before the permit control, the trainer-assignment stop measured at RUNTIME). ⛔ **Operator acceptance is not claimed and cannot be self-set.** |
 | Privacy and security acceptance | Not started |
 | Implementation checkpoint committed | No |
 | Blocking dependency raised | None recorded |

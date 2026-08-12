@@ -124,11 +124,20 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
       /*
        * P2-1 — screen `12` Management Classes, at its canonical route.
        *
-       * ⚠️ `exact: true` and NO `owns`. The class OVERVIEW (screen `13`) and
-       * class CREATION (screen `26`) are separate screens in later phases, and
-       * declaring ownership of a sub-tree that does not exist yet would be a
-       * claim about routes this build does not ship. Ownership is DECLARED per
-       * item, never inferred — and it is declared when the sub-route lands.
+       * ⚠️ `exact` DROPPED AT `P2-2`, AND THE PIN WAS REWRITTEN RATHER THAN
+       * DELETED. It read: *"`exact: true` and NO `owns`. The class OVERVIEW
+       * (screen `13`) and class CREATION (screen `26`) are separate screens in
+       * later phases, and declaring ownership of a sub-tree that does not exist
+       * yet would be a claim about routes this build does not ship."*
+       *
+       * ▶ THAT REASONING DID NOT LAPSE — IT WAS SATISFIED. `26` shipped at
+       * `/management/classes/add-class`, so the sub-tree now exists and
+       * ownership is a measured fact rather than a forward claim. Screen `13`
+       * (`P2-4`) will land under the same base and is covered by the same
+       * non-exact match.
+       *
+       * ⛔ Without this the Add Class route would render with ZERO active rail
+       * items — the exact defect `C2C-002` caught, in the same file.
        *
        * ⛔ The frame's rail also draws Students, Trainers and Schedule. Those
        * are screens `17`, `23` and `25` — later phases with no shipped route,
@@ -139,7 +148,6 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         href: "/management/classes",
         label: "Classes",
         path: "/management/classes",
-        exact: true,
         icon: "calendar",
       },
       {

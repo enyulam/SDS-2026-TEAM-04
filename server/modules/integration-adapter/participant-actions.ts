@@ -63,12 +63,14 @@ import {
   listTrainerSessionsCore,
 } from "@/server/modules/report-workflow/trainer-projections";
 import {
+  createManagementClassCore,
   getManagementRatingsCore,
   getManagementReviewCandidateCore,
   listManagementClassesCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
+  readManagementAddClassOptionsCore,
 } from "@/server/modules/management-view/projections";
 import { createElevatedSupabaseClient } from "@/server/platform/supabase/elevated";
 import {
@@ -110,6 +112,9 @@ import type {
   AdapterIssueScope,
   AdapterManagementApproveAndSubmitInput,
   AdapterManagementApproveAndSubmitSuccess,
+  AdapterAddClassOptionsDto,
+  AdapterClassCreationOutcomeDto,
+  AdapterCreateClassInput,
   AdapterManagementClassListDto,
   AdapterManagementEditWordingInput,
   AdapterManagementEditWordingSuccess,
@@ -708,6 +713,79 @@ export async function adapterListManagementClasses(): Promise<
         activeStudentCount: row.activeStudentCount,
         trainerDisplayNames: [...row.trainerDisplayNames],
       })),
+    },
+  };
+}
+
+/**
+ * P2-2 — the choices screen `26` Add Class offers.
+ *
+ * Same allow-list mapper discipline as `adapterListManagementClasses`: one
+ * field at a time, so a column added to `terms` or `class_grades` later does
+ * NOT reach the client until someone names it here.
+ */
+export async function adapterReadAddClassOptions(): Promise<
+  ActionResult<AdapterAddClassOptionsDto>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementAddClassOptionsCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      grades: result.data.grades.map((grade) => ({
+        classGradeId: grade.classGradeId,
+        code: grade.code,
+        displayName: grade.displayName,
+        sortOrder: grade.sortOrder,
+      })),
+      terms: result.data.terms.map((term) => ({
+        termId: term.termId,
+        label: term.label,
+        startsOn: term.startsOn,
+        endsOn: term.endsOn,
+      })),
+    },
+  };
+}
+
+/**
+ * P2-2 — the governed create.
+ *
+ * ⛔ THE INPUT IS RE-BUILT FIELD BY FIELD, NEVER FORWARDED. A caller cannot
+ * smuggle a `trainerMembershipId`, a `classCode`, a `capacity`, a
+ * `programme` or a `lessonNumber` through this action, because nothing here
+ * would carry it — the same construction that keeps a rating off a list
+ * surface, applied to a write.
+ *
+ * ⚠️ `weekdays` IS SANITISED TO A SORTED, DE-DUPLICATED SET OF 0..6. A
+ * repeated day would otherwise generate the same date twice, and
+ * `class_sessions` has NO unique constraint on (module, date) — measured, not
+ * assumed — so duplicates really would be representable.
+ */
+export async function adapterCreateManagementClass(
+  input: AdapterCreateClassInput,
+): Promise<ActionResult<AdapterClassCreationOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await createManagementClassCore(client, {
+    classGradeId: input.classGradeId,
+    title: input.title,
+    termId: input.termId,
+    room: input.room,
+    startTime: input.startTime,
+    endTime: input.endTime,
+    weekdays: [...new Set(input.weekdays.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort(
+      (a, b) => a - b,
+    ),
+  });
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      classModuleId: result.data.classModuleId,
+      sessionsRequested: result.data.sessionsRequested,
+      sessionsCreated: result.data.sessionsCreated,
+      reason: result.data.reason,
     },
   };
 }

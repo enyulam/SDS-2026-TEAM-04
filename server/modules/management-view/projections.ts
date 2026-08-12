@@ -43,6 +43,13 @@ import {
   listClassModulesCore,
   type ClassListDto,
 } from "@/server/modules/class-session/class-list-projections";
+import {
+  createClassCore,
+  readAddClassOptionsCore,
+  type AddClassOptionsDto,
+  type ClassCreationOutcome,
+  type CreateClassInput,
+} from "@/server/modules/class-session/class-creation";
 import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import type { DimensionCode, RatingLevel } from "@/server/modules/framework/dimensions";
 import {
@@ -481,6 +488,54 @@ export async function listManagementClassesCore(
    */
   if (!listed.ok) return { outcome: "unavailable" };
   return { outcome: "success", data: listed.rows };
+}
+
+// ---------------------------------------------------------------------
+// P2-2 — screen `26` Add Class: the options read and the governed create
+// ---------------------------------------------------------------------
+/**
+ * The Class Grade and term choices screen `26` offers.
+ *
+ * ⚠️ The role gate here is DEFENCE IN DEPTH, not the boundary. Both reads
+ * are RLS-scoped over the caller's own credential, so a trainer reaching
+ * `readAddClassOptionsCore` directly still sees only what their policies
+ * admit — and `terms`' policy is deliberately ACTIVE MEMBER, not
+ * management-only, because five other screens render a term to a
+ * non-management reader. The gate is here because `26` is a MANAGEMENT
+ * surface and a non-management caller has no business being offered it.
+ */
+export async function readManagementAddClassOptionsCore(
+  client: SupabaseClient,
+): Promise<ActionResult<AddClassOptionsDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const options = await readAddClassOptionsCore(client);
+  // ⛔ A REJECTED READ IS NEVER AN EMPTY CALENDAR. An empty term list renders
+  // a form that silently cannot schedule anything (`Q-7`).
+  if (!options.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: options.rows };
+}
+
+/**
+ * Create a Class Module and its dated sessions.
+ *
+ * ⛔ THE ROLE GATE HERE IS NOT THE AUTHORIZATION. Both RPCs independently
+ * re-resolve exactly one ACTIVE `management` membership and refuse anything
+ * else with a single non-disclosing `not_permitted`, and they do it inside
+ * the same transaction as the write. Removing this gate would change the
+ * error a wrong caller sees; it would not let one through.
+ *
+ * ⛔ NO TRAINER ASSIGNMENT — see `class-creation.ts`. It needs a third audit
+ * string the Operator did not name, and it is STOPPED.
+ */
+export async function createManagementClassCore(
+  client: SupabaseClient,
+  input: CreateClassInput,
+): Promise<ActionResult<ClassCreationOutcome>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+  return createClassCore(client, input);
 }
 
 // ---------------------------------------------------------------------

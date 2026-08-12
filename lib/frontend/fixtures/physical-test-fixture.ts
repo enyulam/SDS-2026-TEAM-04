@@ -17,6 +17,10 @@ import {
   type ClassGradeOptionDto,
   type ManagementApproveAndSubmitInput,
   type ManagementApproveAndSubmitSuccess,
+  type AddClassOptionsDto,
+  type TermOptionDto,
+  type ClassCreationOutcomeDto,
+  type CreateClassInput,
   type ManagementClassListDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
@@ -258,6 +262,23 @@ const FIXTURE_CLASS_GRADES: readonly ClassGradeOptionDto[] = [
   { code: "beginner", displayName: "Beginner", sortOrder: 1 },
   { code: "intermediate", displayName: "Intermediate", sortOrder: 2 },
   { code: "advanced", displayName: "Advanced", sortOrder: 3 },
+];
+
+/**
+ * P2-2 — the four seeded terms, mirrored.
+ *
+ * ⛔ A DEVELOPMENT CALENDAR, NOT A RATIFIED ONE. Unlike the three Class
+ * Grades above — which mirror ratified seed values — NO document establishes
+ * iSpeak's real term calendar. The migration that seeds them declares them a
+ * placeholder and names the real calendar an OPERATOR INPUT, and pins the
+ * count at four so a placeholder cannot be silently grown into something that
+ * reads as ratified. ⚠️ The same rule binds this mirror.
+ */
+const FIXTURE_TERMS: readonly TermOptionDto[] = [
+  { termId: "term-2026-1", label: "Term 1, 2026", startsOn: "2026-01-01", endsOn: "2026-03-31" },
+  { termId: "term-2026-2", label: "Term 2, 2026", startsOn: "2026-04-01", endsOn: "2026-06-30" },
+  { termId: "term-2026-3", label: "Term 3, 2026", startsOn: "2026-07-01", endsOn: "2026-09-30" },
+  { termId: "term-2026-4", label: "Term 4, 2026", startsOn: "2026-10-01", endsOn: "2026-12-31" },
 ];
 
 const SESSIONS: readonly FixtureSession[] = [
@@ -1117,6 +1138,78 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       (a, b) => a.classGradeSortOrder - b.classGradeSortOrder || a.title.localeCompare(b.title),
     );
     return { outcome: "success", data: { grades: FIXTURE_CLASS_GRADES, classes } };
+  }
+
+  /**
+   * P2-2 — the deterministic mirror of `readAddClassOptionsCore`.
+   *
+   * ⚠️ THE TERM LABELS MIRROR THE SEEDED DEVELOPMENT CALENDAR, WHICH IS A
+   * PLACEHOLDER AND SAYS SO. No document establishes iSpeak's real term
+   * calendar; the migration names it an OPERATOR INPUT and pins the count at
+   * four. ⛔ These four must never be read as ratified academic facts, and
+   * the fixture must not grow a fifth to make a screen look fuller.
+   */
+  async readAddClassOptions(): Promise<UiActionResult<AddClassOptionsDto>> {
+    await delay(180);
+    return {
+      outcome: "success",
+      data: {
+        grades: FIXTURE_CLASS_GRADES.map((grade) => ({
+          classGradeId: `grade-${grade.code}`,
+          code: grade.code,
+          displayName: grade.displayName,
+          sortOrder: grade.sortOrder,
+        })),
+        terms: FIXTURE_TERMS,
+      },
+    };
+  }
+
+  /**
+   * P2-2 — the deterministic mirror of the governed create.
+   *
+   * ⛔ IT PERSISTS NOTHING AND CLAIMS NOTHING IT DID NOT DO. The fixture is a
+   * browser-session mirror; there is no `class_modules` row to add to, so it
+   * reports the counts the real path WOULD produce and no id that could be
+   * mistaken for a governed one. ▶ A fixture that invented a module id would
+   * let a surface navigate to a class that does not exist.
+   *
+   * ⚠️ THE WEEKDAY EXPANSION IS REPRODUCED EXACTLY, because the count it
+   * returns is the number the surface renders. Getting it wrong here would
+   * make the fixture agree with the screen and disagree with the product.
+   */
+  async createManagementClass(
+    input: CreateClassInput,
+  ): Promise<UiActionResult<ClassCreationOutcomeDto>> {
+    await delay(320);
+    const title = input.title.trim();
+    if (title === "") {
+      return {
+        outcome: "validation",
+        message: "Enter a class name.",
+        fields: [{ path: "title", message: "Enter a class name." }],
+      };
+    }
+    const term = FIXTURE_TERMS.find((item) => item.termId === input.termId) ?? null;
+    let requested = 0;
+    if (term && input.weekdays.length > 0) {
+      const wanted = new Set(input.weekdays);
+      const cursor = new Date(`${term.startsOn}T00:00:00Z`);
+      const end = new Date(`${term.endsOn}T00:00:00Z`);
+      while (cursor.getTime() <= end.getTime()) {
+        if (wanted.has(cursor.getUTCDay())) requested += 1;
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
+      }
+    }
+    return {
+      outcome: "success",
+      data: {
+        classModuleId: "fixture-module-not-persisted",
+        sessionsRequested: requested,
+        sessionsCreated: requested,
+        reason: "created",
+      },
+    };
   }
 
   /**

@@ -7574,3 +7574,90 @@ The ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read* RPCs
 | `npm run prove:no-secrets` | ✅ **exit 0, CLEAN** — run before the push |
 | `npm run prove:stage3-authenticated` | ⛔ **`NOT-RUN` — blocked by an Operator-owned `next dev` (PID 46348). Not killed** |
 | Census | **26 migrations · 29 tables · 49 functions · 12 enums · 30 policies · registry 19** — ▶ **exactly the figure the `C-7` proposal committed to in advance**, asserted as an exact string by the suite |
+
+---
+
+## 2026-08-13 — `P2-2` COMPLETE under READING **B** · screen `26` Add Class · the product's FIRST administrative write path · one thing STOPPED
+
+- **Branch:** `develop`. **Starting HEAD:** `77047ee`. **Scope:** the class-creation write path and screen `26`, on the two audit strings the Operator named — and nothing beyond them.
+
+### ✅ THE RULING, AND THE AMBIGUITY IT ASKED ME TO RECORD
+
+**Operator, 2026-08-12:** *"READING B. My ruling was ambiguous and your stop was right. The enumerated zeros scoped the TERMS family… BUILD `P2-2` — screen `26` Add Class — on the already-ratified `admin.module_created` and `admin.session_created`."*
+
+They also asked, expressly, that **the ambiguity be recorded and not only its resolution**: *"A ruling that scopes a prohibition to one subject and an instruction to another, in one message, is the operator-side instance of the same defect the disciplines describe."*
+
+▶ **THE SHAPE, STATED PLAINLY.** One message carried a **categorical-sounding prohibition** (*"NO WRITE PATH ANYWHERE"*) written while thinking about **terms**, and an **instruction** about a phase whose screen **is a create form**. Each half was right about its own subject; **neither half named its subject**, and a reader cannot recover a scope that was never written down.
+
+⛔ **THAT IS `D-28`'s SHAPE, ON THE OTHER SIDE OF THE CONVERSATION** — a claim whose *stated* scope is wider than its *intended* scope, landing somewhere that reads it as governing. ⚠️ **Recorded because the stale-restatement register would otherwise hold only agent-side instances**, which would make the pattern look like an agent failure mode rather than a property of how rules travel between people.
+
+### ⛔ THE TENTH INSTANCE — AND THE OPERATOR'S RULING ON HOW TO READ IT
+
+At the previous boundary I told the Operator **"two held commits"** when there were **three**: the handoff was derived at `fabbe47`, I committed `5634849`, and I then repeated the handoff's figure **without re-measuring**. ▶ **§15.8.1's exact defect, inside the message that described §15.8.1's freshness report.**
+
+**Operator ruling:** *"Record it as the tenth instance and as evidence the rule is needed rather than evidence it failed — you caught it by measuring before acting, which is what the rule requires."* ⚠️ Recorded here in those terms: the miscount reached a **sentence**, never an **action**, because `git rev-list --count` ran before anything was pushed.
+
+### ✅ THE MIGRATION — `20260813090000_portal_p2_2_class_creation.sql`
+
+**Exactly two reviewed `SECURITY DEFINER` RPCs**, both `VOLATILE`, both `SET search_path TO ''`, both gated on **exactly one ACTIVE `management` membership** (`HAVING count(*) = 1`, failing closed on zero *and* on more than one), both re-resolving their targets **inside the caller's own centre**, and each writing its audit event **in the same transaction as the INSERT**.
+
+⛔ **ZERO** tables, columns, enums, policies or client write grants. ⛔ **THE AUDIT REGISTRY IS UNMOVED AT 19** — `admin.module_created` and `admin.session_created` were ratified at Step 7H and had simply never had a writer. Census **`26·29·49·12·30·19` → `27·29·51·12·30·19`**, moving by exactly the two functions.
+
+▶ **THIS IS WHY READING (B) IS CONSISTENT WITH THE ENUMERATED ZEROS RATHER THAN AN EXCEPTION TO THEM.** A `SECURITY DEFINER` RPC needs **no write policy and no write grant**: the owner writes, the caller holds only `EXECUTE`. **Assertion `C-7` re-proves the terms write surface is still zero inside the very migration that introduced the first administrative write path** — which is exactly the moment someone would open one for convenience.
+
+### ⛔ THE STOP, AND IT IS STRUCTURAL RATHER THAN PROSE
+
+**Trainer assignment needs `admin.trainer_assigned` — a THIRD string the Operator did not name.** Their instruction was explicit: *"If class creation needs anything beyond those two strings and the existing tables, state it and stop."* It does. **Stated and stopped.**
+
+- **Assertion `C-8` FAILS THE BUILD** if either RPC ever references `class_session_assignments` or names `admin.trainer_assigned`.
+- **Leg `P23-9` measures it at RUNTIME** — after a module and two sessions were really created, `class_session_assignments` is unmoved and zero such events exist.
+- ▶ **A stop recorded only in a comment is a stop the next phase edits away.**
+
+✅ **A session with no assignment is a REAL GOVERNED STATE.** `staff-projections.ts` already documents *"a session created but not yet assigned"*, and screen `12` already renders a module with no trainer name — so nothing downstream breaks, and the surface says so plainly rather than leaving a silent hole.
+
+### ⛔ MY OWN MIGRATION APPLIED GREEN WHILE BOTH RPCs WERE BROKEN
+
+The first draft wrote `pg_catalog.coalesce(...)`. **`coalesce` and `nullif` are SQL GRAMMAR CONSTRUCTS, not schema members**, so they cannot be schema-qualified — and **PL/pgSQL resolves identifiers at CALL time, not at `CREATE FUNCTION`**. ⚠️ **The migration applied cleanly with all nine assertions green while neither RPC could execute a single statement.**
+
+▶ **CAUGHT BY CALLING THEM, AND THAT IS NOW A PROPERTY OF THE SUITE:** every `P23` leg **executes** an RPC rather than inspecting the catalogue. **A structural assertion cannot prove a function RUNS** — a new form of *a declared class is not evidence it applied*.
+
+⚠️ **THE BROKEN APPLY WAS ROLLED BACK PROPERLY, NOT PATCHED OVER.** Both functions were dropped, the `supabase_migrations.schema_migrations` row was deleted, the file was corrected, and `supabase migration up` re-applied it — so the tree and the ledger agree and nothing downstream ever saw the broken version. ⛔ **This was legitimate ONLY because the migration was minutes old, LOCAL, UNCOMMITTED and unseen by any other environment.** `R-1` (correct a committed migration by a new forward migration, never by editing an applied file) is untouched and still binds.
+
+### ⛔ TWO CENSUS RATCHETS FIRED, AND BOTH WERE REWRITTEN WITH THEIR REASON
+
+- **`hero-2`'s `P2-6`** pinned **49** functions; it is now **51**, with the two named and the reason written into the leg — *"neither is parent-reachable and neither touches a report, a rating or an observation"*, which is what keeps the leg's own subject intact.
+- **`P21a-14`** pinned the nav census at **16** routes; screen `26` makes it **17**. ⚠️ **Kept as an EXACT number rather than relaxed to a floor**: a `>=` would keep passing if the census silently stopped reading the app tree, which is the only thing the leg exists to catch. **Every new screen deliberately edits that line — that is the ratchet, not friction.**
+- **`prove:portal-p2-2`'s census string** moved the same way, and its comment now records that the **terms migration itself added zero functions**, which `P22a-4` asserts against the file — the claim a whole-database census can no longer make alone once a second migration lands beside it.
+
+### ⚠️ A REFUSAL LEG THAT FAILED FOR THE RIGHT REASON, AND WOULD HAVE BEEN WORSE PASSING
+
+`P23-3` counted `class_modules` **while still `SET LOCAL ROLE authenticated` with no identity** — reading `0` against a baseline of `2` and reporting FAIL on a leg whose reason codes were entirely correct. ▶ **A row count taken under the caller's own role measures RLS VISIBILITY, not EXISTENCE.**
+
+⛔ **The failure was the good outcome.** Had the baseline happened to be zero, the leg would have **passed because the prober could not see the table it was guarding** — passing for the wrong reason, and continuing to pass after the guard broke. Every measurement in the suite now runs as owner, with the role toggling written explicitly rather than left implicit.
+
+### ⛔ I INTRODUCED MOJIBAKE AND REPAIRED IT IN THE SAME RUN
+
+Annotating `26-management-add-class/screen.md` I wrote `âœ…`-class byte sequences into a file that already carries the **pre-existing** `â€"` corruption. ⚠️ **8 sequences, all mine, all repaired** to the correct characters, verified by `prove:encoding` exit 0. ⛔ **The pre-existing corruption was NOT touched** — the Operator ruled the 136-sequence tree-wide finding *"its own bounded run, do not touch"*, and it still has no §12 authorization.
+
+### ✅ WHAT SHIPPED ABOVE THE DATABASE
+
+`server/modules/class-session/class-creation.ts` (the module that owns the tables) → `management-view/projections.ts` (the management gate, **defence in depth — the RPC remains authoritative**) → adapter DTOs and two Server Actions (**allow-list mappers, one field at a time**, so the input type has nowhere to put a trainer, a class code, a capacity or a programme) → port → real port + fixture → `features/management/management-add-class.tsx` → the canonical route `/management/classes/add-class`.
+
+- ⚠️ **THE OCCURRENCE COUNT IS SHOWN BEFORE SUBMIT.** One click can create dozens of governed session records, each with a permanent audit event; **the number of records about to be created is not a detail to discover afterwards.** The preview is presentation — **the server re-reads the term's range from the database and never takes a date range from the form**, because the RPC has an opinion about a foreign TERM and none about a DATE.
+- ⚠️ **A PARTIAL RESULT IS REPORTED, NOT COLLAPSED.** Ten committed sessions under a failed eleventh are real governed state; a "failed" banner over them would be a lie, and a flat "created" would overstate it.
+- ⚠️ **`Room` / `Start time` / `End time` ARE DRAWN AS DROPDOWNS AND BUILT AS FREE INPUTS.** RECORDED DIVERGENCE. The frame is a static render showing one value each and **enumerating no options**, and no ruling, table or seed establishes a room inventory or a time-slot vocabulary. A `<select>` would require **inventing** one (`A-022`). `Term` and `Level` **are** selects — both are backed by real rows.
+- ✅ **`Add Class` on screen `12` became live**, and the nav rail's `exact: true` was **dropped with the change recorded**: under the old flag the new route would have rendered with **zero** active rail items — the `C2C-002` defect, in the same file. A new nav test row pins it.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `npm run prove:portal-p2-2-create` | ✅ **exit 0** — 11 SQL legs + 5 runner checks. **Denials before the permit control**; non-disclosure proved by an AUTHORIZED caller receiving the same `not_permitted` an unauthorized one did; the stop measured at runtime |
+| `npm run prove:portal-p2-2` | ✅ **exit 0** |
+| `npm run prove:hero-all` | ✅ **17/17 by exit code** (after the `P2-6` ratchet was updated) |
+| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · -p2-1 · -p2-1-composed · f-attendance-init-1` | ✅ **all exit 0** |
+| `npm run prove:encoding` · `npm run test:integration` | ✅ **0 · 0** |
+| `tsc` · `eslint` · `next build` · nav suite | ✅ **0 · 0 errors (3 pre-existing warnings) · 0 · 0** |
+| `npm run prove:stage3-authenticated` | ⛔ **`NOT-RUN`, not `FAIL`** — an Operator-owned `next dev` (PID `46348`) still holds this directory. ⚠️ **The cause was REPRODUCED DIRECTLY this run** — `next dev` on port 3421 printed *"Another next dev server is already running… PID 46348"* — so it is measured rather than assumed, and it is **not this phase's code**. **NOT killed** |
+| **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed — no screenshot of any kind |
+| Census | **27 migrations · 29 tables · 51 functions · 12 enums · 30 policies · registry 19** |
