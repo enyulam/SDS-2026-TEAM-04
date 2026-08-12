@@ -5,27 +5,25 @@
 > database. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-13, at the **`P2-3` phase boundary** — screen `27` Edit Class built, proven, **rendered**, committed and **pushed**.
+**Regenerated:** 2026-08-13, at the **`P2-4` phase boundary** — screen `13` Class Overview built, proven, rendered, committed and **pushed**. ⏸ **HELD for your walkthrough of screens `12`, `13`, `26` and `27`.**
 
 ---
 
 ## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — re-verified, not carried
 
-**Three items had lapsed, and one of them was stopping work.**
-
 | Carried claim | Method | Result |
 |---|---|---|
-| `prove:stage3-authenticated` `NOT-RUN` — *"your `next dev` (PID `46348`) holds the directory"* | `netstat`, `tasklist` | ⛔ **LAPSED — YOU HAD ALREADY CLEARED IT.** No listener on 3000; PID `46348` gone. ▶ **Carrying this forward would have deferred the rendered proof for no reason** — the exact *"a stale blocker stops work that was never blocked"* shape |
-| *"`origin/develop` = `62ee67b`, pushed"* | `git rev-list --left-right --count develop...origin/develop` | ⛔ **LAPSED AND WRONG** — measured **`1 0`**. Origin sat at `29f1668`; **`P2-2b` was local only.** Pushed at this boundary |
-| `R-7`'s tail: *"a separate item is owed for `P2-2` — the `admin.trainer_assigned` string"* | read at HEAD in the plan | ⛔ **LAPSED** — discharged at `P2-2b`. ⚠️ **The ROW HEAD had been corrected while its TAIL had not** — the same-row shape, and the hardest to catch |
-| `P2-6`'s `C-7` gate still open | plan §2.3 `R-7` | ✅ **STILL TRUE** — and still the **only** open `C-7` item |
+| `B-P2-3-1` open, Operator decision required | your ruling of 2026-08-13 | ⛔ **LAPSED — RULED AND CLOSED.** Bounded §12 authorization; `test:runtime-profile` **exit 0** |
+| *"No ratified frame draws an inbound control to `27`"* — open question | your ruling of 2026-08-13 | ⛔ **LAPSED AS A QUESTION, STANDING AS A FACT.** Ruled a **DESIGN GAP, not a build gap**. ⚠️ **Screen `13`'s frame draws no Edit control either** — reported to you as the finding you asked for |
+| *"Rendered proof `NOT-RUN` on `26` and `27`"* | `prove:stage3-authenticated` re-run | ⛔ **LAPSED** — all **four** Part 2 screens now carry one |
+| `R-7` — `P2-6`'s `C-7` gate | read at HEAD in the plan | ✅ **STILL TRUE** — and still the **only** open `C-7` item |
 | `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
 | §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** — no fixture load, no hosted contact | ✅ **CARRIED, and stated as carried** |
 | `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** — first fixed at `P2-21` |
-| **136 mojibake sequences / 41 files** | not re-measured this run | ⚠️ **CARRIED AS UNREPRODUCED**, exactly as last recorded. The `P2-2` boundary measured **37 files · 125 sequences** with `CLAUDE.md` at **zero**; neither number is asserted, and **the bounded run must take its own measurement** |
+| **136 mojibake sequences / 41 files** | not re-measured this run | ⚠️ **CARRIED AS UNREPRODUCED.** The `P2-2` boundary measured **37 files · 125 sequences** with `CLAUDE.md` at **zero**; neither number is asserted, and **the bounded run takes its own measurement** |
 | `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
 
-⚠️ **All three lapsed items were corrected in their SOURCE records BEFORE this file was derived.** Correcting only the handoff reproduces the defect, because the next derivation reads the source again.
+⚠️ **Nothing lapsed silently this time: all three lapsed items lapsed because you ruled on them**, and each was corrected in its source record before this file was derived.
 
 ---
 
@@ -33,56 +31,44 @@
 
 | | |
 |---|---|
-| **HEAD** | **`b277233`** — *feat(P2-3): screen 27 Edit Class; registry 19->21; three refusals recorded*. ⚠️ A derived artifact cannot name its own SHA; verify with `git log -1` |
+| **HEAD** | **`fe369e9`** — *feat(P2-4): screen 13 Class Overview; two governed reads; 17-runner empty-result sweep*. ⚠️ A derived artifact cannot name its own SHA; verify with `git log -1` |
 | **Branch** | `develop` · **tree carries only this regeneration** |
-| **Remote** | ✅ **`origin/develop` = `b277233`, PUSHED AND VERIFIED FROM `origin`** — `29f1668..b277233`, carrying the unpushed `62ee67b` with it |
+| **Remote** | ✅ **`origin/develop` = `fe369e9`, PUSHED AND VERIFIED FROM `origin`** — `82488ee..fe369e9`, carrying the `T-P44` commit `c8c56f4` with it |
 | **`main`** | **`5eb84bc`, UNTOUCHED** |
-| **Census (local, measured)** | **29 migrations · 29 tables · 54 functions · 12 enums · 30 policies · 1 storage bucket · audit registry 21** |
-| **Hosted dev / frozen projects** | ⛔ **NOT CONTACTED.** The hosted DB is now **four migrations behind local**; no hosted action is authorized |
+| **Census (local, measured)** | **30 migrations · 29 tables · 56 functions · 12 enums · 30 policies · 1 bucket · audit registry 21** |
+| **Hosted dev / frozen projects** | ⛔ **NOT CONTACTED.** The demonstration stack on 543xx was **never queried** while it idled. Hosted dev is now **five migrations behind local**; no hosted action is authorized |
 
 ---
 
-## ✅ `P2-3` COMPLETE — screen `27` Edit Class
+## ✅ `P2-4` COMPLETE — screen `13` Class Overview
 
-**One migration**, `20260813150000` — two reviewed `SECURITY DEFINER` RPCs, `admin_update_class_module` and `admin_update_class_session`. **Audit registry 19 → 21** on exactly the two strings you authorized **with the count stated in advance**; `A-057` amended in the `C-4` shape, at the **single** declaration site.
+**One migration**, `20260813180000` — two reviewed `SECURITY DEFINER` **READS**. **Zero** new table, column, enum, policy or write grant. **Audit registry UNMOVED at 21** — a read is not a governed action.
 
-⛔ **Zero new table, column, enum or policy. Zero write policy. Zero write grant.**
+⚠️ **IT WAS NOT THE PURE READ SURFACE THE PLAN EXPECTED.** `reports`, `observations` and `report_evidence` carry **zero policies and zero client grants**, so the ratified `A-038` gating was **unreachable** without governed reads. Stated, authorized, built. Assertion **`V-7`** fails the build if a policy or grant ever appears on those three — so the justification cannot rot silently.
 
-**Screen `27` answers at its canonical route** `/management/classes/[classModuleId]/edit`.
+**⛔ The frame is overridden, and the omission is EXPECTED.** Screen `13`'s own note lists **B.E.S.T. Ratings** and a rubric focus-area list. Not built. `C-9` keeps `D-1`'s nine ratings on report **DETAIL** surfaces; `G-2` bars every roll-up. Enforced **three deep** — `V-4` (bare substring, so it catches the next rating column nobody has written yet), `P26-7` on the returned shape, a contract with no field that could hold one — plus `S3-M5-bars` on the painted page.
 
----
-
-## ⛔ THE THREE REFUSALS — kept in the plan, with their lift conditions
-
-| # | Refused | Why, and what would lift it |
-|---|---|---|
-| **1** | **The Sun–Sat DAY STRIP.** ⛔ **ABSENT, not present-and-disabled** | Changing which weekdays a class meets **REMOVES sessions**, and **no cancel or delete audit string was ratified**. A session may already carry attendance, an observation or a **submitted report**. ▶ **A greyed chip reads *"not wired yet"*; this reads *"not permitted"*, and the two must not look alike.** The dates are listed **read-only** with the reason on the surface. **Lift:** a ratified session-cancellation string and its RPC |
-| **2** | **UNASSIGN** — the frame's `-` beside the trainer | Leaving a session with **nobody** is a different action with **no string**. Choosing a **different** trainer is reassignment and works. **Lift:** a ratified unassignment string |
-| **3** | **`Class code` · `Capacity` · `Program`** | `C-14` omits all three; *"programme"* additionally has **no entity** (`A-016`). **Lift:** a ruling adding fields to `C-14`'s six |
-
-⚠️ **All three are now measured on the PAINTED PAGE** by `S3-M4-refusals`, not merely written down — with a detector control requiring it to match the frame's own strings, and a second control (`Save Class` + the read-only `Sessions (n)` list) proving the absences are refusals rather than a page that failed to load.
+**✅ `C-17`'s Class Health Summary is built**, `CLAUDE.md` §6's four conditions verbatim.
 
 ---
 
-## ⛔ ONE THING NEEDS YOU — `B-P2-3-1`, and it is not this phase's
+## ⛔ THE FINDING OF THIS PHASE — two legs that were green and worthless
 
-**`test:runtime-profile` `T-P44` has been FAILING SINCE PART 1 and had never been run.**
+`P26-6` reported *"0 rows with No Report"* because the fixture's only learner already had one, so **`A-038`'s NULL branch was never exercised**. `P26-8` returned NULL because no observation carried `focus_chips`, so **the aggregation you had just ruled on never ran**.
 
-It pins that `lib/supabase/browser.ts` is imported by **nothing** and `lib/supabase/public-config.ts` by exactly four modules — its stated reason being *"if a future client component imported it, a disposable build would inline the disposable URL and publishable key straight into a browser bundle."*
+▶ **A leg that passes on a fixture lacking the case it tests has measured nothing.** Both cases are planted inside the rolled-back transaction now, with a deliberate **winner and runner-up** — a most-frequent-tag proof with one candidate proves nothing — which also proves the tie-break is **deterministic**.
 
-⚠️ **`P1-2b`'s `lib/frontend/evidence-upload.ts` imports BOTH** (commit `1624ef8`, 2026-08-12).
+**And the same class through infrastructure failure.** With Docker stopped, the runner printed *"ran to completion without an error"* and *"0 FAIL"* as **PASS** against an empty string.
 
-**Measured, not argued:** that file, the runner, `public-config.ts` and `browser.ts` are **byte-identical at HEAD** (`git diff HEAD --stat` empty), so the failure **reproduces at `62ee67b`** and is **not** a `P2-3` regression. ⚠️ **`runtime-profile` appears nowhere in `STATUS.md` and only incidentally in `BUILD_NOTES.md` — it has never been recorded as run**, which is how a guard written to catch exactly this went unnoticed.
-
-⛔ **NOT FIXED, deliberately.** Extending a security guard's allow-list **changes an authorization contract** (§12) and is outside this phase's authorization. ▶ The likely disposition is that `T-P44`'s **premise was superseded by `D-5`/`P1-2b`** — a browser-side resumable upload genuinely needs the URL and publishable key — but *"the guard's premise lapsed"* is exactly the claim that must be **ruled, not inferred by the session that tripped over it**.
+✅ **SWEPT: 17 runners carried the shape**, measured **before** fixing. All now call **one shared predicate**, not 17 copies. **`P26a-EMPTY`** proves it rejects an empty result, a docker error carrying no legs, and *another suite's* legs, and **accepts** a real one.
 
 ---
 
-## ⚠️ Also worth your eye
+## ⚠️ THE SCREEN `13` FINDING YOU ASKED FOR
 
-1. **No ratified frame draws an inbound control to `27`.** `Management - Classes` sends a card to **Class Overview**; `Management - Class Overview` names **no Edit control at all**. ⛔ **No Edit affordance was invented on `12`.** `27` is reached at its canonical route. ▶ **Which surface hosts the control is your question** — likely answered when `13` ships at `P2-4`.
-2. **Your *"extend BOTH declaration sites"* premise was stale, and you confirmed it.** `P1-2` consolidated them; the single site was extended with an assertion that no second exists. **Third operator-supplied premise refuted by measurement.**
-3. ⛔ **The phase-scoped-claim defect appeared three more times.** The registry legitimately moving 19 → 21 fired three suites that each pinned the registry **TOTAL** — a phase-scoped claim written as a global absolute. All three now assert only what their own phase did, each with a control. ⚠️ **`P2-2`'s first fix asserted its migration never *mentions* the registry and failed correctly** — it **reads** it in an apply-time assertion that was true when it applied. ⛔ **An applied migration is not edited to make a later test pass.**
+**Screen `13`'s frame draws NO Edit control.** Its note lists exactly two controls — **Manage lesson plans** (→ `14`) and **View Overall Class Statistics** (→ `16`). A search for `dit` across it matches nothing.
+
+▶ **So neither `12` nor `13` provides an inbound affordance to `27`.** Per your ruling this is recorded as a **DESIGN GAP, not a build gap**, in the plan, `STATUS.md` and the pack — with the prohibition written into the component so a later phase cannot read the note as licence. **`27` remains reachable at its canonical route.**
 
 ---
 
@@ -90,20 +76,19 @@ It pins that `lib/supabase/browser.ts` is imported by **nothing** and `lib/supab
 
 | Suite | Result |
 |---|---|
-| `prove:portal-p2-3` | ✅ **exit 0** — 12 SQL legs + runner checks, including **chain verification accepting both new strings** and its **non-vacuity control** |
-| `prove:portal-p2-2-create` · `-p2-2` · `-p2-2b` · `-p2-1` · `-p2-1-composed` · `-1` · `-2` · `-2b` · `-5` · `-5-composed` · `-34` · `f-attendance-init-1` | ✅ **all exit 0** |
-| `prove:hero-all` | ✅ **exit 0** — after `P2-6` fired at `52 → 54` and was updated **with its reason** |
-| ✅ **`prove:stage3-authenticated`** | ✅ **exit 0 — 31 PASS · 0 FAIL · 2 `NOT-RUN`.** **`S3-M3-r` and `S3-M4-r` are the FIRST rendered proofs of screens `26` and `27`**, which is what clearing port 3000 bought |
-| `tsc` · `eslint` · `next build` · nav suite · `test:integration` · `test:g06-grounding` · `prove:encoding` · `prove:no-secrets` · `prove:serving-discipline` · `prove:stage2-routes` · the four guard suites | ✅ **all 0** |
-| `test:runtime-profile` | ⛔ **FAIL — pre-existing, `B-P2-3-1`, not fixed here** |
-| `test:continuity` | ⛔ **`NOT-RUN`** — blocked at `CONT-A0` by `B-STAGE3-2` |
-| `test:exit-condition-b` | ⛔ **`NOT-RUN`** — refused at `XB-PRE`, canonical DB not pristine. **A downstream consequence of `B-STAGE3-2`**; nothing was provisioned |
-| **VISUAL acceptance, screens `12` · `26` · `27`** | ⛔ **`NOT-RUN` on all three**, and not claimed. **A rendered DOM-text proof is not a visual acceptance** |
+| `prove:portal-p2-4` + all 13 other portal suites | ✅ **all exit 0** |
+| `prove:hero-all` | ✅ **exit 0** — after `P2-6`, the single global function ratchet, fired at **54 → 56** and was updated **with its reason** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`.** `S3-M5-r` is screen `13`'s first rendered proof |
+| `test:integration` · `test:g06-grounding` · `tsc` · `eslint` · `next build` · nav (census **18 → 19**) · `prove:encoding` · `prove:no-secrets` · `test:runtime-profile` · `prove:stage2-routes` | ✅ **all 0** |
+| `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — both blocked by `B-STAGE3-2` |
+| **VISUAL acceptance, screens `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four**, and not claimed. A rendered DOM-text proof is not a visual acceptance |
 
 ---
 
 ## Next permitted action
 
-▶ **`P2-4` (`13` Class Overview), in plan order.** A **read** surface — `C-17`/`GC-9`, plus the Class Health Summary, whose four conditions `CLAUDE.md` §6 already fixes exhaustively, so no new vocabulary is invented. ⚠️ It is also the likely host for `27`'s missing inbound control, which is your call, not mine.
+⏸ **HELD.** You are walking screens `12`, `13`, `26` and `27` before `P2-5`.
 
-⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload or expansion · editing ratified authority · a push to `main` · public deployment · human testing · final submission · **the mojibake repair run** · **and a ruling on `B-P2-3-1`**.
+▶ After that, **`P2-5` (`25` Management Schedule)** in plan order — a calendar **projection** of class sessions, gated by `GC-13`: no `Showcase`, and **no duplicated event record** (`A-016` makes calendars projections, never stored duplicates).
+
+⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload or expansion · editing ratified authority · a push to `main` · public deployment · human testing · final submission · **the mojibake repair run** · **and any query against the demonstration stack on 543xx**.
