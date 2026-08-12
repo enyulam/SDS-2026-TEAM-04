@@ -745,6 +745,10 @@ export async function adapterReadAddClassOptions(): Promise<
         startsOn: term.startsOn,
         endsOn: term.endsOn,
       })),
+      trainers: result.data.trainers.map((trainer) => ({
+        trainerMembershipId: trainer.trainerMembershipId,
+        displayName: trainer.displayName,
+      })),
     },
   };
 }
@@ -753,10 +757,12 @@ export async function adapterReadAddClassOptions(): Promise<
  * P2-2 — the governed create.
  *
  * ⛔ THE INPUT IS RE-BUILT FIELD BY FIELD, NEVER FORWARDED. A caller cannot
- * smuggle a `trainerMembershipId`, a `classCode`, a `capacity`, a
- * `programme` or a `lessonNumber` through this action, because nothing here
- * would carry it — the same construction that keeps a rating off a list
- * surface, applied to a write.
+ * smuggle a `classCode`, a `capacity`, a `programme`, a `lessonNumber` or a
+ * TA slot through this action, because nothing here would carry it — the
+ * same construction that keeps a rating off a list surface, applied to a
+ * write. ⚠️ `trainerMembershipId` IS carried (`P2-2b`), and it is the RPC —
+ * not this mapper — that refuses a non-trainer, a deactivated trainer or a
+ * membership from another centre.
  *
  * ⚠️ `weekdays` IS SANITISED TO A SORTED, DE-DUPLICATED SET OF 0..6. A
  * repeated day would otherwise generate the same date twice, and
@@ -777,6 +783,7 @@ export async function adapterCreateManagementClass(
     weekdays: [...new Set(input.weekdays.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort(
       (a, b) => a - b,
     ),
+    trainerMembershipId: input.trainerMembershipId,
   });
   if (result.outcome !== "success") return result;
   return {
@@ -785,6 +792,7 @@ export async function adapterCreateManagementClass(
       classModuleId: result.data.classModuleId,
       sessionsRequested: result.data.sessionsRequested,
       sessionsCreated: result.data.sessionsCreated,
+      sessionsAssigned: result.data.sessionsAssigned,
       reason: result.data.reason,
     },
   };

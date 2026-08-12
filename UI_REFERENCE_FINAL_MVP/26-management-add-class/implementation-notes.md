@@ -115,3 +115,56 @@ Acceptance status:             IMPLEMENTED_AWAITING_VERIFICATION. Operator accep
 | `Start time` / `End time` drawn as dropdowns | ⚠️ **BUILT AS TIME INPUTS**, same reason - no slot vocabulary exists to enumerate. |
 | `Term` dropdown | ✅ **BUILT AS A SELECT** - backed by the four seeded `terms` rows. ⚠️ Those are a **DEVELOPMENT CALENDAR** and the migration says so; the real calendar is an **OPERATOR INPUT**. |
 | Sun-Sat day strip | ✅ Built, and it is a **GENERATOR, not a stored schedule** (`C-14`). No recurrence rule is persisted and no duplicated calendar record is created (`A-047`). |
+
+```
+Timestamp (Asia/Singapore):    2026-08-13
+Source branch:                 develop
+Starting commit:               29f1668
+Screen ID:                     26
+Existing route audited:        /management/classes/add-class (created at the previous entry)
+Components preserved:          Everything. This entry ADDS the Assigned Trainer section.
+Components created:            -
+DTO and port changes:          TrainerChoiceDto added to AddClassOptionsDto;
+                               trainerMembershipId added to CreateClassInput;
+                               sessionsAssigned added to ClassCreationOutcomeDto.
+Fixture changes:               readAddClassOptions now derives trainers from SESSIONS;
+                               createManagementClass reports sessionsAssigned.
+Backend dependencies discovered:
+                               MET. Migration 20260813120000_portal_p2_2b_trainer_assignment.sql
+                               - ONE SECURITY DEFINER RPC, admin_assign_session_trainer,
+                               emitting the ALREADY-RATIFIED admin.trainer_assigned.
+                               REGISTRY UNMOVED AT 19 - the string was ratified at Step 7H
+                               and had simply never had a writer.
+Vocabulary dependencies:       Unchanged. Not rating-bearing.
+Governance blockers:           NONE REMAIN FOR THIS SCREEN. The previous entry recorded
+                               `Assigned Trainer` as STOPPED on a third audit string; the
+                               Operator required the registry be CHECKED rather than asked
+                               about, and the string was ALREADY THERE. The stop rested on a
+                               misread scope, not a missing fact.
+                               STILL NOT BUILT, and correctly: UNASSIGNMENT. Leaving an
+                               assigned session with no trainer is a different action with no
+                               ratified string, and 26 needs none - at creation time there is
+                               nothing to unassign, and the frame's `-` removes the trainer
+                               from the FORM before it is saved.
+Browser viewport:              NOT CAPTURED.
+Before screenshot:             NOT CAPTURED
+After screenshot:              NOT CAPTURED
+Validation:                    prove:portal-p2-2b exit 0 - 9 SQL legs + 8 runner checks,
+                               EVERY leg CALLS the RPC (the standing rule set this day), with
+                               P24a-CALL mechanizing that rule across the whole P2-2 family
+                               and P24a-CALLc controlling it. prove:hero-all 17/17. Every
+                               portal suite exit 0. test:integration 0. tsc 0. eslint 0.
+                               build 0. nav 0. prove:no-secrets 0.
+                               NOT-RUN: prove:stage3-authenticated (Operator-owned next dev)
+                               and VISUAL acceptance.
+Ending commit:                 (recorded in BUILD_NOTES at the phase boundary)
+Acceptance status:             IMPLEMENTED_AWAITING_VERIFICATION.
+```
+
+### The discrepancy table, updated
+
+| Frame element | Disposition |
+|---|---|
+| `Assigned Trainer` + search | ~~⛔ **STOPPED**~~ ✅ **BUILT 2026-08-13 (`P2-2b`).** One trainer, assigned to every session created — `A-016` puts assignment at CLASS-SESSION level, so N dates is N governed assignments. ⚠️ Choosing nobody is a **valid** outcome, not an incomplete form. |
+| The `-` beside the selected trainer | ✅ **Form state, not a governed act.** At creation time there is nothing to unassign. ⛔ **UNASSIGNMENT of a saved session is NOT built** — a different action, no ratified string. |
+| `Trainer Assistant (TA)` (pack `.md`) | ⛔ **PROHIBITED, and now also STRUCTURALLY IMPOSSIBLE** — `class_session_assignments` pins `trainer_role` by CHECK and by composite FK, so a non-`trainer` membership cannot be assigned at all (`A-014`, `G-7`). |

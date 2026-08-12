@@ -802,6 +802,40 @@ The Operator asked for this expressly: *"RECORD THE AMBIGUITY, not just the reso
 
 ✅ **A session created with no assignment is a REAL GOVERNED STATE**, not a broken one — `staff-projections.ts` already documents *"a session created but not yet assigned"*, and screen `12` already renders a module with no trainer name.
 
+---
+
+#### ✅ `P2-2b` — THE STOP IS DISCHARGED, 2026-08-13, AND THE CORRECTION IS MINE
+
+**Operator ruling:** *"`admin.trainer_assigned` — **CHECK BEFORE ASKING**. Your own `P2-2` proposal reported the registry already carries `admin.module_created`, `admin.session_created` AND `admin.trainer_assigned`. If that holds, this is not a new-string question and the stop was unnecessary."*
+
+✅ **MEASURED: it holds.** `array_length(audit_action_registry(), 1)` = **19**, and `admin.trainer_assigned` is among them.
+
+⚠️ **THE MECHANISM, STATED ACCURATELY, BECAUSE IT DECIDES WHICH DISCIPLINE TO DRAW.** This was **not** a missing measurement — §`P2-2`'s own proposal above records the three strings as present, and this plan restated it. ▶ **The error was reading an ENUMERATION OF TWO as NARROWING an already-ratified THREE**, and treating that as a hard stop rather than a one-line question. **A stop is only as good as the fact it rests on**, and this one rested on a scope I inferred rather than on anything measured.
+
+**Migration `20260813120000_portal_p2_2b_trainer_assignment.sql`** — **one** `SECURITY DEFINER` RPC, `admin_assign_session_trainer`. ⛔ **Registry UNMOVED at 19**, zero new table/column/enum/policy, zero write policy, zero write grant. Census `27·29·51` → `28·29·52`; **tables, enums, policies and registry all unmoved**.
+
+**What the schema already guaranteed, and why the RPC is shaped around it:**
+
+| Measured | Consequence |
+|---|---|
+| `class_session_assignments_one_active_per_session_idx` — UNIQUE `(class_session_id) WHERE is_active` | ⛔ **EXACTLY ONE ACTIVE ASSIGNMENT PER SESSION.** Reassignment is **deactivate-then-insert in one transaction**; a bare INSERT would raise `23505` on the second attempt — the defect `P1-2b` already found once |
+| Composite FK `(trainer_membership_id, centre_id, trainer_role)` + `trainer_role` pinned by CHECK | ⛔ **A MANAGEMENT, PARENT OR FOREIGN-CENTRE MEMBERSHIP IS STRUCTURALLY UNASSIGNABLE.** `A-014`/`G-7` is held by the SCHEMA, not by this function's care |
+| The FK pins role and centre — **not lifecycle** | ⚠️ **`status = 'active'` is the one gate ONLY the RPC can make**, and `P24-4` measures a deactivated trainer being refused |
+
+⛔ **ONE EVENT COVERS A REASSIGNMENT, NOT TWO.** The governed action is *"this session is now taught by X"*; the deactivation is that action's other half, and `A-029` counts **actions**. ⛔ **A CONFIRMED NO-OP EMITS NOTHING** (`P24-5`) — the `FA-6` shape.
+
+⛔ **UNASSIGNMENT IS STILL NOT BUILT**, and correctly: it is a different action with **no ratified string**, and `26` needs none because at creation time there is nothing to unassign. The frame's `-` removes the trainer from the **form**.
+
+#### ⛔ THE STANDING RULE THIS PHASE PRODUCED, MECHANIZED
+
+**Operator ruling, on `P2-2`'s most important defect:** *"**A STRUCTURAL ASSERTION CANNOT PROVE A FUNCTION RUNS.** Every RPC migration from here carries a leg that CALLS the function, not one that inspects it."*
+
+✅ **`P24a-CALL` enforces it across the whole `P2-2` family**: it reads every `CREATE FUNCTION public.<name>` out of each migration and requires the paired SQL suite to CALL it. **`P24a-CALLc` is its control** — the same detector, pointed at a file that cannot contain the calls, must report every function uncalled. ▶ **A migration that adds an RPC nobody exercises now FAILS the phase**, which is the only form of this rule that survives the next person in a hurry.
+
+#### ⚠️ AND ONE INSTRUMENT CHANGE, RECORDED RATHER THAN QUIETLY APPLIED
+
+The `P2-2` phase suites pinned **all six** whole-database census figures as one exact string, and **fired on three consecutive phases** — every time because a *later* phase legitimately added an object. ⛔ **The answer is not a floor**: `>=` keeps passing while something silently stops being counted. ▶ **The split instead:** phase suites assert **exactly** the four *"nothing was added"* invariants (tables, enums, policies, registry) and **report** the growing totals; the **global function ratchet lives in exactly one place**, `hero-2`'s `P2-6`, where moving it requires writing down which authorization did it.
+
 #### ⚠️ ONE RECORDED CONTROL-TYPE DIVERGENCE FROM THE FRAME
 
 `Room`, `Start time` and `End time` are **drawn as dropdowns and built as free inputs**. The frame is a static render: it shows one value in each and **enumerates no options**, and no ruling, table or seed establishes a room inventory or a time-slot vocabulary anywhere. ▶ A `<select>` would require **inventing** one — schema by inference from a frame (`A-022`). `Term` and `Level` **are** selects, because both are backed by real rows.

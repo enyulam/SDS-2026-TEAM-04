@@ -111,7 +111,7 @@ Missing backend or governance requirements are **recorded, never invented**.
 
 ~~**Missing** â€” no class-module creation write path.~~ ✅ **MET 2026-08-13** - migration `20260813090000_portal_p2_2_class_creation.sql` adds exactly two reviewed `SECURITY DEFINER` RPCs, `admin_create_class_module` and `admin_create_class_session`, firing the two already-ratified audit strings `admin.module_created` and `admin.session_created`. **Zero tables, columns, enums, policies or client write grants; the audit registry is UNMOVED at 19.**
 
-⛔ **ONE BACKEND DEPENDENCY REMAINS OPEN, AND IT IS A STOP, NOT A GAP:** trainer assignment needs `admin.trainer_assigned`, a **third** audit string the Operator did not name for this phase. It is stated and stopped, and migration assertion `C-8` **fails the build** if either RPC ever reaches `class_session_assignments`.
+~~⛔ **ONE BACKEND DEPENDENCY REMAINS OPEN, AND IT IS A STOP, NOT A GAP:** trainer assignment needs `admin.trainer_assigned`, a **third** audit string the Operator did not name for this phase.~~ ✅ **DISCHARGED 2026-08-13 (`P2-2b`).** The Operator required the registry be CHECKED: `admin.trainer_assigned` **was already in it** — 19 strings, ratified at Step 7H, never written. Migration `20260813120000` adds one `SECURITY DEFINER` RPC, `admin_assign_session_trainer`; **the registry is UNMOVED at 19**. ⚠️ Assertion `C-8` survives as a **BOUNDARY rather than a stop**: the CREATE RPCs still must not reach assignment, because that is a separate governed action with its own event (`A-029`). ⛔ **UNASSIGNMENT remains unbuilt** — a different action with no ratified string, and `26` needs none.
 
 ### Governance
 

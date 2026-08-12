@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Field, Select, TextInput } from "@/components/ui/field";
@@ -30,18 +31,28 @@ import type {
  * ⛔ There is NO `classes` entity between the two and none may be introduced.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ SIX DEPARTURES FROM THE FRAME. FIVE ARE RULED; ONE IS A RECORDED CONTROL-TYPE DIVERGENCE
+ * ⛔ SIX NOTES ON THE FRAME. FOUR ARE RULED OMISSIONS; ONE IS NOW BUILT; ONE IS A RECORDED
+ * ⛔ CONTROL-TYPE DIVERGENCE
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  *
- * 1. ⛔ `Assigned Trainer` IS NOT BUILT, AND IT IS A STOP, NOT AN OMISSION-BY-OVERSIGHT.
- *    Assigning a trainer emits `admin.trainer_assigned` — a THIRD audit string. The Operator
- *    authorized this phase on exactly two, `admin.module_created` and `admin.session_created`,
- *    and said: *"If class creation needs anything beyond those two strings and the existing
- *    tables, state it and stop."* ▶ It does, so it is STATED AND STOPPED. The migration
- *    carries assertion `C-8`, which FAILS THE BUILD if either RPC ever reaches
- *    `class_session_assignments`, so the stop is structural rather than a comment.
- *    ⚠️ A session created without an assignment is a REAL GOVERNED STATE — `staff-projections.ts`
- *    already documents it and `12` already renders a module with no trainer name.
+ * 1. ✅ `Assigned Trainer` IS BUILT (`P2-2b`). ~~IT IS A STOP, NOT AN OMISSION-BY-OVERSIGHT…
+ *    a THIRD audit string…~~ ⚠️ **STRUCK, AND THE CORRECTION IS RECORDED RATHER THAN TIDIED
+ *    AWAY.** The Operator required the registry be CHECKED rather than asked about, and
+ *    `admin.trainer_assigned` **was already in it** — 19 strings, ratified at Step 7H, never
+ *    written. ▶ The error was reading an enumeration of two as NARROWING an already-ratified
+ *    three. **A stop is only as good as the fact it rests on.**
+ *
+ *    ⚠️ ONE TRAINER ACROSS N DATES IS N ASSIGNMENTS, each its own governed transaction and
+ *    audit event — `A-016` makes assignment authoritative at CLASS-SESSION level, so there is
+ *    no module-level assignment to make.
+ *
+ *    ⛔ CHOOSING NO TRAINER IS LEGITIMATE, not an incomplete form. A session with no
+ *    assignment is a REAL GOVERNED STATE — `staff-projections.ts` documents it and `12`
+ *    already renders a module with no trainer name.
+ *
+ *    ⛔ UNASSIGNMENT IS STILL NOT BUILT and `26` needs none: at creation time there is nothing
+ *    to unassign, and the frame's `-` control removes the trainer from the FORM before it is
+ *    saved — client state, not a governed act.
  *
  * 2. ⛔ THE `.md`'s `Trainer Assistant (TA)` SLOT IS PROHIBITED — `A-014` defers the TA
  *    persona and `G-7` binds `centre_membership_role` against extension. `REGISTERED-OMISSION`,
@@ -120,6 +131,8 @@ export function ManagementAddClass() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [days, setDays] = useState<readonly number[]>([]);
+  const [trainerId, setTrainerId] = useState("");
+  const [trainerQuery, setTrainerQuery] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -165,6 +178,19 @@ export function ManagementAddClass() {
     return count;
   }, [term, days]);
 
+  /*
+   * ⚠️ CLIENT-SIDE FILTERING OVER ROWS THE CALLER ALREADY RECEIVED. No query
+   * is issued, so the control cannot disclose or probe for a trainer outside
+   * this centre.
+   */
+  const visibleTrainers = useMemo(() => {
+    const needle = trainerQuery.trim().toLowerCase();
+    const all = options?.trainers ?? [];
+    return needle === ""
+      ? all
+      : all.filter((trainer) => trainer.displayName.toLowerCase().includes(needle));
+  }, [options, trainerQuery]);
+
   if (state.kind === "loading") {
     return <LoadingSkeleton label="Loading class options" rows={4} />;
   }
@@ -197,6 +223,7 @@ export function ManagementAddClass() {
       startTime: startTime === "" ? null : startTime,
       endTime: endTime === "" ? null : endTime,
       weekdays: days,
+      trainerMembershipId: trainerId === "" ? null : trainerId,
     });
     setSubmit(
       result.outcome === "success"
@@ -214,6 +241,8 @@ export function ManagementAddClass() {
           setSubmit({ kind: "idle" });
           setTitle("");
           setDays([]);
+          setTrainerId("");
+          setTrainerQuery("");
         }}
       />
     );
@@ -408,16 +437,82 @@ export function ManagementAddClass() {
           </p>
         </section>
 
-        {/*
-          ⛔ THE FRAME'S `Assigned Trainer` SECTION IS ABSENT, AND ITS ABSENCE IS EXPECTED.
-          It is named on the surface rather than left as a silent hole, because a management
-          user who remembers the design needs to know the class really was created and really
-          has no trainer yet — not wonder whether the form lost their input.
-        */}
-        <FeedbackBanner title="Trainer assignment is not part of this step" tone="info">
-          A class created here has no trainer assigned yet. Assigning one is a separate governed
-          action and is not available on this screen.
-        </FeedbackBanner>
+        <section className="card flex flex-col gap-5 px-6 py-6">
+          <div>
+            <h2 className="text-section-title font-extrabold text-ink-strong">Assigned Trainer</h2>
+            <p className="mt-0.5 text-small text-ink">
+              Optional. The chosen trainer is assigned to every session created above.
+            </p>
+          </div>
+
+          {/*
+            ⚠️ THE SEARCH FILTERS A LIST THIS CALLER ALREADY HOLDS. It issues no query, so it
+            can neither disclose the existence of a trainer outside this centre nor be used to
+            probe for one — the same property the `12` level tabs and the `29` class filter rely
+            on. ⛔ The list is ACTIVE `trainer` memberships only; a deactivated one would be
+            refused by the server, and offering it would be a control that looks like it works.
+          */}
+          <Field
+            id={`${formId}-trainer-search`}
+            label="Search trainer"
+            hint={
+              options.trainers.length === 0
+                ? "No trainer is available to assign."
+                : `${options.trainers.length} trainer${options.trainers.length === 1 ? "" : "s"} at this centre.`
+            }
+          >
+            <TextInput
+              id={`${formId}-trainer-search`}
+              type="search"
+              value={trainerQuery}
+              autoComplete="off"
+              onChange={(event) => setTrainerQuery(event.target.value)}
+            />
+          </Field>
+
+          <ul aria-label="Trainers" className="flex flex-col gap-2">
+            {visibleTrainers.map((trainer) => {
+              const selected = trainerId === trainer.trainerMembershipId;
+              return (
+                <li key={trainer.trainerMembershipId}>
+                  <button
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() =>
+                      setTrainerId(selected ? "" : trainer.trainerMembershipId)
+                    }
+                    className={`flex w-full min-h-11 items-center gap-3 rounded-card border px-4 py-3 text-left ${
+                      selected
+                        ? "border-brand-700 bg-brand-50"
+                        : "border-line bg-surface-muted hover:border-brand-700"
+                    }`}
+                  >
+                    <Avatar displayName={trainer.displayName} size="small" />
+                    <span className="text-[0.8125rem] font-semibold text-ink-strong">
+                      {trainer.displayName}
+                    </span>
+                    <span className="ms-auto text-small text-ink">
+                      {selected ? "Selected" : "Select"}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/*
+            ⛔ NO ASSISTANT / TA ROW, EVER. `A-014` defers the TA persona and `G-7` binds
+            `centre_membership_role` against extension, so a second staff slot cannot be
+            persisted at all — and the schema agrees: `class_session_assignments` pins
+            `trainer_role` to `trainer` by CHECK and by composite FK. `REGISTERED-OMISSION`,
+            and it NEVER ENDS.
+          */}
+          <p className="text-small text-ink" role="status">
+            {trainerId === ""
+              ? "No trainer selected. The class and its sessions are created unassigned, which is a valid state — a trainer can be assigned later."
+              : "This trainer is assigned to each session created above, one governed assignment per session."}
+          </p>
+        </section>
 
         <div className="flex flex-wrap justify-end gap-3">
           <Link
@@ -474,7 +569,22 @@ function ClassCreated({
             screen.
           </p>
         )}
-        <p className="mt-1">No trainer is assigned to these sessions yet.</p>
+        {outcome.sessionsAssigned > 0 ? (
+          <p className="mt-1">
+            A trainer is assigned to {outcome.sessionsAssigned} of them.
+          </p>
+        ) : outcome.sessionsCreated > 0 ? (
+          /*
+           * ⚠️ TWO DIFFERENT FACTS, AND THEY ARE NOT MERGED. "You chose nobody"
+           * and "the assignment refused" are different governed outcomes, and a
+           * single sentence covering both would hide a refusal behind a choice.
+           */
+          <p className="mt-1">
+            {outcome.reason === "created"
+              ? "No trainer is assigned to these sessions yet."
+              : "The sessions were created, but the trainer assignment did not complete. Assign a trainer from the class record."}
+          </p>
+        ) : null}
       </FeedbackBanner>
       <div className="flex flex-wrap gap-3">
         <Link

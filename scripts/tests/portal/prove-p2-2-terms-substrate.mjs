@@ -83,24 +83,39 @@ check(
   `the database is UNMOVED and was actually read (${before} -> ${after}) -- the probe policy did not survive`,
 );
 
-// ---------------------------------------------------------------------
-// The census.
-// ---------------------------------------------------------------------
-// ⚠️ THE PIN MOVED, AND IT WAS REWRITTEN RATHER THAN DELETED. It read
-// `26|29|49|12|30|19` -- the figure the `C-7` proposal committed to in
-// advance, and exactly right at the terms commit. The Operator then ruled
-// reading B, and `20260813090000_portal_p2_2_class_creation.sql` added ONE
-// migration and TWO create RPCs.
-//
-// ▶ WHAT THIS LEG ACTUALLY PROTECTS is unchanged and is the part worth
-//   keeping: the TERMS migration itself contributed nothing but its table
-//   -- no function, no enum, no extra policy -- and `P22a-4` asserts that
-//   against the file, which is the claim a whole-database census can no
-//   longer make on its own once a second migration lands beside it.
+/*
+ * ⚠️ WHY THIS PHASE SUITE NO LONGER PINS THE WHOLE-DATABASE TOTALS — a
+ * deliberate instrument change, recorded rather than quietly applied.
+ *
+ * It pinned all six census figures as one exact string. That fired on THREE
+ * CONSECUTIVE PHASES, every time for the same reason: a LATER phase
+ * legitimately added a migration and a function, and a PHASE-SCOPED proof
+ * has no business failing because a later phase did its job. `hero-2`'s
+ * `P2-6` comment already recorded the observation — *"a pinned census in one
+ * phase's proof goes stale the moment a later phase legitimately adds an
+ * object"* — and three firings is enough to act on it.
+ *
+ * ⛔ THE ANSWER IS NOT A FLOOR. `>=` keeps passing while something silently
+ * stops being counted, which is the only thing a census ratchet exists to
+ * catch.
+ *
+ * ▶ THE SPLIT INSTEAD:
+ *   * THIS suite asserts, EXACTLY, the four figures that must NOT move when
+ *     any phase lands — tables, enums, policies and the audit registry.
+ *     Those are "nothing was added" invariants and they are this phase's own
+ *     claim. A later phase adding a table SHOULD break this.
+ *   * The migration and function TOTALS are REPORTED, not pinned, because
+ *     they legitimately grow with every phase.
+ *   * ⛔ THE GLOBAL FUNCTION RATCHET STILL EXISTS, in exactly ONE place —
+ *     `hero-2`'s `P2-6` — where moving it requires writing down which
+ *     authorization moved it. One site to update per phase, and the reason
+ *     is recorded where somebody reads it.
+ */
 const census = psql(["-c", CENSUS]).stdout.trim();
+const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  census === "27|29|51|12|30|19",
-  `the census is where the two P2-2 migrations together said it would be: 27 migrations | 29 tables | 51 functions (49 + the two create RPCs; terms added ZERO) | 12 enums | 30 policies (terms' one SELECT policy was already counted) | registry 19 (measured: ${census})`,
+  tables === "29" && enums === "12" && policies === "30" && registry === "19",
+  `the four INVARIANTS are unmoved: 29 tables | 12 enums | 30 policies (terms' ONE SELECT policy is already counted here) | ⛔ audit registry 19 (measured ${tables} | ${enums} | ${policies} | ${registry}). Reported: ${migrations} migrations, ${functions} functions — ⚠️ the TERMS migration itself contributed ZERO functions, which P22a-4 asserts against the file, because a whole-database total can no longer make that claim once a second migration lands beside it`,
 );
 
 // ---------------------------------------------------------------------

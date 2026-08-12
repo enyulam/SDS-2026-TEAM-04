@@ -1161,6 +1161,26 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
           sortOrder: grade.sortOrder,
         })),
         terms: FIXTURE_TERMS,
+        /*
+         * ⚠️ DERIVED FROM THE SESSIONS, never a separate literal list — the
+         * same construction the class cards use. A trainer who appears on no
+         * session is not assignable here, which is what the real read also
+         * produces: it lists ACTIVE trainer MEMBERSHIPS, and the fixture has
+         * no membership concept other than "named on a session".
+         */
+        trainers: [
+          ...new Map(
+            SESSIONS.filter((session) => session.trainerName).map((session) => [
+              session.trainerName as string,
+              {
+                trainerMembershipId: `membership-${(session.trainerName as string)
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")}`,
+                displayName: session.trainerName as string,
+              },
+            ]),
+          ).values(),
+        ].sort((a, b) => a.displayName.localeCompare(b.displayName)),
       },
     };
   }
@@ -1207,6 +1227,10 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         classModuleId: "fixture-module-not-persisted",
         sessionsRequested: requested,
         sessionsCreated: requested,
+        // ⚠️ ZERO when no trainer was chosen, which is a REAL outcome and not
+        // a failure — the mirror must not report an assignment nobody asked
+        // for.
+        sessionsAssigned: input.trainerMembershipId ? requested : 0,
         reason: "created",
       },
     };

@@ -17,23 +17,37 @@
  * owner writes, the caller holds only EXECUTE.
  *
  * ---------------------------------------------------------------------
- * ⛔ WHAT THIS DELIBERATELY CANNOT DO, AND IT IS A STOP, NOT A GAP
+ * ✅ TRAINER ASSIGNMENT — THE STOP IS DISCHARGED (Operator, 2026-08-13)
  * ---------------------------------------------------------------------
- * **NO TRAINER ASSIGNMENT.** The frame draws an `Assigned Trainer` section;
- * assigning one emits `admin.trainer_assigned`, a THIRD audit string the
- * Operator did not name when they authorized this phase on
- * `admin.module_created` and `admin.session_created`. It is STOPPED and
- * stated, not half-built — and the migration carries assertion `C-8`, which
- * fails the build if either RPC ever reaches it.
+ * ~~**NO TRAINER ASSIGNMENT.** … a THIRD audit string the Operator did not
+ * name …~~ ⚠️ **STRUCK, AND THE CORRECTION IS MINE TO RECORD.** The Operator
+ * required the registry be checked rather than asked about, and
+ * `admin.trainer_assigned` **was already in it** — measured, 19 strings,
+ * ratified at Step 7H, simply never written. ▶ **My error was not a missing
+ * measurement** (my own `P2-2` proposal recorded the string as present);
+ * it was reading an enumeration of two as NARROWING an already-ratified
+ * three, and treating that as a hard stop rather than a cheap question.
  *
- * ▶ A session created with no assignment is a REAL GOVERNED STATE, not a
- * broken one: `staff-projections.ts` already documents *"a session created
- * but not yet assigned"* and returns no name for it.
+ * Assignment now runs through `admin_assign_session_trainer` — the same
+ * pattern, no write policy, no write grant, **no registry extension**.
+ *
+ * ⛔ WHAT IS STILL NOT BUILT: **UNASSIGNMENT.** Leaving an already-assigned
+ * session with no trainer is a different action with **no ratified audit
+ * string**, and screen `26` needs none — at creation time there is nothing
+ * to unassign, and the frame's `-` control removes the trainer from the
+ * FORM before it is saved.
+ *
+ * ▶ A session created with no assignment is still a REAL GOVERNED STATE:
+ * `staff-projections.ts` documents *"a session created but not yet
+ * assigned"*, and choosing no trainer here remains legitimate.
  *
  * ⛔ NO CLASS CODE, NO CAPACITY, NO PROGRAMME (`C-14`; `A-016` — "programme"
  * has no entity and must never become a hidden `classes` entity between
  * Class Grade and Class Module). ⛔ NO TA FIELD (`A-014`, `G-7`) — a
- * `REGISTERED-OMISSION` that never ends. ⛔ NO LESSON NUMBER OR TITLE: the
+ * `REGISTERED-OMISSION` that never ends, and one the SCHEMA enforces:
+ * `class_session_assignments`' composite FK plus its `trainer_role` CHECK
+ * make assigning any non-`trainer` membership structurally unrepresentable.
+ * ⛔ NO LESSON NUMBER OR TITLE: the
  * `26` frame draws neither, and a parameter no surface supplies is a field
  * invented from nothing. A session created here carries NULL lesson
  * identity, which is the correct NOT RECORDED state (hero 0B).
@@ -69,9 +83,23 @@ export interface TermOptionDto {
   readonly endsOn: string;
 }
 
+/**
+ * One assignable trainer.
+ *
+ * ⛔ `membershipId`, NEVER an account id. Assignment is a MEMBERSHIP fact —
+ * `class_session_assignments` keys on `(trainer_membership_id, centre_id,
+ * trainer_role)` — so passing an account would lose the centre and the role
+ * that make the assignment refusable.
+ */
+export interface TrainerChoiceDto {
+  readonly trainerMembershipId: string;
+  readonly displayName: string;
+}
+
 export interface AddClassOptionsDto {
   readonly grades: readonly ClassGradeChoiceDto[];
   readonly terms: readonly TermOptionDto[];
+  readonly trainers: readonly TrainerChoiceDto[];
 }
 
 interface ClassGradeRow {
@@ -86,6 +114,16 @@ interface TermRow {
   readonly label: string;
   readonly starts_on: string;
   readonly ends_on: string;
+}
+
+interface TrainerMembershipRow {
+  readonly id: string;
+  readonly account_id: string;
+}
+
+interface TrainerAccountRow {
+  readonly id: string;
+  readonly display_name: string | null;
 }
 
 /**
@@ -120,6 +158,16 @@ export async function readAddClassOptionsCore(
   );
   if (!terms.ok) return { ok: false };
 
+  /*
+   * ⚠️ THE TRAINER LIST FAILS SOFT, AND THE ASYMMETRY IS DELIBERATE — the
+   * same split `listClassModulesCore` already makes. Grades and terms are the
+   * SUBSTANCE of this form: without them it can create nothing, so a rejected
+   * read must not render as an empty choice list. A trainer list that cannot
+   * be read leaves the form able to create a class with NO trainer, which is
+   * a legitimate governed outcome — so it degrades rather than blocks.
+   */
+  const trainers = await readAssignableTrainers(client);
+
   return {
     ok: true,
     rows: {
@@ -135,8 +183,48 @@ export async function readAddClassOptionsCore(
         startsOn: row.starts_on,
         endsOn: row.ends_on,
       })),
+      trainers,
     },
   };
+}
+
+/**
+ * The ACTIVE trainer memberships of the caller's centre, with their names.
+ *
+ * ⛔ `status = 'active'` AND `role = 'trainer'` are BOTH filtered here, and
+ * neither is decorative: the RPC refuses a deactivated or non-trainer
+ * membership on its own account, so a list that offered one would be
+ * offering a choice the server will reject — a control that looks like it
+ * works and does not.
+ *
+ * ⚠️ RLS still decides which rows come back. This is a label lookup over
+ * rows the caller's own policies already admit, and it makes no
+ * authorization decision.
+ */
+async function readAssignableTrainers(client: SupabaseClient): Promise<readonly TrainerChoiceDto[]> {
+  const memberships = await readRows<TrainerMembershipRow>(
+    "readAssignableTrainers:centre_memberships",
+    () => client.from("centre_memberships").select("id, account_id").eq("role", "trainer").eq("status", "active"),
+  );
+  if (!memberships.ok || memberships.rows.length === 0) return [];
+
+  const accountIds = [...new Set(memberships.rows.map((row) => row.account_id))];
+  const accounts = await readRows<TrainerAccountRow>("readAssignableTrainers:accounts", () =>
+    client.from("accounts").select("id, display_name").in("id", accountIds),
+  );
+  if (!accounts.ok) return [];
+
+  const nameByAccount = new Map(accounts.rows.map((row) => [row.id, row.display_name]));
+  const out: TrainerChoiceDto[] = [];
+  for (const row of memberships.rows) {
+    const displayName = nameByAccount.get(row.account_id);
+    // A membership whose account name is genuinely unrecorded is OMITTED —
+    // never a blank option, never "Unnamed trainer" (hero 0B).
+    if (!displayName) continue;
+    out.push({ trainerMembershipId: row.id, displayName });
+  }
+  out.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return out;
 }
 
 /**
@@ -154,6 +242,13 @@ export interface ClassCreationOutcome {
   readonly classModuleId: string;
   readonly sessionsRequested: number;
   readonly sessionsCreated: number;
+  /**
+   * ⚠️ REPORTED SEPARATELY FROM `sessionsCreated`, because they can differ.
+   * A session that was created but whose assignment refused is a REAL
+   * governed state — the session exists and has no trainer — and collapsing
+   * the two counts would hide it.
+   */
+  readonly sessionsAssigned: number;
   /** `created`, or the first discriminating reason a session refused. */
   readonly reason: string;
 }
@@ -167,6 +262,11 @@ export interface CreateClassInput {
   readonly endTime: string | null;
   /** `0` = Sunday … `6` = Saturday, matching the frame's Sun–Sat strip. */
   readonly weekdays: readonly number[];
+  /**
+   * ⚠️ A MEMBERSHIP id, or `null` for "no trainer yet" — which is a real
+   * governed state, not an incomplete form.
+   */
+  readonly trainerMembershipId: string | null;
 }
 
 interface ModuleRpcRow {
@@ -176,6 +276,11 @@ interface ModuleRpcRow {
 
 interface SessionRpcRow {
   readonly o_session_id: string | null;
+  readonly o_reason: string | null;
+}
+
+interface AssignRpcRow {
+  readonly o_assignment_id: string | null;
   readonly o_reason: string | null;
 }
 
@@ -223,6 +328,7 @@ export async function createClassCore(
   const dates = await resolveOccurrences(client, input);
 
   let created = 0;
+  let assigned = 0;
   let firstRefusal = "";
   for (const sessionDate of dates) {
     const call = await client.rpc("admin_create_class_session", {
@@ -234,10 +340,34 @@ export async function createClassCore(
       p_term_id: input.termId,
     });
     const row = call.error ? null : firstRpcRow<SessionRpcRow>(call.data);
-    if (row?.o_session_id) {
-      created += 1;
-    } else if (!firstRefusal) {
-      firstRefusal = row?.o_reason ?? "unavailable";
+    if (!row?.o_session_id) {
+      if (!firstRefusal) firstRefusal = row?.o_reason ?? "unavailable";
+      continue;
+    }
+    created += 1;
+
+    /*
+     * ⛔ ASSIGNMENT IS A SEPARATE GOVERNED ACTION, IN ITS OWN TRANSACTION,
+     * WITH ITS OWN AUDIT EVENT. `A-016` makes assignment authoritative at
+     * CLASS-SESSION level, so one trainer across N dates is N assignments —
+     * which is the honest shape, because each session really is separately
+     * assigned and separately re-assignable later.
+     *
+     * ⚠️ A REFUSED ASSIGNMENT DOES NOT UNDO THE SESSION. The session is
+     * already committed and is a real, usable record with no trainer; the
+     * counts report both numbers so the surface can say exactly that.
+     */
+    if (input.trainerMembershipId) {
+      const assignCall = await client.rpc("admin_assign_session_trainer", {
+        p_class_session_id: row.o_session_id,
+        p_trainer_membership_id: input.trainerMembershipId,
+      });
+      const assignRow = assignCall.error ? null : firstRpcRow<AssignRpcRow>(assignCall.data);
+      if (assignRow?.o_assignment_id) {
+        assigned += 1;
+      } else if (!firstRefusal) {
+        firstRefusal = assignRow?.o_reason ?? "unavailable";
+      }
     }
   }
 
@@ -247,6 +377,7 @@ export async function createClassCore(
       classModuleId: moduleRow.o_module_id,
       sessionsRequested: dates.length,
       sessionsCreated: created,
+      sessionsAssigned: assigned,
       reason: firstRefusal || "created",
     },
   };

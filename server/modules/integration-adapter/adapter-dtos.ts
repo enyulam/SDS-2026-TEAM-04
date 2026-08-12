@@ -295,10 +295,13 @@ export interface AdapterManagementClassListDto {
  * ARRIVE IN: no rating, roll-up, observation, attendance value, evidence
  * reference, trainer note, checklist value, content hash or report status.
  *
- * ⛔ AND NOTHING HERE IS A TRAINER ASSIGNMENT. The frame's `Assigned Trainer`
- * section is STOPPED at this phase — it emits `admin.trainer_assigned`, a
- * third audit string the Operator did not name. There is deliberately no
- * `trainerMembershipId` on the input, so the surface cannot send one.
+ * ✅ TRAINER ASSIGNMENT IS BUILT (`P2-2b`, Operator 2026-08-13). ~~The frame's
+ * `Assigned Trainer` section is STOPPED at this phase — it emits
+ * `admin.trainer_assigned`, a third audit string the Operator did not name.~~
+ * ⚠️ **STRUCK: the string was ALREADY in the registry**, measured at 19, and
+ * the phase was stopped on a misread scope rather than a missing string.
+ * ⛔ **UNASSIGNMENT is still not built** — a different action, no ratified
+ * string, and `26` needs none.
  *
  * ⛔ NO `classCode`, NO `capacity`, NO `programme` (`C-14`; `A-016`), and NO
  * TA field (`A-014`, `G-7`).
@@ -317,9 +320,16 @@ export interface AdapterTermOptionDto {
   readonly endsOn: string;
 }
 
+/** ⛔ A MEMBERSHIP id, never an account id — assignment is a membership fact. */
+export interface AdapterTrainerChoiceDto {
+  readonly trainerMembershipId: string;
+  readonly displayName: string;
+}
+
 export interface AdapterAddClassOptionsDto {
   readonly grades: readonly AdapterClassGradeChoiceDto[];
   readonly terms: readonly AdapterTermOptionDto[];
+  readonly trainers: readonly AdapterTrainerChoiceDto[];
 }
 
 export interface AdapterCreateClassInput {
@@ -331,17 +341,21 @@ export interface AdapterCreateClassInput {
   readonly endTime: string | null;
   /** `0` = Sunday … `6` = Saturday, matching the frame's Sun–Sat strip. */
   readonly weekdays: readonly number[];
+  /** A MEMBERSHIP id, or `null` for "no trainer yet" — a real governed state. */
+  readonly trainerMembershipId: string | null;
 }
 
 /**
- * ⚠️ `sessionsRequested` VS `sessionsCreated` is reported rather than
- * collapsed into a boolean: one call creates one dated session, so a partial
- * result is real governed state and the surface must be able to say so.
+ * ⚠️ THREE COUNTS, REPORTED RATHER THAN COLLAPSED. One call creates one dated
+ * session and one further call assigns it, so a partial result is real
+ * governed state: a session that exists with no trainer is usable, and the
+ * surface must be able to say exactly that.
  */
 export interface AdapterClassCreationOutcomeDto {
   readonly classModuleId: string;
   readonly sessionsRequested: number;
   readonly sessionsCreated: number;
+  readonly sessionsAssigned: number;
   readonly reason: string;
 }
 

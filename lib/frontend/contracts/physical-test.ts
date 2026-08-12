@@ -316,11 +316,14 @@ export type ManagementClassListDto = {
  *  - `Program` — "programme" has NO ENTITY, and adding one would be a hidden
  *    `classes` entity between Class Grade and Class Module (`A-016`). The
  *    class's name IS the Class Module title.
- *  - `Assigned Trainer` — assignment emits `admin.trainer_assigned`, a THIRD
- *    audit string the Operator did not name when authorizing this phase on
- *    `admin.module_created` and `admin.session_created`. ⛔ STOPPED and
- *    stated, not half-built. A session with no assignment is a REAL governed
- *    state, and `12` already renders one without a trainer name.
+ *  - ~~`Assigned Trainer` — assignment emits `admin.trainer_assigned`, a THIRD
+ *    audit string the Operator did not name…~~ ✅ **BUILT AT `P2-2b`.** The
+ *    string was ALREADY in the registry — measured at 19 — and the phase was
+ *    stopped on a misread scope, not a missing string. ⛔ **UNASSIGNMENT is
+ *    still not built**: leaving an assigned session with no trainer is a
+ *    different action with no ratified string, and `26` needs none because at
+ *    creation time there is nothing to unassign. A session with no assignment
+ *    remains a REAL governed state, and `12` already renders one.
  *  - the `.md`'s `Trainer Assistant (TA)` slot — PROHIBITED (`A-014`, `G-7`),
  *    a `REGISTERED-OMISSION` that NEVER ENDS.
  *
@@ -353,9 +356,20 @@ export type TermOptionDto = {
   readonly endsOn: string;
 };
 
+/**
+ * ⛔ A MEMBERSHIP id, never an account id. Assignment keys on
+ * `(trainer_membership_id, centre_id, trainer_role)`, so an account id would
+ * lose the centre and the role that make the assignment refusable.
+ */
+export type TrainerChoiceDto = {
+  readonly trainerMembershipId: string;
+  readonly displayName: string;
+};
+
 export type AddClassOptionsDto = {
   readonly grades: readonly ClassGradeChoiceDto[];
   readonly terms: readonly TermOptionDto[];
+  readonly trainers: readonly TrainerChoiceDto[];
 };
 
 export type CreateClassInput = {
@@ -367,17 +381,23 @@ export type CreateClassInput = {
   readonly endTime: string | null;
   /** `0` = Sunday … `6` = Saturday, matching the frame's Sun–Sat strip. */
   readonly weekdays: readonly number[];
+  /** A MEMBERSHIP id, or `null` for "no trainer yet" — a real governed state. */
+  readonly trainerMembershipId: string | null;
 };
 
 /**
  * ⚠️ THE PARTIAL RESULT IS REPORTED, NOT COLLAPSED. One call creates one
- * dated session, so ten committed sessions under a failed eleventh are real
- * governed state — a "failed" banner over them would be a lie.
+ * dated session and one further call assigns it, so ten committed sessions
+ * under a failed eleventh are real governed state — a "failed" banner over
+ * them would be a lie. ⛔ `sessionsAssigned` is separate from
+ * `sessionsCreated` for the same reason: a session that exists with no
+ * trainer is usable, and collapsing the counts would hide it.
  */
 export type ClassCreationOutcomeDto = {
   readonly classModuleId: string;
   readonly sessionsRequested: number;
   readonly sessionsCreated: number;
+  readonly sessionsAssigned: number;
   readonly reason: string;
 };
 

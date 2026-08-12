@@ -132,11 +132,13 @@ export interface PhysicalTestPort {
   /**
    * P2-2 — the governed create.
    *
-   * ⛔ THE INPUT CARRIES NO TRAINER. Assignment needs a third audit string
-   * (`admin.trainer_assigned`) the Operator did not name for this phase, so
-   * the surface cannot send one — the STOP is in the type, not only in prose.
+   * ✅ THE INPUT CARRIES A TRAINER MEMBERSHIP (`P2-2b`), or `null`. ⛔ It
+   * carries NO class code, capacity, programme or TA slot (`C-14`, `A-016`,
+   * `A-014`/`G-7`) — the type has nowhere to put one.
    *
-   * ⛔ AND NO CLASS CODE, CAPACITY OR PROGRAMME (`C-14`, `A-016`).
+   * ⚠️ ONE TRAINER ACROSS N DATES IS N ASSIGNMENTS, each its own governed
+   * transaction and audit event, because `A-016` makes assignment
+   * authoritative at CLASS-SESSION level.
    *
    * ⚠️ The weekday strip is a GENERATOR (`C-14`): this expands into one
    * governed transaction per dated session, each with its own audit event.

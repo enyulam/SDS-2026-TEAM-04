@@ -84,10 +84,39 @@ check(
   `the database is UNMOVED and was actually read (${before} -> ${after}) -- the suite really created modules, sessions and audit events, and rolled all of them back`,
 );
 
+/*
+ * ⚠️ WHY THIS PHASE SUITE NO LONGER PINS THE WHOLE-DATABASE TOTALS — a
+ * deliberate instrument change, recorded rather than quietly applied.
+ *
+ * It pinned all six census figures as one exact string. That fired on THREE
+ * CONSECUTIVE PHASES, every time for the same reason: a LATER phase
+ * legitimately added a migration and a function, and a PHASE-SCOPED proof
+ * has no business failing because a later phase did its job. `hero-2`'s
+ * `P2-6` comment already recorded the observation — *"a pinned census in one
+ * phase's proof goes stale the moment a later phase legitimately adds an
+ * object"* — and three firings is enough to act on it.
+ *
+ * ⛔ THE ANSWER IS NOT A FLOOR. `>=` keeps passing while something silently
+ * stops being counted, which is the only thing a census ratchet exists to
+ * catch.
+ *
+ * ▶ THE SPLIT INSTEAD:
+ *   * THIS suite asserts, EXACTLY, the four figures that must NOT move when
+ *     any phase lands — tables, enums, policies and the audit registry.
+ *     Those are "nothing was added" invariants and they are this phase's own
+ *     claim. A later phase adding a table SHOULD break this.
+ *   * The migration and function TOTALS are REPORTED, not pinned, because
+ *     they legitimately grow with every phase.
+ *   * ⛔ THE GLOBAL FUNCTION RATCHET STILL EXISTS, in exactly ONE place —
+ *     `hero-2`'s `P2-6` — where moving it requires writing down which
+ *     authorization moved it. One site to update per phase, and the reason
+ *     is recorded where somebody reads it.
+ */
 const census = psql(["-c", CENSUS]).stdout.trim();
+const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  census === "27|29|51|12|30|19",
-  `the census moved by EXACTLY the two create RPCs: 27 migrations | 29 tables | 51 functions (49 + 2) | 12 enums | 30 policies | registry 19 (measured: ${census})`,
+  tables === "29" && enums === "12" && policies === "30" && registry === "19",
+  `the four INVARIANTS this phase claims are unmoved: 29 tables | 12 enums | 30 policies | ⛔ audit registry 19 (measured ${tables} | ${enums} | ${policies} | ${registry}). Reported, not pinned, because they grow with every phase: ${migrations} migrations, ${functions} functions`,
 );
 
 // ---------------------------------------------------------------------
@@ -98,7 +127,7 @@ const migration = readFileSync(MIGRATION, "utf8");
 
 check(
   /assertion C-8 failed/.test(migration) && /class_session_assignments/.test(migration) && /trainer_assigned/.test(migration),
-  "P23a-1 ⛔ THE STOP IS STRUCTURAL: the migration carries assertion C-8, which FAILS THE BUILD if either create RPC ever reaches class_session_assignments or names admin.trainer_assigned -- a stop recorded only in prose is a stop the next phase edits away",
+  "P23a-1 ⛔ THE SEPARATION IS STRUCTURAL: assertion C-8 FAILS THE BUILD if either CREATE RPC reaches class_session_assignments or names admin.trainer_assigned. ⚠️ It was written as a STOP and it survives as a BOUNDARY -- P2-2b built assignment in its OWN RPC, so the create path still must not reach it. One RPC, one governed action (A-029)",
 );
 
 check(

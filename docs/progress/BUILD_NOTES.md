@@ -7681,3 +7681,68 @@ Annotating `26-management-add-class/screen.md` I wrote `âœ…`-class byte sequ
 ▶ **THE DIFFERENCE IS UNEXPLAINED, AND THAT IS THE FINDING.** Both obvious explanations were tested and both were refuted, which leaves the original count **unreproduced rather than superseded** — so neither number is asserted here. ⚠️ **The bounded repair run must take its own measurement and must not start from either figure.** ⛔ **The Operator's ruling is untouched: record, do not touch.** Nothing was repaired, and the run still has no §12 authorization.
 
 ⚠️ **Recorded because a carried number that nobody re-measures is exactly how a stale figure survives into a run that acts on it** — and this one would have been handed to a repair run as its scope.
+
+---
+
+## 2026-08-13 — `P2-2b` · the stop DISCHARGED, and the standing rule this phase produced, MECHANIZED
+
+- **Branch:** `develop`. **Starting HEAD:** `29f1668`. **Scope:** governed trainer assignment, completing screen `26`.
+
+### ⛔ THE STOP WAS UNNECESSARY, AND THE MECHANISM MATTERS MORE THAN THE OUTCOME
+
+**Operator:** *"`admin.trainer_assigned` — **CHECK BEFORE ASKING**. Your own `P2-2` proposal reported the registry already carries [it]… If that holds, this is not a new-string question and the stop was unnecessary."*
+
+✅ **Measured: 19 strings, and `admin.trainer_assigned` is among them.** The Operator was right.
+
+⚠️ **BUT THE MECHANISM WAS NOT A MISSING MEASUREMENT, AND RECORDING IT AS ONE WOULD DRAW THE WRONG LESSON.** My own `P2-2` proposal recorded all three strings as present, and the plan restated it. ▶ **The error was reading an ENUMERATION OF TWO as NARROWING an already-ratified THREE** — and then treating that inference as a *hard stop* rather than a one-line question.
+
+▶ **The discipline that follows is not "measure the registry" (I did) but: A STOP IS ONLY AS GOOD AS THE FACT IT RESTS ON.** This one rested on a scope I inferred from an enumeration, not on anything measured — and an inferred scope is exactly the kind of claim that should be cheap to check rather than expensive to obey. **It cost a phase boundary.**
+
+### ✅ `20260813120000_portal_p2_2b_trainer_assignment.sql`
+
+**One** `SECURITY DEFINER` RPC, `admin_assign_session_trainer`. ⛔ **Registry UNMOVED at 19** · zero new table, column, enum or policy · zero write policy · zero write grant. Census `27·29·51` → `28·29·52`, with **tables, enums, policies and registry all unmoved**.
+
+**What the schema already guaranteed — measured before the function was written, and it shaped it:**
+
+- `class_session_assignments_one_active_per_session_idx`, a UNIQUE partial index on `(class_session_id) WHERE is_active`. ⛔ **Exactly one active assignment per session**, so reassignment is **deactivate-then-insert in one transaction**. ▶ A bare INSERT would raise `23505` on the second attempt — **the defect `P1-2b` already found once in the evidence path**, avoided here by measuring first.
+- The composite FK `(trainer_membership_id, centre_id, trainer_role)` plus the `trainer_role` CHECK. ⛔ **Assigning a management, parent or foreign-centre membership is STRUCTURALLY UNREPRESENTABLE** — `A-014`/`G-7` is held by the schema, not by this function's care.
+- ⚠️ **The FK pins role and centre, NOT lifecycle.** So `status = 'active'` is the one gate only the RPC can make, and `P24-4` measures a **deactivated** trainer being refused through it.
+
+⛔ **ONE EVENT COVERS A REASSIGNMENT, NOT TWO.** The governed action is *"this session is now taught by X"*; the deactivation is that action's other half, and `A-029` counts **actions**. ⛔ **A confirmed no-op emits nothing** (`P24-5`) — the `FA-6` shape. ⚠️ **The superseded row is RETAINED, never deleted** — assignment history is how *"who was meant to teach this session"* stays answerable after a change.
+
+⛔ **UNASSIGNMENT IS NOT BUILT, and correctly.** A different action, **no ratified string**, and `26` needs none: at creation time there is nothing to unassign, and the frame's `-` removes the trainer from the **form**.
+
+### ⛔ THE STANDING RULE, MECHANIZED — `P24a-CALL`
+
+**Operator, on this phase's most important defect:** *"**A STRUCTURAL ASSERTION CANNOT PROVE A FUNCTION RUNS.** Every RPC migration from here carries a leg that CALLS the function, not one that inspects it."*
+
+✅ **Built as a measurement, not a promise.** `P24a-CALL` reads every `CREATE FUNCTION public.<name>` out of each migration in the `P2-2` family and requires the paired SQL suite to **call** it. ▶ **A migration that adds an RPC nobody exercises now FAILS the phase** — the only form of this rule that survives the next person in a hurry.
+
+⚠️ **`P24a-CALLc` is its control**, and it is the leg that makes it mean anything: the *same* detector, pointed at a file that **cannot** contain the calls, must report **every** function uncalled. Without it, "all functions are called" is equally true of a matcher that matches nothing — the false-`CLEAN` shape this project has now been bitten by four times.
+
+⚠️ **The terms migration is deliberately in the family** even though it creates **no** function: the rule must be satisfiable by *"there is nothing to call"* as well as by *"everything is called"*, or it would push future phases toward adding a function just to have one.
+
+### ⚠️ AN INSTRUMENT CHANGE — the phase suites stop pinning whole-database totals
+
+The `P2-2` suites pinned all six census figures as one exact string, and **fired on three consecutive phases**, every time because a **later** phase legitimately added a migration and a function. ▶ **A phase-scoped proof has no business failing because a later phase did its job.**
+
+⛔ **The answer is NOT a floor.** `>=` keeps passing while something silently stops being counted, which is the only thing a census ratchet exists to catch.
+
+▶ **The split:** phase suites assert **exactly** the four *"nothing was added"* invariants — **tables, enums, policies, audit registry** — and **report** the migration and function totals. **The global function ratchet lives in exactly ONE place**, `hero-2`'s `P2-6`, where moving the number requires writing down which authorization moved it. **One site per phase, and the reason is recorded where somebody reads it.**
+
+### ✅ The surface
+
+`Assigned Trainer` is built: a search that **filters a list the caller already holds** (no query, so it can neither disclose nor probe), an active-trainer list, and a selection that is **optional**. ⚠️ **Choosing nobody is a valid outcome, not an incomplete form**, and the surface says so before submit. The success panel reports `sessionsAssigned` **separately** from `sessionsCreated`, and ⚠️ **distinguishes "you chose nobody" from "the assignment refused"** — merging them would hide a refusal behind a choice.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-2b` | ✅ **exit 0** — 9 SQL legs + 8 runner checks. **Every leg CALLS the RPC.** Denials before the permit control; the reassignment path made reachable by planting a second trainer, because **a leg that cannot run is NOT-RUN, never PASS** |
+| `prove:hero-all` | ✅ **17/17** — after `P2-6`, now the single global ratchet, moved `51 → 52` with the one function named |
+| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · -p2-1 · -p2-1-composed · -p2-2 · -p2-2-create · f-attendance-init-1` | ✅ **all exit 0** |
+| `prove:encoding` · `test:integration` · `tsc` · `eslint` · `next build` · nav suite | ✅ **0 · 0 · 0 · 0 errors · 0 · 0** |
+| `prove:no-secrets` | ✅ **exit 0, CLEAN** |
+| `prove:stage3-authenticated` | ⛔ **`NOT-RUN`** — the Operator-owned `next dev` still held the directory at this boundary. They have offered to stop it; **the next boundary is when it is needed** |
+| **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed |
+| Census | **28 migrations · 29 tables · 52 functions · 12 enums · 30 policies · registry 19** |
