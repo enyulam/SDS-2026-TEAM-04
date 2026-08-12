@@ -7661,3 +7661,23 @@ Annotating `26-management-add-class/screen.md` I wrote `âœ…`-class byte sequ
 | `npm run prove:stage3-authenticated` | ⛔ **`NOT-RUN`, not `FAIL`** — an Operator-owned `next dev` (PID `46348`) still holds this directory. ⚠️ **The cause was REPRODUCED DIRECTLY this run** — `next dev` on port 3421 printed *"Another next dev server is already running… PID 46348"* — so it is measured rather than assumed, and it is **not this phase's code**. **NOT killed** |
 | **VISUAL acceptance, screen `26`** | ⛔ **`NOT-RUN`** and not claimed — no screenshot of any kind |
 | Census | **27 migrations · 29 tables · 51 functions · 12 enums · 30 policies · registry 19** |
+
+### ⛔ THE §15.8.1 FRESHNESS SWEEP AT THIS BOUNDARY FOUND TWO LAPSED ITEMS — appended, not rewritten
+
+*(Appended after the entry above, per this file's own rule: an entry is never rewritten, it is corrected by a later entry that says so.)*
+
+**1 — `R-7` still listed `P2-2` as `AWAITING_OPERATOR`** in `PORTAL_COMPLETION_PLAN.md` §2.3, a day after the Operator ruled decision 1 and hours after they ruled reading B. ⚠️ **This is the eighth-instance shape recorded one row below it in the same table** — a stale blocker, which *"does not merely mislead, it stops work that was never blocked."* ▶ **Corrected in the SOURCE record before the handoff was derived**, which is §15.8.1 point 2: correcting only the handoff reproduces the defect, because the next derivation reads the source again.
+
+**2 — the tree-wide mojibake figure does not reproduce, and it is NOT being claimed as a reduction.** Carried as **136 sequences across 41 tracked files including `CLAUDE.md` (2)**. Re-measured at this boundary with the detector the finding itself names — the CP1252-decoded em dash `â€”`:
+
+| Measurement | Result |
+|---|---|
+| over `git ls-files` | **37 files · 125 sequences** |
+| over `git ls-files --cached --others` | **37 files · 125 sequences** — identical, so it is not a file-set artefact |
+| detector widened to the other double-encoded forms (`â€™`, `â€œ`, `Â·`, `â†’`) | **no change** — so it is not a detector-width artefact |
+| `CLAUDE.md` | ⛔ **ZERO**, not 2 |
+| Composition | all 36 UI pack `screen.md` files, plus `docs/workstreams/48H_BACKEND_PROGRESS.md` (20) |
+
+▶ **THE DIFFERENCE IS UNEXPLAINED, AND THAT IS THE FINDING.** Both obvious explanations were tested and both were refuted, which leaves the original count **unreproduced rather than superseded** — so neither number is asserted here. ⚠️ **The bounded repair run must take its own measurement and must not start from either figure.** ⛔ **The Operator's ruling is untouched: record, do not touch.** Nothing was repaired, and the run still has no §12 authorization.
+
+⚠️ **Recorded because a carried number that nobody re-measures is exactly how a stale figure survives into a run that acts on it** — and this one would have been handed to a repair run as its scope.
