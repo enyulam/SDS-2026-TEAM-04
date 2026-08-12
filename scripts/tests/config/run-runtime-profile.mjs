@@ -624,6 +624,28 @@ const BROWSER_MODULE = 'lib/supabase/browser.ts'
   }
 }
 
+/*
+ * ⛔ THE T-P44 ALLOW-LISTS AND IMPORT DETECTORS — module scope ON PURPOSE, so
+ * that `T-P44` and its planted control `T-P44c` share ONE definition.
+ */
+const EVIDENCE_UPLOAD = 'lib/frontend/evidence-upload.ts'
+const ALLOWED_CONFIG_IMPORTERS = new Set([
+  'server/platform/env.ts',
+  'server/platform/supabase/request.ts',
+  'proxy.ts',
+  BROWSER_MODULE,
+  EVIDENCE_UPLOAD,
+])
+/*
+ * ⚠️ A SEPARATE SET, not a reuse of the one above. The two questions are
+ * different — *who may READ the config* and *who may CONSTRUCT a browser
+ * client* — and collapsing them would silently admit the four config importers
+ * to the browser client as well.
+ */
+const ALLOWED_BROWSER_IMPORTERS = new Set([EVIDENCE_UPLOAD])
+const CONFIG_IMPORT = /["'](?:@\/lib\/supabase\/public-config|(?:\.{1,2}\/)+(?:lib\/)?supabase\/public-config|\.\/public-config)["']/
+const BROWSER_IMPORT = /["'](?:@\/lib\/supabase\/browser|(?:\.{1,2}\/)+(?:lib\/)?supabase\/browser|\.\/browser)["']/
+
 {
   const id = 'T-P44'
   // ---------------------------------------------------------------------
@@ -650,14 +672,38 @@ const BROWSER_MODULE = 'lib/supabase/browser.ts'
   // Together those mean no client component's module graph can reach a
   // Supabase URL or publishable key, so no client bundle can carry one.
   const before = failures
-  const ALLOWED_CONFIG_IMPORTERS = new Set([
-    'server/platform/env.ts',
-    'server/platform/supabase/request.ts',
-    'proxy.ts',
-    BROWSER_MODULE,
-  ])
-  const CONFIG_IMPORT = /["'](?:@\/lib\/supabase\/public-config|(?:\.{1,2}\/)+(?:lib\/)?supabase\/public-config|\.\/public-config)["']/
-  const BROWSER_IMPORT = /["'](?:@\/lib\/supabase\/browser|(?:\.{1,2}\/)+(?:lib\/)?supabase\/browser|\.\/browser)["']/
+  /*
+   * ⚠️ THE PIN MOVED ON 2026-08-13, AND IT MOVED BY OPERATOR RULING — NOT
+   * BY A SESSION DECIDING THE GUARD WAS INCONVENIENT.
+   *
+   * ▶ WHAT LAPSED, PRECISELY. `T-P44` was written when `browser.ts` was
+   * genuinely DEAD CODE, and it pinned that fact so a future client component
+   * could not quietly resurrect it. `D-5`'s per-child evidence video needed a
+   * RESUMABLE, CLIENT-DIRECT upload — a bounded **ADR-3 exception** the Operator
+   * authorized — and a browser-side upload cannot work without the Supabase URL
+   * and the publishable key. ⛔ **THE PREMISE LAPSED BY AUTHORIZATION, NOT BY
+   * DRIFT**, which is the only reason this widening is legitimate.
+   *
+   * ⛔ **THIS IS NOT THE GUARD WEAKENING, AND A LATER READER MUST NOT READ IT
+   * AS ONE.** Operator, ruling this: *"A guard whose premise lapsed still needs
+   * a ruling, because 'the premise lapsed' is exactly what someone says when
+   * they want the guard out of the way."* The stop that produced this ruling is
+   * recorded as `B-P2-3-1`.
+   *
+   * ⛔ **ONE FILE, NOT A CLASS.** The Operator's constraint was explicit:
+   * *"extend for `evidence-upload.ts` SPECIFICALLY, not as a class. Any other
+   * module importing either one still fails."* ⚠️ There is deliberately NO
+   * pattern, NO directory prefix and NO `lib/frontend/**` allowance here — a
+   * second client module reaching a Supabase target must come back for its own
+   * ruling, exactly as this one did. `T-P44c` below PLANTS an unauthorized
+   * import and requires the guard to still fail on it.
+   */
+  // ⚠️ THE SETS AND THE REGEXES LIVE AT MODULE SCOPE (above), NOT HERE. The
+  // first draft of this widening declared them inside this block and its own
+  // control then re-declared COPIES -- a control with a private copy of the
+  // thing it guards, which is the exact defect its comment warned about. They
+  // were hoisted so `T-P44c` shares the OBJECTS: a future edit that loosens
+  // either is now caught by the control instead of sailing past it.
 
   if (readRequired(id, BROWSER_MODULE) === null || readRequired(id, DECISION_MODULE) === null) {
     // readRequired already recorded the failure.
@@ -687,17 +733,70 @@ const BROWSER_MODULE = 'lib/supabase/browser.ts'
     }
     const strayConfigImporters = configImporters.filter((relative) => !ALLOWED_CONFIG_IMPORTERS.has(relative))
     if (strayConfigImporters.length > 0) {
-      fail(id, DECISION_MODULE + ' is imported by a module outside the four permitted ones: ' + strayConfigImporters.join(', '))
+      fail(id, DECISION_MODULE + ' is imported by a module outside the five permitted ones (the four original + the D-5 client-direct upload): ' + strayConfigImporters.join(', '))
     }
-    if (browserImporters.length > 0) {
-      fail(id, BROWSER_MODULE + ' is no longer unimported: ' + browserImporters.join(', ') + ' -- a disposable build would inline the disposable URL and publishable key into a browser bundle')
+    const strayBrowserImporters = browserImporters.filter(
+      (relative) => !ALLOWED_BROWSER_IMPORTERS.has(relative.replace(/ \(names .*\)$/, '')),
+    )
+    if (strayBrowserImporters.length > 0) {
+      fail(id, BROWSER_MODULE + ' is imported outside the one permitted module (' + EVIDENCE_UPLOAD + '): ' + strayBrowserImporters.join(', ') + ' -- a disposable build would inline the disposable URL and publishable key into a browser bundle')
     }
     if (failures === before) {
       pass(
         id,
-        'no client module graph can reach a Supabase target: NEXT_PUBLIC_SUPABASE_* is read only in ' + DECISION_MODULE + ' and server/platform/env.ts, ' + DECISION_MODULE + ' is imported only by the four permitted modules, and ' + BROWSER_MODULE + ' is imported by nothing at all (' + SOURCE_FILES.length + ' files walked)',
+        'no UNAUTHORIZED client module graph can reach a Supabase target: NEXT_PUBLIC_SUPABASE_* is read only in ' + DECISION_MODULE + ' and server/platform/env.ts, ' + DECISION_MODULE + ' is imported only by the five permitted modules, and ' + BROWSER_MODULE + ' is imported only by ' + EVIDENCE_UPLOAD + ' -- the D-5 client-direct upload, a bounded ADR-3 exception ruled by the Operator (' + SOURCE_FILES.length + ' files walked)',
       )
     }
+  }
+}
+
+{
+  const id = 'T-P44c'
+  // ---------------------------------------------------------------------
+  // ⛔ THE PLANTED CONTROL — the Operator's condition on widening T-P44.
+  // ---------------------------------------------------------------------
+  // *"Prove the guard still fires by planting an unauthorized import."*
+  //
+  // ⚠️ THE WIDENING AND ITS CONTROL SHIP TOGETHER, because an allow-list
+  // that has just grown is at its most dangerous when nobody has checked it
+  // still refuses anything. This runs the SAME two detectors T-P44 uses,
+  // over a SYNTHETIC file that is never written to disk, and requires BOTH
+  // to reject it.
+  //
+  // ⛔ It is deliberately NOT a re-implementation: the regexes and the sets
+  // are the ones above, so a future edit that loosens either is caught here
+  // rather than sailing past a control with its own private copy.
+  const before = failures
+  const PLANTED = 'features/some-future/unauthorized-client.tsx'
+  const plantedSource = [
+    "import { createBrowserSupabaseClient } from '@/lib/supabase/browser'",
+    "import { getPublicSupabaseConfig } from '@/lib/supabase/public-config'",
+  ].join('\n')
+
+  // ⛔ THE SHARED OBJECTS, not copies of them.
+  const detectorSeesConfig = CONFIG_IMPORT.test(plantedSource)
+  const detectorSeesBrowser = BROWSER_IMPORT.test(plantedSource)
+  const configRejects = !ALLOWED_CONFIG_IMPORTERS.has(PLANTED)
+  const browserRejects = !ALLOWED_BROWSER_IMPORTERS.has(PLANTED)
+  /*
+   * ⚠️ AND THE POSITIVE HALF: the one authorized module must be ADMITTED, or
+   * *"the guard still fires"* would be equally true of a guard that rejects
+   * EVERYTHING — including the import the Operator just authorized.
+   */
+  const authorizedAdmitted =
+    ALLOWED_CONFIG_IMPORTERS.has(EVIDENCE_UPLOAD) && ALLOWED_BROWSER_IMPORTERS.has(EVIDENCE_UPLOAD)
+
+  if (!detectorSeesConfig || !detectorSeesBrowser) {
+    fail(id, 'the planted module was not even SEEN by the import detectors, so the rejection below would be meaningless')
+  } else if (!configRejects || !browserRejects) {
+    fail(id, 'an UNAUTHORIZED module was admitted by the widened allow-list -- the T-P44 widening has become a class exemption')
+  } else if (!authorizedAdmitted) {
+    fail(id, 'the AUTHORIZED module is not admitted -- the widening did not actually land')
+  } else if (failures === before) {
+    pass(
+      id,
+      'the widening is BOUNDED TO ONE FILE: a planted ' + PLANTED + ' importing both modules is SEEN by both detectors and REJECTED by both allow-lists, while lib/frontend/evidence-upload.ts alone is admitted -- so T-P44 still fires and did not become a class exemption',
+    )
   }
 }
 

@@ -7883,3 +7883,75 @@ Correcting only the handoff reproduces the defect, because the next derivation r
 again.
 
 **Next step:** `B-P2-3-1` needs a ruling; then `P2-4` (`13` Class Overview) in plan order.
+
+---
+
+## 2026-08-13 — two Operator rulings at the `P2-3` boundary
+
+**Branch:** `develop`. **Starting HEAD:** `82488ee`.
+
+### 1. ✅ `T-P44` — BOUNDED §12 AUTHORIZATION, and `B-P2-3-1` IS CLOSED
+
+**Operator:** *"Extend the allow-list to admit `evidence-upload.ts`'s imports of `browser.ts` and
+`public-config.ts` … The guard's premise has lapsed, and **it lapsed by authorization rather than
+by drift** … I authorized the client-direct upload path as a bounded **ADR-3 exception**, and this
+import is a consequence of that ruling."*
+
+⛔ **EXTENDED FOR ONE FILE, NOT FOR A CLASS**, exactly as constrained. There is deliberately **no
+pattern, no directory prefix and no `lib/frontend/**` allowance** — a second client module reaching
+a Supabase target must come back for its own ruling.
+
+**Proved twice that the guard still fires:**
+
+- **`T-P44c`** plants a synthetic module importing both, and requires **both detectors to SEE it**,
+  **both allow-lists to REJECT it**, and — the half that is easy to forget — the **authorized
+  module to be ADMITTED**. Without that positive leg, *"the guard still fires"* would be equally
+  true of a guard that rejects everything, **including the import just authorized**.
+- **A REAL FILE WAS PLANTED ON DISK** at `features/__tp44probe/unauthorized-client.ts`, the suite
+  measured **exit 1** naming it in both failure messages, the file was removed, and the suite
+  measured **exit 0**. ▶ That is the end-to-end proof the synthetic plant cannot give: it shows
+  the **file walk** actually reaches such a path.
+
+⚠️ **MY FIRST DRAFT OF THE CONTROL HELD PRIVATE COPIES of the allow-lists and the regexes**,
+while its own comment claimed it shared them — **a control with a private copy of the thing it
+guards, which is the precise defect that comment warns about.** The sets and both regexes were
+hoisted to module scope so `T-P44` and `T-P44c` share **one** definition; a future edit that
+loosens either is now caught by the control instead of sailing past it. ▶ **Caught by reading my
+own comment against my own code**, which is the only reason it did not ship.
+
+The `T-P44` failure message also still said *"outside the **four** permitted ones"* after the list
+became five — corrected, because **a leg whose message and measurement disagree is the shape this
+project has been bitten by repeatedly**.
+
+### 2. ⛔ INBOUND CONTROL TO `27` — WAIT FOR SCREEN `13`
+
+**Operator:** *"Do not invent an affordance on `12`. No ratified frame draws one, and building it
+would invent a visible element the frame lacks — **the same rule that gave screen `33` no trainer
+row**. When `P2-4` ships `13`, tell me what that frame actually draws and I will rule where Edit
+lives. **If `13` draws no Edit control either, that is a finding and comes to me as one** — do not
+resolve it by placing the control wherever it seems natural."*
+
+Recorded as `AWAITING_OPERATOR`, deferred to `P2-4`, with the reporting obligation written into the
+carried-open row so it cannot be discharged by inference.
+
+### 3. ✅ A DISCIPLINE PROMOTED TO A STANDING RULE — prohibition **17**
+
+**Operator:** *"A disabled control reads 'not wired yet'; an absent one reads 'not permitted'.
+Where a ruling forbids a capability, the control must be **ABSENT**, not greyed."*
+
+⚠️ **Recorded WITH its boundary against the inert-control treatment**, because the two look
+identical from a distance and mean opposite things: an **inert** control is right when the target
+is merely **not yet built** and will go live when it exists (`Add Class` on `12`, which did exactly
+that at `P2-2`); **absence** is right when the capability is **refused**. Canonical case: screen
+`27`'s day strip.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `test:runtime-profile` | ✅ **exit 0** — `T-P44` and `T-P44c` both PASS; **exit 1 reproduced with a real planted file and exit 0 after its removal** |
+| `tsc` · `eslint` · `prove:encoding` · `prove:no-secrets` | ✅ **all 0** |
+| **VISUAL acceptance, screens `12` · `26` · `27`** | ⛔ **`NOT-RUN` on all three**, unchanged and still not claimed |
+
+**Next step:** `P2-4` — screen `13` Class Overview — **and it must report what `13`'s frame actually
+draws for an Edit control.**
