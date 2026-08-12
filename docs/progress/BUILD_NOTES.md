@@ -8175,3 +8175,115 @@ corrected my own §12 record and the new `CLAUDE.md` note, both of which initial
 cause was documentary silence.
 
 ▶ **Answer to the Operator's question: FOUR screens, not sixteen.**
+
+---
+
+## 2026-08-13 — AUTHORIZATION A · the four-screen rebuild, and the gate that closes the method defect
+
+**Branch:** `develop`, main worktree. **Starting HEAD:** `5cd22dc`.
+**Authorization:** Operator, 2026-08-13, in **two parts, deliberately not mixed** — `A` layout
+and presentation; `B` everything blocked on data, **not built and no placeholders**.
+
+### ⛔ CLOSE THE GAP FIRST
+
+> *"The rule was in §3 of the plan you were executing, and no proof measures §3 compliance. That
+> is the gap. CLOSE IT FIRST … A phase must be able to DEMONSTRATE it opened the `.png`, the
+> `.html` and the numbered pack's `screen.md` — NOT ASSERT IT. Tell me how you would measure
+> that before building it; if it cannot be measured honestly, say so rather than adding a check
+> that only records a claim."*
+
+**The answer given before building: two of three are measurable, one is not.**
+
+* **`.html` — PROVABLE.** It is the only artefact carrying **computed values**. A phase cites
+  values; `AR-3` verifies each occurs **literally** in that pack's `.html`, and `AR-5` verifies
+  each is **USED in the component with comments stripped first**. ▶ You cannot cite a substring
+  of a file you have not opened, and you cannot USE it without deriving from it.
+* **`screen.md` — PROVABLE**, same mechanism: an exact quotation verified at source.
+* **`.png` — NOT MECHANICALLY PROVABLE, AND THE SUITE SAYS SO ON EVERY RUN.** An image leaves
+  no derivable textual residue; `atime` proves *"something touched the file"*, never *"a session
+  looked at it"*; a declaration would be exactly the check the Operator refused. ▶ **The honest
+  bound:** this corpus's `.html` is a full render of the same frame, so proving the `.html` was
+  read covers **content and geometry**. What stays unproven is narrow and real — the `.png` is
+  the tie-break authority **where render and image disagree** (font fallback, clipping,
+  overflow).
+
+**`AR-4` is the leg that would have caught the defect**: ≥6 distinct cited values, **≥2
+FRACTIONAL** (`1.30px`, `9.50px`, `2.40px`, `0.60px`), and **none obtainable from the prose
+note**. A note-derived build cannot produce a fractional pixel value.
+
+**Six controls, `AR-7a`…`f`**, must reject a fabricated value, an all-integer set, a rounding
+attempt and a comment-only value — **and ACCEPT a real one**, because *"the guard fires"* is
+equally true of a predicate that rejects everything.
+
+⛔ **NOT BACK-FILLED.** Screens built before the rule sit in `UNMEASURED` with **no citations**.
+Back-filling would mean opening the `.html` **today** and recording it as though the building
+phase had — **fabricating a historical record**, the precise failure the rule prevents.
+
+⚠️ **`AR-1` FAILED BY CONSTRUCTION AT EACH INTERMEDIATE COMMIT** and was reported that way in
+each message rather than suppressed. It went green at the fourth screen.
+
+### The four screens
+
+| Screen | What the `.png` gave that the note could not |
+|---|---|
+| `12` | ONE `space-between` toolbar row — the level pills and `Add Class` sit **beside** the heading, not below it. A `20px` 3-column grid; cards at `16px` radius; a `···` glyph; a two-slot footer under a 1px divider |
+| `13` | **`✎ Edit class` in the header card** · two stat tiles · a lessons **TABLE** with five columns · a footer of two controls **inside** the card |
+| `26` | **ONE card**, not three, with 1px hairlines and the actions inside it |
+| `27` | Layout-identical to `26` — and it **DOES draw the day strip and the trainer `-` control** |
+
+### ⛔ WHAT MEASURING CORRECTED, AND WHAT IT DID NOT
+
+**Corrected — two claims about screen `13`:**
+
+1. *"This frame draws NO Edit control."* **FALSE.** The `.png` draws it in the header card,
+   top-right. A **DESIGN GAP** had been ruled on that premise; building the control **closes
+   it**. `TRUE-DRIFT`.
+2. *"The frame's own note lists B.E.S.T. Ratings … and this is governance overriding a frame."*
+   True of the **NOTE**. The frame draws **no rating anywhere** — it draws a per-lesson `FOCUS`
+   chip column. ⛔ **The bar is unchanged and still absolute**; its ground moves from *"we
+   override a frame that draws ratings"* to *"the frame draws none, and none may be added"*.
+
+**And the same shape on `27`, in reverse.** The day strip and the `-` control were recorded
+absent **on note-derived evidence**. The frame draws both. Their absence is a **real divergence**
+and `EXPECTED / REQUIRED` — removing sessions has no cancel/delete audit string, unassigning a
+persisted session has no ratified string. ▶ `26` builds the same glyph as `Remove` because
+there it clears a FORM CHOICE before a save. **Same glyph, different act.**
+
+**NOT corrected — nothing about what any screen may DO.** Every refusal, every registered
+omission and every governance-mandated addition stands exactly as ruled.
+
+### ⚠️ ONE DIVERGENCE FROM THE BRIEF, REPORTED RATHER THAN RESOLVED
+
+The brief asked for *"the trainer row with avatar and subtitle"*. The subtitle is **OMITTED** on
+both `26` and `27`: the frame's `Public Speaking · Employee T-1001` is **programme** (`C-14`
+records it as having no entity) plus the **employee ID** (Authorization B). Both halves are
+ruled out, so hero 0B omits the element and `TrainerChoiceDto` carries no field for it.
+
+### ⚠️ THREE PINS MOVED. EVERY ONE REWRITTEN, NONE DELETED
+
+`S3-M2` pinned `Every Class Module running at this centre` and `Actively enrolled in this Class
+Module` — **INVENTED COPY the frame does not draw**. ▶ **The leg was green while measuring the
+opposite of faithfulness to the frame.** `S3-M5` pinned `'Lessons'`, this build's own `h2`.
+Both replaced with strings the frame itself draws. `LEARNERS` is pinned **in its PAINTED form**,
+because `innerText` reports the CSS-transformed text and a render tier measures what is painted.
+
+### No migration
+
+`attendance` carries `attendance_select_management` (centre-scoped via
+`app_has_active_membership`) **and** an `authenticated` SELECT grant — **measured at HEAD before
+the read was written**. So screen `13`'s header is a direct RLS-scoped read like `12`, while its
+report grid still needs the two `SECURITY DEFINER` reads, because `reports` and `observations`
+carry **zero of either**. ⛔ `attendancePercent` is `null`, never `0`, when nothing was recorded,
+and the surface then **omits the whole tile** (hero 0B).
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:artefact-read` | ✅ **exit 0 — 30 PASS · 0 FAIL** across all four screens |
+| Seven portal suites · `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` · `prove:encoding` · `prove:no-secrets` · `prove:stage2-routes` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`** |
+| **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four**, and **before this rebuild there was no basis on which it could pass** |
+| Census | **UNMOVED** — 30 migrations · 29 tables · 56 functions · 12 enums · 30 policies · registry 21 |
+
+**Next step:** the Operator walks all four screens before `P2-5`.

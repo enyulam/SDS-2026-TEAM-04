@@ -1135,7 +1135,7 @@ inert treatment was chosen for.
 | ⛔ **`09` refuses its canonical route** (`C2C-007`) | `OPEN`, measured | `P2-21`, first |
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
 | ~~⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN**~~ ✅ **CLOSED** | ~~`OPEN` · **Operator decision required**~~ ✅ **RULED 2026-08-13** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section. ✅ **RULED AND CLOSED 2026-08-13 — BOUNDED §12 AUTHORIZATION.** The Operator authorized extending the allow-list **for `evidence-upload.ts` SPECIFICALLY, not as a class**, on the ground that **the premise lapsed BY AUTHORIZATION, NOT BY DRIFT**: `T-P44` pinned those modules as unimported when nothing imported them, and `D-5`'s client-direct upload — a bounded **ADR-3 exception** — legitimately does. ⛔ **Any other module importing either one still fails**, proved TWICE: `T-P44c` plants a synthetic module and requires **both detectors to see it and both allow-lists to reject it** while the one authorized module is **admitted**; and a **real file was planted on disk**, measured **exit 1**, and removed, with **exit 0** after. ⚠️ **The control shares the LIVE sets and regexes** — the first draft gave it private copies, which is the very defect its own comment warned about. ▶ **Operator: *"A guard whose premise lapsed still needs a ruling, because 'the premise lapsed' is exactly what someone says when they want the guard out of the way."*** |
-| ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ~~✅ **OPERATOR RULING: WAIT FOR SCREEN `13`** … ⛔ **If `13` draws no Edit control either, THAT IS A FINDING**~~ ⛔ **THE PREMISE WAS FALSE AND THE FINDING IS WITHDRAWN — 2026-08-13.** **`Edit class` IS in frame `13`'s HEADER CARD**, top-right, beside ASSIGNED TRAINER and ASSISTANT. The *"no inbound affordance"* report was a `grep` over the pack's **prose note**, never a reading of the frame (§12). ▶ **This is `TRUE-DRIFT`, not a design gap**: the control is drawn and simply was not built. The Operator rules the rebuild |
+| ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ~~✅ **OPERATOR RULING: WAIT FOR SCREEN `13`** … ⛔ **If `13` draws no Edit control either, THAT IS A FINDING**~~ ✅ **CLOSED 2026-08-13 BY THE AUTHORIZATION-A REBUILD — THE CONTROL IS BUILT AND WIRED.** ~~THE PREMISE WAS FALSE AND THE FINDING IS WITHDRAWN.~~ **`Edit class` IS in frame `13`'s HEADER CARD**, top-right, beside ASSIGNED TRAINER and ASSISTANT. The *"no inbound affordance"* report was a `grep` over the pack's **prose note**, never a reading of the frame (§12). ▶ **This is `TRUE-DRIFT`, not a design gap**: the control is drawn and simply was not built. The Operator rules the rebuild |
 | ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All FOUR Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), `13` (`S3-M5-r`), plus `S3-M2-omissions`, `S3-M4-refusals` and `S3-M5-bars` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance on all four was NOT MERELY `NOT-RUN` — THERE WAS NO BASIS ON WHICH IT COULD PASS**, because every one of these layouts was derived from a prose note rather than from the `.png`/`.html` (§12). A DOM-text proof never becomes a visual acceptance, and in this case it was not even evidence toward one |
 
 ---
@@ -1250,6 +1250,73 @@ exists to prevent. A screen leaves `UNMEASURED` only by being **built or rebuilt
 ⚠️ **`AR-1` FAILS AT AN INTERMEDIATE SCREEN BOUNDARY, BY CONSTRUCTION**, until all four
 Authorization-A screens carry a block. That is reported as *"screen N green, AR-1 outstanding"*
 at each commit — **never** as a green suite.
+
+
+---
+
+## ✅ AUTHORIZATION A — THE FOUR-SCREEN REBUILD (2026-08-13) · **COMPLETE**
+
+**Operator ruling, in two authorizations, deliberately not mixed.** `A` = layout and
+presentation, every `(c)` item needing no data that does not exist. `B` = everything blocked on
+data (FOCUS chips, per-row Stats, the footer targets, the employee ID) — **not built, and no
+placeholders**.
+
+### ⛔ THE GAP WAS CLOSED FIRST — see §12.1
+
+`prove:artefact-read` now measures §3 compliance mechanically. **`AR-1` failed by construction
+at each intermediate screen boundary** and was reported that way in each commit; it went green
+at the fourth. The suite prints its **residual limit on every run**: the `.png` is not
+mechanically provable.
+
+### What each screen gained
+
+| Screen | Built to the frame | Reported divergence |
+|---|---|---|
+| **`12`** | one `space-between` toolbar row (heading + count pill left, four level pills and `Add Class` right) · `20px` 3-column grid · cards at `16px` radius with a `13px` tile chip · the `···` overflow control · the whole card as the affordance to `13` · the `Students` stat in the frame's FOOTER position below the 1px divider | ⛔ **The `···` MENU OPENS TO NOTHING** — the frame draws the glyph and defines **no items**, so the control is real, operable, and says in words that the frame defines no actions. The invented `View class overview` button is **removed** |
+| **`13`** | the header card entire — `58px` chip at `15px` radius, title, `Active` badge, meta line, `ASSIGNED TRAINER`, **`Edit class`** · the two stat tiles (`LEARNERS`, `ATTENDANCE`) · the lessons **TABLE** replacing the `<ul>` · the footer as CONTROLS rather than prose | ⚠️ **TWO EARLIER CLAIMS CORRECTED AT SOURCE** — see below |
+| **`26`** | **ONE card, not three**, with the frame's 1px hairlines and `Cancel` / `Save Class` INSIDE it · the row structure · day chips inline at `9px 15px` · the `230px` search box · the trainer row with avatar and trailing control | ⚠️ **THE TRAINER SUBTITLE IS OMITTED**, and this is reported rather than resolved locally |
+| **`27`** | the same one-card structure (the frame is layout-identical to `26`) · read-only session list in the day strip's place · trainer row · footer inside the card | ⛔ **All three refusals unchanged — and their EVIDENCE corrected** |
+
+### ⛔ TWO CLAIMS CORRECTED AT SOURCE ON SCREEN `13`
+
+1. **The Edit control.** `P2-4` reported *"this frame draws NO Edit control"*, and a **DESIGN
+   GAP** was ruled on that premise. ⛔ **THE PREMISE WAS FALSE** — `Management - Class
+   Overview.png` draws **`✎ Edit class`** in the header card. The claim was a `grep` over the
+   pack's prose note. ▶ **`TRUE-DRIFT`, and now built.**
+2. **The ratings claim.** `P2-4` recorded *"the frame's own note lists B.E.S.T. Ratings … NOT
+   BUILT, and this is governance overriding a frame"*. True of the **NOTE**. Measured against
+   the `.png`, **the frame draws no rating anywhere** — it draws a per-lesson `FOCUS` chip
+   column. ⛔ **The bar is unchanged and still absolute**; only its stated ground moves.
+
+⚠️ **THE SAME SHAPE ON `27`, IN REVERSE.** The day strip and the trainer row's `-` control
+were recorded as absent **on evidence taken from the note**. Measured: **the `.png` DRAWS BOTH.**
+Their absence is a REAL divergence and is `EXPECTED / REQUIRED` — removing sessions has no
+cancel/delete audit string, and unassigning a persisted session has no ratified string either.
+▶ Screen `26` builds the same `-` glyph as `Remove` because there it clears a FORM CHOICE
+before anything is saved. **Same glyph, different act.**
+
+### ⚠️ THREE PINS MOVED, AND EVERY ONE WAS REWRITTEN RATHER THAN DELETED
+
+* **`S3-M2`** — `Every Class Module running at this centre` and `Actively enrolled in this Class
+  Module` were **INVENTED COPY**; the `.png` draws neither. ▶ Pinning invented copy made the leg
+  green **while measuring the opposite of faithfulness to the frame**. Replaced with strings the
+  frame itself draws.
+* **`S3-M5`** — `'Lessons'` was this build's own `h2`; the frame's lesson card carries **column
+  headers**. Replaced with `LEARNERS` and `Edit class`.
+* **`LEARNERS` is pinned IN CAPS** because that is what the page PAINTS: the markup says
+  `Learners` and CSS `text-transform` uppercases it, and `innerText` reports the transformed
+  string. A render tier should measure what is painted.
+
+### Gates at the boundary
+
+| Gate | Result |
+|---|---|
+| `prove:artefact-read` | ✅ **exit 0 — 30 PASS · 0 FAIL**, all four screens, six controls green |
+| Every portal suite (`p2-1`, `-composed`, `p2-2`, `p2-2-create`, `p2-2b`, `p2-3`, `p2-4`) | ✅ **all exit 0** |
+| `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` · `prove:encoding` · `prove:no-secrets` · `prove:stage2-routes` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`**, including `S3-M2-omissions`, `S3-M5-bars` and `S3-M4-refusals` on the painted pages |
+| **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four.** A rendered DOM-text proof is not a visual acceptance, **and this rebuild is exactly why** |
+| Migration / schema | ⛔ **NONE.** No table, column, enum, policy, grant or audit string. `attendance` was already readable by management, measured at HEAD |
 
 ---
 

@@ -3,9 +3,8 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
-import { Field, Select, TextInput } from "@/components/ui/field";
+import { Field, SearchInput, Select, TextInput } from "@/components/ui/field";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -18,10 +17,23 @@ import type {
 } from "@/lib/frontend/contracts/physical-test";
 
 /**
- * Screen 27 — Management Edit Class (PORTAL COMPLETION PLAN phase `P2-3`).
+ * Screen 27 — Management Edit Class (`P2-3`; REBUILT 2026-08-13 under Operator AUTHORIZATION A).
  *
  * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Management - Edit Class/`
  * (Amendment 007 A-056). No pack-local `reference.png`, which is not a gap (`CLAUDE.md` §7.4).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ WHY IT WAS REBUILT, AND WHAT THE `.png` ACTUALLY DRAWS
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * The first build derived its layout from the pack's PROSE NOTE; the `.png` and `.html` were
+ * never opened (`CLAUDE.md` §7.4.1, plan §12). ▶ It drew THREE cards with the actions floating
+ * below them. **This frame is layout-identical to screen `26`**: ONE card at
+ * `padding: 24px 26px`, `border-radius: 18px`, `gap: 20px`, three sections divided by 1px
+ * hairlines, and `Cancel` / `Save Class` INSIDE the card below a final hairline. Only the
+ * title and breadcrumb differ (`Edit Class` · `Classes / Junior Public Speaking / Edit`).
+ *
+ * ⚠️ MEASURING THE FRAME CHANGED NOTHING ABOUT THE THREE REFUSALS BELOW — it changed where the
+ * surviving controls SIT. Each refusal was, and remains, a fact about the audit registry.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⛔ `27` CAN CHANGE A CLASS. IT CANNOT DESTROY ONE — AND THAT IS THE AUDIT REGISTRY'S SHAPE,
@@ -38,10 +50,22 @@ import type {
  *    ▶ **ABSENT rather than PRESENT-AND-DISABLED**, deliberately: a greyed day chip on an Edit
  *    form reads as *"not wired yet"*, and this is *"not permitted"*. The two must not look
  *    alike. The dates that exist are shown read-only instead, so the schedule is still legible.
+ *    ⚠️ **MEASURED AT THE REBUILD: the `.png` DOES draw the strip, Tue and Thu active.** Its
+ *    absence here is therefore a real divergence from the frame and is `EXPECTED / REQUIRED`,
+ *    never a visual regression — the previous record asserted this from the note, which cannot
+ *    support a claim about what a frame draws either way.
  *
  * 2. ⛔ **NO UNASSIGN.** The frame's `-` beside the trainer would leave a session with nobody,
  *    which is a different action with no ratified string. Choosing a DIFFERENT trainer is
- *    reassignment and works, through the `P2-2b` RPC.
+ *    reassignment and works, through the `P2-2b` RPC. ⚠️ Measured at the rebuild: the `.png`
+ *    DOES draw that trailing control, so its absence is a real divergence, `EXPECTED /
+ *    REQUIRED`. ▶ Screen `26` builds the same glyph as `Remove` because there it clears a FORM
+ *    CHOICE before anything is saved; here it would clear a PERSISTED assignment. Same glyph,
+ *    different act — which is exactly why one is built and the other is absent.
+ *
+ * 4. ⛔ **NO TRAINER-ROW SUBTITLE.** The frame's `Public Speaking · Employee T-1001` is
+ *    programme (`C-14`: no entity) plus the employee ID (Authorization B). Both halves are
+ *    ruled out, so hero 0B omits the element; `TrainerChoiceDto` carries no field for it.
  *
  * 3. ⛔ **NO `Class code`, `Capacity` OR `Program`** — `C-14` omits all three, and "programme"
  *    has no entity (`A-016` forbids a hidden `classes` entity between Class Grade and Class
@@ -222,201 +246,242 @@ export function ManagementEditClass({ classModuleId }: { readonly classModuleId:
         </FeedbackBanner>
       )}
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-6">
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Class Details</h2>
-            <p className="mt-0.5 text-small text-ink">Basic information about this class.</p>
-          </div>
+      {/*
+        ⛔ ONE CARD, NOT THREE — the frame's `padding: 24px 26px`, `border-radius: 18px`,
+        `gap: 20px`, with its own 1px hairlines and the actions INSIDE it.
+      */}
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-[20px] rounded-[18px] border border-line bg-surface px-[26px] py-6 shadow-[var(--shadow-card)]"
+      >
+        <SectionHeading title="Class Details" subtitle="Basic information about this class" />
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id={`${formId}-title`} label="Class name" required>
-              <TextInput
-                id={`${formId}-title`}
-                value={title}
-                maxLength={120}
-                autoComplete="off"
-                onChange={(event) => setTitle(event.target.value)}
-              />
-            </Field>
-
-            <Field id={`${formId}-grade`} label="Level" required>
-              <Select
-                id={`${formId}-grade`}
-                value={gradeId}
-                onChange={(event) => setGradeId(event.target.value)}
-              >
-                {data.options.grades.map((grade) => (
-                  <option key={grade.classGradeId} value={grade.classGradeId}>
-                    {grade.displayName}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <Field
-              id={`${formId}-room`}
-              label="Room"
-              hint="Applies to every session of this class."
-            >
-              <TextInput
-                id={`${formId}-room`}
-                value={room}
-                maxLength={80}
-                autoComplete="off"
-                onChange={(event) => setRoom(event.target.value)}
-              />
-            </Field>
-
-            <Field id={`${formId}-term`} label="Term" hint="Applies to every session.">
-              <Select
-                id={`${formId}-term`}
-                value={termId}
-                onChange={(event) => setTermId(event.target.value)}
-              >
-                <option value="">No term</option>
-                {data.options.terms.map((term) => (
-                  <option key={term.termId} value={term.termId}>
-                    {term.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-        </section>
-
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Schedule</h2>
-            <p className="mt-0.5 text-small text-ink">
-              Times apply to every session. The dates themselves are shown below and are not
-              editable here.
-            </p>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id={`${formId}-start`} label="Start time">
-              <TextInput
-                id={`${formId}-start`}
-                type="time"
-                value={startTime}
-                onChange={(event) => setStartTime(event.target.value)}
-              />
-            </Field>
-            <Field
-              id={`${formId}-end`}
-              label="End time"
-              error={timesInverted ? "The end time must be after the start time." : undefined}
-            >
-              <TextInput
-                id={`${formId}-end`}
-                type="time"
-                value={endTime}
-                invalid={timesInverted}
-                onChange={(event) => setEndTime(event.target.value)}
-              />
-            </Field>
-          </div>
-
-          {/*
-            ⛔ THE FRAME'S Sun–Sat DAY STRIP IS ABSENT, NOT DISABLED, AND THAT IS THE POINT.
-            Changing which weekdays a class meets DESTROYS sessions, and no cancel or delete
-            audit string exists. A greyed chip would read as "not wired yet"; an absent control
-            with the dates listed read-only reads as what it is. The reason is stated on the
-            surface rather than left as a silent hole.
-          */}
-          <div>
-            <h3 className="text-small font-bold text-ink-strong">
-              Sessions ({data.editing.sessions.length})
-            </h3>
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {data.editing.sessions.map((session) => (
-                <li
-                  key={session.classSessionId}
-                  className="rounded-field border border-line bg-surface-muted px-3 py-1.5 text-small text-ink-strong"
-                >
-                  {session.sessionDate}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-small text-ink">
-              Adding or removing sessions is not available on this screen. Removing one would
-              discard any attendance, observation or report already recorded against it.
-            </p>
-          </div>
-        </section>
-
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Assigned Trainer</h2>
-            <p className="mt-0.5 text-small text-ink">
-              Choosing a different trainer reassigns every session of this class.
-            </p>
-          </div>
-
-          <Field id={`${formId}-trainer-search`} label="Search trainer">
+        {/* ⛔ `Class code`, `Program` and `Capacity` are omitted by `C-14`; the rest close up. */}
+        <div className="grid gap-[16px] sm:grid-cols-2">
+          <Field id={`${formId}-title`} label="Class name" required>
             <TextInput
-              id={`${formId}-trainer-search`}
-              type="search"
-              value={trainerQuery}
+              id={`${formId}-title`}
+              value={title}
+              maxLength={120}
               autoComplete="off"
-              onChange={(event) => setTrainerQuery(event.target.value)}
+              onChange={(event) => setTitle(event.target.value)}
             />
           </Field>
 
-          <ul aria-label="Trainers" className="flex flex-col gap-2">
-            {visibleTrainers.map((trainer) => {
-              const selected = trainerId === trainer.trainerMembershipId;
-              return (
-                <li key={trainer.trainerMembershipId}>
-                  {/*
-                    ⛔ SELECT ONLY — THERE IS NO DESELECT HERE, unlike screen `26`. On `26`
-                    deselecting means "create it unassigned"; here it would mean UNASSIGNING a
-                    session that already has a trainer, which is a different governed action
-                    with no ratified string.
-                  */}
-                  <button
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setTrainerId(trainer.trainerMembershipId)}
-                    className={`flex w-full min-h-11 items-center gap-3 rounded-card border px-4 py-3 text-left ${
-                      selected
-                        ? "border-brand-700 bg-brand-50"
-                        : "border-line bg-surface-muted hover:border-brand-700"
-                    }`}
-                  >
-                    <Avatar displayName={trainer.displayName} size="small" />
-                    <span className="text-[0.8125rem] font-semibold text-ink-strong">
-                      {trainer.displayName}
-                    </span>
-                    <span className="ms-auto text-small text-ink">
-                      {selected ? "Assigned" : "Assign"}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+          <Field id={`${formId}-grade`} label="Level" required>
+            <Select
+              id={`${formId}-grade`}
+              value={gradeId}
+              onChange={(event) => setGradeId(event.target.value)}
+            >
+              {data.options.grades.map((grade) => (
+                <option key={grade.classGradeId} value={grade.classGradeId}>
+                  {grade.displayName}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field
+            id={`${formId}-room`}
+            label="Room"
+            hint="Applies to every session of this class."
+          >
+            <TextInput
+              id={`${formId}-room`}
+              value={room}
+              maxLength={80}
+              autoComplete="off"
+              onChange={(event) => setRoom(event.target.value)}
+            />
+          </Field>
+
+          <Field id={`${formId}-term`} label="Term" hint="Applies to every session.">
+            <Select
+              id={`${formId}-term`}
+              value={termId}
+              onChange={(event) => setTermId(event.target.value)}
+            >
+              <option value="">No term</option>
+              {data.options.terms.map((term) => (
+                <option key={term.termId} value={term.termId}>
+                  {term.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+
+        <Hairline />
+
+        <SectionHeading
+          title="Schedule"
+          subtitle="Times apply to every session. The dates themselves are not editable here."
+        />
+
+        {/*
+          ⛔ THE FRAME'S Sun–Sat DAY STRIP IS ABSENT, NOT DISABLED, AND THAT IS THE POINT.
+          Measured at the rebuild: the `.png` DOES draw it, with Tue and Thu active. Changing
+          which weekdays a class meets DESTROYS sessions, and no cancel or delete audit string
+          exists. A greyed chip would read as "not wired yet"; this is "not permitted", and the
+          two must not look alike. ▶ The dates that exist are listed read-only in its place, so
+          the schedule stays legible, and the reason is stated on the surface.
+        */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-[12px] font-semibold text-ink-strong">
+            Sessions ({data.editing.sessions.length})
+          </h3>
+          <ul className="flex flex-wrap gap-2">
+            {data.editing.sessions.map((session) => (
+              <li
+                key={session.classSessionId}
+                className="rounded-[10px] border border-line bg-surface-muted px-[15px] py-2 text-[12.5px] font-semibold text-ink-muted"
+              >
+                {session.sessionDate}
+              </li>
+            ))}
           </ul>
-
-          <p className="text-small text-ink" role="status">
-            {trainerId === ""
-              ? "No single trainer covers every session of this class. Choosing one assigns all of them."
-              : "Removing a trainer entirely is not available on this screen."}
+          <p className="text-[11.5px] text-ink-muted">
+            Adding or removing sessions is not available on this screen. Removing one would
+            discard any attendance, observation or report already recorded against it.
           </p>
-        </section>
+        </div>
 
+        <div className="grid gap-[16px] sm:grid-cols-2">
+          {/*
+            ⚠️ Native time inputs where the frame draws dropdowns — the screen `26` reason: no
+            slot vocabulary exists to enumerate, and inventing one would be a fabricated rule
+            about when this academy teaches (`A-022`).
+          */}
+          <Field id={`${formId}-start`} label="Start time">
+            <TextInput
+              id={`${formId}-start`}
+              type="time"
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
+            />
+          </Field>
+          <Field
+            id={`${formId}-end`}
+            label="End time"
+            error={timesInverted ? "The end time must be after the start time." : undefined}
+          >
+            <TextInput
+              id={`${formId}-end`}
+              type="time"
+              value={endTime}
+              invalid={timesInverted}
+              onChange={(event) => setEndTime(event.target.value)}
+            />
+          </Field>
+        </div>
+
+        <Hairline />
+
+        <SectionHeading title="Assigned Trainer" />
+
+        <div className="flex flex-col gap-[7px]">
+          <label
+            htmlFor={`${formId}-trainer-search`}
+            className="text-[12px] font-semibold text-ink-strong"
+          >
+            Search Trainer
+          </label>
+          <SearchInput
+            id={`${formId}-trainer-search`}
+            className="max-w-[230px]"
+            value={trainerQuery}
+            autoComplete="off"
+            onChange={(event) => setTrainerQuery(event.target.value)}
+          />
+        </div>
+
+        <ul aria-label="Trainers" className="flex flex-col gap-2">
+          {visibleTrainers.map((trainer) => {
+            const selected = trainerId === trainer.trainerMembershipId;
+            return (
+              <li
+                key={trainer.trainerMembershipId}
+                className={`flex items-center gap-[13px] rounded-[12px] border px-[14px] py-3 ${
+                  selected ? "border-brand-700 bg-brand-50" : "border-transparent bg-surface-muted"
+                }`}
+              >
+                <Avatar displayName={trainer.displayName} size="medium" />
+                {/*
+                  ⛔ NO SUBTITLE — the frame's `Public Speaking · Employee T-1001` is programme
+                  (`C-14`: no entity) plus the employee ID (Authorization B). Both are ruled
+                  out, so hero 0B omits the element instead of inventing a filler.
+                */}
+                <span className="flex-1 truncate text-[13.5px] font-semibold text-ink-strong">
+                  {trainer.displayName}
+                </span>
+                {/*
+                  ⛔ ASSIGN ONLY — THERE IS NO DESELECT HERE, unlike screen `26`, and the
+                  frame's trailing `-` is ABSENT for the same reason. On `26` deselecting means
+                  "create it unassigned"; here it would UNASSIGN a session that already has a
+                  trainer, which is a different governed action with no ratified string.
+                */}
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setTrainerId(trainer.trainerMembershipId)}
+                  className="inline-flex min-h-11 items-center rounded-[10px] border-[1.3px] border-line bg-surface px-[14px] py-2 text-[12.5px] font-semibold text-ink-muted hover:border-brand-700 hover:text-ink-strong"
+                >
+                  {selected ? "Assigned" : "Assign"}
+                  <span className="sr-only"> {trainer.displayName}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="text-small text-ink" role="status">
+          {trainerId === ""
+            ? "No single trainer covers every session of this class. Choosing one assigns all of them."
+            : "Removing a trainer entirely is not available on this screen."}
+        </p>
+
+        <Hairline />
+
+        {/* The frame's footer: right-aligned, both buttons at `border-radius: 11px`. */}
         <div className="flex flex-wrap justify-end gap-3">
           <Link
             href="/management/classes"
-            className="inline-flex min-h-11 items-center rounded-field border border-line bg-surface px-4 py-2.5 text-body font-semibold text-ink-strong hover:border-brand-200 hover:bg-brand-50"
+            className="inline-flex min-h-11 items-center rounded-[11px] border-[1.3px] border-line bg-surface px-[22px] py-3 text-[13.5px] font-semibold text-ink-muted hover:border-brand-700 hover:text-ink-strong"
           >
             Cancel
           </Link>
-          <Button type="submit" disabled={blocked || submit.kind === "saving"}>
+          <button
+            type="submit"
+            disabled={blocked || submit.kind === "saving"}
+            className="inline-flex min-h-11 items-center gap-2 rounded-[11px] bg-brand-700 px-[24px] py-3 text-[13.5px] font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span aria-hidden="true">✓</span>
             {submit.kind === "saving" ? "Saving…" : "Save Class"}
-          </Button>
+          </button>
         </div>
       </form>
     </div>
   );
+}
+
+/** The frame's section heading: `15px` semibold over a `12px` subtitle, `gap: 3px`. */
+function SectionHeading({
+  title,
+  subtitle,
+}: {
+  readonly title: string;
+  readonly subtitle?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-[3px]">
+      <h2 className="text-[15px] font-semibold text-ink-strong">{title}</h2>
+      {subtitle && <p className="text-[12px] text-ink-muted">{subtitle}</p>}
+    </div>
+  );
+}
+
+/** The frame's `height: 1px` section divider inside the one card. */
+function Hairline() {
+  return <div className="h-px bg-line" />;
 }

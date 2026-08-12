@@ -147,3 +147,81 @@ migration file declaring no registry, with a control), and the totals are now **
 number requires naming the authorization.
 
 ---
+
+---
+
+### 2026-08-13 - REBUILT to the frame, Operator AUTHORIZATION A
+
+```
+Timestamp (Asia/Singapore):    2026-08-13
+Source branch:                 develop  (DEVELOPMENT CLONE)
+Starting commit:               2bf54e1
+Screen ID:                     27
+Existing route audited:        /management/classes/[classModuleId]/edit - UNCHANGED
+Components replaced:           features/management/management-edit-class.tsx (layout rebuilt)
+Components created:            SectionHeading, Hairline (same file)
+DTO and port changes:          NONE
+Migration:                     NONE
+Validation:                    tsc 0 | eslint 0 | next build 0 | prove:artefact-read screen 27
+                               green | prove:portal-p2-3 0 | prove:stage3-authenticated 0
+VISUAL acceptance:             NOT-RUN - and see below: it could not previously have PASSED
+Acceptance status:             PASS claimed on evidence; `Accepted` is Operator-set only
+```
+
+#### Why it was rebuilt
+
+The original layout came from `reference/Management - Edit Class/Management - Edit Class.md` -
+a **prose note**. The `.png` and `.html` were **never opened**. It drew **three cards** with the
+actions floating below them.
+
+▶ **This frame is layout-identical to screen `26`**: ONE card, three hairline-divided sections,
+`Cancel` / `Save Class` inside it. Only the title and breadcrumb differ.
+
+#### What the artefacts say, per artefact
+
+* **`.png`** - one card; `Class Details` · hairline · `Schedule` **including the Sun-Sat day
+  strip with Tue and Thu active** · hairline · `Assigned Trainer` with a `230px` search box and
+  the trainer row carrying avatar, name, subtitle **and a trailing `-` control** · hairline ·
+  right-aligned `Cancel` and `✓ Save Class`.
+* **`.html`** - the same computed values as `26`: card `padding: 24px 26px`,
+  `border-radius: 18px`, `gap: 20px`; rows `gap: 16px`; controls radius `10px`; section heading
+  `15px` over `12px`; chips `padding: 9px 15px`; trainer row `gap: 13px`, name `13.50px`,
+  subtitle `11.50px`, initials `12.50px`; trailing control `outline: 1.30px`; footer buttons
+  `border-radius: 11px`, text `13.50px`.
+* **`screen.md`** (numbered pack) - the governed record: canonical route, and that this screen
+  **edits an existing Class Module under its Class Grade**.
+
+#### ⛔ VISUAL acceptance was not merely `NOT-RUN`
+
+Before this rebuild **there was no basis on which it could pass**. It remains `NOT-RUN`.
+
+#### ⚠️ THE THREE REFUSALS ARE UNCHANGED - AND THEIR EVIDENCE IS NOW CORRECT
+
+Measuring the frame changed **nothing** about what this screen may do. It changed **where the
+surviving controls sit**, and it corrected the EVIDENCE behind two records:
+
+| Refusal | Previously recorded as | Now |
+|---|---|---|
+| **The Sun-Sat day strip** | absent, with the frame's content asserted from the NOTE | ⚠️ **The `.png` DOES draw it, Tue and Thu active.** Its absence is a REAL divergence, `EXPECTED / REQUIRED`. Removing sessions has **no cancel or delete audit string**, and a session may already carry attendance, an observation or a submitted report |
+| **The trainer row's `-` control** | absent, same basis | ⚠️ **The `.png` DOES draw it.** Absent here because on `27` it would UNASSIGN a persisted session; screen `26` builds the same glyph as `Remove` because there it clears a FORM CHOICE before anything is saved. **Same glyph, different act** |
+| **`Class code`, `Program`, `Capacity`** | `C-14` | Unchanged - no column exists and none is proposed |
+
+⛔ **ABSENT, NEVER GREYED** (standing prohibition 17). A disabled day chip on an Edit form reads
+as *"not wired yet"*; these are *"not permitted"*, and the two must not look alike. The dates
+that exist are listed **read-only** in the strip's place, so the schedule stays legible.
+
+#### One further omission, added at this rebuild
+
+⛔ **The trainer row's SUBTITLE.** `Public Speaking · Employee T-1001` is programme (`C-14`: no
+entity) plus the employee ID (Authorization B). Both halves are ruled out, so hero 0B omits the
+element; `TrainerChoiceDto` carries no field that could hold one.
+
+#### Artefact-read citation - verified by `prove:artefact-read`
+
+```artefact-read
+screen: 27
+pack: Management - Edit Class
+component: features/management/management-edit-class.tsx
+html-values: 18px, 26px, 20px, 16px, 10px, 15px, 12.50px, 13.50px, 11.50px, 1.30px
+screen-md-quote: Management edits an existing Class Module under its Class Grade.
+```
