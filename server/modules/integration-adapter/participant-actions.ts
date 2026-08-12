@@ -816,10 +816,29 @@ export async function adapterReadClassOverview(
   const client = await createRequestSupabaseClient();
   const result = await readManagementClassOverviewCore(client, classModuleId);
   if (result.outcome !== "success") return result;
-  const { rows, sessions, health, verdict } = result.data;
+  const { header, rows, sessions, health, verdict } = result.data;
   return {
     outcome: "success",
     data: {
+      // ⚠️ ONE FIELD AT A TIME, like every other mapper here: a column added
+      // to `class_modules` or `attendance` later cannot reach the client
+      // until somebody names it on this list.
+      header:
+        header === null
+          ? null
+          : {
+              classModuleId: header.classModuleId,
+              title: header.title,
+              classGradeLabel: header.classGradeLabel,
+              isActive: header.isActive,
+              meetingDays: header.meetingDays,
+              startTime: header.startTime,
+              endTime: header.endTime,
+              room: header.room,
+              learnerCount: header.learnerCount,
+              attendancePercent: header.attendancePercent,
+              trainerDisplayNames: header.trainerDisplayNames,
+            },
       rows: rows.map((row) => ({
         classSessionId: row.classSessionId,
         sessionDate: row.sessionDate,

@@ -605,14 +605,39 @@ const CHAIN = {
              * proves the verdict ran rather than the heading being decorative.
              *
              * ⛔ `S3-M5-bars` measures the rating exclusion ON THE PAINTED
-             * PAGE, which is strictly stronger than the source scan: this
+             * PAGE, which is strictly stronger than the source scan.
+             *
+             * ⚠️ CORRECTED 2026-08-13: this comment previously said the
              * frame's own note lists "B.E.S.T. Ratings" and a rubric
-             * focus-area list, and `C-9`/`G-2` override it.
+             * focus-area list, and that `C-9`/`G-2` override IT. True of the
+             * NOTE; measured against the `.png`, THE FRAME DRAWS NO RATING
+             * ANYWHERE — it draws a per-lesson `FOCUS` chip column. The bar is
+             * unchanged and still absolute; only its ground moves.
+             *
+             * ⚠️ `'Lessons'` MOVED at the Authorization-A rebuild and is
+             * REWRITTEN, not deleted: the frame's lesson card carries COLUMN
+             * HEADERS, not an `h2`, so that heading was this build's own
+             * invention. `Learners` and `Edit class` replace it — both are
+             * strings the FRAME ITSELF DRAWS, and `Edit class` is load-bearing
+             * twice over, because it is the control whose absence was reported
+             * as a finding and withdrawn.
              */
             id: 'S3-M5',
             path: `/management/classes/${FIXTURE_MODULE}`,
             loading: 'Loading class overview',
-            data: ['Class Overview', 'Class Health Summary', 'Student Report Status', 'Lessons'],
+            data: [
+              'Class Overview',
+              'Class Health Summary',
+              'Student Report Status',
+              // ⚠️ `LEARNERS` IN CAPS BECAUSE THAT IS WHAT THE PAGE PAINTS.
+              // The markup says `Learners` and CSS `text-transform` uppercases
+              // it — sentence-case text under `uppercase` is the accessible
+              // form, and `innerText` reports the TRANSFORMED string. ▶ Pinning
+              // the painted form is the point of a RENDER tier: dropping the
+              // transform would move the pin, which is correct.
+              'LEARNERS',
+              'Edit class',
+            ],
           },
           {
             /*

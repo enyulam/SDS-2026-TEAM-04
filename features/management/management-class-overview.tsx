@@ -2,84 +2,98 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/ui/avatar";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
-import type { ClassOverviewDto, ClassOverviewRowDto } from "@/lib/frontend/contracts/physical-test";
+import type {
+  ClassHeaderDto,
+  ClassOverviewDto,
+  ClassOverviewRowDto,
+  ClassOverviewSessionDto,
+} from "@/lib/frontend/contracts/physical-test";
 
 /**
- * Screen 13 — Management Class Overview (PORTAL COMPLETION PLAN phase `P2-4`).
- *
- * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Management - Class
- * Overview/` (Amendment 007 A-056). No pack-local `reference.png`, which is not a gap (§7.4).
+ * Screen 13 — Management Class Overview (`P2-4`; REBUILT 2026-08-13 under
+ * Operator AUTHORIZATION A).
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ NOTHING ON THIS SURFACE IS AN ASSESSMENT FACT, AND THE ABSENCE IS STRUCTURAL
+ * ⛔ A WITHDRAWN FINDING, RECORDED HERE BECAUSE IT ORIGINATED IN THIS FILE
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * The frame's own note describes a *"Rubric focus-area list … assessed speaking criteria such
- * as audience awareness, body language, and vocal projection"* and lists **B.E.S.T. Ratings**
- * among what the screen summarises. ⛔ **NOT BUILT, and this is governance overriding a frame,
- * not an omission.** `C-9` confines `D-1`'s nine per-dimension ratings to report **DETAIL**
- * surfaces because ratings on an overview *"invite comparison between children"*; `G-2` bars
- * every roll-up on **every** surface, permanently.
+ * The first build reported that *"this frame draws NO Edit control"* and the Operator ruled a
+ * DESIGN GAP on that premise. ⛔ **THE PREMISE WAS FALSE.** `Management - Class Overview.png`
+ * draws **`✎ Edit class`** in the header card, top-right, beside `ASSIGNED TRAINER` and
+ * `ASSISTANT`. The claim was a `grep` over the pack's PROSE NOTE — whose "Buttons and
+ * navigation" section lists only `Manage lesson plans` and `View Overall Class Statistics` —
+ * and a note cannot support *"the frame draws no X"* (`CLAUDE.md` §7.4.1). ▶ The control is
+ * built here now, wired to `27` at its canonical route. **`TRUE-DRIFT`, never a design gap.**
  *
- * ▶ The exclusion is enforced three deep and not by this component's good behaviour: the two
- * RPCs carry migration assertion `V-4`, which **fails the build** if either so much as names a
- * rating; `P26-7` re-asserts it on the returned shape; and the frontend contract declares no
- * field that could hold one.
- *
- * ⚠️ What legitimately survives from that frame section is the **single most frequent
- * improvement-focus tag**, which `CLAUDE.md` §6 mandates by name — computed **server-side** and
- * arriving as **one string**, never as the underlying tags (Operator ruling, `P2-4`).
- *
- * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ THE CLASS HEALTH SUMMARY IS A GOVERNANCE-MANDATED ADDITION THE FRAME OMITS (`C-17`)
- * ═══════════════════════════════════════════════════════════════════════════════════════════
- * `CLAUDE.md` §6 fixes it **exhaustively**: four conditions, evaluated top to bottom, first
- * match wins, so exactly one result is ever shown. The verdict comes from
- * `lib/shared/class-health.ts` — **one copy**, shared with the fixture — and the sentences are
- * **verbatim**. ⛔ Never AI-authored: generating this prose would silently pull the §8-deferred
- * Weekly Class Health Brief into scope.
- *
- * ⛔ Per an interface-cleanup pass recorded in §6, this panel does **not** repeat "Reports
- * completed", "Evidence completion" or "Parent communication" — those duplicate the KPI figures
- * shown above it.
+ * ⚠️ THE SAME CORRECTION APPLIES TO THE RATINGS CLAIM. The earlier note said *"the frame's own
+ * note lists B.E.S.T. Ratings and a rubric focus-area list"* — true of the NOTE. Measured
+ * against the `.png`, **this frame draws no rating anywhere**: what it draws is a per-lesson
+ * `FOCUS` chip column. The bar below is unchanged and still absolute; only its stated ground
+ * moves from *"governance overrides a frame that draws ratings"* to *"the frame draws none, and
+ * none may be added"*.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * ⛔ PER-ROW ACTION GATING — `A-038`, RATIFIED, BUILT TO THE RULE RATHER THAN TO THE FRAME
+ * ⚠️ WHAT THE `.png` DRAWS, TOP TO BOTTOM
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * The inventory records that this screen's gating *"must be built to that rule, not inferred
- * from the frame"*. Exactly four outcomes, and no generic "view report" handler is shared
- * across them:
+ *   1. HEADER CARD — `PS` tile chip · `Public Speaking · Intermediate` · `Active` badge · a
+ *      meta line (`Junior · Tue & Thu · 3:00–4:00 PM · Studio 2 · 12 learners`) · then
+ *      `ASSIGNED TRAINER`, `ASSISTANT` and the `✎ Edit class` button.
+ *   2. TWO STAT TILES — `LEARNERS 12` and `ATTENDANCE 94%` (teal), side by side.
+ *   3. LESSON TABLE — one card, column headers `DATE · LESSON · FOCUS · REPORT STATUS` and an
+ *      unlabelled `Stats ›` column, rows on `#F7F8FB` at `12px` radius.
+ *   4. FOOTER — `Manage lesson plans ›` and `View Overall Class Statistics ›`, as CONTROLS
+ *      inside the same card, not prose.
  *
- *   `submitted`         → opens the CANONICAL submitted report
- *   `trainer_approved`  → opens the management FINAL-REVIEW surface
- *   any earlier status  → **Send Reminder to Trainer**, and NO report content of any kind
- *   NULL (`No Report`)  → **no action button at all** — a plain "—", matching how the Parent
- *                         Calendar disables Access for an absent learner
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ NOTHING HERE IS AN ASSESSMENT FACT, AND THE ABSENCE IS STRUCTURAL
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * `C-9` confines `D-1`'s nine per-dimension ratings to report **DETAIL** surfaces because
+ * ratings on an overview *"invite comparison between children"*; `G-2` bars every roll-up on
+ * every surface, permanently. ▶ Enforced three deep and not by this component's good behaviour:
+ * migration assertion `V-4` **fails the build** if either RPC so much as names a rating (bare
+ * substring, so it catches the next rating column nobody has written yet); `P26-7` re-asserts
+ * it on the returned shape; the contract declares no field that could hold one.
  *
- * ⚠️ The last case is why the projection returns a **row** for a learner with no report rather
- * than omitting them: an absent row could not be told apart from a learner who is not enrolled.
+ * ⚠️ What legitimately survives is the single **most frequent improvement-focus tag**, which
+ * `CLAUDE.md` §6 mandates by name — computed **server-side**, arriving as **one string**, never
+ * as the underlying tags (Operator ruling, `P2-4`).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ TWO GOVERNANCE-MANDATED ADDITIONS THE FRAME OMITS. NEITHER IS AN INVENTION
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * 1. **Student Report Status** — `CLAUDE.md` §6 names *"Management Class Overview's 'Student
+ *    Report Status' table"* directly and gates its per-row buttons under `A-038`. The
+ *    inventory adds that it *"must be built to that rule, not inferred from the frame"*.
+ *    ⚠️ It is NOT the frame's `REPORT STATUS` column: that column is **per LESSON**, this table
+ *    is **per LEARNER**. Different axes, so both exist.
+ * 2. **Class Health Summary** — `C-17`; `CLAUDE.md` §6 fixes it exhaustively at four
+ *    conditions, first match wins. The verdict comes from `lib/shared/class-health.ts`, one
+ *    copy shared with the fixture, and the sentences are **verbatim**. ⛔ Never AI-authored:
+ *    generating this prose would pull the §8-deferred Weekly Class Health Brief into scope.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⚠️ REGISTERED OMISSIONS
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * 1. **`Trainer Assistant (TA)`** on the class card — `A-014`/`G-7`. **PROHIBITED, NEVER ENDS.**
- * 2. **`Manage lesson plans`** → screen `14`, which `P2-6` builds under `D-4`. **INERT with a
- *    stated reason**, not hidden: a link to a route that 404s is worse than a control that says
- *    why. ⚠️ This is the INERT treatment (target not yet built), **not** the ABSENT treatment
- *    (capability refused) — standing prohibition 17 keeps the two apart.
- * 3. **`View Overall Class Statistics`** → screen `16`, which `P2-16` builds. Same treatment.
- * 4. **Lesson name and number** render only where recorded. **NULL means NOT RECORDED** (hero
- *    0B) — never "Lesson 1", never "TBC", never a dash.
- * 5. ⛔ **NO EDIT CONTROL, AND ITS ABSENCE IS RULED.** Neither this frame nor screen `12` draws
- *    an inbound affordance to screen `27` Edit Class. The Operator ruled it a **DESIGN GAP, not
- *    a build gap**: *"It is a question for the design set, not something the build resolves."*
- *    ⛔ Do not add one here or anywhere else, and do not read this note as licence to place one
- *    "where it seems natural". `27` remains reachable at its canonical route.
+ * 1. ⛔ **`ASSISTANT`** in the header card — `A-014` defers the TA persona and `G-7` binds
+ *    `centre_membership_role` against extension. **PROHIBITED, NEVER ENDS**, and there is no
+ *    DTO field that could carry one.
+ * 2. ⚠️ **The `FOCUS` chip column** — lesson-plan focus, `D-4`/`P2-6`, with no substrate at
+ *    HEAD. Operator AUTHORIZATION B. ⛔ `G-3` additionally bars it from any surface presenting
+ *    a governed focus; it arrives with its own phase, in its own labelled position.
+ * 3. ⚠️ **The per-row `Stats ›` link** — screen `16`, `P2-16`. AUTHORIZATION B.
+ * 4. ⚠️ **`Manage lesson plans`** (screen `14`, `P2-6`) and **`View Overall Class Statistics`**
+ *    (screen `16`, `P2-16`) are built as CONTROLS in the frame's footer position, **INERT with
+ *    a stated reason**. ⚠️ This is the INERT treatment (target not yet built), **not** the
+ *    ABSENT treatment (capability refused) — standing prohibition 17 keeps the two apart, and
+ *    screen `27`'s absent day strip is the other side of it.
+ * 5. ⚠️ **Lesson name and number** render only where recorded. **NULL means NOT RECORDED**
+ *    (hero 0B) — never "Lesson 1", never "TBC", never a dash. Same for room, times and the
+ *    ATTENDANCE tile, which is **omitted entirely** rather than shown as `0%`.
  */
 
 const REPORT_LABEL: Record<string, string> = {
@@ -122,19 +136,24 @@ export function ManagementClassOverview({ classModuleId }: { readonly classModul
     );
   }
 
-  const { rows, sessions, health } = state.data;
+  const { header, rows, sessions, health } = state.data;
 
   return (
     <div className="page-grid">
       <div>
         <PageHeading title="Class Overview" />
-        <p className="mt-0.5 text-small text-ink">
+        <p className="mt-0.5 text-[11.5px] text-ink-subtle">
           <Link href="/management/classes" className="underline hover:text-brand-700">
             Classes
-          </Link>{" "}
-          / Overview
+          </Link>
+          {header !== null && ` / ${header.title}`}
         </p>
       </div>
+
+      {header !== null && <HeaderCard header={header} />}
+      {header !== null && <StatTiles header={header} />}
+
+      <LessonTable sessions={sessions} />
 
       {/*
         ⛔ THE CLASS HEALTH SUMMARY — `C-17`, mandated by `CLAUDE.md` §6 and absent from the
@@ -146,9 +165,15 @@ export function ManagementClassOverview({ classModuleId }: { readonly classModul
             <h2 className="text-section-title font-extrabold text-ink-strong">
               Class Health Summary
             </h2>
-            <Badge tone={health.status === "On Track" ? "success" : "warning"}>
+            <span
+              className={`rounded-full px-[10px] py-[5px] text-[11px] font-semibold ${
+                health.status === "On Track"
+                  ? "bg-success-soft text-success-on"
+                  : "bg-warning-soft text-warning-on"
+              }`}
+            >
               {health.status}
-            </Badge>
+            </span>
           </div>
           <p className="text-body text-ink-strong">{health.action}</p>
           {/*
@@ -166,116 +191,331 @@ export function ManagementClassOverview({ classModuleId }: { readonly classModul
           )}
           <p className="text-small text-ink">
             {health.submittedReports} of {health.totalReports} reports submitted
-            {health.evidenceMissing > 0
-              ? ` · ${health.evidenceMissing} missing evidence`
-              : ""}
+            {health.evidenceMissing > 0 ? ` · ${health.evidenceMissing} missing evidence` : ""}
           </p>
         </section>
       )}
 
-      <section className="card flex flex-col gap-4 px-6 py-5" aria-label="Lesson timeline">
-        <h2 className="text-section-title font-extrabold text-ink-strong">Lessons</h2>
-        {sessions.length === 0 ? (
-          <p className="text-small text-ink" role="status">
-            No class sessions have been created for this class yet.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {sessions.map((session) => (
-              <li
-                key={session.classSessionId}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line px-4 py-3"
-              >
-                <span className="text-[0.8125rem] font-semibold text-ink-strong">
-                  {/*
-                    ⛔ NULL MEANS NOT RECORDED — THE ELEMENT IS OMITTED (hero 0B). A session
-                    with no lesson number and no title shows its DATE alone; it never shows
-                    "Lesson 1", "Untitled" or a dash.
-                  */}
-                  {session.lessonNumber !== null && `Lesson ${session.lessonNumber}`}
-                  {session.lessonNumber !== null && session.lessonTitle !== null && " · "}
-                  {session.lessonTitle}
-                  {session.lessonNumber === null && session.lessonTitle === null && session.sessionDate}
-                </span>
-                <span className="text-small text-ink">
-                  {session.sessionDate} · {session.submittedCount} of {session.learnerCount} reports
-                  sent
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <StudentReportStatus rows={rows} />
+    </div>
+  );
+}
 
-      <section className="card flex flex-col gap-4 px-6 py-5" aria-label="Student Report Status">
-        <h2 className="text-section-title font-extrabold text-ink-strong">Student Report Status</h2>
-        {rows.length === 0 ? (
-          <p className="text-small text-ink" role="status">
-            No learners are enrolled in this class yet.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <caption className="sr-only">
-                Report status for every enrolled learner, by class session
-              </caption>
-              <thead>
-                <tr className="border-b border-line">
-                  <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
-                    Student
-                  </th>
-                  <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
-                    Session
-                  </th>
-                  <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
-                    Report
-                  </th>
-                  <th scope="col" className="py-2 text-small font-bold text-ink-strong">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr
-                    key={`${row.classSessionId}-${row.studentId}`}
-                    className="border-b border-line last:border-0"
-                  >
-                    <td className="py-2.5 pe-4 text-[0.8125rem] font-semibold text-ink-strong">
-                      {row.studentDisplayName}
-                    </td>
-                    <td className="py-2.5 pe-4 text-small text-ink">{row.sessionDate}</td>
-                    <td className="py-2.5 pe-4 text-small text-ink">
-                      {row.reportState === null
-                        ? "No Report"
-                        : REPORT_LABEL[row.reportState] ?? row.reportState}
-                    </td>
-                    <td className="py-2.5">
-                      <RowAction row={row} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+/**
+ * The frame's header card — `padding: 20px 22px`, `border-radius: 18px`, `gap: 18px`, with a
+ * `58px` tile chip at `border-radius: 15px`.
+ *
+ * ⛔ THE `ASSISTANT` COLUMN THE FRAME DRAWS BESIDE `ASSIGNED TRAINER` IS ABSENT — `A-014`,
+ * `G-7`. There is no DTO field for it, so this component could not render one if it tried.
+ */
+function HeaderCard({ header }: { readonly header: ClassHeaderDto }) {
+  /*
+   * ⛔ EVERY SEGMENT IS OMITTED WHERE NOT RECORDED (hero 0B). The frame's meta line reads
+   * `Junior · Tue & Thu · 3:00–4:00 PM · Studio 2 · 12 learners`; a class with no agreed room
+   * simply has no room segment, never "Studio —" and never an invented default.
+   * ⚠️ `Junior` is the frame's CLASS CODE, which `C-14` omits — the Class Grade label stands
+   * in its place, and that is a recorded divergence rather than a relabel.
+   */
+  const meta = [
+    header.classGradeLabel,
+    header.meetingDays.length > 0 ? header.meetingDays.join(" & ") : null,
+    header.startTime && header.endTime ? `${header.startTime}–${header.endTime}` : null,
+    header.room,
+    `${header.learnerCount} ${header.learnerCount === 1 ? "learner" : "learners"}`,
+  ].filter((part): part is string => part !== null);
+
+  return (
+    <section
+      aria-label="Class summary"
+      className="flex flex-wrap items-center gap-[18px] rounded-[18px] border border-line bg-surface px-[22px] py-5 shadow-[var(--shadow-card)]"
+    >
+      <Avatar displayName={header.title} size="banner" shape="banner" />
+
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-[10px]">
+          <h2 className="text-[20px] font-bold leading-7 text-ink-strong">{header.title}</h2>
+          {/* The frame's teal `Active` pill. Drawn only where the module IS active. */}
+          {header.isActive && (
+            <span className="rounded-full bg-info-soft px-[10px] py-[5px] text-[11px] font-semibold text-info-on">
+              Active
+            </span>
+          )}
+        </div>
+        <p className="text-[12.5px] text-ink-muted">{meta.join(" · ")}</p>
+      </div>
 
       {/*
-        ⚠️ THE TWO INERT CONTROLS, with their reasons ON THE SURFACE. Their targets are real
-        screens that later phases build; until then a link would 404, and a silent hole would
-        read as a missing feature. ⛔ This is the INERT treatment, deliberately distinct from
-        screen `27`'s ABSENT day strip: that capability is REFUSED, these are NOT YET BUILT.
+        ⛔ NULL MEANS NOT RECORDED — the whole labelled block is omitted when no trainer
+        resolves, never "Unassigned" and never a placeholder avatar.
+        ⚠️ ALL distinct trainers, not one: `A-016` makes assignment authoritative at CLASS
+        SESSION level, so a module may legitimately carry more than one.
       */}
-      <section className="card flex flex-col gap-2 px-6 py-5">
-        <h2 className="text-section-title font-extrabold text-ink-strong">Related</h2>
-        <p className="text-small text-ink">
-          <span className="font-semibold text-ink-strong">Manage lesson plans</span> and{" "}
-          <span className="font-semibold text-ink-strong">View Overall Class Statistics</span> open
-          screens that are not built yet, so neither is a link on this page.
-        </p>
-      </section>
+      {header.trainerDisplayNames.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9.5px] font-semibold uppercase tracking-[0.6px] text-ink-subtle">
+            {header.trainerDisplayNames.length === 1 ? "Assigned trainer" : "Assigned trainers"}
+          </span>
+          {header.trainerDisplayNames.map((name) => (
+            <span key={name} className="flex items-center gap-[9px]">
+              <Avatar displayName={name} size="small" />
+              <span className="text-[13px] font-semibold text-ink-strong">{name}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/*
+        ✅ `Edit class` — IN THE FRAME'S HEADER CARD, where the `.png` draws it, wired to
+        screen `27` at its canonical route. This control is the correction of the withdrawn
+        "no inbound affordance" finding recorded at the top of this file.
+      */}
+      <Link
+        href={`/management/classes/${header.classModuleId}/edit`}
+        className="inline-flex min-h-11 items-center gap-[7px] rounded-full border border-line-strong bg-surface px-4 py-[9px] text-[13px] font-semibold text-ink-strong hover:border-brand-700"
+      >
+        <span aria-hidden="true">✎</span> Edit class
+      </Link>
+    </section>
+  );
+}
+
+/**
+ * The frame's two stat tiles — `flex: 1 1 0`, `padding: 20px 22px`, `border-radius: 16px`,
+ * label `10px` at `letter-spacing: 0.60px`, value `24px`.
+ *
+ * ⛔ THE ATTENDANCE TILE IS OMITTED WHEN NOTHING WAS RECORDED. `0%` is a measured claim that a
+ * class met and nobody came; `null` means no attendance row exists at all (hero 0B).
+ */
+function StatTiles({ header }: { readonly header: ClassHeaderDto }) {
+  return (
+    <div className="flex flex-wrap gap-4">
+      <div className="flex flex-1 basis-56 flex-col gap-1.5 rounded-[16px] border border-line bg-surface px-[22px] py-5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.6px] text-ink-subtle">
+          Learners
+        </span>
+        <span className="text-[24px] font-bold leading-8 text-ink-strong">
+          {header.learnerCount}
+        </span>
+      </div>
+      {header.attendancePercent !== null && (
+        <div className="flex flex-1 basis-56 flex-col gap-1.5 rounded-[16px] border border-line bg-surface px-[22px] py-5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.6px] text-ink-subtle">
+            Attendance
+          </span>
+          <span className="text-[24px] font-bold leading-8 text-info-on">
+            {header.attendancePercent}%
+          </span>
+        </div>
+      )}
     </div>
+  );
+}
+
+/**
+ * The frame's lesson TABLE — a real `<table>`, not the `<ul>` the first build drew.
+ *
+ * Columns `DATE · LESSON · REPORT STATUS` at the frame's `10px` /
+ * `letter-spacing: 0.40px` header scale, rows at `12px` radius on the frame's `#F7F8FB`.
+ *
+ * ⛔ TWO OF THE FRAME'S FIVE COLUMNS ARE ABSENT AND BOTH ARE REGISTERED: `FOCUS` is
+ * lesson-plan focus (`D-4`/`P2-6`, and `G-3` bars it from any governed-focus surface) and
+ * `Stats ›` is screen `16` (`P2-16`). Operator AUTHORIZATION B — they arrive with their
+ * phases, and a placeholder now would advertise data that does not exist.
+ */
+function LessonTable({ sessions }: { readonly sessions: readonly ClassOverviewSessionDto[] }) {
+  return (
+    <section
+      aria-label="Lessons"
+      className="flex flex-col gap-[14px] rounded-[16px] border border-line bg-surface px-[22px] py-5 shadow-[var(--shadow-card)]"
+    >
+      {sessions.length === 0 ? (
+        <p className="text-small text-ink" role="status">
+          No class sessions have been created for this class yet.
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-separate border-spacing-y-1.5 text-left">
+            <caption className="sr-only">Lessons in this class, with report progress</caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                  className="w-[110px] px-[14px] pb-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-ink-subtle"
+                >
+                  Date
+                </th>
+                <th
+                  scope="col"
+                  className="px-[14px] pb-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-ink-subtle"
+                >
+                  Lesson
+                </th>
+                <th
+                  scope="col"
+                  className="px-[14px] pb-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-ink-subtle"
+                >
+                  Report status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sessions.map((session) => (
+                <tr key={session.classSessionId} className="bg-surface-subtle">
+                  <td className="rounded-s-[12px] px-[14px] py-3 text-[13px] font-medium text-ink-strong">
+                    {session.sessionDate}
+                  </td>
+                  <td className="px-[14px] py-3">
+                    {/*
+                      ⛔ NULL MEANS NOT RECORDED (hero 0B). A session with no lesson number and
+                      no title renders NOTHING in this cell — never "Lesson 1", never a dash.
+                    */}
+                    {session.lessonTitle !== null && (
+                      <span className="block text-[13px] font-semibold text-ink-strong">
+                        {session.lessonTitle}
+                      </span>
+                    )}
+                    {session.lessonNumber !== null && (
+                      <span className="block text-[11px] text-ink-muted">
+                        Lesson {session.lessonNumber}
+                      </span>
+                    )}
+                  </td>
+                  <td className="rounded-e-[12px] px-[14px] py-3">
+                    <ReportProgressChip
+                      submitted={session.submittedCount}
+                      learners={session.learnerCount}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/*
+        ⚠️ THE FRAME'S FOOTER, AS CONTROLS RATHER THAN PROSE — a `space-between` row inside the
+        same card, exactly where the `.png` draws it. ⛔ Both are INERT with a stated reason:
+        their targets are real screens later phases build, and a link that 404s is worse than a
+        control that says why. This is NOT the ABSENT treatment; nothing forbids either
+        capability (standing prohibition 17).
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <InertControl label="Manage lesson plans" reason="Lesson plans arrive with screen 14." />
+        <InertControl
+          label="View Overall Class Statistics"
+          reason="Class statistics arrive with screen 16."
+        />
+      </div>
+    </section>
+  );
+}
+
+/** The frame's `Reports sent` / `10 / 12 sent` / `Not started` chip, at its three tones. */
+function ReportProgressChip({
+  submitted,
+  learners,
+}: {
+  readonly submitted: number;
+  readonly learners: number;
+}) {
+  if (submitted === 0) {
+    return (
+      <span className="rounded-full bg-neutral-soft px-[10px] py-[5px] text-[11px] font-medium text-ink-muted">
+        Not started
+      </span>
+    );
+  }
+  if (submitted >= learners) {
+    return (
+      <span className="rounded-full bg-success-soft px-[10px] py-[5px] text-[11px] font-medium text-success-on">
+        Reports sent
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-warning-soft px-[10px] py-[5px] text-[11px] font-medium text-warning-on">
+      {submitted} / {learners} sent
+    </span>
+  );
+}
+
+/** A frame control whose target screen is not built yet. Present, disabled, and it says why. */
+function InertControl({ label, reason }: { readonly label: string; readonly reason: string }) {
+  return (
+    <button
+      type="button"
+      disabled
+      title={reason}
+      className="inline-flex min-h-11 cursor-not-allowed items-center gap-[5px] text-[13px] font-semibold text-neutral-on"
+    >
+      {label} <span aria-hidden="true">›</span>
+      <span className="sr-only"> — {reason}</span>
+    </button>
+  );
+}
+
+/**
+ * ⛔ A GOVERNANCE-MANDATED ADDITION THE FRAME OMITS — `CLAUDE.md` §6 names this table directly
+ * and the inventory says it *"must be built to that rule, not inferred from the frame"*.
+ *
+ * ⚠️ It is NOT the frame's `REPORT STATUS` column, which is per LESSON. This is per LEARNER.
+ */
+function StudentReportStatus({ rows }: { readonly rows: readonly ClassOverviewRowDto[] }) {
+  return (
+    <section className="card flex flex-col gap-4 px-6 py-5" aria-label="Student Report Status">
+      <h2 className="text-section-title font-extrabold text-ink-strong">Student Report Status</h2>
+      {rows.length === 0 ? (
+        <p className="text-small text-ink" role="status">
+          No learners are enrolled in this class yet.
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <caption className="sr-only">
+              Report status for every enrolled learner, by class session
+            </caption>
+            <thead>
+              <tr className="border-b border-line">
+                <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
+                  Student
+                </th>
+                <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
+                  Session
+                </th>
+                <th scope="col" className="py-2 pe-4 text-small font-bold text-ink-strong">
+                  Report
+                </th>
+                <th scope="col" className="py-2 text-small font-bold text-ink-strong">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={`${row.classSessionId}-${row.studentId}`}
+                  className="border-b border-line last:border-0"
+                >
+                  <td className="py-2.5 pe-4 text-[0.8125rem] font-semibold text-ink-strong">
+                    {row.studentDisplayName}
+                  </td>
+                  <td className="py-2.5 pe-4 text-small text-ink">{row.sessionDate}</td>
+                  <td className="py-2.5 pe-4 text-small text-ink">
+                    {row.reportState === null
+                      ? "No Report"
+                      : REPORT_LABEL[row.reportState] ?? row.reportState}
+                  </td>
+                  <td className="py-2.5">
+                    <RowAction row={row} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 

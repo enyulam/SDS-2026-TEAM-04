@@ -27,6 +27,8 @@ const sizes = {
   medium: "size-10 text-small",
   tile: "size-11 text-[15px]",
   large: "size-12 text-body",
+  /* `Management - Class Overview.html`: `58px` square, `font-size: 18px`. */
+  banner: "size-[58px] text-[18px]",
 } as const;
 
 /** `tile` is the frame's `border-radius: 13px` class chip, not `rounded-xl`. */
@@ -34,6 +36,8 @@ const shapes = {
   circle: "rounded-full",
   square: "rounded-xl",
   tile: "rounded-[13px]",
+  /* …at `border-radius: 15px`, a different radius from the `12` card chip. */
+  banner: "rounded-[15px]",
 } as const;
 
 /** Deterministic, order-independent tint selection. Carries no meaning and no status. */

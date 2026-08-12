@@ -1312,9 +1312,54 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       (row) => row.reportState === "submitted" && row.evidenceCount === 0,
     ).length;
 
+    /*
+     * The frame's header card and its two stat tiles.
+     *
+     * ⚠️ `agreed` MIRRORS THE SERVER RULE: a shared value is shown only when
+     * EVERY session agrees, otherwise `null` and the segment is omitted. The
+     * fixture must exercise the same branch the projection does, or the OMIT
+     * path stays permanently unrendered here.
+     * ⛔ NO ASSISTANT FIELD — `A-014`/`G-7`, structural, not cosmetic.
+     */
+    const agreed = <T,>(values: readonly (T | null | undefined)[]): T | null => {
+      const present = values.filter((value): value is T => value !== null && value !== undefined);
+      if (present.length === 0 || present.length !== values.length) return null;
+      return new Set(present).size === 1 ? present[0] : null;
+    };
+    const marks = owned.flatMap((session) => session.students.map((student) => student.attendanceState));
+    const header = {
+      classModuleId,
+      title: owned[0].moduleName,
+      classGradeLabel: owned[0].classGrade,
+      isActive: true,
+      meetingDays: [
+        ...new Set(
+          owned.map(
+            (session) =>
+              ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+                new Date(`${session.date}T00:00:00Z`).getUTCDay()
+              ],
+          ),
+        ),
+      ],
+      startTime: agreed(owned.map((session) => session.startTime)),
+      endTime: agreed(owned.map((session) => session.endTime)),
+      room: agreed(owned.map((session) => session.room)),
+      learnerCount: new Set(owned.flatMap((session) => session.students.map((s) => s.studentId))).size,
+      // ⛔ `null`, not `0`, when nothing was recorded (hero 0B).
+      attendancePercent:
+        marks.length === 0
+          ? null
+          : Math.round((marks.filter((mark) => mark === "present").length / marks.length) * 100),
+      trainerDisplayNames: [
+        ...new Set(owned.map((session) => session.trainerName).filter((name): name is string => !!name)),
+      ],
+    };
+
     return {
       outcome: "success",
       data: {
+        header,
         rows,
         sessions,
         health: {

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 
 /*
  * ⛔ THE FOUR CONDITIONS LIVE IN `lib/shared/class-health.ts`, NOT HERE. They
@@ -149,6 +149,203 @@ export async function readClassHealthCore(
     totalReports: row.total_reports,
     mainFollowUpArea: row.main_follow_up_area,
   } };
+}
+
+/**
+ * ═════════════════════════════════════════════════════════════════════════
+ * THE FRAME'S HEADER CARD AND ITS TWO STAT TILES (rebuild, 2026-08-13)
+ * ═════════════════════════════════════════════════════════════════════════
+ * ⚠️ NO MIGRATION AND NO RPC. `class_modules`, `class_grades`,
+ * `class_sessions`, `class_session_assignments`, `enrolments` and
+ * **`attendance`** each carry a management SELECT policy AND a matching
+ * `authenticated` SELECT grant, **measured at HEAD before this was written**
+ * (`attendance_select_management` is centre-scoped through
+ * `app_has_active_membership`). ▶ That is why this is a direct RLS-scoped
+ * read like screen `12`, while the report grid above needs the two
+ * `SECURITY DEFINER` reads: `reports` and `observations` carry **zero**
+ * policies and **zero** grants.
+ *
+ * ⛔ EVERY FIELD IS `null` WHERE NOT RECORDED, AND THE SURFACE OMITS THE
+ * ELEMENT (hero 0B). A class with no attendance rows has **no attendance
+ * tile** — never `0%`, which is a measured fact about a class nobody
+ * attended, and never `—`.
+ */
+export type ClassHeaderDto = {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeLabel: string | null;
+  readonly isActive: boolean;
+  /** Distinct weekdays the module actually meets, derived from session dates. */
+  readonly meetingDays: readonly string[];
+  /** Only where EVERY session agrees; otherwise `null` and the segment is omitted. */
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly room: string | null;
+  readonly learnerCount: number;
+  /** `null` when NO attendance has been recorded at all — not `0`. */
+  readonly attendancePercent: number | null;
+  readonly trainerDisplayNames: readonly string[];
+};
+
+interface ModuleRow {
+  readonly id: string;
+  readonly title: string;
+  readonly class_grade_id: string;
+  readonly is_active: boolean;
+}
+
+interface GradeRow {
+  readonly id: string;
+  readonly display_name: string;
+}
+
+interface HeaderSessionRow {
+  readonly id: string;
+  readonly session_date: string;
+  readonly starts_at: string | null;
+  readonly ends_at: string | null;
+  readonly room: string | null;
+}
+
+interface AttendanceRow {
+  readonly status: string;
+}
+
+interface EnrolmentRow {
+  readonly student_id: string;
+}
+
+interface AssignmentRow {
+  readonly trainer_membership_id: string;
+}
+
+interface MembershipRow {
+  readonly id: string;
+  readonly account_id: string;
+}
+
+interface AccountRow {
+  readonly id: string;
+  readonly display_name: string | null;
+}
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+/** One value where every session agrees, otherwise `null`. */
+function agreed<T>(values: readonly (T | null)[]): T | null {
+  const present = values.filter((value): value is T => value !== null && value !== "");
+  if (present.length === 0 || present.length !== values.length) return null;
+  const distinct = new Set(present);
+  return distinct.size === 1 ? present[0] : null;
+}
+
+export async function readClassHeaderCore(
+  client: SupabaseClient,
+  classModuleId: string,
+): Promise<QueryOutcome<ClassHeaderDto | null>> {
+  const classModule = await readMaybeRow<ModuleRow>("readClassHeaderCore:class_modules", () =>
+    client.from("class_modules").select("id, title, class_grade_id, is_active").eq("id", classModuleId),
+  );
+  if (!classModule.ok) return { ok: false };
+  // ⚠️ "No such module" and "not your centre" are ONE value, deliberately.
+  if (!classModule.rows) return { ok: true, rows: null };
+
+  const grade = await readMaybeRow<GradeRow>("readClassHeaderCore:class_grades", () =>
+    client.from("class_grades").select("id, display_name").eq("id", classModule.rows!.class_grade_id),
+  );
+  if (!grade.ok) return { ok: false };
+
+  const sessions = await readRows<HeaderSessionRow>("readClassHeaderCore:class_sessions", () =>
+    client
+      .from("class_sessions")
+      .select("id, session_date, starts_at, ends_at, room")
+      .eq("class_module_id", classModuleId)
+      .order("session_date", { ascending: true }),
+  );
+  if (!sessions.ok) return { ok: false };
+
+  const enrolments = await readRows<EnrolmentRow>("readClassHeaderCore:enrolments", () =>
+    client.from("enrolments").select("student_id").eq("class_module_id", classModuleId).eq("is_active", true),
+  );
+  if (!enrolments.ok) return { ok: false };
+
+  const attendance = await readRows<AttendanceRow>("readClassHeaderCore:attendance", () =>
+    client.from("attendance").select("status").eq("class_module_id", classModuleId),
+  );
+  if (!attendance.ok) return { ok: false };
+
+  const trainers = await readTrainerNames(
+    client,
+    sessions.rows.map((row) => row.id),
+  );
+
+  const present = attendance.rows.filter((row) => row.status === "present").length;
+
+  return {
+    ok: true,
+    rows: {
+      classModuleId: classModule.rows.id,
+      title: classModule.rows.title,
+      classGradeLabel: grade.rows ? grade.rows.display_name : null,
+      isActive: classModule.rows.is_active,
+      meetingDays: [
+        ...new Set(sessions.rows.map((row) => WEEKDAYS[new Date(`${row.session_date}T00:00:00Z`).getUTCDay()])),
+      ],
+      startTime: agreed(sessions.rows.map((row) => (row.starts_at ? row.starts_at.slice(0, 5) : null))),
+      endTime: agreed(sessions.rows.map((row) => (row.ends_at ? row.ends_at.slice(0, 5) : null))),
+      room: agreed(sessions.rows.map((row) => row.room)),
+      learnerCount: new Set(enrolments.rows.map((row) => row.student_id)).size,
+      /*
+       * ⛔ ZERO ATTENDANCE ROWS IS `null`, NOT `0`. `0%` asserts that a class
+       * met and nobody came; `null` says nothing was recorded, and hero 0B
+       * makes the surface omit the tile entirely rather than invent either.
+       */
+      attendancePercent:
+        attendance.rows.length === 0 ? null : Math.round((present / attendance.rows.length) * 100),
+      trainerDisplayNames: trainers,
+    },
+  };
+}
+
+/**
+ * ⚠️ EVERY DISTINCT TRAINER ACROSS THIS MODULE'S SESSIONS, not one.
+ * `A-016` makes assignment authoritative at CLASS-SESSION level, so a module
+ * legitimately carries different trainers on different sessions. The frame
+ * draws one name because its synthetic class has one; the rule is the plural.
+ * ⚠️ The chain FAILS SOFT — an unresolvable name is omitted and the class
+ * still renders.
+ */
+async function readTrainerNames(
+  client: SupabaseClient,
+  sessionIds: readonly string[],
+): Promise<readonly string[]> {
+  if (sessionIds.length === 0) return [];
+  const assignments = await readRows<AssignmentRow>("readClassHeaderCore:class_session_assignments", () =>
+    client
+      .from("class_session_assignments")
+      .select("trainer_membership_id")
+      .eq("is_active", true)
+      .in("class_session_id", sessionIds),
+  );
+  if (!assignments.ok || assignments.rows.length === 0) return [];
+
+  const membershipIds = [...new Set(assignments.rows.map((row) => row.trainer_membership_id))];
+  const memberships = await readRows<MembershipRow>("readClassHeaderCore:centre_memberships", () =>
+    client.from("centre_memberships").select("id, account_id").in("id", membershipIds),
+  );
+  if (!memberships.ok || memberships.rows.length === 0) return [];
+
+  const accounts = await readRows<AccountRow>("readClassHeaderCore:accounts", () =>
+    client.from("accounts").select("id, display_name").in("id", memberships.rows.map((row) => row.account_id)),
+  );
+  if (!accounts.ok) return [];
+  return [
+    ...new Set(
+      accounts.rows
+        .map((row) => row.display_name)
+        .filter((name): name is string => typeof name === "string" && name.length > 0),
+    ),
+  ];
 }
 
 /**

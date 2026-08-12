@@ -392,7 +392,38 @@ export interface AdapterClassHealthDto {
   readonly mainFollowUpArea: string | null;
 }
 
+/**
+ * The frame's header card and its two stat tiles (rebuild, 2026-08-13).
+ *
+ * ⛔ NO TA / ASSISTANT FIELD. The frame draws `ASSISTANT` beside
+ * `ASSIGNED TRAINER`; `A-014` defers the persona and `G-7` binds
+ * `centre_membership_role` against extension, so there is no field here that
+ * could carry one — the omission is structural, not cosmetic.
+ *
+ * ⛔ NO CLASS CODE, PROGRAMME OR CAPACITY (`C-14`, `A-016`), and no lesson
+ * FOCUS chip: lesson-plan focus is `D-4`/`P2-6` work with no substrate at
+ * HEAD, and `G-3` bars it from any surface presenting a governed focus.
+ *
+ * ⚠️ EVERY OPTIONAL FIELD IS `null` WHERE NOT RECORDED and the surface OMITS
+ * the element (hero 0B) — including `attendancePercent`, where `0` would be a
+ * measured claim that nobody attended.
+ */
+export interface AdapterClassHeaderDto {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly classGradeLabel: string | null;
+  readonly isActive: boolean;
+  readonly meetingDays: readonly string[];
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly room: string | null;
+  readonly learnerCount: number;
+  readonly attendancePercent: number | null;
+  readonly trainerDisplayNames: readonly string[];
+}
+
 export interface AdapterClassOverviewDto {
+  readonly header: AdapterClassHeaderDto | null;
   readonly rows: readonly AdapterClassOverviewRowDto[];
   readonly sessions: readonly AdapterClassOverviewSessionDto[];
   readonly health: AdapterClassHealthDto | null;

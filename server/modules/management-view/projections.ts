@@ -49,6 +49,8 @@ import {
   readClassStatusRowsCore,
   summariseSessions,
   type ClassHealthDto,
+  readClassHeaderCore,
+  type ClassHeaderDto,
   type ClassOverviewRowDto,
   type ClassOverviewSessionDto,
 } from "@/server/modules/class-session/class-overview";
@@ -572,6 +574,7 @@ export async function readManagementClassOverviewCore(
   client: SupabaseClient,
   classModuleId: string,
 ): Promise<ActionResult<{
+  readonly header: ClassHeaderDto | null;
   readonly rows: readonly ClassOverviewRowDto[];
   readonly sessions: readonly ClassOverviewSessionDto[];
   readonly health: ClassHealthDto | null;
@@ -579,6 +582,16 @@ export async function readManagementClassOverviewCore(
 }>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
+
+  /*
+   * ⛔ THE HEADER FAILS CLOSED WITH EVERYTHING ELSE. A rejected class read is
+   * `unavailable`, never a page with a blank title over a real report grid:
+   * a header that silently renders nothing is how a management reader ends up
+   * looking at one class while believing they are looking at another.
+   */
+  const header = await readClassHeaderCore(client, classModuleId);
+  if (!header.ok) return { outcome: "unavailable" };
+  if (header.rows === null) return { outcome: "unavailable" };
 
   const grid = await readClassStatusRowsCore(client, classModuleId);
   if (!grid.ok) return { outcome: "unavailable" };
@@ -588,6 +601,7 @@ export async function readManagementClassOverviewCore(
   return {
     outcome: "success",
     data: {
+      header: header.rows,
       rows: grid.rows,
       sessions: summariseSessions(grid.rows),
       health: health.rows,
