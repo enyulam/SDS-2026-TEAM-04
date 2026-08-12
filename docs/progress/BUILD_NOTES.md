@@ -7497,3 +7497,80 @@ The omission leg carries a control requiring the matcher to fire against **the s
 ⛔ **THE ONE PLACE I AM PROPOSING SOMETHING THE REGISTRY DOES NOT COVER IS STATED AS A QUESTION, NOT DESIGNED AROUND.** There is no audit string for creating a **term**, and three readings are defensible: a governed act needing a twentieth string; inert scheduling structure that audits nothing, as `class_grades` does; or terms **seeded** rather than created, which removes the RPC entirely. ▶ **`A-029` requires one event per GOVERNED action — and whether creating a term IS one is a ruling, not an inference.**
 
 **The full question — table, columns, constraints, policies, grants, RPCs, the four Operator decisions and the exact census effect — is at `docs/plan/PORTAL_COMPLETION_PLAN.md` §`P2-2`.**
+
+---
+
+## 2026-08-12 — `P2-2` SUBSTRATE BUILT UNDER THE `C-7` RULING · a pin rewritten · one question STOPPED on
+
+- **Branch:** `develop`. **Starting HEAD:** `5634849` (pushed). **Scope:** the `D-3` terms substrate, exactly as authorized and no more.
+
+### ✅ THE PUSH — and a correction to my own report first
+
+⛔ **I told you "two held commits". IT WAS THREE.** The handoff was derived at `fabbe47` and said two; I then committed `5634849` and repeated the handoff's figure into chat **without re-measuring**. ▶ **That is §15.8.1's exact defect, occurring in the message that described §15.8.1's freshness report.** Measured before acting: `git rev-list --count b3bd814..HEAD` = **3**.
+
+`prove:no-secrets` **exit 0** — 309 commits, 2012 blobs, 693 files, **zero credentials**, all four controls fired, three identifiers adjudicated true negative and pinned by value. Pushed and **verified by querying `origin`**: `develop` = `5634849`, **`main` = `5eb84bc`, untouched**.
+
+### ✅ THE TERMS SUBSTRATE — `20260812230000_portal_d3_terms_substrate.sql`
+
+**Authorized under `C-7`, decision 1 option (c): SEEDED, not created.** ▶ **The ruling's own reasoning is what removed the RPC and the audit question together** — no governed action, therefore no event owed, therefore `A-029` is satisfied **by there being no action rather than by argument**, and the registry stays at **19**. **No twentieth string.**
+
+**1 table · 1 nullable column · 1 RLS `SELECT` policy · 1 matching `SELECT` grant · 4 seed rows · ZERO functions · ZERO enums · ZERO audit strings · ZERO write policies · ZERO write grants.**
+
+⚠️ **AND NO READ RPC EITHER.** The authorization permitted them *"as needed"*, and measured against the alternative **none was needed**: the policy plus its minimum matching grant already serves every reader, and a `SECURITY DEFINER` function added for symmetry is **a second gate to keep in step** for no capability the policy lacks. The narrower instrument won, as at `P2-1`.
+
+⛔ **THE POLICY IS `active member of the centre`, NOT MANAGEMENT-ONLY** — screens `02`, `03`, `18`, `25` and `29` all render a term to a non-management reader, and leg `P22-9` exercises that direction. ▶ **A policy chosen for a reason nobody exercises is a policy nobody has checked.**
+
+### ⛔ THE WRITE GUARD IS ASSERTED IN BOTH PLACES, AS REQUIRED
+
+Operator: *"Assert the absence — a leg that fails the migration if a write policy or grant on terms ever appears, the way E1 and E9 were written."*
+
+**In the migration:** `T-6` **fails the build**. **In the suite:** `P22-2` re-asserts it at **every phase boundary**, which is where a later phase adding an INSERT policy for query convenience is actually caught — an in-migration assertion runs once.
+
+⚠️ **`P22-3` IS THE LEG THAT MAKES `P22-2` MEAN ANYTHING.** It **plants an INSERT policy inside the transaction**, requires the **same detector function** to see it, drops it, and confirms it did not survive. ▶ Both sides come from **one** `pg_temp.write_surface()` declaration, because *a control that exercises a different query from the assertion proves nothing about the assertion*.
+
+### ⚠️ THE SEED IS A DEVELOPMENT CALENDAR AND SAYS SO IN ITS OWN TEXT
+
+⛔ **Unlike the Step 7E seed — whose centre, three Class Grades and nine dimensions are all RATIFIED values — NO DOCUMENT ESTABLISHES iSpeak's REAL TERM CALENDAR.** The frame renders exactly one example label, `"Term 1, 2035"`, and nothing fixes how many terms a year holds or when they run.
+
+The four rows are calendar-quarter 2026 boundaries in the frame's label shape, chosen to **span the sessions that exist** (measured: 4 sessions, `2026-02-03 .. 2026-02-17`, all inside Term 1). ▶ **The migration declares them a placeholder and names the real calendar an OPERATOR INPUT**, and `T-7` pins the count at four **so a placeholder cannot be silently grown into something that reads as ratified.** `P22a-3` asserts that declaration is present.
+
+### ⛔ MY OWN ASSERTION FAILED MY OWN MIGRATION, AND IT WAS RIGHT TO
+
+`T-1` pinned the column count at **7**; the table declares **8**. The migration **aborted, leaving no partial state** (verified: neither `terms` nor `term_id` existed after the failure). ▶ **An author's miscount, caught by the author's own guard rather than by review.** Corrected to 8 **with the incident recorded in the assertion's own comment**, because *a count pinned to the wrong number is indistinguishable from a correct one until something moves*.
+
+### ⛔ `prove:hero-9`'s `P9-6` FIRED, AND THE PIN WAS REWRITTEN — NEVER DELETED
+
+`P9-6` asserted *"no term table and no term column exists: `G-4` held at the schema"*. **`D-3` REVERSED `G-4`**, so the leg fired on the migration that made its premise false — **exactly what a pin is for**.
+
+▶ **THE PROTECTION WAS NEVER REALLY ABOUT THE WORD "TERM".** What `G-4` protected was **end-of-term REPORT generation staying deferred**, and `D-3` expressly preserved that. So `P9-6` now measures **the half that still holds**: terms may exist, but **no report/rating/score/grade column may hang off them, no term function, no term audit string.** ⚠️ **Second application of *when a pin moves, check whether the leg still describes what it measures*.**
+
+⛔ **AND ITS SUCCESS STRING WAS STALE IN THE SAME BREATH.** The runner still printed *"G-4's term filter is gone from the screen and absent from the schema"* — **false the moment the migration applied**, and printed **only on success**, which is where nobody looks. Rewritten too.
+
+⚠️ **THIRD STRING-PATCH SYNTAX ERROR THIS SESSION.** The rewrite embedded unescaped double quotes in a JS string; `eslint` reported `Parsing error` and `prove:hero-all` went red. ▶ **Caught by the exit code, then `node --check` before anything was trusted again** — the discipline held three times out of three.
+
+### ⛔ `prove:stage3-authenticated` IS `NOT-RUN` AT THIS BOUNDARY — BLOCKED, NOT FAILED
+
+The harness could not serve: **another `next dev` is already running from this directory** (PID `46348`, port 3000). Next.js 16 refuses a second dev server per directory.
+
+⛔ **IT IS NOT MY PROCESS TO KILL.** It is an Operator-owned process in the Operator's environment, and terminating it is not something this session is authorized to do. ▶ **Classified `NOT-RUN`, never `FAIL`** — the harness measured nothing, and *aborted or zero-match is `NOT-RUN`, never `PASS`* cuts both ways. **It ran green earlier this session at `fabbe47`**, so this is an environment condition and not a regression — but that is a statement about a different commit and is not claimed for this one.
+
+### ⛔ THE STOP — ONE QUESTION, AND IT IS AN INTERNAL INCONSISTENCY, NOT A GAP
+
+The ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read* RPCs as needed"**, and also says **"BUILD `P2-2` COMPLETE"**. ⛔ **`P2-2` IS SCREEN `26` ADD CLASS — A CREATE FORM.** Those cannot both hold: a complete Add Class needs governed writes to `class_modules`, `class_sessions` and `class_session_assignments`.
+
+⚠️ **NOT RESOLVED BY PICKING.** The `C-4` precedent is the Operator's own: *"a ruling with an internal inconsistency is a stop-and-ask, not a puzzle to solve"*, and it is recorded as the corpus's clearest vindication of holding rather than applying. **The asymmetry is severe:** building the write path would create the product's **first governed administrative write path** under a ruling whose plain words forbid one.
+
+▶ **Everything unambiguous was delivered; only the ambiguous half is held.** The two candidate readings are recorded in the plan.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `npm run prove:portal-p2-2` | ✅ **exit 0** — 9 SQL legs + 10 runner checks, non-vacuity first, the write guard controlled by a planted policy |
+| `npm run prove:hero-all` | ✅ **17/17 by exit code** (after the `P9-6` rewrite) |
+| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · -p2-1 · f-attendance-init-1` | ✅ **all exit 0** |
+| `npm run test:integration` | ✅ **exit 0** |
+| `tsc` · `eslint` · `next build` | ✅ **0 · 0 errors (3 pre-existing warnings) · 0** |
+| `npm run prove:no-secrets` | ✅ **exit 0, CLEAN** — run before the push |
+| `npm run prove:stage3-authenticated` | ⛔ **`NOT-RUN` — blocked by an Operator-owned `next dev` (PID 46348). Not killed** |
+| Census | **26 migrations · 29 tables · 49 functions · 12 enums · 30 policies · registry 19** — ▶ **exactly the figure the `C-7` proposal committed to in advance**, asserted as an exact string by the suite |

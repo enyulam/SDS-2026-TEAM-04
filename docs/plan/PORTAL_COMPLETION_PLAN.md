@@ -744,6 +744,29 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 
 ---
 
+### ✅ `P2-2` RULED AND HALF-BUILT — 2026-08-12
+
+**Operator ruling, `C-7`, decision 1 = option (c): TERMS ARE SEEDED, NOT CREATED.** In their words: *"Terms are academy calendar structure, not a user-created object in this product… Seeding removes the RPC and the audit question together, and satisfies `A-029` trivially rather than by argument: no governed action, no event. No twentieth string."*
+
+✅ **BUILT AND PROVEN:** migration `20260812230000_portal_d3_terms_substrate.sql` — **1 table · 1 nullable `class_sessions.term_id` (NO backfill) · 1 RLS `SELECT` policy · 1 matching `SELECT` grant · 4 seed rows · ZERO functions, enums, audit strings, write policies, write grants.** `prove:portal-p2-2` **exit 0**. Census **26 · 29 · 49 · 12 · 30 · 19** — exactly the figure proposed in advance.
+
+⚠️ **THE SEED IS A DEVELOPMENT CALENDAR AND DECLARES ITSELF ONE.** No document establishes iSpeak's real term calendar; the four 2026 quarter rows are a placeholder, the real calendar is an **OPERATOR INPUT**, and `T-7` pins the count at four so it cannot be silently grown into something that reads as ratified.
+
+### ⛔ `P2-2`'s SCREEN IS STOPPED ON AN INTERNAL INCONSISTENCY IN THE RULING
+
+The same ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read* RPCs as needed"** — and also **"BUILD `P2-2` COMPLETE"**. ⛔ **`P2-2` is screen `26` Add Class, a CREATE form**, which needs governed writes to `class_modules`, `class_sessions` and `class_session_assignments`.
+
+**The two readings, recorded rather than chosen between:**
+
+| # | Reading | Consequence |
+|---|---|---|
+| **A** | *"NO WRITE PATH ANYWHERE"* is categorical | The terms substrate is all of `P2-2` that ships. **Screen `26` is deferred** until class creation is authorized as its own question, and `P2-3` (`27` Edit Class) defers with it |
+| **B** | The enumerated list scoped the **terms family**; class creation proceeds on the two **already-ratified** audit strings `admin.module_created` and `admin.session_created` | Three governed `SECURITY DEFINER` write RPCs ship. ⚠️ **They need no write policy and no write grant** — that is the whole point of the pattern — so reading (B) is *consistent* with the enumerated zeros |
+
+▶ **Reading (B) is textually available and (A) is textually plain.** The asymmetry decides the handling, not the probability: building (B) wrongly creates the product's **first governed administrative write path** under a ruling forbidding one; building (A) wrongly costs one screen. **`C-4`'s precedent governs — a ruling with an internal inconsistency is a stop-and-ask.**
+
+---
+
 ## 8. ⛔ STANDING PROHIBITIONS — carried unchanged
 
 | # | Prohibition | Source |

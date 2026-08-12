@@ -189,7 +189,7 @@ check(
 
 console.log(
   bad === 0
-    ? "\nRESULT: PASS -- `29` carries Class, Lesson and Trainer and a live class filter; the RPC's gate was chosen around, not weakened; and G-4's term filter is gone from the screen and absent from the schema."
+    ? "\nRESULT: PASS -- `29` carries Class, Lesson and Trainer and a live class filter; the RPC's gate was chosen around, not weakened; and the term SUBSTRATE now exists under D-3 while screen 29's All-terms FILTER is still not built and no term REPORT substrate exists -- G-4 was reversed for the entity, never for the report."
     : `\nRESULT: FAIL -- ${bad} check(s) failed.`,
 );
 process.exit(bad === 0 ? 0 : 1);

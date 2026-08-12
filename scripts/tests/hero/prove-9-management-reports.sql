@@ -176,21 +176,42 @@ BEGIN
   EXECUTE 'RESET ROLE';
 
   -- ---------------------------------------------------------------
-  -- P9-6 -- ⛔ G-4 IS STRUCTURAL, NOT JUST ABSENT FROM THE SCREEN. No
-  -- term table, column or enum exists anywhere in `public`. The frame's
-  -- "All terms" filter has no substrate to be built on, which is exactly
-  -- the reason G-4 gave for refusing it.
+  -- P9-6 -- ⛔ REWRITTEN 2026-08-12 AT `P2-2`, NEVER DELETED.
+  --
+  -- ~~G-4 IS STRUCTURAL: no term table, column or enum exists anywhere in
+  -- `public`.~~ ⛔ THAT PREMISE LAPSED. Operator ruling `D-3` REVERSED
+  -- `G-4` and terms are now built as SCHEDULING STRUCTURE; this leg fired
+  -- on the migration that made it false, which is exactly what a pin is
+  -- for.
+  --
+  -- ▶ THE PROTECTION IS NOT LOST, BECAUSE IT WAS NEVER REALLY ABOUT THE
+  -- WORD "TERM". What `G-4` protected was **end-of-term REPORT GENERATION
+  -- staying deferred** (`CLAUDE.md` §8, spec §28), and `D-3` expressly
+  -- preserved that deferral while permitting the scheduling entity. So the
+  -- leg now measures THE HALF THAT STILL HOLDS: terms may exist, but
+  -- nothing report-shaped may hang off them.
+  --
+  -- ⚠️ Second application of *when a pin moves, check whether the leg
+  -- still describes what it measures* -- the `P1-2` parent-arm case. A pin
+  -- deleted the first time it is inconvenient is not a pin.
   -- ---------------------------------------------------------------
   SELECT pg_catalog.count(*) INTO v_n
     FROM information_schema.columns c
-   WHERE c.table_schema = 'public'
-     AND (c.table_name = 'terms' OR c.column_name IN ('term', 'term_id', 'term_label'));
-  IF v_n = 0 THEN
+   WHERE c.table_schema = 'public' AND c.table_name = 'terms'
+     AND (c.column_name ILIKE '%report%' OR c.column_name ILIKE '%rating%'
+       OR c.column_name ILIKE '%score%'  OR c.column_name ILIKE '%grade%'
+       OR c.column_name ILIKE '%band%'   OR c.column_name ILIKE '%overall%');
+  IF v_n = 0
+     AND NOT EXISTS (SELECT 1 FROM pg_catalog.unnest(public.audit_action_registry()) x WHERE x LIKE '%term%')
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_catalog.pg_proc pr JOIN pg_catalog.pg_namespace ns ON ns.oid = pr.pronamespace
+        WHERE ns.nspname = 'public' AND pr.proname ILIKE '%term%')
+  THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P9-6 -- no term table and no term column exists: G-4 held at the schema, not only at the screen';
+    RAISE NOTICE 'PASS P9-6 -- terms exist as SCHEDULING STRUCTURE only: no report/rating/score/grade column, no term function, no term audit string. END-OF-TERM REPORT GENERATION REMAINS DEFERRED (D-3 reversed G-4 for the entity, NOT for the report)';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P9-6 -- % term-shaped column(s) exist -- the §8-deferred substrate G-4 refused', v_n;
+    RAISE WARNING 'FAIL P9-6 -- % report-shaped term column(s), or a term function/audit string exists -- this is the drift toward the §8-deferred term REPORT that D-3 did NOT authorize', v_n;
   END IF;
 
   RAISE NOTICE '---- P9 SQL: % passed, % failed ----', v_pass, v_fail;

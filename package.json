@@ -65,6 +65,7 @@
     "prove:portal-34": "node --env-file=.env.local scripts/tests/portal/prove-p1-34-evidence-review.mjs",
     "prove:portal-p2-1": "node --env-file=.env.local scripts/tests/portal/prove-p2-1-management-classes.mjs",
     "prove:portal-p2-1-composed": "node --env-file=.env.local --conditions=react-server --import ./scripts/tests/integration/alias-loader.mjs scripts/tests/portal/prove-p2-1-composed-class-list.mjs",
+    "prove:portal-p2-2": "node --env-file=.env.local scripts/tests/portal/prove-p2-2-terms-substrate.mjs",
     "prove:no-secrets": "node scripts/publication/prove-no-secrets.mjs"
   },
   "dependencies": {
