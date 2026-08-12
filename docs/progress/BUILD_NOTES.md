@@ -7483,3 +7483,17 @@ The omission leg carries a control requiring the matcher to fire against **the s
 | `tsc` · `eslint` | ✅ **0 · 0 errors** |
 
 ⛔ **Still `NOT-RUN` and not claimable from any green above:** the password sign-in form · the server-action transport (renders are GETs) · the AI drafting and grounding pipeline · every governed **mutation** leg, which belongs on the disposable stack.
+
+---
+
+## 2026-08-12 — `P2-2` STOPPED AT ITS `C-7` SCHEMA GATE, question stated in full
+
+- **Branch:** `develop`. **HEAD:** `fabbe47`. ⛔ **No code, no migration, no schema. The phase is STOPPED, not started.**
+
+**The frame was read and the build was measured at HEAD before anything was proposed.** Measured: **zero non-`SELECT` policies and zero non-`SELECT` client grants** on all five class tables, **no `terms` object of any kind**, and **no RPC that creates a module, a session or an assignment.** So the delta is genuinely `NEEDS NEW SCHEMA` + `NEEDS NEW SERVER ACTION`, and it is the Operator's to authorize.
+
+✅ **ONE MEASUREMENT REMOVED A GATE I EXPECTED TO ARM.** The Step 7H registry **already carries `admin.module_created`, `admin.session_created` and `admin.trainer_assigned`** — measured live at **19** strings. ▶ **`P2-2` needs no registry extension**, and `A-057`'s prohibition, re-armed at three evidence strings, is not engaged. ⚠️ **Had this been read off the delta table rather than measured, the phase would have requested an audit-registry extension it does not need** — the `P2-1` lesson, twice in two phases.
+
+⛔ **THE ONE PLACE I AM PROPOSING SOMETHING THE REGISTRY DOES NOT COVER IS STATED AS A QUESTION, NOT DESIGNED AROUND.** There is no audit string for creating a **term**, and three readings are defensible: a governed act needing a twentieth string; inert scheduling structure that audits nothing, as `class_grades` does; or terms **seeded** rather than created, which removes the RPC entirely. ▶ **`A-029` requires one event per GOVERNED action — and whether creating a term IS one is a ruling, not an inference.**
+
+**The full question — table, columns, constraints, policies, grants, RPCs, the four Operator decisions and the exact census effect — is at `docs/plan/PORTAL_COMPLETION_PLAN.md` §`P2-2`.**

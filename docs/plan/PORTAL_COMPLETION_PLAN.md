@@ -656,6 +656,94 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 
 ---
 
+---
+
+## `P2-2` · screen `26` Management Add Class — the `D-3` terms substrate and the class-creation write path
+
+> ⛔ **STOPPED HERE. THIS SECTION CREATES NOTHING.** No table, column, type, policy, grant, RPC, audit string, migration or route exists from it. It is the **`C-7` per-phase question put to the Operator before any code**, in the shape `P1-1b`'s design and `P1-2`'s table family were both stated before their migrations were written. **Every measurement below was taken at HEAD on 2026-08-12, not read off a document.**
+
+**Frame** · `reference/Management - Add Class/` + `26-management-add-class/screen.md`. Draws: **Class Details** (Class name · **Class code** · **Program** · Level · **Capacity** · Room) · **Schedule** (day selectors Sun–Sat · Start time · End time · **Term**) · **Assigned Trainer** with a search, and a **Trainer Assistant (TA)** slot in its `.md` · **Cancel** / **Save Class**.
+
+**Built today, measured at HEAD** · `/management/classes` exists (`P2-1`) and its `Add Class` control is **inert by design**, awaiting this phase. ⛔ **There is NO class-creation path of any kind:** `class_modules`, `class_sessions`, `class_grades`, `class_session_assignments` and `enrolments` carry **ZERO non-`SELECT` policies and ZERO non-`SELECT` client grants**, and no RPC creates any of them. **No `terms` object of any kind exists.**
+
+| Delta | Class |
+|---|---|
+| A `terms` entity, and the session's link to it (`D-3`, `C-6`) | **NEEDS NEW SCHEMA** (`C-7`) |
+| Governed create paths for module · sessions · trainer assignment | **NEEDS NEW SERVER ACTION** (reviewed `SECURITY DEFINER` RPCs) |
+| The `26` form and its states | `PRESENTATION-ONLY` once the above lands |
+| **Class code · Capacity · Program** | ⛔ **GOVERNANCE-BLOCKED** — `C-14` omits code and capacity; **"programme" has no entity and must not become a hidden `classes` entity** (`A-016`) |
+| **Trainer Assistant (TA)** | ⛔ **PROHIBITED** — `A-014`, `G-7`. `REGISTERED-OMISSION`, **never ends** |
+
+### ✅ ONE MEASUREMENT THAT REMOVES A GATE I EXPECTED TO ARM
+
+**The Step 7H audit registry already carries `admin.module_created`, `admin.session_created` and `admin.trainer_assigned`** — measured live: `audit_action_registry()` returns **19** strings and those three are among them. ▶ **`P2-2` therefore needs NO registry extension**, and `A-029`'s one-event-per-action rule is satisfied by strings that were ratified at Step 7H and have simply never had a writer. ⛔ **The `A-057` stop-and-ask, re-armed at three evidence strings, is NOT engaged by this phase.**
+
+### 1 · ONE NEW TABLE — `public.terms`
+
+⛔ **`C-6` decides its shape before any preference does: TERMS GROUP SESSIONS. There is NO lessons entity, and lesson identity stays the two columns already on `class_sessions`.**
+
+| Column | Type | Null | Default | What it is for |
+|---|---|---|---|---|
+| `id` | `uuid` | NOT NULL | `gen_random_uuid()` | PK |
+| `centre_id` | `uuid` | NOT NULL | — | FK → `centres(id)` `ON DELETE RESTRICT`. Terms are centre-owned, like `class_grades` and unlike the global `assessment_dimensions` |
+| `label` | `text` | NOT NULL | — | The one thing every frame that mentions a term actually renders — `"Term 1, 2035"`. ⚠️ **ONE field, not a number plus a year**: `08`, `19`, `33` and `29` all draw a single string, and splitting it would invent a structure no frame shows and no rule requires |
+| `starts_on` | `date` | NOT NULL | — | The scheduling substance. `D-3` builds terms **because the calendar features need the structure**, and a term with no boundaries scopes nothing |
+| `ends_on` | `date` | NOT NULL | — | `CHECK (ends_on >= starts_on)` |
+| `is_active` | `boolean` | NOT NULL | `true` | Matches `class_modules` / `enrolments`; a closed term is deactivated, never deleted |
+| `created_at` / `updated_at` | `timestamptz` | NOT NULL | `now()` | As every other governed table |
+
+**Constraints:** `UNIQUE (centre_id, label)` — a centre cannot hold two terms with the same name, which is what makes the label safe to render as an identity. ⛔ **No overlap constraint between terms.** Real academies run overlapping intensives, and an `EXCLUDE` here would refuse a legitimate arrangement to enforce a rule nobody ratified.
+
+**And ONE new column:** `class_sessions.term_id uuid NULL REFERENCES public.terms(id) ON DELETE RESTRICT`.
+
+⚠️ **NULLABLE, DELIBERATELY, AND THIS IS THE LOAD-BEARING CHOICE.** Every one of the **4 existing `class_sessions` rows** predates terms. A `NOT NULL` column would either refuse the migration or force a backfill that **invents a term for sessions nobody assigned one to** — and hero 0B already ruled that **`NULL` means NOT RECORDED and the element is omitted**, never defaulted. ⛔ **No backfill, and no invented "Term 1".**
+
+⚠️ **The FK is to `terms`, and there is no composite `(term_id, centre_id)` form** — unlike `report_evidence`'s deliberate composite. The reason is that a session already carries `centre_id` and `class_module_id`, and the module already pins the centre; a third path to the same centre is a third answer that can disagree. **Centre agreement is instead enforced by the RPC, which resolves the term inside the caller's own centre and can therefore never attach a foreign one.**
+
+### 2 · POLICIES AND GRANTS — ⛔ `SELECT` ONLY, AND NO WRITE POLICY ANYWHERE
+
+**Measured at HEAD: not one of the five class tables carries a non-`SELECT` policy or a non-`SELECT` client grant.** Every governed mutation in this product is a reviewed `SECURITY DEFINER` RPC (`ADR-3`, `A-030`), and **`P2-2` does not change that.**
+
+**Proposed, and it is the minimum:**
+
+| Object | Policy | Grant |
+|---|---|---|
+| `public.terms` | **RLS enabled** · **one** `SELECT` policy — an active member of the centre, mirroring `class_grades_select_active_member` | **one** `GRANT SELECT TO authenticated` |
+| `class_sessions.term_id` | — (the table's existing three `SELECT` policies already cover the row) | — (the table's existing grant already covers the column) |
+
+⛔ **ZERO `INSERT`, `UPDATE` or `DELETE` policy, and zero write grant, on ANY table in this family.** The form writes **only** through the RPCs in §3. **A policy and its minimum matching grant ship together** (`A-030`, Step 7G) — and here that is exactly one of each, on exactly one table.
+
+⚠️ **Why `terms` gets a `SELECT` policy at all, when `report_evidence` deliberately got none.** A term is **scheduling structure a trainer and a parent legitimately see on a session**, not report substance; it belongs in the roster class, not the reports class. ⛔ **The `SELECT` policy is `active member of the centre` — NOT management-only** — because `02`, `03`, `29`, `18` and `25` all render a term to a non-management reader, and serving that through a management-only policy would need a second instrument later.
+
+### 3 · THREE RPCs, AND THE AUDIT STRINGS THEY FIRE ALREADY EXIST
+
+| RPC | Volatility | EXECUTE | Gate | Audit |
+|---|---|---|---|---|
+| `admin_create_term(p_label, p_starts_on, p_ends_on)` | `VOLATILE` | `authenticated` | **Exactly one ACTIVE `management` membership**, resolved live in the caller's own centre — the `HAVING count(*) = 1` form that fails closed on zero **and** on more than one | ⛔ **NONE — and this is the one place I am proposing something the registry does not cover.** See the question below |
+| `admin_create_class_module(p_class_grade_id, p_title)` | `VOLATILE` | `authenticated` | The same management gate · the grade must be **in the caller's own centre** | ▶ **`admin.module_created`** — already ratified, same transaction as the INSERT |
+| `admin_create_class_session(p_class_module_id, p_session_date, p_starts_at, p_ends_at, p_room, p_term_id, p_trainer_membership_id)` | `VOLATILE` | `authenticated` | The same management gate · module, term and trainer membership **all re-resolved inside the caller's centre** | ▶ **`admin.session_created`**, and **`admin.trainer_assigned`** when a trainer is supplied — **both already ratified**, both in the same transaction |
+
+⛔ **ONE CALL CREATES ONE DATED SESSION.** The frame's **Sun–Sat day selectors are a GENERATOR, not a stored schedule** — `C-14`'s words. The **client** expands the chosen days across the term into N dated sessions and calls the RPC N times; **no recurrence rule is stored, and no duplicated calendar record is created** (`A-016`, `A-047`). ⚠️ **This is the design question I am least certain about and it is flagged as decision 3 below.**
+
+### 4 · ⚠️ FOUR DECISIONS THAT ARE THE OPERATOR'S, NOT MINE
+
+1. ⛔ **`admin_create_term` HAS NO AUDIT STRING, AND I WILL NOT INVENT ONE.** The registry carries `admin.module_created`, `admin.session_created`, `admin.trainer_assigned`, `admin.student_created`, `admin.enrolment_changed`, `admin.parent_link_changed`, `admin.profile_created` — **and nothing for a term.** ▶ **Three readings, and the choice is yours:** **(a)** creating a term is a governed administrative act and needs **`admin.term_created`** — a **twentieth** registry string, which is a `CLAUDE.md` §12 stop-and-ask in its own right; **(b)** a term is inert scheduling structure that carries no authorization and audits nothing, like `class_grades`, which is **seeded** and has no create action either; **(c)** terms are **seeded** rather than created, and screen `26` only *selects* one — which removes the RPC entirely. ⚠️ **I lean (b) or (c): `D-3` calls terms "scheduling structure", and `G-4`'s original refusal was about not building a substrate for a label.** But **`A-029` requires one event per GOVERNED action**, and whether creating a term is one is a ruling, not an inference.
+2. **`class_sessions.term_id` NULLABLE with NO backfill.** The four existing sessions stay term-less and their term is **omitted, never invented**. ⛔ **Recommended, and it needs your word** — the alternative is a fabricated academic fact on live rows.
+3. ⚠️ **THE RECURRENCE GENERATOR RUNS IN THE CLIENT AND STORES NOTHING.** `C-14` says a recurring pattern is *"a generator, not a stored schedule"*, which settles that no rule is **stored** — it does not settle **where the expansion happens**. ▶ **Client-side expansion means N round trips and N audit events, one per session, which is the honest shape**: each session really is a separate governed record. **A server-side batch RPC would be fewer calls but would put a loop inside a governed transaction and make partial failure ambiguous.** **Recommended as proposed; your call.**
+4. **`room` stays on `class_sessions` only.** `C-14` left open *"whether it is also a module-level default"*. ⛔ **Recommended: no module-level default.** `G-6` made `room` a **plain descriptive column that must never scope a query**; a second copy on the module is a second answer to *where does this class meet*, and the two can disagree. The form pre-fills the field per session from the previous one — **presentation, not storage.**
+
+### 5 · WHAT THIS FAMILY DOES NOT CONTAIN
+
+⛔ **No lessons entity** (`C-6`) · **no `classes` entity between Class Grade and Class Module** (`A-016`) · **no fourth Class Grade** (`A-026`, `A-054`) · **no class code, capacity or programme column** (`C-14` omits all three) · **no TA field and no `centre_membership_role` extension** (`A-014`, `G-7`) · **no term REPORT of any kind** (`D-3` authorizes structure only; `C-11` defers screen `28`) · **no duplicated calendar or event record** (`A-047`) · **no new enum** · **no write policy or write grant on any table** · **no change to `Q-27`, `G-2`, `A-036`, `A-038` or the content hash.**
+
+### 6 · WHAT AN AUTHORIZATION WOULD NEED TO SAY
+
+**One migration**, creating: **1 table** (`terms`) · **1 column** (`class_sessions.term_id`) · **1 RLS policy + 1 matching `SELECT` grant** (on `terms` only) · **2 or 3 RPCs** depending on decision 1 · **0 new enums** · **0 new audit action strings** *(unless decision 1 goes to reading (a), which is its own stop-and-ask)* · **0 seed rows** *(unless decision 1 goes to reading (c), which would add them)*.
+
+⛔ **Census effect if approved as proposed:** **25 → 26 migrations · 28 → 29 tables · 49 → 51 or 52 functions · 12 enums unchanged · 29 → 30 policies · audit registry UNCHANGED at 19.**
+
+---
+
 ## 8. ⛔ STANDING PROHIBITIONS — carried unchanged
 
 | # | Prohibition | Source |
