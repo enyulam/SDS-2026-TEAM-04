@@ -320,6 +320,56 @@ a {
   padding: 0.875rem 0.9375rem;
 }
 
+/*
+ * ⛔ THE SHARED SELECT'S CHEVRON GEOMETRY. Added 2026-08-13 after an Operator
+ * walkthrough found EVERY `<select>` on screens `26` and `27` painting roughly
+ * a dozen chevrons in a horizontal row, overlapping the selected text.
+ *
+ * ⚠️ MEASURED IN A BROWSER BEFORE ANYTHING WAS CHANGED, because three causes
+ * were possible and only one is right. `getComputedStyle` on the shipped
+ * markup returned:
+ *
+ *     background-repeat: repeat · background-size: auto ·
+ *     background-position: 0% 0% · appearance: none
+ *
+ * ▶ So the `appearance` reset DID take and there is no native chevron
+ * underneath. The cause is the FIRST hypothesis: the background image TILES.
+ * `.form-field` is unlayered and declares the `background` SHORTHAND, which
+ * resets repeat, size and position; `bg-no-repeat`,
+ * `bg-[length:1.15rem]` and `bg-[right_0.75rem_center]` were emitted into
+ * `@layer utilities` and lost the cascade. Only the chevron itself survived,
+ * because it is an INLINE style — so one glyph tiled across the control.
+ *
+ * ⚠️ THIS IS THE `F-01b` TRAP AGAIN, in a control nobody had re-measured. The
+ * remedy is the one this file already established for `.auth-field` and
+ * `.notes-field`: an unlayered modifier that outranks the utility layer.
+ * ⛔ Writing these as utilities on the element would look correct in review
+ * and change nothing on screen — which is exactly what happened.
+ *
+ * `.form-field` itself is still deliberately NOT moved into a layer, and its
+ * `background` shorthand is left alone: both would change the cascade for
+ * every consumer in the application at once, and the recorded decision above
+ * is to keep the fix narrow.
+ */
+.form-field.select-field {
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.15rem;
+  padding-inline-end: 2.5rem;
+}
+
+/*
+ * ⛔ THE SHARED SEARCH INPUT'S LEADING GUTTER. Same walkthrough, same trap:
+ * the magnifier is a LEADING AFFORDANCE the frame draws, and typed text ran
+ * underneath it. Measured before the change: `padding-inline-start` computed
+ * `14px` — `.form-field`'s own `padding` shorthand — while the icon sits at
+ * `left: 14px` and is `16px` wide, so text began exactly where the icon
+ * begins. The `pl-10` utility on the input was emitted and lost.
+ */
+.form-field.search-field {
+  padding-inline-start: 2.5rem;
+}
+
 /* ---------------------------------------------------------------------------
  * Loading presentation
  * ------------------------------------------------------------------------- */

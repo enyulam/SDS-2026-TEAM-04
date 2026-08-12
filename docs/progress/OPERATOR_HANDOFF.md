@@ -1,13 +1,12 @@
 # OPERATOR HANDOFF — B.E.S.T Coach Final MVP
 
 > ⛔ **NOT A TRACKER · NOT AUTHORITY · DERIVED.** Every line is reproduced or mechanically
-> reduced from `STATUS.md`, `BUILD_NOTES.md`, `PORTAL_COMPLETION_PLAN.md`, `git`, or the live
-> database. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
+> reduced from `STATUS.md`, `BUILD_NOTES.md`, `PORTAL_COMPLETION_PLAN.md`, `git`, or a live
+> measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-13, at the **AUTHORIZATION A boundary** — screens `12`, `13`, `26` and
-`27` rebuilt from their `.png` and `.html`, one commit per screen, plus the mechanical gate that
-closes the method defect. ⏸ **HELD for your walkthrough of all four.**
+**Regenerated:** 2026-08-13, after your walkthrough. **Defects 1 and 2 fixed and measured;
+defect 3 reported and HELD for your ruling.** ⏸ Nothing built for defect 3.
 
 ---
 
@@ -15,88 +14,100 @@ closes the method defect. ⏸ **HELD for your walkthrough of all four.**
 
 | Carried claim | Method | Result |
 |---|---|---|
-| **`13` has no inbound Edit affordance — a DESIGN GAP, not a build gap** | the `.png` opened and read | ⛔ **LAPSED, AND THE PREMISE WAS FALSE.** `Management - Class Overview.png` draws **`✎ Edit class` in the header card**. The disposition rested on a `grep` over the pack's prose note. ✅ **CLOSED — the control is built and wired to `27`.** Corrected in the plan, `STATUS.md` and the pack **before** this file was derived |
-| *"The frame's own note lists B.E.S.T. Ratings … governance overrides the frame"* (`13`) | the `.png` opened and read | ⛔ **LAPSED AS EVIDENCE.** The frame draws **no rating anywhere** — it draws a per-lesson `FOCUS` chip column. ⚠️ **The BAR is unchanged and still absolute**; only its stated ground moved |
-| *"`27`'s day strip and trainer `-` control are absent"* — stated as frame facts | the `.png` opened and read | ⛔ **LAPSED AS EVIDENCE, STANDING AS RULE.** The frame **DRAWS BOTH**; their absence is a REAL divergence and `EXPECTED / REQUIRED`. No cancel/delete string, no unassign string |
-| **VISUAL acceptance `NOT-RUN` on `12` · `13` · `26` · `27`** | re-read at HEAD | ✅ **STILL TRUE — and restated at full weight:** before the rebuild **there was no basis on which it could pass**. It stays `NOT-RUN` now |
-| `R-7` — `P2-6`'s `C-7` gate | read at HEAD in the plan | ✅ **STILL TRUE** — still the **only** open `C-7` item |
+| **VISUAL acceptance `NOT-RUN` on `12` · `13` · `26` · `27`** | your walkthrough | ⚠️ **PARTLY LAPSED, AND IT IS YOUR CALL, NOT MINE.** You walked all four: `12` **correct in full**, and every frame match on `13`/`26`/`27` confirmed. ⛔ I do **not** record any of them as visually accepted — `Accepted` is Operator-set only |
+| *"`26`/`27` backend integration unproven by walk"* | your walkthrough | ⛔ **LAPSED** — you confirmed Level and Term persist correctly |
+| `prove:stage2-routes` exits 0 | re-run twice | ⛔ **LAPSED — now `NOT-RUN`.** Next 16 allows ONE `next dev` per directory and one is running (**PID 24124, port 3000, started 04:51**). It appeared **between the passing battery and your walk**, so it is almost certainly your own walk server. ⛔ **NOT KILLED.** `next build` 0 and `next start` served the measurement suite — a lock, not a regression |
+| `R-7` — `P2-6`'s `C-7` gate | read at HEAD | ✅ **STILL TRUE** — still the only open `C-7` item |
 | `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
-| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** — no fixture load, no hosted contact | ✅ **CARRIED, and stated as carried** |
-| `09` refuses its canonical route (`C2C-007`) | read at HEAD in the plan | ✅ **STILL TRUE** — first fixed at `P2-21` |
+| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** | ✅ **CARRIED, and stated as carried** |
+| `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** |
 | `test:continuity` · `test:exit-condition-b` blocked by `B-STAGE3-2` | not re-run | ✅ **CARRIED** |
-| **136 mojibake sequences / 41 files** | not re-measured this run | ⚠️ **CARRIED AS UNREPRODUCED.** The bounded run takes its own measurement |
-| `main` untouched | `git ls-remote origin main` | ✅ **STILL TRUE** — `5eb84bc` |
-
-⚠️ **Three items lapsed this run, and all three lapsed because the FRAMES were finally read.**
-Each was corrected in its source record first, then this file was derived.
+| **136 mojibake sequences / 41 files** | not re-measured | ⚠️ **CARRIED AS UNREPRODUCED** |
+| `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
 
 ---
 
-## Position
+## ✅ DEFECT 1 — the chevron tiled. FIXED, AND DIAGNOSED BY MEASUREMENT
 
-| | |
-|---|---|
-| **HEAD** | the **`27`** rebuild commit, fourth of four. ⚠️ A derived artifact cannot name its own SHA; verify with `git log -1` |
-| **Branch** | `develop` · four commits, **one per screen**, plus this record commit |
-| **`main`** | **`5eb84bc`, UNTOUCHED** |
-| **Census (local, measured)** | **30 migrations · 29 tables · 56 functions · 12 enums · 30 `public` policies · registry 21 — ALL UNMOVED.** ⚠️ An unscoped `pg_policy` count reads **31**; the extra row is the `storage` bucket policy, not a new `public` one |
-| **Migration this run** | ⛔ **NONE.** No table, column, enum, policy, grant or audit string |
-| **Hosted dev / frozen projects** | ⛔ **NOT CONTACTED.** The demonstration stack on 543xx was **never queried** |
+You named three possible causes. **The measurement discriminates them**, so this is not an
+argument. `getComputedStyle` in headless Chrome, on the shipped markup, **before any change**:
 
----
+```
+background-repeat: repeat   ·  background-size: auto
+background-position: 0% 0%  ·  appearance: none
+```
 
-## ⛔ THE GAP YOU NAMED IS CLOSED — `prove:artefact-read`
+▶ **`appearance: none` eliminates two of the three outright.** The reset DID take, and there is
+no native chevron underneath. **The cause is the first: the background image TILES.**
 
-> *"The rule was in §3 of the plan you were executing, and no proof measures §3 compliance."*
+**Why.** `.form-field` is **unlayered** and declares the `background` **SHORTHAND**, which resets
+repeat, size and position. Tailwind emits its utilities into `@layer utilities`, and an unlayered
+rule outranks every rule in every layer — so `bg-no-repeat`, `bg-[length:1.15rem]` and
+`bg-[right_0.75rem_center]` were generated, matched and **silently lost**. Only the chevron
+survived, because it is an **inline** style.
 
-**Measurable, and measured:**
+⚠️ **`app/globals.css` already documented this exact trap at `F-01b`**, with `.auth-field` and
+`.notes-field` as its remedy. **Fixed at the shared control the same way: `.form-field.select-field`.**
+⛔ Written as utilities on the element it would have looked correct in review and changed nothing.
 
-* **`.html`** — `AR-3` requires every cited value to occur **literally** in that pack's `.html`;
-  `AR-5` requires each to be **USED in the component, comments stripped first**, so *"used"*
-  cannot degenerate into *"quoted"*.
-* **`screen.md`** — `AR-6`, an exact quotation verified at source.
-* **`AR-4` is the leg that would have caught the defect**: ≥6 distinct values, **≥2 FRACTIONAL**,
-  **none obtainable from the prose note**. A note-derived build cannot produce `1.30px`.
-* **`AR-7a`…`f` — six controls.** A fabricated value, an all-integer set, a rounding attempt and
-  a comment-only value must each be **REJECTED**, and a real value **ACCEPTED**.
+**Measured after:** `no-repeat · 18.4px · calc(100% - 12px) 50% · appearance: none · padding-right: 40px`.
 
-**⛔ NOT MEASURABLE, AND SAID SO RATHER THAN FAKED: the `.png`.** An image leaves no derivable
-textual residue; `atime` proves *"something touched the file"*, never *"a session looked at
-it"*; a declaration would be exactly the *"check that only records a claim"* you refused.
-▶ **The honest bound:** this corpus's `.html` is a full render of the same frame, so proving it
-was read covers **content and geometry**. What stays unproven is narrow and real — the `.png` is
-the tie-break authority **where render and image disagree**. **The suite prints this limit on
-every run.**
+## ✅ DEFECT 2 — the magnifier did not clear. FIXED
 
-⛔ **NOT BACK-FILLED.** Earlier screens sit in `UNMEASURED` with no citations: back-filling would
-mean opening the `.html` today and recording it as though the building phase had.
+Same trap, one line away. **Before:** `padding-inline-start: 14px` — the `.form-field` padding
+shorthand — against an icon at `left: 14px`, `16px` wide. Text began **exactly where the icon
+begins**. **After:** `40px`. Fixed at the shared control as `.form-field.search-field`.
 
-⚠️ **`AR-1` FAILED BY CONSTRUCTION at each intermediate commit** and was reported that way, never
-suppressed. Green at the fourth.
+## ⛔ NO OTHER SELECT CARRIES THE TREATMENT — measured
+
+`SC-3` scans **85 sources** and asserts no select outside the shared control combines
+`form-field` with `appearance-none`. **Five raw `<select>` elements legitimately exist elsewhere**
+(`management-report-review`, `management-reports-queue`, `parent-reports-list`, `trainer-roster`,
+`trainer-schedule`); each was read, none carries it. ⚠️ Routing them through the shared component
+is a change to five screens **outside this authorization** and was **not** done.
 
 ---
 
-## ✅ AUTHORIZATION A — what each screen gained
+## ⏸ DEFECT 3 — ANSWERED FROM THE `.png`, NOTHING BUILT
 
-| Screen | Built |
-|---|---|
-| **`12`** | ONE `space-between` toolbar row (heading + count pill left; four level pills and `Add Class` right) · `20px` 3-column grid · cards at `16px` radius with a `13px` tile chip · the `···` control · the whole card as the affordance to `13` · the `Students` stat in the frame's FOOTER position. ⛔ **The `···` MENU OPENS TO NOTHING** — the frame defines no items, so it says so in words. The invented `View class overview` button is **removed** |
-| **`13`** | the header card entire — `58px` chip at `15px` radius, title, `Active` badge, meta line, `ASSIGNED TRAINER`, **`Edit class`** · the two stat tiles · the lessons **TABLE** replacing the `<ul>` · the footer as CONTROLS |
-| **`26`** | **ONE card, not three**, with 1px hairlines and `Cancel` / `Save Class` INSIDE it · the row structure · day chips inline · the `230px` search box · the trainer row |
-| **`27`** | the same one-card structure (the frame is layout-identical to `26`) · a read-only session list where the day strip sits |
+**Question: does the frame draw a dedicated back affordance, and in what position?**
 
-**⛔ AUTHORIZATION B IS NOT BUILT and nothing stands in for it:** FOCUS chips (`D-4`/`P2-6`),
-per-row `Stats` (`P2-16`), the two footer targets, the employee ID.
+## ⛔ NO. NOT ON ANY OF THE THREE.
 
-**⚠️ ONE DIVERGENCE FROM YOUR BRIEF, reported rather than resolved.** You asked for *"the trainer
-row with avatar and subtitle"*. The subtitle is **OMITTED**: the frame's
-`Public Speaking · Employee T-1001` is programme (`C-14`: no entity) plus the employee ID
-(Authorization B). **Both halves are ruled out**, so hero 0B omits the element and
-`TrainerChoiceDto` carries no field that could hold one.
+| Screen | Header, as the `.png` draws it | Back control |
+|---|---|---|
+| **`13`** | breadcrumb `Classes / Junior · Public Speaking` at **`11.50px`**, **ABOVE** the `22px` title `Class Overview`; bell + `OH` identity on the right | ⛔ **NONE** |
+| **`26`** | `22px` title `Add Class`, breadcrumb `Classes / Add Class` at **`12.50px`** **BELOW** it; bell + identity right | ⛔ **NONE** |
+| **`27`** | `22px` title `Edit Class`, breadcrumb `Classes / Junior Public Speaking / Edit` at **`12.50px`** **BELOW** it; bell + identity right | ⛔ **NONE** |
 
-**⚠️ THREE PINS MOVED, EVERY ONE REWRITTEN.** `S3-M2` pinned two strings of **invented copy** the
-frame does not draw — the leg was green **while measuring the opposite of faithfulness**.
-`S3-M5` pinned `'Lessons'`, this build's own `h2`. `LEARNERS` is pinned in its **painted** form.
+**Corroboration, per artefact:**
+
+* **`.png`** — the header band on all three holds a two-line title stack at the left and the
+  bell + identity strip at the right. **No arrow, no chevron, no button, in any position.**
+* **`.html`** — the header is one `space-between` row with **exactly two children**: the title
+  stack and the identity strip. **The string `Back` occurs in none of the three files** (nor in
+  `12`'s).
+* **`screen.md`** — records no back control for any of the three.
+
+**What the frames DO draw that leads backward:**
+
+1. **The breadcrumb's first segment, `Classes`** — on all three. It is muted `11.50px`/`12.50px`
+   text, and in this build it **is** a live link to `/management/classes`. ▶ This is your
+   *"a route exists; it simply does not read as a back control."*
+2. **The persistent left rail**, with `Classes` active on all three — a route to screen `12`,
+   **not** to the previous screen.
+3. **`Cancel`, inside the card footer on `26` and `27` only** — it returns to Classes, but it
+   reads as *discard*, and `13` has no equivalent.
+
+⚠️ **TWO FURTHER FACTS MEASURED WHILE ANSWERING, both relevant to whatever you rule:**
+
+* **`13`'s breadcrumb is ABOVE the title in the frame and BELOW it in this build.** `26` and `27`
+  match the frame (below). This is real drift on `13` alone and I have **not** touched it.
+* **Screen `12` renders NO breadcrumb at all**, though its frame draws `Management / Classes`
+  above the title. Reported as a fact, not as a challenge to your acceptance of `12`.
+
+⛔ **I have built nothing for defect 3 and will not until you rule.** The trainer portal's
+`Back to Schedule` was not consulted.
 
 ---
 
@@ -104,23 +115,28 @@ frame does not draw — the leg was green **while measuring the opposite of fait
 
 | Suite | Result |
 |---|---|
-| `prove:artefact-read` | ✅ **exit 0 — 30 PASS · 0 FAIL**, four screens, six controls |
-| Seven portal suites · `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` · `prove:encoding` · `prove:no-secrets` · `prove:stage2-routes` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
-| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`**, including `S3-M2-omissions`, `S3-M5-bars` and `S3-M4-refusals` on the painted pages |
-| `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — both blocked by `B-STAGE3-2` |
-| **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four**, and not claimed. **A rendered DOM-text proof is not a visual acceptance, and this rebuild is exactly why** |
+| `prove:shared-controls` (new) | ✅ **exit 0 — 8 PASS · 0 FAIL**, browser measurement + stale-build guard + three detector controls |
+| `prove:artefact-read` · `p2-1` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `prove:hero-all` · `test:integration` · `prove:encoding` · `prove:no-secrets` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage2-routes` | ⛔ **`NOT-RUN`** — blocked by the running `next dev` lock (see freshness report). **Not a regression, and not killed** |
+| `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — `B-STAGE3-2` |
+| **VISUAL acceptance** | ⛔ **Operator-set only. Not claimed here** |
+
+⚠️ **Four instrument defects were found and fixed before any reading was trusted** — the
+extractor measured a wrapper `div`; the `<select` scan read **comments**; the extractor then read
+the **new fix comment** and reported `appearance: auto`, which looked like the fix regressing the
+product; and the first post-fix run measured a **stale bundle**. ▶ **A scan over prose is not a
+scan over code — third instance this session.** `SC-1`'s own assertion was also wrong once while
+the product was right: Chrome **resolves** `right 0.75rem center` to `calc(100% - 12px) 50%`.
 
 ---
 
 ## Next permitted action
 
-⏸ **HELD.** You walk screens `12`, `13`, `26` and `27`.
+⏸ **HELD on your ruling for defect 3**, then your re-walk, then **`P2-5` (`25` Management
+Schedule)** — a calendar **projection**, gated by `GC-13`: no `Showcase`, no duplicated event
+record (`A-016`).
 
-▶ After that, **`P2-5` (`25` Management Schedule)** in plan order — a calendar **projection** of
-class sessions, gated by `GC-13`: no `Showcase`, and **no duplicated event record** (`A-016`
-makes calendars projections, never stored duplicates).
-
-⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload or expansion ·
-editing ratified authority · a push to `main` · public deployment · human testing · final
-submission · **the mojibake repair run** · **and any query against the demonstration stack on
-543xx**.
+⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing
+ratified authority · a push to `main` · public deployment · human testing · final submission ·
+**the mojibake repair run** · **any query against the demonstration stack on 543xx** · and
+**killing the running `next dev` server**.

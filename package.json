@@ -71,7 +71,8 @@
     "prove:portal-p2-2b": "node --env-file=.env.local scripts/tests/portal/prove-p2-2b-trainer-assignment.mjs",
     "prove:portal-p2-3": "node --env-file=.env.local scripts/tests/portal/prove-p2-3-class-edit.mjs",
     "prove:portal-p2-4": "node --env-file=.env.local scripts/tests/portal/prove-p2-4-class-overview.mjs",
-    "prove:artefact-read": "node scripts/tests/portal/prove-artefact-read.mjs"
+    "prove:artefact-read": "node scripts/tests/portal/prove-artefact-read.mjs",
+    "prove:shared-controls": "node --env-file=.env.local scripts/tests/portal/prove-shared-controls.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

@@ -1318,6 +1318,95 @@ before anything is saved. **Same glyph, different act.**
 | **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four.** A rendered DOM-text proof is not a visual acceptance, **and this rebuild is exactly why** |
 | Migration / schema | ⛔ **NONE.** No table, column, enum, policy, grant or audit string. `attendance` was already readable by management, measured at HEAD |
 
+
+---
+
+## §12.2 — THE WALKTHROUGH DEFECTS, AND THE STANDING LIMIT OF DOM-TEXT PROOF
+
+**Operator walkthrough, 2026-08-13.** Screen `12` correct in full; every frame match on `13`,
+`26` and `27` confirmed; backend integration on `26`/`27` confirmed. **Three defects**, none of
+which any green proof in this project could see.
+
+> ⛔ **OPERATOR, FOR THE RECORD:** *"Rendered DOM proof passed on all four screens while a
+> dozen chevrons were stacked inside a field and three screens had no exit. That is the standing
+> limit of DOM-text proof, and it is why VISUAL acceptance stays NOT-RUN until I walk."*
+
+▶ `innerText` reports the STRINGS a page paints. It says nothing about **where they sit** or
+**what is painted on top of them**. A render tier is a proof of DATA ARRIVAL, never of layout.
+
+### ✅ DEFECT 1 — the select chevron tiled a dozen times. FIXED
+
+**Three causes were possible and the measurement discriminated them.** `getComputedStyle` on the
+shipped markup, in headless Chrome, **before anything was changed**:
+
+```
+background-repeat: repeat  ·  background-size: auto
+background-position: 0% 0%  ·  appearance: none
+```
+
+▶ **The `appearance` reset DID take**, so there is no native chevron underneath — hypotheses
+(b) and (c) are both eliminated **by measurement, not by argument**. The cause is (a): the
+background image **TILES**.
+
+**Why.** `.form-field` is UNLAYERED and declares the `background` **SHORTHAND**, which resets
+repeat, size and position. `@import "tailwindcss"` emits utilities into `@layer utilities`, and
+an unlayered rule outranks every rule in every layer — so `bg-no-repeat`, `bg-[length:1.15rem]`
+and `bg-[right_0.75rem_center]` were generated, matched, and **silently lost**. Only the chevron
+survived, because it is an **inline** style.
+
+⚠️ **THIS IS THE `F-01b` CASCADE TRAP, ALREADY DOCUMENTED IN `app/globals.css`**, in two
+controls nobody had re-measured. **Fixed at the shared control** with the remedy that file
+already established for `.auth-field` and `.notes-field`: an unlayered modifier
+**`.form-field.select-field`**. ⛔ Written as utilities it would have looked correct in review
+and changed nothing on screen — which is exactly what had happened.
+
+### ✅ DEFECT 2 — the search magnifier did not clear. FIXED
+
+Same trap, same file. Measured before the change: **`padding-inline-start: 14px`** —
+`.form-field`'s own `padding` shorthand — while the icon sits at `left: 14px` and is `16px`
+wide. Text began **exactly where the icon begins**. `pl-10` was emitted and lost. Fixed at the
+shared control as **`.form-field.search-field`**. Measured after: **`40px`**.
+
+### ⛔ NO OTHER SELECT CARRIES THE TREATMENT — measured, not assumed
+
+`SC-3` scans every `.ts`/`.tsx` under `app`, `features`, `components` and `lib` and asserts that
+**no select outside the shared control combines `form-field` with `appearance-none`** — the
+combination that produced the defect. **Five raw `<select>` elements legitimately exist
+elsewhere** (`management-report-review`, `management-reports-queue`, `parent-reports-list`,
+`trainer-roster`, `trainer-schedule`); each was read and none carries the treatment. ⚠️ Routing
+them through the shared component is a change to five screens **outside this authorization** and
+was NOT done.
+
+### ⚠️ THREE INSTRUMENT DEFECTS, FOUND AND FIXED BEFORE ANY READING WAS TRUSTED
+
+The measurement instrument was wrong three times, and each wrong reading **looked like a product
+defect**:
+
+| # | The instrument did | It reported | Fix |
+|---|---|---|---|
+| 1 | took the FIRST template literal after the marker — the **wrapper `div`'s** class, not the input's | `padding-inline-start: 0px` | extract the first string that actually names `form-field` |
+| 2 | scanned `<select` over **raw source including comments** | **8** files rendering a raw select; **3 were COMMENTS**, including this rebuild's own *"a `<select>` would require INVENTING one"* | strip comments first |
+| 3 | extracted the class list from source **including the new fix comment**, which names `` `.form-field` `` in prose | `appearance: auto` — read as the fix having REGRESSED the product | strip comments before extraction too |
+
+▶ **A SCAN OVER PROSE IS NOT A SCAN OVER CODE.** `AR-5` already guards it, `SC-3` guards it,
+and the extractor needed it as well. **Third instance in one session.**
+
+⛔ **AND A FOURTH: A STALE BUNDLE IS A VACUOUS MEASUREMENT.** `next start` serves whatever
+`.next` already holds, so the first post-fix run measured the **previous build** and reported the
+defect as still present. **`SC-BUILD` now refuses to measure a bundle older than
+`app/globals.css` or `components/ui/field.tsx`** — proved firing before it was proved passing.
+
+⚠️ **`SC-1`'s ASSERTION WAS ALSO WRONG ONCE, AND THE PRODUCT WAS NOT.** It required the
+computed position to start with `right`; Chrome **resolves** `right 0.75rem center` to
+`calc(100% - 12px) 50%`. An assertion written against the AUTHORED value rather than the
+COMPUTED one **fails a correct fix** and would have sent the next session hunting a closed defect.
+
+### ⛔ DEFECT 3 — REPORTED, NOT BUILT
+
+**No back affordance on `13`, `26` or `27`.** Answered from the `.png` and corroborated against
+each `.html`; **held for the Operator's ruling.** See `docs/progress/STATUS.md` for the
+per-screen finding.
+
 ---
 
 ## 11. Completion states

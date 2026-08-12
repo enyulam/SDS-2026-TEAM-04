@@ -95,11 +95,19 @@ export function Select({
   children,
   ...props
 }: SelectHTMLAttributes<HTMLSelectElement> & { readonly invalid?: boolean }) {
+  /*
+   * ⛔ THE CHEVRON GEOMETRY LIVES IN `.select-field`, NOT IN UTILITIES.
+   * `bg-no-repeat`, `bg-[length:…]`, `bg-[right_…]` and `pr-10` were written
+   * here first: they were emitted into `@layer utilities`, lost the cascade to
+   * unlayered `.form-field`, and the chevron TILED a dozen times across the
+   * control. Measured in a browser, then moved to `app/globals.css`, where an
+   * unlayered modifier outranks the utility layer.
+   */
   return (
     <select
       {...props}
       aria-invalid={invalid || undefined}
-      className={`form-field cursor-pointer appearance-none bg-[length:1.15rem] bg-[right_0.75rem_center] bg-no-repeat pr-10 ${className}`}
+      className={`form-field select-field cursor-pointer appearance-none ${className}`}
       style={{
         // Inline chevron, so no icon CDN or remote asset is required.
         backgroundImage:
@@ -135,10 +143,17 @@ export function SearchInput({
           <path d="m20 20-3.2-3.2" />
         </svg>
       </span>
+      {/*
+        ⛔ THE LEADING GUTTER LIVES IN `.search-field`, NOT IN `pl-10`. The
+        utility was emitted and lost the cascade to unlayered `.form-field`,
+        so text began at `14px` — exactly where the magnifier begins — and ran
+        underneath it. The icon is a LEADING AFFORDANCE the frame draws;
+        entered text must clear it.
+      */}
       <input
         {...props}
         type={props.type ?? "search"}
-        className="form-field border-line bg-surface pl-10"
+        className="form-field search-field border-line bg-surface"
       />
     </div>
   );

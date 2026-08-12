@@ -8287,3 +8287,93 @@ and the surface then **omits the whole tile** (hero 0B).
 | Census | **UNMOVED** — 30 migrations · 29 tables · 56 functions · 12 enums · 30 policies · registry 21 |
 
 **Next step:** the Operator walks all four screens before `P2-5`.
+
+---
+
+## 2026-08-13 — the walkthrough defects: two shared-control fixes, measured; one held
+
+**Branch:** `develop`, main worktree. **Starting HEAD:** `e76659e`.
+**Authorization:** Operator, 2026-08-13 — *"Fix 1 and 2. Report 3 from the `.png` and stop for
+my ruling before building it."*
+
+### ⛔ THE FINDING THAT MATTERS MOST IS THE OPERATOR'S OWN
+
+> *"Rendered DOM proof passed on all four screens while a dozen chevrons were stacked inside a
+> field and three screens had no exit. That is the standing limit of DOM-text proof, and it is
+> why VISUAL acceptance stays NOT-RUN until I walk."*
+
+▶ `innerText` reports the **strings** a page paints. It says nothing about **where they sit**
+or **what is painted on top of them**. Every render leg in this project was green through both
+defects, and correctly so: they measure data arrival, not layout.
+
+### Defect 1 — diagnosed by measurement, not by argument
+
+Three causes were named. `getComputedStyle` in headless Chrome, on the shipped markup, **before
+anything was changed**:
+
+```
+background-repeat: repeat  ·  background-size: auto
+background-position: 0% 0%  ·  appearance: none
+```
+
+**`appearance: none` eliminates two of the three hypotheses outright.** There is no native
+chevron to draw over. The image simply **tiles**, because `.form-field` is unlayered and
+declares the `background` **shorthand** — which resets repeat, size and position — while
+`bg-no-repeat`, `bg-[length:1.15rem]` and `bg-[right_0.75rem_center]` sit in `@layer utilities`,
+which any unlayered rule outranks. The chevron itself survived only because it is an **inline**
+style.
+
+⚠️ `app/globals.css` **already documented this exact trap** at `F-01b`, with `.auth-field` and
+`.notes-field` as its remedy. The defect is that trap in two controls nobody had re-measured.
+
+**Fixed at the shared control**, in the same file, the same way: `.form-field.select-field`.
+⛔ Written as utilities on the element it would have looked correct in review and changed
+nothing on screen.
+
+### Defect 2 — the same trap, one line away
+
+Measured before: **`padding-inline-start: 14px`**, the `.form-field` padding shorthand, against
+an icon at `left: 14px` and `16px` wide. Text began exactly where the icon begins. Fixed as
+`.form-field.search-field`; measured after: **`40px`**.
+
+### ⚠️ FOUR INSTRUMENT DEFECTS — AND EVERY ONE LOOKED LIKE A PRODUCT DEFECT
+
+1. The class extractor took the FIRST template literal after the marker — in `SearchInput` that
+   is the **wrapper `div`'s** class, not the input's. It reported `padding-inline-start: 0px`,
+   and I nearly recorded a `div`'s padding as the product's.
+2. The raw-`<select>` scan read **comments**: 8 files, of which 3 were **prose** — including
+   this rebuild's own *"a `<select>` would require INVENTING one"*.
+3. After the fix, the extractor read the **new fix comment**, which names `` `.form-field` `` in
+   a sentence, and returned a class list assembled out of prose — reporting `appearance: auto`,
+   which read as **the fix having regressed the product**.
+4. The first post-fix run measured a **stale bundle**: `next start` serves whatever `.next`
+   holds, and the CSS had changed after the last build.
+
+▶ **A SCAN OVER PROSE IS NOT A SCAN OVER CODE.** `AR-5` guards it, `SC-3` guards it, and the
+extractor needed it too — **third instance in a single session**. ⛔ `SC-BUILD` now **refuses to
+measure a bundle older than the source**, and was proved FIRING before it was proved passing.
+
+⚠️ **`SC-1`'s assertion was wrong once while the product was right**: it required the computed
+position to start with `right`, and Chrome resolves `right 0.75rem center` to
+`calc(100% - 12px) 50%`. An assertion written against the AUTHORED value rather than the
+COMPUTED one fails a correct fix.
+
+### ⛔ Defect 3 — reported, not built
+
+**No `.png` of `13`, `26` or `27` draws a dedicated back affordance, in any position.** The
+header row is `space-between` with exactly two children — the title stack and the bell +
+identity strip — and the string `Back` appears in none of the three `.html` files. Two further
+facts measured while answering: **`13`'s breadcrumb sits ABOVE its title in the frame and BELOW
+it in this build**, and **screen `12` renders no breadcrumb at all** though its frame draws
+`Management / Classes`. Held for the Operator's ruling.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:shared-controls` | ✅ **exit 0 — 8 PASS · 0 FAIL**, including the browser measurement and its stale-build guard |
+| `prove:artefact-read` · five portal suites · `prove:hero-all` · `test:integration` · `prove:encoding` · `prove:no-secrets` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage2-routes` | ⛔ **`NOT-RUN`** — Next 16 allows ONE `next dev` per directory and one is running (PID 24124, port 3000, started 04:51), almost certainly the Operator's walk server. **NOT killed.** `next build` 0 and `next start` served the measurement suite, so this is a lock, not a regression |
+| **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN`** — and this stretch is the clearest evidence yet for why |
+
+**Next step:** the Operator rules defect 3, then re-walks before `P2-5`.
