@@ -176,8 +176,8 @@ items. The control is real, focusable and dismissible, and says so in words.
 ```artefact-read
 screen: 12
 pack: Management - Classes
-component: features/management/management-classes.tsx, components/ui/avatar.tsx
-html-values: 16px, 13px, 18px, 20px, 11px, 1.30px, 9.50px, 2.40px
+component: features/management/management-classes.tsx, components/ui/avatar.tsx, components/ui/page-heading.tsx
+html-values: 16px, 13px, 18px, 20px, 11px, 1.30px, 9.50px, 2.40px, 11.50px, 3px
 screen-md-quote: Management list over Class Modules under their Class Grades.
 ```
 

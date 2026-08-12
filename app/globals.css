@@ -368,6 +368,21 @@ a {
  */
 .form-field.search-field {
   padding-inline-start: 2.5rem;
+  /*
+   * ⛔ THE FILL AND THE HAIRLINE, FOUND BY `SC-6` ON ITS FIRST RUN — the check
+   * the Operator ruled for after `F-01b` recurred. `Management - Add Class.html`
+   * draws this control on `var(--surface-card, white)` with
+   * `outline: 1px var(--border-subtle, #EDEFF4)`. The component asked for both
+   * with `bg-surface border-line`, and BOTH LOST: `.form-field` declares the
+   * `background` AND `border` shorthands, so the box rendered on the muted fill
+   * (measured `rgb(244, 245, 249)`) with a TRANSPARENT border (measured
+   * `rgba(0, 0, 0, 0)`).
+   *
+   * ▶ Neither was visible to a DOM-text proof and neither was caught by the
+   * walkthrough. They were found because the trap was mechanised.
+   */
+  background-color: var(--color-surface);
+  border-color: var(--color-line);
 }
 
 /* ---------------------------------------------------------------------------

@@ -322,6 +322,8 @@ async function main() {
         selectAppearance: cs.appearance || cs.webkitAppearance,
         selectPaddingRight: ci ? cs.paddingRight : '',
         searchPaddingLeft: ci.paddingInlineStart || ci.paddingLeft,
+        searchBackground: ci.backgroundColor,
+        searchBorder: ci.borderTopColor,
       };
       host.remove();
       return out;
@@ -337,7 +339,10 @@ async function main() {
         `position=${measured.selectPosition} · appearance=${measured.selectAppearance} · ` +
         `padding-right=${measured.selectPaddingRight}`,
     )
-    console.log(`  MEASURED  search input: padding-inline-start=${measured.searchPaddingLeft}\n`)
+    console.log(
+      `  MEASURED  search input: padding-inline-start=${measured.searchPaddingLeft} · `+
+        `background=${measured.searchBackground} · border=${measured.searchBorder}\n`,
+    )
 
     // --- SC-1 the chevron ------------------------------------------
     if (measured.selectRepeat !== 'no-repeat') {
@@ -384,6 +389,41 @@ async function main() {
       )
     } else {
       ok('SC-2', `typed text clears the magnifier: padding-inline-start computes ${pad}px against an icon ending near 30px`)
+    }
+
+    /*
+     * ⛔ SC-2b — THE SAME TRAP ON THE SAME CONTROL, FOUND BY `SC-6` ON ITS
+     * FIRST RUN. `Management - Add Class.html` draws the search box on
+     * `var(--surface-card, white)` with `outline: 1px var(--border-subtle,
+     * #EDEFF4)`. The component asked for that with `bg-surface border-line` —
+     * utilities that lose to `.form-field`'s `background` and `border`
+     * SHORTHANDS, so the box rendered on the muted fill with a TRANSPARENT
+     * border. ▶ Neither is visible to a DOM-text proof, and neither was
+     * reported by the walkthrough: the Operator's ruling to mechanise the trap
+     * is what surfaced them.
+     *
+     * ⚠️ BORDER IS INCLUDED THOUGH THE RULING SAID *"background or padding"*.
+     * It is the same shorthand, the same cascade and the same silence; naming
+     * two of the three would leave the third to recur.
+     */
+    const WHITE = /^rgb\(255,\s*255,\s*255\)$/
+    if (!WHITE.test(measured.searchBackground ?? '')) {
+      no(
+        'SC-2b',
+        `⛔ the search box is not on the frame's white fill: background-color computes ${measured.searchBackground}. ` +
+          '`bg-surface` lost the cascade to `.form-field`',
+      )
+    } else if (/rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(measured.searchBorder ?? '')) {
+      no(
+        'SC-2b',
+        `⛔ the search box has no visible hairline: border-color computes ${measured.searchBorder}, ` +
+          'where the frame draws `outline: 1px #EDEFF4`. `border-line` lost the cascade',
+      )
+    } else {
+      ok(
+        'SC-2b',
+        `the search box carries the frame's fill and hairline: background=${measured.searchBackground} · border=${measured.searchBorder}`,
+      )
     }
   } finally {
     browser?.close()
@@ -488,6 +528,58 @@ function structuralLegs() {
     )
   } else {
     ok('SC-4', 'no component outside the shared control paints its own inline SVG chevron')
+  }
+
+  /*
+   * ⛔ `SC-6` — THE `F-01b` TRAP, MECHANICALLY ENFORCED. Operator ruling,
+   * 2026-08-13:
+   *
+   *     "globals.css already documented this trap and named its remedy, and
+   *      the utilities were still written. A documented trap that is not
+   *      mechanically enforced is a trap that recurs — if that check is
+   *      cheap, build it: any element combining .form-field with a
+   *      background or padding utility fails."
+   *
+   * ▶ It is cheap, and it is built. `.form-field` is UNLAYERED and declares
+   * both the `background` and the `padding` SHORTHANDS, so a `bg-*` or `p*-`
+   * utility on the same element is EMITTED, MATCHED AND DISCARDED. It looks
+   * correct in review and does nothing on screen — which is the whole defect.
+   *
+   * ⚠️ The remedy is a `.form-field.<modifier>` rule in `app/globals.css`, the
+   * pattern that file already established for `.auth-field` and
+   * `.notes-field`. This leg names the modifier, so the fix is never a guess.
+   */
+  const OFFENDER = /\b(bg-[a-z0-9[\]./-]+|p[trblxyse]?-[a-z0-9[\]./-]+|border-(?!\[)[a-z][a-z0-9-]*)\b/g
+  const violations = []
+  for (const f of files) {
+    const code = stripComments(readFileSync(f, 'utf8'))
+    // Every class string that names `form-field`, of any quote style.
+    for (const chunk of code.split(/["'`]/)) {
+      if (!/\bform-field\b/.test(chunk)) continue
+      const hits = [...chunk.matchAll(OFFENDER)].map((m) => m[0])
+      if (hits.length > 0) {
+        violations.push(`${f.slice(REPO_ROOT.length + 1)} :: ${[...new Set(hits)].join(' ')}`)
+      }
+    }
+  }
+  if (violations.length > 0) {
+    no(
+      'SC-6',
+      `⛔ ${violations.length} element(s) combine \`form-field\` with a background, padding or border utility, which LOSES THE CASCADE and silently does nothing: ` +
+        violations.join(' | ') +
+        '. Move the value into a `.form-field.<modifier>` rule in app/globals.css',
+    )
+  } else {
+    ok('SC-6', `no element combines \`form-field\` with a background, padding or border utility (${files.length} sources scanned) — the F-01b trap cannot recur silently`)
+  }
+  // ⚠️ THE CONTROL. The detector must be shown to fire, or "none found" is
+  // equally true of a regex that matches nothing.
+  const probe = 'className="form-field bg-surface pl-10 border-line"'
+  const probeHits = [...probe.split(/["'`]/).filter((c) => /\bform-field\b/.test(c)).join(' ').matchAll(OFFENDER)]
+  if (probeHits.length === 3) {
+    ok('SC-6c', `CONTROL: the detector MATCHES all three offenders in a planted \`form-field bg-surface pl-10 border-line\` (${probeHits.map((m) => m[0]).join(' ')})`)
+  } else {
+    no('SC-6c', `the F-01b detector matched ${probeHits.length} of 3 planted offenders, so SC-6 measured nothing`)
   }
 
   /*

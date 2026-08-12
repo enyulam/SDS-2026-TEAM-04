@@ -221,7 +221,7 @@ carry zero of either.
 ```artefact-read
 screen: 13
 pack: Management - Class Overview
-component: features/management/management-class-overview.tsx, components/ui/avatar.tsx
-html-values: 18px, 15px, 12.50px, 9.50px, 0.60px, 0.40px, 24px, 12px, 110px
+component: features/management/management-class-overview.tsx, components/ui/avatar.tsx, components/ui/page-heading.tsx
+html-values: 18px, 15px, 12.50px, 9.50px, 0.60px, 0.40px, 24px, 12px, 110px, 11.50px, 3px
 screen-md-quote: Management overview of one Class Module, including per-row status gating governed by
 ```

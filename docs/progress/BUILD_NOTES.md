@@ -8377,3 +8377,87 @@ it in this build**, and **screen `12` renders no breadcrumb at all** though its 
 | **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN`** — and this stretch is the clearest evidence yet for why |
 
 **Next step:** the Operator rules defect 3, then re-walks before `P2-5`.
+
+---
+
+## 2026-08-13 — the back affordance, the breadcrumb drifts, and the trap made mechanical
+
+**Branch:** `develop`, main worktree. **Starting HEAD:** `e797d08`.
+**Authorization:** Operator ruling, 2026-08-13 — build a back affordance on `13`, `26` and `27`;
+fix both measured breadcrumb drifts; mechanise the `F-01b` trap; make comment-stripping standing.
+
+### ⛔ An addition the frames do not draw, and it is cited as one
+
+> *"The frames omit it. I am authorizing an addition the frames do not draw, because a screen a
+> user cannot leave is a usability defect and the design set not catching it does not make it
+> correct … cite it that way in all three components, so a later visual pass does not remove it
+> for fidelity."*
+
+Recorded verbatim in `13`, `26` and `27`. A frame comparison **will** find an element the frame
+lacks; that is `EXPECTED / REQUIRED`, exactly as a `REGISTERED-OMISSION` is expected in the other
+direction.
+
+### The control was EXTRACTED, and the measurement is what made that safe
+
+`trainer-roster` and `trainer-assessment` carried the same control **with byte-identical class
+strings** — compared programmatically before anything moved, which is why re-pointing both is
+**provably zero visual change** rather than a hope. `components/ui/back-link.tsx` is now the one
+definition.
+
+⚠️ **`trainer-draft-generation` was NOT re-pointed.** It carries a VARIANT (`rounded-field`,
+`text-body`, `font-bold`), and normalising it would change a **Part 1** screen's appearance.
+▶ Leaving one recorded exception is honest; silently restyling an accepted screen is not.
+
+**Targets:** `13`→`12`, `26`→`12`, **`27`→`13`** — the class it edits, which is both where Edit
+is entered from and the only inbound route to `27`. The breadcrumb is neither removed nor
+duplicated anywhere.
+
+### Two measured drifts, both the Operator's to rule and both ruled
+
+`13`'s breadcrumb sat BELOW its title where the frame draws it ABOVE (`11.50px`, `gap: 3px`);
+`12` rendered none at all. Both fixed through a new `breadcrumb` slot on `PageHeading`.
+⚠️ `26`/`27` were left alone — **their frames genuinely draw it below**, at `12.50px`, and
+"fixing" them to match `13` would have been the inverse error.
+
+> *"My acceptance of `12` was a walkthrough, not a measurement, and your measurement supersedes
+> it."*
+
+### ⛔ `F-01b` RECURRED. Stating that plainly, because it is the point.
+
+`app/globals.css` **already carried a full paragraph** naming this cascade trap, explaining that
+Tailwind emits utilities into `@layer utilities`, that an unlayered rule outranks them, and that
+`.auth-field` / `.notes-field` were the remedy. **The next two controls were still written with
+utilities.** Prose in the very file being edited did not prevent the defect it described.
+
+✅ **`SC-6` enforces it now**, and it **found two more live losses on its first run** — on the
+same search control, neither visible to a DOM proof nor caught by the walkthrough:
+
+* fill: frame `white`, rendered **`rgb(244, 245, 249)`** (`bg-surface` lost) → now `rgb(255, 255, 255)`
+* hairline: frame `1px #EDEFF4`, rendered **`rgba(0, 0, 0, 0)`** (`border-line` lost) → now `rgb(237, 239, 245)`
+
+⚠️ Border is included though the ruling said *"background or padding"*: `.form-field` declares
+all three shorthands, and naming two would leave the third to recur.
+
+### ⛔ Comment-stripping is standing, and the third instance is the memorable one
+
+The raw-`<select>` scan reported **eight** offending files. **Three were COMMENTS** — including
+**this rebuild's own sentence explaining that a `<select>` would have to be invented**. The
+detector matched the prose in which the thing was explained. ▶ One shared `stripComments()`,
+imported everywhere, never copied.
+
+**A fifth tooling defect this stretch, caught by reading the result:** a shell heredoc ate a
+backticked comment through command substitution, leaving `// ⚠️ , not : the Operator ruled` in
+a proof file. The PIN was correct; only its explanation was destroyed. Repaired.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:shared-controls` | ✅ **exit 0 — 11 PASS · 0 FAIL**, including `SC-2b`, `SC-6` and its planted three-offender control |
+| `prove:artefact-read` | ✅ **exit 0 — 30 PASS**; `12` and `13` now also cite `11.50px` and `3px` for the breadcrumb, and name `page-heading.tsx` |
+| Six portal suites · `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` · `prove:encoding` · `prove:no-secrets` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage2-routes` · `prove:stage3-authenticated` | ⛔ **BOTH `NOT-RUN`** — both serve in `mode: 'dev'`, and Next 16 permits ONE dev server per directory. The Operator's walk server holds it on `:3000`. **Not killed.** The Operator offered to clear it; **it is needed now** |
+| **VISUAL acceptance** | ⛔ Operator-set only. Not claimed |
+
+**Next step:** the Operator clears `:3000`, the two dev-mode suites run, and the Operator
+re-walks all four before `P2-5`.

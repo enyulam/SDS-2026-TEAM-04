@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
+import { BackLink } from "@/components/ui/back-link";
 import { Button } from "@/components/ui/button";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Field, SearchInput, Select, TextInput } from "@/components/ui/field";
@@ -124,6 +125,23 @@ import type {
  * evidence reference, trainer note or report status. There is no field one could arrive in —
  * the create RPCs carry assertion `C-9`, which fails the build if either ever mentions a
  * report, a rating or an observation.
+ */
+
+/*
+ * ⛔ OPERATOR ADDITION ON USABILITY GROUNDS — NOT A FRAME MATCH. 2026-08-13.
+ *
+ * **The frame draws NO back affordance**, measured from the `.png` and corroborated against
+ * the `.html` (the string `Back` occurs in neither). The Operator authorized it anyway:
+ * *"a screen a user cannot leave is a usability defect and the design set not catching it does
+ * not make it correct."*
+ *
+ * ⛔ **DO NOT REMOVE THIS FOR VISUAL FIDELITY.** A later visual pass comparing this surface
+ * to its frame will find an element the frame lacks; that is EXPECTED and RULED, exactly as a
+ * `REGISTERED-OMISSION` is expected in the other direction.
+ *
+ * ⚠️ The control is the product's EXISTING one — `components/ui/back-link.tsx`, extracted
+ * from `trainer-roster` and `trainer-assessment`, whose class strings were byte-identical.
+ * A second treatment for the same act is the divergence the Operator keeps ruling against.
  */
 
 /** Sun-first, matching the frame's own strip order. */
@@ -275,9 +293,16 @@ export function ManagementAddClass() {
 
   return (
     <div className="page-grid">
+      {/*
+        ⚠️ THE BREADCRUMB STAYS BELOW THE TITLE, AS THE FRAME DRAWS IT (`12.50px`), and is
+        NOT duplicated by the back link. `13` was the only order defect; this screen matches.
+      */}
       <div>
-        <PageHeading title="Add Class" />
-        <p className="mt-0.5 text-small text-ink">
+        <PageHeading
+          title="Add Class"
+          actions={<BackLink href="/management/classes" label="Classes" />}
+        />
+        <p className="mt-0.5 text-[12.5px] text-ink-muted">
           <Link href="/management/classes" className="underline hover:text-brand-700">
             Classes
           </Link>{" "}

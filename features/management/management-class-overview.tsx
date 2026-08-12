@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
+import { BackLink } from "@/components/ui/back-link";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -96,6 +97,23 @@ import type {
  *    ATTENDANCE tile, which is **omitted entirely** rather than shown as `0%`.
  */
 
+/*
+ * ⛔ OPERATOR ADDITION ON USABILITY GROUNDS — NOT A FRAME MATCH. 2026-08-13.
+ *
+ * **The frame draws NO back affordance**, measured from the `.png` and corroborated against
+ * the `.html` (the string `Back` occurs in neither). The Operator authorized it anyway:
+ * *"a screen a user cannot leave is a usability defect and the design set not catching it does
+ * not make it correct."*
+ *
+ * ⛔ **DO NOT REMOVE THIS FOR VISUAL FIDELITY.** A later visual pass comparing this surface
+ * to its frame will find an element the frame lacks; that is EXPECTED and RULED, exactly as a
+ * `REGISTERED-OMISSION` is expected in the other direction.
+ *
+ * ⚠️ The control is the product's EXISTING one — `components/ui/back-link.tsx`, extracted
+ * from `trainer-roster` and `trainer-assessment`, whose class strings were byte-identical.
+ * A second treatment for the same act is the divergence the Operator keeps ruling against.
+ */
+
 const REPORT_LABEL: Record<string, string> = {
   incomplete: "Not started",
   observation_saved: "Assessment saved",
@@ -140,15 +158,25 @@ export function ManagementClassOverview({ classModuleId }: { readonly classModul
 
   return (
     <div className="page-grid">
-      <div>
-        <PageHeading title="Class Overview" />
-        <p className="mt-0.5 text-[11.5px] text-ink-subtle">
-          <Link href="/management/classes" className="underline hover:text-brand-700">
-            Classes
-          </Link>
-          {header !== null && ` / ${header.title}`}
-        </p>
-      </div>
+      {/*
+        ⚠️ THE BREADCRUMB MOVED ABOVE THE TITLE — TRUE-DRIFT, measured and ruled.
+        `Management - Class Overview.html` draws it at `font-size: 11.50px` FIRST, then the
+        `22px` title, at `gap: 3px`. This build had it below. ⛔ `26` and `27` are NOT the same
+        case: their frames genuinely draw the breadcrumb BELOW the title, at `12.50px`.
+        ⛔ It is NOT duplicated and NOT replaced by the back link — both are present, per ruling.
+      */}
+      <PageHeading
+        breadcrumb={
+          <>
+            <Link href="/management/classes" className="underline hover:text-brand-700">
+              Classes
+            </Link>
+            {header !== null && ` / ${header.title}`}
+          </>
+        }
+        title="Class Overview"
+        actions={<BackLink href="/management/classes" label="Classes" />}
+      />
 
       {header !== null && <HeaderCard header={header} />}
       {header !== null && <StatTiles header={header} />}

@@ -1407,6 +1407,100 @@ COMPUTED one **fails a correct fix** and would have sent the next session huntin
 each `.html`; **held for the Operator's ruling.** See `docs/progress/STATUS.md` for the
 per-screen finding.
 
+
+---
+
+## §12.3 — STANDING RULES SET BY THE WALKTHROUGH RULING (2026-08-13)
+
+### ⛔ RULE 1 — STRIP COMMENTS BEFORE ANY SCAN. STANDING, NOT PER-SUITE.
+
+> **Operator:** *"Comment-stripping before scanning is now a standing requirement, not a
+> per-suite habit."*
+
+**Every scan over source — in any proof, for any purpose — runs on
+`stripComments()` from `scripts/tests/portal/artefact-read-rule.mjs` first.** One
+implementation, imported; never a private copy.
+
+▶ **THREE INSTANCES IN A SINGLE SESSION**, and the third is the one to remember: the
+raw-`<select>` scan reported **eight** offending files, of which **three were COMMENTS** —
+including **this rebuild's own sentence saying a `<select>` would have to be invented**. The
+detector matched the prose in which I had explained why I was not doing the thing it accused me
+of doing. ⚠️ A scan over prose is not a scan over code, and a comment is the likeliest place
+for the exact string a detector hunts for, because that is where it gets explained.
+
+### ⛔ RULE 2 — A DOCUMENTED TRAP THAT IS NOT MECHANICALLY ENFORCED IS A TRAP THAT RECURS.
+
+> **Operator:** *"globals.css already documented this trap and named its remedy, and the
+> utilities were still written … if that check is cheap, build it: any element combining
+> `.form-field` with a background or padding utility fails."*
+
+**`F-01b` RECURRED, PLAINLY STATED.** `app/globals.css` carried a full paragraph naming the
+cascade trap, explaining that Tailwind emits utilities into `@layer utilities`, that an unlayered
+rule outranks them, and that `.auth-field` / `.notes-field` were the remedy — **and the next two
+controls were still written with utilities.** Prose in the file being edited did not prevent the
+defect it described.
+
+✅ **`SC-6` NOW ENFORCES IT.** Any element whose class string names `form-field` alongside a
+`bg-*`, `p*-` **or `border-*`** utility fails the suite, and the message names the remedy
+(`.form-field.<modifier>` in `app/globals.css`) so the fix is never a guess.
+
+⚠️ **BORDER IS INCLUDED THOUGH THE RULING SAID *"background or padding"***: `.form-field`
+declares all three as shorthands, and naming two of the three would leave the third to recur.
+
+✅ **IT PAID FOR ITSELF ON ITS FIRST RUN**, finding two live losses on the search control that
+neither the walkthrough nor any DOM proof had caught — measured, then fixed:
+
+| | Frame draws | Rendered before | After |
+|---|---|---|---|
+| fill | `var(--surface-card, white)` | **`rgb(244, 245, 249)`** — `bg-surface` lost | `rgb(255, 255, 255)` |
+| hairline | `outline: 1px #EDEFF4` | **`rgba(0, 0, 0, 0)`** — `border-line` lost | `rgb(237, 239, 245)` |
+
+---
+
+## §12.4 — THE BACK AFFORDANCE: AN OPERATOR ADDITION THE FRAMES DO NOT DRAW
+
+> **Operator ruling, 2026-08-13:** *"The frames omit it. I am authorizing an addition the frames
+> do not draw, because a screen a user cannot leave is a usability defect and the design set not
+> catching it does not make it correct."*
+
+⛔ **CITE IT AS SUCH — it is recorded in all three components so a later visual pass does not
+remove it for fidelity.** A frame comparison will find an element the frame lacks; that is
+**EXPECTED and RULED**, exactly as a `REGISTERED-OMISSION` is expected in the other direction.
+
+**The control is the product's EXISTING one**, extracted rather than invented:
+`components/ui/back-link.tsx`, taken from `trainer-roster` ("Back to Schedule") and
+`trainer-assessment` ("Back to Student Roster") — whose class strings were **byte-identical**,
+measured before the move, so both were re-pointed with **provably zero visual change**.
+▶ Creating a shared component and leaving the originals inline would have made **four**
+definitions of one control.
+
+⚠️ **ONE CALL SITE IS DELIBERATELY NOT RE-POINTED AND IS REPORTED, NOT NORMALISED.**
+`trainer-draft-generation.tsx` carries a **variant** (`rounded-field`, `text-body`, `font-bold`),
+not a copy. Re-pointing it would **change a Part 1 screen's appearance**, which needs its own
+ruling.
+
+| Screen | Back target | Why |
+|---|---|---|
+| `13` | → `12` | the class list it was opened from |
+| `26` | → `12` | same |
+| `27` | → **`13`** | **the class it edits**, which is where Edit is entered from — and the ONLY inbound route to `27` |
+
+⛔ **THE BREADCRUMB IS NEITHER REMOVED NOR DUPLICATED.** It stays as drawn on all three.
+
+### ✅ TWO MEASURED DRIFTS, RULED AND FIXED
+
+1. **`13`'s breadcrumb was BELOW its title; the frame draws it ABOVE** (`11.50px`, `gap: 3px`,
+   then the `22px` title). Fixed. ⚠️ `26` and `27` are **not** the same case — their frames
+   genuinely draw it BELOW, at `12.50px`, and they were left alone.
+2. **`12` rendered NO breadcrumb at all**, though its frame draws `Management / Classes`. Fixed.
+   > **Operator:** *"My acceptance of `12` was a walkthrough, not a measurement, and your
+   > measurement supersedes it."*
+
+Both are carried by a new **`breadcrumb`** slot on `PageHeading`, rendered above the title.
+⚠️ A **second** above-title slot, deliberately not `eyebrow`: `eyebrow` is an uppercase
+brand-coloured LABEL with four live consumers, and this is a muted navigational PATH carrying a
+link.
+
 ---
 
 ## 11. Completion states

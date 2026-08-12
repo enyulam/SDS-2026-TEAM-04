@@ -588,7 +588,9 @@ const CHAIN = {
       id: 'S3-M3',
       path: '/management/classes/add-class',
       loading: 'Loading class options',
-      data: ['Add Class', 'Class Details', 'Beginner', 'Assigned Trainer'],
+      // ⚠️ `Back to Classes` is PINNED: it is an Operator addition on usability
+      // grounds that the frame does not draw, so nothing else would notice its removal.
+      data: ['Add Class', 'Class Details', 'Beginner', 'Assigned Trainer', 'Back to Classes'],
     },
     ...(FIXTURE_MODULE === null
       ? []
@@ -637,6 +639,8 @@ const CHAIN = {
               // transform would move the pin, which is correct.
               'LEARNERS',
               'Edit class',
+              // ⚠️ The Operator's back affordance, pinned for the same reason.
+              'Back to Classes',
             ],
           },
           {
@@ -655,7 +659,11 @@ const CHAIN = {
             id: 'S3-M4',
             path: `/management/classes/${FIXTURE_MODULE}/edit`,
             loading: 'Loading class',
-            data: ['Edit Class', 'Fixture Module A', 'Schedule', 'Assigned Trainer'],
+            // ⚠️ "Back to Class Overview", not "Back to Classes": the Operator
+            // ruled 27's target is 13 — the class it edits, and the only
+            // inbound route to it. Pinned because the frame draws no back
+            // control, so nothing else would notice its removal.
+            data: ['Edit Class', 'Fixture Module A', 'Schedule', 'Assigned Trainer', 'Back to Class Overview'],
           },
         ]),
     {

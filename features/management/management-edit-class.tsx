@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
+import { BackLink } from "@/components/ui/back-link";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Field, SearchInput, Select, TextInput } from "@/components/ui/field";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -86,6 +87,23 @@ import type {
  * ⛔ Nothing here is an assessment fact. No rating (`C-9`), no roll-up (`G-2`), no observation,
  * attendance value, evidence reference, trainer note or report status — the update RPCs carry
  * assertion `U-6`, which fails the build if either ever mentions one.
+ */
+
+/*
+ * ⛔ OPERATOR ADDITION ON USABILITY GROUNDS — NOT A FRAME MATCH. 2026-08-13.
+ *
+ * **The frame draws NO back affordance**, measured from the `.png` and corroborated against
+ * the `.html` (the string `Back` occurs in neither). The Operator authorized it anyway:
+ * *"a screen a user cannot leave is a usability defect and the design set not catching it does
+ * not make it correct."*
+ *
+ * ⛔ **DO NOT REMOVE THIS FOR VISUAL FIDELITY.** A later visual pass comparing this surface
+ * to its frame will find an element the frame lacks; that is EXPECTED and RULED, exactly as a
+ * `REGISTERED-OMISSION` is expected in the other direction.
+ *
+ * ⚠️ The control is the product's EXISTING one — `components/ui/back-link.tsx`, extracted
+ * from `trainer-roster` and `trainer-assessment`, whose class strings were byte-identical.
+ * A second treatment for the same act is the divergence the Operator keeps ruling against.
  */
 
 type SubmitState =
@@ -201,12 +219,24 @@ export function ManagementEditClass({ classModuleId }: { readonly classModuleId:
   return (
     <div className="page-grid">
       <div>
-        <PageHeading title="Edit Class" />
+        {/*
+          ⚠️ THE BACK TARGET IS SCREEN `13`, NOT `12` — Operator ruling. `27` is entered from
+          the class it edits, and returning to the class list would drop the reader a level
+          further out than they came from. ⛔ `13` is also the ONLY inbound route to `27`.
+        */}
+        <PageHeading
+          title="Edit Class"
+          actions={
+            <BackLink href={`/management/classes/${classModuleId}`} label="Class Overview" />
+          }
+        />
         {/*
           ⛔ The frame's breadcrumb reads `Classes / Junior Public Speaking / Edit`. `Junior`
           is a CLASS CODE and `C-14` omits it, so the module title stands alone.
+          ⚠️ It stays BELOW the title, as this frame draws it (`12.50px`), and the back link
+          does not replace it.
         */}
-        <p className="mt-0.5 text-small text-ink">
+        <p className="mt-0.5 text-[12.5px] text-ink-muted">
           <Link href="/management/classes" className="underline hover:text-brand-700">
             Classes
           </Link>{" "}

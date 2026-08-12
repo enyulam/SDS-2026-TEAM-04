@@ -149,7 +149,14 @@ export function ManagementClasses() {
 
   return (
     <div className="page-grid">
-      <PageHeading title="Classes" />
+      {/*
+        ⛔ THE BREADCRUMB WAS MISSING ENTIRELY, and the Operator ruled it TRUE-DRIFT:
+        *"My acceptance of `12` was a walkthrough, not a measurement, and your measurement
+        supersedes it."* `Management - Classes.html` draws `Management / Classes` at
+        `font-size: 11.50px` with `gap: 3px` ABOVE the `22px` title.
+        ⚠️ NO BACK LINK HERE — `12` is the top of this branch; there is nothing above it.
+      */}
+      <PageHeading breadcrumb={<>Management / Classes</>} title="Classes" />
 
       {/*
         The frame's ONE toolbar row: heading + count pill on the left, level pills and

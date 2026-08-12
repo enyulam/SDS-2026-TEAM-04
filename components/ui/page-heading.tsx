@@ -1,11 +1,22 @@
 import type { ReactNode } from "react";
 
 export function PageHeading({
+  breadcrumb,
   eyebrow,
   title,
   description,
   actions,
 }: {
+  /**
+   * The frame's breadcrumb, ABOVE the title.
+   *
+   * ⚠️ A SECOND ABOVE-TITLE SLOT, and deliberately not `eyebrow`. `eyebrow` is an
+   * uppercase brand-coloured LABEL and has four live consumers; the breadcrumb is a muted
+   * navigational PATH that carries a link. Measured off the frames:
+   * `Management - Classes.html` and `Management - Class Overview.html` both draw it at
+   * `font-size: 11.50px` with `gap: 3px` to the `22px` title.
+   */
+  readonly breadcrumb?: ReactNode;
   readonly eyebrow?: string;
   readonly title: string;
   readonly description?: string;
@@ -14,6 +25,9 @@ export function PageHeading({
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-3xl">
+        {breadcrumb && (
+          <div className="mb-[3px] text-[11.5px] font-medium text-ink-subtle">{breadcrumb}</div>
+        )}
         {eyebrow && (
           <p className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-brand-800">
             {eyebrow}

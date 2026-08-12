@@ -10,6 +10,7 @@ import {
   type FormEvent,
 } from "react";
 import { Avatar, initialsFrom } from "@/components/ui/avatar";
+import { BackLink } from "@/components/ui/back-link";
 import { Button } from "@/components/ui/button";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Icon, IconTile } from "@/components/ui/icon";
@@ -426,13 +427,8 @@ export function TrainerAssessment() {
             stays visible beside the choices.
           </p>
         </div>
-        <Link
-          href={`/trainer/sessions/${draft.sessionId}/roster`}
-          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[11px] bg-brand-100 px-4 py-2.5 text-[0.84375rem] font-semibold text-brand-800 no-underline transition hover:bg-brand-200"
-        >
-          <Icon name="chevronLeft" size={16} />
-          Back to Student Roster
-        </Link>
+        {/* Extracted to the shared `BackLink` 2026-08-13 — byte-identical class string. */}
+        <BackLink href={`/trainer/sessions/${draft.sessionId}/roster`} label="Student Roster" />
       </header>
 
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,15.5rem)_minmax(0,1fr)]">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 import { Avatar, initialsFrom } from "@/components/ui/avatar";
+import { BackLink } from "@/components/ui/back-link";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
 import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -392,13 +393,10 @@ export function TrainerRoster() {
             Student Roster
           </h1>
         </div>
-        <Link
-          href="/trainer/schedule"
-          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[11px] bg-brand-100 px-4 py-2.5 text-[0.84375rem] font-semibold text-brand-800 no-underline transition hover:bg-brand-200"
-        >
-          <Icon name="chevronLeft" size={16} />
-          Back to Schedule
-        </Link>
+        {/* Extracted to the shared `BackLink` 2026-08-13. The class string was
+            BYTE-IDENTICAL to `trainer-assessment`'s, measured before the move, so this is
+            provably zero visual change. */}
+        <BackLink href="/trainer/schedule" label="Schedule" />
       </header>
 
       {/* Class Session banner — the frame's dark accent surface (D1: eyebrow relabelled). */}

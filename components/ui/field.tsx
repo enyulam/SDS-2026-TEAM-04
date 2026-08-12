@@ -153,7 +153,7 @@ export function SearchInput({
       <input
         {...props}
         type={props.type ?? "search"}
-        className="form-field search-field border-line bg-surface"
+        className="form-field search-field"
       />
     </div>
   );
