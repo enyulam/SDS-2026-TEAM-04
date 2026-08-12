@@ -15,8 +15,8 @@
 | Role | Management |
 | Folder | `13-management-class-overview` |
 | Canonical route | `/management/classes/[classModuleId]` |
-| Current implemented route | â€” (no implemented route) |
-| Route-compatibility treatment | Not applicable â€” no implemented route |
+| Current implemented route | ✅ **`/management/classes/[classModuleId]`** - created 2026-08-13, plan phase `P2-4`, at the CANONICAL path. ⚠️ The segment is `classModuleId` because the entity is the CLASS MODULE (`A-016`); `classId` would put a prohibited `classes` entity into the URL. |
+| Route-compatibility treatment | **Not applicable - the implemented route IS the canonical route.** |
 | Figma file key | `sSY1TYw3jyVlZDy8V2Mu7g` |
 | Figma file name | `SDS-dashboard` |
 | Figma node | `689:66` |

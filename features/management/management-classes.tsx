@@ -51,10 +51,17 @@ import type { ManagementClassListDto } from "@/lib/frontend/contracts/physical-t
  *    does; where it is more, all are shown. ⛔ A second name is a second SESSION'S trainer —
  *    never an assistant (see 2).
  *
- * 5. ⚠️ THE CARD'S OWN DESTINATION IS INERT, NOT MISSING. A card opens screen `13` Class
- *    Overview (`P2-4`), whose route does not exist at HEAD, and one screen per phase is the
- *    plan's rule (§3). A link to a route that 404s would be worse than an inert control with
- *    a stated reason — the same treatment `29`'s "Send Reminder to Trainer" already carries.
+ * 5. ~~⚠️ THE CARD'S OWN DESTINATION IS INERT, NOT MISSING. A card opens screen `13` Class
+ *    Overview (`P2-4`), whose route does not exist at HEAD~~ ✅ **THE CARD IS NOW LIVE —
+ *    screen `13` shipped at `P2-4` (2026-08-13)**, at `/management/classes/[classModuleId]`.
+ *    ⚠️ REWRITTEN, NOT DELETED: the rule it stated still governs, and it governed correctly
+ *    here. A link to a route that 404s would be worse than an inert control with a stated
+ *    reason — the same treatment `29`'s "Send Reminder to Trainer" already carries. ▶ The
+ *    control went live when its TARGET became real, which is exactly the condition the inert
+ *    treatment was chosen for, not a relaxed rule. Second instance after `Add Class` at `P2-2`.
+ *
+ *    ⛔ **AND STILL NO EDIT AFFORDANCE.** No ratified frame draws one to screen `27`, and the
+ *    Operator ruled that a **DESIGN GAP, not a build gap**. Do not add one to this card.
  *
  *    ✅ `Add Class` IS NOW LIVE — screen `26` shipped at `P2-2`. ⚠️ The clause above read
  *    *"`Add Class` AND THE CARD'S OWN DESTINATION ARE INERT"*; it was REWRITTEN rather than
@@ -213,6 +220,11 @@ export function ManagementClasses() {
         <section aria-label="Class modules" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {visible.map((row) => (
             <article key={row.classModuleId} className="card flex flex-col gap-4 px-5 py-[18px]">
+              {/*
+                ✅ THE CARD OPENS SCREEN `13`, live since `P2-4`. ⛔ The whole card is NOT a
+                link: the frame draws one destination, and wrapping the card would also swallow
+                the trainer names into it. One explicit control, one destination.
+              */}
               <div className="flex items-start gap-3">
                 {/*
                   The frame's `PS` / `SD` chip. It is INITIALS DERIVED FROM THE TITLE by the
@@ -257,6 +269,14 @@ export function ManagementClasses() {
                   Actively enrolled in this Class Module
                 </span>
               </p>
+
+              <Link
+                href={`/management/classes/${row.classModuleId}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-field border border-line px-4 py-2 text-small font-semibold text-brand-700 hover:border-brand-700 hover:bg-brand-50"
+              >
+                View class overview
+                <span className="sr-only"> for {row.title}</span>
+              </Link>
             </article>
           ))}
         </section>

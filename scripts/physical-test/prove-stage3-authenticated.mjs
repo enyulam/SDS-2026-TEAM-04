@@ -590,6 +590,27 @@ const CHAIN = {
       : [
           {
             /*
+             * P2-4 — screen `13` Management Class Overview. ⛔ ITS FIRST
+             * RENDERED PROOF.
+             *
+             * ⚠️ `Class Health Summary` IS THE LOAD-BEARING STRING. It is the
+             * panel `C-17` mandates and the FRAME OMITS, so it cannot appear
+             * unless the governance-mandated addition was really built — and
+             * one of its four ratified sentences must appear with it, which
+             * proves the verdict ran rather than the heading being decorative.
+             *
+             * ⛔ `S3-M5-bars` measures the rating exclusion ON THE PAINTED
+             * PAGE, which is strictly stronger than the source scan: this
+             * frame's own note lists "B.E.S.T. Ratings" and a rubric
+             * focus-area list, and `C-9`/`G-2` override it.
+             */
+            id: 'S3-M5',
+            path: `/management/classes/${FIXTURE_MODULE}`,
+            loading: 'Loading class overview',
+            data: ['Class Overview', 'Class Health Summary', 'Student Report Status', 'Lessons'],
+          },
+          {
+            /*
              * P2-3 — screen `27` Management Edit Class. ⛔ ITS FIRST RENDERED PROOF.
              *
              * ⚠️ THE MODULE TITLE IS THE LOAD-BEARING STRING. It is not chrome: it
@@ -864,6 +885,39 @@ async function main() {
                 fail('S3-M4-refusals', 'the control failed: `Save Class` and/or the read-only `Sessions (n)` list did not render, so the nine absences are uninterpretable')
               } else {
                 pass('S3-M4-refusals', 'screen 27 renders `Save Class` and the read-only `Sessions (n)` list, and NONE of `Class code` / `Capacity` / `Program` / `Unassign` / the Mon–Fri day strip — the three refusals, measured on the painted page')
+              }
+            }
+          }
+
+          /*
+           * P2-4 — SCREEN `13`'s RATING EXCLUSION, ON THE PAINTED PAGE.
+           *
+           * ⛔ The frame's own note lists **B.E.S.T. Ratings** and a rubric
+           * focus-area list of assessed criteria. `C-9` confines `D-1`'s nine
+           * per-dimension ratings to report DETAIL surfaces and `G-2` bars
+           * every roll-up everywhere, so governance overrides the frame here
+           * and the omission is EXPECTED, never a regression.
+           */
+          if (id === 'S3-M5') {
+            if (text === null) {
+              notRun('S3-M5-bars', 'the class overview did not render, so its rating exclusion was not measured')
+            } else {
+              const banned = ['Beginning', 'Developing', 'Mastering', 'Mastered', 'Overall Grade', 'Asst.']
+              const present = banned.filter((b) => text.includes(b))
+              const probe =
+                'Beginning Developing Mastering Mastered · Overall Grade: Mastering · Asst. Nadia Rahman'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M5-bars', 'the rating detector did not match its own probe -- every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M5-bars', `screen 13 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} -- each is barred on an overview surface (C-9, G-2, A-014)`)
+              } else if (!text.includes('Class Health Summary')) {
+                // ⚠️ THE CONTROL. Without it, "no rating vocabulary appeared"
+                // is equally true of a blank page -- and the Class Health
+                // Summary is the panel that MUST be there.
+                fail('S3-M5-bars', 'the control failed: the governance-mandated Class Health Summary did not render, so the absences are uninterpretable')
+              } else {
+                pass('S3-M5-bars', 'screen 13 renders the governance-mandated Class Health Summary and NONE of the four rating labels, `Overall Grade` or `Asst.` -- C-9, G-2 and A-014 measured on the painted page, over a frame whose own note lists B.E.S.T. Ratings')
               }
             }
           }

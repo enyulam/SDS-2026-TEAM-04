@@ -46,6 +46,7 @@ export const RPC_MIGRATIONS = [
   { migration: "20260813090000_portal_p2_2_class_creation.sql", suite: "prove-p2-2-class-creation.sql" },
   { migration: "20260813120000_portal_p2_2b_trainer_assignment.sql", suite: "prove-p2-2b-trainer-assignment.sql" },
   { migration: "20260813150000_portal_p2_3_class_edit.sql", suite: "prove-p2-3-class-edit.sql" },
+  { migration: "20260813180000_portal_p2_4_class_overview.sql", suite: "prove-p2-4-class-overview.sql" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

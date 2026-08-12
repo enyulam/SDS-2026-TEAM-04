@@ -65,6 +65,7 @@ import {
 import {
   createManagementClassCore,
   readManagementClassForEditCore,
+  readManagementClassOverviewCore,
   updateManagementClassCore,
   getManagementRatingsCore,
   getManagementReviewCandidateCore,
@@ -116,6 +117,7 @@ import type {
   AdapterManagementApproveAndSubmitSuccess,
   AdapterAddClassOptionsDto,
   AdapterClassEditDto,
+  AdapterClassOverviewDto,
   AdapterClassUpdateOutcomeDto,
   AdapterUpdateClassInput,
   AdapterClassCreationOutcomeDto,
@@ -799,6 +801,58 @@ export async function adapterCreateManagementClass(
       sessionsCreated: result.data.sessionsCreated,
       sessionsAssigned: result.data.sessionsAssigned,
       reason: result.data.reason,
+    },
+  };
+}
+
+/**
+ * P2-4 — screen `13` Class Overview. Allow-list mapper, one field at a time,
+ * so a column added to any underlying relation later does NOT reach the client
+ * until someone names it here.
+ */
+export async function adapterReadClassOverview(
+  classModuleId: string,
+): Promise<ActionResult<AdapterClassOverviewDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementClassOverviewCore(client, classModuleId);
+  if (result.outcome !== "success") return result;
+  const { rows, sessions, health, verdict } = result.data;
+  return {
+    outcome: "success",
+    data: {
+      rows: rows.map((row) => ({
+        classSessionId: row.classSessionId,
+        sessionDate: row.sessionDate,
+        lessonNumber: row.lessonNumber,
+        lessonTitle: row.lessonTitle,
+        studentId: row.studentId,
+        studentDisplayName: row.studentDisplayName,
+        reportId: row.reportId,
+        reportState: row.reportState,
+        evidenceCount: row.evidenceCount,
+      })),
+      sessions: sessions.map((session) => ({
+        classSessionId: session.classSessionId,
+        sessionDate: session.sessionDate,
+        lessonNumber: session.lessonNumber,
+        lessonTitle: session.lessonTitle,
+        reportedCount: session.reportedCount,
+        submittedCount: session.submittedCount,
+        learnerCount: session.learnerCount,
+      })),
+      // ⚠️ THE VERDICT AND THE COUNTS TRAVEL TOGETHER OR NOT AT ALL. A
+      // health block carrying counts but no ratified sentence, or a sentence
+      // with no counts behind it, would each be a half-answer the surface
+      // would have to guess about.
+      health: health === null || verdict === null ? null : {
+        status: verdict.status,
+        action: verdict.action,
+        pendingReports: health.pendingReports,
+        evidenceMissing: health.evidenceMissing,
+        submittedReports: health.submittedReports,
+        totalReports: health.totalReports,
+        mainFollowUpArea: health.mainFollowUpArea,
+      },
     },
   };
 }

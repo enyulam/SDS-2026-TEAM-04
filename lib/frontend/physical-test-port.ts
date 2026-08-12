@@ -15,6 +15,7 @@ import type {
   AddClassOptionsDto,
   ClassCreationOutcomeDto,
   ClassEditDto,
+  ClassOverviewDto,
   ClassUpdateOutcomeDto,
   CreateClassInput,
   UpdateClassInput,
@@ -157,6 +158,12 @@ export interface PhysicalTestPort {
    * a missing one does.
    */
   readClassForEdit(classModuleId: string): Promise<UiActionResult<ClassEditDto>>;
+  /**
+   * P2-4 — screen `13` Class Overview. Module-keyed; the centre is
+   * server-derived, and a module outside it resolves to the same
+   * non-disclosing `unavailable` a missing one does.
+   */
+  readClassOverview(classModuleId: string): Promise<UiActionResult<ClassOverviewDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

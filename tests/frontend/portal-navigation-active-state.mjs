@@ -129,6 +129,12 @@ const EXPECTED_BY_ROUTE = new Map([
    * PARAMETERISED one, and a prefix matcher that handled the first could still
    * mishandle the second. Both are checked because both are reachable.
    */
+  /*
+   * P2-4 — screen `13`, the PARENT of the edit route. ⚠️ Both are listed:
+   * a matcher that handled `.../edit` could still mishandle the shorter
+   * dynamic path that is its prefix, and vice versa.
+   */
+  ["/management/classes/[classModuleId]", { role: "management", label: "Classes" }],
   ["/management/classes/[classModuleId]/edit", { role: "management", label: "Classes" }],
   ["/management/reports", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],

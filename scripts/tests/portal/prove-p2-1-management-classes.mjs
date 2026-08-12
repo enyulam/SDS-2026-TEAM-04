@@ -31,6 +31,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
+import { emittedLegs } from "./suite-output-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -73,6 +74,21 @@ const passes = (out.match(/PASS P21-/g) ?? []).length;
 const fails = (out.match(/FAIL P21-/g) ?? []).length;
 
 console.log("");
+/*
+ * ⛔ THE SUITE ACTUALLY EMITTED ITS OWN LEGS — ASSERTED FIRST, because the
+ * check(s) immediately below are TRUE OF AN EMPTY STRING.
+ *
+ * ⚠️ Measured, not hypothesised: with the Docker daemon stopped, `psql`
+ * returned nothing and a runner of this exact shape reported *"ran to
+ * completion without an error"* and *"0 FAIL"* as PASS. ▶ The vacuity class,
+ * arriving through INFRASTRUCTURE FAILURE rather than logic — a suite that
+ * cannot run must not be able to report clean.
+ */
+check(
+  emittedLegs(out, "P21"),
+  `the SQL suite ACTUALLY RAN and emitted its own P21- legs (${out.trim().length} chars of output) -- without this, the assertions below are satisfied by an unreachable database`,
+);
+
 check(!/^ERROR/m.test(out), "the SQL suite ran to completion without an error");
 check(fails === 0, `no failing SQL leg (${fails} FAIL)`);
 check(passes === 9, `all NINE SQL legs EXECUTED (${passes}/9) -- an unrun leg is NOT-RUN, never PASS`);
@@ -223,7 +239,8 @@ check(
   `P21a-13 the portal navigation suite exits 0 with the new route (exit ${nav.status}) -- exactly one active rail item on /management/classes`,
 );
 /*
- * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, THEN 17 → 18 AT `P2-3`, AND WAS REWRITTEN
+ * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, 17 → 18 AT `P2-3`, THEN 18 → 19 AT
+ * `P2-4`, AND WAS REWRITTEN
  * EACH TIME RATHER THAN DELETED. Screen `26` shipped at
  * `/management/classes/add-class` and screen `27` at
  * `/management/classes/[classModuleId]/edit`, so the app tree really does carry
@@ -240,8 +257,8 @@ check(
  * chances to relax the wrong one.
  */
 check(
-  /all 18 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 18 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 19 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 19 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3 + screen `13` at P2-4) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

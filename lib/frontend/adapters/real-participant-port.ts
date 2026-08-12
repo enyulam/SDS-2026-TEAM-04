@@ -58,6 +58,7 @@ import type {
   AddClassOptionsDto,
   ClassCreationOutcomeDto,
   ClassEditDto,
+  ClassOverviewDto,
   ClassUpdateOutcomeDto,
   CreateClassInput,
   UpdateClassInput,
@@ -110,6 +111,7 @@ import {
   adapterGetManagementSubmittedReport,
   adapterCreateManagementClass,
   adapterReadClassForEdit,
+  adapterReadClassOverview,
   adapterUpdateManagementClass,
   adapterListManagementClasses,
   adapterReadAddClassOptions,
@@ -254,6 +256,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** P2-3 — screen `27`. Module-keyed; the centre is server-derived. */
     readClassForEdit(classModuleId: string): Promise<UiActionResult<ClassEditDto>> {
       return guard(() => adapterReadClassForEdit(classModuleId));
+    },
+
+    /** P2-4 — screen `13`. Two governed reads behind one call. */
+    readClassOverview(classModuleId: string): Promise<UiActionResult<ClassOverviewDto>> {
+      return guard(() => adapterReadClassOverview(classModuleId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

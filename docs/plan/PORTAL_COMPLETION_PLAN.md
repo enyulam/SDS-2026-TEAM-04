@@ -631,7 +631,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-1** | `12` Management Classes | Class-list projection, level tabs | — | — · ✅ **BUILT AND PROVEN 2026-08-12** at `/management/classes`. ⛔ **No migration** — policy AND grant already present on all eight relations, both layers measured at HEAD (`P21-3`). Three `REGISTERED-OMISSION`s, each with a controlled detector |
 | **P2-2** | `26` Add Class | ⚠️ **`D-3` terms substrate** + class creation | P2-1 | `C-6` `C-7` `C-14` · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/add-class`, in **two** migrations — the terms substrate (read-only, seeded, zero functions) and **two** create RPCs on the **already-ratified** `admin.module_created` / `admin.session_created`. ⛔ **Registry UNMOVED at 19**, zero new table/enum/policy/write grant. ⛔ **Trainer assignment STOPPED** — needs a third string; enforced by migration assertion `C-8` |
 | **P2-3** | `27` Edit Class | Class edit write path | P2-2 | `C-14` · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/[classModuleId]/edit`. Two update RPCs; **audit registry 19 → 21** on `admin.module_updated` and `admin.session_updated`, the exact two authorized with the count stated in advance; zero new table/enum/policy/write grant. ⛔ **THREE REFUSALS** — no day strip, no unassign, no class code/capacity/programme — each with its reason and its lift condition recorded in the `P2-3` section below. ⚠️ **No ratified frame draws an inbound control to `27`**; none was invented |
-| **P2-4** | `13` Class Overview | Class summary, lesson timeline, **+ Class Health Summary** | P2-1 | `C-17` (`GC-9`) |
+| **P2-4** | `13` Class Overview | Class summary, lesson timeline, **+ Class Health Summary** | P2-1 | `C-17` (`GC-9`) · ✅ **BUILT AND PROVEN 2026-08-13** at `/management/classes/[classModuleId]`. Two `SECURITY DEFINER` READS; **zero new table/column/enum/policy/write grant; registry UNMOVED at 21**. ⛔ **The frame's B.E.S.T. Ratings and rubric focus-area list are NOT built** — `C-9`/`G-2` override the frame, enforced three deep. ✅ `C-17`'s Class Health Summary built verbatim, extracted to one shared file. ⛔ No Edit affordance: **DESIGN GAP, not a build gap** |
 | **P2-5** | `25` Management Schedule | Centre calendar as a **projection** of class sessions | P2-2 | `GC-13` — no `Showcase`, no duplicated event record |
 | **P2-6** | `14` Lesson Plan Management | ⚠️ **`D-4` materials substrate** + Management upload | P2-4, P2-2 | `C-7`; Lock §8.2 — **separate bucket, separate policies** |
 | **P2-7** | `11` Management Dashboard | KPI tiles, approval list, calendar, events | P2-1, P2-5 | ⛔ **`C-9` — no ratings**; `C-18` |
@@ -966,6 +966,107 @@ by `D-5`/`P1-2b`** — a browser-side resumable upload genuinely needs the Supab
 publishable key — but "the guard's premise lapsed" is exactly the shape that must be
 **ruled, not inferred by the session that trips over it**. **Operator decision required.**
 
+
+---
+
+## `P2-4` · screen `13` Management Class Overview — ✅ **COMPLETE 2026-08-13**
+
+**Operator authorization:** *"SCHEMA AUTHORIZED — two SECURITY DEFINER read RPCs, exactly as proposed … Zero new table, column, enum, policy or write grant. Registry unmoved at 21."*
+
+**Migration `20260813180000`** — `report_list_management_class_status` and
+`report_class_health_summary`. Census `30 · 29 · 56`; **tables, enums, policies and the audit
+registry all unmoved**. A read is not a governed action (`A-029`).
+
+### ⛔ WHY A FUNCTION EXISTS AT ALL — MEASURED BEFORE IT WAS PROPOSED
+
+`reports`, `observations` and `report_evidence` carry **ZERO policies and ZERO client grants**.
+Unlike `12`, this surface **cannot** be a direct RLS read. ⚠️ Assertion **`V-7`** keeps that
+justification honest: it fails the build if a policy or client grant ever appears on those three,
+because the functions would go on working while the reason for them had evaporated.
+
+### ⛔ THE BARS, ASSERTED STRUCTURALLY — AND THE FRAME IS OVERRIDDEN
+
+The frame's own note lists **B.E.S.T. Ratings** and a *"rubric focus-area list … assessed
+speaking criteria"*. **NOT BUILT.** `C-9` confines `D-1`'s nine ratings to report **DETAIL**
+surfaces; `G-2` bars every roll-up everywhere. ▶ **The omission is EXPECTED, never a regression.**
+
+Enforced **three deep**: migration **`V-4`** fails the build if either RPC so much as **names**
+a barred term — matched as a **bare substring**, so it also catches `observation_ratings`,
+`report_version_ratings` and `competency_rating` **without enumerating them**, which an
+enumerated list would not have done for the next rating column somebody adds. `P26-7` re-asserts
+it on the **returned shape** (a column can be renamed and still carry a rating). The contract
+declares no field that could hold one. ✅ And `S3-M5-bars` measures it on the **painted page**.
+
+### ✅ `C-17` — THE CLASS HEALTH SUMMARY, A GOVERNANCE-MANDATED ADDITION THE FRAME OMITS
+
+`CLAUDE.md` §6's **four conditions, verbatim, top to bottom, first match wins**. ⛔ Never
+AI-authored — generating this prose would silently pull the §8-deferred Weekly Class Health
+Brief into scope.
+
+⚠️ **EXTRACTED TO `lib/shared/class-health.ts`, NOT COPIED.** The server projection and the
+deterministic fixture both need the verdict, and the server module is `server-only` — so the
+fixture **cannot import it**. ▶ **The constraint produced the better structure**: two copies of
+a ratified closed set is how one surface quietly acquires a fifth condition, and §6's whole
+point is that exactly one result is ever shown.
+
+### ⛔ `A-038` PER-ROW GATING — BUILT TO THE RULE, NOT INFERRED FROM THE FRAME
+
+Four outcomes, each checked independently, with **no generic "view report" handler**:
+`submitted` → the canonical report · `trainer_approved` → the final-review surface · any earlier
+status → **Send Reminder to Trainer** and **no report content of any kind** · **`No Report` → no
+button at all**, a plain "—".
+
+⚠️ That last case is why the projection returns a **row** for a learner with no report: an
+absent row cannot be told apart from a learner who is not enrolled.
+
+### ⚠️ THE FINDING OF THIS PHASE — TWO LEGS THAT PASSED WHILE MEASURING NOTHING
+
+**Operator:** *"A leg that passes on a fixture lacking the case it tests has measured nothing,
+and planting the case inside the rolled-back transaction is the fix."*
+
+The first green run of `prove-p2-4` was **worthless on its two most important behaviours**:
+
+* **`P26-6`** reported *"0 rows with No Report"* — the fixture's only learner already had one,
+  so **`A-038`'s NULL branch was never exercised**;
+* **`P26-8`** returned NULL — no observation carried `focus_chips`, so **the server-side
+  aggregation the Operator had just ruled on never ran**.
+
+Both are now **planted inside the rolled-back transaction**: a second learner, and chips with a
+deliberate **winner and runner-up**. ▶ **A most-frequent-tag proof with one candidate proves
+nothing**, so the leg requires `audience_awareness` — the `count DESC, chip ASC` tie-break
+winner — which also proves ties are **deterministic** rather than planner-order.
+
+### ⛔ THE SAME VACUITY CLASS, ARRIVING THROUGH INFRASTRUCTURE FAILURE
+
+Mid-phase the **Docker daemon stopped**, and the runner printed **two PASS lines** — *"ran to
+completion without an error"* and *"0 FAIL"* — against **no output at all**. Both are trivially
+true of an empty string; only the pinned executed-count leg caught it.
+
+**Operator ruling:** *"a suite that cannot run must not be able to report clean."*
+
+✅ **SWEPT: 17 runners carried the shape** (measured **before** fixing; only `prove-p2-4` was
+guarded, because it had just been fixed). Every one now calls **one shared predicate**,
+`scripts/tests/portal/suite-output-rule.mjs` — shared, not copied, so a control guards the
+predicate everyone actually runs. **`P26a-EMPTY`** proves it **rejects** an empty result, a
+non-empty docker error carrying no legs, and *another suite's* legs, and **accepts** a real one
+— the positive clause matters, or "the guard fires" would be equally true of a predicate that
+rejects everything.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-4` | ✅ **exit 0** — 11 SQL legs + runner checks, including the shared emitted-output guard and its control |
+| Every other portal suite (13 of them) · `prove:hero-all` · `test:integration` · `test:g06-grounding` | ✅ **all exit 0** — after `P2-6`, the single global function ratchet, fired at **54 → 56** and was updated **with its reason** |
+| `tsc` · `eslint` · `next build` · nav suite · `prove:encoding` · `prove:no-secrets` · `test:runtime-profile` · `prove:stage2-routes` | ✅ **all 0**. Route census **18 → 19** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`.** `S3-M5-r` is screen `13`'s FIRST rendered proof, and `S3-M5-bars` measures the rating exclusion on the painted page |
+| **VISUAL acceptance, screens `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four**, and not claimed |
+
+✅ **Screen `12`'s card destination WENT LIVE** — the second inert control to activate when its
+target became real (after `Add Class` at `P2-2`). **Rewritten, not deleted**: the rule still
+governs, and the control went live because the TARGET became real, which is the condition the
+inert treatment was chosen for.
+
 ---
 
 ## 8. ⛔ STANDING PROHIBITIONS — carried unchanged
@@ -1035,7 +1136,7 @@ publishable key — but "the guard's premise lapsed" is exactly the shape that m
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
 | ~~⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN**~~ ✅ **CLOSED** | ~~`OPEN` · **Operator decision required**~~ ✅ **RULED 2026-08-13** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section. ✅ **RULED AND CLOSED 2026-08-13 — BOUNDED §12 AUTHORIZATION.** The Operator authorized extending the allow-list **for `evidence-upload.ts` SPECIFICALLY, not as a class**, on the ground that **the premise lapsed BY AUTHORIZATION, NOT BY DRIFT**: `T-P44` pinned those modules as unimported when nothing imported them, and `D-5`'s client-direct upload — a bounded **ADR-3 exception** — legitimately does. ⛔ **Any other module importing either one still fails**, proved TWICE: `T-P44c` plants a synthetic module and requires **both detectors to see it and both allow-lists to reject it** while the one authorized module is **admitted**; and a **real file was planted on disk**, measured **exit 1**, and removed, with **exit 0** after. ⚠️ **The control shares the LIVE sets and regexes** — the first draft gave it private copies, which is the very defect its own comment warned about. ▶ **Operator: *"A guard whose premise lapsed still needs a ruling, because 'the premise lapsed' is exactly what someone says when they want the guard out of the way."*** |
 | ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ✅ **OPERATOR RULING: *WAIT FOR SCREEN `13`.*** ⛔ **Do not invent an affordance on `12`** — building it would invent a visible element the frame lacks, *"the same rule that gave screen `33` no trainer row"*. ⚠️ **`P2-4` must REPORT WHAT `13`'s FRAME ACTUALLY DRAWS**, and the Operator rules where Edit lives. ⛔ **If `13` draws no Edit control either, THAT IS A FINDING and comes to the Operator as one** — it is **not** resolved by placing the control wherever it seems natural |
-| ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All three Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), plus `S3-M2-omissions` and `S3-M4-refusals` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance stays `NOT-RUN` on all three**, and a DOM-text proof never becomes one |
+| ⚠️ **`RENDERED PROOF` on Part 2 screens** | **NARROWED 2026-08-13**, restated each boundary | ✅ **All FOUR Part 2 screens now have a RENDERED proof** — `12` (`S3-M2-r`), `26` (`S3-M3-r`), `27` (`S3-M4-r`), `13` (`S3-M5-r`), plus `S3-M2-omissions`, `S3-M4-refusals` and `S3-M5-bars` measuring ruled-out material on the painted page. ⛔ **VISUAL acceptance stays `NOT-RUN` on all four**, and a DOM-text proof never becomes one |
 
 ---
 

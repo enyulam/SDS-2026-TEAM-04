@@ -7955,3 +7955,97 @@ that at `P2-2`); **absence** is right when the capability is **refused**. Canoni
 
 **Next step:** `P2-4` — screen `13` Class Overview — **and it must report what `13`'s frame actually
 draws for an Edit control.**
+
+---
+
+## 2026-08-13 — `P2-4` · screen `13` Management Class Overview · and the empty-result sweep
+
+**Branch:** `develop`, main worktree. **Starting HEAD:** `c8c56f4`.
+**Authorization:** Operator, 2026-08-13 — *"SCHEMA AUTHORIZED — two SECURITY DEFINER read RPCs, exactly as proposed … Registry unmoved at 21."*
+
+### What shipped
+
+Migration `20260813180000` — `report_list_management_class_status` and
+`report_class_health_summary`, two reviewed reads. **Zero** new table, column, enum, policy or
+write grant; **registry UNMOVED at 21**, because a read is not a governed action (`A-029`).
+Census `30 · 29 · 56 · 12 · 30`.
+
+Then the spine, `features/management/management-class-overview.tsx`, and the canonical route
+`/management/classes/[classModuleId]`. ✅ **Screen `12`'s card destination went live** — the
+second inert control to activate when its target became real.
+
+### ⛔ Why functions exist here at all, measured before they were proposed
+
+`reports`, `observations` and `report_evidence` carry **zero policies and zero client grants**.
+Unlike `12`, this surface cannot be a direct RLS read. ⚠️ Assertion **`V-7`** keeps that
+justification honest — it fails the build if a policy or grant ever appears on those three,
+because the functions would keep working while their reason had evaporated and nobody would
+notice.
+
+### ⛔ The frame is overridden, and the omission is EXPECTED
+
+Screen `13`'s own frame note lists **B.E.S.T. Ratings** and a *"rubric focus-area list"*.
+**Not built.** `C-9` keeps `D-1`'s nine ratings on report DETAIL surfaces; `G-2` bars every
+roll-up everywhere. Enforced **three deep** — migration `V-4` (bare-substring match, so it
+catches the next rating column nobody has written yet), suite `P26-7` on the returned shape, and
+a contract with no field that could hold one — plus `S3-M5-bars` on the painted page.
+
+### ⚠️ THE FINDING: two legs that were green and worthless
+
+The first passing run of `prove-p2-4` measured **nothing** on its two most important behaviours.
+`P26-6` reported *"0 rows with No Report"* because the fixture's only learner already had one, so
+**`A-038`'s NULL branch was never exercised**. `P26-8` returned NULL because no observation
+carried `focus_chips`, so **the aggregation the Operator had just ruled on never ran**.
+
+▶ **A leg that passes on a fixture lacking the case it tests has measured nothing**, and the fix
+is to plant the case **inside the rolled-back transaction**. Both are planted now — a second
+learner, and chips with a deliberate **winner and runner-up**, because a most-frequent-tag proof
+with one candidate proves nothing. The leg names `audience_awareness`, the `count DESC, chip ASC`
+winner, which also proves ties are **deterministic** rather than planner-order.
+
+### ⛔ THE SAME VACUITY CLASS THROUGH INFRASTRUCTURE FAILURE — and a 17-runner sweep
+
+Mid-phase the **Docker daemon stopped**. `psql` returned nothing, and the runner printed **two
+PASS lines** — *"the SQL suite ran to completion without an error"* and *"no failing SQL leg
+(0 FAIL)"* — against an empty string. Both are trivially true of nothing. Only the pinned
+executed-count leg caught it.
+
+**Operator ruling:** *"Record it as the vacuity class arriving through INFRASTRUCTURE FAILURE
+rather than logic — a suite that cannot run must not be able to report clean."*
+
+✅ **MEASURED BEFORE FIXING: 17 runners carried the shape.** Only `prove-p2-4` was guarded, and
+only because it had just been fixed. The 17: `f-attendance-init-1`, `p1-1b`, `p1-2`, `p1-2b`,
+`p1-34`, `p1-5`, `p2-1`, `p2-2-class-creation`, `p2-2-terms`, `p2-2b`, `p2-3`, and hero
+`1`, `2`, `3`, `4`, `7`, `9`.
+
+⛔ **ONE SHARED PREDICATE, NOT 17 COPIES** — `scripts/tests/portal/suite-output-rule.mjs`. A
+private copy in each would be 17 chances to weaken the one that matters, and would leave the
+control guarding a predicate nobody runs (the `T-P44c` lesson, applied **before** being bitten by
+it). **`P26a-EMPTY`** proves the predicate **rejects** an empty result, **rejects** a non-empty
+docker error carrying no legs, **rejects another suite's** legs, and **accepts** a real one.
+⚠️ The accepting clause is not decoration: without it, *"the guard fires"* would be equally
+true of a predicate that rejects everything and fails every suite forever.
+
+I did **not** restart Docker — the demonstration stack on 543xx is frozen, and its state is the
+Operator's. They restarted it and confirmed the stop was right.
+
+### ⚠️ A constraint that produced the better structure
+
+`CLAUDE.md` §6's four Class Health conditions were first written in the server module. The
+deterministic fixture needs the same verdict and **cannot import a `server-only` module** — so
+they were **extracted** to `lib/shared/class-health.ts` rather than repeated. ▶ Two copies of a
+ratified closed set is how one surface quietly acquires a fifth condition; the constraint forced
+the right shape rather than merely blocking the wrong one.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `prove:portal-p2-4` + every other portal suite (13) | ✅ **all exit 0** |
+| `prove:hero-all` | ✅ **exit 0** — after `P2-6`, the single global function ratchet, fired at **54 → 56** and was updated with its reason |
+| `test:integration` · `test:g06-grounding` · `prove:encoding` · `prove:no-secrets` · `test:runtime-profile` · `prove:stage2-routes` · nav · `tsc` · `eslint` · `next build` | ✅ **all 0** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`** |
+| **VISUAL acceptance, `12` · `13` · `26` · `27`** | ⛔ **`NOT-RUN` on all four**, not claimed |
+| Census, measured | **30 migrations · 29 tables · 56 functions · 12 enums · 30 policies · 1 bucket · registry 21** |
+
+**Next step:** the Operator walks screens `12`, `13`, `26` and `27` before `P2-5`.

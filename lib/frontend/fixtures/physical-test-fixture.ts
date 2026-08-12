@@ -19,6 +19,7 @@ import {
   type ManagementApproveAndSubmitSuccess,
   type AddClassOptionsDto,
   type ClassEditDto,
+  type ClassOverviewDto,
   type ClassUpdateOutcomeDto,
   type TermOptionDto,
   type UpdateClassInput,
@@ -58,6 +59,7 @@ import {
 import type { UiActionResult } from "../contracts/result";
 import type { PhysicalTestPort } from "../physical-test-port";
 import { GOVERNED_DIMENSIONS } from "./dimensions";
+import { classHealthVerdict } from "@/lib/shared/class-health";
 import { deriveSessionEligibility } from "@/lib/schedule/session-eligibility";
 import { fixtureSessionDates } from "@/lib/schedule/fixture-session-dates";
 
@@ -1235,6 +1237,101 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         // for.
         sessionsAssigned: input.trainerMembershipId ? requested : 0,
         reason: "created",
+      },
+    };
+  }
+
+  /**
+   * P2-4 — the deterministic mirror of screen `13`.
+   *
+   * ⚠️ IT DERIVES FROM `SESSIONS`, so the module it describes is one the
+   * class list also shows. A fixture whose overview described a module no
+   * other screen carries would let this surface pass against data that exists
+   * nowhere else.
+   *
+   * ⛔ THE HEALTH BLOCK REPRODUCES `CLAUDE.md` §6's FOUR CONDITIONS BY
+   * CALLING THE SAME FUNCTION THE REAL PATH USES — it does not restate the
+   * sentences. Two copies of a ratified closed set is how one surface quietly
+   * acquires a fifth condition, and the whole point of §6 is that exactly one
+   * result is ever shown.
+   *
+   * ⛔ NO RATING, NO ROLL-UP, NO PANEL TEXT — the contract carries no field
+   * that could hold one, so the fixture cannot invent one either.
+   */
+  async readClassOverview(classModuleId: string): Promise<UiActionResult<ClassOverviewDto>> {
+    await delay(240);
+    const owned = SESSIONS.filter((session) => session.classModuleId === classModuleId);
+    if (owned.length === 0) return { outcome: "unavailable" };
+
+    const rows = owned.flatMap((session) =>
+      session.students.map((student, index) => ({
+        classSessionId: session.sessionId,
+        sessionDate: session.date,
+        lessonNumber: session.lessonNumber ?? null,
+        lessonTitle: session.lessonTitle ?? null,
+        studentId: student.studentId,
+        studentDisplayName: student.displayName,
+        /*
+         * ⚠️ THE FIRST LEARNER OF EACH SESSION IS DELIBERATELY LEFT WITHOUT
+         * A REPORT. `A-038` gives a `No Report` row no action at all, and a
+         * fixture in which every learner had one would leave that branch of
+         * the surface permanently unrendered — the same vacuity the SQL suite
+         * had to plant a second learner to escape.
+         */
+        /*
+         * ⚠️ DERIVED FROM THE FIXTURE'S OWN `reportId`, not from an invented
+         * `reportStatus` field. The first draft read a property `FixtureStudent`
+         * does not have; `tsc` caught it, and the correct source was already
+         * there — a fabricated status would have made this surface disagree
+         * with every other screen reading the same learner.
+         */
+        reportId: index === 0 ? null : student.reportId,
+        reportState: index === 0 || student.reportId === null ? null : "submitted",
+        evidenceCount: index === 0 ? 0 : 1,
+      })),
+    );
+
+    const sessions = owned.map((session) => {
+      const forSession = rows.filter((row) => row.classSessionId === session.sessionId);
+      return {
+        classSessionId: session.sessionId,
+        sessionDate: session.date,
+        lessonNumber: session.lessonNumber ?? null,
+        lessonTitle: session.lessonTitle ?? null,
+        learnerCount: forSession.length,
+        reportedCount: forSession.filter((row) => row.reportId !== null).length,
+        submittedCount: forSession.filter((row) => row.reportState === "submitted").length,
+      };
+    });
+
+    const pendingReports = rows.filter(
+      (row) => row.reportId !== null && row.reportState !== "submitted",
+    ).length;
+    const submittedReports = rows.filter((row) => row.reportState === "submitted").length;
+    const evidenceMissing = rows.filter(
+      (row) => row.reportState === "submitted" && row.evidenceCount === 0,
+    ).length;
+
+    return {
+      outcome: "success",
+      data: {
+        rows,
+        sessions,
+        health: {
+          // ⚠️ THE VERDICT TAKES ONLY THE TWO COUNTS IT BRANCHES ON. Passing
+          // the whole health block would let a future edit make the verdict
+          // depend on a field §6 never mentions.
+          ...classHealthVerdict({ pendingReports, evidenceMissing }),
+          pendingReports,
+          evidenceMissing,
+          submittedReports,
+          totalReports: pendingReports + submittedReports,
+          // ⚠️ NULL, and that is a real state rather than a gap in the
+          // fixture: the deterministic data carries no improvement-focus tag,
+          // and NULL means NOT RECORDED (hero 0B), so the surface must omit
+          // the line rather than print a fabricated focus area.
+          mainFollowUpArea: null,
+        },
       },
     };
   }

@@ -44,6 +44,15 @@ import {
   type ClassListDto,
 } from "@/server/modules/class-session/class-list-projections";
 import {
+  classHealthVerdict,
+  readClassHealthCore,
+  readClassStatusRowsCore,
+  summariseSessions,
+  type ClassHealthDto,
+  type ClassOverviewRowDto,
+  type ClassOverviewSessionDto,
+} from "@/server/modules/class-session/class-overview";
+import {
   readClassForEditCore,
   updateClassCore,
   type ClassEditDto,
@@ -543,6 +552,51 @@ export async function createManagementClassCore(
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
   return createClassCore(client, input);
+}
+
+/**
+ * P2-4 — screen `13` Class Overview.
+ *
+ * ⛔ THE ROLE GATE IS DEFENCE IN DEPTH, not the boundary. Both RPCs
+ * re-resolve exactly one ACTIVE management membership inside the database and
+ * return ZERO ROWS otherwise, so a caller who bypassed this file entirely
+ * still reads nothing.
+ *
+ * ⚠️ THE SUMMARY IS FETCHED EVEN WHEN THE GRID IS EMPTY, and the two are
+ * NOT collapsed into one call. A module with no sessions yet is a real state
+ * whose health is still answerable — `CLAUDE.md` §6's condition 4 — and
+ * deriving the counts from the grid would silently re-implement the ratified
+ * definition of *pending* in a second place.
+ */
+export async function readManagementClassOverviewCore(
+  client: SupabaseClient,
+  classModuleId: string,
+): Promise<ActionResult<{
+  readonly rows: readonly ClassOverviewRowDto[];
+  readonly sessions: readonly ClassOverviewSessionDto[];
+  readonly health: ClassHealthDto | null;
+  readonly verdict: { readonly status: string; readonly action: string } | null;
+}>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const grid = await readClassStatusRowsCore(client, classModuleId);
+  if (!grid.ok) return { outcome: "unavailable" };
+  const health = await readClassHealthCore(client, classModuleId);
+  if (!health.ok) return { outcome: "unavailable" };
+
+  return {
+    outcome: "success",
+    data: {
+      rows: grid.rows,
+      sessions: summariseSessions(grid.rows),
+      health: health.rows,
+      // ⚠️ NO VERDICT WITHOUT A SUMMARY. `classHealthVerdict` would happily
+      // return "On Track" for a fabricated all-zero summary, which is exactly
+      // the sentence a refused read must never produce.
+      verdict: health.rows === null ? null : classHealthVerdict(health.rows),
+    },
+  };
 }
 
 /**

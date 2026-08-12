@@ -352,6 +352,53 @@ export interface AdapterCreateClassInput {
  * surface must be able to say exactly that.
  */
 /**
+ * P2-4 — screen `13` Class Overview.
+ *
+ * ⛔ THERE IS NO FIELD HERE THAT COULD CARRY AN ASSESSMENT FACT. No rating,
+ * no roll-up, no panel text, no trainer note, no checklist or approval
+ * internal, no content hash — the type holds the bar, and the database holds
+ * it again (`V-4`).
+ */
+export interface AdapterClassOverviewRowDto {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly studentId: string;
+  readonly studentDisplayName: string;
+  readonly reportId: string | null;
+  readonly reportState: string | null;
+  readonly evidenceCount: number;
+}
+
+export interface AdapterClassOverviewSessionDto {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly reportedCount: number;
+  readonly submittedCount: number;
+  readonly learnerCount: number;
+}
+
+export interface AdapterClassHealthDto {
+  readonly status: string;
+  readonly action: string;
+  readonly pendingReports: number;
+  readonly evidenceMissing: number;
+  readonly submittedReports: number;
+  readonly totalReports: number;
+  /** ⛔ ONE STRING, by Operator ruling. Never the underlying tags. */
+  readonly mainFollowUpArea: string | null;
+}
+
+export interface AdapterClassOverviewDto {
+  readonly rows: readonly AdapterClassOverviewRowDto[];
+  readonly sessions: readonly AdapterClassOverviewSessionDto[];
+  readonly health: AdapterClassHealthDto | null;
+}
+
+/**
  * P2-3 — screen `27` Edit Class.
  *
  * ⛔ NO `dayOfWeek`, NO `sessionIds` TO REMOVE, AND NO UNASSIGN FLAG. `27`

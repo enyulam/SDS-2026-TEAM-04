@@ -30,6 +30,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
+import { emittedLegs } from "./suite-output-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -76,6 +77,21 @@ const passes = (out.match(/PASS P23-/g) ?? []).length;
 const fails = (out.match(/FAIL P23-/g) ?? []).length;
 
 console.log("");
+/*
+ * ⛔ THE SUITE ACTUALLY EMITTED ITS OWN LEGS — ASSERTED FIRST, because the
+ * check(s) immediately below are TRUE OF AN EMPTY STRING.
+ *
+ * ⚠️ Measured, not hypothesised: with the Docker daemon stopped, `psql`
+ * returned nothing and a runner of this exact shape reported *"ran to
+ * completion without an error"* and *"0 FAIL"* as PASS. ▶ The vacuity class,
+ * arriving through INFRASTRUCTURE FAILURE rather than logic — a suite that
+ * cannot run must not be able to report clean.
+ */
+check(
+  emittedLegs(out, "P23"),
+  `the SQL suite ACTUALLY RAN and emitted its own P23- legs (${out.trim().length} chars of output) -- without this, the assertions below are satisfied by an unreachable database`,
+);
+
 check(!/^ERROR/m.test(out), "the SQL suite ran to completion without an error");
 check(fails === 0, `no failing SQL leg (${fails} FAIL)`);
 check(passes === 11, `all ELEVEN SQL legs EXECUTED (${passes}/11) -- an unrun leg is NOT-RUN, never PASS`);

@@ -394,6 +394,53 @@ export type CreateClassInput = {
  * trainer is usable, and collapsing the counts would hide it.
  */
 /**
+ * P2-4 — screen `13` Class Overview.
+ *
+ * ⛔ THE ABSENCE OF A RATING FIELD IS STRUCTURAL. `C-9` confines `D-1`'s
+ * nine per-dimension ratings to report DETAIL surfaces and `G-2` bars every
+ * roll-up on every surface, so this contract carries no field that could hold
+ * either — and the two RPCs behind it are asserted not to name one.
+ */
+export type ClassOverviewRowDto = {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly studentId: string;
+  readonly studentDisplayName: string;
+  readonly reportId: string | null;
+  /** ⚠️ NULL means **No Report** — `A-038` gives that row no action at all. */
+  readonly reportState: string | null;
+  readonly evidenceCount: number;
+};
+
+export type ClassOverviewSessionDto = {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly reportedCount: number;
+  readonly submittedCount: number;
+  readonly learnerCount: number;
+};
+
+export type ClassHealthDto = {
+  readonly status: string;
+  readonly action: string;
+  readonly pendingReports: number;
+  readonly evidenceMissing: number;
+  readonly submittedReports: number;
+  readonly totalReports: number;
+  readonly mainFollowUpArea: string | null;
+};
+
+export type ClassOverviewDto = {
+  readonly rows: readonly ClassOverviewRowDto[];
+  readonly sessions: readonly ClassOverviewSessionDto[];
+  readonly health: ClassHealthDto | null;
+};
+
+/**
  * P2-3 — screen `27` Edit Class.
  *
  * ⛔ THE THREE REFUSALS ARE HELD BY THIS TYPE. There is no field for
