@@ -522,17 +522,75 @@ async function partRealAuth() {
      * chain (see `INT-Q27`, which failed in the same run and correctly
      * printed no `PASS`). This was the single divergent block, not a pattern.
      */
+    /*
+     * ⛔ THIS LEG WAS PINNED TO AN EMPTY-FIXTURE STATE AND WENT RED WHEN THE
+     * OPERATOR'S WALKTHROUGH LEGITIMATELY MOVED IT. Corrected 2026-08-12.
+     *
+     * It asserted zero rows for `FIXTURE_SESSION`/`STUDENT` "with no
+     * trainer-approved report" -- but that pair is now `submitted`, so BOTH
+     * reads correctly return content and the leg was measuring a premise
+     * rather than a boundary. ▶ THE PRODUCT WAS RIGHT AND THE TEST WAS OLD.
+     *
+     * ⚠️ THE FIX IS TO DERIVE THE SUBJECT AT RUNTIME instead of assuming a
+     * fixture state: find a report that is genuinely PRE-APPROVAL and assert
+     * the governed reads refuse it. A leg that depends on nobody having used
+     * the product is not a boundary proof; it is a clock.
+     */
     const failuresBefore = failures;
-    const canonical = await clients.parent.rpc("report_get_canonical", { p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT });
-    if (canonical.error || (Array.isArray(canonical.data) && canonical.data.length !== 0)) {
-      fail("INT-A5", "the parent canonical read did not return the zero-row unavailable outcome");
+    const preApproval = await q(
+      "postgres",
+      "SELECT class_session_id || '|' || student_id FROM public.reports " +
+        "WHERE status IN ('incomplete','observation_saved','drafting','draft_ready','needs_edit') LIMIT 1;",
+    );
+    const [preSession, preStudent] = String(preApproval ?? "").trim().split("|");
+
+    // ⚠️ NON-VACUITY FIRST. With no pre-approval report anywhere, every
+    // refusal below would pass against nothing at all -- the S-8 shape.
+    if (!preSession || !preStudent) {
+      fail("INT-A5", "no PRE-APPROVAL report exists, so the refusals below would be vacuous");
     }
-    const review = await clients.management.rpc("report_get_management_review", { p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT });
-    if (review.error || (Array.isArray(review.data) && review.data.length !== 0)) {
-      fail("INT-A5", "the management review read returned content with no trainer-approved report");
+
+    if (preSession && preStudent) {
+      const review = await clients.management.rpc("report_get_management_review", {
+        p_class_session_id: preSession, p_student_id: preStudent,
+      });
+      if (review.error || (Array.isArray(review.data) && review.data.length !== 0)) {
+        fail("INT-A5", "the management review read returned content for a PRE-APPROVAL report");
+      }
+
+      /*
+       * ⚠️ THE CONTROL, AND IT IS WHAT MAKES THE ZERO ABOVE MEAN ANYTHING.
+       * Management reaches every pair in its own centre, so the SAME read
+       * against the now-`submitted` fixture pair MUST return content. Without
+       * it, "0 rows" is equally consistent with a read that answers nobody.
+       */
+      const permitted = await clients.management.rpc("report_get_management_review", {
+        p_class_session_id: FIXTURE_SESSION, p_student_id: STUDENT,
+      });
+      if (permitted.error || !Array.isArray(permitted.data) || permitted.data.length === 0) {
+        fail("INT-A5", "the CONTROL failed: management read nothing for the submitted pair, so the refusal above is uninterpretable");
+      }
+
+      /*
+       * ⛔ THE PARENT HALF, WITH ITS SCOPE STATED HONESTLY. The fixture
+       * parent's own linked learner is now `submitted`, so a pre-approval
+       * report of THEIR child is no longer available to read without mutating
+       * the canonical database -- which this suite must not do. The refusal
+       * below therefore has TWO independent sufficient grounds (pre-approval
+       * status AND no `parent_student_links` row), and this leg does NOT
+       * claim to isolate the status gate for the parent. `INT-R3`/`INT-R6`
+       * isolate it on the disposable database, where mutation is safe.
+       */
+      const canonical = await clients.parent.rpc("report_get_canonical", {
+        p_class_session_id: preSession, p_student_id: preStudent,
+      });
+      if (canonical.error || (Array.isArray(canonical.data) && canonical.data.length !== 0)) {
+        fail("INT-A5", "the parent canonical read did not return the zero-row unavailable outcome");
+      }
     }
+
     if (failures === failuresBefore) {
-      pass("INT-A5", "zero-row outcomes: nothing is parent-visible or management-readable before approval/submission");
+      pass("INT-A5", "a PRE-APPROVAL report (derived at runtime, not assumed) is unreadable by management and unreadable by a parent, while the SAME management read returns content for the submitted pair -- so the zeros are discrimination, not blindness");
     }
   }
 
@@ -1461,15 +1519,33 @@ SELECT string_agg(state_from || '>' || state_to, ',' ORDER BY seq_no)
       walk(dto.data, "$");
       const topKeys = Object.keys(dto.data).sort().join(",");
       const panelKeys = Object.keys(dto.data.panels).sort().join(",");
-      if (topKeys !== "panels,submittedAt") {
-        fail("INT-Q27", `the Parent DTO's top-level keys are '${topKeys}', expected exactly 'panels,submittedAt'`);
+      /*
+       * ⚠️ `context` WAS ADDED BY HERO PHASE 1 AND THIS EXPECTATION WAS NOT
+       * MOVED WITH IT, so the leg reported a Q-27 failure about a key whose
+       * contents Q-27 does not reach. Corrected 2026-08-12.
+       *
+       * ⛔ THE FIX IS A STRENGTHENING, NOT A RELAXATION. Widening the
+       * top-level set to admit `context` would let ANY future key ride in
+       * beside it, so `context`'s OWN field set is now pinned exactly too --
+       * seven identity and scheduling fields, `G-5`'s trainer name among them,
+       * and not one of them a rating. The `walk` below is unchanged and still
+       * scans the WHOLE payload, `context` included, for a rating-bearing key
+       * or a leaf whose value is a rating label.
+       */
+      const contextKeys = Object.keys(dto.data.context ?? {}).sort().join(",");
+      const CONTEXT_EXPECTED =
+        "classGradeLabel,classModuleTitle,lessonNumber,lessonTitle,sessionDate,studentDisplayName,trainerDisplayName";
+      if (topKeys !== "context,panels,submittedAt") {
+        fail("INT-Q27", `the Parent DTO's top-level keys are '${topKeys}', expected exactly 'context,panels,submittedAt'`);
+      } else if (contextKeys !== CONTEXT_EXPECTED) {
+        fail("INT-Q27", `the Parent DTO's context keys are '${contextKeys}', expected exactly '${CONTEXT_EXPECTED}'`);
       } else if (panelKeys !== "areasForDevelopment,overview,remarks,strengths") {
         fail("INT-Q27", `the Parent DTO's panel keys are '${panelKeys}', expected exactly the four OD-4 panels`);
       } else if (badKeys.length > 0) {
         fail("INT-Q27", `the Parent payload carries rating-bearing key(s): ${badKeys.join(", ")}`);
       } else if (badValues.length > 0) {
         fail("INT-Q27", `the Parent payload carries a leaf whose value IS a rating label: ${badValues.join(", ")}`);
-      } else pass("INT-Q27", "the governed Parent projection's payload carries exactly {panels, submittedAt} with the four OD-4 panels, NO key anywhere named for a dimension or a rating, and NO leaf whose value is a rating label — the nine ratings are excluded at the PROJECTION layer, and the test is structural rather than the bare-word scan A-052 prohibits");
+      } else pass("INT-Q27", "the governed Parent projection's payload carries exactly {context, panels, submittedAt} -- context pinned to its seven identity/scheduling fields -- with the four OD-4 panels, NO key anywhere named for a dimension or a rating, and NO leaf whose value is a rating label — the nine ratings are excluded at the PROJECTION layer, and the test is structural rather than the bare-word scan A-052 prohibits");
     }
   }
 

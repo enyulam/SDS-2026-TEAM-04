@@ -7435,3 +7435,51 @@ Grades, modules and enrolments are the **substance**: "no classes" and "6 classe
 ### Checkpoint
 
 **Committed at the phase boundary, never mid-phase.** ⛔ **`P2-2` (`26` Add Class) HITS THE `C-7` SCHEMA GATE** — `D-3` terms plus class creation — and must **STOP with its tables, columns, policies and grants stated** before any migration is written.
+
+---
+
+## 2026-08-12 — THE TWO STALE SUITES REPAIRED · screen `12` gains a RENDERED proof · a control that caught its own probe
+
+- **Branch:** `develop`. **Scope:** the bounded unit the plan scheduled *"before Part 2 so the suite can gate"* (§10). ⛔ **No product code changed. No migration. No schema.**
+
+### ⛔ ONE ROOT CAUSE, TWO SUITES: A LEG THAT DEPENDS ON NOBODY HAVING USED THE PRODUCT IS NOT A PROOF, IT IS A CLOCK
+
+`test:integration` (`INT-A5` ×2, `INT-Q27`) and `prove:stage3-authenticated` (`S3-M1-r`, `S3-P1-r`, `S3-P2-r`) were **all pinned to an empty-fixture state the Operator's walkthrough legitimately moved.** ▶ **The product was right and the tests were old.** Neither was caused by `P2-1`, which writes nothing.
+
+**`INT-A5` — the subject is now DERIVED AT RUNTIME, not assumed.** It asserted zero rows for a pair it believed had no trainer-approved report; that pair is now `submitted`, so **both reads correctly returned content and the leg was measuring a premise rather than a boundary.** It now finds a genuinely **pre-approval** report at run time, asserts management's status-gated read refuses it, and — ⚠️ **the part that makes the zero mean anything** — asserts the **same read returns content for the submitted pair**. **Non-vacuity first:** with no pre-approval report anywhere, every refusal would pass against nothing.
+
+⚠️ **THE PARENT HALF'S SCOPE IS STATED HONESTLY RATHER THAN OVERSOLD.** The fixture parent's own learner is now `submitted`, and this suite must not mutate the canonical database (`B-STAGE3-2`). So the parent refusal has **two independent sufficient grounds** — pre-approval status **and** no link — and **the leg expressly does not claim to isolate the status gate.** `INT-R3`/`INT-R6` isolate it on the disposable database, where mutation is safe.
+
+**`INT-Q27` — corrected to the CURRENT ratified field set, and STRENGTHENED.** It expected `panels,submittedAt` while hero Phase 1 had added `context`. ⛔ **Widening the top-level set to admit `context` alone would let any future key ride in beside it**, so `context`'s **own** field set is now pinned exactly — seven identity and scheduling fields, `G-5`'s trainer name among them. The whole-payload `walk` for rating-bearing keys and rating-valued leaves is **unchanged**.
+
+**`stage3` — the three render legs are now STATE-DERIVED.** Each measures the governed state first and asserts the outcome that state **requires**: an empty queue must paint its empty state; a populated one must paint its data. ▶ **Pinning either alone tests half the surface** — the same both-direction reasoning `A-003` applies to refusals. ⚠️ **A null probe is `NOT-RUN`, never a default**: guessing "assume empty" would make an unmeasured state look like a measured one. The container is resolved **through the local-target guard, never guessed** — a guess reaches whichever stack is running, which may be the frozen one.
+
+✅ **TWO Q-27 LEGS THAT HAD BEEN `NOT-RUN` NOW ACTUALLY RUN.** They were skipped because the parent surfaces never rendered. **`Q-27` is now measured on a POPULATED parent report for the first time** — the four panels paint and no rating vocabulary or skills card appears.
+
+### ✅ SCREEN `12` NOW HAS A RENDERED PROOF — THE FIRST FOR ANY PART 2 SURFACE
+
+`S3-M2` drives `/management/classes` in headless Chrome under a real admin-minted **management** session: **200**, hydrated, and **five data selectors matched**. ▶ **`P2-1`'s own suites prove the DATA path and scan the SOURCE; neither looks at a painted page.** This is the `P1-5` lesson applied at the HTTP layer.
+
+`S3-M2-omissions` asserts the **three ruled omissions and `G-2` on the RENDERED TEXT** — `Asst.` · `Assist` · `Lessons done` · `Junior` · `Overall Grade`. ⛔ **Strictly stronger than the source scan**: a component could import a forbidden string from elsewhere, and the painted page cannot lie about what it painted.
+
+⚠️ **VISUAL ACCEPTANCE IS STILL `NOT-RUN` AND IS NOT CLAIMED.** A DOM-text render proof says the surface paints its data; it says nothing about layout, spacing or fidelity to the frame. **The two must not be conflated.**
+
+### ⛔ THE DETECTOR'S CONTROL CAUGHT ITS OWN PROBE, WHICH IS THE ONLY REASON THIS ENTRY IS HONEST
+
+The omission leg carries a control requiring the matcher to fire against **the strings the frame itself draws**. It went **red**: my probe contained `Asst.` but not `Assist`, so **one of the five banned tokens was never exercised** and its absence on the page would have proved nothing.
+
+▶ **Two different questions, and a control answering only the first is the shape that let a broken sweep report *"0 uncorrected claims"*:** *did the page paint?* (`Beginner` renders) and *can the matcher fire?* (the probe). **Both are now asserted.**
+
+⛔ **AND THE FIX ATTEMPT ITSELF REPRODUCED A RECORDED HAZARD.** An escaped apostrophe was consumed while patching the file, leaving a **syntax error** — and the failing run **echoed the offending source line**, which contained the word `fail`. ▶ **Same family as the backtick `SyntaxError` whose echoed line contained `RESULT: PASS`.** Caught because the verdict came from the **exit code** and a `node --check` was run before trusting anything.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `npm run test:integration` | ✅ **exit 0** — was exit 1 |
+| `npm run prove:stage3-authenticated` | ✅ **exit 0** — **26 PASS · 0 FAIL · 2 NOT-RUN** (password sign-in and mutation legs, both correctly `NOT-RUN`) |
+| `npm run prove:hero-all` | ✅ **17/17** |
+| `npm run prove:portal-p2-1` | ✅ **exit 0** |
+| `tsc` · `eslint` | ✅ **0 · 0 errors** |
+
+⛔ **Still `NOT-RUN` and not claimable from any green above:** the password sign-in form · the server-action transport (renders are GETs) · the AI drafting and grounding pipeline · every governed **mutation** leg, which belongs on the disposable stack.

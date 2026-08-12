@@ -99,7 +99,7 @@
 // EXIT: 0 every leg PASS · 1 any leg FAIL or NOT-RUN or main() threw.
 // =====================================================================
 
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import os from 'node:os'
 import { join } from 'node:path'
@@ -114,6 +114,14 @@ import {
   serveDisciplined,
   stopServed,
 } from './serving-discipline.mjs'
+import { resolveLocalTarget } from '../fixtures/local-target-guard.mjs'
+
+/*
+ * ⚠️ RESOLVED THROUGH THE GUARD, NEVER GUESSED. There is no default local
+ * target: a guess would reach whichever stack happens to be running, which
+ * may be the FROZEN one.
+ */
+const { dbContainer: DB_CONTAINER } = resolveLocalTarget()
 
 const APP_PORT = 3421
 const DEBUG_PORT = 9421
@@ -419,6 +427,47 @@ async function renderLeg(browser, id, path, { loading, selectors }, budgetMs = 2
 // The chain. Tier-1 selectors are SURFACE-SPECIFIC mount text plus the
 // role's own portal chrome — never a nav word shared across the portal.
 // ---------------------------------------------------------------------
+/*
+ * ⛔ THE THREE RENDER LEGS BELOW USED TO PIN AN EMPTY-FIXTURE STATE, AND THEY
+ * WENT RED WHEN THE OPERATOR USED THE PRODUCT. Corrected 2026-08-12.
+ *
+ * `"No reports waiting"`, `"No reports available yet"` and the parent refusal
+ * copy were all correct on a pristine fixture and all false once real reports
+ * existed. ▶ THE PRODUCT WAS RIGHT AND THE TEST WAS OLD -- a leg that depends
+ * on nobody having used the product is not a proof, it is a clock.
+ *
+ * ⚠️ THE FIX IS A STRENGTHENING. Each leg now MEASURES the governed state
+ * first and asserts the outcome that state REQUIRES: an empty queue must
+ * paint its empty state, and a populated one must paint its data. Pinning
+ * either alone tests half the surface.
+ */
+function probeGovernedState() {
+  const sql = [
+    "SELECT (SELECT count(*) FROM public.reports WHERE status = 'trainer_approved')",
+    "|| '|' || (SELECT count(*) FROM public.reports r JOIN public.parent_student_links l",
+    "            ON l.student_id = r.student_id AND l.is_active",
+    "           WHERE r.latest_submitted_version_id IS NOT NULL)",
+    "|| '|' || (SELECT count(*) FROM public.reports",
+    `           WHERE class_session_id = '${FIXTURE_SESSION}' AND student_id = '${FIXTURE_STUDENT}'`,
+    "             AND latest_submitted_version_id IS NOT NULL);",
+  ].join(' ')
+  const r = spawnSync(
+    'docker',
+    ['exec', '-i', DB_CONTAINER, 'psql', '--no-psqlrc', '-U', 'postgres', '-d', 'postgres', '-At', '-c', sql],
+    { encoding: 'utf8', shell: false },
+  )
+  if (r.status !== 0) return null
+  const [pending, parentSubmitted, pairSubmitted] = r.stdout.trim().split('|').map(Number)
+  return { pending, parentSubmitted, pairSubmitted }
+}
+
+/*
+ * ⚠️ A NULL PROBE IS `NOT-RUN`, NEVER A DEFAULT. Guessing "assume empty"
+ * would make an unmeasured state look like a measured one -- exactly the
+ * shape this file's own S-8 lineage warns about.
+ */
+const STATE = probeGovernedState()
+
 const CHAIN = {
   trainer: [
     {
@@ -468,14 +517,48 @@ const CHAIN = {
   ],
   management: [
     {
+      /*
+       * P2-1 — screen `12` Management Classes, at its canonical route.
+       *
+       * ⚠️ THIS IS THE FIRST RENDERED PROOF OF A PART 2 SURFACE. `P2-1`'s own
+       * suites prove the DATA path and scan the SOURCE; neither of them looks
+       * at a painted page. ▶ A green data proof plus a green source scan is
+       * not a proof of the path between them — the `P1-5` lesson, applied at
+       * the HTTP layer this time.
+       *
+       * ⛔ The three `REGISTERED-OMISSION`s are asserted on the RENDERED TEXT
+       * below (`S3-M2-omissions`), which is strictly stronger than the source
+       * scan: a component could import the forbidden string from elsewhere.
+       */
+      id: 'S3-M2',
+      path: '/management/classes',
+      loading: 'Loading centre classes',
+      data: [
+        'Every Class Module running at this centre',
+        'All Classes',
+        'All levels',
+        'Beginner',
+        'Actively enrolled in this Class Module',
+      ],
+    },
+    {
       id: 'S3-M1',
       path: '/management/reports',
       loading: 'Loading Management report queue',
+      // ⚠️ STATE-DERIVED. The first three strings are the surface's own
+      // chrome and hold in every state. The fourth is the one that MOVED:
+      // an empty queue must paint "No reports waiting"; a populated one must
+      // paint the table caption instead. Asserting the wrong one is how this
+      // leg spent a day reporting a defect the product did not have.
       data: [
         'School-wide report oversight for this centre',
         'Pending final review',
         'Correction tracking',
-        'No reports waiting',
+        STATE === null
+          ? 'School-wide report oversight for this centre'
+          : STATE.pending === 0
+            ? 'No reports waiting'
+            : 'Trainer-approved reports waiting for Management',
       ],
     },
   ],
@@ -484,17 +567,40 @@ const CHAIN = {
       id: 'S3-P1',
       path: '/parent/reports',
       loading: 'Loading available family reports',
-      data: ['received for your linked learners', 'No reports available yet'],
+      // ⚠️ STATE-DERIVED, same reason as S3-M1. A linked parent with a
+      // submitted report must see the LIST, not the empty state.
+      data: [
+        'received for your linked learners',
+        STATE === null
+          ? 'received for your linked learners'
+          : STATE.parentSubmitted === 0
+            ? 'No reports available yet'
+            : 'Session',
+      ],
     },
     {
       id: 'S3-P2',
       path: `/parent/students/${FIXTURE_STUDENT}/sessions/${FIXTURE_SESSION}/report`,
       loading: 'Loading family report',
-      // THE PARENT BOUNDARY, HOLDING. No version has reached `submitted`, so
-      // the canonical parent read resolves nothing and the surface refuses.
-      // That refusal is the correct governed outcome, not a missing screen:
-      // a parent may only ever see the canonical SUBMITTED version.
-      data: ['It may no longer be available in this workspace'],
+      /*
+       * THE PARENT BOUNDARY — AND IT IS THE SAME BOUNDARY IN BOTH DIRECTIONS.
+       *
+       * ~~No version has reached `submitted`, so the canonical parent read
+       * resolves nothing and the surface refuses.~~ ⛔ THAT PREMISE LAPSED:
+       * this pair IS submitted now. The refusal was always the correct
+       * governed outcome for an UNSUBMITTED pair, and the four panels are the
+       * correct outcome for a submitted one. ▶ A refusal-only leg proves half
+       * a boundary; `A-003`'s both-direction discipline is the same idea.
+       *
+       * ⛔ `Q-27` is asserted separately below and is UNTOUCHED by this:
+       * whichever branch renders, no rating may appear in the payload.
+       */
+      data:
+        STATE === null
+          ? ['It may no longer be available in this workspace']
+          : STATE.pairSubmitted === 0
+            ? ['It may no longer be available in this workspace']
+            : ['Overview', 'Strengths', 'Areas for Development', 'Remarks'],
     },
   ],
 }
@@ -602,6 +708,51 @@ async function main() {
           // may legitimately contain "mastered" or "eye contact". The
           // assertion is STRUCTURAL — the ruled-out card and any replacement
           // visualization must be absent.
+          /*
+           * P2-1 — THE THREE RULED OMISSIONS, ON THE PAINTED PAGE.
+           *
+           * ⛔ `Asst.` is a TA field (`A-014`, `G-7`) and NEVER ENDS.
+           * ⚠️ `Lessons done` ENDS when `D-3`/`D-4` data arrives.
+           * ⛔ `Junior` is the frame's tab; the ratified vocabulary is
+           *    Beginner / Intermediate / Advanced (`A-016`, `A-054`).
+           *
+           * ⚠️ Guarded on `text === null`: an absence assertion over a page
+           * that never rendered is true of nothing, and this file's own S-8
+           * lineage is exactly that mistake.
+           */
+          if (id === 'S3-M2') {
+            if (text === null) {
+              notRun('S3-M2-omissions', 'the classes surface did not render, so its three ruled omissions were not measured')
+            } else {
+              const banned = ['Asst.', 'Assist', 'Lessons done', 'Junior', 'Overall Grade']
+              const present = banned.filter((b) => text.includes(b))
+              /*
+               * ⚠️ THE DETECTOR'S OWN CONTROL, run against the FRAME's actual
+               * strings. `Beginner` rendering proves the PAGE painted; this
+               * proves the MATCHER can fire. They are different questions, and
+               * a control that answers only the first is the shape that let a
+               * broken sweep report "0 uncorrected claims".
+               */
+              // Every banned token appears here EXACTLY as the frame or the ruled-out
+              // roll-up draws it. The control below requires ALL of them to match.
+              const probe =
+                'Asst. Nadia Rahman / Trainer Assistant (TA) · 8 / 12 Lessons done · Junior · Overall Grade: Mastering'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M2-omissions', 'the omission detector did not match the strings the FRAME itself draws — every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M2-omissions', `screen 12 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} — each is a RULED omission`)
+              } else if (!text.includes('Beginner')) {
+                // ⚠️ THE CONTROL. Without it, "none of the five appeared" is
+                // equally true of a blank page — and `Beginner` is the exact
+                // token the frame's `Junior` was replaced BY.
+                fail('S3-M2-omissions', 'the control failed: the ratified `Beginner` tab did not render, so the five absences are uninterpretable')
+              } else {
+                pass('S3-M2-omissions', 'screen 12 renders the ratified `Beginner` tab and NONE of `Asst.` / `Assist` / `Lessons done` / `Junior` / `Overall Grade` — the three registered omissions and G-2, measured on the painted page')
+              }
+            }
+          }
+
           if (role === 'parent') {
             if (text === null) {
               notRun(`${id}-q27`, 'the surface did not render, so the Q-27 boundary was not measured on it')
