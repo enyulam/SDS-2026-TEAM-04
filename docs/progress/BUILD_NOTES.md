@@ -8111,3 +8111,67 @@ share an identical layout at **10px** field radius with a **230px** third column
 **Next:** a read-only re-measurement of all four screens against `.png` AND `.html` is reported
 to the Operator, classified per element as `REGISTERED-OMISSION` / `BLOCKED` / `TRUE-DRIFT`.
 ⏸ **`P2-5` is held.** The Operator rules the rebuild before anything is written.
+
+---
+
+## 2026-08-13 — the three follow-ups: `CLAUDE.md` §7.4.1, the `13` table verified at source, and Part 1's method audited
+
+**Branch:** `develop`. **No rebuild performed.**
+
+### 1. `CLAUDE.md` §7.4.1 — the artefact contract (Operator-authorized)
+
+Added under an explicit bounded authorization naming §7.4. `.png` = geometry and visual truth ·
+`.html` = measurable values, **values never markup**, and **the `.png` wins on disagreement** ·
+`.md` = content only, **never geometry and never evidence about what a frame draws or omits** ·
+the numbered pack's `screen.md` = implementation, governance, provenance, **read every phase**.
+Every phase reads all three; **every claim about a frame names the artefact it rests on**.
+
+### 2. ⚠️ THE `13` TABLE IS NOT AN INVENTION — I WAS WRONG TO LABEL IT ONE
+
+Verified at source before touching it, as instructed. **`CLAUDE.md:248` names *"Management Class
+Overview's **'Student Report Status' table**"*** as a definite entity whose per-row buttons must
+gate on status (`A-038`), and the inventory row for `13` says that gating *"must be built to that
+rule, not inferred from the frame"*. ▶ **It is a governance-mandated addition the frame omits —
+the same class as the Class Health Summary beside it. It stays, cited.**
+
+⛔ **Deleting it because the frame lacks it would have been the exact inverse of the error that
+started this**, which is why the Operator required verification at source first.
+
+⚠️ One correction to my own re-measurement: the frame's `REPORT STATUS` column is **per
+LESSON**; the ratified table is **per STUDENT**. Different axes, not alternatives — the
+per-lesson column remains `TRUE-DRIFT`.
+
+**The `12` button WAS an invention and is removed.** The `.png` shows the card's affordance is
+**the card itself plus a `···` overflow menu**; I added a button the frame does not draw while
+simultaneously reporting that another screen's Edit control did not exist. Both errors have one
+cause. ⚠️ The card is therefore **still not wired to `13`** — deliberately, because the correct
+affordance is a rebuild and adding a second wrong control would compound it.
+
+### 3. ✅ PART 1'S METHOD HOLDS — and the boundary is exact
+
+**Measured from the records, not assumed.**
+
+* ✅ **The requirement was explicit.** `BUILD_NOTES.md:3709` records the hero plan's Operator
+  amendments including *"`.png` **and** `.html` with values-never-markup"*.
+* ✅ **A provenance audit was already run, at the Operator's demand, and answered BY
+  RE-DERIVATION rather than from memory** — *"a context compaction sits between this session and
+  the Batch 3 work, so **every `.html` was re-extracted today**"*. Result: **`.png` and `.html`
+  YES for all eight framed hero screens.** The gap found then was `screen.md`, and it was closed.
+* ✅ **Independent corroboration in the artefacts themselves:** the Batch 3 adjudication carries
+  **509 px citations**, including **fractional values** — `12.5px`, `11.5px`, `9px/15–17px
+  padding`, `7px gutter`, `26px disc` — in *frame value / current value / resulting class*
+  tables. ▶ **A prose note cannot produce a fractional pixel value.** This is not a claim about
+  what was read; it is a residue only the `.html` could have left.
+* ✅ **The four defective screens are OUTSIDE those plans.** `grep` for `screen \`12\``,
+  \`13\`, \`26\`, \`27\` across every `UI_RECONCILIATION_*` and `HERO_*` plan returns
+  **zero files**. They are Part 2 screens from the deferred-24 set.
+
+⛔ **BUT THE ROOT CAUSE IS NOT "a plan that lacked the rule".** `PORTAL_COMPLETION_PLAN.md`
+§3 — the plan I was executing — **already required** *"the `/reference/` `.png`, its `.html`,
+**and** the numbered pack's `screen.md`"*. ▶ **The rule was there and I did not follow it, for
+four consecutive phases, each reported complete with a gate table and accepted.** ⚠️ **No proof
+in this project measures §3 compliance**, which is why it survived four phases undetected. I have
+corrected my own §12 record and the new `CLAUDE.md` note, both of which initially implied the
+cause was documentary silence.
+
+▶ **Answer to the Operator's question: FOUR screens, not sixteen.**

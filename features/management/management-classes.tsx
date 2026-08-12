@@ -221,9 +221,18 @@ export function ManagementClasses() {
           {visible.map((row) => (
             <article key={row.classModuleId} className="card flex flex-col gap-4 px-5 py-[18px]">
               {/*
-                ✅ THE CARD OPENS SCREEN `13`, live since `P2-4`. ⛔ The whole card is NOT a
-                link: the frame draws one destination, and wrapping the card would also swallow
-                the trainer names into it. One explicit control, one destination.
+                ⛔ THE `View class overview` BUTTON ADDED HERE ON 2026-08-13 WAS REMOVED THE SAME
+                DAY, BY OPERATOR RULING: **it is an INVENTION.** The `.png` draws no such control
+                — the card's affordance is **the card itself plus a `···` overflow menu**, and I
+                added a button the frame does not have while simultaneously reporting that
+                another screen's Edit control did not exist. ▶ Both errors have ONE cause: the
+                layout was derived from the pack's prose `.md` note and the `.png` was never
+                opened (`CLAUDE.md` §7.4.1).
+
+                ⚠️ THE CARD IS THEREFORE STILL NOT WIRED TO SCREEN `13`, which IS built and IS
+                live at `/management/classes/[classModuleId]`. That is deliberate: the correct
+                affordance is a REBUILD of this card to the frame, and the Operator rules the
+                rebuild. Adding a second wrong control in the meantime would compound it.
               */}
               <div className="flex items-start gap-3">
                 {/*
@@ -269,14 +278,6 @@ export function ManagementClasses() {
                   Actively enrolled in this Class Module
                 </span>
               </p>
-
-              <Link
-                href={`/management/classes/${row.classModuleId}`}
-                className="inline-flex min-h-11 items-center justify-center rounded-field border border-line px-4 py-2 text-small font-semibold text-brand-700 hover:border-brand-700 hover:bg-brand-50"
-              >
-                View class overview
-                <span className="sr-only"> for {row.title}</span>
-              </Link>
             </article>
           ))}
         </section>

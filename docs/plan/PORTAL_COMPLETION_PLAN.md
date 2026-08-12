@@ -1149,6 +1149,19 @@ inert treatment was chosen for.
 > draws no X"* requires the `.png`; a note cannot support either claim. State which artefact a
 > claim rests on when you make it.**
 
+### ⛔ THE RULE WAS ALREADY IN THIS PLAN. IT WAS NOT FOLLOWED.
+
+⚠️ **§3 of this document, *"How a phase is shaped"*, already requires every phase to carry the
+frame read in full — *"the `/reference/` `.png`, its `.html`, **and** the numbered pack's
+`screen.md`, which carries prohibitions and dependencies the visual artefacts cannot"*.** The
+hero-chain plan carried the same requirement as an explicit Operator amendment (*".png AND .html
+with values-never-markup"*).
+
+▶ **So this is a COMPLIANCE failure, not a missing rule**, and it must be recorded that way.
+Four consecutive phases declared §3 satisfied while reading one artefact of the three — and every
+one of those phases was reported to the Operator as complete, with a gate table, and accepted.
+⚠️ **No proof in this project measured §3 compliance**, which is why it survived four phases.
+
 ### What happened
 
 Screens `12`, `13`, `26` and `27` had their layouts derived from

@@ -422,6 +422,31 @@ Every screen needs its non-happy-path states built, not just its default: a **va
 
 ⚠️ **A higher-ranked governed functional / product / privacy ruling may override a SPECIFIC visible element of a `/reference/` frame without invalidating the rest of that pack.** The visual and functional ladders stay separate (§1, A-045): `/reference/` decides appearance, governance decides behaviour and disclosure — and **`/reference/*.md` prose never gains functional rank** (Authority Lock §28.2 keeps it at functional rank 5). The live example is **Q-27** on screen `30`: the frame still draws the "This Term's Skills" nine-dimension card and the Final MVP **must not implement it**; that omission is **EXPECTED / REQUIRED**, never a visual regression.
 
+
+### 7.4.1 ⛔ THE ARTEFACT CONTRACT — which file inside a `/reference/` pack answers which question
+
+*(Added 2026-08-13 under an explicit bounded Operator authorization naming this section. **This settles a GAP, it re-ranks nothing.** §7.4 and `A-056` already make `reference/<mapped pack>/` visual rank 1; what neither said is **WHICH OF THE THREE FILES INSIDE IT** is authoritative for what.)*
+
+⚠️ **THE SILENCE HERE WAS NOT THE CAUSE, AND THIS NOTE MUST NOT BE READ AS SAYING SO.** Measured afterwards: `docs/plan/PORTAL_COMPLETION_PLAN.md` §3 **already required** every phase to read *"the `/reference/` `.png`, its `.html`, **and** the numbered pack's `screen.md`"*, and the hero-chain plan carried the same requirement as an explicit Operator amendment. ▶ **THE RULE EXISTED IN THE PLAN BEING EXECUTED AND WAS NOT FOLLOWED.** This section closes a real gap in `CLAUDE.md` — a session reading only the standing contract would not have learned which file answers which question — but the defect below is a **COMPLIANCE failure, not a documentation gap**, and recording it the other way round would let the next session believe the rule is new.
+
+**A pack holds three artefacts. They are not interchangeable, and one of them cannot carry geometry at all.**
+
+| Artefact | What it is authoritative for | ⛔ What it can NEVER support |
+|---|---|---|
+| **`.png`** | **GEOMETRY AND VISUAL TRUTH.** Layout, hierarchy, composition, which controls exist and where they sit | — |
+| **`.html`** | **MEASURABLE VALUES** — spacing, type scale, grid structure, column counts, radii. **VALUES, NEVER MARKUP** (§*"`.html` is values never markup"*). ⚠️ **Where the `.html` and the `.png` disagree, the `.png` WINS** | Structure to be copied as markup |
+| **`.md`** | **CONTENT DESCRIPTION ONLY** — useful for *"is this element accounted for"* | ⛔ **NEVER geometry, and NEVER evidence about what a frame DRAWS OR OMITS** |
+| **the numbered pack's `screen.md`** | **IMPLEMENTATION, GOVERNANCE, PROVENANCE** — what may be built, what is prohibited, what is deliberately omitted | Appearance |
+
+**⛔ EVERY PHASE READS THE `.png`, THE `.html` AND THE NUMBERED PACK'S `screen.md`.** The numbered `screen.md` is not optional reading and not a formality: **it is what caught the `32`/`33` prohibition.**
+
+**⛔ ANY CLAIM OF THE FORM *"the frame draws X"* OR *"the frame draws no X"* REQUIRES THE `.png`. Nothing else supports either.** A `.md` note lists content; its silence about an element is **not evidence the element is absent**.
+
+**⛔ EVERY CLAIM ABOUT A FRAME NAMES THE ARTEFACT IT RESTS ON** — *"the `.png` shows …"*, *"the `.html` computes …"*, *"the note lists …"*. A claim that cannot name one is not a measurement.
+
+⚠️ **WHY THIS RULE EXISTS — measured, not hypothetical.** Screens `12`, `13`, `26` and `27` had their layouts derived from the pack's **prose `.md` note**; the `.png` and `.html` were **never opened**. Two consequences followed, and both were reported to the Operator as sound work: **(1)** *"screen `13` draws no Edit control"* was a `grep` over prose and is **FALSE** — `Edit class` sits in that frame's header card — and a **DESIGN GAP** disposition was built on it; **(2)** VISUAL acceptance was reported `NOT-RUN` when the truth was that **there was no basis on which it could pass**, because the layout was never derived from the artefact that defines it. ▶ **The `.html` is the only artefact carrying computed values, so a layout built without it cannot be faithful except by accident** — and no proof in this project detects the difference, because a rendered DOM-text leg asserts only that some strings appear on a painted page. Full record: `docs/plan/PORTAL_COMPLETION_PLAN.md` §12.
+
+
 ## 8. Explicitly out of scope for the MVP — do not build without sign-off
 
 These appear in the spec (so you'll see them referenced) but are **deferred, post-MVP** (spec §26 build plan is the actual scope; §28 is the roadmap, not the backlog):
