@@ -5,29 +5,27 @@
 > database. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-12, at the **`P2-2` schema gate** — `P2-1` complete and committed, `P2-2` stopped before any code.
+**Regenerated:** 2026-08-12, at the **`P2-2` screen stop** — the terms substrate built and proven; screen `26` held on one question.
 
 ---
 
-## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — what was re-verified, and what had lapsed
-
-**Every item below was re-measured against current state. None was copied forward.**
+## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — re-verified, not carried
 
 | Carried claim | Method | Result |
 |---|---|---|
-| `test:integration` red (`47/3/3`, exit 1) | re-run at HEAD | ⛔ **LAPSED — exit 0.** Repaired this session |
-| `prove:stage3-authenticated` red | re-run at HEAD | ⛔ **LAPSED — exit 0**, 26 PASS · 0 FAIL · 2 NOT-RUN |
-| Plan §10: *"`run-integration.mjs:517` calls `pass("INT-A5")` unconditionally"* | read the block at HEAD | ⛔ **LAPSED** — it is guarded by `failuresBefore` and prints no `PASS` when it fails. **The instrument defect was already closed; only the fixture staleness was real** |
-| `C-14`: *"enrolment date — needs a column; no dated enrolment field measured"* | `information_schema.columns` | ⛔ **LAPSED** — `public.enrolments.enrolled_at` is `timestamptz NOT NULL` and already exists. **A stale MEASUREMENT, which is the wording a later reader trusts without re-checking** |
-| `RENDERED CAPTURE` `NOT-RUN` on every authenticated surface | ran the harness | ⚠️ **PARTIALLY LAPSED.** Five authenticated surfaces now render under a real session, screen `12` among them. ⛔ **VISUAL acceptance is still `NOT-RUN` and is NOT claimed** — a DOM-text proof says the page paints its data and nothing about layout or fidelity to the frame |
-| Part 1 attested by the Operator's walkthrough | `git log` | ⚠️ **POINT-IN-TIME AT `f2200e8`, AND HEAD IS NOW `fabbe47`.** Three commits have landed since. ⛔ **`CLAUDE.md` §14.7: no later state inherits it.** What carries at HEAD is the **automated** evidence, re-run this session and green |
-| `P2-2` / `P2-6` `C-7` schema gates | plan §2.3 `R-7` + live catalogue | ✅ **STILL TRUE** — zero non-`SELECT` policies and zero non-`SELECT` client grants on all five class tables |
-| `09` refuses its canonical route (`C2C-007`) | read `returned-reports-queue.tsx:36` at HEAD | ✅ **STILL TRUE** — the bare route is refused; only `?status=needs_edit` renders |
-| `B-G06-DET-1` open | no automated verdict produced this session | ✅ **STILL TRUE** — carried |
-| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** — no hosted connection and no fixture load ran this session | ✅ **CARRIED UNCHANGED**, and stated as carried rather than as re-verified |
+| *"two held commits"* — **my own chat report** | `git rev-list --count` | ⛔ **LAPSED, AND IT WAS MINE.** It was **three**. The handoff was derived at `fabbe47`, I committed `5634849`, then repeated the handoff's figure without re-measuring. ▶ **§15.8.1's exact defect, in the message describing §15.8.1** |
+| `P2-2` `C-7` schema gate `AWAITING_OPERATOR` | the ruling of 2026-08-12 | ⛔ **LAPSED — RULED.** Option (c), seeded. Substrate built |
+| `develop` 2 commits ahead, unpushed | `git ls-remote` | ⛔ **LAPSED** — pushed and verified from `origin`; **one new commit is now unpushed** |
+| `prove:stage3-authenticated` exit 0 | re-ran at this boundary | ⛔ **LAPSED — `NOT-RUN`, blocked.** An Operator-owned `next dev` (PID `46348`) holds the directory |
+| `prove:hero-9` green | re-ran | ⛔ **LAPSED then RESTORED** — `P9-6` fired on `D-3` reversing `G-4`; pin rewritten, 17/17 again |
+| `P2-6` `C-7` gate | plan §2.3 `R-7` | ✅ **STILL TRUE** — not yet written up |
+| `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
+| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** — no hosted contact, no fixture load | ✅ **CARRIED, and stated as carried** |
+| `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** |
+| 136 mojibake sequences / 41 files | Operator ruled *record, do not touch* | ✅ **STILL TRUE — untouched, needs its own §12 authorization** |
 | `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
 
-⚠️ **Every lapsed item was corrected in its SOURCE record before this file was derived** — `PORTAL_COMPLETION_PLAN.md`, `STATUS.md`, `BUILD_NOTES.md` and the screen-`12` pack — because correcting only the handoff reproduces the defect.
+⚠️ **Every lapsed item was corrected in its SOURCE record before this file was derived.**
 
 ---
 
@@ -35,104 +33,64 @@
 
 | | |
 |---|---|
-| **HEAD** | **`fabbe47`** — *test: repair the two fixture-stale suites so they gate again; screen 12 gains a rendered proof*. ⚠️ **A derived artifact cannot name its own SHA** — the commit carrying this file is its successor; verify with `git log -1` |
-| **Branch** | `develop` |
-| **Tree** | **3 modified docs**, staged for the `P2-2`-gate commit: `PORTAL_COMPLETION_PLAN.md`, `STATUS.md`, `BUILD_NOTES.md` |
-| **Remote** | `origin` → `github.com/enyulam/best-coach-mvp` (**PRIVATE**). ⛔ **`develop` on origin is `b3bd814` — TWO commits BEHIND local.** **Nothing was pushed this session; no push is authorized** |
-| **`main`** | **`5eb84bc`, UNTOUCHED.** Not pushed, nothing merged |
-| **Worktrees** | **ONE** — the main checkout on `develop` |
-| **Migrations** | **25 on disk · 25 applied LOCAL.** ⛔ **This session added none** |
-| **Census (local, measured)** | **25 migrations · 28 tables · 49 functions · 12 enums · 29 policies · audit registry 19 strings.** ⛔ **All unchanged by both commits** |
+| **HEAD** | **`77db4f2`** — *feat(P2-2): the D-3 terms substrate, seeded and read-only, under the C-7 ruling*. ⚠️ A derived artifact cannot name its own SHA; verify with `git log -1` |
+| **Branch** | `develop` · **tree CLEAN** |
+| **Remote** | `origin/develop` = **`5634849`**. ⛔ **`77db4f2` is UNPUSHED** — your push authorization named the held commits and was spent on them; this one is a fresh question |
+| **`main`** | **`5eb84bc`, UNTOUCHED** |
+| **Census (local, measured)** | **26 migrations · 29 tables · 49 functions · 12 enums · 30 policies · audit registry 19** — ▶ **exactly the figure the `C-7` proposal committed to in advance**, asserted as an exact string by the suite |
+| **Hosted dev / frozen projects** | ⛔ **NOT CONTACTED.** The hosted DB is **one migration behind local** and no hosted action is authorized |
 
-## Environments
+---
 
-| | |
+## ✅ What the ruling produced
+
+**`P2-2`'s substrate is built exactly as authorized and no more:** 1 table (`terms`) · 1 nullable `class_sessions.term_id` with **no backfill** · 1 RLS `SELECT` policy · 1 matching `SELECT` grant · 4 seed rows · **zero** functions, enums, audit strings, write policies, write grants.
+
+▶ **Your option (c) did the work you said it would:** no governed action, no event owed, **`A-029` satisfied by there being no action rather than by argument.** Registry stays 19.
+
+⚠️ **No read RPC either.** It was authorized *"as needed"* and **none was needed** — the policy plus its minimum matching grant already serves every reader, and a `SECURITY DEFINER` function added for symmetry is a second gate to keep in step.
+
+⛔ **The write guard is asserted in both places, as you required.** `T-6` fails the migration; `P22-2` re-asserts at **every phase boundary**, which is where a later phase adding an INSERT policy for convenience is actually caught. **`P22-3` plants an INSERT policy inside the transaction and requires the same detector to see it.**
+
+---
+
+## ⛔ THE STOP — one internal inconsistency, not a gap
+
+Your ruling says **"NO WRITE PATH ANYWHERE"** and **"SECURITY DEFINER *read* RPCs as needed"**, and also says **"BUILD `P2-2` COMPLETE"**. ⛔ **`P2-2` is screen `26` Add Class — a CREATE form**, needing governed writes to `class_modules`, `class_sessions` and `class_session_assignments`.
+
+| Reading | Consequence |
 |---|---|
-| **Local dev stack** | `best-coach-dev` on `544xx`, running. Resolved **through the local-target guard, never guessed** |
-| **Hosted dev DB** | `poblcfbxxzgarclchzkx` (`ap-southeast-1`). ⛔ **NOT CONTACTED THIS SESSION** |
-| **Deployed dev app** | `https://best-coach-dev.vercel.app`, production branch `develop`. ⚠️ **Origin `develop` is `b3bd814`, so NOTHING DEPLOYED CAN CONTAIN `P2-1`.** The deployment itself was not queried |
-| ⛔ **FROZEN, OFF LIMITS** | `best-coach-mvp.vercel.app` (on `main`) and hosted `zjukuffiuzkbiblmnuwl`. **Neither was contacted** |
+| **A** — *"no write path anywhere"* is categorical | The substrate is all of `P2-2` that ships. **Screen `26` defers**, and `P2-3` (`27` Edit Class) defers with it |
+| **B** — the enumerated zeros scoped the **terms family**; class creation proceeds on the **already-ratified** `admin.module_created` / `admin.session_created` | Three governed write RPCs ship. ⚠️ **They need no write policy and no write grant** — that is the pattern's whole point — so (B) is *consistent* with your enumerated zeros |
+
+▶ **(B) is textually available; (A) is textually plain.** The **asymmetry** decided the handling, not the odds: building (B) wrongly creates the product's **first governed administrative write path** under a ruling forbidding one; building (A) wrongly costs one screen. **`C-4`'s precedent is yours** — a ruling with an internal inconsistency is a stop-and-ask.
+
+## ⚠️ Two smaller things that need you
+
+1. **The seed is a DEVELOPMENT CALENDAR and says so in its own text.** No document establishes iSpeak's real term calendar — the frame shows one example label and nothing else. Four 2026 quarter rows are seeded as a placeholder; **the real calendar is an Operator input**, and `T-7` pins the count at four so it cannot be silently grown into something that reads as ratified.
+2. ⛔ **A `next dev` you own (PID `46348`, port 3000) is holding this directory**, and Next 16 refuses a second — so `prove:stage3-authenticated` could not serve. **I did not kill it.** Stop it when convenient and the harness runs again.
 
 ---
 
-## What this session did
-
-### ✅ `P2-1` — screen `12` Management Classes, COMPLETE (`918f186`)
-
-Route `/management/classes`, canonical. Chain: `listClassModulesCore` → `listManagementClassesCore` → `adapterListManagementClasses` → the port → the fixture → `management-classes.tsx`.
-
-⛔ **NO MIGRATION, AND THE CLAIM IS ITSELF A PROOF LEG.** A management `SELECT` policy **and** a matching `authenticated` grant already exist on all eight relations the screen reads — **both layers measured separately**, because a present policy with no grant reads as an RLS failure (`A-030`).
-
-**Three `REGISTERED-OMISSION`s, each with a detector that must match the frame's own string:** `Asst.` (a TA field — `A-014`, `G-7`; **never ends**) · `X / 12 Lessons done` (**ends when `D-3`/`D-4` data arrives**) · the frame's `Junior` tab (**`Beginner` is not a relabel of it** — `A-016`, `A-054`).
-
-⚠️ **One trainer per card is not a governed fact.** Assignment is authoritative at **class-session** level, so the card names the **distinct trainers actually assigned across that module's sessions**. A second name is a second **session's** trainer, never an assistant.
-
-### ✅ The two stale suites repaired (`fabbe47`)
-
-**One root cause:** legs pinned to an empty-fixture state the Operator's walkthrough legitimately moved. ▶ **The product was right and the tests were old.** `INT-A5` now **derives** a pre-approval report at run time with a control; `INT-Q27` is corrected **and strengthened**; `stage3`'s three render legs are **state-derived**.
-
-✅ **Two `Q-27` legs that had been `NOT-RUN` now actually RUN** — the parent boundary is measured on a populated report for the first time. ✅ **Screen `12` gained `S3-M2`, the first rendered proof of any Part 2 surface**, plus `S3-M2-omissions` asserting the three omissions and `G-2` **on the painted page**.
-
----
-
-## ⛔ THE STOP — `P2-2` IS AT ITS `C-7` SCHEMA GATE AND NEEDS YOUR RULING
-
-**The full question is written out at `docs/plan/PORTAL_COMPLETION_PLAN.md` §`P2-2`** — table, columns, constraints, policies, grants, RPCs, four decisions and the exact census effect. In summary:
-
-**Proposed:** **1 table** (`public.terms`) · **1 column** (`class_sessions.term_id`, **NULLABLE, no backfill**) · **1 RLS `SELECT` policy + 1 matching `SELECT` grant**, on `terms` only · **2–3 reviewed `SECURITY DEFINER` RPCs** · **0 enums** · **0 new audit strings** · ⛔ **0 write policies and 0 write grants anywhere.**
-
-✅ **A gate I expected to arm does NOT.** The registry already carries **`admin.module_created`, `admin.session_created`, `admin.trainer_assigned`** — measured live at 19 strings — so **`A-057`'s prohibition, re-armed at three evidence strings, is not engaged.**
-
-⚠️ **FOUR DECISIONS ARE YOURS**, and the first is the one that actually matters: **there is no audit string for creating a TERM**, and three readings are defensible — a governed act needing a **twentieth** string (itself a §12 stop-and-ask); inert scheduling structure that audits nothing, as `class_grades` does; or terms **seeded** rather than created, which removes the RPC entirely. ▶ **`A-029` requires one event per GOVERNED action, and whether creating a term IS one is a ruling, not an inference.**
-
-⛔ **NO MIGRATION MAY BE WRITTEN UNTIL THAT IS RULED.**
-
----
-
-## Suites that RAN this session, by exit code
+## Suites at this boundary, by exit code
 
 | Suite | Result |
 |---|---|
-| `prove:portal-p2-1` | ✅ **exit 0** — 9 SQL legs + 20 runner checks, non-vacuity first, every absence leg controlled |
-| `prove:portal-p2-1-composed` | ✅ **exit 0** — the composed core RUN with admin-minted sessions for all three roles |
-| `prove:hero-all` | ✅ **17/17 by exit code** |
-| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · f-attendance-init-1` | ✅ **all exit 0** |
-| `prove:stage2-routes` · `test:integration` · `prove:stage3-authenticated` | ✅ **exit 0** (the last two after repair) |
-| `tsc` · `eslint` · `next build` | ✅ **0 · 0 errors (3 pre-existing warnings) · 0** |
-| Portal navigation census | ✅ **exit 0** — 16 routes read from the app tree; the ratchet SAW the new route |
-
-## NOT-RUN this session, with reasons — never merged with the above
-
-| Not run | Reason |
-|---|---|
-| **VISUAL acceptance / screenshot capture on screen `12`** | ⛔ A DOM-text render proof is **not** a visual acceptance and is not reported as one |
-| Password sign-in · server-action transport · governed **mutation** legs | ⛔ `stage3` states these itself: renders are GETs, mutations belong on the disposable stack, and a password is an Operator credential no agent may handle |
-| Grounding detector vs real provider prose (**`B-G06-DET-1`**) | **No automated verdict produced.** Open |
-| Any hosted or billable operation | Not authorized, not attempted |
-| Fixture load or expansion | Not authorized, not attempted |
-| `prove:no-secrets` | **Not run this session** — no push was made or proposed |
+| `prove:portal-p2-2` | ✅ **exit 0** — 9 SQL + 10 runner, non-vacuity first, the write guard controlled by a planted policy |
+| `prove:hero-all` | ✅ **17/17** (after the `P9-6` rewrite) |
+| `prove:portal-1 · -2 · -2b · -5 · -34 · -5-composed · -p2-1 · f-attendance-init-1` | ✅ **all exit 0** |
+| `test:integration` · `tsc` · `eslint` · `next build` | ✅ **0 · 0 · 0 errors · 0** |
+| `prove:no-secrets` | ✅ **exit 0, CLEAN** — 309 commits, 2012 blobs, zero credentials, four controls fired |
+| `prove:stage3-authenticated` | ⛔ **`NOT-RUN` — blocked, not failed** |
+| **VISUAL acceptance, any screen** | ⛔ **`NOT-RUN`** and not claimed |
 
 ---
 
-## Open · carried · unratified
-
-- ⛔ **`P2-2` and `P2-6` schema gates** — `AWAITING_OPERATOR` under `R-7`/`C-7`. `P2-2`'s question is now stated in full; `P2-6`'s is not yet written.
-- ⚠️ **A TREE-WIDE ENCODING FINDING, measured and deliberately NOT repaired.** **41 tracked files carry 136 pre-existing mojibake sequences** (a double-encoded em dash), including **all 36 UI pack `screen.md` files** and **`CLAUDE.md` itself (2)**. ⛔ Repairing 41 governed files is its own bounded run, and **`CLAUDE.md` is ratified authority whose editing needs a bounded §12 authorization.**
-- ⛔ **`develop` is 2 commits ahead of `origin` and UNPUSHED.** No push is authorized by anything above.
-- ⚠️ **§10 Phase 1 exit condition (c) remains UNPROVEN** — the hosted fixture is the Step 7F minimum and `observations.follow_up_notes` was measured NULL. The broader §11 fixture (2 trainers, 2 modules, 3–4 learners, 2 parents, **a second session**) is exactly what (c) needs and remains deferred.
-- ⛔ **`09` refuses its canonical route** (`C2C-007`) — re-verified at HEAD. `P2-21` fixes it first.
-- ⚠️ **`A-044` is knowingly unmet for screen `28`** — ruled by `C-11`, deliberate.
-
-## Claims this session made that execution does NOT prove
-
-- ⛔ **`P2-1` is `PASS`, which is a SESSION EVIDENCE VERDICT. `Accepted` is yours and only yours** (`CLAUDE.md` §14.1, §15.6). A session never accepts its own work.
-- ⛔ **The Operator walkthrough that attested Part 1 was at `f2200e8` and does not carry to `fabbe47`.** Three commits have landed since. `P2-1` touched shared spine files — the port interface, the adapter, the contracts and the management rail — so the honest position is that **the automated evidence is green at HEAD and the human attestation is not.**
-- ⚠️ **Nothing built since `b3bd814` is deployed anywhere.**
-
 ## Next permitted action
 
-⛔ **STOPPED. `P2-2` needs your `C-7` ruling** — read `PORTAL_COMPLETION_PLAN.md` §`P2-2`, and in particular **decision 1**, the term audit-string question.
+⛔ **STOPPED on the write-path question above.**
 
-**Everything else in plan order after `P2-2` is unblocked** and can proceed autonomously: `P2-3` depends on `P2-2`, but **`P2-10` (`23` Trainers) has no dependency at all** and could be built ahead of the gate if you would rather not be interrupted — say so and I will take it next instead of waiting.
+**If reading (B):** say so and screen `26` is built next, in plan order.
+**If reading (A):** the next buildable phase in plan order is **`P2-4` (`13` Class Overview)**, which depends only on `P2-1` and is unblocked — `P2-3` defers with `26`. ▶ **That is plan order with a blocked node skipped, not a reorder**, and `P2-4` precedes `P2-10` regardless.
 
-⛔ **Carried by nothing above, and each needing its own authorization:** any hosted or billable operation · a fixture reload or expansion · editing ratified authority · a push to `origin` · a push to `main` · public deployment · human testing · final submission.
+⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload or expansion · editing ratified authority · **a push of `77db4f2`** · a push to `main` · public deployment · human testing · final submission.
