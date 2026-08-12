@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackBanner } from "@/components/ui/feedback-banner";
-import { Field, Select, TextInput } from "@/components/ui/field";
+import { Field, SearchInput, Select, TextInput } from "@/components/ui/field";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -17,11 +17,27 @@ import type {
 } from "@/lib/frontend/contracts/physical-test";
 
 /**
- * Screen 26 — Management Add Class (PORTAL COMPLETION PLAN phase `P2-2`).
+ * Screen 26 — Management Add Class (`P2-2`; REBUILT 2026-08-13 under Operator AUTHORIZATION A).
  *
  * Current Final MVP visual authority is `UI_REFERENCE_FINAL_MVP/reference/Management - Add Class/`
  * (Amendment 007 A-056). This pack carries NO local `reference.png`, and that absence is NOT a
  * missing reference and NOT a reason to re-export from live Figma (`CLAUDE.md` §7.4).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * ⛔ WHY IT WAS REBUILT, AND WHAT THE `.png` ACTUALLY DRAWS
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * The first build derived its layout from the pack's PROSE NOTE; the `.png` and `.html` were
+ * never opened (`CLAUDE.md` §7.4.1, plan §12). ▶ It drew THREE separate cards with the actions
+ * floating below them. The frame draws **ONE card** — `padding: 24px 26px`,
+ * `border-radius: 18px`, `gap: 20px` — with its three sections separated by **1px hairlines**,
+ * and **`Cancel` / `Save Class` INSIDE that card**, right-aligned below a final hairline.
+ *
+ * Row structure, measured: `Class name | Class code` · `Program | Level | Capacity` ·
+ * `Room | Term` · the day strip inline · `Start time | End time` · the search box · the
+ * selected-trainer row. Fields sit in a `16px` row gap with a `7px` label-to-control gap.
+ *
+ * ⚠️ EVERY GEOMETRIC VALUE HERE IS CITED FROM `Management - Add Class.html` and verified by
+ * `prove:artefact-read`, which fails if a cited value is absent from that file or unused here.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⛔ WHAT THIS SCREEN CREATES, IN THE GOVERNED VOCABULARY
@@ -52,7 +68,16 @@ import type {
  *
  *    ⛔ UNASSIGNMENT IS STILL NOT BUILT and `26` needs none: at creation time there is nothing
  *    to unassign, and the frame's `-` control removes the trainer from the FORM before it is
- *    saved — client state, not a governed act.
+ *    saved — client state, not a governed act. ✅ It is BUILT as `Remove`, in the frame's
+ *    position at the end of the selected-trainer row.
+ *
+ *    ⛔ THE TRAINER ROW'S SUBTITLE IS OMITTED, AND THIS IS A REPORTED DIVERGENCE FROM THE
+ *    REBUILD BRIEF. The frame's subtitle reads `Public Speaking · Employee T-1001` — the first
+ *    half is PROGRAMME, which `C-14` records as having no entity, and the second is the
+ *    EMPLOYEE ID, a registered omission in its own right. ▶ Both halves are ruled out, so the
+ *    subtitle has NO buildable content at HEAD and hero 0B omits the element rather than
+ *    filling it. `TrainerChoiceDto` carries exactly `trainerMembershipId` and `displayName`,
+ *    so this component could not render one if it tried.
  *
  * 2. ⛔ THE `.md`'s `Trainer Assistant (TA)` SLOT IS PROHIBITED — `A-014` defers the TA
  *    persona and `G-7` binds `centre_membership_role` against extension. `REGISTERED-OMISSION`,
@@ -268,266 +293,310 @@ export function ManagementAddClass() {
         />
       )}
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-6">
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Class Details</h2>
-            <p className="mt-0.5 text-small text-ink">Basic information about this class.</p>
-          </div>
+      {/*
+        ⛔ ONE CARD, NOT THREE. `padding: 24px 26px`, `border-radius: 18px`, `gap: 20px`, with
+        the frame's own 1px hairlines between sections and the actions INSIDE it.
+      */}
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-[20px] rounded-[18px] border border-line bg-surface px-[26px] py-6 shadow-[var(--shadow-card)]"
+      >
+        <SectionHeading title="Class Details" subtitle="Basic information about this class" />
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              id={`${formId}-title`}
-              label="Class name"
-              required
-              hint="This is the Class Module's name."
-            >
-              <TextInput
-                id={`${formId}-title`}
-                value={title}
-                maxLength={120}
-                autoComplete="off"
-                onChange={(event) => setTitle(event.target.value)}
-              />
-            </Field>
-
-            {/*
-              ⛔ The Level options are the three ratified Class Grades, read from the database.
-              The frame's `Junior` is not among them and is not a synonym for one (`A-054`).
-            */}
-            <Field id={`${formId}-grade`} label="Level" required>
-              <Select
-                id={`${formId}-grade`}
-                value={gradeId}
-                onChange={(event) => setGradeId(event.target.value)}
-              >
-                <option value="">Choose a Class Grade</option>
-                {options.grades.map((grade) => (
-                  <option key={grade.classGradeId} value={grade.classGradeId}>
-                    {grade.displayName}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            {/*
-              ⚠️ A FREE TEXT INPUT, and the frame draws a dropdown. No room inventory exists in
-              any table, seed or ruling, so a select would have to invent one.
-            */}
-            <Field
-              id={`${formId}-room`}
-              label="Room"
-              hint="Optional. Left empty, no room is recorded for these sessions."
-            >
-              <TextInput
-                id={`${formId}-room`}
-                value={room}
-                maxLength={80}
-                autoComplete="off"
-                onChange={(event) => setRoom(event.target.value)}
-              />
-            </Field>
-
-            <Field
-              id={`${formId}-term`}
-              label="Term"
-              hint="The term the sessions are scheduled across."
-            >
-              <Select
-                id={`${formId}-term`}
-                value={termId}
-                onChange={(event) => setTermId(event.target.value)}
-              >
-                <option value="">No term</option>
-                {options.terms.map((item) => (
-                  <option key={item.termId} value={item.termId}>
-                    {item.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-        </section>
-
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Schedule</h2>
-            <p className="mt-0.5 text-small text-ink">Which days and times this class meets.</p>
-          </div>
-
-          <fieldset className="flex flex-col gap-2">
-            <legend className="text-small font-bold text-ink-strong">Days</legend>
-            <div className="flex flex-wrap gap-2">
-              {WEEKDAYS.map((day) => {
-                const selected = days.includes(day.index);
-                return (
-                  <button
-                    key={day.index}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() =>
-                      setDays((current) =>
-                        current.includes(day.index)
-                          ? current.filter((value) => value !== day.index)
-                          : [...current, day.index].sort((a, b) => a - b),
-                      )
-                    }
-                    className={`inline-flex min-h-11 min-w-[3.75rem] items-center justify-center rounded-field border px-3 py-2 text-small font-semibold ${
-                      selected
-                        ? "border-brand-700 bg-brand-700 text-white"
-                        : "border-line bg-surface-muted text-ink-subtle hover:border-brand-700 hover:text-ink-strong"
-                    }`}
-                  >
-                    {day.short}
-                    <span className="sr-only">{day.full}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            {/*
-              ⚠️ Native time inputs, where the frame draws dropdowns. Same reason as Room: no
-              slot vocabulary exists to enumerate, and inventing one would be a fabricated rule
-              about when this academy teaches.
-            */}
-            <Field id={`${formId}-start`} label="Start time" hint="Optional.">
-              <TextInput
-                id={`${formId}-start`}
-                type="time"
-                value={startTime}
-                onChange={(event) => setStartTime(event.target.value)}
-              />
-            </Field>
-            <Field
-              id={`${formId}-end`}
-              label="End time"
-              hint="Optional."
-              error={timesInverted ? "The end time must be after the start time." : undefined}
-            >
-              <TextInput
-                id={`${formId}-end`}
-                type="time"
-                value={endTime}
-                invalid={timesInverted}
-                aria-describedby={timesInverted ? `${formId}-end-error` : undefined}
-                onChange={(event) => setEndTime(event.target.value)}
-              />
-            </Field>
-          </div>
-
-          {/*
-            ⚠️ THE COUNT IS SHOWN BEFORE THE CLICK, NOT AFTER. Each occurrence is a separate
-            governed record with its own permanent audit event.
-          */}
-          <p className="rounded-card bg-surface-muted px-4 py-3 text-small text-ink" role="status">
-            {occurrences > 0 ? (
-              <>
-                <span className="font-bold text-ink-strong">
-                  {occurrences} class {occurrences === 1 ? "session" : "sessions"}
-                </span>{" "}
-                will be created across {term?.label}. Each one is a separate record.
-              </>
-            ) : days.length > 0 && !term ? (
-              <>Choose a term to schedule these days into. Without one, the class is created with no sessions yet.</>
-            ) : (
-              <>No days selected. The class is created with no sessions yet — you can add them later.</>
-            )}
-          </p>
-        </section>
-
-        <section className="card flex flex-col gap-5 px-6 py-6">
-          <div>
-            <h2 className="text-section-title font-extrabold text-ink-strong">Assigned Trainer</h2>
-            <p className="mt-0.5 text-small text-ink">
-              Optional. The chosen trainer is assigned to every session created above.
-            </p>
-          </div>
-
-          {/*
-            ⚠️ THE SEARCH FILTERS A LIST THIS CALLER ALREADY HOLDS. It issues no query, so it
-            can neither disclose the existence of a trainer outside this centre nor be used to
-            probe for one — the same property the `12` level tabs and the `29` class filter rely
-            on. ⛔ The list is ACTIVE `trainer` memberships only; a deactivated one would be
-            refused by the server, and offering it would be a control that looks like it works.
-          */}
+        {/*
+          ⛔ THE FRAME'S FIRST ROW IS `Class name | Class code` AND ITS SECOND IS
+          `Program | Level | Capacity`. `Class code`, `Program` and `Capacity` are all ruled
+          out by `C-14`/`A-016`, so the surviving controls close up rather than leaving three
+          gaps: an empty column would read as a field that failed to load.
+        */}
+        <div className="grid gap-[16px] sm:grid-cols-2">
           <Field
-            id={`${formId}-trainer-search`}
-            label="Search trainer"
-            hint={
-              options.trainers.length === 0
-                ? "No trainer is available to assign."
-                : `${options.trainers.length} trainer${options.trainers.length === 1 ? "" : "s"} at this centre.`
-            }
+            id={`${formId}-title`}
+            label="Class name"
+            required
+            hint="This is the Class Module's name."
           >
             <TextInput
-              id={`${formId}-trainer-search`}
-              type="search"
-              value={trainerQuery}
+              id={`${formId}-title`}
+              value={title}
+              maxLength={120}
               autoComplete="off"
-              onChange={(event) => setTrainerQuery(event.target.value)}
+              onChange={(event) => setTitle(event.target.value)}
             />
           </Field>
 
-          <ul aria-label="Trainers" className="flex flex-col gap-2">
-            {visibleTrainers.map((trainer) => {
-              const selected = trainerId === trainer.trainerMembershipId;
-              return (
-                <li key={trainer.trainerMembershipId}>
-                  <button
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() =>
-                      setTrainerId(selected ? "" : trainer.trainerMembershipId)
-                    }
-                    className={`flex w-full min-h-11 items-center gap-3 rounded-card border px-4 py-3 text-left ${
-                      selected
-                        ? "border-brand-700 bg-brand-50"
-                        : "border-line bg-surface-muted hover:border-brand-700"
-                    }`}
-                  >
-                    <Avatar displayName={trainer.displayName} size="small" />
-                    <span className="text-[0.8125rem] font-semibold text-ink-strong">
-                      {trainer.displayName}
-                    </span>
-                    <span className="ms-auto text-small text-ink">
-                      {selected ? "Selected" : "Select"}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          {/*
+            ⛔ The Level options are the three ratified Class Grades, read from the database.
+            The frame's `Junior` is not among them and is not a synonym for one (`A-054`).
+          */}
+          <Field id={`${formId}-grade`} label="Level" required>
+            <Select
+              id={`${formId}-grade`}
+              value={gradeId}
+              onChange={(event) => setGradeId(event.target.value)}
+            >
+              <option value="">Choose a Class Grade</option>
+              {options.grades.map((grade) => (
+                <option key={grade.classGradeId} value={grade.classGradeId}>
+                  {grade.displayName}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
           {/*
-            ⛔ NO ASSISTANT / TA ROW, EVER. `A-014` defers the TA persona and `G-7` binds
-            `centre_membership_role` against extension, so a second staff slot cannot be
-            persisted at all — and the schema agrees: `class_session_assignments` pins
-            `trainer_role` to `trainer` by CHECK and by composite FK. `REGISTERED-OMISSION`,
-            and it NEVER ENDS.
+            ⚠️ A FREE TEXT INPUT, and the frame draws a dropdown. No room inventory exists in
+            any table, seed or ruling, so a select would have to invent one.
           */}
-          <p className="text-small text-ink" role="status">
-            {trainerId === ""
-              ? "No trainer selected. The class and its sessions are created unassigned, which is a valid state — a trainer can be assigned later."
-              : "This trainer is assigned to each session created above, one governed assignment per session."}
-          </p>
-        </section>
+          <Field
+            id={`${formId}-room`}
+            label="Room"
+            hint="Optional. Left empty, no room is recorded for these sessions."
+          >
+            <TextInput
+              id={`${formId}-room`}
+              value={room}
+              maxLength={80}
+              autoComplete="off"
+              onChange={(event) => setRoom(event.target.value)}
+            />
+          </Field>
 
+          <Field
+            id={`${formId}-term`}
+            label="Term"
+            hint="The term the sessions are scheduled across."
+          >
+            <Select
+              id={`${formId}-term`}
+              value={termId}
+              onChange={(event) => setTermId(event.target.value)}
+            >
+              <option value="">No term</option>
+              {options.terms.map((item) => (
+                <option key={item.termId} value={item.termId}>
+                  {item.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+
+        <Hairline />
+
+        <SectionHeading title="Schedule" subtitle="Which days and times this class meets" />
+
+        {/* The frame's inline strip: `gap: 8px`, chips at `padding: 9px 15px`, radius `10px`. */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">Days this class meets</legend>
+          <div className="flex flex-wrap gap-2">
+            {WEEKDAYS.map((day) => {
+              const selected = days.includes(day.index);
+              return (
+                <button
+                  key={day.index}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() =>
+                    setDays((current) =>
+                      current.includes(day.index)
+                        ? current.filter((value) => value !== day.index)
+                        : [...current, day.index].sort((a, b) => a - b),
+                    )
+                  }
+                  className={`inline-flex min-h-11 items-center justify-center rounded-[10px] border px-[15px] py-2 text-[12.5px] font-semibold ${
+                    selected
+                      ? "border-brand-700 bg-brand-700 text-white"
+                      : "border-line bg-surface-muted text-ink-muted hover:border-brand-700 hover:text-ink-strong"
+                  }`}
+                >
+                  {day.short}
+                  <span className="sr-only">{day.full}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <div className="grid gap-[16px] sm:grid-cols-2">
+          {/*
+            ⚠️ Native time inputs, where the frame draws dropdowns. Same reason as Room: no
+            slot vocabulary exists to enumerate, and inventing one would be a fabricated rule
+            about when this academy teaches.
+          */}
+          <Field id={`${formId}-start`} label="Start time" hint="Optional.">
+            <TextInput
+              id={`${formId}-start`}
+              type="time"
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
+            />
+          </Field>
+          <Field
+            id={`${formId}-end`}
+            label="End time"
+            hint="Optional."
+            error={timesInverted ? "The end time must be after the start time." : undefined}
+          >
+            <TextInput
+              id={`${formId}-end`}
+              type="time"
+              value={endTime}
+              invalid={timesInverted}
+              aria-describedby={timesInverted ? `${formId}-end-error` : undefined}
+              onChange={(event) => setEndTime(event.target.value)}
+            />
+          </Field>
+        </div>
+
+        {/*
+          ⚠️ THE COUNT IS SHOWN BEFORE THE CLICK, NOT AFTER. Each occurrence is a separate
+          governed record with its own permanent audit event. ⛔ NOT IN THE FRAME, and kept:
+          a form that can create dozens of permanent records must say how many before it does.
+        */}
+        <p className="rounded-[10px] bg-surface-muted px-4 py-3 text-small text-ink" role="status">
+          {occurrences > 0 ? (
+            <>
+              <span className="font-bold text-ink-strong">
+                {occurrences} class {occurrences === 1 ? "session" : "sessions"}
+              </span>{" "}
+              will be created across {term?.label}. Each one is a separate record.
+            </>
+          ) : days.length > 0 && !term ? (
+            <>Choose a term to schedule these days into. Without one, the class is created with no sessions yet.</>
+          ) : (
+            <>No days selected. The class is created with no sessions yet — you can add them later.</>
+          )}
+        </p>
+
+        <Hairline />
+
+        <SectionHeading title="Assigned Trainer" />
+
+        {/*
+          ⚠️ THE SEARCH FILTERS A LIST THIS CALLER ALREADY HOLDS. It issues no query, so it
+          can neither disclose the existence of a trainer outside this centre nor be used to
+          probe for one — the same property the `12` level tabs and the `29` class filter rely
+          on. ⛔ The list is ACTIVE `trainer` memberships only; a deactivated one would be
+          refused by the server, and offering it would be a control that looks like it works.
+        */}
+        <div className="flex flex-col gap-[7px]">
+          <label
+            htmlFor={`${formId}-trainer-search`}
+            className="text-[12px] font-semibold text-ink-strong"
+          >
+            Search Trainer
+          </label>
+          <SearchInput
+            id={`${formId}-trainer-search`}
+            className="max-w-[230px]"
+            value={trainerQuery}
+            autoComplete="off"
+            aria-describedby={`${formId}-trainer-hint`}
+            onChange={(event) => setTrainerQuery(event.target.value)}
+          />
+          <p id={`${formId}-trainer-hint`} className="text-[11.5px] text-ink-muted">
+            {options.trainers.length === 0
+              ? "No trainer is available to assign."
+              : `${options.trainers.length} trainer${options.trainers.length === 1 ? "" : "s"} at this centre.`}
+          </p>
+        </div>
+
+        <ul aria-label="Trainers" className="flex flex-col gap-2">
+          {visibleTrainers.map((trainer) => {
+            const selected = trainerId === trainer.trainerMembershipId;
+            return (
+              <li
+                key={trainer.trainerMembershipId}
+                className={`flex items-center gap-[13px] rounded-[12px] border px-[14px] py-3 ${
+                  selected ? "border-brand-700 bg-brand-50" : "border-transparent bg-surface-muted"
+                }`}
+              >
+                <Avatar displayName={trainer.displayName} size="medium" />
+                {/*
+                  ⛔ NO SUBTITLE. The frame's `Public Speaking · Employee T-1001` is programme
+                  (`C-14`: no entity) plus the employee ID (a registered omission). Both halves
+                  are ruled out, so hero 0B omits the element rather than inventing a filler —
+                  and `TrainerChoiceDto` carries no field that could hold one.
+                */}
+                <span className="flex-1 truncate text-[13.5px] font-semibold text-ink-strong">
+                  {trainer.displayName}
+                </span>
+                {/*
+                  The frame's trailing `-` control, built as a labelled button. ⛔ It removes
+                  the trainer from THIS FORM before it is saved — client state, never a
+                  governed unassignment, which has no ratified audit string.
+                */}
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setTrainerId(selected ? "" : trainer.trainerMembershipId)}
+                  className="inline-flex min-h-11 items-center rounded-[10px] border-[1.3px] border-line bg-surface px-[14px] py-2 text-[12.5px] font-semibold text-ink-muted hover:border-brand-700 hover:text-ink-strong"
+                >
+                  {selected ? "Remove" : "Select"}
+                  <span className="sr-only"> {trainer.displayName}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/*
+          ⛔ NO ASSISTANT / TA ROW, EVER. `A-014` defers the TA persona and `G-7` binds
+          `centre_membership_role` against extension, so a second staff slot cannot be
+          persisted at all — and the schema agrees: `class_session_assignments` pins
+          `trainer_role` to `trainer` by CHECK and by composite FK. `REGISTERED-OMISSION`,
+          and it NEVER ENDS.
+        */}
+        <p className="text-small text-ink" role="status">
+          {trainerId === ""
+            ? "No trainer selected. The class and its sessions are created unassigned, which is a valid state — a trainer can be assigned later."
+            : "This trainer is assigned to each session created above, one governed assignment per session."}
+        </p>
+
+        <Hairline />
+
+        {/* The frame's footer: right-aligned, `gap: 12px`, both buttons at `border-radius: 11px`. */}
         <div className="flex flex-wrap justify-end gap-3">
           <Link
             href="/management/classes"
-            className="inline-flex min-h-11 items-center rounded-field border border-line bg-surface px-4 py-2.5 text-body font-semibold text-ink-strong hover:border-brand-200 hover:bg-brand-50"
+            className="inline-flex min-h-11 items-center rounded-[11px] border-[1.3px] border-line bg-surface px-[22px] py-3 text-[13.5px] font-semibold text-ink-muted hover:border-brand-700 hover:text-ink-strong"
           >
             Cancel
           </Link>
-          <Button type="submit" disabled={blocked || submit.kind === "saving"}>
+          <button
+            type="submit"
+            disabled={blocked || submit.kind === "saving"}
+            className="inline-flex min-h-11 items-center gap-2 rounded-[11px] bg-brand-700 px-[24px] py-3 text-[13.5px] font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span aria-hidden="true">✓</span>
             {submit.kind === "saving" ? "Saving…" : "Save Class"}
-          </Button>
+          </button>
         </div>
       </form>
     </div>
   );
+}
+
+/** The frame's section heading: `15px` semibold over a `12px` subtitle, `gap: 3px`. */
+function SectionHeading({
+  title,
+  subtitle,
+}: {
+  readonly title: string;
+  readonly subtitle?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-[3px]">
+      <h2 className="text-[15px] font-semibold text-ink-strong">{title}</h2>
+      {subtitle && <p className="text-[12px] text-ink-muted">{subtitle}</p>}
+    </div>
+  );
+}
+
+/** The frame's `height: 1px` section divider inside the one card. */
+function Hairline() {
+  return <div className="h-px bg-line" />;
 }
 
 /**
