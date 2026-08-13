@@ -26,6 +26,9 @@ export type IconName =
   | "document"
   | "bell"
   | "logout"
+  | "clock"
+  | "pin"
+  | "user"
   | "chevronLeft"
   | "chevronRight"
   | "chevronDown"
@@ -101,6 +104,31 @@ const paths: Readonly<Record<IconName, ReactNode>> = {
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <path d="m16 17 5-5-5-5" />
       <path d="M21 12H9" />
+    </>
+  ),
+  /*
+   * P2-5 — three ADDITIVE entries for screen `25`'s detail rows, matching the
+   * four icons `Management - Schedule.png` draws beside date, time, location
+   * and trainer. ⚠️ ADDITIVE ONLY: no existing entry is touched, so no screen
+   * that already renders an icon changes. `calendar` was already here and is
+   * reused for the date row rather than duplicated.
+   */
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  pin: (
+    <>
+      <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20a7 7 0 0 1 14 0" />
     </>
   ),
   chevronLeft: <path d="m15 18-6-6 6-6" />,

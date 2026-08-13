@@ -26,6 +26,7 @@ import {
   type ClassCreationOutcomeDto,
   type CreateClassInput,
   type ManagementClassListDto,
+  type ManagementScheduleDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
@@ -1104,6 +1105,50 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * level tab with zero cards is a real rendering case, and a fixture in which
    * every tab is populated cannot exercise the empty-tab path at all.
    */
+  /**
+   * P2-5 — the deterministic mirror of `readCentreScheduleCore`.
+   *
+   * ⚠️ IT PROJECTS THE SAME SESSIONS, exactly as the server projects
+   * `class_sessions`. There is no fixture calendar array and there must not
+   * be one: a second store of dated events is the duplicated event record
+   * `A-016` and `GC-13` prohibit, and a fixture that held one would be
+   * mirroring a shape the product is not allowed to have.
+   *
+   * ⛔ `room` IS CARRIED AS-IS, INCLUDING WHEN IT IS ABSENT. One fixture
+   * session sets it and the rest leave it unset, so both the RENDER path and
+   * the hero-0B OMIT path are exercised — a fixture where every session had a
+   * room could never show that the omission works.
+   */
+  async readManagementSchedule(
+    fromDate: string,
+    toDate: string,
+  ): Promise<UiActionResult<ManagementScheduleDto>> {
+    await delay(200);
+    const sessions = SESSIONS.filter(
+      (session) => session.date >= fromDate && session.date <= toDate,
+    )
+      .slice()
+      .sort((a, b) => (a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)))
+      .map((session) => ({
+        classSessionId: session.sessionId,
+        classModuleId: session.classModuleId,
+        sessionDate: session.date,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        room: session.room ?? null,
+        moduleTitle: session.moduleName,
+        classGradeLabel: session.classGrade,
+        trainerDisplayNames: session.trainerName ? [session.trainerName] : [],
+      }));
+    return {
+      outcome: "success",
+      data: {
+        sessions,
+        monthsWithSessions: [...new Set(SESSIONS.map((session) => session.date.slice(0, 7)))].sort(),
+      },
+    };
+  }
+
   async listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>> {
     await delay(240);
     const byModule = new Map<

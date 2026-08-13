@@ -81,12 +81,15 @@ DECLARE
   v_modules0   integer;
   v_sessions0  integer;
   v_assign0    integer;
+  v_assignev0  integer;
   v_seq0       bigint;
 BEGIN
   -- ---- baselines, as OWNER ------------------------------------------
   SELECT count(*) INTO v_modules0  FROM public.class_modules;
   SELECT count(*) INTO v_sessions0 FROM public.class_sessions;
   SELECT count(*) INTO v_assign0   FROM public.class_session_assignments;
+  -- ⚠️ A BASELINE, NOT AN ABSOLUTE. See P23-9.
+  SELECT count(*) INTO v_assignev0 FROM public.audit_events WHERE action = 'admin.trainer_assigned';
   -- ⚠️ `coalesce` is grammar, not a schema member -- it cannot be qualified.
   SELECT coalesce(max(seq_no), 0) INTO v_seq0 FROM public.audit_events;
   SELECT id INTO v_grade_id FROM public.class_grades WHERE code = 'intermediate';
@@ -228,12 +231,34 @@ BEGIN
     RAISE NOTICE 'FAIL P23-8  duplicate title reported %', v_reason;
   END IF;
 
-  -- P23-9 -- ⛔ THE STOP, MEASURED AT RUNTIME.
+  -- P23-9 -- ⛔ THE CREATE RPCs ASSIGN NOBODY, MEASURED AT RUNTIME.
+  --
+  -- ⚠️ REWRITTEN 2026-08-13, AND THIS IS THE PHASE-SCOPED-CLAIM DEFECT FOR
+  --    THE FOURTH TIME. It read `... AND v_n = 0` over a GLOBAL count of every
+  --    `admin.trainer_assigned` event that has ever existed. That was true the
+  --    day `P2-2` shipped and became false twice over: `P2-2b` BUILT assignment
+  --    under its own Operator ruling, and the Operator's screen-26 walkthrough
+  --    then fired 13 of them at 06:56 on 2026-08-13. ▶ A phase-scoped claim
+  --    written as a global absolute measures every OTHER phase's behaviour.
+  --
+  -- ⛔ THE CLAIM IS NOT WEAKENED, IT IS WRITTEN AS WHAT IT ALWAYS MEANT: the
+  --    two CREATE RPCs assign nobody. Measured as a DELTA across this suite's
+  --    own transaction, which is exactly how the `class_session_assignments`
+  --    half of the same line was already written.
+  --
+  -- ⚠️ THE PROSE BELOW IS ALSO CORRECTED RATHER THAN DELETED. *"assignment
+  --    needs a THIRD string the Operator did not name, so it is STOPPED"* was
+  --    true at `P2-2` and is SUPERSEDED: the string was already ratified, the
+  --    stop rested on a misread scope, and `P2-2b` discharged it with
+  --    `admin_assign_session_trainer`. What survives is the part that still
+  --    protects something -- a session with no assignment is a REAL governed
+  --    state, and CREATION must not silently manufacture one.
   SELECT count(*) INTO v_n FROM public.audit_events WHERE action = 'admin.trainer_assigned';
-  IF (SELECT count(*) FROM public.class_session_assignments) = v_assign0 AND v_n = 0 THEN
-    RAISE NOTICE 'PASS P23-9  ⛔ THE STOP HELD: a module and two sessions were really created, class_session_assignments is UNMOVED at % and ZERO admin.trainer_assigned events exist -- assignment needs a THIRD string the Operator did not name, so it is STOPPED, not half-built. A session with no assignment is a REAL governed state', v_assign0;
+  IF (SELECT count(*) FROM public.class_session_assignments) = v_assign0
+     AND v_n = v_assignev0 THEN
+    RAISE NOTICE 'PASS P23-9  ⛔ THE CREATE PATH ASSIGNS NOBODY: a module and two sessions were really created, class_session_assignments is UNMOVED at % and the admin.trainer_assigned count is UNMOVED at % (a DELTA, not a global total -- P2-2b built assignment and the Operator walked it). A session with no assignment is a REAL governed state and creation must not manufacture one', v_assign0, v_assignev0;
   ELSE
-    RAISE NOTICE 'FAIL P23-9  assignments moved, or % trainer_assigned event(s) fired', v_n;
+    RAISE NOTICE 'FAIL P23-9  assignments moved, or trainer_assigned went % -> %', v_assignev0, v_n;
   END IF;
 
   -- P23-10 -- ⛔ EXACTLY TWO ACTION STRINGS.

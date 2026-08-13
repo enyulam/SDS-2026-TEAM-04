@@ -665,6 +665,35 @@ const CHAIN = {
             // control, so nothing else would notice its removal.
             data: ['Edit Class', 'Fixture Module A', 'Schedule', 'Assigned Trainer', 'Back to Class Overview'],
           },
+          {
+            /*
+             * P2-5 — screen `25` Management Schedule. ⛔ ITS FIRST RENDERED PROOF.
+             *
+             * ⚠️ `?month=2026-02` IS DELIBERATE AND IS NOT A CONVENIENCE. The
+             * governed fixture's sessions run 2026-01 .. 2026-03 and the calendar
+             * opens on TODAY'S month, which is empty — a real and correct state,
+             * and one in which this leg would measure the empty path only. ▶ The
+             * month parameter is a VIEW SELECTOR (`A-045`'s presentation-only
+             * reading): it reaches no row RLS would refuse.
+             *
+             * ⛔ `February 2026` IS THE LOAD-BEARING STRING. It can only paint if
+             * the deep link parsed, the window resolved and the month control
+             * derived its label — chrome alone would match everything else here.
+             * `Fixture Module A` is the second: a chip can only carry it if
+             * `readCentreScheduleCore` joined the module behind a real session.
+             */
+            id: 'S3-M6',
+            path: '/management/schedule?month=2026-02',
+            loading: 'Loading the schedule',
+            data: [
+              'Schedule',
+              'All classes and sessions across the academy',
+              'February 2026',
+              'Schedule Details',
+              'Month',
+              'Fixture Module A',
+            ],
+          },
         ]),
     {
       id: 'S3-M1',
@@ -923,6 +952,63 @@ async function main() {
                 fail('S3-M4-refusals', 'the control failed: `Save Class` and/or the read-only `Sessions (n)` list did not render, so the nine absences are uninterpretable')
               } else {
                 pass('S3-M4-refusals', 'screen 27 renders `Save Class` and the read-only `Sessions (n)` list, and NONE of `Class code` / `Capacity` / `Program` / `Unassign` / the Mon–Fri day strip — the three refusals, measured on the painted page')
+              }
+            }
+          }
+
+          /*
+           * P2-5 — SCREEN `25`'s FOUR OMISSIONS, MEASURED ON THE PAINTED PAGE.
+           *
+           * ⛔ Each removes something the frame DRAWS, and each is a governance
+           * decision rather than unfinished work:
+           *   1. `Showcase` — `GC-13`. ⚠️ In the `.html` it is BOTH a badge and a
+           *      THIRD chip colour, so the colour itself encoded the barred type;
+           *   2. `Assist.` / `Asst.` — `A-014`, `G-7`, and `trainer_role` IS
+           *      `centre_membership_role`, so an assistant is inexpressible;
+           *   3. the `Main:` prefix — a consequence of 2, with nothing left to
+           *      contrast against;
+           *   4. `Junior` — `A-016`/`A-026`/`A-054`; labels come from
+           *      `class_grades.display_name`.
+           * Plus `G-2`'s `Overall Grade` and the four rating labels, which have no
+           * business on any calendar.
+           *
+           * ⚠️ A SOURCE SCAN CANNOT MAKE THIS CLAIM — a component could import a
+           * badge from elsewhere, and the DTO could still carry a value a helper
+           * renders. The painted page can.
+           */
+          if (id === 'S3-M6') {
+            if (text === null) {
+              notRun('S3-M6-omissions', 'the schedule did not render, so its four omissions were not measured')
+            } else {
+              const banned = [
+                'Showcase', 'Assist.', 'Asst.', 'Main:', 'Junior',
+                'Overall Grade', 'Mastering', 'Mastered', 'Beginning', 'Developing',
+              ]
+              const present = banned.filter((b) => text.includes(b))
+              /*
+               * ⚠️ THE DETECTOR'S OWN CONTROL, against the strings the FRAME
+               * itself draws plus the barred vocabulary. *Did the page paint?*
+               * and *can the matcher fire?* are different questions.
+               */
+              const probe =
+                'Showcase · Main: Sam Ong · Assist. Sam Ong · Asst. Sam Ong · Junior · Public Speaking · ' +
+                'Overall Grade B · Mastering · Mastered · Beginning · Developing'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M6-omissions', 'the omission detector did not match the strings the FRAME itself draws — every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M6-omissions', `screen 25 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} — each is a REFUSED string`)
+              } else if (!text.includes('February 2026') || !text.includes('Schedule Details')) {
+                /*
+                 * ⚠️ THE CONTROL. Without it, "none of the ten appeared" is
+                 * equally true of a blank page — and on THIS screen it is also
+                 * true of a calendar that resolved an EMPTY month, which is a
+                 * real state the fixture can produce. `February 2026` proves the
+                 * deep link resolved; `Schedule Details` proves the panel painted.
+                 */
+                fail('S3-M6-omissions', 'the control failed: `February 2026` and/or `Schedule Details` did not render, so the ten absences are uninterpretable')
+              } else {
+                pass('S3-M6-omissions', 'screen 25 renders `February 2026` and `Schedule Details`, and NONE of `Showcase` / `Assist.` / `Asst.` / `Main:` / `Junior` / `Overall Grade` / the four rating labels — GC-13, A-014, A-016 and G-2, measured on the painted page over a frame that draws the first five')
               }
             }
           }

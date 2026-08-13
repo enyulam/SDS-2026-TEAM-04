@@ -289,6 +289,31 @@ export interface AdapterManagementClassListDto {
 }
 
 /**
+ * P2-5 — screen `25` Management Schedule.
+ *
+ * ⛔ NO SESSION-TYPE FIELD, AND THAT IS THE `Showcase` BAR MADE STRUCTURAL
+ * (`GC-13`). ⛔ No assistant field either: `trainer_role` is typed
+ * `centre_membership_role`, so an assistant is inexpressible in the database
+ * before it is prohibited by `A-014`/`G-7`.
+ */
+export interface AdapterScheduleSessionSummaryDto {
+  readonly classSessionId: string;
+  readonly classModuleId: string;
+  readonly sessionDate: string;
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  readonly room: string | null;
+  readonly moduleTitle: string;
+  readonly classGradeLabel: string | null;
+  readonly trainerDisplayNames: readonly string[];
+}
+
+export interface AdapterManagementScheduleDto {
+  readonly sessions: readonly AdapterScheduleSessionSummaryDto[];
+  readonly monthsWithSessions: readonly string[];
+}
+
+/**
  * P2-2 — screen `26` Add Class.
  *
  * ⛔ NOTHING HERE IS AN ASSESSMENT FACT, AND THERE IS NO FIELD ONE COULD

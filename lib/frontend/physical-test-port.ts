@@ -20,6 +20,7 @@ import type {
   CreateClassInput,
   UpdateClassInput,
   ManagementClassListDto,
+  ManagementScheduleDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -164,6 +165,16 @@ export interface PhysicalTestPort {
    * non-disclosing `unavailable` a missing one does.
    */
   readClassOverview(classModuleId: string): Promise<UiActionResult<ClassOverviewDto>>;
+
+  /**
+   * `P2-5` — screen `25`. The window is a VIEW selector, not an authorization
+   * input: the centre is server-derived and RLS decides every row regardless
+   * of the dates asked for.
+   */
+  readManagementSchedule(
+    fromDate: string,
+    toDate: string,
+  ): Promise<UiActionResult<ManagementScheduleDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

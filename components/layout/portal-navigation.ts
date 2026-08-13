@@ -143,11 +143,32 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
        * are screens `17`, `23` and `25` — later phases with no shipped route,
        * and a rail item pointing at a 404 is worse than an absent one. They
        * arrive with their screens.
+       *
+       * ✅ SCHEDULE ARRIVED AT `P2-5`, exactly as that sentence anticipated,
+       * and it is added below rather than by rewriting the sentence: the rule
+       * did not lapse, it was SATISFIED. ⛔ Students (`17`) and Trainers
+       * (`23`) still have no shipped route and still get no item.
        */
       {
         href: "/management/classes",
         label: "Classes",
         path: "/management/classes",
+        icon: "calendar",
+      },
+      /*
+       * P2-5 — screen `25` Management Schedule, at its canonical route.
+       *
+       * ⚠️ `exact: true` AND NO `owns`. Nothing sits under `/management/schedule`
+       * and nothing is planned to: the calendar is a PROJECTION whose chips
+       * lead to a class, which belongs to Classes. Declaring ownership of a
+       * sub-tree that does not exist would be a claim about routes this build
+       * does not ship — the pin `P2-2` had to rewrite on the Classes item.
+       */
+      {
+        href: "/management/schedule",
+        label: "Schedule",
+        path: "/management/schedule",
+        exact: true,
         icon: "calendar",
       },
       {

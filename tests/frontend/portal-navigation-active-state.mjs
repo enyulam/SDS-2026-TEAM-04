@@ -136,6 +136,11 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/classes/[classModuleId]", { role: "management", label: "Classes" }],
   ["/management/classes/[classModuleId]/edit", { role: "management", label: "Classes" }],
+  /*
+   * P2-5 — screen `25` at its canonical route. ⚠️ Its rail item is `exact: true`
+   * with NO `owns`, so it must be current on ITSELF and on nothing else.
+   */
+  ["/management/schedule", { role: "management", label: "Schedule" }],
   ["/management/reports", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],

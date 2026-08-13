@@ -1599,3 +1599,99 @@ link.
 ⚠️ **`PASS` is an evidence verdict; `Accepted` is the Operator's and only the Operator's.** A session never accepts its own work, and **code existing is not work being complete**.
 
 **`P1-1a`, `P1-1b` and `P1-1c` are `PASS` — executed and committed 2026-08-11, making `D-1` the first of the five portal decisions to reach a surface. ⚠️ `PASS` is the session evidence verdict; `Accepted` is the Operator's (§14.1, §15.6). `P1-2` is `PASS` for its substrate with its **upload transport outstanding**, and `P1-5`'s blocker `A-002` is **RESOLVED** — it now awaits its own authorization rather than a ruling.**
+
+
+---
+
+## §12.6 — `P2-5` (SCREEN `25` MANAGEMENT SCHEDULE): A PROJECTION, AND NO MIGRATION
+
+**Route:** `/management/schedule`, canonical. ⛔ **NO MIGRATION, NO RPC, NO POLICY, NO GRANT, and
+the audit registry is UNMOVED at 21** — a read is not a governed action (`A-029`).
+
+### The schema question, answered by measurement before anything was written
+
+All six tables the projection touches — `class_sessions`, `class_modules`, `class_grades`,
+`class_session_assignments`, `centre_memberships`, `accounts` — carry a management `SELECT`
+policy **and** a matching `authenticated` `SELECT` grant. ▶ That is why screen `25` is a direct
+RLS-scoped read like screen `12`, and not the two `SECURITY DEFINER` reads screen `13` needed,
+where `reports` and `observations` carry **zero of both**.
+
+⚠️ **`class_sessions.room` ALREADY EXISTS** — `text`, nullable, written by `26` and `27`. The
+frame's `Studio 2` needed no column.
+
+### ⛔ `GC-13` DISCHARGED, AND IT REACHED FURTHER THAN THE REGISTER'S WORDING
+
+The register bars *"a second event entity"*. Measured in the `.html`, `Showcase` is **also** a
+badge **and a THIRD chip treatment** (`#DCF2F3` / `#3FBAC2`) on the 5:00 PM chip — the same
+session the details panel labels `Showcase`. ▶ **The colour ENCODED the barred type.** None of the
+three is built, and the bar is structural: `session_type`, `event_type` and `showcase` return
+**zero columns** across the schema.
+
+### ⚠️ THE `.md` NEVER MENTIONS `Showcase` — §7.4.1 EARNS ITSELF AGAIN, MEASURED
+
+This pack's prose note lists *"Lesson cards with date, time, room, assigned Trainer, and Trainer
+Assistant (TA)"* and **names `Showcase` nowhere**. ▶ A build derived from the note would have
+missed the frame's second badge and its third chip colour entirely **and reported a clean match**.
+The `.png` is the only artefact in which it is visible. ⚠️ This is the first phase since §12.4
+where the three-artefact rule was followed, and it caught something on its first outing.
+
+### `REGISTERED-OMISSION`s — preserved and cited
+
+| Frame draws | Ruling | Ends |
+|---|---|---|
+| `Showcase` badge + its chip colour | `GC-13`, `A-016` | **NEVER** |
+| `Assist.` / `Asst.` | `A-014`, `G-7` — and `trainer_role` **IS** `centre_membership_role`, so an assistant is **INEXPRESSIBLE** | **NEVER** |
+| `Main:` prefix | consequence of the row above | **NEVER** |
+| `Junior` | `A-016` / `A-026` / `A-054` | **NEVER** |
+
+⚠️ **`Studio 2` IS NOT ON THAT LIST.** `room` exists and is NULL, so the element is **omitted by
+hero 0B** — nothing is refused and the row appears the moment a session carries one.
+
+### Two judgement calls, stated so they can be overturned rather than discovered
+
+1. **The month control's contents.** The frame draws a chevron and enumerates nothing — the
+   screen-`12` `···` shape. Built, because unlike the `···` the FUNCTION is unambiguous and a
+   calendar that cannot change month is unusable. Its contents are **measured**: the months this
+   centre demonstrably has sessions in. ⛔ No guessed range.
+2. **Chip colour.** Hue per Class Module, deterministic, **cycling**, carrying no meaning — stated
+   because a reader who took colour for a session type would be reading back the barred concept.
+
+### `prove:portal-p2-5` — 7 SQL legs + 12 runner checks, exit 0
+
+⛔ **`P25-4` is the leg that matters**: it fails the day either layer disappears, which is the
+only thing standing between this screen and a silently empty calendar.
+
+⚠️ **AND ITS FIRST DRAFT FAILED A CORRECT PRODUCT.** It required each table to carry a policy
+whose NAME contained `management`, and `class_grades_select_active_member` is deliberately an
+active-member policy. ▶ **A NAME IS NOT A PERMISSION.** Rewritten to read each table AS a
+management caller under RLS — strictly stronger, because a policy named `..._management` that
+excluded management would have passed the name test. *(Same defect class as the `SC-1` assertion
+written against an AUTHORED rather than a COMPUTED value.)*
+
+⚠️ **ITS CONTROL RAISED RATHER THAN RETURNING ZERO**, and that is sharper than what was written
+for: `reports` carries no client grant, so the read is refused at the **PRIVILEGE** layer and
+never reaches RLS. `CLAUDE.md` §6.1 — privilege and policy are two layers, and a missing grant
+must never be misdiagnosed as an RLS failure. The abort was correctly reported as **3 of 7 legs
+executed**, not as a pass.
+
+---
+
+## §12.7 — FOUR SUITES WENT RED. ONE WAS MINE; THREE WERE THE OPERATOR'S WALKTHROUGH
+
+⚠️ **MEASURED, NOT ARGUED.** The walkthrough's own audit rows are timestamped
+**06:55–06:56 on 2026-08-13** — `admin.module_created` ×1, `admin.session_created` ×13,
+`admin.trainer_assigned` ×13, `admin.module_updated` ×1 — all **before** commit `3431981` at
+08:02:34. `P2-5` adds no migration and no write path, proved mechanically by `P25a-NOMIG` and
+`P25a-PROJECTION`.
+
+| Suite | Cause | Repair |
+|---|---|---|
+| `prove:portal-p2-1` | **MINE** — the route ratchet, 19 → 20 | Pin **REWRITTEN, not deleted**, and `/management/schedule` added to the nav expectation table. *"Every new screen deliberately edits this line — that is the ratchet, not friction."* |
+| `prove:encoding` | Operator created `Beginner -  Dance` through screen `26`, typed with a HYPHEN | ⛔ The suite demanded **every** module title contain U+2014 — i.e. that the product REJECT a title a user types without one. **Scoped to the SEEDED titles**; `E-2`'s mojibake check still runs over **every** row, including the Operator's |
+| `prove:portal-p2-2-create` | 13 `admin.trainer_assigned` events from the walk | ⛔ **THE PHASE-SCOPED-CLAIM DEFECT, FOURTH INSTANCE.** `P23-9` counted every `admin.trainer_assigned` event **that has ever existed**, to claim the two CREATE RPCs assign nobody. Rewritten as a **DELTA** — what it always meant. ⚠️ Its prose was corrected too: *"assignment needs a THIRD string"* was **superseded by `P2-2b`** |
+| `prove:hero-7` | the walk assessed the last learner who qualified | ⛔ `P7-6` needs an enrolled learner **without** an observation, and a legitimate walkthrough CONSUMED its precondition. **The case is now PLANTED** inside the rolled-back transaction — the `P26-6` remedy. ⚠️ It reported `FAIL`, not `PASS`, which is the only reason it was found |
+
+▶ **THE PATTERN WORTH KEEPING: three suites encoded a snapshot of the fixture as if it were a
+rule.** Each survived only while nobody used the product. A suite that a legitimate walkthrough
+can turn red is measuring the fixture, not the behaviour — and the repair is always to scope the
+claim to what it actually meant, never to relax it.

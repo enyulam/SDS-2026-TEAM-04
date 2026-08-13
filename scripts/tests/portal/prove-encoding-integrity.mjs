@@ -71,13 +71,36 @@ const titles = psql(
   `SELECT title || '|' || encode(convert_to(title, 'UTF8'), 'hex') FROM public.class_modules ORDER BY title;`,
 ).stdout.trim().split("\n").filter(Boolean);
 
+/*
+ * ⚠️ SCOPED TO THE SEEDED TITLES — 2026-08-13, AND THE PRODUCT WAS RIGHT.
+ *
+ * This read `titles.length === 3 && titles.every(... em dash ...)` and it went
+ * RED the moment the Operator created a class through screen `26` during their
+ * walkthrough: `Beginner -  Dance`, typed with a HYPHEN, at 06:56 on
+ * 2026-08-13. ▶ The suite was demanding that EVERY class module title in the
+ * database contain U+2014 — which would mean the product must REJECT a title a
+ * user types without one. That is not a rule this project has, and it is not
+ * one it should acquire from a test.
+ *
+ * ⛔ THE PROTECTION IS NOT WEAKENED, AND THE DIVISION IS THE POINT. `E-3` was
+ * always about the TWO REPAIRED SEEDED TITLES; it is now written that way, with
+ * the seeded set identified by its stable `Fixture Module` marker and its count
+ * still pinned so it cannot silently become zero. ⚠️ `E-2` below — no `???`,
+ * no mojibake — still runs over EVERY row including the Operator's, and that is
+ * the leg that actually protects encoding.
+ *
+ * ⚠️ Same class as the `P25-4` predicate that failed a correct `class_grades`
+ * policy for being named `active_member`: an assertion written against the
+ * state that happened to exist, rather than against the property that matters.
+ */
+const seeded = titles.filter((t) => t.split("|")[0].includes("Fixture Module"));
 check(
-  titles.length === 3 && titles.every((t) => t.split("|")[1].includes("e28094")),
-  `all three class module titles carry a real em dash (${titles.length} checked)`,
+  seeded.length === 3 && seeded.every((t) => t.split("|")[1].includes("e28094")),
+  `all three SEEDED class module titles carry a real em dash (${seeded.length} seeded of ${titles.length} total). ⚠️ Scoped to the seeded set: a title a user types through screen 26 is not required to contain U+2014, and E-2 below still checks every row`,
 );
 check(
   !titles.some((t) => t.split("|")[1].includes("3f3f3f")),
-  "no title carries the `3f3f3f` substitution the repair removed",
+  `no title carries the \`3f3f3f\` substitution the repair removed (${titles.length} titles checked, INCLUDING any created through the product)`,
 );
 
 const anyCorrupt = psql(

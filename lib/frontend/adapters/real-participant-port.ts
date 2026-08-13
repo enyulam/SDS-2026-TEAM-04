@@ -63,6 +63,7 @@ import type {
   CreateClassInput,
   UpdateClassInput,
   ManagementClassListDto,
+  ManagementScheduleDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -114,6 +115,7 @@ import {
   adapterReadClassOverview,
   adapterUpdateManagementClass,
   adapterListManagementClasses,
+  adapterReadManagementSchedule,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -261,6 +263,14 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** P2-4 — screen `13`. Two governed reads behind one call. */
     readClassOverview(classModuleId: string): Promise<UiActionResult<ClassOverviewDto>> {
       return guard(() => adapterReadClassOverview(classModuleId));
+    },
+
+    /** P2-5 — screen `25`. The window is a view selector; the centre is server-derived. */
+    readManagementSchedule(
+      fromDate: string,
+      toDate: string,
+    ): Promise<UiActionResult<ManagementScheduleDto>> {
+      return guard(() => adapterReadManagementSchedule(fromDate, toDate));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

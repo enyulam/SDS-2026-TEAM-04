@@ -54,6 +54,7 @@ import {
   type ClassOverviewRowDto,
   type ClassOverviewSessionDto,
 } from "@/server/modules/class-session/class-overview";
+import { readCentreScheduleCore, type ScheduleDto } from "@/server/modules/class-session/schedule";
 import {
   readClassForEditCore,
   updateClassCore,
@@ -506,6 +507,38 @@ export async function listManagementClassesCore(
    */
   if (!listed.ok) return { outcome: "unavailable" };
   return { outcome: "success", data: listed.rows };
+}
+
+// ---------------------------------------------------------------------
+// P2-5 — screen `25` Management Schedule
+// ---------------------------------------------------------------------
+/**
+ * The centre's calendar for a window, as a PROJECTION of class sessions.
+ *
+ * ⚠️ THE ROLE GATE IS A PRESENTATION IMPROVEMENT, NOT THE SECURITY BOUNDARY
+ * — the same statement `listManagementClassesCore` makes. RLS decides each
+ * row independently inside the database, so a trainer reaching
+ * `readCentreScheduleCore` directly still sees only their own sessions.
+ *
+ * ⛔ THE WINDOW IS NOT AN AUTHORIZATION INPUT. Widening it reaches no row a
+ * narrow one could not; the centre comes from the caller's membership, never
+ * from a parameter.
+ *
+ * ⛔ A REJECTED READ IS NEVER AN EMPTY CALENDAR. Success-with-zero-sessions
+ * renders "nothing scheduled this month" — a positive claim about the
+ * academy. `Q-7`: the two are different values and only one was observed.
+ */
+export async function readManagementScheduleCore(
+  client: SupabaseClient,
+  fromDate: string,
+  toDate: string,
+): Promise<ActionResult<ScheduleDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const schedule = await readCentreScheduleCore(client, fromDate, toDate);
+  if (!schedule.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: schedule.rows };
 }
 
 // ---------------------------------------------------------------------

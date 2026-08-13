@@ -193,6 +193,24 @@ BEGIN
   -- this path to manufacture assessment substance, and cannot probe which
   -- reports have been assessed.
   -- ---------------------------------------------------------------
+  -- ⛔ THE CASE IS PLANTED, BECAUSE IT STOPPED EXISTING. Added 2026-08-13.
+  --
+  -- ⚠️ THIS LEG WENT `NOT-RUN` AND THE PRODUCT WAS CORRECT. It searches for
+  --    an enrolled learner WITHOUT an observation on this session, and the
+  --    Operator's own hero-chain walkthrough assessed the last one that
+  --    qualified. ▶ A leg whose precondition a legitimate walkthrough can
+  --    consume is a leg that will keep disappearing -- the same vacuity class
+  --    as `P26-6` ("0 rows with NO report" because the fixture's only learner
+  --    already had one), and the established remedy is the same: PLANT the
+  --    case inside the rolled-back transaction rather than hope for it.
+  --
+  -- ⚠️ IT REPORTED `FAIL`, NOT `PASS`, and that is why this was found at
+  --    all. A leg that cannot run is NOT-RUN, never PASS.
+  INSERT INTO public.students (id, centre_id, full_name, is_active)
+  VALUES ('c2000000-0000-4000-8000-0000000007f1', v_centre, 'Probe Learner Seven', true);
+  INSERT INTO public.enrolments (centre_id, class_module_id, student_id, is_active)
+  VALUES (v_centre, v_module, 'c2000000-0000-4000-8000-0000000007f1', true);
+
   SELECT e.student_id, e.id INTO v_student, v_enrolment
     FROM public.enrolments e
     LEFT JOIN public.observations o

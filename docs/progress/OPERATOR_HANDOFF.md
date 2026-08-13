@@ -5,8 +5,19 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-13, after the hover defect. **All of it executed. Nothing is blocked.**
-⏸ Held for your re-walk before `P2-5`.
+**Regenerated:** 2026-08-13, at the `P2-5` boundary.
+⏸ **One thing needed from you: `:3000`.** See below.
+
+---
+
+## ⚠️ I NEED `:3000` CLEAR — YOU ASKED TO BE TOLD WHEN
+
+**Measured just now:** an `npm run dev` (**PID `10220`**, started **12:35:33 PM**) is LISTENING on
+`:3000`. That is your re-walk server. ⛔ **I have not killed it.**
+
+Both `prove:stage2-routes` and `prove:stage3-authenticated` serve in `mode: 'dev'`, and Next 16
+permits one dev server per directory. **`S3-M6` — screen `25`'s first rendered proof — is written
+and cannot run.** Everything else in the battery is green.
 
 ---
 
@@ -14,107 +25,97 @@
 
 | Carried claim | Method | Result |
 |---|---|---|
-| *"`prove:stage2-routes` and `prove:stage3-authenticated` `NOT-RUN` on the `:3000` dev lock"* | **re-run** | ⛔ **LAPSED — YOU CLEARED IT. BOTH RUN, BOTH EXIT 0.** This was the last handoff's one open ask; it is discharged and must not be carried again |
-| *"the chevron and search fixes are accepted"* | your re-walk | ⚠️ **PARTIALLY LAPSED** — the base chevron holds; **hover regressed** and is now fixed |
-| *"`SC-6` catches the `F-01b` trap"* | re-measured | ⚠️ **WAS TRUE AND INSUFFICIENT.** It scanned class strings only; the defect was in a CSS state rule. Extended, plus two new legs |
-| `R-7` — `P2-6`'s `C-7` gate | read at HEAD | ✅ **STILL TRUE** — still the only open `C-7` item |
+| *"`:3000` is clear"* (your message) | `netstat` | ⛔ **LAPSED — RE-TAKEN.** PID `10220` since 12:35:33 PM. Both dev-mode suites `NOT-RUN` |
+| *"VISUAL acceptance `NOT-RUN` on `12`/`13`/`26`/`27`"* | your ruling | ⛔ **LAPSED — ACCEPTED**, with its three limits recorded and inseparable from it |
+| *"`P2-5` is next in plan order"* | plan §635 | ⛔ **LAPSED — BUILT.** `GC-13` discharged |
+| *"the battery is green"* | re-run | ⛔ **LAPSED THEN RESTORED** — four suites went red, one mine, three yours. All repaired |
+| `R-7` — `P2-6`'s `C-7` gate | read at HEAD | ✅ **STILL TRUE** — still the only open `C-7` item, and `P2-6` is next |
 | `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
-| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured this run** | ✅ **CARRIED, and stated as carried** |
+| §10 Phase 1 exit condition **(c)** unproven | ⚠️ not re-measured | ✅ **CARRIED, and stated as carried** |
 | `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** |
 | `test:continuity` · `test:exit-condition-b` blocked by `B-STAGE3-2` | not re-run | ✅ **CARRIED** |
 | **136 mojibake sequences / 41 files** | not re-measured | ⚠️ **CARRIED AS UNREPRODUCED** |
-| `trainer-draft-generation`'s `BackLink` variant | unchanged | ✅ **STILL OPEN** — awaiting its own ruling |
+| `trainer-draft-generation`'s `BackLink` variant | unchanged | ✅ **STILL OPEN** |
 | `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
 
-⚠️ **Two claims lapsed this run and both were corrected at source before this file was derived.**
+---
+
+## ✅ `P2-5` — SCREEN `25`, AND THE SCHEMA GATE ANSWERED BY MEASUREMENT
+
+⛔ **NO MIGRATION. NO SCHEMA CHANGE. NOTHING TO AUTHORIZE.** Measured at HEAD at **both** layers
+before a line was written: all six projection tables — `class_sessions`, `class_modules`,
+`class_grades`, `class_session_assignments`, `centre_memberships`, `accounts` — carry a management
+`SELECT` policy **and** a matching `authenticated` `SELECT` grant. `class_sessions.room` already
+exists. ▶ A direct RLS-scoped read like `12`, not the two `SECURITY DEFINER` reads `13` needed.
+
+Census `29 · 29 · 56 · 12 · 30 · 21`. **Registry unmoved at 21** — a read is not a governed
+action (`A-029`).
+
+### ⛔ `GC-13` REACHED FURTHER THAN THE REGISTER'S WORDING
+
+The register bars *"a second event entity"*. Measured in the `.html`, `Showcase` is **also a badge
+AND A THIRD CHIP TREATMENT** (`#DCF2F3` / `#3FBAC2`) on the 5:00 PM chip — the same session the
+details panel labels `Showcase`. ▶ **The colour ENCODED the barred type.** None of the three is
+built, and the bar is structural: `session_type`, `event_type` and `showcase` return **zero
+columns** across the schema.
+
+### ⚠️ THE `.md` NEVER MENTIONS `Showcase` — §7.4.1 EARNED ITSELF ON ITS FIRST OUTING
+
+The pack's note lists *"… assigned Trainer, and Trainer Assistant (TA)"* and names `Showcase`
+**nowhere**. A build derived from it would have missed the second badge and the third chip colour
+**and reported a clean match**.
+
+### Four omissions, and one that is deliberately not one
+
+`Showcase` (`GC-13`) · `Assist.`/`Asst.` (`A-014`, `G-7` — **and** `trainer_role` IS
+`centre_membership_role`, so an assistant is **inexpressible**) · the `Main:` prefix (a
+consequence of the second) · `Junior` (`A-016`/`A-026`/`A-054`). All four **never end**.
+
+⚠️ **`Studio 2` IS NOT ONE OF THEM.** `room` exists and is NULL → **hero 0B omits the element**.
+Nothing is refused; the row appears the moment a session carries one.
+
+### Two judgement calls — yours to overturn
+
+1. **The month control's contents.** The frame draws a chevron and enumerates nothing — screen
+   `12`'s `···` shape. I built it, because unlike the `···` the **function** is unambiguous and a
+   calendar that cannot change month is unusable. Contents are **measured**: the months this
+   centre demonstrably has sessions in. ⛔ No guessed range.
+2. **Chip colour.** Hue per Class Module, deterministic, **cycling**, meaning nothing — stated
+   because a reader who took colour for a session type would be reading back the barred concept.
+
+### ⚠️ `P25-4`'s FIRST DRAFT FAILED A CORRECT PRODUCT
+
+It required each table to carry a policy whose **name** contained `management`;
+`class_grades_select_active_member` is deliberately an active-member policy, like `terms`.
+▶ **A NAME IS NOT A PERMISSION.** Rewritten to READ each table as a management caller under RLS —
+**strictly stronger**, since a policy named `..._management` that excluded management would have
+passed the name test. Its control then **raised** rather than returning zero: `reports` has no
+client grant, so the refusal is at the **PRIVILEGE** layer and never reaches RLS. The abort was
+correctly reported as **3 of 7 legs executed**, not as a pass.
 
 ---
 
-## ⛔ THE DEFECT — MEASURED FIRST, EXPLAINED SECOND
+## ⛔ FOUR SUITES WENT RED. ONE WAS MINE; THREE WERE YOUR WALKTHROUGH
 
-`CSS.forcePseudoState` — DevTools' own *Force element state* — so the **browser** resolved the
-cascade rather than a model of it in JavaScript.
+**Measured, not argued.** Your walk's audit rows are timestamped **06:55–06:56** —
+`admin.module_created` ×1, `admin.session_created` ×13, `admin.trainer_assigned` ×13,
+`admin.module_updated` ×1 — all **before** my commit `3431981` at 08:02:34, and `P2-5` adds no
+migration and no write path.
 
-| State | `background-repeat` · `-size` · `-position` | |
+| Suite | Cause | Repair |
 |---|---|---|
-| rest | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ |
-| **`:hover`** | **`repeat` · `auto` · `0% 0%`** | ⛔ **REGRESSED** |
-| `:focus` · `:disabled` · `[aria-invalid]` | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ survived |
+| `prove:portal-p2-1` | **MINE** — route ratchet 19 → 20 | pin **rewritten, not deleted** |
+| `prove:encoding` | your `Beginner -  Dance`, typed with a hyphen | ⛔ the suite demanded **every** module title contain an em dash — i.e. that the product **reject a title a user types**. Scoped to the **seeded** titles; the mojibake check still covers every row |
+| `prove:portal-p2-2-create` | 13 `trainer_assigned` events from the walk | ⛔ **phase-scoped-claim defect, FOURTH instance** — a **global** count standing in for "these two RPCs assign nobody". Now a **delta** |
+| `prove:hero-7` | the walk assessed the last learner who qualified | `P7-6` needs a learner **without** an observation and your walk **consumed its precondition**. Case now **planted**. ⚠️ It said `FAIL`, not `PASS` — the only reason it was found |
 
-**Your reading of the shape was exactly right, and the arithmetic is why.**
-`.form-field:hover:not(:disabled)` is **`(0,3,0)`** and beats `.form-field.select-field`'s
-`(0,2,0)` unconditionally. The other three states are themselves `(0,2,0)` and lose to the
-modifier **on source order alone** — the modifier sits later in the file.
-▶ **Three of the four were saved by line ordering, not by design.**
+▶ **Three suites encoded a snapshot of the fixture as if it were a rule**, and each survived only
+while nobody used the product.
 
-✅ **FIXED AT THE ROOT.** The `background` SHORTHAND is gone from the base rule **and all four
-state rules**, replaced by `background-color`. ⚠️ Chasing it with `.form-field.select-field:hover`
-would have fixed **one** state and left the next state rule anyone adds to break it again.
-
-**Provably safe for every consumer rather than assumed:** `SC-4` proves nothing else paints a
-background image; `SC-6` proves nothing combines `.form-field` with a `bg-*`/`p*-`/`border-*`
-utility. Nothing relied on the shorthand's resets.
-
----
-
-## ⛔ THE MORE IMPORTANT HALF — the check that missed it
-
-> *"If it only inspects base-state declarations, it will keep missing state variants."*
-
-| Leg | Now measures | Its control |
-|---|---|---|
-| **`SC-6`** | class strings, **including variant prefixes** — `hover:bg-*`, `focus:p*-`, `disabled:border-*`, `focus-visible:*`, stacked | **`SC-6c`** plants **5** offenders, **2 of them state variants** — the plant you required |
-| **`SC-9`** *(new)* | **`app/globals.css` itself** — no `.form-field` STATE rule may use the `background`/`padding`/`border` SHORTHAND | **`SC-9c`** plants the defect's own shape; the longhand state rule and the base rule beside it must **not** match |
-| **`SC-9b`** *(new)* | no element carries **two** `.form-field` modifiers | **`SC-9bc`** plants a two-modifier element |
-| **`SC-7`** ×4 | the chevron under **hover · focus · disabled · invalid** | **`SC-8c`** |
-| **`SC-8`** | the search fill and hairline **under hover** | **`SC-8c`** |
-
-⛔ **`SC-6` alone could never have caught this.** It scans **component class strings**; the defect
-was in a **CSS state rule**, where no class string could reveal it. Widening it was necessary and
-**not sufficient** — hence `SC-9`.
-
-⚠️ **`SC-9` IS NARROWER THAN A BLANKET BAN, AND I WANT THAT ON THE RECORD.** A first cut barred
-the shorthand everywhere and failed on two provably harmless rules: the base `.form-field` at
-`(0,1,0)`, which **loses** to every modifier and is the value modifiers exist to override; and
-`.form-field.notes-field`, a modifier declaring its **own** padding. A STATE rule is different in
-kind — it co-applies with whatever modifier is present **and outranks it**.
-⛔ **The exemption is measured, not trusted: `SC-9b` proves the two-modifier case cannot arise.**
-
----
-
-## ⛔ A SIXTH INSTRUMENT DEFECT — AND THE FIRST GREEN RUN WAS ENTIRELY VACUOUS
-
-The first post-fix run reported **`SC-7-hover` PASS** and **`SC-8` PASS**. **Both measured nothing.**
-
-`.form-field` declares `transition: … background-color 160ms ease`, and `getComputedStyle`
-returns the **currently animated** value — so a read taken immediately after forcing `:hover`
-returns the value from **before** the hover. In the output that is **indistinguishable from
-forcing that never applied**.
-
-▶ **It also explains why the earlier run looked sound.** Before the root fix the hover rule used
-the SHORTHAND, and repeat/size/position are **not** in the transition list — they snapped
-instantly, so the tiling was measurable at once. **The moment the fix left only `background-color`
-changing, every state read went silently stale.**
-
-⛔ **`SC-8c` failed loudly**, on a bare `.form-field` whose hover tint is known:
-`rgb(244,245,249)` → `rgb(244,245,249)`. After waiting out the transition:
-`rgb(244,245,249)` → **`rgb(238,240,246)`**.
-
-⚠️ **A state suite without a control proving the forcing applies is not a weaker measurement — it
-is not a measurement at all**, and it would have shipped to you as a clean green run.
-
-**A seventh, in the battery:** six scripts invoked as `prove:p2-*` all exited non-zero. **They are
-named `prove:portal-p2-*`; nothing was failing.** A non-zero exit from a name that does not exist
-reads exactly like a regression.
-
----
-
-## ✅ YOUR SECOND QUESTION, ANSWERED BY MEASUREMENT
-
-*"were `bg-surface` and `border-line` also lost in any state variant, or only at rest?"*
-
-**Only at rest.** Under forced hover the **hairline survives** at `rgb(237, 239, 245)`. The fill
-moves to `rgb(238, 240, 246)` — the product-wide `.form-field:hover` tint, **designed, not a loss**.
+⚠️ **ONE THING TO FLAG AGAINST YOUR ACCEPTANCE:** `components/ui/icon.tsx` is a **shared control**,
+and your acceptance is superseded by a change to one. The change is **purely additive** — three
+new entries for `25`'s detail rows; **no existing entry touched**, so no accepted screen's
+rendering changes. Reported rather than assumed harmless; yours to judge.
 
 ---
 
@@ -122,26 +123,30 @@ moves to `rgb(238, 240, 246)` — the product-wide `.form-field:hover` tint, **d
 
 | Suite | Result |
 |---|---|
-| `prove:shared-controls` | ✅ **exit 0 — 21 PASS · 0 FAIL** |
-| `prove:stage2-routes` | ✅ **exit 0 — 17 checks** |
-| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`** |
-| `prove:artefact-read` · `prove:encoding` · `prove:no-secrets` | ✅ all 0 |
-| `prove:portal-p2-1` · `-composed` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `portal-34` · `portal-5-composed` | ✅ all 0 |
+| `prove:portal-p2-5` | ✅ **exit 0** — 7 SQL legs + 12 runner checks |
+| `prove:artefact-read` | ✅ **exit 0** — `25` added to `MEASURED`; 11 cited values, 4 fractional |
+| `prove:shared-controls` | ✅ **exit 0** — 21 PASS · 0 FAIL |
+| `prove:encoding` · `no-secrets` · `portal-p2-1` · `-composed` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `portal-34` · `portal-5-composed` | ✅ all 0 |
 | `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` | ✅ all 0 |
 | `tsc` · `eslint` · `next build` | ✅ all 0 |
+| `prove:stage2-routes` · `prove:stage3-authenticated` | ⛔ **`NOT-RUN`** — the `:3000` dev lock |
 | `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — `B-STAGE3-2` |
-| **VISUAL acceptance** | ⛔ Operator-set only. **Not claimed** |
 
-⛔ **No migration. No schema change. Audit registry unmoved at 21.**
+## VISUAL ACCEPTANCE STATUS — reported at this boundary, as you asked
+
+| Screen | Status |
+|---|---|
+| `12` · `13` · `26` · `27` | ✅ **OPERATOR-ACCEPTED 2026-08-13** at commit `3431981`, **point-in-time**, **not covering focus order or responsive collapse**, **superseded by any later change to a shared control** |
+| **`25`** | ⛔ **`NOT-RUN`** — Operator-set only, and not claimed |
 
 ---
 
 ## Next permitted action
 
-⏸ **You re-walk `12`, `13`, `26`, `27`.** Then **`P2-5` (`25` Management Schedule)** — a calendar
-**projection**, gated by `GC-13`: no `Showcase`, no duplicated event record (`A-016`).
+⏸ **Clear `:3000`, I run the two dev-mode suites, you walk `25`.** Then **`P2-6`** — which carries
+**`R-7`, the only open `C-7` item**, so it will stop for your schema authorization.
 
 ⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing
 ratified authority · a push to `main` · public deployment · human testing · final submission ·
-**the mojibake repair run** · **any query against the demonstration stack on 543xx** ·
-`trainer-draft-generation`'s `BackLink` variant.
+**the mojibake repair run** · **any query against the demonstration stack on 543xx** · and
+**killing the running `next dev` server**.

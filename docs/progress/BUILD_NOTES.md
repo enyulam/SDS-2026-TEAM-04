@@ -8572,3 +8572,248 @@ to `rgb(238, 240, 246)`, which is the product-wide `.form-field:hover` tint and 
 
 **Next permitted action:** the Operator re-walks all four screens before `P2-5`
 (`25` Management Schedule).
+
+---
+
+## 2026-08-13 — OPERATOR VISUAL ACCEPTANCE OF `12`, `13`, `26`, `27`; AND THE SIXTH AND SEVENTH INSTRUMENT DEFECTS RECORDED IN FULL
+
+**Checkpoint.** Part 2 boundary, after the Operator's re-walk. **HEAD:** `3431981`.
+**Branch:** `develop`, main working tree.
+
+### ✅ MANUAL VERIFICATION — OPERATOR, ON LOCALHOST
+
+> *"Re-walked all four on localhost. The hover chevron defect is gone — Level and Term render
+> correctly at rest, on hover, and with the list open, on both `26` and `27`. Back links, search
+> field, and `12`'s breadcrumb all correct. VISUAL ACCEPTANCE: `12`, `13`, `26` and `27` are
+> ACCEPTED."*
+
+**This is the first VISUAL acceptance recorded in this project.** Every prior boundary reported it
+`NOT-RUN`, correctly.
+
+⛔ **THE LIMITS ARE PART OF THE ACCEPTANCE AND ARE NOT SEPARABLE FROM IT:**
+
+1. **POINT-IN-TIME at `3431981`.** No later commit inherits it.
+2. **DOES NOT COVER FOCUS ORDER OR RESPONSIVE COLLAPSE.** Neither was walked; neither may be
+   claimed from it.
+3. **SUPERSEDED BY ANY LATER CHANGE TO A SHARED CONTROL** — `components/ui/field.tsx`,
+   `page-heading.tsx`, `back-link.tsx`, `avatar.tsx`, or `app/globals.css`. All four screens draw
+   through them, so a single edit moves all four at once.
+
+`Accepted` is the Operator's mark alone (`CLAUDE.md` §15.6). No session may write it, imply it, or
+extend its scope to a screen or a commit it did not name.
+
+### ⛔ THE FINDING: THREE OF FOUR STATE RULES WERE SAVED BY SOURCE ORDER, NOT BY DESIGN
+
+> **Operator:** *"three of four state rules were saved by source order rather than by design, so
+> the defect existed in three more places and simply had not fired. Fixing at the root was right."*
+
+`.form-field:focus`, `.form-field:disabled` and `.form-field[aria-invalid="true"]` each carried
+the same `background` SHORTHAND. All three are `(0,2,0)` — **identical specificity to
+`.form-field.select-field`** — so the modifier won on **source order alone**, because it sits
+later in the file. Only `:hover`, at `(0,3,0)` through its `:not(:disabled)`, won outright and
+therefore fired.
+
+▶ **A defect that has not fired is not a defect that is absent.** Reordering the stylesheet, or
+adding one modifier above those rules, would have fired all three at once — and the base-state
+measurement would still have been green throughout.
+
+This is why the repair was made at the base rule and all four state rules together rather than at
+`.form-field.select-field:hover`.
+
+### ⛔ `SC-9` EXISTS BECAUSE `SC-6` WAS *MEASURED* BLIND TO THIS SHAPE
+
+> **Operator:** *"SC-6 scans class strings and this defect lived in a CSS state rule, so no class
+> string could have revealed it. Record that the second check exists because the first was
+> MEASURED blind to this shape, not assumed sufficient."*
+
+Recorded exactly so. `SC-6` was extended to variant prefixes (`hover:bg-*`, `focus:p*-`,
+`focus-visible:*`, stacked forms) and that extension is real and proved by `SC-6c`, which plants
+five offenders of which two are state variants. **It still could not have caught this defect at
+any width of regex**, because the offending declaration was never in a component class string.
+
+The insufficiency was demonstrated by a failing run, not reasoned about in advance. **`SC-9` scans
+`app/globals.css` itself** — the only artefact in which this shape is visible.
+
+`SC-9` is narrower than a blanket ban, on arithmetic: the base rule at `(0,1,0)` **loses** to every
+modifier and is the value modifiers exist to override; a modifier declaring its own shorthand can
+only harm an element carrying two. **`SC-9b` measures that the two-modifier case cannot arise**,
+so the exemption is not taken on trust.
+
+### ⛔ SIXTH INSTRUMENT DEFECT — THE VACUOUS FIRST GREEN, FULL MECHANISM
+
+> **Operator:** *"a transitioned property read immediately after forcing a state returns the
+> pre-state value, and the fix is what made the instrument go stale."*
+
+**Mechanism, stated completely:**
+
+1. `.form-field` declares `transition: … background-color 160ms ease`.
+2. `getComputedStyle` returns the **currently animated** value of a transitioning property, not
+   its target.
+3. `CSS.forcePseudoState` starts the transition; a read issued in the same tick therefore returns
+   the value from **before** the state was forced.
+4. In the suite's output that is **indistinguishable from a forced state that never applied**.
+
+**And the fix is what made the instrument go stale.** Before the root fix, the hover rule used the
+`background` SHORTHAND. `background-repeat`, `-size` and `-position` are **not** in the transition
+list, so they **snapped instantly** — the tiling was measurable in the same tick, and the
+instrument appeared sound. The moment the fix left only `background-color` changing at hover,
+every state read went silently stale. **The defect in the instrument was latent the whole time and
+was unmasked by repairing the product.**
+
+**`SC-8c` is the only reason this was seen.** It forces hover on a bare `.form-field` whose tint is
+known and requires the reading to CHANGE. It failed at `rgb(244,245,249)` → `rgb(244,245,249)`,
+while `SC-7-hover` and `SC-8` sat green beside it. After waiting out the transition:
+`rgb(244,245,249)` → `rgb(238,240,246)`.
+
+⚠️ **A state suite without a control proving the forcing applies is not a weaker measurement — it
+is not a measurement at all**, and this one would have been reported as a clean green run.
+
+### ⚠️ SEVENTH INSTRUMENT DEFECT — A NAMING ERROR THAT READ AS A REGRESSION
+
+Six proof scripts were invoked as `prove:p2-1`, `prove:p2-1-composed`, `prove:p2-2-create`,
+`prove:p2-2b`, `prove:p2-3`, `prove:p2-4`. **All six exited non-zero. Nothing was failing** — the
+scripts are named `prove:portal-p2-*`.
+
+▶ `npm run` returns a non-zero exit for a script that does not exist, which is **byte-for-byte the
+same signal as a failing suite**. Only reading `package.json` separated them. A battery invoked by
+hand-written names can report a regression that does not exist, and — worse in the other
+direction — a typo'd name can never report the regression that does.
+
+### Files changed
+
+`docs/progress/STATUS.md` · this file · `docs/plan/PORTAL_COMPLETION_PLAN.md` ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification:** none re-run for this entry; it records the Operator's manual
+verification and three findings. The suite state at `3431981` is the previous entry's table.
+
+**Decisions:** `CLAUDE.md` §15.6 (`Accepted` is Operator-set only) · §15.4 (historical log).
+
+**Next permitted action:** `P2-5` — screen `25` Management Schedule, gated by `GC-13`.
+
+---
+
+## 2026-08-13 — `P2-5`: SCREEN `25` MANAGEMENT SCHEDULE, AND FOUR RED SUITES SEPARATED BY MEASUREMENT
+
+**Checkpoint.** Part 2, `P2-5`. **Branch:** `develop`. **Starting HEAD:** `3431981`.
+
+### Scope
+
+Screen `25` at its canonical route `/management/schedule`, gated by `GC-13`. Built from the
+`.png`, the `.html` and the numbered pack's `screen.md` — all three opened, every claim naming
+the artefact behind it.
+
+### ⛔ THE SCHEMA GATE, ANSWERED BY MEASUREMENT: NOTHING TO AUTHORIZE
+
+Measured at HEAD at **both** layers before a line was written. All six projection tables —
+`class_sessions`, `class_modules`, `class_grades`, `class_session_assignments`,
+`centre_memberships`, `accounts` — carry a management `SELECT` policy **and** a matching
+`authenticated` `SELECT` grant. `class_sessions.room` already exists (`text`, nullable), written
+by `26` and `27`.
+
+▶ **No migration, no RPC, no policy, no grant, no column.** Census `29 · 29 · 56 · 12 · 30 · 21`;
+audit registry **unmoved at 21** — a read is not a governed action (`A-029`).
+
+### ⛔ `GC-13` reached further than the register's wording
+
+The register bars *"a second event entity"*. Measured in the `.html`, `Showcase` is **also a
+badge and a THIRD chip treatment** (`#DCF2F3` / `#3FBAC2`) on the 5:00 PM chip — the same session
+the details panel labels `Showcase`. **The colour encoded the barred type.** None of the three is
+built, and it is structural: `session_type`, `event_type` and `showcase` return zero columns.
+
+### ⚠️ The `.md` never mentions `Showcase` — §7.4.1 earned itself on its first outing
+
+The pack's prose note lists *"Lesson cards with date, time, room, assigned Trainer, and Trainer
+Assistant (TA)"* and names `Showcase` nowhere. A build derived from the note would have missed
+the second badge and the third chip colour **and reported a clean match**.
+
+### Omissions, and one that is deliberately not an omission
+
+`Showcase` · `Assist.`/`Asst.` · the `Main:` prefix · `Junior` — four `REGISTERED-OMISSION`s, each
+cited in the component, none of which ever ends. ⚠️ `Assist.` has two independent grounds:
+`A-014`/`G-7`, and `trainer_role` **is** `centre_membership_role`, so an assistant is
+inexpressible in the database.
+
+⚠️ **`Studio 2` is NOT one of them.** `room` exists and is NULL, so hero 0B omits the element.
+Nothing is refused; the row appears the moment a session carries a room.
+
+### Two judgement calls, recorded so they can be overturned
+
+1. The month control's contents — the frame draws a chevron and enumerates nothing. Built,
+   because unlike screen `12`'s three-dot control the function is unambiguous; contents
+   **measured** (months this centre has sessions in), never a guessed range.
+2. Chip colour — hue per Class Module, deterministic, cycling, meaning nothing.
+
+### ⚠️ `P25-4`'s first draft failed a correct product
+
+It required each table to carry a policy whose **name** contained `management`.
+`class_grades_select_active_member` is deliberately an active-member policy, exactly like
+`terms`. **A name is not a permission.** Rewritten to read each table *as* a management caller
+under RLS — strictly stronger, because a policy named `..._management` that excluded management
+would have passed the name test. Same defect class as the `SC-1` assertion written against an
+authored rather than a computed value.
+
+Its control then **raised** instead of returning zero: `reports` carries no client grant, so the
+refusal is at the **privilege** layer and never reaches RLS (`CLAUDE.md` §6.1). The abort was
+correctly reported as 3 of 7 legs executed, not as a pass.
+
+### ⛔ FOUR SUITES WENT RED. ONE WAS MINE; THREE WERE THE OPERATOR'S WALKTHROUGH
+
+Measured, not argued. The walk's audit rows are timestamped **06:55–06:56 on 2026-08-13** —
+`admin.module_created` ×1, `admin.session_created` ×13, `admin.trainer_assigned` ×13,
+`admin.module_updated` ×1 — all **before** commit `3431981` at 08:02:34. `P2-5` adds no migration
+and no write path, proved mechanically by `P25a-NOMIG` and `P25a-PROJECTION`.
+
+| Suite | Cause | Repair |
+|---|---|---|
+| `prove:portal-p2-1` | **mine** — route ratchet 19 to 20 | pin **rewritten, not deleted**; `/management/schedule` added to the nav expectation table |
+| `prove:encoding` | the Operator created `Beginner -  Dance` through screen `26`, typed with a hyphen | the suite demanded **every** module title contain U+2014 — i.e. that the product reject a title a user types without one. Scoped to the **seeded** titles; `E-2`'s mojibake check still covers every row |
+| `prove:portal-p2-2-create` | 13 `admin.trainer_assigned` events from the walk | **phase-scoped-claim defect, fourth instance.** `P23-9` counted every such event **that has ever existed** to claim two CREATE RPCs assign nobody. Rewritten as a **delta** — what it always meant. Its *"needs a THIRD string"* prose was **superseded by `P2-2b`** and is corrected, not deleted |
+| `prove:hero-7` | the walk assessed the last learner who qualified | `P7-6` needs an enrolled learner **without** an observation, and a legitimate walkthrough **consumed its precondition**. The case is now **planted** inside the rolled-back transaction — the `P26-6` remedy. ⚠️ It reported `FAIL`, not `PASS`, which is the only reason it was found |
+
+▶ **Three suites encoded a snapshot of the fixture as if it were a rule**, and each survived only
+while nobody used the product. A suite a legitimate walkthrough can turn red is measuring the
+fixture, not the behaviour; the repair is always to scope the claim to what it meant.
+
+### Files changed
+
+`features/management/management-schedule.tsx` · `server/modules/class-session/schedule.ts` ·
+`server/modules/management-view/projections.ts` ·
+`server/modules/integration-adapter/participant-actions.ts` and `adapter-dtos.ts` ·
+`lib/frontend/contracts/physical-test.ts`, `physical-test-port.ts`,
+`adapters/real-participant-port.ts`, `fixtures/physical-test-fixture.ts` ·
+`app/(portals)/management/schedule/page.tsx` · `components/layout/portal-navigation.ts` ·
+`components/ui/icon.tsx` (three ADDITIVE entries) ·
+`scripts/tests/portal/prove-p2-5-schedule.sql` and `.mjs` ·
+`scripts/tests/portal/artefact-read-rule.mjs` ·
+`scripts/tests/portal/prove-p2-1-management-classes.mjs` ·
+`scripts/tests/portal/prove-encoding-integrity.mjs` ·
+`scripts/tests/portal/prove-p2-2-class-creation.sql` ·
+`scripts/tests/hero/prove-7-follow-up-save.sql` ·
+`scripts/physical-test/prove-stage3-authenticated.mjs` ·
+`tests/frontend/portal-navigation-active-state.mjs` · `package.json` ·
+`UI_REFERENCE_FINAL_MVP/25-management-schedule/implementation-notes.md` · the records
+
+⚠️ **`components/ui/icon.tsx` is a SHARED CONTROL and the Operator's visual acceptance names one.**
+The change is **purely additive** — three new map entries and three new union members; **no
+existing entry is touched**, so no already-accepted screen's rendering changes. Reported rather
+than assumed harmless.
+
+### Automated verification — exit codes only
+
+| Suite | Exit |
+|---|---|
+| `prove:portal-p2-5` | **0** — 7 SQL legs + 12 runner checks |
+| `prove:artefact-read` | **0** — screen `25` added to `MEASURED`; 11 cited values, 4 fractional |
+| `prove:shared-controls` | **0** — 21 PASS, 0 FAIL |
+| `prove:encoding`, `prove:no-secrets`, `prove:portal-p2-1`, `-composed`, `p2-2-create`, `p2-2b`, `p2-3`, `p2-4`, `portal-34`, `portal-5-composed` | **0** |
+| `prove:hero-all`, `test:integration`, `test:g06-grounding`, `test:runtime-profile` | **0** |
+| `tsc --noEmit`, `eslint .`, `next build` | **0** |
+| `prove:stage2-routes`, `prove:stage3-authenticated` | ⛔ **`NOT-RUN`** — `:3000` is held by an `npm run dev` (PID 10220) started 12:35:33 PM, the Operator's re-walk server. **Not killed** |
+
+**Manual verification:** none claimed. **`P2-5` VISUAL acceptance: `NOT-RUN`** — Operator-set only.
+
+**Decisions:** `A-016`/`GC-13` (projection, no duplicated event record) · `A-029` (a read is not a
+governed action) · `A-014`/`G-7` · `A-026`/`A-054` · hero 0B · `CLAUDE.md` §6.1, §7.4.1, §15.6.
+
+**Next permitted action:** the Operator clears `:3000` so `S3-M6` can run; then `P2-6`.

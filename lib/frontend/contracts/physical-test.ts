@@ -303,6 +303,50 @@ export type ManagementClassSummaryDto = {
   readonly trainerDisplayNames: readonly string[];
 };
 
+/**
+ * `P2-5` — screen `25` Management Schedule.
+ *
+ * ⛔ FOUR THINGS THE FRAME DRAWS THAT THIS SHAPE DELIBERATELY CANNOT CARRY,
+ * so a later phase cannot render one by accident:
+ *
+ *  - **`Showcase`** — the frame's second badge and its third chip colour.
+ *    `GC-13` bars it outright. There is no session-type field here and none
+ *    in the database (`session_type`, `event_type` and `showcase` return ZERO
+ *    columns, measured at HEAD), so the concept has nowhere to live.
+ *  - **`Assist. Sam Ong` / `Assist.`** — `A-014` defers the TA persona and
+ *    `G-7` binds `centre_membership_role` against extension. ⚠️ Here it is
+ *    also STRUCTURALLY INEXPRESSIBLE: `class_session_assignments.trainer_role`
+ *    IS `centre_membership_role`, whose values are `management` / `trainer` /
+ *    `parent`. `REGISTERED-OMISSION`, and it NEVER ENDS.
+ *  - **`Main:`** — a CONSEQUENCE of the line above, not a separate decision.
+ *    The prefix exists in the frame only to contrast with `Assist.`; with no
+ *    assistant possible, it is a distinction with nothing on its other side.
+ *  - **`Junior`** — the ratified Class Grade vocabulary is `Beginner` /
+ *    `Intermediate` / `Advanced` (`A-016`, `A-026`, `A-054`). The label is
+ *    READ from `class_grades.display_name`, never written as a literal.
+ */
+export type ScheduleSessionSummaryDto = {
+  readonly classSessionId: string;
+  readonly classModuleId: string;
+  /** `YYYY-MM-DD`. */
+  readonly sessionDate: string;
+  /** `null` where not recorded — the surface omits the row (hero 0B). */
+  readonly startTime: string | null;
+  readonly endTime: string | null;
+  /** `null` on every fixture session at HEAD. The column exists; the value does not. */
+  readonly room: string | null;
+  readonly moduleTitle: string;
+  readonly classGradeLabel: string | null;
+  /** Distinct assigned trainers. A second name is a second trainer, never an assistant. */
+  readonly trainerDisplayNames: readonly string[];
+};
+
+export type ManagementScheduleDto = {
+  readonly sessions: readonly ScheduleSessionSummaryDto[];
+  /** `YYYY-MM` values this centre demonstrably has sessions in. */
+  readonly monthsWithSessions: readonly string[];
+};
+
 export type ManagementClassListDto = {
   readonly grades: readonly ClassGradeOptionDto[];
   readonly classes: readonly ManagementClassSummaryDto[];

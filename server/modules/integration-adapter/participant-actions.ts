@@ -70,6 +70,7 @@ import {
   getManagementRatingsCore,
   getManagementReviewCandidateCore,
   listManagementClassesCore,
+  readManagementScheduleCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
@@ -123,6 +124,7 @@ import type {
   AdapterClassCreationOutcomeDto,
   AdapterCreateClassInput,
   AdapterManagementClassListDto,
+  AdapterManagementScheduleDto,
   AdapterManagementEditWordingInput,
   AdapterManagementEditWordingSuccess,
   AdapterManagementQueueRowDto,
@@ -810,6 +812,40 @@ export async function adapterCreateManagementClass(
  * so a column added to any underlying relation later does NOT reach the client
  * until someone names it here.
  */
+/**
+ * `P2-5` — screen `25` Management Schedule.
+ *
+ * ⚠️ SAME ALLOW-LIST MAPPER DISCIPLINE AS EVERY OTHER READ HERE: one field at
+ * a time, so a column added to `class_sessions` later cannot reach the client
+ * until somebody names it on this list. ⛔ That is what keeps a future
+ * `session_type` from arriving on a Showcase-barred surface by default.
+ */
+export async function adapterReadManagementSchedule(
+  fromDate: string,
+  toDate: string,
+): Promise<ActionResult<AdapterManagementScheduleDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementScheduleCore(client, fromDate, toDate);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      sessions: result.data.sessions.map((row) => ({
+        classSessionId: row.classSessionId,
+        classModuleId: row.classModuleId,
+        sessionDate: row.sessionDate,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        room: row.room,
+        moduleTitle: row.moduleTitle,
+        classGradeLabel: row.classGradeLabel,
+        trainerDisplayNames: row.trainerDisplayNames,
+      })),
+      monthsWithSessions: result.data.monthsWithSessions,
+    },
+  };
+}
+
 export async function adapterReadClassOverview(
   classModuleId: string,
 ): Promise<ActionResult<AdapterClassOverviewDto>> {
