@@ -442,6 +442,14 @@ Every screen needs its non-happy-path states built, not just its default: a **va
 
 **⛔ ANY CLAIM OF THE FORM *"the frame draws X"* OR *"the frame draws no X"* REQUIRES THE `.png`. Nothing else supports either.** A `.md` note lists content; its silence about an element is **not evidence the element is absent**.
 
+> ### ⛔ **A PROSE NOTE LISTS WHAT A SCREEN *CONTAINS*; IT DOES NOT ENUMERATE WHAT A SCREEN *ENCODES*.**
+>
+> *(Added 2026-08-13 under an explicit bounded Operator instruction naming this section: **"that is the better formulation — put it into §7.4.1 itself."** It **supersedes nothing**; it is the general rule the paragraph above states as a special case, and it is placed here because a reader who takes only one sentence from this section should take this one.)*
+>
+> **Colour, position, weight, adjacency, shade and spacing carry meaning that prose has no obligation to mention.** A note can be complete as a content list and still omit the thing that decides whether an element may be built at all.
+>
+> ⚠️ **MEASURED, NOT HYPOTHETICAL — the first phase executed under §7.4.1 caught one immediately.** Screen `25`'s pack note lists *"Lesson cards with date, time, room, assigned Trainer, and Trainer Assistant (TA)"* and names **`Showcase` nowhere**. The `.png` draws it as a **badge**; the `.html` carries it as a **third chip treatment** (`#DCF2F3` / `#3FBAC2`) on one chip — ▶ **the colour ENCODED a type the `GC-13` register bars**, and the register's own wording (*"a second event entity"*) named neither. A note-derived build would have shipped both **and reported a clean match**, and no proof in this project would have caught it: a rendered-DOM leg asserts that strings appear, and these are a badge and two hex values.
+
 **⛔ EVERY CLAIM ABOUT A FRAME NAMES THE ARTEFACT IT RESTS ON** — *"the `.png` shows …"*, *"the `.html` computes …"*, *"the note lists …"*. A claim that cannot name one is not a measurement.
 
 ⚠️ **WHY THIS RULE EXISTS — measured, not hypothetical.** Screens `12`, `13`, `26` and `27` had their layouts derived from the pack's **prose `.md` note**; the `.png` and `.html` were **never opened**. Two consequences followed, and both were reported to the Operator as sound work: **(1)** *"screen `13` draws no Edit control"* was a `grep` over prose and is **FALSE** — `Edit class` sits in that frame's header card — and a **DESIGN GAP** disposition was built on it; **(2)** VISUAL acceptance was reported `NOT-RUN` when the truth was that **there was no basis on which it could pass**, because the layout was never derived from the artefact that defines it. ▶ **The `.html` is the only artefact carrying computed values, so a layout built without it cannot be faithful except by accident** — and no proof in this project detects the difference, because a rendered DOM-text leg asserts only that some strings appear on a painted page. Full record: `docs/plan/PORTAL_COMPLETION_PLAN.md` §12.

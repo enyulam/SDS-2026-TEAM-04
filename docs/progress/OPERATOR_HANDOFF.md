@@ -5,163 +5,129 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-13, at the `P2-6` `C-7` gate.
-⏸ **Two things need you: a Docker decision, and three `P2-6` rulings.**
+**Regenerated:** 2026-08-13, at the `P2-6` size-limit stop.
+⏸ **Two decisions needed: the bucket size limit, and whether `supabase start` may be run.**
+
+---
+
+## ✅ CONTAINERS CONFIRMED BEFORE ANYTHING RAN, AS YOU ASKED
+
+Nine `*_best-coach-dev` and nine `*_best-coach-mvp`. `config.toml` `project_id = "best-coach-dev"`,
+and the guard refuses any other target.
+
+⛔ **The demonstration stack was not queried, not stopped and not altered — nine containers before
+my work, nine after.**
 
 ---
 
 ## ⚠️ TWO THINGS I NEED
 
-### 1. Docker Desktop is down — and I did not restart it
+### 1 · The bucket size limit — PROPOSED, NOT SET
 
-`:3000` was clear, so **`prove:stage2-routes` ran: PASS, 17 checks, exit 0.**
+**`25 MiB` = `26214400` bytes.** Four grounds, in the order they carry weight:
 
-`prove:stage3-authenticated` then reported **`S3-00` FAIL — the loopback Supabase stack is
-unreachable.** The docker daemon `npipe` is unreachable and no Docker process is running.
-**`S3-M6`, screen `25`'s first rendered proof, is `NOT-RUN`.**
+1. **The only empirical anchor says `1.8 – 4.2 MB`.** The frame's four files, measured in the
+   `.html`: `4.2 MB` PPTX · `1.8 MB` PDF · `2.6 MB` KEY · `3.9 MB` PPTX. `25 MiB` is **~6× the
+   largest** — headroom for an image-heavy deck, not a number fitted to the samples. ⚠️ This is
+   evidence about **magnitude**, not a schema'd field; `A-022` bars the latter and this is not it.
+2. **It keeps Lock §8.2's media-class separation enforceable BY THE BUCKET ROW.** A ~100 MiB
+   "document" is almost certainly carrying **embedded video** — the `D-5` evidence class, with a
+   different bucket and different policies. ▶ A limit that admits video makes the separation
+   depend on who uploads what, when §8.2 exists precisely so it does not.
+3. **The recoverable direction is UP.** Raising is a one-row `UPDATE`, no data migration, no
+   orphans. Lowering after files exist blocks re-upload of material already accepted.
+4. **It reads as a different media class at a glance** — a quarter of `evidence`'s `104857600`,
+   rather than two identical numbers that invite folding the buckets together.
 
-⛔ **I did not start it.** Starting Docker Desktop would also restart the **frozen demonstration
-stack's containers on 543xx**, and your standing constraint is that nothing may touch it. That is
-your call, not mine.
+⚠️ **A SECOND ROW FIELD I WILL NOT SET SILENTLY: `allowed_mime_types`.** It sits on the same row
+and was not in your instruction. The frame draws exactly three chips:
 
-▶ **The guard did its job**: it reported `FAIL`, not a green nothing. Fifth time that rule has paid
-for itself.
-
-### 2. Three `P2-6` decisions — see §13.4 below
-
----
-
-## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — re-verified, not carried
-
-| Carried claim | Method | Result |
-|---|---|---|
-| *"`:3000` is held"* | re-run | ⛔ **LAPSED — you cleared it.** `stage2` ran and PASSED |
-| *"`S3-M6` blocked on the `:3000` lock"* | re-run | ⛔ **LAPSED, AND THE CAUSE CHANGED** — now blocked on **Docker being down**, a different blocker with a different owner |
-| *"the icon change may supersede your acceptance"* | your ruling | ⛔ **LAPSED — RULED NOT SUPERSEDING.** Acceptance of `12`/`13`/`26`/`27` stands at `3431981` |
-| *"two `P2-5` judgement calls open"* | your ruling | ⛔ **LAPSED — BOTH ACCEPTED** |
-| `R-7` — `P2-6`'s `C-7` gate | read at HEAD | ⚠️ **HALF-DISCHARGED.** The **statement** is made (plan §13); the **authorization** is yours |
-| `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
-| §10 Phase 1 exit condition **(c)** unproven | ⚠️ not re-measured | ✅ **CARRIED, and stated as carried** |
-| `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** |
-| `test:continuity` · `test:exit-condition-b` | not re-run | ✅ **CARRIED** — and now also blocked by Docker |
-| **136 mojibake sequences / 41 files** | not re-measured | ⚠️ **CARRIED AS UNREPRODUCED** |
-| `trainer-draft-generation`'s `BackLink` variant | unchanged | ✅ **STILL OPEN** |
-| `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
-
----
-
-## ✅ RECORDED, AS YOU RULED
-
-**§12.8 — the fixture-content-pin class, named.** A suite may pin a **governed rule**; it may not
-pin what the fixture **happens to contain**. A content pin is invisible while the product sits
-unused — the fixture is the only writer — and when it fires it **looks exactly like a regression**.
-
-⛔ **`prove:encoding` recorded as your framing has it: a test asserting a defect.** Requiring every
-title to contain an em dash is, as a product rule, *the system must reject a title typed with a
-hyphen*. It was not over-tight; it asserted the **wrong behaviour**.
-
-`P23-9` recorded as the **fourth** phase-scoped-claim instance, with the other three.
-`P7-6` recorded as the same family from the other direction, **with the note that it said `FAIL`
-rather than `PASS`, which is the only reason it surfaced.**
-
-**§12.9 — §7.4.1 earned itself on its first outing.** The `.md` names `Showcase` nowhere; the
-`.png` draws the badge; the `.html` carries the third chip colour. ▶ **A prose note lists what a
-screen CONTAINS; it does not enumerate what a screen ENCODES.**
-
----
-
-## ⏸ `P2-6` · SCREEN `14` LESSON PLAN MANAGEMENT — STATED, STOPPED
-
-All three artefacts opened. **Full statement: `PORTAL_COMPLETION_PLAN.md` §13.**
-
-### Counts, stated in advance
-
-**`1` table · `1` bucket · `1` storage policy · `0` table policies · `0` client table grants ·
-`4` RPCs · `4` EXECUTE grants · `0` enums · audit registry `21 → 22` (`material.attached`).**
-
-**Table `public.class_session_materials`** — `id` · `class_session_id` · `centre_id` ·
-`storage_object_path` · `display_name` (the frame draws `Lesson 1 – Intro to Persuasion`, not the
-file name) · `media_type` (the `PPTX`/`PDF`/`KEY` chip) · `byte_size` (`4.2 MB`) ·
-`uploaded_by_account_id` · `uploaded_by_membership_id` · `created_at`.
-
-Composite FK `(class_session_id, centre_id)` → `class_sessions (id, centre_id)` `RESTRICT` —
-✅ `class_sessions_id_centre_key` **already exists**, so no extra object. `UNIQUE
-(storage_object_path)`. ⛔ **NO `UNIQUE (class_session_id)`** — the frame draws **two files on
-Lesson 3**, so materials are **many-per-session**. That is the one deliberate divergence from
-`report_evidence`, and it is the frame's own.
-
-**Bucket `lesson-materials`** — private, own size limit, own MIME list. ⛔ **SEPARATE from
-`evidence`**, Lock §8.2: *"separate buckets and separate policies — do not fold them into the
-evidence bucket."*
-
-**Policies/grants** follow the ratified evidence shape exactly: **zero** on the table, everything
-through `SECURITY DEFINER` RPCs, **one** `storage.objects` insert policy for the browser upload.
-
-### ⛔ §13.4 — THREE DECISIONS I CANNOT MAKE
-
-**1 · Is REMOVAL built?** The frame draws **no delete control**, and the `27`-day-strip discipline
-says an undrawn unratified control is not built. ⚠️ But a wrongly-uploaded file could then never
-be removed by anyone, ever — and `D-5` ruled evidence removable for exactly that reason.
-▶ **Recommend BUILD**, registry `21 → 23`.
-
-**2 · Does a download emit an audit event?** `evidence.accessed` fires because the object is a
-child's video. A slide deck is teaching material, and `A-029` plus the `P2-4` precedent hold that
-**a read is not a governed action**. ▶ **Recommend NO string.**
-
-**3 · ⛔ NEW-QUESTION, HARD STOP — WHO AUTHORS `KEY FOCUS POINTS`?** `D-4` gives their purpose and
-their position constraint but **not their author**, and the frame draws them **read-only with no
-edit affordance anywhere**.
-
-- If Management authors them, `14` needs an edit control the frame does not draw.
-- If nobody does, the block is always empty, hero 0B omits it, and the feature is **VACUOUS —
-  worse than absent, because the frame implies it works.**
-- Either way it decides whether **`class_sessions.key_focus`** is a fifth object, which is **NOT**
-  in the counts above and would change them.
-
-⛔ **`observations.focus_chips` is NOT this field and must not be reused for it.** That is the
-trainer's **post-session** observation; `KEY FOCUS` is **lesson-plan intent** (`G-3`). Conflating
-them is the invisible substitution `D-4`'s position constraint exists to prevent.
-
-### Not built regardless
-
-`6-week persuasive speaking unit` (a module description — no entity, the `C-14` family, `A-022`) ·
-KEY FOCUS in or adjoining any governed carried-forward focus line (`D-4`, `G-3`, §10 exit
-condition **(c)**) · the frame's `WEEK 5` inconsistency · any rating or `Overall Grade` · any TA
-field.
-
-### ⚠️ One measurement limit, stated in the statement itself
-
-Docker stopped before this phase, so §13 is read from **migration files at HEAD** plus this
-session's earlier live measurements. ⛔ **The at-HEAD re-measurement is OWED before any migration**,
-and the authorization should be read as conditional on it.
-
----
-
-## Suites at this boundary
-
-| Suite | Result |
+| Chip | MIME |
 |---|---|
-| `prove:stage2-routes` | ✅ **exit 0 — 17 checks** |
-| `prove:stage3-authenticated` | ⛔ **`NOT-RUN` — `S3-00`, docker daemon down.** `S3-M6` unrun |
-| everything else | ✅ **exit 0 at `e8d9482`** — no code changed since |
-| `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** |
+| `PPTX` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+| `PDF` | `application/pdf` |
+| `KEY` | `application/vnd.apple.keynote` |
+
+⛔ **A narrow list is a REFUSAL, not a default** — `.docx`, `.ppt`, `.pages`, images and archives
+would be rejected at the bucket. **Recommend the three the frame draws.** Your call if wider.
+
+### 2 · `S3-M6` is still `NOT-RUN` — the dev stack's host ports are not published
+
+**Diagnosed, not guessed.** `supabase_kong_best-coach-dev` is **running and healthy**, and its
+`HostConfig.PortBindings` carries `8000/tcp → 54421` — but `NetworkSettings.Ports` is **empty**.
+Docker Desktop's port proxy did not re-publish after the restart. `127.0.0.1:54421` returns
+**HTTP 000** on `/rest/v1/` and `/auth/v1/health` alike, and `supabase status` reports **five
+stopped services** (imgproxy, edge_runtime, analytics, vector, pooler).
+
+▶ **I restarted only the dev Kong container** — stateless, reversible, scoped by name, with the
+`best-coach-mvp` count checked at 9 before and 9 after. **It did not fix it.**
+
+⛔ **The next step, `supabase start` on the dev project, is a larger action on your stack and I
+have NOT taken it.** Your call.
+
+**Run result:** `4 PASS · 3 FAIL · 26 NOT-RUN`. The three failures are the trainer, management and
+parent magiclink mints; `S3-M6-t` and `S3-M6-r` are `NOT-RUN`.
+
+⚠️ **A FINDING IN THE SUITE ITSELF.** It printed `PASS  S3-00  the local loopback Supabase stack
+was resolved` **while `54421` was returning HTTP 000**. ▶ **The leg's name reads as a reachability
+check; it is a config-resolution check.** Nothing was reported green — the mint failures caught it
+one leg later — but a leg whose name overstates what it measured is the same shape as `SC-1` and
+`P25-4`. Recorded, not repaired: fixing another phase's harness mid-gate is not what was
+authorized.
+
+---
+
+## ✅ YOUR THREE RULINGS — RECORDED
+
+| # | Ruling | Effect |
+|---|---|---|
+| **1** | **REMOVAL — BUILD.** Registry `21 → 23`, **Management only**, cited in the component as an **Operator addition on the same grounds as the back affordance** | `material.attached` + `material.removed` |
+| **2** | **DOWNLOAD EVENT — NO STRING.** *"Your `P2-4` precedent decides it"* — `A-029`, a read is not a governed action | registry stays at **23** |
+| **3** | **`KEY FOCUS POINTS` — RAISED AND DECLINED**, recorded **with the reason so a later phase does not read `D-4`'s mention as licence**. No `class_sessions.key_focus`, not a fifth object. If an author is later named it returns as its own question with its own schema authorization | no column, no chips |
+
+## ✅ YOUR CONDITIONAL HELD — re-measured at HEAD, nothing differs from §13
+
+| §13 claim | Measured | |
+|---|---|---|
+| census `30 · 29 · 56 · 12 · 30 · 21` | `30\|29\|56\|12\|30\|21` | ✅ |
+| `class_sessions_id_centre_key` exists | present | ✅ **no extra object** |
+| `class_session_materials` absent | `ABSENT` | ✅ |
+| only `evidence`, private, `104857600` | one row, matches | ✅ |
+| **`P1-2`'s bucket invariant** | `public_buckets=0`, `null_limit=0` | ✅ **holds; the new bucket must preserve it** |
+| one `storage.objects` policy · `terms` exists | both | ✅ |
+| registry exactly 21, no `material.*` | 21, `none` | ✅ |
+| no `key_focus` column | absent | ✅ and it stays absent |
+
+⚠️ **One ADDITION, not a contradiction:** `class_sessions_id_module_key UNIQUE (id,
+class_module_id)` also exists and §13 did not mention it. Changes nothing — the composite FK uses
+the centre key — recorded so the next reader does not think a key appeared.
+
+## ✅ `CLAUDE.md` §7.4.1 amended, as instructed
+
+*"A prose note lists what a screen CONTAINS; it does not enumerate what a screen ENCODES"* is now
+a highlighted block in §7.4.1. ⛔ **It supersedes nothing** — it is the general rule the existing
+paragraph states as a special case — and it carries the measured `Showcase` instance, so the rule
+arrives with its evidence attached.
+
+§12.8 and §12.9 stand as accepted.
+
+---
 
 ## VISUAL ACCEPTANCE STATUS — reported at this boundary
 
 | Screen | Status |
 |---|---|
-| `12` · `13` · `26` · `27` | ✅ **ACCEPTED** at `3431981`, point-in-time, not covering focus order or responsive collapse, superseded by a shared-control change — ✅ **and the additive icon change is RULED NOT SUPERSEDING** |
-| `25` | ⛔ **`NOT-RUN`** |
+| `12` · `13` · `26` · `27` | ✅ **ACCEPTED** at `3431981`, with its three limits; the additive icon change ruled **not superseding** |
+| `25` | ⛔ **`NOT-RUN`** — and `S3-M6` could not run either |
 | `14` | ⛔ **`NOT-RUN` — not built** |
-
----
 
 ## Next permitted action
 
-⏸ **Your Docker decision, and your three `P2-6` rulings.** ⛔ No migration is written and no count
-is acted on until you authorize.
+⏸ **Rule the size limit (and the MIME list), and decide on `supabase start`.**
+⛔ **No migration is written until the size figure is ruled** — it is the one item your own
+instruction stopped.
 
 ⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing
-ratified authority · a push to `main` · public deployment · human testing · final submission ·
-**the mojibake repair run** · **any query against the demonstration stack on 543xx** ·
-**starting Docker Desktop** · **killing a running dev server**.
+ratified authority beyond the §7.4.1 addition you instructed · a push to `main` · public
+deployment · human testing · final submission · **the mojibake repair run** · **any query against
+the demonstration stack on 543xx** · **`supabase start` or `supabase stop` on any project**.

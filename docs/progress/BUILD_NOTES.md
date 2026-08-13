@@ -8933,3 +8933,111 @@ this file · `docs/progress/OPERATOR_HANDOFF.md`
 undisturbed by the additive icon change. **`25` `NOT-RUN`.**
 
 **Next permitted action:** the Operator decides on Docker, and rules the three `P2-6` decisions.
+
+---
+
+## 2026-08-13 — `P2-6` SCHEMA AUTHORIZED (3 RULINGS); CONDITIONAL RE-MEASUREMENT HELD; SIZE LIMIT PROPOSED NOT SET
+
+**Checkpoint.** Part 2, `P2-6` gate. **Branch:** `develop`. **HEAD at start:** `efaa30a`.
+
+### Containers confirmed before anything ran
+
+`docker ps` shows **both** stacks: nine `*_best-coach-dev` and nine `*_best-coach-mvp`.
+`config.toml` `project_id = "best-coach-dev"`, and `resolveLocalTarget` + `assertConfigProjectId`
+refuse any other target. ⛔ **The demonstration stack was not queried, not stopped and not
+altered — nine containers before, nine after.**
+
+### The three Operator rulings
+
+1. **REMOVAL — BUILD IT.** Registry `21 → 23`, Management only. The Operator's reasoning is
+   recorded because it decides the clause: *"the `27` day-strip discipline protects against
+   destroying GOVERNED RECORDS — removing a session discards attendance, observations and reports.
+   A lesson slide deck is none of those. And a file nobody can remove is a worse outcome than an
+   undrawn control, which is the same reasoning that made `D-5`'s evidence removable."*
+   ⛔ To be cited in the component as an **Operator addition on the same grounds as the back
+   affordance**, so a later visual pass does not remove it for fidelity.
+2. **DOWNLOAD EVENT — NO STRING.** *"Your `P2-4` precedent decides it."* `evidence.accessed` fires
+   because the object is a child's video and the mint is the only trace it existed; a slide deck
+   is teaching material, and `A-029` holds that a read is not a governed action.
+3. **`KEY FOCUS POINTS` — RAISED AND DECLINED.** No `class_sessions.key_focus`, not a fifth
+   object. ⚠️ Recorded **with the reason**, on the Operator's explicit instruction, *"so a later
+   phase does not read `D-4`'s mention as licence"*. If the academy later names an author it
+   returns as its own question with its own schema authorization.
+
+### ✅ The conditional held — re-measured at HEAD
+
+The authorization was conditional on re-measuring now that Docker is up. **Nothing differs from
+§13.** Census `30|29|56|12|30|21` identical · `class_sessions_id_centre_key` present ·
+`class_session_materials` ABSENT · only the `evidence` bucket, private, `104857600` ·
+**`P1-2`'s invariant holds: `public_buckets=0`, `null_limit=0`** · one `storage.objects` policy ·
+`terms` exists · registry exactly 21 with no `material.*` · no `key_focus` column.
+
+⚠️ One **addition**, not a contradiction: `class_sessions_id_module_key UNIQUE (id,
+class_module_id)` also exists and §13 did not mention it. It changes nothing — the composite FK
+uses the centre key — and is recorded so the next reader does not think a key appeared.
+
+### ⛔ Bucket size limit — proposed, NOT set
+
+**`25 MiB` = `26214400` bytes.** Grounds, in order of weight: the only empirical anchor is the
+frame's four files at `1.8–4.2 MB`, so this is **~6× the largest**, headroom rather than a fitted
+number — and it is evidence about **magnitude**, not a schema'd field (`A-022`) · it keeps Lock
+§8.2's media-class separation **enforceable by the bucket row**, because a ~100 MiB "document" is
+almost certainly embedded video, which is the `D-5` evidence class with different policies · the
+**recoverable direction is up** (raising is a one-row `UPDATE`; lowering after files exist blocks
+legitimate re-upload) · and a quarter of `evidence`'s figure **reads as a different media class**.
+
+⚠️ **A second bucket-row field flagged rather than set silently: `allowed_mime_types`.** The frame
+draws exactly `PPTX` / `PDF` / `KEY`. **A narrow list is a refusal, not a default** — `.docx`,
+`.ppt`, images and archives would be rejected at the bucket — and `A-022` bars widening it on my
+own reading.
+
+### ⛔ `S3-M6` still `NOT-RUN` — the dev stack's host ports are not published
+
+**Diagnosed, not guessed.** `supabase_kong_best-coach-dev` is **running and healthy** and its
+`HostConfig.PortBindings` carries `8000/tcp → 54421`, but `NetworkSettings.Ports` is **empty** —
+Docker Desktop's port proxy did not re-publish after the restart. `127.0.0.1:54421` returns
+**HTTP 000** on `/rest/v1/` and `/auth/v1/health` alike; `supabase status` reports **five stopped
+services** (imgproxy, edge_runtime, analytics, vector, pooler).
+
+▶ I restarted **only the dev Kong container** — stateless, reversible, scoped by name, with the
+`best-coach-mvp` count verified at 9 before and after. **It did not fix it.** The next step
+(`supabase start` on the dev project) is a larger action on the Operator's stack and was **not
+taken**.
+
+Run result: `4 PASS · 3 FAIL · 26 NOT-RUN`. The three failures are the trainer, management and
+parent magiclink mints; every surface leg including `S3-M6-t` and `S3-M6-r` is `NOT-RUN`.
+
+### ⚠️ A FINDING IN THE SUITE: `S3-00` PASSES ON RESOLUTION, NOT REACHABILITY
+
+It printed **`PASS  S3-00  the local loopback Supabase stack was resolved`** while `54421` was
+returning HTTP 000. ▶ **The leg's name reads as a reachability check; it is a config-resolution
+check.** The suite still failed correctly overall — nothing was reported green, and the mint
+failures caught it one leg later — but a leg whose name overstates what it measured is the same
+shape as `SC-1`'s authored-vs-computed assertion and `P25-4`'s name-is-not-a-permission defect.
+**Recorded; not repaired in this entry**, because repairing another phase's harness mid-gate is
+not what was authorized.
+
+### `CLAUDE.md` §7.4.1 amended, under an explicit bounded instruction
+
+> **Operator:** *"'A prose note lists what a screen CONTAINS; it does not enumerate what a screen
+> ENCODES' is the better formulation — put it into §7.4.1 itself."*
+
+Added as a highlighted block. ⛔ **It supersedes nothing** — it is the general rule the existing
+paragraph states as a special case — and it carries the measured `Showcase` instance so the rule
+arrives with its evidence attached.
+
+### Files changed
+
+`CLAUDE.md` (§7.4.1) · `docs/plan/PORTAL_COMPLETION_PLAN.md` (§13.7, §13.8, §13.9) ·
+`docs/progress/STATUS.md` · this file · `docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification:** `prove:encoding` exit 0 after every structured write.
+`prove:stage3-authenticated` **`NOT-RUN` for every surface leg** — see above. No product code
+changed, so no other suite was re-run.
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` ACCEPTED at `3431981`. `25` `NOT-RUN`.
+`14` `NOT-RUN` — not built.
+
+**Next permitted action:** the Operator rules the bucket size limit (and the MIME list), and
+decides whether `supabase start` may be run on the dev project. **No migration is written until
+the size figure is ruled.**

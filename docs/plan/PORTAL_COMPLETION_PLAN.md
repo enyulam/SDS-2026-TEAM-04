@@ -1986,3 +1986,86 @@ substitution `D-4`'s position constraint exists to prevent.
 acted on until the Operator authorizes — including the three decisions in 13.4 and the owed
 at-HEAD re-measurement in the preamble.** This discharges the *statement* half of `R-7`; the
 authorization half is the Operator's.
+
+---
+
+## §13.7 — THE THREE RULINGS, THE RE-MEASUREMENT, AND THE ONE THING STILL STOPPED
+
+**Operator, 2026-08-13.** Three rulings received; the schema is **AUTHORIZED as stated, plus
+removal**. ⛔ **One item remains stopped by the Operator's own instruction: the bucket size limit.**
+
+### The three rulings, recorded
+
+| # | Ruling | Effect |
+|---|---|---|
+| **1 · REMOVAL** | ✅ **BUILD IT. Registry `21 → 23`. Management only.** *"The `27` day-strip discipline protects against destroying GOVERNED RECORDS — removing a session discards attendance, observations and reports. A lesson slide deck is none of those. And a file nobody can remove is a worse outcome than an undrawn control, which is the same reasoning that made `D-5`'s evidence removable."* ⛔ **Cited in the component as an OPERATOR ADDITION ON THE SAME GROUNDS AS THE BACK AFFORDANCE** — the frame omits it and the Operator authorized it anyway, so a later visual pass does not remove it for fidelity | `material.attached` + `material.removed` |
+| **2 · DOWNLOAD EVENT** | ✅ **NO STRING.** *"Your `P2-4` precedent decides it. `evidence.accessed` fires because the object is a child's video and the mint is the only trace it existed. A slide deck is teaching material — no child's data, no privacy surface — and `A-029` holds that a read is not a governed action."* | registry stays at **23** |
+| **3 · `KEY FOCUS POINTS`** | ⛔ **RAISED AND DECLINED — DO NOT BUILD.** *"`D-4` gave them a purpose and a position constraint and never named an author. There is no authoring surface in the ratified inventory and the frame draws them read-only. Building a read for a field nobody can write produces a permanently empty panel — worse than absent."* **No `class_sessions.key_focus`. Not a fifth object.** ▶ **Recorded as DECLINED WITH THE REASON so a later phase does not read `D-4`'s mention as licence.** If the academy later names an author, it **returns as its own question with its own schema authorization** | no column, no chips |
+
+### ✅ THE CONDITIONAL HELD — re-measured at HEAD, 2026-08-13, Docker back up
+
+⚠️ **The Operator's authorization was conditional on this.** Every figure §13 stated from migration
+files is confirmed against the live database. **Nothing differs.**
+
+| Claim in §13 | Measured at HEAD | |
+|---|---|---|
+| census `30 · 29 · 56 · 12 · 30 · 21` | `30\|29\|56\|12\|30\|21` | ✅ identical |
+| `class_sessions_id_centre_key UNIQUE (id, centre_id)` exists | present | ✅ no extra object needed |
+| `class_session_materials` does not exist | `ABSENT` | ✅ |
+| only the `evidence` bucket exists | one row: `evidence` | ✅ |
+| `evidence` is private, limit `104857600` | `public=false`, `104857600` | ✅ |
+| **`P1-2`'s bucket invariant** | `public_buckets=0`, `null_limit=0` | ✅ **holds, and the new bucket must preserve it** |
+| one `storage.objects` policy | `evidence_objects_insert_authoring_trainer` (INSERT) | ✅ |
+| `terms` exists | `EXISTS` | ✅ |
+| registry is exactly 21, no `material.*` | 21 strings, `material%` → `none` | ✅ |
+| `class_sessions` has no `key_focus` | absent | ✅ and it stays absent (ruling 3) |
+
+⚠️ **ONE ADDITION, NOT A CONTRADICTION.** `class_sessions` also carries
+`class_sessions_id_module_key UNIQUE (id, class_module_id)`, which §13 did not mention. It changes
+nothing — the composite FK uses the centre key — and is recorded so the next reader does not
+think a key appeared.
+
+### ⛔ §13.8 — THE BUCKET SIZE LIMIT: PROPOSED, NOT SET
+
+> **Operator:** *"Tell me the size limit you propose and why BEFORE setting it. These are
+> documents, not video, so 100 MiB is probably wrong in both directions."*
+
+**PROPOSED: `25 MiB` = `26214400` bytes.** Four reasons, in the order they carry weight.
+
+**1 · The only empirical anchor the project has says `1.8 – 4.2 MB`.** The frame's four sample
+files, measured in the `.html`: `4.2 MB` (PPTX) · `1.8 MB` (PDF) · `2.6 MB` (KEY) · `3.9 MB`
+(PPTX). ⚠️ **This is evidence about MAGNITUDE, not a schema'd field** — `A-022` bars deriving a
+field from a frame, and a ceiling the Operator rules is not that. `25 MiB` is **~6× the largest
+sample**, which is headroom for an image-heavy deck rather than a number fitted to the samples.
+
+**2 · It keeps Lock §8.2's media-class separation ENFORCEABLE BY THE BUCKET ROW.** A ~100 MiB
+"document" is almost certainly carrying **embedded video** — which is the evidence media class,
+governed by `D-5`, `A-001` and a different bucket with different policies. ▶ A limit that admits
+video into the documents bucket makes the separation depend on **who uploads what**, when §8.2
+exists precisely so it does not.
+
+**3 · The recoverable direction is UP.** Raising a bucket's `file_size_limit` is a one-row
+`UPDATE` with no data migration and no orphaned objects. Lowering it after files exist blocks
+re-upload of material that was legitimately accepted. **Starting lower is the reversible choice.**
+
+**4 · It reads as a different media class at a glance.** A quarter of `evidence`'s `104857600`,
+so a reader comparing the two bucket rows **sees** that they hold different things — rather than
+two identical numbers that invite folding them together.
+
+⛔ **NOT SET. Awaiting the Operator's figure.**
+
+### ⚠️ §13.9 — A SECOND BUCKET-ROW FIELD I WILL NOT SET SILENTLY
+
+`allowed_mime_types` is on the same row and was not in the Operator's instruction. The frame draws
+exactly three type chips — **`PPTX`, `PDF`, `KEY`** — which map to:
+
+| Chip | MIME |
+|---|---|
+| `PPTX` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+| `PDF` | `application/pdf` |
+| `KEY` | `application/vnd.apple.keynote` |
+
+⚠️ **A narrow list is a REFUSAL, not a default.** With exactly these three, an upload of `.docx`,
+`.ppt`, `.pages`, an image or a `.zip` is **rejected at the bucket**, and the frame is the only
+evidence about which types are wanted. ▶ Per `A-022` I will not widen it on my own reading.
+**Recommend the three the frame draws; the Operator's call if it should be wider.**
