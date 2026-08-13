@@ -5,120 +5,142 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-14. ⏸ **Stopped where you told me to stop.**
+**Regenerated:** 2026-08-14 · **HEAD `3cf361e`** · branch `develop` · tree clean at write time.
 
----
+## ⚠️ §15.8.1 FRESHNESS SWEEP — what I re-verified, and what had LAPSED
 
-## ⛔ THE ONE THING BLOCKING EVERYTHING: DOCKER DESKTOP'S PORT PROXY
+**Four items the previous handoff led with were re-measured against current state. THREE HAD
+LAPSED**, and all three were corrected in the source record first, then re-derived here:
 
-`supabase start` ran on the **dev project only**, pinned by `config.toml`. **Exit 0**, every URL
-reported normally.
-
-| Step | dev | mvp |
-|---|---|---|
-| before | **9** | **9** |
-| after `supabase start` | **9** | **9** |
-| end of run | **9** | **9** |
-
-⛔ **It did not resolve the port publication, so I stopped and did not escalate — your instruction.**
-
-`supabase_kong_best-coach-dev`'s `NetworkSettings.Ports` is still `{"8000/tcp":[]}`, and
-`127.0.0.1:54421` still returns **HTTP 000** on `/rest/v1/` and `/auth/v1/health`.
-
-▶ **AND THE MEASUREMENT WIDENED THE DIAGNOSIS.** Across the **whole daemon**, both stacks,
-**ZERO of 18 containers carries a host binding** — every `docker ps` Ports column shows only the
-container-internal port, and the count of `->` mappings is **0**.
-
-⚠️ **This is a Docker Desktop-wide port-proxy failure, not a dev-stack problem.** That is why
-neither the earlier Kong restart nor `supabase start` changed anything — **neither could have.**
-A full Docker Desktop restart is what this diagnosis points at, and that is yours.
-
----
-
-## ⛔ WHY THE MIGRATION IS NOT WRITTEN — a deliberate stop, not an omission
-
-**Nothing about `P2-6` remains undecided.** The authorization is complete and both figures are
-ruled. The blocker is that the migration cannot be **applied or proven**:
-
-1. The established path is **`supabase migration up`**, over **TCP `54422`** — down for the same
-   reason as `54421`.
-2. ⛔ **The `docker exec … psql -f` workaround is the path that ALREADY BROKE ATOMICITY here.**
-   `BUILD_NOTES.md`: *"`psql -f` autocommits per statement. The first apply left the function
-   committed while its assertion block aborted … a migration's atomicity is a property of how it
-   is APPLIED, not only of how it is written."* Reaching for it now would be escalating around
-   the blocker you asked to be told about.
-3. Writing the file unapplied would **immediately break `prove:portal-p2-5`'s `P25a-NOMIG` pin**
-   (`migrations.length === 30`) in a suite that cannot run to observe it — leaving an unproven
-   migration a later session would reasonably read as shipped.
-
-▶ Screen `14`'s frontend is likewise not built: it consumes a projection that does not exist, and
-building a UI against an unapplied schema is how a phase ends up "complete" with nothing behind it.
-
-**`S3-M6` is `NOT-RUN`.** The run was `4 PASS · 3 FAIL · 26 NOT-RUN`; the failures are the
-trainer, management and parent magiclink mints.
-
----
-
-## ✅ BOTH BUCKET-ROW FIELDS RULED — recorded with their reasons
-
-**`file_size_limit = 26214400` (`25 MiB`).** Your deciding ground is recorded *with* the number,
-so a later phase asked to raise it must argue against **that** rather than against a bare figure:
-the ceiling is not a capacity estimate, it is **the mechanism keeping `evidence` and
-`lesson-materials` distinct media classes**.
-
-**`allowed_mime_types` — eight types, wider than the frame draws:**
-`PDF` · `PPTX` · `PPT` · `KEY` · `DOCX` · `DOC` · `PNG` · `JPEG`.
-
-⛔ **Recorded as an OPERATOR RULING with your reason — *"a trainer preparing a class will have a
-Word handout or a photo of a worksheet"* — so it does not read as drift, and so A LATER PHASE
-DOES NOT NARROW IT BACK TO THE FRAME'S THREE.** The frame is a static render of three files
-someone happened to upload; it is **not an inventory of permitted types**.
-
-⚠️ Still narrow where it matters: **no video, no audio, no archive** — the half Lock §8.2 needs.
-⚠️ **`PNG`/`JPEG` here are teaching material keyed to a CLASS SESSION, never to a person**, and
-are **not** the §8.2 student-photo class, which is PDPA-live and stays unbuilt.
-
-## ⚠️ `S3-00` — recorded as its own class, third in a family
-
-It printed `PASS  S3-00  the local loopback Supabase stack was resolved` **while `54421` returned
-HTTP 000**. The leg resolved *configuration*; its **name asserts reachability**.
-
-▶ **Nothing went green only because the three mints failed one leg later. Remove that downstream
-leg and `S3-00` becomes a false PASS on a dead stack.**
-
-| Instance | Gap between name and measurement |
+| Carried previously | Re-measured now |
 |---|---|
-| `SC-1` | **authored** value vs the **computed** one |
-| `P25-4` | policy **NAME** vs actual **readability** |
-| **`S3-00`** | **reachability** vs **config resolution** |
+| *"THE ONE THING BLOCKING EVERYTHING: Docker Desktop's port proxy"* | ⛔ **LAPSED.** You fixed it — the cause was **Windows**, not Docker |
+| *"WHY THE MIGRATION IS NOT WRITTEN — a deliberate stop"* | ⛔ **LAPSED.** Written, applied, proved |
+| *"`S3-M6` is `NOT-RUN`"* | ⛔ **LAPSED.** `S3-M6-r` and `S3-M6-omissions` both **PASS** |
+| *"`S3-00`'s name overstates its measurement — not repaired"* | ✅ **STILL TRUE**, carried below |
 
-⚠️ **A leg's name is read far more often than its body, so the name is part of the assertion.**
-⛔ **Not repaired — another phase's harness**, as you instructed.
-
-## ✅ `class_sessions_id_module_key` recorded
-
-Two unique keys on `class_sessions`, both since Step 7E: `..._id_centre_key UNIQUE (id, centre_id)`
-(the one the materials FK will use) and `..._id_module_key UNIQUE (id, class_module_id)`, which
-§13 did not mention. **Neither is new.** Recorded because *"an unmentioned key found later reads
-as an appearance."*
+▶ **Nothing was carried forward from the previous handoff without being re-measured.**
 
 ---
 
-## VISUAL ACCEPTANCE STATUS — reported at this boundary
+## ✅ `P2-6` IS COMPLETE — screen `14` and the lesson-materials substrate
+
+Migration `20260814090000`, applied with **`supabase migration up` in ONE transaction**, all nine
+assertions `M-1`…`M-9` executed inside it. **Exactly what you authorized, every count stated in
+advance:**
+
+| | Authorized | Delivered |
+|---|---|---|
+| table | 1 | `class_session_materials` (29 → **30**) |
+| bucket | 1 | `lesson-materials`, **private**, **25 MiB**, **8** MIME types |
+| storage policy | 1 | INSERT only |
+| table policies · client grants · enums | **0 · 0 · 0** | **0 · 0 · 0** |
+| registry | 21 → 23 | `material.attached`, `material.removed` |
+
+✅ **`P1-2`'s bucket invariant re-proved across BOTH buckets** — `0` public, `0` without a size
+limit — which is what you asked for and stronger than checking the new bucket alone.
+
+⛔ **`material.accessed` is RULED ABSENT** and `M-2` fails the build if it appears. `PLM-7` proves
+it live: two `material_signed_path` calls moved the audit count **by zero**.
+
+## ⚠️ THREE THINGS THAT NEED YOUR EYES
+
+### 1. ⛔ `AR-4-14` is LEFT FAILING, and it is a question for you
+
+The artefact-read rule requires **≥2 fractional** `.html` values, because a fraction cannot be
+forged from a prose note. **This frame carries exactly three, and two belong to the SHARED PORTAL
+SHELL:**
+
+| Value | Carrier |
+|---|---|
+| `10.50px` | `Management Portal` — shared shell |
+| `13.50px` | sidebar nav — shared shell |
+| **`11.50px`** | **the breadcrumb — this screen's own component** |
+
+▶ **Two routes to green existed and both were refused.** Citing icon-internal geometry
+(`7.50px`, `5.83px`) satisfies the letter while citing values the component does not build to.
+Rewriting the shell's `text-[0.84375rem]` → `text-[13.5px]` is **arithmetically identical** but
+**touches a shared control on four ACCEPTED screens**, which your standing limit says supersedes
+their acceptance.
+
+**A rule-versus-frame question, not a threshold to quietly lower.**
+
+### 2. ⚠️ ONE CHANGE TO AN ALREADY-ACCEPTED SCREEN
+
+**Screen `13`'s `Manage lesson plans` footer control moved from INERT to LIVE.** `P2-4` built it
+inert with the stated reason *"Lesson plans arrive with screen 14."* ▶ **That reason has lapsed,
+and leaving it would have made the stated reason FALSE.** It is the frame's own control
+(`.html:274`, `#EC4B96`, `13px`, weight `600`), screen `14` has **no other inbound route**, and the
+treatment matches `InertControl` apart from colour — which moves **toward** the frame.
+
+### 3. ⛔ `KEY FOCUS POINTS` — declined, and mechanised so it cannot drift back
+
+Migration `M-6` fails the build on `class_sessions.key_focus` · `PLM-8` re-asserts it ·
+`PLMa-KEYFOCUS` bars the strings in source with a three-way control · `S3-M7-omissions` proves it
+never reaches the painted page. ⛔ `observations.focus_chips` is barred by the same list — a
+**different field** (post-session observation, not lesson-plan intent, `G-3`).
+
+## ⛔ §12.8 AT SCALE — six suites red from one authorized migration
+
+`p2-2`, `p2-2-create`, `p2-2b`, `p2-3`, `p2-4`, `p2-5` each pinned a **global absolute** as their
+own phase-scoped claim; `hero-2` pinned `functions = 56`.
+
+⛔ **Bumping every number was REFUSED** — it re-arms the identical trap for `P2-7`. Pins became
+**FLOORS**; `enums` stays an **equality**; the **two ratchets that are EXACT by their own recorded
+design** (route census 20 → 21, global function ratchet 56 → 61) were **rewritten with the new
+entry NAMED, never deleted**.
+
+⚠️ **`P2-5`'s own header ALREADY STATED the rule while the code three lines below contradicted
+it** — the same shape §7.4.1 records: the rule existed and was not followed.
+⚠️ **`P22-4` went red BECAUSE THE PRODUCT WORKS** — your governed Add Class walk legitimately set
+terms on 13 sessions. It now measures the **migration** (nullable, no DEFAULT, pre-terms rows still
+NULL) rather than what the fixture happens to hold.
+
+## Suite state
+
+| Suite | Result |
+|---|---|
+| `prove:portal-p2-6` (8 SQL legs + 18 runner checks) | ✅ **PASS** |
+| Every other portal + hero suite | ✅ **PASS** |
+| `prove:stage2-routes` | ✅ **PASS** — 17 checks |
+| `prove:stage3-authenticated` | **39 PASS · 1 FAIL · 2 NOT-RUN** |
+| `prove:artefact-read` | ⛔ **1 FAIL — `AR-4-14`**, deliberate |
+| `prove:serving-discipline` | ⛔ **1 FAIL — `D-10`**, not repaired |
+| `tsc --noEmit` · `eslint` | ✅ clean |
+
+✅ **`S3-M7-r` and `S3-M7-omissions` are screen `14`'s FIRST rendered proof.** `S3-M6` is green for
+the first time.
+
+## ⛔ Two findings recorded and NOT repaired (the `S3-00` precedent)
+
+- **`S3-T1-r`** — the trainer calendar opens on **today's** month; all 17 sessions are in
+  `2026-01`…`2026-03`; the leg hardcodes `February 2026`. ▶ **The product is correct and the leg has
+  been overtaken by time.** ⚠️ `S3-M6` **already anticipated this** and solved it with `?month=`;
+  the trainer leg has no such parameter. **§12.8 from the TIME direction.**
+- **`D-10`** — port `3419` verifiably free (`HTTP 000`, no `netstat` entry), teardown leg still
+  red, one surviving `node.exe` holding neither `3419` nor `3000`. A Windows teardown-timing
+  finding, untouched by this phase.
+- **`S3-00`** — still passes on *config resolution* while its name claims *reachability*. Unrepaired
+  on your instruction; it belongs to another phase's harness.
+
+## VISUAL ACCEPTANCE — reported at this boundary
 
 | Screen | Status |
 |---|---|
-| `12` · `13` · `26` · `27` | ✅ **ACCEPTED** at `3431981`, with its three limits |
-| `25` | ⛔ **`NOT-RUN`** — `S3-M6` could not run |
-| `14` | ⛔ **`NOT-RUN` — not built** |
+| `12` · `26` · `27` | ✅ **ACCEPTED** at `3431981`, with its three limits |
+| `13` | ✅ **ACCEPTED** at `3431981` — ⚠️ **now carries the INERT→LIVE change above** |
+| `25` · `14` | ⛔ **`NOT-RUN` — Operator-set only.** A DOM-text proof says the surface paints its data and **nothing** about layout or fidelity |
+
+## Container counts
+
+**dev `9` · mvp `0`** before and after every step. ⛔ The demonstration stack was **never started,
+queried or altered** — it stayed at `0` throughout.
 
 ## Next permitted action
 
-⏸ **Restore Docker Desktop's port publication.** Then, needing no further ruling: apply `P2-6`'s
-migration at `25 MiB` with the eight MIME types, build screen `14` complete, and re-run
-`prove:stage3-authenticated` for `S3-M6`.
+Walk screens `25` and `14`; rule `AR-4-14`; then `P2-7` in plan order.
 
-⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing
-ratified authority · a push to `main` · public deployment · human testing · final submission ·
-**the mojibake repair run** · **any query against the demonstration stack on 543xx** ·
-**`supabase stop` on any project** · restarting Docker Desktop itself.
+⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing ratified
+authority · a push to `main` · public deployment · human testing · final submission · **the
+mojibake repair run** · **any query against the demonstration stack on 543xx** · **`supabase stop`
+on any project** · starting the demonstration stack.
