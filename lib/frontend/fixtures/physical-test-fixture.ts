@@ -28,6 +28,7 @@ import {
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
+  type ManagementDashboardSummaryDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
@@ -1166,6 +1167,43 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * file here would make the empty state unreachable in the fixture mode that
    * exists to exercise exactly those states.
    */
+  /**
+   * `P2-7` — screen `11`.
+   *
+   * ⚠️ DERIVED FROM THE FIXTURE'S OWN ROWS, never hard-coded. Hard-coding
+   * four plausible numbers would make the tiles agree with nothing and would
+   * survive any change to the fixture — the deterministic mode exists so the
+   * surface can be exercised, not so it can display invented figures.
+   */
+  async readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>> {
+    await delay(180);
+    const learners = new Set(SESSIONS.flatMap((s) => s.students.map((st) => st.studentId)));
+    const assessed = new Set(
+      SESSIONS.flatMap((s) => s.students.filter((st) => st.reportId !== null).map((st) => st.studentId)),
+    );
+    /*
+     * ⚠️ THE STATUS COMES FROM THE MUTABLE FIXTURE STATE, not from the static
+     * learner row — `FixtureStudent` carries a `reportId` and no status, and
+     * `tsc` caught the first draft reading a field that does not exist. ▶ This
+     * is the SAME derivation the roster uses, deliberately: a second way of
+     * resolving a learner's status is how two surfaces come to disagree about
+     * the same learner.
+     */
+    const state = this.readState();
+    const states = SESSIONS.flatMap((s) =>
+      s.students.map((st) => (st.reportId === null ? null : (state.reports[st.reportId]?.status ?? null))),
+    );
+    return {
+      outcome: "success",
+      data: {
+        totalStudents: learners.size,
+        assessedStudents: assessed.size,
+        pendingApproval: states.filter((state) => state === "trainer_approved").length,
+        submittedReports: states.filter((state) => state === "submitted").length,
+      },
+    };
+  }
+
   async readManagementLessonPlans(
     classModuleId: string,
   ): Promise<UiActionResult<ManagementLessonPlansDto | null>> {

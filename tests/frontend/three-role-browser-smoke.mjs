@@ -686,7 +686,7 @@ try {
   const shellContrast = [];
   for (const [portal, home, probe] of [
     ["Trainer", "/trainer/schedule", "/trainer/reports?status=needs_edit"],
-    ["Management", "/management", "/management/reports?status=trainer_approved"],
+    ["Management", "/management/dashboard", "/management/reports?status=trainer_approved"],
     ["Parent", "/parent", "/parent/reports"],
   ]) {
     for (const path of [home, probe]) {

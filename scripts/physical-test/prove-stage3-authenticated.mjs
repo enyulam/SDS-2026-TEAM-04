@@ -729,6 +729,54 @@ const CHAIN = {
             ],
           },
         ]),
+    /*
+     * ⚠️ DELIBERATELY OUTSIDE THE `FIXTURE_MODULE` GUARD, unlike `S3-M4` .. `S3-M7`.
+     * Those four address a specific module by id and genuinely cannot run without one.
+     * `/management/dashboard` takes NO parameter -- it is the Management portal home.
+     * ▶ Left inside the guard it would have been SILENTLY SKIPPED whenever the module
+     * lookup failed, and a leg that disappears for a reason unrelated to itself reports
+     * green by not existing. That is the vacuity class, arriving through scoping.
+     */
+    {
+      /*
+       * P2-7 -- screen `11` Management Dashboard. THIS IS ITS FIRST RENDERED
+       * PROOF, and the first proof of the route move: the path below is
+       * `/management/dashboard`, the canonical route screen `11` took, with
+       * `/management` left behind as the `R-B1` compatibility redirect.
+       *
+       * `Submitted` IS THE LOAD-BEARING STRING, and it is load-bearing for a
+       * GOVERNANCE reason rather than a data one. The frame draws this tile as
+       * `Approved`; `A-036` makes `approved` transient-in-transaction, so that
+       * tile could only ever read zero. Seeing `Submitted` on the painted page is
+       * the Operator's substitution actually reaching a user -- the one place a
+       * source-side scan cannot look.
+       *
+       * EVERY STRING BELOW IS CHROME OR A GOVERNED LABEL. NOT ONE IS FIXTURE
+       * CONTENT -- no learner name, no count, no date. That is deliberate under
+       * the phase-scoped-claim rule: the two reports currently at
+       * `trainer_approved` are what the fixture HAPPENS to hold, and pinning
+       * either would turn the next legitimate management approval into a red
+       * suite. `P22-4` is the canonical example of exactly that trap, and it is
+       * not re-armed here.
+       *
+       * THE KPI VALUES ARE THEREFORE PROVEN BY THE `-live` LEG BELOW, which
+       * asserts THE REFUSAL GLYPH IS ABSENT rather than asserting any number.
+       */
+      id: 'S3-M8',
+      path: '/management/dashboard',
+      loading: 'Loading reports waiting for approval',
+      data: [
+        'Overview of student assessments',
+        'Total Students',
+        'Assessed',
+        'Pending Approval',
+        'Submitted',
+        'Reports waiting for approval',
+        'awaiting approval',
+        'View all',
+        'Today\u2019s Events',
+      ],
+    },
     {
       id: 'S3-M1',
       path: '/management/reports',
@@ -1086,6 +1134,103 @@ async function main() {
                 fail('S3-M7-omissions', 'the control failed: `Weekly Lessons` and/or `Slides not uploaded yet` did not render, so the twelve absences are uninterpretable')
               } else {
                 pass('S3-M7-omissions', 'screen 14 renders `Weekly Lessons` and `Slides not uploaded yet`, and NONE of `KEY FOCUS POINTS` / `Key focus` / `Showcase` / `Assist.` / `Asst.` / `Junior` / the class description / `Overall Grade` / the four rating labels — the KEY FOCUS decline, GC-13, A-014, A-016, C-14 and G-2, measured on the painted page over a frame that draws KEY FOCUS on every card')
+              }
+            }
+          }
+
+          /*
+           * P2-7 -- SCREEN `11`'s DUAL LEAK, ON THE PAINTED PAGE.
+           *
+           * ONE LEAK WITH TWO RENDERINGS (Operator ruling, 2026-08-14). The frame draws
+           * a RATING CHIP on every approval row AND a one-line DESCRIPTION carrying the
+           * same vocabulary in prose. Removing either alone leaves the leak in place
+           * while making the panel LOOK clean -- which is worse than not fixing it.
+           * THIS LEG THEREFORE BARS THE VOCABULARY, not the markup: a chip and a
+           * sentence are the same string to a reader of rendered text, so one detector
+           * catches both and neither can be reintroduced alone.
+           *
+           * `PDSa-RATINGS` already proves the SOURCE names none of it. This proves the
+           * PAINTED PAGE carries none of it -- the only place a disclosure actually
+           * happens, and the only place a value arriving through an unexpected field
+           * would show up.
+           */
+          if (id === 'S3-M8') {
+            if (text === null) {
+              notRun('S3-M8-omissions', 'the dashboard did not render, so its omissions were not measured')
+              notRun('S3-M8-live', 'the dashboard did not render, so the summary read was not measured')
+            } else {
+              const banned = [
+                'Mastering', 'Mastered', 'Beginning', 'Developing', 'Overall Grade',
+                'Grade 8', 'Hall A', 'Assist.', 'Asst.', 'Showcase', 'Junior',
+              ]
+              const present = banned.filter((b) => text.includes(b))
+              /*
+               * THE CONTROL IS THE FRAME'S OWN TWO ROW DESCRIPTIONS, VERBATIM. It is not
+               * a synthetic probe: these are the exact sentences the design draws under
+               * each learner, so the detector is measured against the strings that would
+               * actually leak.
+               */
+              const probe =
+                'Mastered eye contact, clear projection / Beginning on sentence flow & pace / ' +
+                'Developing / Mastering / Overall Grade B / Grade 8 Speaking / Hall A / ' +
+                'Assist. Sam Ong / Asst. Sam Ong / Showcase / Junior'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M8-omissions', 'the omission detector did not match the strings the FRAME itself draws — every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M8-omissions', `screen 11 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} — each is a REFUSED string`)
+              } else if (!text.includes('Reports waiting for approval') || !text.includes('awaiting approval')) {
+                /*
+                 * THE CONTROL. Without it, "none of the eleven appeared" is equally true
+                 * of a blank page and of a REFUSED read -- two states this surface
+                 * genuinely reaches. The queue heading and its count pill prove the
+                 * approval panel itself is on the page, which is exactly where the chip
+                 * and the description would both have been drawn.
+                 */
+                fail('S3-M8-omissions', 'the control failed: the approval panel did not render, so the eleven absences are uninterpretable')
+              } else {
+                pass('S3-M8-omissions', 'screen 11 renders the approval panel and NONE of the four rating labels / `Overall Grade` / `Grade 8` / `Hall A` / `Assist.` / `Asst.` / `Showcase` / `Junior` — the row carries learner, session date and status ONLY. C-9, G-2, A-016, A-026/A-054, A-014/G-7 and GC-13, measured on the painted page over a frame that draws a rating chip AND a prose description on every row')
+              }
+
+              /*
+               * THE SUMMARY READ ACTUALLY RESOLVED -- asserted WITHOUT PINNING A COUNT.
+               * `KpiTile` renders an em dash, never `0`, when the read is refused (`Q-7`:
+               * a refusal is not an empty result). So a NUMERIC value under each of the
+               * four captions proves `report_centre_dashboard_summary` returned four
+               * integers to a real management session.
+               *
+               * This is the phase-scoped-claim-safe form of a liveness check: it measures
+               * the governed REFUSAL CONTRACT, not what the fixture happens to contain, so
+               * enrolling a student or submitting a report can never turn it red.
+               *
+               * ⚠️ SCOPED TO THE VALUE UNDER EACH CAPTION, DELIBERATELY. The first draft
+               * of this leg scanned the WHOLE page for an em dash and went red on a
+               * correct page -- the glyph lives in shared chrome as well, so a page-wide
+               * scan measures the SHELL rather than this screen's read, and any future
+               * shell copy carrying a dash would have turned it red again. ▶ A detector
+               * whose subject is wider than its claim reports failures that are not the
+               * failure it names.
+               */
+              const captions = ['Total Students', 'Assessed', 'Pending Approval', 'Submitted']
+              const readings = captions.map((caption) => {
+                const at = text.indexOf(caption)
+                if (at === -1) return { caption, value: null }
+                // `innerText` puts the caption and its value on consecutive lines.
+                const after = text.slice(at + caption.length).replace(/^[\s\r\n]+/, '')
+                return { caption, value: after.slice(0, 12).split(/[\r\n]/)[0].trim() }
+              })
+              const missing = readings.filter((r) => r.value === null).map((r) => r.caption)
+              const numeric = readings.filter((r) => /^[0-9][0-9,]*$/.test(r.value ?? ''))
+              const refused = readings.filter((r) => (r.value ?? '').startsWith('\u2014'))
+              const seen = readings.map((r) => `${r.caption}=${JSON.stringify(r.value)}`).join(', ')
+              if (missing.length > 0) {
+                fail('S3-M8-live', `the KPI caption(s) ${missing.join(', ')} did not render, so the summary read could not be measured`)
+              } else if (refused.length > 0) {
+                fail('S3-M8-live', `${refused.length} KPI tile(s) read the em-dash REFUSAL glyph — report_centre_dashboard_summary did not resolve for this management session (${seen})`)
+              } else if (numeric.length !== 4) {
+                fail('S3-M8-live', `a KPI value is neither a number nor the refusal glyph, so this leg cannot say what happened (${seen})`)
+              } else {
+                pass('S3-M8-live', `all four KPI tiles carry a NUMERIC value and none reads the em-dash refusal glyph — report_centre_dashboard_summary resolved for a real management session. NO COUNT IS PINNED: the governed refusal contract is what is measured, so enrolling a learner can never turn this red`)
               }
             }
           }

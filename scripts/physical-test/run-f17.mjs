@@ -112,8 +112,8 @@ const IDENTITIES = [
     email: 'management.fixture@example.test',
     authId: 'd0000000-0000-4000-8000-000000000001',
     role: 'management',
-    home: '/management',
-    landing: '/management',
+    home: '/management/dashboard',
+    landing: '/management/dashboard',
   },
   {
     key: 'parent',

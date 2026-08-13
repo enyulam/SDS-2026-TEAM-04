@@ -56,6 +56,7 @@ import {
 } from "@/server/modules/class-session/class-overview";
 import { readCentreScheduleCore, type ScheduleDto } from "@/server/modules/class-session/schedule";
 import { readLessonPlansCore, type LessonPlanDto } from "@/server/modules/class-session/lesson-plans";
+import { readDashboardSummaryCore, type DashboardSummaryDto } from "@/server/modules/class-session/dashboard";
 import {
   readClassForEditCore,
   updateClassCore,
@@ -540,6 +541,32 @@ export async function readManagementScheduleCore(
   const schedule = await readCentreScheduleCore(client, fromDate, toDate);
   if (!schedule.ok) return { outcome: "unavailable" };
   return { outcome: "success", data: schedule.rows };
+}
+
+// ---------------------------------------------------------------------
+// P2-7 — screen `11` Management Dashboard
+// ---------------------------------------------------------------------
+/**
+ * The four KPI tiles, plus the pending-review queue the same screen draws.
+ *
+ * ⚠️ THE ROLE GATE IS DEFENCE IN DEPTH, NOT THE BOUNDARY. The RPC beneath
+ * resolves the centre from the caller's OWN active management membership and
+ * takes no parameter, so a non-management caller reaching
+ * `readDashboardSummaryCore` directly gets NULLs from the database itself.
+ *
+ * ⛔ A REJECTED READ IS NEVER FOUR ZEROES. `readDashboardSummaryCore` turns
+ * the RPC's NULLs into `{ ok: false }` precisely so a refusal cannot be
+ * painted as a centre with no learners and nothing assessed (`Q-7`).
+ */
+export async function readManagementDashboardSummaryCore(
+  client: SupabaseClient,
+): Promise<ActionResult<DashboardSummaryDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const summary = await readDashboardSummaryCore(client);
+  if (!summary.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: summary.rows };
 }
 
 // ---------------------------------------------------------------------

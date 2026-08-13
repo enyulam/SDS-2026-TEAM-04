@@ -97,12 +97,22 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
   },
   management: {
     label: "Management",
-    home: "/management",
+    /*
+     * `P2-7` / Operator ruling 2026-08-14 (option 2): `/management/dashboard` is the
+     * canonical Management entry route and `/management` is preserved as a compatibility
+     * redirect onto it. ⚠️ THE RAIL NAMES THE DESTINATION, NOT THE REDIRECT — exactly as
+     * the Trainer rail does under `R-B1`. A rail item pointing at a route that redirects
+     * away would make "Dashboard" NEVER be the current item, because the URL the browser
+     * settles on is never the one the item declares.
+     * ⛔ Only the TARGET moves. The label, icon and position are unchanged, so no accepted
+     * screen's rail changes appearance and none of them IS `/management`.
+     */
+    home: "/management/dashboard",
     navigation: [
       {
-        href: "/management",
+        href: "/management/dashboard",
         label: "Dashboard",
-        path: "/management",
+        path: "/management/dashboard",
         exact: true,
         icon: "dashboard",
       },

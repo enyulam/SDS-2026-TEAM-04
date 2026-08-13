@@ -5,155 +5,104 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-14 · branch `develop` · ⏸ **stopped at `P2-7`'s two authorization gates.**
+**Regenerated:** 2026-08-14 · branch `develop` · ✅ **`P2-7` COMPLETE — screen `11` built and proven.**
 
 ## ⚠️ §15.8.1 FRESHNESS SWEEP
 
-**Every open item, blocker and limit re-verified against current state before deriving.**
+**Every open item, blocker and limit re-verified against current state before deriving. Nothing
+copied forward from the previous handoff.**
 
 | Carried previously | Re-measured now |
 |---|---|
-| `AR-4-14` open, awaiting your ruling | ⛔ **LAPSED AS AN OPEN ITEM — you ruled it.** Now `KNOWN-RED` with a stated cause |
-| Screen `13`'s INERT→LIVE change awaiting your view | ⛔ **LAPSED — you ruled it.** Acceptance of `13` **STANDS** |
-| §12.8 repair awaiting your view | ⛔ **LAPSED — you ruled it**, and asked for the pin-versus-ratchet census, below |
-| `S3-T1-r` · `D-10` · `S3-00` | ✅ **STILL TRUE. CARRIED**, with `S3-T1-r`'s remedy now recorded as known |
-| `P2-6` complete, `P2-7` next | ✅ **STILL TRUE**, and `P2-7` is now **stated and stopped** |
+| `P2-7` stated and stopped at two gates | ⛔ **LAPSED — you ruled both.** `P2-7` is **COMPLETE** |
+| `D-10` red, "needs a diagnosis" | ⛔ **LAPSED. `prove:serving-discipline` now exits 0, `PASS` on two consecutive runs.** ▶ The original diagnosis was **right**, which is why it cleared: it was reporting a **real surviving `node.exe`**, not a false red. That process has exited. ⚠️ Recorded as *lapsed*, **not as "never a problem"** — a future run leaving a process behind will correctly go red again. **Nothing was changed to achieve this** |
+| `AR-4-14` `KNOWN-RED` | ✅ **STILL TRUE. CARRIED.** `prove:artefact-read` re-run: **44 PASS · 1 FAIL**, verdict unchanged and deliberately failing |
+| `S3-T1-r` | ✅ **STILL TRUE. CARRIED.** Re-measured as the **sole** stage-3 FAIL. Remedy known (`?month=`); authorization missing |
+| `09` refuses its canonical route (`C2C-007`) | ✅ **STILL TRUE. CARRIED** — the route file is still absent on disk |
+| The mojibake repair | ✅ **STILL TRUE. CARRIED** — `STATUS.md` carries **1** occurrence, unchanged from HEAD; this session introduced none |
+| `S3-00` · `B-G06-DET-1` · §10 Phase 1 exit (c) · `test:continuity` / `test:exit-condition-b` (`B-STAGE3-2`) | ✅ **STILL TRUE. CARRIED**, unchanged |
 
-▶ **Nothing was carried forward without being re-measured. Three items had lapsed** — all three
-because you ruled them — and each was corrected in the source record first, then re-derived here.
+▶ **One item had LAPSED (`D-10`) and it was corrected in `STATUS.md` FIRST, then re-derived here** —
+correcting only the handoff would have reproduced the defect, because the next derivation reads the
+source again. ⚠️ **It would otherwise have been carried into a third handoff as an open blocker that
+was not blocking anything.**
 
 ---
 
-## ⏸ WHERE THIS STOPPED: `P2-7` (screen `11` Management Dashboard) — TWO GATES
+## ✅ WHAT SHIPPED: `P2-7`, screen `11` Management Dashboard
 
-**Nothing built, nothing migrated, nothing committed for `P2-7`.** All three artefacts opened.
+Both §16 gates were ruled and executed. Screen `11` answers at its canonical route
+**`/management/dashboard`**; **`/management` is preserved as a compatibility redirect** on the
+ratified `R-B1` precedent.
 
-### ⛔ STOP 1 — SCHEMA. One function, for one KPI tile
-
-**The `Assessed` tile is the ONLY element on this screen with no source.** Measured at HEAD:
-`reports`, `observations` and `report_versions` all carry **ZERO client grants**, and the three
-delivered management boundaries expose only `trainer_approved` / `needs_edit` / `draft_ready` /
-`submitted` — a report at `incomplete` / `observation_saved` / `drafting` is invisible to
-management **by `A-038`'s design**.
-
-**Stated in advance, nothing written:**
-
-| | Proposed |
+| Ruling | Executed as |
 |---|---|
-| tables · columns · enums · policies · client grants | **0 · 0 · 0 · 0 · 0** |
-| audit registry | **UNMOVED at 23** — a read is not a governed action (`A-029`) |
-| functions | **1** — a reviewed `SECURITY DEFINER` **READ**, management-only, centre from the caller's own membership |
+| **1 — chips AND row descriptions, one leak** | Row carries **learner · session date · status** only. **Both omissions cited together at the same site**, descriptions named as **assessment substance, not a copy preference**. Guards bar the **vocabulary**, so one detector catches chip and sentence alike |
+| **2 — `Approved` → `Submitted`** | Third Step 7I1D-R2 sighting, cited **as an Operator ruling** |
+| **3 — schema, centre scope** | `20260814140000`: **1** `SECURITY DEFINER` read · **0** tables/columns/enums/policies/client-grants · **registry unmoved at 23** · four `V-4` bars **plus a control proving each fires** |
+| **4 — route option 2** | Canonical route + redirect + rail re-pointed to the **destination** |
 
-**Returns exactly four integers:** `total_students` · `assessed_students` · `pending_approval` ·
-`submitted_reports`. ⛔ No rating, roll-up, panel text, trainer note, content hash or per-child
-anything, with a build-failing assertion if the body so much as **names** rating vocabulary
-(bare substring, as `V-4` does at `P2-4`).
+⚠️ **A second migration `20260814141000` is a FORWARD COMMENT CORRECTION under `R-1`**, not a second
+change — the first said *"screen 14"* where the screen is `11`, and an applied migration is
+corrected forward, never edited.
 
-⚠️ **THE PRECEDENT AND ITS LIMIT.** `report_class_health_summary` **already** returns aggregate
-counts spanning pre-trainer-approval reports to management **at CLASS scope** — so *counts are not
-content* is already ruled. **What is NOT ruled is widening that to CENTRE scope.** That is the
-decision.
+---
 
-▶ **A no-authorization alternative exists and is worse:** call the per-module summary once per
-module and sum client-side. N round-trips, a governed aggregate re-derived outside the database,
-and it **still cannot produce *assessed learners*** — only report totals.
+## ⛔ THE ONE FINDING WORTH YOUR TIME: a defect no SQL leg could see
 
-**If you say no:** the tile becomes a `REGISTERED-OMISSION` with no substrate and the dashboard
-ships with **three** tiles. A complete screen under a stated omission, not a broken one.
+**This phase's seven SQL legs were ALL GREEN while all four KPI tiles rendered the refusal em dash
+in the browser.**
 
-### ⛔ STOP 2 — ROUTE. The canonical route is not where the surface lives
+- `report_centre_dashboard_summary` is `RETURNS record` → PostgREST returns a **bare object**.
+- Its peer `report_class_health_summary` is `SETOF record` → an **array**.
+- The consumer read `rows[0]` → `undefined` every call → **failed closed**.
+
+⚠️ **Failing closed is what hid it.** The surface rendered its refusal state, which looks
+deliberate — `Q-7`'s em dash was a *correct* control reporting a *false* condition.
+
+⚠️ **No SQL leg could have caught it:** `SELECT … FROM f()` reads both shapes identically. The
+existing rule closes *"a structural assertion cannot prove a function RUNS"*; **this is the next gap
+out**, and only the painted page could see it.
+
+**Caught by** the new `S3-M8-live` leg · **fixed with** `readMaybeRow`, the already-ratified helper
+(**code only, no schema change**) · **mechanized as `PDSa-SHAPE`**, reading `proretset` from
+`pg_proc`, with a control. ▶ **All 9 RPC consumers in the codebase now match** — the defect was
+isolated to this one read.
+
+⚠️ **The new rule's own first draft was wrong and is recorded that way:** it compared `proretset`
+against `"t"` where the cast yields `true`/`false`, reporting **five mismatches that were not real**.
+Caught because one contradicted a catalogue reading taken minutes earlier and **the contradiction
+was checked against the database rather than believed** — and **its control refused to certify at
+the same moment**.
+
+---
+
+## ⏸ WHAT NEEDS YOU
+
+1. **VISUAL acceptance on `11`, `14` and `25`** — all three `NOT-RUN`. You said you would walk them
+   together rather than start the server for two screens. **Tell me when you want `:3000` clear.**
+2. **`S3-T1-r`** — remedy is known (`?month=`, exactly as `S3-M6` already does it); only the
+   authorization is missing.
+3. **`AR-4-14`** stays `KNOWN-RED` by your ruling. ⚠️ **A second frame hitting the same wall is a
+   stop-and-ask, not a second `KNOWN-RED`.**
+
+**Nothing is blocked on you to continue** — `P2-8` is next in plan order, and every schema change
+still stops for your authorization.
+
+---
+
+## STATE
 
 | | |
 |---|---|
-| Canonical (ratified inventory) | **`/management/dashboard`** |
-| Where it lives today | **`/management`** — `page.tsx` renders `ManagementDashboard` |
-| What the pack proposes | *"preserve `/management` as a redirect"* |
-
-⛔ **That is a route-compatibility treatment, which `CLAUDE.md` §12 names a stop-and-ask.** It also
-moves the **portal home** and the **Dashboard rail `href`** — a **shared control** on screens you
-have already accepted.
-
-1. **Build at `/management`** — no treatment, no shared-control change, a **recorded divergence**
-   from the ratified canonical route.
-2. **Move + redirect**, per the pack. ⭐ **My recommendation** — the canonical route is ratified and
-   a redirect preserves every existing entry point.
-3. **Move, and re-point the rail** — option 2 plus the nav census and its expectations.
-
-⚠️ **The pack proposing a treatment is not the same thing as the treatment being authorized**,
-which is exactly the distinction §12 draws.
-
----
-
-## ⛔ THE FRAME'S GOVERNANCE COLLISIONS — the largest in the estate so far
-
-**A rating chip on EVERY row** of *Reports waiting for approval*. The `.html` carries all four
-ratified labels as literal text — **8 chips, 8 rows** (`Beginning`×2, `Developing`×3,
-`Mastering`×2, `Mastered`×1).
-
-▶ **BOTH AVAILABLE READINGS PROHIBIT IT, which is the strongest form.** As a per-dimension rating,
-`C-9` confines the nine to report **DETAIL** surfaces and its own row names `P2-7`. As a single
-roll-up, `G-2` bars every roll-up everywhere, permanently.
-
-⚠️ **A SECOND, QUIETER LEAK ON THE SAME PANEL.** The eight row descriptions carry the vocabulary
-**in running text** — *"**Mastered** eye contact, clear projection"*, *"**Beginning** on sentence
-flow & pace"*. ▶ **Removing the chips and keeping the descriptions would leave the leak in place.**
-They also have no substrate: `A-038` gives management the four parent-facing panels and nothing
-else.
-
-⚠️ **The `Approved` KPI has an empty referent.** `A-036` makes `approved` transient-in-transaction
-and it never commits — the count is **always zero, forever, by design**. **Third sighting of the
-Step 7I1D-R2 defect.** Proposed: the tile reads **`Submitted`**. A label correction against the
-frame, recorded rather than silently applied.
-
----
-
-## ✅ YOUR FOUR `P2-6` RULINGS, AS RECORDED
-
-1. **`AR-4-14` = `KNOWN-RED`** — not a defect, not a waiver, threshold unmoved. Recorded in
-   `artefact-read-rule.mjs` itself; **the leg still fails and its verdict is unchanged.**
-   ⚠️ **A second frame hitting the same wall is a stop-and-ask.**
-2. **Screen `13`'s acceptance STANDS.** ▶ Generalised: **a screen's visual acceptance is not a
-   freeze on the sentences the code tells about itself.**
-3. **The §12.8 census, by CHECK rather than by suite:**
-
-   | Class | Count |
-   |---|---|
-   | **CONTENT PINS** — measured what the schema/fixture *happened to hold* | **13** |
-   | **GENUINE RATCHETS** — exact by their own recorded design, legitimately moved | **2** |
-   | **REGISTRATION GUARDS** — never pins; they *worked*, demanding a new thing be declared | **3** |
-
-   The 2 ratchets are the route census (**20 → 21**) and the single global function ratchet
-   (**56 → 61**), both rewritten with the new entry **NAMED**. ⚠️ **Neither was a defect.**
-   The 3 guards are the nav `N-0` census, `RPC_MIGRATIONS`/`PLMa-PAIR`, and `AR-1`/`AR-8a`.
-   ⛔ **`P22-4` is the canonical §12.8 example**, and `P2-5`'s header-versus-code contradiction is
-   **`D-28`**.
-4. **`S3-T1-r` and `D-10` CARRIED.** ⚠️ **`S3-T1-r`'s remedy is already proven here** — `S3-M6`
-   pins `?month=` for exactly this reason — **so only the authorization is missing.** `D-10` needs
-   a diagnosis, not a decision.
-
-## VISUAL ACCEPTANCE
-
-| Screen | Status |
-|---|---|
-| `12` · `13` · `26` · `27` | ✅ **ACCEPTED** at `3431981` — `13`'s acceptance **confirmed to stand** |
-| `25` · `14` | ⛔ **`NOT-RUN`** — you will walk them together with whatever `P2-7` produces |
-| `11` | ⛔ **`NOT-RUN` — not built** |
-
-## Suite state
-
-Unchanged from `3cf361e` — no product code changed since. `prove:artefact-read` re-run: **`AR-4-14`
-still fails, deliberately.** `prove:serving-discipline` **`D-10`** and `prove:stage3-authenticated`
-**`S3-T1-r`** remain the two carried reds.
-
-## Container counts
-
-**dev `9` · mvp `0`** throughout. ⛔ The demonstration stack was never started, queried or altered.
-
-## Next permitted action
-
-**Rule `P2-7`'s two stops.** Everything else on that screen is measured and ready to build.
-
-⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing ratified
-authority · a push to `main` · public deployment · human testing · final submission · **the
-mojibake repair run** · **any query against the demonstration stack on 543xx** · **`supabase stop`
-on any project** · starting the demonstration stack.
+| Branch · worktree | `develop` · main worktree |
+| Containers | **dev 9 · mvp 0** ⛔ the demonstration stack was never started or queried |
+| Ports | `:3000` untouched all session. `:3423` used for one route-security run and **released** |
+| Migrations added | 2 (`20260814140000`, `20260814141000` — the second a comment-only `R-1` correction) |
+| Audit registry | **23, unmoved** |
+| Portal + hero suites | **34 / 34 green** |
+| `prove:portal-p2-7` | **PASS** (0 failed checks) |
+| stage 3 | **43 PASS · 1 FAIL · 2 NOT-RUN** — the FAIL is the carried `S3-T1-r` |
+| `integrated-route-security` | **26 / 26**, `canonicalRoutes: 18`, `guardedPortalRoutes: 16` |
+| Deliberately red | `prove:artefact-read` (`AR-4-14`, `KNOWN-RED`). ⚠️ `AR-4-11` — **this phase's own artefact citation — PASSES** |
+| `tsc --noEmit` · `npm run build` | clean; the build lists `/management/dashboard` |

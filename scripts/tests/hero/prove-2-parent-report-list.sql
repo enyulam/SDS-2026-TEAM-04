@@ -273,6 +273,22 @@ BEGIN
   -- growing totals. ▶ One site to update per phase, and it is this one,
   -- where moving the number requires writing down which authorization did it.
   --
+  -- ⚠️ THE FUNCTION COUNT MOVED 61 -> 62 ON 2026-08-14, AND THE ONE IS
+  -- NAMED. Portal phase P2-7 (screen `11` Management Dashboard, migration
+  -- `20260814140000`) added exactly one, `report_centre_dashboard_summary`,
+  -- under an Operator schema authorization that stated every count in advance
+  -- and moved NOTHING ELSE: 0 tables, 0 columns, 0 enums, 0 policies, 0 client
+  -- grants, registry unmoved at 23.
+  -- ⛔ IT IS NOT PARENT-REACHABLE. It resolves its centre from the CALLER'S OWN
+  -- active management membership -- never from a parameter -- and returns NULLs
+  -- to every other caller, so a parent session reaches no row through it.
+  -- ⚠️ AND IT RETURNS FOUR INTEGERS AND NOTHING ELSE. The migration's own
+  -- assertions fail the build if the body ever names a rating, a panel field, a
+  -- note, a checklist or a hash -- with a control proving each of those four
+  -- detectors actually fires -- so this suite's subject, what a PARENT can read,
+  -- is untouched and the context field-set assertion below is still exactly 7.
+  -- ⛔ UPDATED WITH ITS REASON, NEVER RELAXED.
+  --
   -- ⚠️ THE FUNCTION COUNT MOVED 56 -> 61 ON 2026-08-14, AND THE FIVE ARE
   -- NAMED. Portal phase P2-6 added `app_management_may_attach_material`
   -- (the sole predicate behind the one lesson-materials storage policy),
@@ -382,12 +398,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 61 THEN
+  IF v_n = 1 AND v_listed = 62 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 61 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 six, P2-2 two, P2-2b one, P2-3 two, P2-4 two, P2-6 five) and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet';
+    RAISE NOTICE 'PASS P2-6 -- 62 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 six, P2-2 two, P2-2b one, P2-3 two, P2-4 two, P2-6 five, P2-7 one) and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 61) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 62) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

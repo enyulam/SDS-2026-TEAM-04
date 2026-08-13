@@ -228,3 +228,68 @@ RENDERED CAPTURE **NOT-RUN** (authenticated surface). NOT-RUN is not PASS.
 tsc 0 - eslint 0 - build 0 - route census 17 unchanged - emitted-CSS 4/4 - no governed surface
 touched. Full detail: docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md Phase 12.
 `Accepted` is Operator-set only and has NOT been set.
+
+### 2026-08-14 — `P2-7` BUILT (PORTAL COMPLETION PLAN phase `P2-7`)
+
+**Route:** `/management/dashboard` — the canonical route, **created**, with `/management`
+preserved as a **compatibility redirect** under the Operator's option-2 ruling and built to the
+ratified `R-B1` precedent (`/trainer` → `/trainer/schedule`) rather than to a new pattern.
+
+**Schema delivered, exactly as authorized:** 0 tables · 0 columns · 0 enums · 0 policies · 0 client
+grants · **audit registry UNMOVED at 23** · **ONE** reviewed `SECURITY DEFINER` READ,
+`report_centre_dashboard_summary()`, returning **four integers**. Measured both directions:
+management reads `13 · 10 · 2 · 4`; a trainer reads **`NULL`**, not zeroes.
+
+#### ⛔⛔ ONE LEAK WITH TWO RENDERINGS — cited together at one site, by ruling
+
+**(a) THE RATING CHIP ON EVERY ROW.** The `.html` carries all four ratified labels as literal
+text — **8 chips for 8 rows** (`Beginning`×2, `Developing`×3, `Mastering`×2, `Mastered`×1).
+⛔ **BOTH AVAILABLE READINGS PROHIBIT IT**, which is the strongest form: as a per-dimension rating
+`C-9` confines the nine to report **DETAIL** surfaces; as a roll-up `G-2` bars it everywhere,
+permanently.
+
+**(b) THE ONE-LINE ROW DESCRIPTION.** ⚠️ **THE FRAME'S ROW DESCRIPTIONS ARE ASSESSMENT SUBSTANCE.
+THIS IS NOT A COPY PREFERENCE.** All eight are in the `.html` and they carry the vocabulary **in
+running prose** — *"**Mastered** eye contact, clear projection"*, *"**Beginning** on sentence flow
+& pace"*. ▶ **Removing the chips and keeping the descriptions would leave the leak in place and
+LOOK COMPLETE.** They also have no substrate: `A-038` gives management the four parent-facing
+panels and nothing else.
+
+⛔ **THE RULE BUILT TO:** the row carries **learner, session and status — nothing about how the
+child performed.** No chip, no band name, no paraphrase of a band in prose.
+▶ **`REGISTERED-OMISSION`, and it NEVER ENDS.** Cited together **at the row markup itself** so a
+later phase cannot delete one and believe the panel is clean.
+
+#### ⛔ THE `Approved` KPI READS `Submitted` — an Operator ruling, not drift
+
+`A-036` makes `approved` **transient-in-transaction**; it never commits, so the frame's tile would
+read **zero forever**. ▶ *"A KPI that can only ever read zero is worse than absent — it asserts a
+measurement that does not exist."* **THIRD SIGHTING of the Step 7I1D-R2 defect.** Migration
+assertion **`W-5` fails the build** if anybody counts the transient status.
+
+#### Three more frame strings not built as drawn
+
+`Grade 8` (×5) — not a ratified Class Grade; every label is **read** from
+`class_grades.display_name` (`A-016`, `A-026`/`A-054`). · `Hall A` (×5) — `room` exists but is
+**NULL on all 17 sessions**, so hero `0B` omits it. · `4 awaiting approval` over **8 drawn rows** —
+**the frame contradicts itself**; the pill reads the list it sits on.
+
+⚠️ **`Today's Events` is NOT a second event entity** (`GC-13`, `A-016`): it is `P2-5`'s delivered
+schedule projection filtered to today.
+
+#### The bars, asserted the way `V-4` asserts them
+
+Migration `W-4` fails the build if the read names a **rating**, a **panel field**, a **trainer
+note or chip**, or a **checklist/hash** field — bare substrings, so it catches the next rating
+column nobody has written yet. ⚠️ **`W-4c` requires all four detectors to FIRE against planted
+samples**, so the four absences are measurements rather than four patterns that can never match.
+
+```artefact-read
+screen: 11
+pack: Management - Dashboard
+component: features/management/management-dashboard-screen.tsx
+html-values: 14.50px, 13.50px, 12.50px, 9.50px, 23px, 16px, 12px, 11px
+screen-md-quote: Management landing surface for the final MVP.
+```
+
+**Visual acceptance:** `NOT-RUN` — Operator-set only.

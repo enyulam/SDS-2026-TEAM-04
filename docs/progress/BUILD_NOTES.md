@@ -9432,3 +9432,148 @@ code changed, so no other suite was re-run.
 the Operator will walk them together with whatever `P2-7` produces.
 
 **Next permitted action:** the Operator rules `P2-7`'s two stops.
+
+---
+
+## 2026-08-14 (later still) — `P2-7` SHIPPED: SCREEN `11`, THE ROUTE MOVE, AND A DEFECT NO SQL LEG COULD SEE
+
+**Branch/worktree:** `develop`, main worktree · **starting HEAD:** `e8d9482` · **ending HEAD:** see
+the commit below · **working tree at start:** clean.
+
+### Scope
+
+`P2-7` — screen `11` Management Dashboard. §16's two stops were ruled by the Operator; everything
+§16.5 listed as ready was built.
+
+### The four rulings, as executed
+
+1. **RATING CHIPS AND ROW DESCRIPTIONS — ONE ruling, both prohibited.** The approval row carries
+   **learner · session date · status** and nothing else. **Both omissions are cited together at the
+   same site**, with the frame's prose descriptions named explicitly as **assessment substance, not
+   a copy preference**. ⛔ The guards are written against the **VOCABULARY**, not the markup, so one
+   detector catches a chip and a sentence alike: `PDSa-RATINGS` (source) and `S3-M8-omissions`
+   (painted page), with `PDSa-RATINGSc` controlling against **the frame's own two descriptions,
+   verbatim**.
+2. **`Approved` → `Submitted`**, recorded as the **third Step 7I1D-R2 sighting** and cited as an
+   Operator ruling. `A-036` makes `approved` transient-in-transaction, so the frame's tile could
+   only ever read zero.
+3. **SCHEMA AUTHORIZED as stated, widened to CENTRE scope.** Migration `20260814140000`: one
+   `SECURITY DEFINER` read, **0 tables · 0 columns · 0 enums · 0 policies · 0 client grants ·
+   registry unmoved at 23**. Centre resolved from the caller's own active management membership,
+   never a parameter; NULLs (not zeroes) to every other caller. Four `V-4`-class bars plus **`W-4c`,
+   a control requiring all four detectors to fire against planted samples**.
+4. **ROUTE option 2.** `/management/dashboard` canonical; `/management` a compatibility redirect on
+   the ratified `R-B1` precedent.
+
+⚠️ **A SECOND MIGRATION EXISTS AND IS NOT A SECOND CHANGE.** `20260814141000` is a **forward comment
+correction under `R-1`** — the first migration's `COMMENT` said *"screen 14"* where the screen is
+`11`. **An applied migration is corrected forward, never edited**, because an edited applied file
+diverges from what actually ran.
+
+### ⛔ The defect: `RETURNS record` vs `SETOF`, invisible to every SQL leg
+
+**This phase's seven SQL legs were ALL GREEN while all four KPI tiles rendered the refusal em dash
+in the browser.**
+
+- `report_centre_dashboard_summary` is `RETURNS record` (`proretset = false`) → PostgREST resolves
+  it to a **bare object**.
+- `report_class_health_summary`, its nearest peer, is `SETOF record` → an **array**.
+- The consumer read `readRows(...).rows[0]` → `undefined` every call → **failed closed**.
+
+⚠️ **Failing closed is what made it invisible.** The surface rendered its refusal state, which looks
+deliberate — `Q-7`'s em dash was a *correct* control reporting a *false* condition.
+
+⚠️ **No SQL leg could have caught it:** `SELECT … FROM f()` reads both shapes identically. The
+existing `rpc-call-rule` closes *"a structural assertion cannot prove a function RUNS"*; **this is
+the next gap out**, and only the painted page could see it.
+
+**Caught by** `S3-M8-live`. **Fixed with** `readMaybeRow`, the already-ratified helper that accepts
+either shape — **code only, no schema change**. **Mechanized as `PDSa-SHAPE`**, pairing every
+`client.rpc(…)` consumer with its function's `proretset` read from `pg_proc`, controlled by
+`PDSa-SHAPEc`. ▶ **All 9 RPC consumers in the codebase match**, so the defect was isolated to this
+one read.
+
+⚠️ **The rule's own first draft was wrong**, and it is kept here because the catch matters more than
+the slip: it compared `proretset` against `"t"`, but `'x' || boolean` casts to `true`/`false`, so
+every function read as non-set-returning and it reported **five mismatches that were not real**.
+Caught because one of the five contradicted a catalogue reading taken minutes earlier and **the
+contradiction was checked against the database rather than believed**; ⛔ **its control refused to
+certify at the same moment**, which is what a control is for.
+
+### `S3-M8-live` — a liveness leg that pins no count
+
+Its first draft scanned the whole page for the em dash and **would have gone red on a correct page**
+— the glyph also lives in shared chrome. ▶ **A detector whose subject is wider than its claim
+reports failures that are not the failure it names.** Rescoped to the value under each of the four
+captions, and it now reports what it saw. ⛔ **It pins NO COUNT** — it asserts the governed refusal
+contract, so enrolling a learner can never turn it red (the `P22-4` lesson applied).
+
+⚠️ **`S3-M8` sits OUTSIDE the `FIXTURE_MODULE` guard** unlike `S3-M4`…`S3-M7`, which address a
+module by id. Left inside it would have been **silently skipped** whenever the module lookup
+failed, and **a leg that disappears for a reason unrelated to itself reports green by not
+existing**.
+
+### Three census movements, each rewritten with its cause named
+
+`hero-2`'s single global function ratchet **61 → 62** · `prove-p2-1`'s route census **21 → 22**
+(⚠️ `P2-7` **added** a route without removing one — `/management` still ships) ·
+`integrated-route-security`'s `CANONICAL_ROUTE_COUNT` **17 → 18**. **`/management` also changed
+CLASS**, leaving `PORTAL_ROUTES` for a named `MANAGEMENT_COMPAT_ROUTE` and gaining its own
+**`SEC-12b`** — separate from `SEC-12` because one leg covering both would pass while one of the two
+redirects was silently deleted. ▶ **None was a defect.**
+
+### `R-0b` is not a defect
+
+`hero-14/15/16` failed in the first battery and passed individually, which **looked** intermittent.
+It is deterministic and correct: `R-0b` asserts a successful build post-dates the newest source, and
+`dashboard.ts` had just been edited. ▶ **The remedy is `npm run build`.** All three green after.
+
+### Files changed
+
+**Migrations:** `supabase/migrations/20260814140000_portal_p2_7_dashboard_summary.sql` ·
+`20260814141000_portal_p2_7_comment_fix.sql`
+**Product:** `server/modules/class-session/dashboard.ts` ·
+`server/modules/management-view/projections.ts` ·
+`features/management/management-dashboard-screen.tsx` ·
+`app/(portals)/management/page.tsx` (now a redirect) ·
+`app/(portals)/management/dashboard/page.tsx` (new) ·
+`components/layout/portal-navigation.ts` · 7 `homeHref` call sites across 6 components
+**Proofs and rules:** `scripts/tests/portal/prove-p2-7-dashboard.{sql,mjs}` (new) ·
+`scripts/tests/portal/rpc-call-rule.mjs` (`rpcShapeMismatches`) ·
+`scripts/tests/portal/prove-p2-1-management-classes.mjs` (route census) ·
+`scripts/tests/hero/prove-2-parent-report-list.sql` (function ratchet) ·
+`scripts/physical-test/prove-stage3-authenticated.mjs` (`S3-M8` + two legs) ·
+`tests/frontend/integrated-route-security.mjs` · `tests/frontend/portal-navigation-active-state.mjs` ·
+`tests/frontend/post-login-destinations.mjs` · `tests/frontend/authentication-browser-smoke.mjs` ·
+`tests/frontend/three-role-browser-smoke.mjs` · `scripts/physical-test/prove-stage2-routes.mjs` ·
+`scripts/physical-test/disposable-stack.mjs` · `scripts/physical-test/run-f17.mjs`
+**Docs:** `docs/plan/PORTAL_COMPLETION_PLAN.md` (§17) · `docs/progress/STATUS.md` · this file ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+### Automated verification
+
+**All 17 portal suites PASS · all 17 hero suites PASS** (34/34, by exit code, after the build).
+`prove:portal-p2-7` **PASS (0 failed checks)**. `prove:stage3-authenticated` **43 PASS · 1 FAIL · 2
+NOT-RUN** — the single FAIL is the carried `S3-T1-r`. `integrated-route-security` **26/26 passed**,
+`canonicalRoutes: 18`, `guardedPortalRoutes: 16`, run against a disciplined server on **port 3423**
+so `:3000` was never touched. `portal-navigation-active-state`, `post-login-destinations`,
+`session-eligibility`, `app-route-census`, `test:integration`, `test:runtime-profile`,
+`test:g06-grounding`, `prove:stage2-routes`, `prove:encoding`, `prove:no-secrets`,
+`prove:shared-controls`, `prove:production-fixture-guard`, `prove:trusted-store-acl`,
+`prove:trusted-transport-selection`, `prove:hosted-target-guard` — **all exit 0**.
+`npx tsc --noEmit` clean; `npm run build` clean and lists `/management/dashboard`.
+
+**Deliberately still red, both carried and neither caused by this phase:** `prove:artefact-read`
+(**44 PASS · 1 FAIL** = `AR-4-14`, the Operator-ruled `KNOWN-RED`; ⚠️ **`AR-4-11`, this phase's own
+artefact citation, PASSES** with 4 fractional values) · `prove:serving-discipline` (`D-10`, port
+teardown hygiene).
+
+**Environment:** containers **dev 9 · mvp 0** throughout. ⛔ The demonstration stack was never
+started and never queried; ports `:3000`, `:3419`, `:3421` untouched, and the spare `:3423` was
+released.
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` ACCEPTED at `3431981`. **`11`, `14` and `25` are
+`NOT-RUN`** — the Operator will walk the three together.
+
+**Next permitted action:** `P2-8` in plan order. Every schema change still stops for Operator
+authorization.

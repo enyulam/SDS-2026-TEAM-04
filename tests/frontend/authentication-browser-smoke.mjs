@@ -314,7 +314,7 @@ const roleCases = [
   {
     role: "management",
     label: "Management",
-    home: "/management",
+    home: "/management/dashboard",
     shot: "auth-02-management.png",
     // A Management login must not hint at the review queue or any governed Management power.
     forbidden: [

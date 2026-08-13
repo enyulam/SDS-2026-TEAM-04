@@ -22,6 +22,7 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
+  ManagementDashboardSummaryDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -184,6 +185,13 @@ export interface PhysicalTestPort {
   readManagementLessonPlans(
     classModuleId: string,
   ): Promise<UiActionResult<ManagementLessonPlansDto | null>>;
+  /**
+   * `P2-7` — screen `11`. ⛔ NO PARAMETER, and that is the authorization
+   * boundary rather than a convenience: the centre is resolved from the
+   * caller's own active management membership inside the database, so there
+   * is no other centre a caller could name.
+   */
+  readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

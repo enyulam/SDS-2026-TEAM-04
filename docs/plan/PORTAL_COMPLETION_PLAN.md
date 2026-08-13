@@ -2720,3 +2720,152 @@ the same thing as the treatment being authorized**, which is precisely the disti
 
 ⏸ **NOTHING BUILT. NOTHING MIGRATED. NOTHING COMMITTED for `P2-7`.** Two stops, both stated with
 their counts and options. Everything in §16.5 is ready to build the moment they are ruled.
+---
+
+## §17 — `P2-7` SHIPPED: SCREEN `11`, THE ROUTE MOVE, AND A DEFECT NO SQL LEG COULD SEE
+
+**Status: BUILT · PROVEN · VISUAL ACCEPTANCE `NOT-RUN`.** §16's two stops were both ruled by the
+Operator on 2026-08-14 and are recorded at §15-style detail below. Everything §16.5 listed as
+ready was built.
+
+### §17.1 — The four rulings, and what each produced
+
+| # | Ruling | What shipped |
+|---|---|---|
+| **1** | **Rating chips AND row descriptions — BOTH prohibited, ONE ruling** | The approval row carries **learner · session date · status** and nothing else. **Both omissions are cited together at the same site**, with the frame's prose descriptions named explicitly as **assessment substance, not a copy preference** |
+| **2** | **The `Approved` KPI becomes `Submitted`** | The fourth tile counts `submitted`. Recorded as the **third Step 7I1D-R2 sighting** and cited **as an Operator ruling**, so it does not read as drift from the frame |
+| **3** | **Schema AUTHORIZED as stated; centre scope YES; assert the bars the way `V-4` did** | One `SECURITY DEFINER` read, 0 tables/columns/enums/policies/client-grants, registry unmoved at 23. Four bar assertions **plus `W-4c`, a control proving each detector fires against a planted sample** |
+| **4** | **Route option 2** | `/management/dashboard` is canonical; `/management` is a compatibility redirect on the ratified **`R-B1`** precedent |
+
+⛔ **RULING 1 IS THE ONE TO READ TWICE.** The frame draws the leak **twice on every row** — once as
+a chip, once as a sentence. ▶ **Removing either alone leaves the leak in place and makes the panel
+LOOK clean**, which is worse than not fixing it. The guard is therefore written against the
+**VOCABULARY**, not the markup: `PDSa-RATINGS` (source) and `S3-M8-omissions` (painted page) each
+catch **both renderings with one detector**, and `PDSa-RATINGSc` controls it against **the frame's
+own two descriptions, verbatim**.
+
+### §17.2 — The route move, as executed
+
+**Stated in full before building, per the ruling.** What moved:
+
+| Moved | From → to |
+|---|---|
+| Portal home | `app/(portals)/management/page.tsx` now `redirect("/management/dashboard")` |
+| The canonical page | new `app/(portals)/management/dashboard/page.tsx` |
+| Rail item | `portal-navigation.ts` — `home`, `href` and `path` name the **destination** |
+| 7 `homeHref` call sites | across 6 components |
+
+⚠️ **IT TOUCHED ACCEPTED SCREENS' NAVIGATION, AND THAT WAS SAID BEFORE BUILDING** — one `href` on
+the shared rail, plus `management-classes.tsx`'s `homeHref`. **Label, icon, position and
+active-state logic are unchanged.**
+
+⛔ **The rail names the DESTINATION, not the redirect** (`PDSa-RAIL`). A rail item pointing at a
+route that redirects away would make `Dashboard` **never** be the current item, because the URL
+the browser settles on is never the one the item declares.
+
+**What did NOT move, checked and recorded:** `proxy.ts`'s prefix matchers (`/management` +
+`/management/:path*` — the bare root must stay guarded exactly as `/trainer` does),
+`app-route-census.mjs`, and the frozen `_checkpoint-evidence/F-01b/measure-controls.mjs`.
+
+### §17.3 — ⛔ THE DEFECT: A SQL LEG THAT CALLS A FUNCTION CANNOT PROVE THE CLIENT RECEIVES ITS SHAPE
+
+**Measured, not hypothesised. This phase's seven SQL legs were ALL GREEN while all four KPI tiles
+rendered the refusal em dash in the browser.**
+
+- `report_centre_dashboard_summary` is **`RETURNS record`** (`proretset = false`), so PostgREST
+  resolves it to a **BARE OBJECT**.
+- Its nearest peer `report_class_health_summary` is **`SETOF record`** and resolves to an **ARRAY**.
+- The consumer used `readRows(...).rows[0]` → `undefined` on **every** call → **failed closed**.
+
+⚠️ **FAILING CLOSED IS WHAT MADE IT INVISIBLE.** The surface rendered its refusal state, which
+looks deliberate. `Q-7`'s em dash is a *correct* control that was reporting a *false* condition.
+
+⚠️ **AND NO SQL LEG COULD HAVE CAUGHT IT.** In SQL, `SELECT … FROM f()` reads **both shapes
+identically**. The existing `rpc-call-rule` closes *"a structural assertion cannot prove a function
+RUNS"* — this is the **next gap out**, and it needed the painted page to see.
+
+**What caught it:** `S3-M8-live`, on the rendered DOM.
+**The fix:** `readMaybeRow` — the **already-ratified** helper that accepts either shape, written
+after two earlier governed RPC reads hit the same wall. **Code only; no schema change.**
+**The mechanization:** **`PDSa-SHAPE`** in `rpc-call-rule.mjs` — pairs every `client.rpc(…)`
+consumer with its function's `proretset` **read from `pg_proc`**, and fails when a `RETURNS record`
+function is read with `readRows`. **`PDSa-SHAPEc` controls it.** ▶ **All 9 RPC consumers in the
+codebase now match their function's shape**, so the defect was isolated to this one read.
+
+⚠️ **AND THE RULE'S OWN FIRST DRAFT WAS WRONG, WHICH IS WORTH KEEPING.** It compared `proretset`
+against `"t"`; `'x' || boolean` casts to **`true`/`false`**, so every function read as
+non-set-returning and it reported **five mismatches that were not real**. Caught because one of the
+five contradicted a catalogue reading taken minutes earlier — **the contradiction was checked
+against the database rather than believed**. ⛔ **Its control refused to certify at the same time**,
+which is exactly what a control is for. The parse now accepts only the two known spellings and
+leaves anything else **undefined**, so an unparsed line **skips** the site instead of silently
+asserting it is a bare record.
+
+### §17.4 — `S3-M8-live`: a liveness leg that pins no count
+
+The first draft scanned the **whole page** for the em dash and would have gone red on a correct
+page — the glyph also lives in shared chrome. ▶ **A detector whose subject is wider than its claim
+reports failures that are not the failure it names.** Rescoped to **the value under each of the
+four captions**, and it now **reports what it saw** on failure.
+
+⛔ **It pins NO COUNT.** It asserts the governed **refusal contract** — a numeric value rather than
+`Q-7`'s glyph — so enrolling a learner or submitting a report **can never turn it red**. That is
+the §12.8-safe form of a liveness check, and it is the direct application of the `P22-4` lesson.
+
+⚠️ **`S3-M8` sits OUTSIDE the `FIXTURE_MODULE` guard**, unlike `S3-M4`…`S3-M7`. Those four address
+a module by id and genuinely cannot run without one; `/management/dashboard` takes no parameter.
+▶ Left inside the guard it would have been **silently skipped** whenever the module lookup failed,
+and **a leg that disappears for a reason unrelated to itself reports green by not existing**.
+
+### §17.5 — The three census movements, each rewritten with its cause NAMED
+
+Per the accepted classification — **a ratchet that makes a phase write down what it added is the
+mechanism working, not a defect.**
+
+| Census | Move | Named cause |
+|---|---|---|
+| `hero-2` `P2-6` — the project's **single global function ratchet** | **61 → 62** | `report_centre_dashboard_summary`, migration `20260814140000`. Recorded with the proof that it is **not parent-reachable** (centre resolved from the caller's own membership; NULLs to everyone else) |
+| `prove-p2-1` route census | **21 → 22** | screen `11` at `/management/dashboard`. ⚠️ **`P2-7` ADDED a route without removing one** — `/management` still ships as the redirect, so the census counts both |
+| `integrated-route-security` `CANONICAL_ROUTE_COUNT` | **17 → 18** | 14 canonical portal + **2** compatibility aliases + `/` + `/login` |
+
+**`/management` also changed CLASS**, not just count: it left `PORTAL_ROUTES` for a named
+`MANAGEMENT_COMPAT_ROUTE`, on **exactly the reasoning that kept `/trainer` out of that list**, and
+gained its own **`SEC-12b`** — written as a separate leg rather than folded into `SEC-12`, because
+one leg covering both would pass while one of the two redirects was silently deleted.
+
+### §17.6 — `R-0b` is not a defect, recorded so the next run does not "fix" it
+
+`hero-14/15/16` failed in the first battery and passed individually, which looked intermittent.
+**It is deterministic and correct:** `R-0b` asserts a successful build post-dates the newest
+source, and `dashboard.ts` had just been edited. ▶ **The remedy is `npm run build`, never a change
+to the suite.** All three are green after building.
+
+### §17.6a — ⚠️ ONE FINDING RECORDED AND DELIBERATELY NOT REPAIRED
+
+**`features/management/management-dashboard.tsx` is now ORPHANED.** The old `ManagementDashboard`
+component served `/management`; that route is now a redirect and the canonical page renders
+**`ManagementDashboardScreen`**. Measured: `grep` for `ManagementDashboard` across every `.ts`,
+`.tsx` and `.mjs` in the repository returns **nothing outside the file's own definition**.
+
+⛔ **NOT DELETED, AND THAT IS A DECISION.** Removing a file is a scope judgement the phase was not
+given — the component may be wanted as reference, and deleting it is not reversible by re-reading
+this note. ▶ **Reported for a ruling, exactly as the `S3-00` precedent handles a finding that is
+real but outside the authorized change.** Its one live edit this phase was its `homeHref`, moved to
+the destination with the other six call sites so it stays correct if it is ever mounted again.
+
+### §17.7 — Position
+
+✅ **Screen `11` BUILT and PROVEN.** `prove:portal-p2-7` **PASS**; stage 3 **43 PASS · 1 FAIL · 2
+NOT-RUN**, the single FAIL being the carried `S3-T1-r`. All 34 portal + hero suites green.
+
+⏸ **VISUAL acceptance `NOT-RUN` for `11`, `14` and `25`** — the Operator will walk the three
+together.
+
+**Carried unchanged:** `AR-4-14` (`KNOWN-RED`, cause recorded inside the rule file, escalation at a
+second instance) · `S3-T1-r` (remedy known — `?month=`; authorization missing) · `D-10` ·
+`S3-00` · `B-G06-DET-1` · §10 Phase 1 exit (c) unproven · `09` refuses its canonical route
+(`C2C-007`) · the mojibake repair run · `test:continuity` / `test:exit-condition-b` blocked by
+`B-STAGE3-2`.
+
+⚠️ **`AR-4-11` PASSES** with 4 fractional values — this phase's own artefact citation is sound, and
+the `AR-4-14` red is unrelated to it.

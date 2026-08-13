@@ -99,7 +99,7 @@ export function ManagementWordingEditor() {
     return (
       <StatePanel
         result={resource.result}
-        homeHref="/management"
+        homeHref="/management/dashboard"
         homeLabel="Return to Management workspace"
       />
     );

@@ -282,7 +282,7 @@ export function ManagementSchedule({ initialMonth }: { readonly initialMonth?: s
         <StatePanel
           result={state.result}
           title="The schedule could not be loaded"
-          homeHref="/management"
+          homeHref="/management/dashboard"
           homeLabel="Return to Management workspace"
         />
       ) : null}

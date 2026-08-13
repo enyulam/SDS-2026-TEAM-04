@@ -112,7 +112,12 @@ const EXPECTED_BY_ROUTE = new Map([
   ["/trainer/reports/[reportId]/review", { role: "trainer", label: "Returned reports" }],
   ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Returned reports" }],
   // Management.
-  ["/management", { role: "management", label: "Dashboard" }],
+  // `P2-7` / Operator option 2: `/management` is now a COMPATIBILITY REDIRECT
+  // onto the canonical `/management/dashboard`, exactly as `/trainer` redirects
+  // onto `/trainer/schedule` under `R-B1`. ⚠️ `redirectsTo` is not a free pass:
+  // `N-0b` READS the page source and fails if it does not really redirect.
+  ["/management", { redirectsTo: "/management/dashboard" }],
+  ["/management/dashboard", { role: "management", label: "Dashboard" }],
   // P2-1 — screen `12` at its canonical route. This expectation is also what
   // proves Dashboard does NOT light up here.
   ["/management/classes", { role: "management", label: "Classes" }],
@@ -392,7 +397,7 @@ const ROUTES = [
     ],
     [
       "an EXACT item still matches its own path",
-      isNavigationItemActive(dashboard, "/management") === true,
+      isNavigationItemActive(dashboard, "/management/dashboard") === true,
     ],
     [
       "a NON-EXACT item matches its own path",

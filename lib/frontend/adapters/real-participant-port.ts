@@ -65,6 +65,7 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
+  ManagementDashboardSummaryDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -118,6 +119,7 @@ import {
   adapterListManagementClasses,
   adapterReadManagementSchedule,
   adapterReadLessonPlans,
+  adapterReadDashboardSummary,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -280,6 +282,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       classModuleId: string,
     ): Promise<UiActionResult<ManagementLessonPlansDto | null>> {
       return guard(() => adapterReadLessonPlans(classModuleId));
+    },
+
+    /** `P2-7` — screen `11`. No parameter: the centre is the caller's own. */
+    readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>> {
+      return guard(() => adapterReadDashboardSummary());
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

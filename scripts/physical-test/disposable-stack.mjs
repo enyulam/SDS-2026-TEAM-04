@@ -257,8 +257,8 @@ export const DISPOSABLE_IDENTITIES = [
     email: 'management.disposable@f17-disposable.example.test',
     authId: 'd0000000-0000-4000-8000-000000000001',
     role: 'management',
-    home: '/management',
-    landing: '/management',
+    home: '/management/dashboard',
+    landing: '/management/dashboard',
     accountId: 'c0000000-0000-4000-8000-000000000001',
   },
   {

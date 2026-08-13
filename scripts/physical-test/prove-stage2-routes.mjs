@@ -84,7 +84,7 @@ const CHAIN = [
   ['trainer', `/trainer/reports/${OPAQUE_REPORT}/review`, 'Trainer review + checklist + approve'],
   ['trainer', `/trainer/reports/${OPAQUE_REPORT}/edit`, 'Trainer edit'],
   ['trainer', '/trainer/reports', 'Returned-reports queue'],
-  ['management', '/management', 'Management dashboard'],
+  ['management', '/management/dashboard', 'Management dashboard'],
   ['management', '/management/reports', 'Management pending list'],
   ['management', `/management/reports/${OPAQUE_REPORT}/review`, 'Management detail + Approve & Submit'],
   ['management', `/management/reports/${OPAQUE_REPORT}/edit`, 'Management WORDING-ONLY editor'],

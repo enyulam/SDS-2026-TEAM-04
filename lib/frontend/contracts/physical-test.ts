@@ -348,6 +348,27 @@ export type ManagementScheduleDto = {
 };
 
 /**
+ * `P2-7` — screen `11` Management Dashboard KPI tiles.
+ *
+ * ⛔ FOUR INTEGERS. There is no field a rating, roll-up, panel, note,
+ * checklist value or content hash could arrive in — `C-9` confines the nine
+ * ratings to report DETAIL surfaces and `G-2` bars every roll-up everywhere.
+ *
+ * ⛔ `submittedReports`, NOT `approved`. `A-036` makes `approved`
+ * TRANSIENT-IN-TRANSACTION and it never commits, so the frame's `Approved`
+ * tile counts a status with an empty referent and would read ZERO FOREVER.
+ * ▶ A KPI that can only ever report zero asserts a measurement that does not
+ * exist, which is worse than the tile being absent. Operator ruling,
+ * 2026-08-14 — the third sighting of the Step 7I1D-R2 defect.
+ */
+export type ManagementDashboardSummaryDto = {
+  readonly totalStudents: number;
+  readonly assessedStudents: number;
+  readonly pendingApproval: number;
+  readonly submittedReports: number;
+};
+
+/**
  * `P2-6` — screen `14` Management Lesson Plan Management.
  *
  * ⛔ THREE THINGS THE FRAME DRAWS THAT THIS SHAPE DELIBERATELY CANNOT CARRY:

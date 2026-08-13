@@ -106,7 +106,7 @@ export function ManagementDashboard() {
     return (
       <StatePanel
         result={state.result}
-        homeHref="/management"
+        homeHref="/management/dashboard"
         homeLabel="Return to Management workspace"
       />
     );

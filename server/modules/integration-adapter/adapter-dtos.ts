@@ -327,6 +327,23 @@ export interface AdapterManagementScheduleDto {
  * ⛔ NO `description` and NO `programme` (`C-14`, `A-016`, `A-022`) — the
  * frame's "6-week persuasive speaking unit" has no column behind it.
  */
+/**
+ * `P2-7` — screen `11` Management Dashboard KPI tiles.
+ *
+ * ⛔ FOUR INTEGERS AND NOTHING ELSE. No rating, roll-up, panel field, trainer
+ * note, checklist value or content hash — and no field one could arrive in.
+ *
+ * ⛔ `submittedReports`, NOT `approved`. `A-036` makes `approved`
+ * transient-in-transaction, so the frame's `Approved` tile counts a status
+ * that never commits and would read zero forever. Operator ruling.
+ */
+export interface AdapterDashboardSummaryDto {
+  readonly totalStudents: number;
+  readonly assessedStudents: number;
+  readonly pendingApproval: number;
+  readonly submittedReports: number;
+}
+
 export interface AdapterLessonMaterialDto {
   readonly materialId: string;
   readonly displayName: string;

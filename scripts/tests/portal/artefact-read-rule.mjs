@@ -70,13 +70,13 @@ const REF_ROOT = join(PACK_ROOT, "reference");
  * being BUILT OR REBUILT under the rule, never by being annotated.
  */
 export const UNMEASURED = [
-  "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
+  "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
   "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "28",
   "29", "30", "31", "32", "33", "AUTH-01", "AUTH-02", "AUTH-03",
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["12", "13", "14", "25", "26", "27"];
+export const MEASURED = ["11", "12", "13", "14", "25", "26", "27"];
 
 /*
  * ⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.

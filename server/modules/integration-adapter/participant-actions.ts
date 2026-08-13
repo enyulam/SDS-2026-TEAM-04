@@ -72,6 +72,7 @@ import {
   listManagementClassesCore,
   readManagementScheduleCore,
   readManagementLessonPlansCore,
+  readManagementDashboardSummaryCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
@@ -127,6 +128,7 @@ import type {
   AdapterManagementClassListDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
+  AdapterDashboardSummaryDto,
   AdapterManagementEditWordingInput,
   AdapterManagementEditWordingSuccess,
   AdapterManagementQueueRowDto,
@@ -844,6 +846,32 @@ export async function adapterReadManagementSchedule(
         trainerDisplayNames: row.trainerDisplayNames,
       })),
       monthsWithSessions: result.data.monthsWithSessions,
+    },
+  };
+}
+
+/**
+ * `P2-7` — screen `11` Management Dashboard.
+ *
+ * ⚠️ The mapper names four fields and there are four to name, so the
+ * allow-list discipline is trivially satisfied here — but it is kept
+ * explicit anyway, because the value of the pattern is that a FIFTH field
+ * added to the RPC later cannot reach the client until somebody writes it
+ * down.
+ */
+export async function adapterReadDashboardSummary(): Promise<
+  ActionResult<AdapterDashboardSummaryDto>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementDashboardSummaryCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      totalStudents: result.data.totalStudents,
+      assessedStudents: result.data.assessedStudents,
+      pendingApproval: result.data.pendingApproval,
+      submittedReports: result.data.submittedReports,
     },
   };
 }

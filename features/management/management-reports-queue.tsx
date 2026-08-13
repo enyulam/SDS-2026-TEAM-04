@@ -185,7 +185,7 @@ export function ManagementReportsQueue() {
     return (
       <StatePanel
         result={{ outcome: "unavailable" }}
-        homeHref="/management"
+        homeHref="/management/dashboard"
         homeLabel="Return to Management workspace"
       />
     );
@@ -198,7 +198,7 @@ export function ManagementReportsQueue() {
     return (
       <StatePanel
         result={state.result}
-        homeHref="/management"
+        homeHref="/management/dashboard"
         homeLabel="Return to Management workspace"
       />
     );

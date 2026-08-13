@@ -48,6 +48,12 @@ export const RPC_MIGRATIONS = [
   { migration: "20260813150000_portal_p2_3_class_edit.sql", suite: "prove-p2-3-class-edit.sql" },
   { migration: "20260813180000_portal_p2_4_class_overview.sql", suite: "prove-p2-4-class-overview.sql" },
   { migration: "20260814090000_portal_p2_6_lesson_materials.sql", suite: "prove-p2-6-lesson-materials.sql" },
+  { migration: "20260814140000_portal_p2_7_dashboard_summary.sql", suite: "prove-p2-7-dashboard.sql" },
+  // The R-1 forward comment correction. It declares NO function, and the rule
+  // must be satisfiable by "there is nothing to call" as well as by
+  // "everything is called" -- otherwise a correction like this one would be
+  // pushed toward inventing a function just to have one.
+  { migration: "20260814141000_portal_p2_7_comment_fix.sql", suite: "prove-p2-7-dashboard.sql" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */
@@ -90,6 +96,64 @@ export function uncalledFunctions(root, pairs = RPC_MIGRATIONS) {
  * behind a helper.
  */
 const PORTAL_ERA = "20260812230000";
+
+/**
+ * ⛔ THE SECOND STANDING RULE, ADDED 2026-08-14 AFTER A MEASURED DEFECT.
+ *
+ * The rule above closes *"a structural assertion cannot prove a function
+ * RUNS"*. This one closes the next gap out: **A SQL LEG THAT CALLS A FUNCTION
+ * CANNOT PROVE THE CLIENT RECEIVES THE SHAPE IT EXPECTS.**
+ *
+ * ▶ THE DEFECT IT CLOSES, stated once so it is not re-derived. PostgREST
+ * resolves a `RETURNS record` function (`proretset = false`) to a BARE OBJECT
+ * and a `RETURNS SETOF` / `RETURNS TABLE` function to an ARRAY. `readRows`
+ * types its payload `TRow[]`, so a consumer reading `rows[0]` off a bare object
+ * gets `undefined` on EVERY call. ⚠️ It then FAILS CLOSED, which is the trap:
+ * the surface renders its refusal state and looks deliberate.
+ *
+ * ⚠️ AND NO SQL LEG CAN SEE IT. In SQL, `SELECT … FROM f()` reads both shapes
+ * identically — `P2-7`'s seven SQL legs were all green while all four of its
+ * KPI tiles rendered the refusal glyph in the browser.
+ *
+ * `readMaybeRow` accepts EITHER shape and is the correct helper for a
+ * single-record RPC; `readRows` is correct only for a set-returning one.
+ *
+ * @param root repository root
+ * @param isSetReturning `(fnName) => boolean | undefined` — supplied by the
+ *   caller from `pg_proc.proretset`. ⛔ Read from the DATABASE, never parsed
+ *   out of the migration text: the catalogue is what PostgREST itself reads.
+ */
+export function rpcShapeMismatches(root, isSetReturning) {
+  const mismatches = [];
+  let inspected = 0;
+  const dir = join(root, "server", "modules");
+  const walk = (path) => {
+    for (const entry of readdirSync(path, { withFileTypes: true })) {
+      const full = join(path, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".ts")) {
+        const source = readFileSync(full, "utf8");
+        /*
+         * The helper and the RPC name sit in one expression:
+         *   readRows<T>("ctx", () => client.rpc("fn", …))
+         * so one pattern spanning them is enough, and it cannot pair a helper
+         * with an RPC from a different statement.
+         */
+        const CALL = /\b(readRows|readMaybeRow)\s*<[^>]*>\s*\(\s*"[^"]*"\s*,\s*\(\)\s*=>\s*[a-zA-Z_$][\w$]*\s*\.rpc\(\s*"([a-z0-9_]+)"/g;
+        for (const [, helper, fn] of source.matchAll(CALL)) {
+          const setReturning = isSetReturning(fn);
+          if (setReturning === undefined) continue; // not a function this run can see
+          inspected += 1;
+          if (!setReturning && helper === "readRows") {
+            mismatches.push(`${entry.name}:${fn} is RETURNS record (a bare object) but is read with readRows`);
+          }
+        }
+      }
+    }
+  };
+  walk(dir);
+  return { inspected, mismatches };
+}
 
 export function unpairedMigrations(root, pairs = RPC_MIGRATIONS) {
   const dir = join(root, "supabase", "migrations");

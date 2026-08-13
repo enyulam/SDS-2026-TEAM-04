@@ -67,7 +67,11 @@ const RATIFIED = [
 ];
 
 /** The deferred dashboards no sign-in may land on (C2C-012). */
-const DEFERRED_DASHBOARDS = new Set(["/management", "/parent"]);
+// `P2-7`: the Management dashboard moved to its canonical route and
+// `/management` now redirects onto it. BOTH are listed, deliberately — landing
+// on the redirect reaches the dashboard just as surely as landing on it
+// directly, so guarding only one would leave the other open.
+const DEFERRED_DASHBOARDS = new Set(["/management", "/management/dashboard", "/parent"]);
 
 /**
  * THE ROUTE CENSUS IS READ, NOT RESTATED.

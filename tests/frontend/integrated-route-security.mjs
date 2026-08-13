@@ -79,9 +79,15 @@ const OPAQUE_ID_2 = "00000000-0000-4000-8000-000000000002";
 const OPAQUE_ID_3 = "00000000-0000-4000-8000-000000000003";
 
 /**
- * The 14 CANONICAL portal routes. `/trainer` is deliberately NOT in this list: it is the
- * compatibility redirect and is asserted separately (SEC-09) so that its preservation is a
- * named requirement rather than an incidental pass.
+ * The 14 CANONICAL portal routes. `/trainer` and `/management` are deliberately NOT in this
+ * list: both are compatibility redirects and each is asserted separately (SEC-12, SEC-12b) so
+ * that its preservation is a named requirement rather than an incidental pass.
+ *
+ * ⚠️ `/management` MOVED INTO THAT CLASS AT `P2-7`. Screen `11` took `/management/dashboard`
+ * as its canonical route and `/management` became a redirect toward it, built to the same
+ * R-B1 precedent `/trainer` already sets. ▶ The canonical entry below is therefore the
+ * DASHBOARD, and the bare prefix is carried by `MANAGEMENT_COMPAT_ROUTE`. Leaving `/management`
+ * in this list would have asserted a canonical route that no longer renders anything.
  */
 const PORTAL_ROUTES = [
   "/trainer/schedule",
@@ -91,7 +97,7 @@ const PORTAL_ROUTES = [
   `/trainer/reports/${OPAQUE_ID}/review`,
   `/trainer/sessions/${OPAQUE_ID_2}/roster`,
   `/trainer/sessions/${OPAQUE_ID_2}/students/${OPAQUE_ID_3}/assess`,
-  "/management",
+  "/management/dashboard",
   "/management/reports",
   `/management/reports/${OPAQUE_ID}/edit`,
   `/management/reports/${OPAQUE_ID}/review`,
@@ -103,15 +109,25 @@ const PORTAL_ROUTES = [
 /** The compatibility redirect, preserved by operator ruling R-B1 (`app/(portals)/trainer/page.tsx`). */
 const TRAINER_COMPAT_ROUTE = "/trainer";
 
-/** Everything the proxy guards: the 14 canonical portal routes plus the compatibility alias. */
-const GUARDED_ROUTES = [...PORTAL_ROUTES, TRAINER_COMPAT_ROUTE];
+/** The second compatibility redirect, added at `P2-7` on the same R-B1 precedent (`app/(portals)/management/page.tsx`). */
+const MANAGEMENT_COMPAT_ROUTE = "/management";
+
+/** Everything the proxy guards: the 14 canonical portal routes plus BOTH compatibility aliases. */
+const GUARDED_ROUTES = [...PORTAL_ROUTES, TRAINER_COMPAT_ROUTE, MANAGEMENT_COMPAT_ROUTE];
 
 /** The two non-portal routes. `/` is guarded by `app/page.tsx`; `/login` is the open door. */
 const ROOT_ROUTE = "/";
 const LOGIN_ROUTE = "/login";
 
-/** 14 canonical portal + 1 compatibility + `/` + `/login` = the 17 routes `next build` lists. */
-const CANONICAL_ROUTE_COUNT = 17;
+/**
+ * 14 canonical portal + 2 compatibility + `/` + `/login` = the 18 routes `next build` lists.
+ *
+ * ⚠️ 17 -> 18 AT `P2-7`, and the increment is REAL rather than bookkeeping: screen `11` ADDED
+ * `/management/dashboard` without removing `/management`, which still ships as the redirect.
+ * ▶ Rewritten with the new route NAMED, never bumped silently -- a census that moves without
+ * saying what moved stops being evidence.
+ */
+const CANONICAL_ROUTE_COUNT = 18;
 
 /** A-046, Amendment 005: this parameter is PRESENTATION ONLY and grants nothing. */
 const ROLE_QUERIES = ["trainer", "management", "parent"];
@@ -556,6 +572,27 @@ check(
   `unauthenticated Location=${JSON.stringify(portalDenials.get(TRAINER_COMPAT_ROUTE).location)}; source redirect present=${/redirect\(\s*["']\/trainer\/schedule["']\s*\)/.test(trainerEntrySource)}`,
 );
 
+/**
+ * ⛔ AND THE SAME PROOF FOR `/management`, SEPARATELY NAMED. Screen `11` moved the Management
+ * home to `/management/dashboard` at `P2-7` and left `/management` as the alias. Its
+ * unauthenticated behaviour is likewise the `/login` denial -- authorization runs BEFORE the
+ * alias resolves -- so the alias itself is again proven FROM SOURCE.
+ *
+ * ▶ Written as its own leg rather than folded into SEC-12, because a single leg covering both
+ * would pass while one of the two redirects was silently deleted.
+ */
+const managementEntrySource = await readFile(
+  join(REPO_ROOT, "app", "(portals)", "management", "page.tsx"),
+  "utf8",
+);
+const managementRedirectPresent = /redirect\(\s*["']\/management\/dashboard["']\s*\)/.test(managementEntrySource);
+check(
+  "SEC-12b",
+  "/management is preserved as a compatibility redirect toward /management/dashboard",
+  portalDenials.get(MANAGEMENT_COMPAT_ROUTE).location === LOGIN_ROUTE && managementRedirectPresent,
+  `unauthenticated Location=${JSON.stringify(portalDenials.get(MANAGEMENT_COMPAT_ROUTE).location)}; source redirect present=${managementRedirectPresent}`,
+);
+
 /* ---------------------------------------------------------------------------
  * SEC-13 .. SEC-16 — the SHAPE of the cross-role guard, by static inspection.
  *
@@ -836,6 +873,7 @@ try {
     `${ROOT_ROUTE}?role=management`,
     "/trainer",
     "/management",
+    "/management/dashboard",
     "/parent",
     "/management/reports?role=management",
     "/parent/reports?role=parent",
