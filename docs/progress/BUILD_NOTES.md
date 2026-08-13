@@ -9041,3 +9041,124 @@ changed, so no other suite was re-run.
 **Next permitted action:** the Operator rules the bucket size limit (and the MIME list), and
 decides whether `supabase start` may be run on the dev project. **No migration is written until
 the size figure is ruled.**
+
+---
+
+## 2026-08-14 — `P2-6` FULLY RULED; `supabase start` RUN AND INSUFFICIENT; MIGRATION DELIBERATELY NOT WRITTEN
+
+**Checkpoint.** Part 2, `P2-6`. **Branch:** `develop`. **HEAD at start:** `48c0861`.
+
+### Container counts at every step, as instructed
+
+| Step | dev | mvp |
+|---|---|---|
+| before `supabase start` | **9** | **9** |
+| after `supabase start` | **9** | **9** |
+| after the whole run | **9** | **9** |
+
+⛔ **The demonstration stack was never queried, stopped or altered.** `config.toml`
+`project_id = "best-coach-dev"` pinned every command, and `supabase stop` was not run against
+anything.
+
+### The two bucket-row rulings
+
+**`file_size_limit = 26214400` (`25 MiB`) — APPROVED.** The Operator's deciding ground is recorded
+with it, because a later phase asked to raise it should argue against **that** rather than a bare
+number: *"a limit that admits video makes the media-class separation depend on who uploads what,
+when the separation exists precisely so it does not"*, with the recoverable-direction-is-up
+tiebreak. ▶ The ceiling is not a capacity estimate; it is **the mechanism keeping `evidence` and
+`lesson-materials` distinct media classes**.
+
+**`allowed_mime_types` — RULED WIDER THAN THE FRAME DRAWS.** Eight types: `PDF` · `PPTX` · `PPT` ·
+`KEY` · `DOCX` · `DOC` · `PNG` · `JPEG`. Operator reasoning: *"a trainer preparing a class will
+have a Word handout or a photo of a worksheet."*
+
+⛔ **Recorded as an Operator ruling with its reason, on explicit instruction, so it does not read
+as drift and so a later phase does not narrow it back to the frame's three.** The frame is a
+static render of three files someone happened to upload — **not an inventory of permitted types**.
+
+⚠️ It is still narrow where it matters: **no `video/*`, no `audio/*`, no archive** — which is the
+half Lock §8.2 needs, and what keeps the separation at the bucket row rather than by convention.
+⚠️ **`PNG`/`JPEG` here are teaching material keyed to a CLASS SESSION, never to a person, and are
+not the §8.2 student-photo class**, which is PDPA-live and remains unbuilt and unauthorized.
+
+### ⛔ `supabase start` — authorized, run, insufficient
+
+Exit 0, dev project only, every URL reported normally. **The port is still not published:**
+`supabase_kong_best-coach-dev`'s `NetworkSettings.Ports` is `{"8000/tcp":[]}` and
+`127.0.0.1:54421` still returns **HTTP 000** on `/rest/v1/` and `/auth/v1/health`.
+
+▶ **The measurement widened the diagnosis.** Across the **whole daemon**, both stacks, **zero of
+18 containers carries a host binding** — every `docker ps` Ports column shows only the
+container-internal port and the count of `->` mappings is **0**. ⚠️ **This is a Docker
+Desktop-wide port-proxy failure, not a dev-stack problem.** Neither the earlier container restart
+nor `supabase start` could have fixed it, which is why neither did.
+
+**Stopped and reported rather than escalated, per the Operator's own instruction.**
+
+### ⛔ The migration was NOT written, and that is a deliberate stop
+
+The authorization is complete and both figures are ruled. **Nothing about `P2-6` remains
+undecided.** What blocks it is that the migration cannot be **applied or proven**:
+
+1. The established path is **`supabase migration up`**, over **TCP `54422`** — down for the same
+   reason as `54421`.
+2. ⛔ **The `docker exec … psql -f` workaround is the path that already broke atomicity in this
+   project**, recorded in this file: *"`psql -f` autocommits per statement. The first apply left
+   the function committed while its assertion block aborted … a migration's atomicity is a
+   property of how it is APPLIED, not only of how it is written."* Using it now would be
+   escalating around the blocker the Operator asked to be told about.
+3. Writing the file unapplied would **immediately break `prove:portal-p2-5`'s `P25a-NOMIG` pin**
+   (`migrations.length === 30`) in a suite that cannot be run to observe it — leaving an
+   unapplied, unproven migration in the tree that a later session would reasonably read as
+   shipped.
+
+▶ Screen `14`'s frontend was likewise not built: it consumes a projection that does not exist yet,
+and building a UI against an unapplied schema is how a phase ends up "complete" with nothing
+behind it.
+
+### ⚠️ `S3-00` — a check whose NAME overstates what it measures. Third in its family
+
+Recorded as its own named class, distinct from §12.8's fixture-content pin.
+
+`prove:stage3-authenticated` printed **`PASS  S3-00  the local loopback Supabase stack was
+resolved`** while `54421` returned HTTP 000. The leg is not wrong about what it did — it resolved
+configuration — but its **name asserts reachability**, and that is what a reader scanning output
+acts on.
+
+▶ **Nothing went green only because the three magiclink mints failed one leg later. Remove or
+weaken that downstream leg and `S3-00` becomes a false PASS on a dead stack.**
+
+| Instance | The gap between name and measurement |
+|---|---|
+| `SC-1` | asserted the **authored** value where the browser reports the **computed** one |
+| `P25-4` | required a policy **NAME** to contain `management` where the property is **readability** |
+| **`S3-00`** | claims **reachability** where it measures **config resolution** |
+
+⚠️ **A leg's name is read far more often than its body, so the name is part of the assertion.**
+⛔ **Not repaired — it belongs to another phase's harness**, per the Operator's instruction.
+
+### `class_sessions_id_module_key`
+
+`class_sessions` carries two unique keys, both since Step 7E: `..._id_centre_key UNIQUE (id,
+centre_id)` — the one the materials FK will use — and `..._id_module_key UNIQUE (id,
+class_module_id)`, which §13 did not mention. **Neither is new and nothing changed.** Recorded
+because *"an unmentioned key found later reads as an appearance"*, and a reader who believes a key
+appeared goes looking for the migration that added it.
+
+### Files changed
+
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§13.10, §13.11, §13.12) · `docs/progress/STATUS.md` ·
+this file · `docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification:** `prove:encoding` exit 0 after every structured write.
+`prove:stage3-authenticated` — **`S3-M6` `NOT-RUN`**, 4 PASS · 3 FAIL · 26 `NOT-RUN`, the three
+failures being the trainer/management/parent magiclink mints. No product code changed.
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` ACCEPTED at `3431981`. `25` `NOT-RUN`.
+`14` `NOT-RUN` — not built.
+
+**Next permitted action:** the Operator restores Docker Desktop's port publication (a full Docker
+Desktop restart is the remedy this diagnosis points at). Then, unchanged and needing no further
+ruling: apply `P2-6`'s migration at `25 MiB` with the eight MIME types, build screen `14`
+complete, and re-run `prove:stage3-authenticated` for `S3-M6`.

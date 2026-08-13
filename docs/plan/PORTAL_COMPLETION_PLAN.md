@@ -2069,3 +2069,150 @@ exactly three type chips — **`PPTX`, `PDF`, `KEY`** — which map to:
 `.ppt`, `.pages`, an image or a `.zip` is **rejected at the bucket**, and the frame is the only
 evidence about which types are wanted. ▶ Per `A-022` I will not widen it on my own reading.
 **Recommend the three the frame draws; the Operator's call if it should be wider.**
+
+---
+
+## §13.10 — THE BUCKET ROW IS RULED. THE MIGRATION IS BLOCKED ON THE STACK, NOT ON A DECISION
+
+**Operator, 2026-08-13.** Both open bucket-row fields are now ruled. ⛔ **Nothing about `P2-6`
+remains undecided; what remains is an environment failure.**
+
+### `file_size_limit` — `25 MiB` = `26214400` bytes · APPROVED
+
+> **Operator:** *"Your §8.2 argument decides it: a limit that admits video makes the media-class
+> separation depend on who uploads what, when the separation exists precisely so it does not. And
+> the recoverable direction being up is the right tiebreak."*
+
+⚠️ **Recorded with the deciding ground named**, because a later phase asked to raise it should have
+to argue against **that** rather than against a bare number: the ceiling is not a capacity
+estimate, it is **the mechanism that keeps `evidence` and `lesson-materials` separate media
+classes**. Raising it toward video sizes does not merely relax a limit — it dissolves Lock §8.2's
+separation into a matter of who happens to upload what.
+
+### `allowed_mime_types` — WIDER THAN THE FRAME DRAWS · OPERATOR RULING
+
+> **Operator:** *"The frame draws PPTX, PDF and KEY, but a trainer preparing a class will have a
+> Word handout or a photo of a worksheet … ⚠️ This is wider than the frame draws. Record it as an
+> Operator ruling with the reason, so it does not read as drift, and so a later phase does not
+> narrow it back to match the frame."*
+
+**The ratified list — eight types:**
+
+| Ext | MIME |
+|---|---|
+| `PDF` | `application/pdf` |
+| `PPTX` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+| `PPT` | `application/vnd.ms-powerpoint` |
+| `KEY` | `application/vnd.apple.keynote` |
+| `DOCX` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
+| `DOC` | `application/msword` |
+| `PNG` | `image/png` |
+| `JPEG` | `image/jpeg` |
+
+⛔ **THIS IS AN OPERATOR RULING, NOT DRIFT, AND A LATER PHASE MUST NOT NARROW IT BACK TO THE
+FRAME'S THREE.** The frame is a static render showing the three files someone happened to upload;
+it is **not an inventory of permitted types**, and treating it as one would refuse a Word handout
+or a photographed worksheet — the ordinary case the Operator named.
+
+⚠️ **It is still narrow in the direction that matters.** No `video/*`, no `audio/*`, no archive.
+▶ **That is the half Lock §8.2 needs**, and it is what makes the media-class separation hold at the
+bucket row rather than by convention.
+
+⚠️ **`PNG`/`JPEG` are a teaching-material photo, and they are NOT the `§8.2` student-photo class.**
+That surface (`Management - Register Student`) is **PDPA-live** and remains unbuilt and
+unauthorized. This bucket is keyed to a **class session**, never to a person, and no image here is
+an identity photograph.
+
+### ⛔ `supabase start` — AUTHORIZED, RUN, AND IT DID NOT RESOLVE THE FAILURE
+
+Run on the **dev project only**, pinned by `config.toml` `project_id = "best-coach-dev"`. Exit 0;
+it reported every URL normally.
+
+| | dev | mvp |
+|---|---|---|
+| before | **9** | **9** |
+| after | **9** | **9** |
+
+⛔ **The port is still not published.** `supabase_kong_best-coach-dev`'s `NetworkSettings.Ports`
+is `{"8000/tcp":[]}` and `127.0.0.1:54421` still returns **HTTP 000**.
+
+▶ **AND THE MEASUREMENT WIDENED THE DIAGNOSIS.** Across the **whole daemon**, both stacks, **ZERO
+of the 18 containers carries a host binding** — every `docker ps` Ports column shows only the
+container-internal port, and the count of `->` mappings is **0**. ⚠️ **This is a Docker
+Desktop-wide port-proxy failure, not a dev-stack problem**, which is why a container restart and
+then `supabase start` both left it unchanged. Neither could have fixed it.
+
+**Stopped and reported, per the Operator's own instruction, rather than escalated.**
+
+### ⛔ WHY THE MIGRATION IS ALSO STOPPED — AND IT IS NOT A SECOND DECISION
+
+The authorization is complete and the figures are ruled. **The blocker is that the migration
+cannot be APPLIED or PROVEN:**
+
+- The established path is **`supabase migration up`**, which connects over **TCP `54422`** — down
+  for the same reason as `54421`.
+- ⛔ **The `docker exec … psql -f` workaround is the path that already broke atomicity in this
+  project.** `BUILD_NOTES.md` records it: *"`psql -f` autocommits per statement. The first apply
+  left the function committed while its assertion block aborted … ▶ A migration's atomicity is a
+  property of how it is APPLIED, not only of how it is written."* Reaching for it now would be
+  escalating around the blocker the Operator asked to be told about.
+- Writing the file without applying it would **immediately break `prove:portal-p2-5`'s
+  `P25a-NOMIG` pin** (`migrations.length === 30`), and that suite cannot be run to see it —
+  leaving an unapplied, unproven migration in the tree that a later session would reasonably read
+  as shipped.
+
+⛔ **No migration file is written.** The moment the daemon publishes ports again, `P2-6` proceeds
+under the authorization already given, at `25 MiB` with the eight MIME types above.
+
+---
+
+## §13.11 — `S3-00`: A CHECK WHOSE NAME OVERSTATES WHAT IT MEASURES
+
+> **Operator:** *"the leg's NAME reads as a reachability check while it is a config-resolution
+> check. Nothing went green, but only because a later leg caught what this one asserted. Record it
+> — a check whose name overstates what it measures is a false claim waiting for the leg behind it
+> to be removed. Do NOT repair it now; it belongs to another phase's harness."*
+
+**Recorded as its own named class**, distinct from §12.8's fixture-content pin.
+
+`prove:stage3-authenticated` printed **`PASS  S3-00  the local loopback Supabase stack was
+resolved`** while `127.0.0.1:54421` was returning **HTTP 000**. The leg is not wrong about what it
+did — it resolved configuration — but its **name asserts reachability**, and a reader scanning
+the output reads *"the stack is up"*.
+
+▶ **The defect is the gap between the name and the measurement, and it is latent by construction.**
+Nothing went green **only because the three magiclink mints failed one leg later**. ⛔ **Remove or
+weaken that downstream leg and `S3-00` becomes a false PASS on a dead stack** — the suite would
+report a resolved, reachable stack that is neither.
+
+**The family this belongs to, now three deep:**
+
+| Instance | The gap |
+|---|---|
+| `SC-1` | asserted the **authored** value (`right 0.75rem center`) where the browser reports the **computed** one — failed a correct fix |
+| `P25-4` | required a policy **NAME** to contain `management` where the property is **readability** — failed a correct product |
+| **`S3-00`** | claims **reachability** where it measures **config resolution** — passes on a dead stack |
+
+⚠️ **The general rule: a leg's name is read far more often than its body, so the name is part of
+the assertion.** If the two disagree, the name is what future sessions will act on.
+
+⛔ **NOT REPAIRED — it belongs to another phase's harness**, and fixing it mid-gate is not what was
+authorized. Recorded so the repair has a home.
+
+---
+
+## §13.12 — `class_sessions_id_module_key`, recorded so it is not read as an appearance
+
+> **Operator:** *"The `class_sessions_id_module_key` note is exactly right to record. An
+> unmentioned key found later reads as an appearance."*
+
+`class_sessions` carries **two** unique keys, both since Step 7E:
+
+- `class_sessions_id_centre_key UNIQUE (id, centre_id)` — the one `class_session_materials`'
+  composite FK will use, so centre drift is **unrepresentable** rather than merely checked;
+- `class_sessions_id_module_key UNIQUE (id, class_module_id)` — **not mentioned in §13**, and
+  recorded here for that reason alone.
+
+⚠️ **Neither is new and nothing changed.** The note exists because **an unmentioned key found
+later reads as an appearance** — and a reader who believes a key appeared will go looking for the
+migration that added it.
