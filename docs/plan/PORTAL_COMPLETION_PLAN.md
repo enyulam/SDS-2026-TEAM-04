@@ -1695,3 +1695,294 @@ executed**, not as a pass.
 rule.** Each survived only while nobody used the product. A suite that a legitimate walkthrough
 can turn red is measuring the fixture, not the behaviour — and the repair is always to scope the
 claim to what it actually meant, never to relax it.
+
+---
+
+## §12.8 — A SUITE THAT PINS FIXTURE CONTENT RATHER THAN A GOVERNED RULE
+
+> **Operator ruling, 2026-08-13:** *"THE THREE RED SUITES ARE ONE CLASS AND I WANT IT NAMED. Each
+> had encoded a snapshot of the fixture as if it were a rule, and each survived only while nobody
+> used the product … Distinguish 'this is what the fixture happens to hold' from 'this is what the
+> system must enforce', and pin only the second."*
+
+### ⛔ THE RULE
+
+**A suite may pin a GOVERNED RULE. It may not pin what the fixture HAPPENS TO CONTAIN.**
+
+A content pin is invisible while the product sits unused, because the fixture is the only writer.
+The moment anyone exercises the product — a walkthrough, a demo, a UAT session — the pin fires.
+▶ **And it fires looking exactly like a regression**, which is the expensive part: the next
+session spends its time hunting a defect in code that is behaving correctly.
+
+**Before writing an assertion, answer which of the two it is:**
+
+| | *"what the fixture happens to hold"* | *"what the system must enforce"* |
+|---|---|---|
+| Written as | a literal count, a total, an exact set, a specific string | a **delta**, an **invariant**, a **refusal**, a **shape** |
+| Broken by | somebody using the product | a real defect |
+| Correct response when red | **scope the claim to what it meant** | **fix the product** |
+
+⚠️ **THE REPAIR IS NEVER TO RELAX THE CHECK.** Every one of the three below came back **stronger**
+than it went in, because scoping a claim to what it actually meant removes the accidental half and
+leaves the load-bearing half exposed.
+
+### ⛔ `prove:encoding` IS THE CLEAREST CASE — A TEST ASSERTING A DEFECT
+
+> **Operator:** *"demanding every module title contain an em dash required the product to REJECT a
+> title typed with a hyphen — a test asserting a defect."*
+
+It required **every** `class_modules.title` to contain `U+2014`. Stated as a product rule, that is:
+**the system must REJECT a class title a user types with a hyphen.** No such rule exists, none was
+ever proposed, and building one would be a defect.
+
+▶ **The suite was not merely over-tight — it was asserting the wrong behaviour**, and it would have
+kept asserting it until somebody typed a title. The Operator did, at 06:56 on 2026-08-13
+(`Beginner -  Dance`, through screen `26`).
+
+**Repaired:** the em-dash claim is scoped to the **seeded** titles, identified by their stable
+`Fixture Module` marker with the count still pinned so it cannot become zero. ⛔ **`E-2`'s
+mojibake check still runs over EVERY row, including the Operator's** — that is the leg that
+actually protects encoding, and it is untouched.
+
+### ⛔ `P23-9` — THE PHASE-SCOPED-CLAIM DEFECT, FOURTH INSTANCE
+
+Recorded with the other three (§12's census split, and the three `P2-2`-era suites that pinned the
+audit registry TOTAL). `P23-9` claimed *the two CREATE RPCs assign nobody* and wrote it as
+`count(*) FROM audit_events WHERE action = 'admin.trainer_assigned' = 0` — **a global count of
+every such event that has ever existed**.
+
+It was true the day `P2-2` shipped and became false **twice**: `P2-2b` BUILT assignment under its
+own Operator ruling, and the walkthrough then fired 13 more.
+
+**Repaired as a DELTA** across the suite's own transaction — which is how the
+`class_session_assignments` half of the very same `IF` was already written. ⚠️ Its prose was
+corrected rather than deleted: *"assignment needs a THIRD string the Operator did not name"* is
+**superseded by `P2-2b`**, where the string turned out to be already ratified.
+
+### ⛔ `P7-6` — THE SAME FAMILY FROM THE OTHER DIRECTION
+
+> **Operator:** *"the same family from the other direction — and it said FAIL rather than PASS,
+> which is the only reason it surfaced."*
+
+`P7-6` does not pin fixture content; it **depends on a fixture SHAPE** — an enrolled learner with
+no observation on the session. The walkthrough legitimately **consumed its precondition** by
+assessing the last learner who qualified.
+
+▶ **A precondition a legitimate walkthrough can consume is a precondition that will keep
+disappearing.** The established remedy applies unchanged: **PLANT the case inside the rolled-back
+transaction** (`P26-6`, `P26-8`, `P24`'s second trainer).
+
+⚠️ **IT REPORTED `FAIL`, NOT `PASS`, AND THAT IS THE WHOLE REASON IT WAS FOUND.** A leg that
+cannot run is `NOT-RUN`, never `PASS` — the rule that has now paid for itself in four separate
+places: the docker-stopped runner, `SC-8c`'s vacuous forced hover, this leg, and `S3-00` refusing
+to report a green Stage 3 against an unreachable stack.
+
+### The test to apply to a new assertion
+
+1. **Say the assertion out loud as a product rule.** *"The system must reject a title typed with a
+   hyphen"* fails immediately. If the sentence is absurd, the pin is on fixture content.
+2. **Ask what a legitimate user action would do to it.** If a walkthrough turns it red, it is
+   measuring the fixture.
+3. **Prefer a delta to a total**, a refusal to a count, a shape to a string.
+4. **If it must pin content, scope it to the SEEDED set** and pin the count so it cannot silently
+   become zero.
+
+---
+
+## §12.9 — §7.4.1 EARNED ITSELF ON ITS FIRST OUTING
+
+> **Operator ruling, 2026-08-13:** *"The GC-13 finding is the significant one: the register bars a
+> second event entity, and the frame also encodes it as a badge and a third chip colour that the
+> .md never mentions. A note-derived build would have missed both and reported a clean match.
+> Record §7.4.1 as having earned itself on its first outing."*
+
+**Recorded.** `CLAUDE.md` §7.4.1 — the artefact contract — was written on 2026-08-13 after four
+consecutive phases derived their layouts from a prose `.md`. **`P2-5` is the first phase executed
+under it, and it caught something immediately.**
+
+| Artefact | What it said about `Showcase` |
+|---|---|
+| the pack's **`.md`** | ⛔ **NOTHING.** It lists *"Lesson cards with date, time, room, assigned Trainer, and Trainer Assistant (TA)"* and names `Showcase` **nowhere** |
+| the **`.png`** | a second badge on the second details card |
+| the **`.html`** | ⚠️ **a THIRD chip treatment** — `#DCF2F3` / `#3FBAC2` — on the 5:00 PM chip, distinct from the pink `#FCE7F0`/`#EC4B96` and the teal `#B5E5E8`/`#2B8F96` |
+
+▶ **The colour ENCODED the barred type.** The `GC-13` register bars *"a second event entity"*; the
+frame carries the same concept in **two further places the register does not name**, and the
+`.md` — the artefact four previous phases were built from — mentions **neither**.
+
+⛔ **A note-derived build would have shipped both and reported a clean match.** It would not have
+been caught by any proof this project runs: a rendered-DOM leg asserts that strings appear, and
+these are a badge and two hex values.
+
+**The general form, worth keeping:** ▶ **a prose note lists what a screen CONTAINS; it does not
+enumerate what a screen ENCODES.** Colour, position, weight, adjacency and shade carry meaning
+that prose has no obligation to mention — and `Showcase` is the case where the meaning was
+governance-bearing. **The `.md`'s silence about an element is not evidence the element is absent**
+(§7.4.1), and this is the first measured instance of that clause mattering.
+
+---
+
+# §13 — `P2-6` · SCREEN `14` LESSON PLAN MANAGEMENT · ⛔ THE `C-7` STATEMENT, STOPPED FOR AUTHORIZATION
+
+**Route (ratified):** `/management/classes/[classModuleId]/lesson-plans` · **Figma** `760:2`
+**Artefacts opened:** `reference/Management - Lesson Plan Management/` `.png` **and** `.html`, and
+the numbered pack's `screen.md` (§7.4.1).
+
+⚠️ **ONE MEASUREMENT LIMIT, STATED UP FRONT.** Docker Desktop stopped between the `P2-5` boundary
+and this statement, so the live database was **not** re-measured for this phase. Everything below
+is read from the **migration files at HEAD** plus measurements taken earlier in the same session
+while the stack was up (census `29 · 29 · 56 · 12 · 30 · 21`). ⛔ **The at-HEAD re-measurement is
+OWED before any migration is written**, and the authorization should be read as conditional on it.
+
+---
+
+## 13.1 What the `.png` draws
+
+Breadcrumb `Classes / Junior · Public Speaking / Lesson Plans` · title `Lesson Plan Management` ·
+a **`← Class Overview`** back control (this frame *does* draw one) · a header card with avatar,
+`Junior · Public Speaking`, the meta line
+`6-week persuasive speaking unit · Tue & Thu · 3:00–4:00 PM · Studio 2 · 12 learners`, and a
+`Term 1 · 2025` selector · `Weekly Lessons` with a `Completed / This week / Upcoming` legend ·
+then one card per lesson carrying a `LESSON n` pill, title, `Tue 25 Feb · Studio 2`, a status
+badge, a **`KEY FOCUS POINTS`** chip row, a **`SLIDES & MATERIALS`** file list
+(`PPTX`/`PDF`/`KEY` type chip · name · size · a download glyph), an
+**`Upload slides & materials`** button, and a dashed **`Slides not uploaded yet`** empty state.
+
+⚠️ **The frame draws TWO files on Lesson 3** (`Vocal Warm-ups`, `Lesson 3 – Projection`). Materials
+are **many-per-session**, unlike evidence's ratified one-per-report.
+
+⚠️ **The last card reads `WEEK 5` where the other four read `LESSON n`.** Measured in the `.html`,
+not inferred. Treated as a frame inconsistency; the build uses `LESSON n` throughout and records
+the divergence.
+
+## 13.2 What needs NO new schema — measured, not assumed
+
+| Frame element | Source at HEAD |
+|---|---|
+| lesson number, lesson title | `class_sessions.lesson_number`, `.lesson_title` (both exist, nullable) |
+| date, `Studio 2` | `class_sessions.session_date`, `.room` |
+| `Tue & Thu`, `3:00–4:00 PM` | derived from the module's sessions — screen `13` already does exactly this |
+| `12 learners` | `enrolments` |
+| `Term 1 · 2025` | `terms` (shipped at `P2-2`) |
+| `Completed` / `This week` / `Upcoming` | **deterministic** from `session_date` vs today. No column, no enum |
+| the back control | `components/ui/back-link.tsx` |
+
+## 13.3 ⛔ THE SCHEMA ASK — counts stated in advance
+
+**`1` table · `1` bucket · `1` storage policy · `0` table policies · `0` client table grants ·
+`4` RPCs · `4` `EXECUTE` grants · `0` enums · audit registry `21 → 22`.**
+
+### One table — `public.class_session_materials`
+
+| Column | Type | Note |
+|---|---|---|
+| `id` | `uuid` PK `DEFAULT gen_random_uuid()` | |
+| `class_session_id` | `uuid NOT NULL` | `D-4`: materials belong to a **specific class session**, never to the class generally |
+| `centre_id` | `uuid NOT NULL` | |
+| `storage_object_path` | `text NOT NULL` | |
+| `display_name` | `text NOT NULL` | the frame draws `Lesson 1 – Intro to Persuasion`, which is **not** the file name |
+| `media_type` | `text NOT NULL` | drives the `PPTX`/`PDF`/`KEY` chip |
+| `byte_size` | `bigint NOT NULL` | the frame draws `4.2 MB` |
+| `uploaded_by_account_id` | `uuid NOT NULL` | durable actor FK, `RESTRICT` (`A-029`) |
+| `uploaded_by_membership_id` | `uuid NOT NULL` | durable actor FK, `RESTRICT` |
+| `created_at` | `timestamptz NOT NULL DEFAULT now()` | |
+
+**Constraints:** composite FK `(class_session_id, centre_id) → class_sessions (id, centre_id)`
+`ON DELETE RESTRICT` — ✅ **`class_sessions_id_centre_key` already exists**, so no extra object is
+needed and centre drift is **unrepresentable** rather than merely checked · `UNIQUE
+(storage_object_path)` · `CHECK (byte_size > 0 AND byte_size <= <the ruled ceiling>)`.
+
+⛔ **NO `UNIQUE (class_session_id)`** — the frame draws two files on one lesson. This is the one
+deliberate divergence from the `report_evidence` template, and it is the frame's own.
+
+### One bucket — `lesson-materials`
+
+Private, its own `file_size_limit`, its own `allowed_mime_types`. ⛔ **SEPARATE FROM `evidence`** —
+Authority Lock §8.2: *"separate media classes requiring separate buckets and separate policies —
+do not fold them into the evidence bucket."*
+
+### Policies and grants — the ratified evidence shape, unchanged
+
+- **`0` RLS policies and `0` client grants on `class_session_materials`.** Everything reads and
+  writes through reviewed `SECURITY DEFINER` RPCs, exactly as `report_evidence` does.
+- **`1` policy on `storage.objects`** — `lesson_materials_objects_insert_management` — so the
+  browser can upload directly, the `P1-2b` transport pattern.
+
+### Four RPCs
+
+| RPC | Caller | Does |
+|---|---|---|
+| `material_list_for_session(uuid)` | management **and** trainer | the file list. `D-4`: management uploads, **trainers download** |
+| `material_attach_confirm(...)` | management only | turns an uploaded object into an accepted row |
+| `material_signed_url(...)` | management **and** trainer | mints the short-TTL download URL |
+| `material_remove(uuid)` | management only | ⚠️ **conditional — see 13.4 decision 1** |
+
+### Audit registry `21 → 22` — exactly one string
+
+**`material.attached`** — a governed Management upload has become an accepted material row.
+
+⚠️ **The name follows `evidence.attached`'s ratified reasoning** (`C-4`): no authorized workflow
+leaves an object unattached, so **the upload IS the attach**, and `A-029`'s one-event-per-action
+rule forbids a second name for one action.
+
+⛔ **This is a fresh stop-and-ask in its own right.** `A-057`'s evidence extension is spent and
+does not licence a new family.
+
+## 13.4 ⛔ THREE THINGS I CANNOT DECIDE
+
+### Decision 1 — is removal built?
+
+**The frame draws NO delete control** — the file rows carry a download glyph and nothing else.
+The established discipline (the `27` day strip, unassign) says an undrawn, unratified control is
+**not built**.
+
+⚠️ **But the consequence is sharper here than there:** a wrongly-uploaded file could never be
+removed, by anyone, ever. `D-5` expressly ruled that evidence **can** be removed for exactly this
+reason.
+
+▶ **Recommendation: BUILD IT**, `material.removed` making the registry `21 → 23`. **Your call.**
+
+### Decision 2 — does a download emit an audit event?
+
+`evidence.accessed` fires on every signed-URL mint because the object is **a child's video**.
+A lesson slide deck is **teaching material, not personal data**, and `A-029` plus the `P2-4`
+precedent hold that **a read is not a governed action**.
+
+▶ **Recommendation: NO string.** Registry stays where decision 1 leaves it. **Your call.**
+
+### Decision 3 — ⛔ NEW-QUESTION, AND A HARD STOP: WHO AUTHORS `KEY FOCUS POINTS`?
+
+`D-4` permits the chips and states their **purpose** — *"to give a trainer a quick refresher on
+what the session covers, before class"* — and their **position constraint**. It does **not** say
+who writes them or through which surface. **The frame draws them read-only on `14`: there is no
+edit affordance anywhere in it.**
+
+⛔ **I will not infer an author.** Three things follow and none is mine to pick:
+
+1. If Management authors them, `14` needs an edit control the frame does not draw.
+2. If nobody authors them, the column is always empty, hero 0B omits the whole block, and the
+   feature is **vacuous** — which is worse than absent, because the frame implies it works.
+3. Whichever way it goes, it decides whether this phase also adds **`class_sessions.key_focus`**
+   (`text[]`, `1` column) — which is **not** in the 13.3 counts above and would change them.
+
+⚠️ **`observations.focus_chips` IS NOT THIS FIELD and must not be reused for it.** That is the
+trainer's **post-session** observation; `KEY FOCUS` is **lesson-plan intent**. `G-3` is explicit
+that they are different fields with different authority, and conflating them is the invisible
+substitution `D-4`'s position constraint exists to prevent.
+
+## 13.5 What is NOT built regardless
+
+| Frame element | Why |
+|---|---|
+| **`6-week persuasive speaking unit`** | a module description. **No column, no entity** — the `C-14` family (`Class code`, `Capacity`, `Program`). `A-022`: do not schema a field from a frame. **`REGISTERED-OMISSION`** |
+| **KEY FOCUS in or adjoining a governed carried-forward focus line** | `D-4`'s hard constraint · `G-3` · protects §10 Phase 1 exit condition **(c)**. ⛔ On `14` there is no such line, so the constraint is satisfiable — and the check must still be **structural**, because the substitution is invisible on the rendered page |
+| **`WEEK 5`** | a frame inconsistency; `LESSON n` throughout, divergence recorded |
+| any rating, roll-up or `Overall Grade` | `C-9`, `G-2` |
+| `Assist.` / TA anything | `A-014`, `G-7` |
+
+## 13.6 Status
+
+⏸ **`AWAITING_OPERATOR`.** ⛔ **No migration is written, no file is created, and no count above is
+acted on until the Operator authorizes — including the three decisions in 13.4 and the owed
+at-HEAD re-measurement in the preamble.** This discharges the *statement* half of `R-7`; the
+authorization half is the Operator's.

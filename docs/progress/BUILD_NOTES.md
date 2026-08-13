@@ -8817,3 +8817,119 @@ than assumed harmless.
 governed action) · `A-014`/`G-7` · `A-026`/`A-054` · hero 0B · `CLAUDE.md` §6.1, §7.4.1, §15.6.
 
 **Next permitted action:** the Operator clears `:3000` so `S3-M6` can run; then `P2-6`.
+
+---
+
+## 2026-08-13 — THE FIXTURE-CONTENT-PIN CLASS NAMED; §7.4.1 RECORDED; `P2-6` STOPPED AT THE `C-7` GATE
+
+**Checkpoint.** Part 2, after `P2-5`. **Branch:** `develop`. **HEAD at start:** `e8d9482`.
+
+### Suites run once `:3000` was cleared
+
+- **`prove:stage2-routes` — PASS, 17 checks, exit 0.**
+- **`prove:stage3-authenticated` — `S3-00` FAIL: the loopback Supabase stack is unreachable.**
+  Docker Desktop is not running and the daemon `npipe` is unreachable. **`S3-M6` — screen `25`'s
+  first rendered proof — is `NOT-RUN`.**
+
+▶ **The guard did its job.** `S3-00` refused to report a green Stage 3 against an unreachable
+stack. That is the fifth place *a leg that cannot run is `NOT-RUN`, never `PASS`* has paid for
+itself, after the docker-stopped `P2-4` runner, `SC-8c`'s vacuous forced hover, `P7-6`, and the
+executed-count leg.
+
+⛔ **Docker was NOT restarted.** Starting Docker Desktop would also restart the **frozen
+demonstration stack's containers on 543xx**, which the standing constraint puts off limits. That
+is an Operator decision, not mine.
+
+### ⛔ THE THREE RED SUITES ARE ONE CLASS, AND IT IS NOW NAMED — plan §12.8
+
+> **Operator:** *"Each had encoded a snapshot of the fixture as if it were a rule, and each
+> survived only while nobody used the product … Distinguish 'this is what the fixture happens to
+> hold' from 'this is what the system must enforce', and pin only the second."*
+
+**The rule recorded:** a suite may pin a **governed rule**; it may not pin what the fixture
+**happens to contain**. A content pin is invisible while the product sits unused, because the
+fixture is the only writer — and when it fires it **looks exactly like a regression**, which is
+the expensive part.
+
+**`prove:encoding` is the clearest case, and the Operator's framing is the right one: a test
+asserting a defect.** Requiring every `class_modules.title` to contain `U+2014` is, stated as a
+product rule, *the system must reject a class title a user types with a hyphen*. No such rule
+exists and building one would be a defect. It was not merely over-tight — it asserted the wrong
+behaviour, and would have kept doing so until somebody typed a title.
+
+**`P23-9` is the phase-scoped-claim defect, fourth instance**, recorded with the other three (§12's
+census split and the three `P2-2`-era suites that pinned the registry total). It claimed *the two
+CREATE RPCs assign nobody* and wrote it as a global count of every `admin.trainer_assigned` event
+that has ever existed. Now a delta.
+
+**`P7-6` is the same family from the other direction** — it depends on a fixture **shape**, and
+the walkthrough **consumed its precondition**. Case planted. ⚠️ **It said `FAIL`, not `PASS`,
+which is the only reason it surfaced.**
+
+**The test now recorded for a new assertion:** say it out loud as a product rule; ask what a
+legitimate user action does to it; prefer a delta to a total, a refusal to a count, a shape to a
+string; and if content must be pinned, scope it to the seeded set with its count pinned so it
+cannot silently become zero.
+
+### ✅ §7.4.1 EARNED ITSELF ON ITS FIRST OUTING — plan §12.9
+
+Recorded on the Operator's ruling. `CLAUDE.md` §7.4.1 was written on 2026-08-13 after four phases
+derived their layouts from a prose `.md`. **`P2-5` is the first phase executed under it.**
+
+The pack's `.md` names `Showcase` **nowhere**. The `.png` draws it as a badge; the `.html` carries
+it as a **third chip treatment** (`#DCF2F3`/`#3FBAC2`). The `GC-13` register bars *"a second event
+entity"* — the frame carries the same concept in **two further places the register does not
+name**, and the artefact four previous phases were built from mentions **neither**.
+
+▶ **The general form worth keeping: a prose note lists what a screen CONTAINS; it does not
+enumerate what a screen ENCODES.** Colour, position, weight, adjacency and shade carry meaning
+prose has no obligation to mention, and here that meaning was governance-bearing.
+
+### ✅ THE ICON CHANGE — acceptance stands
+
+Operator ruling: *"Purely additive, three new entries, no existing one touched, so no accepted
+screen's rendering moves. Recorded as not superseding."* The visual acceptance of `12`, `13`, `26`
+and `27` at `3431981` is **undisturbed**.
+
+### ✅ THE TWO `P2-5` JUDGEMENT CALLS — accepted
+
+Measured months rather than a guessed range; per-module cycling hue that means nothing.
+> **Operator:** *"a hue that appears to encode something it does not is worse than one that
+> obviously does not."*
+
+### ⏸ `P2-6` — STATED AND STOPPED AT THE `C-7` GATE
+
+Screen `14` Lesson Plan Management. All three artefacts opened. **Full statement at
+`PORTAL_COMPLETION_PLAN.md` §13.** Counts stated in advance:
+
+**`1` table · `1` bucket · `1` storage policy · `0` table policies · `0` client table grants ·
+`4` RPCs · `4` EXECUTE grants · `0` enums · audit registry `21 → 22`.**
+
+⚠️ **Materials are many-per-session** — the frame draws two files on Lesson 3 — the one deliberate
+divergence from `report_evidence`'s ratified one-per-report, and it is the frame's own.
+✅ `class_sessions_id_centre_key` already exists, so the composite FK needs no extra object.
+
+**Three decisions the Operator owns:** whether removal is built (recommend yes, `21 → 23`) ·
+whether a download emits an event (recommend no) · and ⛔ **a NEW-QUESTION hard stop: who authors
+`KEY FOCUS POINTS`?** `D-4` gives their purpose and position constraint but not their author, and
+the frame draws them read-only with no edit affordance. If nobody authors them the feature is
+**vacuous — worse than absent, because the frame implies it works**. It also decides whether
+`class_sessions.key_focus` is a fifth object, which is **not** in the counts above.
+⛔ `observations.focus_chips` is **not** this field and must not be reused for it (`G-3`).
+
+⚠️ **One measurement limit stated in the statement itself:** Docker stopped before this phase, so
+it is read from migration files at HEAD plus this session's earlier live measurements. **The
+at-HEAD re-measurement is owed before any migration.**
+
+### Files changed
+
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§12.8, §12.9, §13) · `docs/progress/STATUS.md` ·
+this file · `docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification:** `prove:stage2-routes` exit 0 (17 checks). `prove:stage3-authenticated`
+**`NOT-RUN`** on `S3-00`. No code changed in this entry, so no other suite was re-run.
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` **ACCEPTED** at `3431981` with their three limits,
+undisturbed by the additive icon change. **`25` `NOT-RUN`.**
+
+**Next permitted action:** the Operator decides on Docker, and rules the three `P2-6` decisions.
