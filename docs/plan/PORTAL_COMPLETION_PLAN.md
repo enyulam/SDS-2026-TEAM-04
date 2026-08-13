@@ -2407,3 +2407,316 @@ sizes rather than rem approximations.)*
 | **VISUAL acceptance, `12`/`13`/`26`/`27`** | ✅ **ACCEPTED at `3431981`**. ⚠️ `13` carries the §14.4 change |
 | `tsc --noEmit`, `eslint` | ✅ clean |
 | Container counts | **dev 9 · mvp 0** at every step |
+
+---
+
+## §15 — THE FOUR `P2-6` RULINGS (Operator, 2026-08-14)
+
+### §15.1 — ⛔ `AR-4-14` IS A **KNOWN RED**, NOT A DEFECT AND NOT A WAIVER
+
+> **Operator:** *"LEAVE IT FAILING, with its reason recorded. Both routes to green are worse than
+> red: citing icon geometry the component does not build to is **fabricating evidence**, and
+> rewriting the shell's `text-[0.84375rem]` touches a shared control on four accepted screens to
+> satisfy a threshold. Record it as a **KNOWN RED with a stated cause**, not a defect and not
+> waived. `AR-4` is a **heuristic** for whether the `.html` was read, and this frame simply does not
+> carry enough fractional values in its own component. **Do NOT lower the threshold — a rule
+> relaxed to fit one frame stops measuring the next.**"*
+
+**`KNOWN-RED-AR-4-14`.** ⚠️ **A third status, and it is neither of the two a reader reaches for.**
+It is **not a defect** — nothing is wrong with screen `14`, its citation or its build. It is **not
+a waiver** — the leg still runs, still fails, and still appears in every report.
+
+**The measured cause, so nobody re-derives it:**
+
+| Fractional value in this frame | Carrier |
+|---|---|
+| `10.50px` | `Management Portal` — **shared portal shell** |
+| `13.50px` | sidebar nav items — **shared portal shell** |
+| **`11.50px`** | **the breadcrumb — screen `14`'s own component** |
+
+▶ **`AR-4` asks for ≥2 and this frame offers 1 inside the screen's own component.** That is a
+property of the *frame*, not of the build.
+
+⛔ **THE TWO ROUTES TO GREEN, AND WHY EACH IS WORSE THAN RED:**
+
+1. **Citing icon-internal geometry** (`7.50px`, `5.83px`) is **fabricating evidence** — quoting
+   values the component demonstrably does not build to, in a rule whose entire purpose is to
+   distinguish *derived from* from *quoted at*.
+2. **Rewriting the shell's `text-[0.84375rem]` → `text-[13.5px]`** is arithmetically identical and
+   still **touches a shared control on four ACCEPTED screens** to satisfy a threshold.
+
+⛔ **THE THRESHOLD DOES NOT MOVE.** *"A rule relaxed to fit one frame stops measuring the next."*
+
+⚠️ **ESCALATION CONDITION, STATED IN ADVANCE:** *"If a later frame hits the same wall, bring it to
+me; **two instances would make it a rule problem rather than a frame accident**."* ▶ **The second
+occurrence is a stop-and-ask, not a second `KNOWN-RED`.**
+
+### §15.2 — ✅ SCREEN `13`'s CONTROL: ACCEPTANCE STANDS, AND THE UPDATE WAS THE FIX
+
+> **Operator:** *"correct, and **not a regression against my acceptance**. Its inert reason had
+> lapsed and leaving it would have made the sentence false. **That is the stale-restatement family,
+> and updating it is the fix rather than the violation.** Acceptance of `13` stands."*
+
+▶ **THE RULING THAT MATTERS BEYOND THIS CONTROL:** a screen's visual acceptance is **not** a freeze
+on the sentences the code tells about itself. `P2-4` wrote *"Lesson plans arrive with screen 14."*
+as a **true statement with an expiry**, and `P2-6` is when it expired. **Leaving it would have
+preserved the pixels and falsified the record.**
+
+⚠️ **This is the stale-restatement family arriving from a new direction.** Every prior instance was
+a rule restated in a second place and not updated when the first moved. This one is a **reason**
+that was true when written and was outlived by the thing it explained. **Same failure, different
+clock.**
+
+### §15.3 — ⛔ §12.8's CANONICAL EXAMPLE, AND THE PIN-VERSUS-RATCHET CENSUS
+
+> **Operator:** *"refusing the number-bump is right, and I want the reasoning kept: **bumping
+> re-arms the identical trap for `P2-7`, so the cheap repair costs more than the expensive one.**
+> ⚠️ **`P22-4` going red BECAUSE THE PRODUCT WORKS is the clearest instance of the class this
+> project has produced.** My Add Class walkthrough legitimately set terms on 13 sessions, and a
+> suite treated that as a regression. **Record it as the canonical example under §12.8.** And
+> `P2-5`'s own header stating the correct rule while the code three lines below contradicted it is
+> **`D-28` again — proximity defeating the check that distance would have triggered.**"*
+
+#### ⛔ THE CANONICAL §12.8 EXAMPLE — `P22-4`
+
+**The leg asserted:** `count(*) FROM class_sessions WHERE term_id IS NOT NULL = 0`.
+**It was true** when the terms substrate shipped, because nothing had ever set a term.
+**It went red** when the Operator scheduled classes through the governed Add Class flow.
+
+▶ **THE SUITE REPORTED A REGRESSION WHOSE ONLY CAUSE WAS THE PRODUCT BEING USED CORRECTLY.**
+
+⚠️ **Why this one is canonical where the earlier instances were merely illustrative:** the others
+(`prove:encoding`'s em-dash demand, `P23-9`'s absolute-zero) required a *reading* to see the defect.
+This one is self-evident — **the feature working is the failure condition.** A test in that shape is
+not measuring the system; it is measuring the system's disuse.
+
+**The repair pattern, stated generally:** a claim about a *migration* must be asserted against the
+**migration's own properties** — the column is nullable, carries **no `DEFAULT`**, and rows
+predating it still hold `NULL` — never against **how many rows currently happen to have a value**.
+▶ **None of the three moves when somebody schedules a class.**
+
+#### ⚠️ `D-28` AGAIN — PROXIMITY DEFEATING THE CHECK
+
+`prove-p2-5-schedule.mjs`'s header stated the rule **correctly**:
+
+> *"THE REGISTRY IS REPORTED, NOT PINNED AS THIS PHASE'S CLAIM … a phase-scoped claim written as a
+> global absolute measures every OTHER phase's behaviour."*
+
+**Three lines below, the code read `registry === "21"`.**
+
+▶ **`D-28`'s shape: the rule and its violation were adjacent, and adjacency is exactly what
+suppresses the check.** A reader who had to *travel* to the rule would have arrived holding the
+question *"does the code satisfy this?"*. A reader whose eye passes over both in one glance
+arrives holding no question at all — the comment reads as a **description of the code beneath it**
+rather than a **constraint on it**. ⛔ **Distance would have triggered the comparison that
+proximity suppressed.**
+
+#### THE CENSUS — content pins versus genuine ratchets
+
+**All six suites are now governed rules rather than content pins.** Classified by CHECK, not by
+suite, because one suite carried several:
+
+| Class | Count | What it was |
+|---|---|---|
+| **CONTENT PINS** (measured what the schema/fixture *happened to hold*) | **13** | repaired as **floors**, one **rescoped to its window**, one **rewritten to measure the migration** |
+| **GENUINE RATCHETS** (exact *by their own recorded design*, legitimately moved) | **2** | rewritten with the new entry **NAMED**, never deleted |
+| **REGISTRATION GUARDS** (not pins at all — they *worked*, demanding a new thing be declared) | **3** | satisfied by declaring it |
+
+**The 13 content pins:** `P25a-NOMIG` · `P25a-CENSUS` · `P25-1`/`P25-7` (p2-5 SQL) · the four
+`tables === "29"` checks in `p2-2-terms`, `p2-2-create`, `p2-2b`, `p2-4` · `p2-3`'s combined
+tables/enums/policies/registry check · `P25-1` (p2-3 SQL) · `P26-1` and `P26-11` (p2-4 SQL) ·
+**`P22-4`**.
+
+**The 2 genuine ratchets — both EXACT by design, and both say why in their own comments:**
+
+| Ratchet | Moved | Why it is not a floor |
+|---|---|---|
+| Route census `P21a-14` | 20 → **21** | *"a floor would keep passing if it silently stopped [reading the tree]"* |
+| Global function ratchet (`hero-2` `P2-6`) | 56 → **61** | the project's **single** global function count, deliberately in one place |
+
+⚠️ **NEITHER WAS A DEFECT.** A ratchet that requires a phase to write down what it added **is the
+mechanism working** — *"Every new screen deliberately edits this line — that is the ratchet, not
+friction."* ▶ **The five new functions and the new route are NAMED at both sites.**
+
+**The 3 registration guards — all three fired correctly and none was weakened:** the nav suite's
+`N-0` (the new route needed an expectation) · `RPC_MIGRATIONS`/`PLMa-PAIR` (the new migration needed
+a paired suite — *"the point of failure to watch"*, per its own header) · `artefact-read`'s
+`AR-1`/`AR-8a` (the new `MEASURED` screen needed its citation block).
+
+⛔ **THE ECONOMIC POINT, KEPT ON THE OPERATOR'S INSTRUCTION:** bumping thirteen numbers is the
+**cheap** repair and it **re-arms the identical trap for `P2-7`**. ▶ **The cheap repair costs more
+than the expensive one**, and it costs it later, to somebody with less context.
+
+### §15.4 — TWO CARRIED FINDINGS, WITH A KNOWN REMEDY AND A MISSING AUTHORIZATION
+
+> **Operator:** *"correctly deferred under the `S3-00` precedent. Record them as carried, with the
+> note that **`S3-M6` already solved the same problem with `?month=`, so the remedy is known and
+> only the authorization is missing**."*
+
+| Finding | State |
+|---|---|
+| **`S3-T1-r`** | ⛔ **CARRIED.** The trainer calendar opens on **today's** month; all 17 sessions sit in `2026-01`…`2026-03`; the leg hardcodes `February 2026`. **§12.8 from the TIME direction** — the product is correct and the leg was overtaken by the calendar. ✅ **THE REMEDY IS KNOWN AND ALREADY PROVEN IN THIS REPOSITORY:** `S3-M6` pins `?month=2026-02` in the URL for exactly this reason, and its comment records why. **Only the authorization to touch that harness is missing.** |
+| **`D-10`** | ⛔ **CARRIED.** `prove:serving-discipline` teardown. Port `3419` verifiably free (`HTTP 000`, no `netstat` entry) with one surviving `node.exe` holding neither `3419` nor `3000`. A Windows teardown-timing finding, untouched by this phase. **No remedy identified yet.** |
+| **`S3-00`** | ⛔ **CARRIED** (unchanged). Passes on *config resolution* while its name claims *reachability*. |
+
+⚠️ **A CARRIED FINDING WITH A KNOWN REMEDY IS A DIFFERENT OBJECT FROM AN OPEN INVESTIGATION**, and
+recording them the same way loses the distinction. **`S3-T1-r` needs a decision; `D-10` needs a
+diagnosis.**
+
+---
+
+## §16 — `P2-7` (screen `11` Management Dashboard): STATED AND STOPPED
+
+**All three artefacts opened** (`CLAUDE.md` §7.4.1): `reference/Management - Dashboard/….png` ·
+`….html` · `UI_REFERENCE_FINAL_MVP/11-management-dashboard/screen.md`. **Nothing built.**
+
+### §16.1 — ⛔ THE LARGEST FRAME-VERSUS-GOVERNANCE COLLISION IN THE ESTATE SO FAR
+
+**The `.png` draws a RATING CHIP ON EVERY ROW** of *Reports waiting for approval* — and the `.html`
+carries all four ratified labels as literal text, **8 chips for 8 rows**:
+
+| Label | Occurrences in the `.html` |
+|---|---|
+| `Beginning` | 2 |
+| `Developing` | 3 |
+| `Mastering` | 2 |
+| `Mastered` | 1 |
+
+⛔ **PROHIBITED, AND BOTH AVAILABLE READINGS PROHIBIT IT — which is the strongest form:**
+
+- Read as a **per-dimension rating**, `C-9` confines `D-1`'s nine ratings to report **DETAIL**
+  surfaces, because ratings on a list surface *"invite comparison between children"*. The
+  dashboard is a **list surface**, and `C-9`'s own row in §2 names **`P2-7`** explicitly.
+- Read as a **single roll-up of the nine**, `G-2` bars **every roll-up on every surface,
+  permanently**.
+
+▶ **There is no reading on which the chip is legal.** `REGISTERED-OMISSION`, and it **NEVER ENDS**.
+
+### §16.2 — ⛔ A SECOND, QUIETER LEAK ON THE SAME PANEL
+
+Each row carries a one-line description, and **the `.html` gives all eight verbatim**:
+
+> `Mastered eye contact, clear projection` · `Beginning on sentence flow & pace` ·
+> `Improving tone and body language` · `Excellent emotional expression in debate` ·
+> `Polishing persuasive techniques` · `Consistent use of rhetorical questions` ·
+> `Enhancing vocal variety and pauses` · `Strengthening audience engagement`
+
+⚠️ **TWO INDEPENDENT PROBLEMS, and the first is easy to miss because it is prose rather than a
+chip.** *"**Mastered** eye contact"* and *"**Beginning** on sentence flow"* put the **ratified
+rating vocabulary into running text** — the same disclosure the chips make, wearing a sentence.
+▶ **Removing the chips and keeping the descriptions would leave the leak in place.**
+
+**Second:** no ratified field supplies a one-line assessment summary. `A-038` gives management the
+four parent-facing panels at `trainer_approved` and nothing else; a per-row précis is **assessment
+substance with no substrate**. ⛔ `REGISTERED-OMISSION` — **no substrate, and it would leak if it
+had one.**
+
+### §16.3 — ⚠️ THE `Approved` KPI TILE HAS AN EMPTY REFERENT
+
+The frame draws **`Approved 9`**. ⛔ Under **`A-036`** `approved` is **transient-in-transaction**
+and **no operation ever commits with `status = 'approved'`**, so a count of approved reports is
+**always zero, forever**, by design.
+
+▶ **This is the SAME defect corrected at Step 7I1D-R2** for Class Health Summary and Management
+Insight, where *"approved reports"* was struck and replaced with **submitted**. The canonical
+readable version is the one `latest_submitted_version_id` names.
+
+**Proposed:** the tile reads **`Submitted`**, sourced from the already-accepted
+`report_list_management_submitted` boundary. ⚠️ **A LABEL CORRECTION AGAINST THE FRAME, recorded
+rather than silently applied.**
+
+### §16.4 — ⚠️ THREE MORE FRAME STRINGS THAT ARE NOT RATIFIED
+
+| Frame string | Occurrences | Disposition |
+|---|---|---|
+| `Grade 8` (Today's Events) | 5 | ⛔ Not a ratified Class Grade — the vocabulary is `Beginner`/`Intermediate`/`Advanced` (`A-016`, `A-026`/`A-054`). Read from `class_grades.display_name`, never a literal |
+| `Hall A` | 5 | `class_sessions.room` **exists** — not a `C-14` refusal — but is **NULL on all 17 sessions**. hero `0B`: **omit the element** |
+| `4 awaiting approval` badge over **8 drawn rows** | 1 | ⚠️ **The frame contradicts itself.** The badge is built from the **actual** pending count, so the two can never disagree in the product |
+
+⚠️ **`Today's Events` is NOT a second event entity.** `GC-13` bars one and `A-016` fixes calendars
+as **projections of class-session records**, so it is built from `readCentreScheduleCore`
+(delivered at `P2-5`) filtered to today. **No new entity, no duplicated event record.**
+
+### §16.5 — ✅ WHAT IS BUILDABLE WITH NO SCHEMA CHANGE AT ALL — measured, not assumed
+
+| Element | Source | Measured |
+|---|---|---|
+| **Total Students** | `students`, direct RLS read | ✅ `authenticated SELECT` grant **and** a `students_select_management` policy both present |
+| **Pending Approval** | `listManagementPendingReviewCore` row count | ✅ already accepted and in use on this very surface |
+| **Submitted** (for the corrected tile) | `report_list_management_submitted` | ✅ delivered RPC |
+| **Reports waiting for approval** list | `listManagementPendingReviewCore` | ✅ already returns name, session date and status |
+| **Calendar** + **Today's Events** | `readCentreScheduleCore` (`P2-5`) | ✅ delivered, and `A-016`-compliant by construction |
+
+### §16.6 — ⛔ STOP 1 (SCHEMA): THE `Assessed` TILE IS THE ONLY THING WITH NO SOURCE
+
+**`Assessed 1,088`** counts learners who have been assessed. Computing it requires reading
+`observations` or `reports` at **pre-trainer-approval** statuses, and **measured at HEAD both tables
+carry ZERO client grants** (`reports`, `observations`, `report_versions` — all `NOGRANT`). ▶ **There
+is no direct read to fall back on**, exactly as at `P2-4`.
+
+⚠️ **NOR IS IT DERIVABLE FROM THE ACCEPTED SURFACE.** The three delivered management boundaries
+expose only `trainer_approved`, `needs_edit`, `draft_ready` and `submitted`; a report at
+`incomplete`, `observation_saved` or `drafting` is invisible to management **by `A-038`'s design**.
+`report_class_health_summary` does return `total_reports`, but **per CLASS MODULE**, and it counts
+**reports, not assessed learners**.
+
+**⛔ STATED IN ADVANCE, FOR AUTHORIZATION — nothing written:**
+
+| | Proposed |
+|---|---|
+| **Tables** | **0** |
+| **Columns** | **0** |
+| **Enums** | **0** |
+| **Policies** | **0** |
+| **Client table grants** | **0** |
+| **Audit registry** | **0 — UNMOVED at 23.** A read is not a governed action (`A-029`) |
+| **Functions** | **1** — `report_centre_dashboard_summary()`, a reviewed `SECURITY DEFINER` **READ**, management-only, centre resolved from the caller's own membership |
+
+**Returning exactly:** `total_students int` · `assessed_students int` · `pending_approval int` ·
+`submitted_reports int`. ⛔ **No rating, no roll-up, no panel text, no trainer note, no content
+hash, no per-child anything** — four integers. An assertion in the migration would fail the build
+if the body so much as **names** rating vocabulary, matched as a bare substring, exactly as `V-4`
+does at `P2-4`.
+
+⚠️ **THE PRECEDENT, AND ITS LIMIT.** `report_class_health_summary` already returns aggregate
+counts spanning pre-trainer-approval reports to management **at class scope** — so *counts are not
+content* is already ruled. **What is NOT ruled is widening that to CENTRE scope**, and that is the
+decision. ▶ **A cheaper alternative exists and is worse:** call the existing per-module summary
+once per module and sum client-side. It needs no authorization, but it **re-derives a governed
+aggregate outside the database**, costs N round-trips, and still cannot produce *assessed
+learners* — only report totals.
+
+**If the answer is no:** the `Assessed` tile becomes a **`REGISTERED-OMISSION` with no substrate**
+and the dashboard ships with **three** tiles. That is a complete screen under a stated omission,
+not a broken one.
+
+### §16.7 — ⛔ STOP 2 (ROUTE): THE CANONICAL ROUTE IS NOT WHERE THE SURFACE LIVES
+
+| | |
+|---|---|
+| Canonical route (ratified inventory) | **`/management/dashboard`** |
+| Where the surface lives today | **`/management`** — `page.tsx` renders `ManagementDashboard` |
+| What the pack proposes | *"Build the canonical `/management/dashboard` route to node `397:2`; **preserve `/management` as a redirect**."* |
+
+⛔ **THAT IS A ROUTE-COMPATIBILITY TREATMENT, AND `CLAUDE.md` §12 NAMES IT A STOP-AND-ASK** —
+*"execute a route-compatibility treatment (move/redirect/alias/replace) without its own
+authorization"*. It also moves the **portal home** and the **Dashboard rail item's `href`**
+(`portal-navigation.ts` — `home: "/management"`, the rail entry, and its `path`), which is a
+**shared control** on surfaces already accepted.
+
+**Three options, stated for a ruling — none executed:**
+
+1. **Build at `/management`** (where it already is). No route treatment, no shared-control change,
+   and a **recorded divergence** from the ratified canonical route.
+2. **Move to `/management/dashboard` + redirect `/management`**, per the pack. Requires this
+   authorization and touches the rail and portal home.
+3. **Move, and additionally re-point the rail.** Same as 2 plus the nav census and its expectations.
+
+⚠️ **I have a recommendation and it is option 2**, because the inventory's canonical route is
+ratified and a redirect preserves every existing entry point — **but the pack proposing it is not
+the same thing as the treatment being authorized**, which is precisely the distinction §12 draws.
+
+### §16.8 — Position
+
+⏸ **NOTHING BUILT. NOTHING MIGRATED. NOTHING COMMITTED for `P2-7`.** Two stops, both stated with
+their counts and options. Everything in §16.5 is ready to build the moment they are ruled.

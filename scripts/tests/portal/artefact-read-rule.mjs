@@ -78,6 +78,38 @@ export const UNMEASURED = [
 /** Screens that MUST carry a citation block. */
 export const MEASURED = ["12", "13", "14", "25", "26", "27"];
 
+/*
+ * ⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.
+ *
+ * ⚠️ `AR-4-14` FAILS ON PURPOSE AND MUST KEEP FAILING. It is **not a defect**
+ *    (nothing is wrong with screen `14`, its citation or its build) and it is
+ *    **not a waiver** (the leg still runs, still fails, still reports).
+ *
+ * ▶ THE MEASURED CAUSE: `AR-4` requires >=2 FRACTIONAL values, and the
+ *   `Management - Lesson Plan Management` frame carries exactly THREE --
+ *   `10.50px` (`Management Portal`) and `13.50px` (sidebar nav) belong to the
+ *   SHARED PORTAL SHELL, leaving `11.50px` (the breadcrumb) as the only one
+ *   inside screen `14`'s own component. **That is a property of the FRAME.**
+ *
+ * ⛔ BOTH ROUTES TO GREEN WERE REFUSED, and the reasons are the ruling:
+ *    1. Citing icon-internal geometry (`7.50px`, `5.83px`) is FABRICATING
+ *       EVIDENCE -- quoting values the component does not build to, inside a
+ *       rule whose whole purpose is to separate `derived from` from `quoted
+ *       at`.
+ *    2. Rewriting the shell's `text-[0.84375rem]` -> `text-[13.5px]` is
+ *       arithmetically identical and still TOUCHES A SHARED CONTROL ON FOUR
+ *       ACCEPTED SCREENS to satisfy a threshold.
+ *
+ * ⛔ DO NOT LOWER THE THRESHOLD. Operator: *"a rule relaxed to fit one frame
+ *    stops measuring the next."* `AR-4` is a HEURISTIC for whether the
+ *    `.html` was opened; weakening it to fit the one frame it cannot measure
+ *    destroys it for every frame it can.
+ *
+ * ⚠️ ESCALATION CONDITION, SET IN ADVANCE: if a LATER frame hits the same
+ *    wall, that is a STOP-AND-ASK, not a second `KNOWN-RED`. Operator: *"two
+ *    instances would make it a RULE problem rather than a FRAME accident."*
+ */
+
 const BLOCK = /```artefact-read\r?\n([\s\S]*?)```/g;
 
 /** `10.50px` -> `10.5px`, `13.00px` -> `13px`; anything else unchanged. */

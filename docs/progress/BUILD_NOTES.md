@@ -9329,3 +9329,106 @@ INERT→LIVE change above.** `25` and `14` **`NOT-RUN`** — Operator-set only.
 
 **Next permitted action:** the Operator walks screens `25` and `14`; rules `AR-4-14`; then `P2-7`
 in plan order.
+
+---
+
+## 2026-08-14 (later) — THE FOUR `P2-6` RULINGS RECORDED; `P2-7` STATED AND STOPPED
+
+**Checkpoint.** Part 2. **Branch:** `develop`. **HEAD at start:** `57516be`. **Containers: dev 9 ·
+mvp 0** throughout; the demonstration stack was never started.
+
+### The four rulings
+
+**(1) `AR-4-14` = `KNOWN-RED`** — a third status, neither defect nor waiver. Recorded in
+`artefact-read-rule.mjs` itself with its measured cause and its escalation condition; **the leg
+still runs and still fails, verdict unchanged**. ⛔ The threshold does not move — *"a rule relaxed
+to fit one frame stops measuring the next."* ⚠️ **A second frame hitting the same wall is a
+stop-and-ask, not a second `KNOWN-RED`** — two instances would make it a rule problem rather than a
+frame accident.
+
+**(2) Screen `13`'s acceptance STANDS.** The INERT→LIVE change is *"the stale-restatement family,
+and updating it is the fix rather than the violation."* ▶ **The ruling that generalises: a screen's
+visual acceptance is not a freeze on the sentences the code tells about itself.** `P2-4` wrote a
+**true statement with an expiry**, and `P2-6` is when it expired. ⚠️ Same failure as every prior
+stale-restatement instance, **different clock** — those were rules restated in a second place and
+left behind; this was a *reason* outlived by the thing it explained.
+
+**(3) The §12.8 census — 13 content pins · 2 genuine ratchets · 3 registration guards**, classified
+by CHECK rather than by suite because one suite carried several. ⚠️ **Neither ratchet was a
+defect**: a ratchet that makes a phase write down what it added is the mechanism working, and both
+were rewritten with the new entry NAMED. ⛔ **`P22-4` is the Operator-designated canonical
+example** — it *"went red BECAUSE THE PRODUCT WORKS"*, and it is canonical because the earlier
+instances needed a *reading* to see the defect while here **the feature working IS the failure
+condition**; a test in that shape measures the system's **disuse**. ⚠️ **`P2-5`'s header
+contradicting the code three lines below it is `D-28`** — proximity defeating the check distance
+would have triggered: a reader who must *travel* to a rule arrives holding the question, while one
+whose eye crosses both at once reads the comment as a **description of** the code rather than a
+**constraint on** it.
+
+**(4) `S3-T1-r` and `D-10` CARRIED.** ⚠️ **`S3-T1-r`'s remedy is already proven in this
+repository** — `S3-M6` pins `?month=` for exactly this reason — **so only the authorization is
+missing.** `D-10` needs a diagnosis, not a decision. ▶ **A carried finding with a known remedy is a
+different object from an open investigation, and recording them the same way loses the
+distinction.**
+
+### `P2-7` — stated and stopped, nothing built
+
+All three artefacts opened (§7.4.1). ⛔ **The frame carries the largest governance collision in the
+estate so far**: a rating chip on **every row** of *Reports waiting for approval*, with all four
+ratified labels literal in the `.html` — **8 chips for 8 rows** (`Beginning`×2, `Developing`×3,
+`Mastering`×2, `Mastered`×1). **Both available readings prohibit it**, which is the strongest form:
+as a per-dimension rating `C-9` confines the nine to report DETAIL surfaces (and `C-9`'s own row
+names `P2-7`); as a single roll-up `G-2` bars every roll-up everywhere, permanently.
+
+⚠️ **A SECOND, QUIETER LEAK ON THE SAME PANEL.** The eight row descriptions carry the ratified
+vocabulary **in running text** — *"**Mastered** eye contact, clear projection"*, *"**Beginning** on
+sentence flow & pace"*. ▶ **Removing the chips and keeping the descriptions would leave the leak in
+place**, which is exactly the kind of half-fix that reads as complete. They also have **no
+substrate**: `A-038` gives management the four parent-facing panels and nothing else.
+
+⚠️ **The `Approved` KPI tile has an empty referent.** `A-036` makes `approved`
+transient-in-transaction and it never commits, so the count is **always zero, forever, by design**.
+**Third sighting of the Step 7I1D-R2 defect**, after Class Health Summary and Management Insight.
+Proposed: the tile reads **`Submitted`**, from the already-accepted boundary — **a label correction
+against the frame, recorded rather than silently applied.**
+
+Three more unratified frame strings dispositioned: `Grade 8` (not a ratified Class Grade — read
+from `class_grades.display_name`), `Hall A` (`room` exists but is NULL on all 17 sessions → hero
+`0B` omit), and a `4 awaiting approval` badge drawn over **8 rows** — **the frame contradicting
+itself**, resolved by building the badge from the actual count. ⚠️ **`Today's Events` is NOT a
+second event entity** (`GC-13`, `A-016`): it is `readCentreScheduleCore` filtered to today.
+
+**TWO STOPS, both stated with counts and options, neither executed:**
+
+1. **SCHEMA.** The `Assessed` tile is the **only** element with no source. `reports`,
+   `observations` and `report_versions` all measured **ZERO client grants** at HEAD, and the three
+   delivered management boundaries expose only `trainer_approved`/`needs_edit`/`draft_ready`/
+   `submitted` — a report at `incomplete`/`observation_saved`/`drafting` is invisible to management
+   **by `A-038`'s design**. Proposed: **0 tables · 0 columns · 0 enums · 0 policies · 0 client
+   grants · registry UNMOVED at 23 · ONE reviewed `SECURITY DEFINER` READ** returning **four
+   integers**, with a build-failing assertion if its body names rating vocabulary. ⚠️ **The
+   precedent is `report_class_health_summary`**, which already returns such counts **at CLASS
+   scope** — so *counts are not content* is ruled; **the decision is whether that widens to CENTRE
+   scope.** ▶ A no-authorization alternative exists and is worse: sum the per-module summary
+   client-side — N round-trips, a governed aggregate re-derived outside the database, and it still
+   cannot produce *assessed learners*.
+2. **ROUTE.** Canonical `/management/dashboard` versus the surface's current `/management`. The
+   pack proposes a redirect; **§12 names a route-compatibility treatment a stop-and-ask**, and it
+   moves the portal home and the Dashboard rail `href` — **a shared control on accepted screens**.
+   Three options stated; recommendation is option 2. ⚠️ **The pack proposing a treatment is not the
+   same thing as the treatment being authorized**, which is the distinction §12 draws.
+
+### Files changed
+
+`scripts/tests/portal/artefact-read-rule.mjs` (the `KNOWN-RED` record — **no verdict change**) ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§15, §16) · `docs/progress/STATUS.md` · this file ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification:** `prove:encoding` exit 0 after every structured write.
+`prove:artefact-read` re-run — **`AR-4-14` still FAILS, deliberately and unchanged**. No product
+code changed, so no other suite was re-run.
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` ACCEPTED at `3431981`. `25` and `14` **`NOT-RUN`** —
+the Operator will walk them together with whatever `P2-7` produces.
+
+**Next permitted action:** the Operator rules `P2-7`'s two stops.
