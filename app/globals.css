@@ -231,11 +231,39 @@ a {
  * Form fields — light fill, hairline border, pink focus ring
  * ------------------------------------------------------------------------- */
 
+/*
+ * ⛔ `background-color`, NEVER the `background` SHORTHAND — here and in every
+ * state rule below. Changed 2026-08-13 after `F-01b` recurred TWICE.
+ *
+ * The shorthand omits `background-repeat`, `-size` and `-position`, so it
+ * RESETS all three to their defaults. That is what tiled the select chevron a
+ * dozen times across the control, and — after the base-state fix — what made
+ * it come BACK ON HOVER, because `.form-field:hover:not(:disabled)` carries
+ * specificity `(0,3,0)` and beats `.form-field.select-field`'s `(0,2,0)`
+ * outright. ⚠️ MEASURED, not deduced: `repeat` · `auto` · `0% 0%` at hover,
+ * while `:focus`, `:disabled` and `[aria-invalid]` — all `(0,2,0)` — survived
+ * because the modifier is later in the file.
+ *
+ * ▶ Chasing that with `.form-field.select-field:hover` would have fixed ONE
+ * state and left the next state rule anyone adds to break it again. Removing
+ * the shorthand removes the whole class of defect.
+ *
+ * ✅ SAFE FOR EVERY EXISTING CONSUMER, and that is measured rather than
+ * assumed: `SC-4` proves no component outside the shared control paints its
+ * own background image, and `SC-6` proves no element combines `.form-field`
+ * with a `bg-*`, `p*-` or `border-*` utility. Nothing relied on the
+ * shorthand's resets.
+ *
+ * ~~"its `background` shorthand is left alone: that would change the cascade
+ * for every consumer in the application at once"~~ — the earlier note below
+ * is SUPERSEDED for the shorthand only. `.form-field` is still NOT moved into
+ * a layer.
+ */
 .form-field {
   width: 100%;
   border: 1px solid transparent;
   border-radius: 0.625rem;
-  background: var(--color-surface-muted);
+  background-color: var(--color-surface-muted);
   color: #1b2b4b;
   padding: 0.75rem 0.875rem;
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
@@ -246,11 +274,13 @@ a {
 }
 
 .form-field:hover:not(:disabled) {
-  background: #eef0f6;
+  /* ⛔ `background-color`: the shorthand here is what returned the tiled
+     chevron on hover. Specificity `(0,3,0)` beats every `.form-field.<modifier>`. */
+  background-color: #eef0f6;
 }
 
 .form-field:focus {
-  background: #ffffff;
+  background-color: #ffffff;
   border-color: var(--color-brand-600);
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.16);
   outline: none;
@@ -258,7 +288,7 @@ a {
 
 .form-field[aria-invalid="true"] {
   border-color: #b3301f;
-  background: var(--color-danger-soft);
+  background-color: var(--color-danger-soft);
 }
 
 .form-field[aria-invalid="true"]:focus {
@@ -267,7 +297,7 @@ a {
 
 .form-field:disabled {
   cursor: not-allowed;
-  background: #eef0f6;
+  background-color: #eef0f6;
   color: #a6aec0;
 }
 

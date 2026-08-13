@@ -8461,3 +8461,114 @@ a proof file. The PIN was correct; only its explanation was destroyed. Repaired.
 
 **Next step:** the Operator clears `:3000`, the two dev-mode suites run, and the Operator
 re-walks all four before `P2-5`.
+
+---
+
+## 2026-08-13 — `F-01b` ONE STATE DEEPER: THE CHEVRON RETURNED ON HOVER
+
+**Checkpoint.** Part 2, after the Operator's re-walk of screens `12`, `13`, `26`, `27`.
+**Branch/worktree:** `develop`, main working tree. **Starting HEAD:** `0e50452`.
+
+**Operator's report.** *"Breadcrumbs, back links, search field and the base chevron are all
+correct. ⛔ ONE DEFECT REMAINS: the chevron tiling returns ON HOVER … Base state is correct; only
+hover regresses … MEASURE IT, do not assume."*
+
+### Scope
+
+1. Measure the four `.form-field` states in a browser before changing anything.
+2. Fix at the shared control.
+3. Extend `SC-6` to state variants, with a planted `hover:bg-*` proving the extension fires.
+4. Answer, by measurement, whether `bg-surface` / `border-line` were also lost in any state.
+5. Run `prove:stage2-routes` and `prove:stage3-authenticated` (`:3000` cleared by the Operator).
+
+### The measurement, taken first
+
+`CSS.forcePseudoState` — DevTools' own *Force element state* — so the browser resolved the
+cascade rather than a model of it in JavaScript.
+
+| State | `background-repeat` · `-size` · `-position` | |
+|---|---|---|
+| rest | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ |
+| **`:hover`** | **`repeat` · `auto` · `0% 0%`** | ⛔ **REGRESSED** |
+| `:focus` · `:disabled` · `[aria-invalid]` | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ |
+
+**The arithmetic explains the hover-only shape exactly.** `.form-field:hover:not(:disabled)` is
+`(0,3,0)` and beats `.form-field.select-field`'s `(0,2,0)` unconditionally. The other three states
+are themselves `(0,2,0)` and lose to the modifier **on source order alone** — three of four were
+saved by line ordering, not by design.
+
+### The fix — at the root, not the symptom
+
+The `background` SHORTHAND is removed from the base `.form-field` rule **and from all four state
+rules**, replaced by `background-color`. Chasing it with a `.form-field.select-field:hover` rule
+would have fixed one state and left the next state rule anyone adds to break it again.
+
+Safe for every existing consumer, and measured rather than assumed: `SC-4` proves nothing outside
+the shared control paints its own background image; `SC-6` proves nothing combines `.form-field`
+with a `bg-*` / `p*-` / `border-*` utility.
+
+### The more important half — the check that missed it
+
+- **`SC-6`** now matches **variant prefixes** (`hover:bg-*`, `focus:p*-`, `disabled:border-*`,
+  `focus-visible:*`, stacked forms). **`SC-6c` plants five offenders, two of them state variants.**
+- **`SC-9` (new)** scans `app/globals.css` itself, because this defect lived in a CSS state rule
+  where no component class string could reveal it. No `.form-field` STATE rule may use the
+  `background` / `padding` / `border` shorthand. `SC-9c` plants the defect's own shape and
+  requires the longhand state rule and the base rule beside it **not** to match.
+- **`SC-9b` (new)** proves no element carries two `.form-field` modifiers — which is what makes
+  `SC-9`'s modifier exemption sound rather than convenient.
+- **`SC-7` ×4** measures the chevron under hover, focus, disabled and invalid.
+
+### ⛔ A SIXTH INSTRUMENT DEFECT — the state suite's first green run was entirely vacuous
+
+The first post-fix run reported `SC-7-hover` PASS and `SC-8` PASS. **Both measured nothing.**
+`.form-field` declares `transition: … background-color 160ms ease`, and `getComputedStyle`
+returns the currently animated value — so a read taken immediately after forcing `:hover` returns
+the value from *before* it, indistinguishable from forcing that never applied.
+
+It also explains why the earlier run looked sound: the pre-fix hover rule used the SHORTHAND, and
+`background-repeat` / `-size` / `-position` are not transitioned — they snapped instantly. **The
+moment the fix left only `background-color` changing, every state read went silently stale.**
+
+**`SC-8c` caught it**, on a bare `.form-field` whose hover tint is known: `rgb(244,245,249)` →
+`rgb(244,245,249)`. After waiting out the transition: `rgb(244,245,249)` → `rgb(238,240,246)`.
+A state suite without a control proving the forcing applies is not a weaker measurement — it is
+not a measurement at all, and it would have shipped as a clean green run.
+
+### ⚠️ A SEVENTH, in the battery itself
+
+Six proof scripts were invoked as `prove:p2-*` and all six exited non-zero. **The scripts are
+named `prove:portal-p2-*`; nothing was failing.** A non-zero exit from a name that does not exist
+reads exactly like a regression; only reading `package.json` separated them.
+
+### The Operator's second question, answered by measurement
+
+*"were `bg-surface` and `border-line` also lost in any state variant, or only at rest?"* —
+**only at rest.** Under forced hover the hairline survives at `rgb(237, 239, 245)`; the fill moves
+to `rgb(238, 240, 246)`, which is the product-wide `.form-field:hover` tint and is designed.
+
+### Files changed
+
+`app/globals.css` · `scripts/tests/portal/prove-shared-controls.mjs` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§12.5) · `docs/progress/STATUS.md` · this file ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+### Automated verification — exit codes only
+
+| Suite | Exit |
+|---|---|
+| `prove:shared-controls` | **0** — 21 PASS · 0 FAIL |
+| `prove:stage2-routes` | **0** — 17 checks |
+| `prove:stage3-authenticated` | **0** — 34 PASS · 0 FAIL · 2 `NOT-RUN` |
+| `prove:artefact-read` · `prove:encoding` · `prove:no-secrets` | **0** |
+| `prove:portal-p2-1` · `-composed` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `portal-34` · `portal-5-composed` | **0** |
+| `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` | **0** |
+| `tsc --noEmit` · `eslint .` · `next build` | **0** |
+
+**Manual verification:** none claimed. **VISUAL acceptance stays `NOT-RUN`** — Operator-set only.
+
+**Decisions:** `CLAUDE.md` §7.4.1 (artefact contract) · §12 (no schema change: none made) ·
+§15.6 (`PASS` is an evidence verdict; `Accepted` is the Operator's).
+
+**Next permitted action:** the Operator re-walks all four screens before `P2-5`
+(`25` Management Schedule).

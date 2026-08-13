@@ -1487,6 +1487,95 @@ ruling.
 
 ⛔ **THE BREADCRUMB IS NEITHER REMOVED NOR DUPLICATED.** It stays as drawn on all three.
 
+---
+
+## §12.5 — `F-01b` ONE STATE DEEPER, AND THE HALF THE FIRST FIX COULD NOT SEE
+
+> **Operator, 2026-08-13:** *"the chevron tiling returns ON HOVER … Base state is correct; only
+> hover regresses … MEASURE IT, do not assume … ⚠️ SC-6 did not catch this, and that is the more
+> important half."*
+
+### ⛔ THE PRODUCT DEFECT — MEASURED, THEN EXPLAINED, IN THAT ORDER
+
+`CSS.forcePseudoState` — DevTools' own *Force element state* — was used so the BROWSER resolved
+the cascade rather than a model of it in JavaScript. **Measured at HEAD before anything changed:**
+
+| State | `background-repeat` · `-size` · `-position` | |
+|---|---|---|
+| rest | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ |
+| **`:hover`** | **`repeat` · `auto` · `0% 0%`** | ⛔ **REGRESSED** |
+| `:focus` · `:disabled` · `[aria-invalid]` | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ survived |
+
+**The arithmetic explains the hover-only shape exactly.** `.form-field:hover:not(:disabled)` is
+**`(0,3,0)`** and beats `.form-field.select-field`'s **`(0,2,0)`** unconditionally. The other
+three states are themselves `(0,2,0)` and lose to the modifier **on source order alone** — the
+modifier sits later in the file. ▶ **Three of the four were saved by line ordering, not by
+design**, which is why fixing only the reported state would have been the wrong repair.
+
+✅ **THE FIX IS AT THE ROOT, NOT AT THE SYMPTOM.** The `background` SHORTHAND is removed from the
+base `.form-field` rule **and from all four state rules**, replaced by `background-color`.
+⚠️ Chasing it with a `.form-field.select-field:hover` rule would have fixed **one** state and
+left the next state rule anyone adds to break it again.
+
+**The change is provably safe for every existing consumer rather than assumed to be:** `SC-4`
+proves no component outside the shared control paints its own background image, and `SC-6` proves
+no element combines `.form-field` with a `bg-*`, `p*-` or `border-*` utility. Nothing relied on
+the shorthand's resets.
+
+### ⛔ RULE 2 EXTENDED — VARIANTS, AND THE STYLESHEET ITSELF
+
+`SC-6` scans **component class strings**. This defect lived in a **CSS state rule**, where no
+class string could ever have revealed it. Widening `SC-6` was necessary and **not sufficient**.
+
+| Leg | What it now measures | Its control |
+|---|---|---|
+| **`SC-6`** | class strings, **now including variant prefixes** — `hover:bg-*`, `focus:p*-`, `disabled:border-*`, `focus-visible:*`, stacked forms | **`SC-6c`** plants 5 offenders, **2 of them state variants**, exactly as the ruling required |
+| **`SC-9`** | **`app/globals.css` itself** — no `.form-field` STATE rule may use the `background` / `padding` / `border` SHORTHAND | **`SC-9c`** plants the defect's own shape; the longhand state rule and the base rule beside it must **not** match |
+| **`SC-9b`** | no element carries **two** `.form-field` modifiers | **`SC-9bc`** plants a two-modifier element |
+| **`SC-7`** ×4 | the chevron geometry under **hover, focus, disabled and invalid** | **`SC-8c`**, below |
+| **`SC-8`** | the search control's fill and hairline **under hover** | **`SC-8c`** |
+
+⚠️ **`SC-9` IS NARROWER THAN A BLANKET BAN, AND THE NARROWING IS ARITHMETIC RATHER THAN
+CONVENIENCE.** A first cut barred the shorthand everywhere and failed on two provably harmless
+rules: the base `.form-field` at `(0,1,0)`, which **loses** to every modifier and is the value
+modifiers exist to override; and `.form-field.notes-field`, a modifier declaring its **own**
+padding. A STATE rule is different in kind — it co-applies with whatever modifier is present
+**and outranks it**. ⛔ **The exemption is not taken on trust: `SC-9b` measures that the
+two-modifier case cannot arise.**
+
+### ⛔ THE OPERATOR'S SECOND QUESTION, ANSWERED BY MEASUREMENT
+
+*"were `bg-surface` and `border-line` also lost in any state variant, or only at rest?"* —
+**Only at rest.** Measured under forced hover: `border-color` = `rgb(237, 239, 245)`, the hairline
+**survives**. The fill moves to `rgb(238, 240, 246)`, which is the product-wide `.form-field:hover`
+tint and is **DESIGNED, not a loss**.
+
+### ⛔ A SIXTH INSTRUMENT DEFECT — AND `SC-8c` IS THE ONLY REASON IT WAS SEEN
+
+The first post-fix run reported **`SC-7-hover` PASS and `SC-8` PASS**. Both were **VACUOUS**.
+
+`.form-field` declares `transition: … background-color 160ms ease`, and `getComputedStyle`
+returns the **currently animated** value — so a read taken immediately after forcing `:hover`
+returns the value from **before** the hover. Indistinguishable, in the output, from a forced state
+that never applied.
+
+▶ **It also explains why the earlier run looked sound.** Before the root fix the hover rule used
+the SHORTHAND, and `background-repeat` / `-size` / `-position` are **not** in the transition list —
+they snapped instantly, so the tiling was measurable at once. **The moment the fix left only
+`background-color` changing, every state read went silently stale.** The suite now waits out the
+transition.
+
+⛔ **`SC-8c` FAILED FIRST AND FAILED LOUDLY**, on a bare `.form-field` whose hover tint is known:
+`rgb(244, 245, 249)` → `rgb(244, 245, 249)`, i.e. no change. It now reads
+`rgb(244, 245, 249)` → **`rgb(238, 240, 246)`**. ⚠️ **A state suite without a control proving the
+forcing applies is not a weaker measurement — it is not a measurement at all**, and it would have
+shipped as a clean green run.
+
+**A seventh, caught the same way:** six proof scripts were invoked as `prove:p2-*` and all six
+exited non-zero. **The scripts are named `prove:portal-p2-*`; nothing was failing.** ▶ A
+non-zero exit from a name that does not exist reads exactly like a regression, and only checking
+`package.json` separated them.
+
 ### ✅ TWO MEASURED DRIFTS, RULED AND FIXED
 
 1. **`13`'s breadcrumb was BELOW its title; the frame draws it ABOVE** (`11.50px`, `gap: 3px`,

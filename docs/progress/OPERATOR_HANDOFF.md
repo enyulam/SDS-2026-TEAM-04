@@ -5,107 +5,116 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-13, after your back-affordance ruling. **All of it executed.**
-⏸ Held for your re-walk.
+**Regenerated:** 2026-08-13, after the hover defect. **All of it executed. Nothing is blocked.**
+⏸ Held for your re-walk before `P2-5`.
 
 ---
 
-## ⚠️ ONE THING I NEED FROM YOU — YOU OFFERED IT, AND IT IS NOW
-
-**Please clear the `next dev` server on `:3000`.** Both `prove:stage2-routes` **and**
-`prove:stage3-authenticated` serve in `mode: 'dev'`, and Next 16 permits **one dev server per
-directory**. ⛔ **I have not killed it** — it is your walk server. Every other suite is green;
-these two are `NOT-RUN` purely on the lock.
-
----
-
-## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — re-verified, not carried
+## ⛔ FRESHNESS REPORT (`CLAUDE.md` §15.8.1) — re-verified at this commit, not carried
 
 | Carried claim | Method | Result |
 |---|---|---|
-| *"No frame draws a back affordance — HELD for a ruling"* | your ruling | ⛔ **LAPSED — RULED AND BUILT.** An Operator addition on usability grounds, cited as such in all three components |
-| *"`13`'s breadcrumb is above in the frame, below in the build"* | your ruling | ⛔ **LAPSED — RULED `TRUE-DRIFT` AND FIXED** |
-| *"`12` renders no breadcrumb"* | your ruling | ⛔ **LAPSED — RULED AND FIXED.** *"My acceptance of `12` was a walkthrough, not a measurement"* |
-| `prove:stage2-routes` `NOT-RUN` on the dev lock | re-run | ✅ **STILL TRUE, AND NOW WIDER** — `prove:stage3-authenticated` is blocked by the same lock. Both need `:3000` cleared |
+| *"`prove:stage2-routes` and `prove:stage3-authenticated` `NOT-RUN` on the `:3000` dev lock"* | **re-run** | ⛔ **LAPSED — YOU CLEARED IT. BOTH RUN, BOTH EXIT 0.** This was the last handoff's one open ask; it is discharged and must not be carried again |
+| *"the chevron and search fixes are accepted"* | your re-walk | ⚠️ **PARTIALLY LAPSED** — the base chevron holds; **hover regressed** and is now fixed |
+| *"`SC-6` catches the `F-01b` trap"* | re-measured | ⚠️ **WAS TRUE AND INSUFFICIENT.** It scanned class strings only; the defect was in a CSS state rule. Extended, plus two new legs |
 | `R-7` — `P2-6`'s `C-7` gate | read at HEAD | ✅ **STILL TRUE** — still the only open `C-7` item |
 | `B-G06-DET-1` open | no verdict produced | ✅ **STILL TRUE** |
-| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured** | ✅ **CARRIED, and stated as carried** |
+| §10 Phase 1 exit condition **(c)** unproven | ⚠️ **not re-measured this run** | ✅ **CARRIED, and stated as carried** |
 | `09` refuses its canonical route (`C2C-007`) | read at HEAD | ✅ **STILL TRUE** |
 | `test:continuity` · `test:exit-condition-b` blocked by `B-STAGE3-2` | not re-run | ✅ **CARRIED** |
 | **136 mojibake sequences / 41 files** | not re-measured | ⚠️ **CARRIED AS UNREPRODUCED** |
+| `trainer-draft-generation`'s `BackLink` variant | unchanged | ✅ **STILL OPEN** — awaiting its own ruling |
 | `main` untouched | `git ls-remote` | ✅ **STILL TRUE** — `5eb84bc` |
 
+⚠️ **Two claims lapsed this run and both were corrected at source before this file was derived.**
+
 ---
 
-## ✅ THE BACK AFFORDANCE — extracted, not invented
+## ⛔ THE DEFECT — MEASURED FIRST, EXPLAINED SECOND
 
-**The control I reused:** `trainer-roster`'s **"Back to Schedule"** and `trainer-assessment`'s
-**"Back to Student Roster"** — a `Link` in the page header's right slot, `bg-brand-100`
-`text-brand-800`, `rounded-[11px]`, `min-h-11`, `chevronLeft` icon, `Back to <target>` label.
+`CSS.forcePseudoState` — DevTools' own *Force element state* — so the **browser** resolved the
+cascade rather than a model of it in JavaScript.
 
-⚠️ **Their class strings were BYTE-IDENTICAL**, compared programmatically before anything moved
-— which is what makes re-pointing both **provably zero visual change** rather than a hope.
-Extracted to **`components/ui/back-link.tsx`**; both originals now call it. ▶ A shared component
-with the originals left inline would have made **four** definitions of one control.
-
-⛔ **`trainer-draft-generation` is deliberately NOT re-pointed and is reported, not normalised.**
-It carries a **variant** (`rounded-field`, `text-body`, `font-bold`), and changing it would alter
-a **Part 1** screen's appearance. That needs its own ruling.
-
-| Screen | Target | Label |
+| State | `background-repeat` · `-size` · `-position` | |
 |---|---|---|
-| `13` | `12` | Back to Classes |
-| `26` | `12` | Back to Classes |
-| `27` | **`13`** | **Back to Class Overview** — the class it edits, and the only inbound route to `27` |
+| rest | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ |
+| **`:hover`** | **`repeat` · `auto` · `0% 0%`** | ⛔ **REGRESSED** |
+| `:focus` · `:disabled` · `[aria-invalid]` | `no-repeat` · `18.4px` · `calc(100% - 12px) 50%` | ✅ survived |
 
-⛔ **Cited in all three components as an OPERATOR ADDITION ON USABILITY GROUNDS, NOT A FRAME
-MATCH**, with your reasoning quoted, so a later visual pass does not remove it for fidelity.
-⛔ **The breadcrumb is neither removed nor duplicated.**
+**Your reading of the shape was exactly right, and the arithmetic is why.**
+`.form-field:hover:not(:disabled)` is **`(0,3,0)`** and beats `.form-field.select-field`'s
+`(0,2,0)` unconditionally. The other three states are themselves `(0,2,0)` and lose to the
+modifier **on source order alone** — the modifier sits later in the file.
+▶ **Three of the four were saved by line ordering, not by design.**
 
-## ✅ THE TWO BREADCRUMB DRIFTS — both fixed
+✅ **FIXED AT THE ROOT.** The `background` SHORTHAND is gone from the base rule **and all four
+state rules**, replaced by `background-color`. ⚠️ Chasing it with `.form-field.select-field:hover`
+would have fixed **one** state and left the next state rule anyone adds to break it again.
 
-* **`13`** — moved **ABOVE** the title, at the frame's `11.50px` with `gap: 3px`.
-  ⚠️ **`26` and `27` were left alone**: their frames genuinely draw it **below**, at `12.50px`.
-  "Fixing" them to match `13` would have been the inverse error.
-* **`12`** — breadcrumb `Management / Classes` added above the title.
-
-Both carried by a new **`breadcrumb`** slot on `PageHeading`. ⚠️ A **second** above-title slot,
-deliberately not `eyebrow`: that one is an uppercase brand-coloured **label** with four live
-consumers; this is a muted navigational **path** carrying a link.
+**Provably safe for every consumer rather than assumed:** `SC-4` proves nothing else paints a
+background image; `SC-6` proves nothing combines `.form-field` with a `bg-*`/`p*-`/`border-*`
+utility. Nothing relied on the shorthand's resets.
 
 ---
 
-## ⛔ `F-01b` RECURRED, AND IS NOW MECHANICAL — AND IT PAID FOR ITSELF IMMEDIATELY
+## ⛔ THE MORE IMPORTANT HALF — the check that missed it
 
-**Stated plainly, as you asked.** `app/globals.css` **already carried a full paragraph** naming
-this cascade trap, explaining that Tailwind emits utilities into `@layer utilities`, that an
-unlayered rule outranks them, and that `.auth-field` / `.notes-field` were the remedy.
-**The next two controls were still written with utilities.** ▶ Prose in the very file being
-edited did not prevent the defect it described.
+> *"If it only inspects base-state declarations, it will keep missing state variants."*
 
-✅ **`SC-6`** fails any element whose class string names `form-field` beside a `bg-*`, `p*-`
-**or `border-*`** utility, and the message names the remedy so the fix is never a guess.
-⚠️ **Border is included though your ruling said *"background or padding"*** — `.form-field`
-declares all three shorthands, and naming two would leave the third to recur.
+| Leg | Now measures | Its control |
+|---|---|---|
+| **`SC-6`** | class strings, **including variant prefixes** — `hover:bg-*`, `focus:p*-`, `disabled:border-*`, `focus-visible:*`, stacked | **`SC-6c`** plants **5** offenders, **2 of them state variants** — the plant you required |
+| **`SC-9`** *(new)* | **`app/globals.css` itself** — no `.form-field` STATE rule may use the `background`/`padding`/`border` SHORTHAND | **`SC-9c`** plants the defect's own shape; the longhand state rule and the base rule beside it must **not** match |
+| **`SC-9b`** *(new)* | no element carries **two** `.form-field` modifiers | **`SC-9bc`** plants a two-modifier element |
+| **`SC-7`** ×4 | the chevron under **hover · focus · disabled · invalid** | **`SC-8c`** |
+| **`SC-8`** | the search fill and hairline **under hover** | **`SC-8c`** |
 
-**It found two more live losses on its first run**, on the same search control, neither visible
-to a DOM proof nor caught by your walk:
+⛔ **`SC-6` alone could never have caught this.** It scans **component class strings**; the defect
+was in a **CSS state rule**, where no class string could reveal it. Widening it was necessary and
+**not sufficient** — hence `SC-9`.
 
-| | Frame draws | Rendered before | Now |
-|---|---|---|---|
-| fill | `white` | **`rgb(244, 245, 249)`** — `bg-surface` lost | `rgb(255, 255, 255)` |
-| hairline | `1px #EDEFF4` | **`rgba(0, 0, 0, 0)`** — `border-line` lost | `rgb(237, 239, 245)` |
+⚠️ **`SC-9` IS NARROWER THAN A BLANKET BAN, AND I WANT THAT ON THE RECORD.** A first cut barred
+the shorthand everywhere and failed on two provably harmless rules: the base `.form-field` at
+`(0,1,0)`, which **loses** to every modifier and is the value modifiers exist to override; and
+`.form-field.notes-field`, a modifier declaring its **own** padding. A STATE rule is different in
+kind — it co-applies with whatever modifier is present **and outranks it**.
+⛔ **The exemption is measured, not trusted: `SC-9b` proves the two-modifier case cannot arise.**
 
-## ⛔ COMMENT-STRIPPING IS NOW STANDING, NOT PER-SUITE
+---
 
-One shared `stripComments()`, imported, never copied. ▶ **The third instance is the memorable
-one:** the raw-`<select>` scan reported **eight** offenders, of which **three were COMMENTS** —
-including **my own sentence explaining that a `<select>` would have to be invented**. The
-detector matched the prose in which the thing was explained.
+## ⛔ A SIXTH INSTRUMENT DEFECT — AND THE FIRST GREEN RUN WAS ENTIRELY VACUOUS
 
-**A fifth tooling defect this stretch**, caught by reading the result: a shell heredoc ate a
-backticked comment through command substitution, leaving `// ⚠️ , not : the Operator ruled` in a
-proof file. The **pin** was correct; only its explanation was destroyed. Repaired.
+The first post-fix run reported **`SC-7-hover` PASS** and **`SC-8` PASS**. **Both measured nothing.**
+
+`.form-field` declares `transition: … background-color 160ms ease`, and `getComputedStyle`
+returns the **currently animated** value — so a read taken immediately after forcing `:hover`
+returns the value from **before** the hover. In the output that is **indistinguishable from
+forcing that never applied**.
+
+▶ **It also explains why the earlier run looked sound.** Before the root fix the hover rule used
+the SHORTHAND, and repeat/size/position are **not** in the transition list — they snapped
+instantly, so the tiling was measurable at once. **The moment the fix left only `background-color`
+changing, every state read went silently stale.**
+
+⛔ **`SC-8c` failed loudly**, on a bare `.form-field` whose hover tint is known:
+`rgb(244,245,249)` → `rgb(244,245,249)`. After waiting out the transition:
+`rgb(244,245,249)` → **`rgb(238,240,246)`**.
+
+⚠️ **A state suite without a control proving the forcing applies is not a weaker measurement — it
+is not a measurement at all**, and it would have shipped to you as a clean green run.
+
+**A seventh, in the battery:** six scripts invoked as `prove:p2-*` all exited non-zero. **They are
+named `prove:portal-p2-*`; nothing was failing.** A non-zero exit from a name that does not exist
+reads exactly like a regression.
+
+---
+
+## ✅ YOUR SECOND QUESTION, ANSWERED BY MEASUREMENT
+
+*"were `bg-surface` and `border-line` also lost in any state variant, or only at rest?"*
+
+**Only at rest.** Under forced hover the **hairline survives** at `rgb(237, 239, 245)`. The fill
+moves to `rgb(238, 240, 246)` — the product-wide `.form-field:hover` tint, **designed, not a loss**.
 
 ---
 
@@ -113,22 +122,26 @@ proof file. The **pin** was correct; only its explanation was destroyed. Repaire
 
 | Suite | Result |
 |---|---|
-| `prove:shared-controls` | ✅ **exit 0 — 11 PASS · 0 FAIL** |
-| `prove:artefact-read` | ✅ **exit 0 — 30 PASS**; `12`/`13` now also cite `11.50px` and `3px` |
-| `p2-1` · `-composed` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` · `prove:encoding` · `prove:no-secrets` · `tsc` · `eslint` · `next build` | ✅ **all 0** |
-| `prove:stage2-routes` · `prove:stage3-authenticated` | ⛔ **BOTH `NOT-RUN`** — the `:3000` dev lock. **Not killed.** Needed now |
+| `prove:shared-controls` | ✅ **exit 0 — 21 PASS · 0 FAIL** |
+| `prove:stage2-routes` | ✅ **exit 0 — 17 checks** |
+| `prove:stage3-authenticated` | ✅ **exit 0 — 34 PASS · 0 FAIL · 2 `NOT-RUN`** |
+| `prove:artefact-read` · `prove:encoding` · `prove:no-secrets` | ✅ all 0 |
+| `prove:portal-p2-1` · `-composed` · `p2-2-create` · `p2-2b` · `p2-3` · `p2-4` · `portal-34` · `portal-5-composed` | ✅ all 0 |
+| `prove:hero-all` · `test:integration` · `test:g06-grounding` · `test:runtime-profile` | ✅ all 0 |
+| `tsc` · `eslint` · `next build` | ✅ all 0 |
 | `test:continuity` · `test:exit-condition-b` | ⛔ **`NOT-RUN`** — `B-STAGE3-2` |
-| **VISUAL acceptance** | ⛔ Operator-set only. Not claimed |
+| **VISUAL acceptance** | ⛔ Operator-set only. **Not claimed** |
+
+⛔ **No migration. No schema change. Audit registry unmoved at 21.**
 
 ---
 
 ## Next permitted action
 
-⏸ **You clear `:3000`; I run the two dev-mode suites; you re-walk all four.** Then **`P2-5`
-(`25` Management Schedule)** — a calendar **projection**, gated by `GC-13`: no `Showcase`, no
-duplicated event record (`A-016`).
+⏸ **You re-walk `12`, `13`, `26`, `27`.** Then **`P2-5` (`25` Management Schedule)** — a calendar
+**projection**, gated by `GC-13`: no `Showcase`, no duplicated event record (`A-016`).
 
 ⛔ **Carried by nothing above:** any hosted or billable action · a fixture reload · editing
 ratified authority · a push to `main` · public deployment · human testing · final submission ·
-**the mojibake repair run** · **any query against the demonstration stack on 543xx** · and
-**killing the running `next dev` server**.
+**the mojibake repair run** · **any query against the demonstration stack on 543xx** ·
+`trainer-draft-generation`'s `BackLink` variant.

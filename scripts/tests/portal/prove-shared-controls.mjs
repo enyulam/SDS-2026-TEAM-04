@@ -153,6 +153,49 @@ class Browser {
     return r.result?.result?.value
   }
 
+  /*
+   * ⛔ A REAL STATE MEASUREMENT, NOT A SIMULATED ONE. `CSS.forcePseudoState`
+   * is the same mechanism DevTools' "Force element state" uses, so the browser
+   * resolves the cascade for `:hover` / `:focus` exactly as it would under a
+   * pointer. ▶ Reading a state by re-implementing specificity in JavaScript
+   * would measure MY model of the cascade, not the browser's — which is the
+   * error that let `F-01b` recur.
+   */
+  async forceState(selector, pseudoClasses) {
+    await this.send('DOM.enable')
+    await this.send('CSS.enable')
+    /*
+     * ⚠️ ONE LEVEL, NOT TWO. `send` returns the whole CDP message, so the
+     * command's own result object is `msg.result`. `Runtime.evaluate` needs
+     * `msg.result.result.value` only because ITS result object has its own
+     * `result` field — copying that shape here addressed nothing and reported
+     * every state as NOT-RUN, which is the correct failure but the wrong reason.
+     */
+    const doc = await this.send('DOM.getDocument', { depth: -1 })
+    const rootId = doc.result?.root?.nodeId
+    const found = await this.send('DOM.querySelector', { nodeId: rootId, selector })
+    const nodeId = found.result?.nodeId
+    if (!nodeId) return false
+    await this.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: pseudoClasses })
+    /*
+     * ⛔ WAIT OUT THE TRANSITION — a SIXTH instrument defect, and `SC-8c` is the
+     * only reason it was seen rather than shipped as a green run.
+     *
+     * `.form-field` declares `transition: … background-color 160ms ease`.
+     * `getComputedStyle` returns the CURRENTLY ANIMATED value, so a read taken
+     * immediately after forcing `:hover` returns the value BEFORE the hover —
+     * indistinguishable from a forced state that never applied.
+     *
+     * ▶ IT ALSO EXPLAINS WHY THE EARLIER RUN LOOKED SOUND. Before the root fix
+     * the hover rule used the `background` SHORTHAND, and `background-repeat`,
+     * `-size` and `-position` are NOT in the transition list — they snapped
+     * instantly, so the tiling was measurable at once. The moment the fix left
+     * only `background-color` changing, every state read went silently stale.
+     */
+    await new Promise((r) => setTimeout(r, 320))
+    return true
+  }
+
   close() {
     try {
       this.ws?.close()
@@ -296,12 +339,19 @@ async function main() {
     }
     ok('SC-0', `the app stylesheet is loaded and resolving design tokens (--color-line = ${token})`)
 
-    const measured = await browser.evaluate(`(() => {
+    /*
+     * ⚠️ THE PROBE NODES ARE LEFT IN THE DOCUMENT, not removed, because the
+     * state measurements below need to address them by selector. They are
+     * removed at the end of the run.
+     */
+    await browser.evaluate(`(() => {
       const host = document.createElement('div');
+      host.id = 'sc-probe';
       host.style.cssText = 'position:fixed;left:0;top:0;width:320px';
       document.body.appendChild(host);
 
       const sel = document.createElement('select');
+      sel.id = 'sc-probe-select';
       sel.className = ${JSON.stringify(SELECT_CLASSES)};
       sel.style.backgroundImage = "url(\\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E\\")";
       const opt = document.createElement('option');
@@ -310,24 +360,36 @@ async function main() {
       host.appendChild(sel);
 
       const inp = document.createElement('input');
+      inp.id = 'sc-probe-search';
       inp.className = ${JSON.stringify(SEARCH_CLASSES)};
       host.appendChild(inp);
 
-      const cs = getComputedStyle(sel);
-      const ci = getComputedStyle(inp);
-      const out = {
-        selectRepeat: cs.backgroundRepeat,
-        selectSize: cs.backgroundSize,
-        selectPosition: cs.backgroundPosition,
-        selectAppearance: cs.appearance || cs.webkitAppearance,
-        selectPaddingRight: ci ? cs.paddingRight : '',
-        searchPaddingLeft: ci.paddingInlineStart || ci.paddingLeft,
-        searchBackground: ci.backgroundColor,
-        searchBorder: ci.borderTopColor,
-      };
-      host.remove();
-      return out;
+      // ⚠️ A BARE \`.form-field\`, carrying no modifier, existing ONLY so the
+      // forced-hover mechanism itself can be proved to fire. See SC-8c.
+      const plain = document.createElement('input');
+      plain.id = 'sc-probe-plain';
+      plain.className = 'form-field';
+      host.appendChild(plain);
+      return true;
     })()`)
+
+    const readProbe = () =>
+      browser.evaluate(`(() => {
+        const cs = getComputedStyle(document.getElementById('sc-probe-select'));
+        const ci = getComputedStyle(document.getElementById('sc-probe-search'));
+        return {
+          selectRepeat: cs.backgroundRepeat,
+          selectSize: cs.backgroundSize,
+          selectPosition: cs.backgroundPosition,
+          selectAppearance: cs.appearance || cs.webkitAppearance,
+          selectPaddingRight: cs.paddingRight,
+          searchPaddingLeft: ci.paddingInlineStart || ci.paddingLeft,
+          searchBackground: ci.backgroundColor,
+          searchBorder: ci.borderTopColor,
+        };
+      })()`)
+
+    const measured = await readProbe()
 
     if (!measured) {
       no('SC-1', 'the probe returned nothing — NOT a measurement')
@@ -425,6 +487,131 @@ async function main() {
         `the search box carries the frame's fill and hairline: background=${measured.searchBackground} · border=${measured.searchBorder}`,
       )
     }
+
+    /*
+     * ⛔ SC-8c — THE CONTROL FOR EVERY FORCED-STATE MEASUREMENT BELOW, and it
+     * runs FIRST because everything after it is worthless without it.
+     *
+     * ▶ A `CSS.forcePseudoState` call that silently did not apply would make
+     * every state leg read EXACTLY like the base state — that is, it would
+     * make `SC-7-hover` and `SC-8` PASS by measuring nothing. So the mechanism
+     * is proved on a bare `.form-field` whose hover tint is known and
+     * deliberate: rest is `--color-surface-muted`, hover is `#eef0f6`. If
+     * those two readings are identical, the forcing did not happen.
+     */
+    const plainAtRest = await browser.evaluate(
+      "getComputedStyle(document.getElementById('sc-probe-plain')).backgroundColor",
+    )
+    const plainForced = await browser.forceState('#sc-probe-plain', ['hover'])
+    const plainAtHover = plainForced
+      ? await browser.evaluate("getComputedStyle(document.getElementById('sc-probe-plain')).backgroundColor")
+      : null
+    await browser.forceState('#sc-probe-plain', [])
+    if (plainForced && plainAtHover && plainAtHover !== plainAtRest) {
+      ok(
+        'SC-8c',
+        `CONTROL: forced hover DEMONSTRABLY APPLIES — a bare \`.form-field\` moves ${plainAtRest} → ${plainAtHover}. Every state leg below measures a real cascade`,
+      )
+    } else {
+      no(
+        'SC-8c',
+        `⛔ forced hover did not change a bare \`.form-field\` (rest=${plainAtRest}, hover=${plainAtHover}). ` +
+          'Every state measurement below is VACUOUS and none of their verdicts may be read',
+      )
+    }
+
+    /*
+     * ═══════════════════════════════════════════════════════════════════
+     * ⛔ SC-7 — `F-01b` ONE STATE DEEPER. Operator, 2026-08-13:
+     * ═══════════════════════════════════════════════════════════════════
+     *     "the chevron tiling returns ON HOVER … Base state is correct; only
+     *      hover regresses … MEASURE IT, do not assume: read the computed
+     *      background-repeat, -size and -position in the hover state, not
+     *      just at rest."
+     *
+     * ▶ FOUR state rules on `.form-field` used the `background` SHORTHAND
+     * (`:hover:not(:disabled)`, `:focus`, `[aria-invalid="true"]`,
+     * `:disabled`). A shorthand omitting repeat/size/position RESETS all
+     * three — so a state rule can undo a base-state fix, and the base-state
+     * measurement that proved the fix says nothing about it.
+     *
+     * ⚠️ EVERY STATE IS MEASURED, not just the reported one. Hover is what the
+     * Operator saw; asserting only hover would leave the other three to be
+     * discovered the same way.
+     */
+    const STATES = [
+      { id: 'hover', pseudo: ['hover'], setup: null },
+      { id: 'focus', pseudo: ['focus'], setup: null },
+      { id: 'disabled', pseudo: [], setup: "document.getElementById('sc-probe-select').disabled = true" },
+      {
+        id: 'invalid',
+        pseudo: [],
+        setup: "document.getElementById('sc-probe-select').setAttribute('aria-invalid','true')",
+      },
+    ]
+    for (const state of STATES) {
+      if (state.setup) await browser.evaluate(`(() => { ${state.setup}; return true; })()`)
+      if (state.pseudo.length > 0) {
+        const forced = await browser.forceState('#sc-probe-select', state.pseudo)
+        if (!forced) {
+          no(`SC-7-${state.id}`, `the probe node could not be addressed, so the ${state.id} state was NOT measured`)
+          continue
+        }
+      }
+      const m = await readProbe()
+      console.log(
+        `  MEASURED  select @${state.id}: repeat=${m.selectRepeat} · size=${m.selectSize} · position=${m.selectPosition}`,
+      )
+      if (m.selectRepeat !== 'no-repeat' || !/^1\.15rem|^18\.4px/.test(m.selectSize)) {
+        no(
+          `SC-7-${state.id}`,
+          `⛔ the chevron REGRESSES in the ${state.id} state: repeat=${m.selectRepeat} · size=${m.selectSize} · position=${m.selectPosition}. ` +
+            'A `.form-field` state rule using the `background` SHORTHAND reset them',
+        )
+      } else {
+        ok(`SC-7-${state.id}`, `the chevron survives the ${state.id} state: repeat=${m.selectRepeat} · size=${m.selectSize} · position=${m.selectPosition}`)
+      }
+      // Reset for the next state.
+      if (state.pseudo.length > 0) await browser.forceState('#sc-probe-select', [])
+      if (state.id === 'disabled') {
+        await browser.evaluate("(() => { document.getElementById('sc-probe-select').disabled = false; return true; })()")
+      }
+      if (state.id === 'invalid') {
+        await browser.evaluate("(() => { document.getElementById('sc-probe-select').removeAttribute('aria-invalid'); return true; })()")
+      }
+    }
+
+    /*
+     * ⛔ SC-8 — THE OPERATOR'S SECOND QUESTION, asked of the two losses `SC-6`
+     * had just found: *"were bg-surface and border-line also lost in any state
+     * variant, or only at rest? Measure rather than infer."*
+     */
+    {
+      const forced = await browser.forceState('#sc-probe-search', ['hover'])
+      if (!forced) {
+        no('SC-8', 'the search probe could not be addressed, so its hover state was NOT measured')
+      } else {
+        const m = await readProbe()
+        console.log(`  MEASURED  search @hover: background=${m.searchBackground} · border=${m.searchBorder}`)
+        /*
+         * ⚠️ THE HOVER TINT IS EXPECTED AND IS NOT THE DEFECT. `.form-field:hover`
+         * deliberately darkens every field in the product, and this control is a
+         * `.form-field`. What must NOT happen is the HAIRLINE vanishing — that
+         * was a silent loss, not a designed state.
+         */
+        if (/rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(m.searchBorder ?? '')) {
+          no('SC-8', `⛔ the search hairline VANISHES on hover: border-color computes ${m.searchBorder}`)
+        } else {
+          ok(
+            'SC-8',
+            `the search hairline survives hover (${m.searchBorder}); the fill darkens to ${m.searchBackground}, which is the product-wide \`.form-field:hover\` tint and is DESIGNED, not a loss`,
+          )
+        }
+        await browser.forceState('#sc-probe-search', [])
+      }
+    }
+
+    await browser.evaluate("(() => { document.getElementById('sc-probe').remove(); return true; })()")
   } finally {
     browser?.close()
     stopServed(served.child ?? served)
@@ -549,7 +736,22 @@ function structuralLegs() {
    * pattern that file already established for `.auth-field` and
    * `.notes-field`. This leg names the modifier, so the fix is never a guess.
    */
-  const OFFENDER = /\b(bg-[a-z0-9[\]./-]+|p[trblxyse]?-[a-z0-9[\]./-]+|border-(?!\[)[a-z][a-z0-9-]*)\b/g
+  /*
+   * ⚠️ VARIANT PREFIXES ARE INCLUDED — `hover:bg-*`, `focus:p*-`,
+   * `disabled:border-*`, `focus-visible:*`, `active:*`, and any stacked form.
+   * Operator ruling, 2026-08-13:
+   *
+   *     "If it only inspects base-state declarations, it will keep missing
+   *      state variants — hover, focus, active, disabled, and their
+   *      focus-visible pairs."
+   *
+   * ▶ A variant utility loses the cascade exactly as a base utility does, and
+   * it is WORSE: the base state looks correct and only the state regresses, so
+   * a green base-state measurement says nothing about it. That is precisely
+   * how the returning hover chevron survived this suite's first green run.
+   */
+  const OFFENDER =
+    /\b(?:[a-z-]+:)*(bg-[a-z0-9[\]./-]+|p[trblxyse]?-[a-z0-9[\]./-]+|border-(?!\[)[a-z][a-z0-9-]*)\b/g
   const violations = []
   for (const f of files) {
     const code = stripComments(readFileSync(f, 'utf8'))
@@ -574,12 +776,143 @@ function structuralLegs() {
   }
   // ⚠️ THE CONTROL. The detector must be shown to fire, or "none found" is
   // equally true of a regex that matches nothing.
-  const probe = 'className="form-field bg-surface pl-10 border-line"'
+  //
+  // ⛔ THE PLANT THE OPERATOR REQUIRED: *"prove the extension fires by planting
+  // a hover:bg-* on a form-field element."* Two of the five offenders below are
+  // STATE VARIANTS, so a detector that silently ignored variants would fail
+  // this control rather than pass SC-6 vacuously.
+  const probe = 'className="form-field bg-surface pl-10 border-line hover:bg-surface-muted focus-visible:p-2"'
   const probeHits = [...probe.split(/["'`]/).filter((c) => /\bform-field\b/.test(c)).join(' ').matchAll(OFFENDER)]
-  if (probeHits.length === 3) {
-    ok('SC-6c', `CONTROL: the detector MATCHES all three offenders in a planted \`form-field bg-surface pl-10 border-line\` (${probeHits.map((m) => m[0]).join(' ')})`)
+  const variantHits = probeHits.filter((m) => m[0].includes(':'))
+  if (probeHits.length === 5 && variantHits.length === 2) {
+    ok(
+      'SC-6c',
+      `CONTROL: the detector MATCHES all 5 planted offenders, 2 of them STATE VARIANTS (${probeHits.map((m) => m[0]).join(' ')})`,
+    )
   } else {
-    no('SC-6c', `the F-01b detector matched ${probeHits.length} of 3 planted offenders, so SC-6 measured nothing`)
+    no(
+      'SC-6c',
+      `the F-01b detector matched ${probeHits.length} of 5 planted offenders (${variantHits.length} of 2 variants), so SC-6 measured nothing`,
+    )
+  }
+
+  /*
+   * ═════════════════════════════════════════════════════════════════════════
+   * ⛔ `SC-9` — THE HALF `SC-6` STRUCTURALLY COULD NOT SEE.
+   * ═════════════════════════════════════════════════════════════════════════
+   * `SC-6` scans COMPONENT class strings. The returning hover chevron lived in
+   * a CSS STATE RULE — `.form-field:hover:not(:disabled) { background: … }` —
+   * where NO component class string could ever have revealed it. Widening
+   * `SC-6` to variants was necessary and is not sufficient; this leg scans the
+   * STYLESHEET itself.
+   *
+   * ⚠️ THE BAR IS ON STATE RULES, AND THE NARROWING IS ARITHMETIC, NOT
+   * CONVENIENCE. A first cut barred the shorthand in EVERY `.form-field` rule
+   * and failed on two that are provably harmless:
+   *
+   *   · `.form-field { padding: …; border: … }` is `(0,1,0)` and LOSES to every
+   *     `.form-field.<modifier>` at `(0,2,0)`. It is the base value the
+   *     modifiers exist to override; it cannot reset one.
+   *   · `.form-field.notes-field { padding: … }` is a modifier declaring its
+   *     OWN padding. It can only harm an element carrying TWO modifiers.
+   *
+   * ▶ A STATE rule is different in kind: it co-applies with whatever modifier
+   * is on the element AND outranks it — `.form-field:hover:not(:disabled)` is
+   * `(0,3,0)`. That asymmetry is the entire defect, and it is why the base
+   * `padding` shorthand never disturbed `select-field`'s `padding-inline-end`
+   * while the hover `background` shorthand destroyed it.
+   *
+   * ⛔ THE NARROWING IS NOT TAKEN ON TRUST. `SC-9b` proves the two-modifier
+   * case cannot arise, so the second exemption is measured rather than assumed.
+   */
+  const cssRules = readFileSync(join(REPO_ROOT, 'app', 'globals.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  // ⚠️ Innermost-rule matching, so a rule nested inside `@media` is seen too.
+  // A parser blind to at-rules would exempt them by ACCIDENT rather than by
+  // classification, which is the failure this whole leg exists to prevent.
+  const RULE = /([^{}]+)\{([^{}]*)\}/g
+  const SHORTHAND = /(^|;)\s*(background|padding|border)\s*:/g
+  const isStateSelector = (selector) =>
+    selector
+      .split(',')
+      .filter((part) => part.includes('.form-field'))
+      .some((part) => /[:[]/.test(part.replace(/\.[A-Za-z][\w-]*/g, '')))
+  const collectStateShorthands = (css) => {
+    const out = []
+    for (const [, selector, body] of css.matchAll(new RegExp(RULE.source, 'g'))) {
+      if (!selector.includes('.form-field') || !isStateSelector(selector)) continue
+      const bad = [...new Set([...body.matchAll(new RegExp(SHORTHAND.source, 'g'))].map((m) => m[2]))]
+      if (bad.length > 0) out.push(`${selector.trim().replace(/\s+/g, ' ')} :: ${bad.join(' ')}`)
+    }
+    return out
+  }
+  const shorthandRules = collectStateShorthands(cssRules)
+  if (shorthandRules.length > 0) {
+    no(
+      'SC-9',
+      `⛔ ${shorthandRules.length} \`.form-field\` STATE rule(s) in app/globals.css use a SHORTHAND, which resets every longhand it omits — ` +
+        `this is exactly what returned the tiled chevron on hover: ${shorthandRules.join(' | ')}. Use the longhand`,
+    )
+  } else {
+    ok(
+      'SC-9',
+      'no `.form-field` STATE rule in app/globals.css uses the `background`, `padding` or `border` SHORTHAND — no state can silently reset a modifier',
+    )
+  }
+  // ⚠️ THE CONTROL, planted in the shape the defect actually had. Line 2 is the
+  // LEGAL longhand and line 3 is the EXEMPTED base rule; neither may match, or
+  // the leg would be firing for the wrong reason.
+  {
+    const planted =
+      '.form-field:hover:not(:disabled) { background: #eef0f6; }\n' +
+      '.form-field:focus { background-color: red; }\n' +
+      '.form-field { padding: 1px; }'
+    const hits = collectStateShorthands(planted)
+    if (hits.length === 1 && hits[0].includes(':hover')) {
+      ok('SC-9c', `CONTROL: the matcher FIRES on a planted \`${hits[0]}\` and on NEITHER the longhand state rule nor the base rule beside it`)
+    } else {
+      no('SC-9c', `the shorthand matcher fired on ${hits.length} rule(s) of 1 planted state rule (${hits.join(' | ')}), so SC-9 measured nothing`)
+    }
+  }
+
+  /*
+   * ⛔ `SC-9b` — WHAT MAKES `SC-9`'s MODIFIER EXEMPTION SOUND. A modifier may
+   * declare its own shorthand ONLY because no element ever carries two of them;
+   * if one did, the later modifier's shorthand would reset the earlier's
+   * longhands at equal specificity. That premise is measured here, not assumed.
+   */
+  const modifierNames = [...cssRules.matchAll(/\.form-field\.([A-Za-z][\w-]*)\s*\{/g)].map((m) => m[1])
+  const uniqueModifiers = [...new Set(modifierNames)]
+  const findDoubles = (sources) => {
+    const doubled = []
+    for (const [label, code] of sources) {
+      for (const chunk of code.split(/["'`]/)) {
+        if (!/\bform-field\b/.test(chunk)) continue
+        const present = uniqueModifiers.filter((m) => new RegExp(`\\b${m}\\b`).test(chunk))
+        if (present.length > 1) doubled.push(`${label} :: ${present.join(' + ')}`)
+      }
+    }
+    return doubled
+  }
+  const doubles = findDoubles(files.map((f) => [f.slice(REPO_ROOT.length + 1), stripComments(readFileSync(f, 'utf8'))]))
+  if (doubles.length > 0) {
+    no(
+      'SC-9b',
+      `⛔ ${doubles.length} element(s) carry TWO \`.form-field\` modifiers, so a modifier's own shorthand can reset the other's longhands: ${doubles.join(' | ')}`,
+    )
+  } else {
+    ok(
+      'SC-9b',
+      `no element carries two of the ${uniqueModifiers.length} \`.form-field\` modifiers (${uniqueModifiers.join(', ')}) — SC-9's modifier exemption holds`,
+    )
+  }
+  {
+    const planted = [['planted.tsx', `className="form-field ${uniqueModifiers.slice(0, 2).join(' ')}"`]]
+    const hits = uniqueModifiers.length > 1 ? findDoubles(planted) : []
+    if (hits.length === 1) {
+      ok('SC-9bc', `CONTROL: the two-modifier detector FIRES on a planted \`${hits[0]}\``)
+    } else {
+      no('SC-9bc', `the two-modifier detector matched ${hits.length} of 1 planted element, so SC-9b measured nothing`)
+    }
   }
 
   /*
