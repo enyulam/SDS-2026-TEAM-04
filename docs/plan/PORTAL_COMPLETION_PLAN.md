@@ -2216,3 +2216,194 @@ authorized. Recorded so the repair has a home.
 ⚠️ **Neither is new and nothing changed.** The note exists because **an unmentioned key found
 later reads as an appearance** — and a reader who believes a key appeared will go looking for the
 migration that added it.
+
+---
+
+## §14 — `P2-6` SHIPPED: SCREEN `14`, THE MATERIALS SUBSTRATE, AND THE DIAGNOSIS LESSON
+
+### §14.1 — ⛔ THE DIAGNOSIS LESSON, recorded on the Operator's instruction
+
+> **Operator, 2026-08-14:** *"Docker's port publication is restored, and the cause was Windows, not
+> Docker … Record the diagnosis: **when a fix that should work does not, widen the measurement
+> before widening the action.** Your zero-of-18-containers reading is what pointed at the daemon
+> rather than the stack, and the bind error text is what pointed outside Docker entirely."*
+
+**The actual cause:** Windows had **dynamically reserved TCP `53739`–`54738`**, a contiguous
+1000-port block that swallowed **both** project ranges (`543xx` and `544xx`). Docker could not bind
+the host side of any publication. **Fixed durably**, not by rebooting: `winnat` stopped, `54320`–
+`54439` reserved as an administered exclusion with `store=persistent`, `winnat` restarted.
+
+▶ **THE SHAPE OF THE MISTAKE THAT DID NOT HAPPEN.** Two actions had already been taken and had not
+worked — a Kong container restart, then an authorized `supabase start`. The tempting third step is
+a **bigger action**: restart Docker Desktop, then reboot. ⛔ Each would have been a **wider action
+on an unwidened measurement**, and *none of them addressed the cause*, so the failure would have
+survived every one of them and cost the whole run.
+
+**What was done instead — two widenings, each cheap:**
+
+| Widening | What it ruled out |
+|---|---|
+| Counted host bindings across **all 18 containers, both stacks** — found **ZERO** | It is not the dev stack. Not a Supabase problem at all |
+| Read the **bind error text** rather than the exit code | It is not Docker. The refusal came from the OS |
+
+⚠️ **The first widening cost one `docker ps` and eliminated an entire class of hypothesis.** The
+second cost nothing at all — the text was already on screen, unread.
+
+▶ **THE GENERAL RULE, in the Operator's words:** *"when a fix that should work does not, widen the
+measurement before widening the action."* ⛔ A fix that should have worked and did not is
+**evidence the model is wrong**, not evidence the fix was too small. Escalating the action treats
+it as the second thing while the first is what is true.
+
+### §14.2 — `P2-6` delivered, exactly as authorized
+
+| Object | Authorized | Delivered |
+|---|---|---|
+| tables | 1 | `class_session_materials` (29 → **30**) |
+| buckets | 1 | `lesson-materials`, **private**, `26214400`, **8** MIME types |
+| storage policies | 1 | `lesson_materials_objects_insert_management` (**INSERT only**) |
+| table policies | **0** | **0** |
+| client table grants | **0** | **0** |
+| enums | **0** | **0** (12 → 12) |
+| registry | 21 → 23 | `material.attached`, `material.removed` |
+| functions | — | +5 (56 → **61**) |
+
+**Applied with `supabase migration up`** — one transaction, all nine assertions `M-1`…`M-9`
+executed inside it. ⛔ Never `psql -f` (the path that already broke atomicity here), never
+`db reset`.
+
+**`P1-2`'s bucket invariant re-proved across BOTH buckets:** `public_buckets=0`, `null_limit=0`.
+
+⚠️ **`material.accessed` is RULED ABSENT, and assertion `M-2` fails the build if it appears.** A
+download emits nothing — `A-029` plus the Operator's `P2-4` precedent. `PLM-7` measures it on a
+live call: two `material_signed_path` invocations moved the audit count **by zero**.
+
+### §14.3 — ⛔ `KEY FOCUS POINTS`: RAISED, DECLINED, AND MECHANISED THREE DEEP
+
+The frame draws the column on **all five** lesson cards. It is **not built**, and the decline is
+enforced rather than remembered:
+
+| Depth | Mechanism |
+|---|---|
+| Database | Migration assertion **`M-6` FAILS THE BUILD** if `class_sessions.key_focus` appears |
+| SQL proof | **`PLM-8`** re-asserts the column's absence and the absence of focus-named columns |
+| Source | **`PLMa-KEYFOCUS`** bars `key_focus`, `focus_chips` and `KEY FOCUS POINTS`, comments stripped, **with a three-way control** |
+| Painted page | **`S3-M7-omissions`** proves the string never reaches the rendered DOM |
+
+⛔ **`observations.focus_chips` is barred by the same list, deliberately.** It is a *different
+field* — the trainer's POST-session observation, not lesson-plan INTENT (`G-3`) — and substituting
+it would be the invisible swap `D-4`'s position constraint exists to prevent.
+
+### §14.4 — ⚠️ ONE CHANGE TO AN ALREADY-ACCEPTED SCREEN, reported not buried
+
+**Screen `13`'s `Manage lesson plans` footer control moved from INERT to LIVE.** `P2-4` built it
+inert with the stated reason *"Lesson plans arrive with screen 14."*
+
+▶ **That reason has lapsed, and leaving it would have made the stated reason FALSE** — which is
+worse than either treatment, because the next reader would trust a sentence the product had
+outgrown. It is the frame's own control (`.html:274` — `Manage lesson plans`, `#EC4B96`, `13px`,
+weight `600`), screen `14` has **no other inbound route**, and the treatment matches `InertControl`
+exactly apart from colour, which moves **toward** the frame.
+
+⚠️ **Reported as a change to an accepted screen.** The inert-versus-absent distinction (standing
+prohibition 17) is untouched; `View Overall Class Statistics` remains inert.
+
+### §14.5 — ⛔ §12.8's CLASS AT SCALE: SIX SUITES, ONE DEFECT, AND THE REPAIR THAT WAS REFUSED
+
+**`P2-6`'s authorized migration turned SIX green suites red in one step.** Every one had pinned a
+**global absolute** as its own phase-scoped claim:
+
+| Suite | Pinned | Broken by |
+|---|---|---|
+| `p2-5` | `migrations.length === 30`, `tables === 29`, `registry === 21` | the new migration |
+| `p2-2`, `p2-2-create`, `p2-2b`, `p2-3`, `p2-4` | `tables === 29` (+ `registry === 21`) | the new table |
+| `hero-2` | `functions = 56` | the five new functions |
+
+⛔ **THE OBVIOUS REPAIR WAS REFUSED.** Bumping `29 → 30` and `21 → 23` would have taken ten minutes
+and **re-armed the identical trap for `P2-7`** — teaching that the fix for a phase-scoped claim is
+to keep re-fitting it to other phases' work.
+
+▶ **WHAT EACH PHASE CAN HONESTLY CLAIM is that it REMOVED nothing.** A later phase's legal
+**addition** is not its business. So the pins became **FLOORS** (`>=`), with two deliberate
+exceptions:
+
+- **`enums` stays an EQUALITY.** Every phase since has been authorized at **zero** enums, so
+  movement in *either* direction is a finding.
+- **Two RATCHETS stay EXACT, by their own recorded design** — the route census (`P21a-14`, 20 → 21)
+  and the single global function ratchet (`hero-2` `P2-6`, 56 → 61). ⚠️ Their comments state why:
+  *"a floor would keep passing if it silently stopped [reading]"*. **Both were rewritten with the
+  new entry NAMED, never deleted.**
+
+**Two more instances found in the same sweep, each measuring the fixture rather than a rule:**
+
+1. **`P25a-NOMIG`** pinned the whole tree at 30 files. The *reason* was sound — *"a migration added
+   under an unrelated filename would pass the name test alone"* — but the **scope** was not.
+   Rewritten to count only files **inside `P2-5`'s window**, keeping the guard and dropping the
+   claim over the future.
+2. **`P22-4`** asserted *"zero sessions carry a term"*. ▶ **It went red because the product
+   works** — the Operator's governed Add Class walkthrough legitimately set terms on 13 sessions.
+   Rewritten to measure what *no backfill* actually means: the column is **nullable**, carries **no
+   DEFAULT**, and sessions predating terms still hold NULL. **None of those moves when somebody
+   schedules a class.**
+
+⚠️ **`P2-5`'s own header ALREADY STATED THE RULE** — *"the registry is REPORTED, not pinned as this
+phase's claim"* — **while the code three lines below pinned `registry === "21"`.** ▶ **A correct
+rule written in a comment and contradicted by the code beside it** is the same shape §7.4.1
+records: *the rule existed and was not followed.*
+
+### §14.6 — ⚠️ A COLLISION, AND A LIMIT I COULD NOT SATISFY HONESTLY
+
+**Leg-prefix collision, found and fixed.** `prove-p2-4-class-overview.sql` **already owns
+`P26-1`…`P26-11`**. This phase's suite named its legs `P26-` too. ⛔ Runners count legs **by
+prefix**, so a collision is not untidiness — it makes each suite's leg count meaningless the moment
+both outputs meet. **Renamed to `PLM-`.**
+
+⛔ **`AR-4-14` IS LEFT FAILING, DELIBERATELY.** The artefact-read rule requires **≥2 fractional**
+`.html` values, because a fraction cannot be forged from a prose note. **This frame carries exactly
+three fractional values and two of them belong to the SHARED PORTAL SHELL:**
+
+| Value | Carrier |
+|---|---|
+| `10.50px` | `Management Portal` — shared shell |
+| `13.50px` | the sidebar nav items — shared shell |
+| **`11.50px`** | **the breadcrumb — this screen's own component** |
+
+▶ **It could have been made green two ways, and both were refused.** Citing icon-internal geometry
+(`7.50px`, `5.83px`) would satisfy the letter while citing values the component does not build to.
+Rewriting the shell's `text-[0.84375rem]` to `text-[13.5px]` — arithmetically identical — would
+**touch a shared control on four accepted screens**, which the standing limit says supersedes their
+acceptance. ⛔ **Neither is worth a green tick.**
+
+**This is a rule-versus-frame question for the Operator**, not a threshold to quietly lower.
+
+*(⚠️ The sweep also caught a real fidelity error: `SLIDES & MATERIALS` is **`10px`** in the `.html`
+and had been built at `11px`. Corrected. The whole component now builds to the frame's **measured**
+sizes rather than rem approximations.)*
+
+### §14.7 — Two findings recorded and NOT repaired, per the `S3-00` precedent
+
+1. **`S3-T1-r` — a DATE-DEPENDENT fixture pin.** The trainer calendar opens on **today's** month;
+   all 17 sessions live in `2026-01`…`2026-03`; the leg hardcodes `February 2026`. ▶ **The product
+   is correct and the leg has simply been overtaken by time.** ⚠️ `S3-M6` **already anticipated
+   exactly this** — its comment records that the calendar *"opens on TODAY'S month, which is
+   empty"* — and solved it by pinning `?month=2026-02` in the URL. The trainer leg has no such
+   parameter. **§12.8's class, from the TIME direction.** Another phase's harness.
+2. **`prove:serving-discipline` `D-10`.** Port `3419` is **verifiably free** (`HTTP 000`, no
+   `netstat` entry) yet the teardown leg fails, with one `node.exe` surviving that holds neither
+   `3419` nor `3000`. **A Windows teardown-timing finding**, untouched by this phase.
+
+### §14.8 — Gate table
+
+| Gate | Verdict |
+|---|---|
+| Migration applied, all 9 assertions executed in-transaction | ✅ `PASS` |
+| `prove:portal-p2-6` (8 SQL legs + 18 runner checks) | ✅ `PASS` |
+| Every other portal + hero suite | ✅ `PASS` |
+| `prove:stage2-routes` | ✅ `PASS` (17 checks) |
+| `prove:stage3-authenticated` | **39 PASS · 1 FAIL · 2 NOT-RUN** — the FAIL is `S3-T1-r` above |
+| `S3-M7-r` / `S3-M7-omissions` — screen `14`'s FIRST rendered proof | ✅ `PASS` |
+| `prove:artefact-read` | ⛔ **1 FAIL — `AR-4-14`**, §14.6, left failing on purpose |
+| `prove:serving-discipline` | ⛔ **1 FAIL — `D-10`**, §14.7, not repaired |
+| **VISUAL acceptance, screen `14`** | ⛔ **`NOT-RUN` — Operator-set only** |
+| **VISUAL acceptance, `12`/`13`/`26`/`27`** | ✅ **ACCEPTED at `3431981`**. ⚠️ `13` carries the §14.4 change |
+| `tsc --noEmit`, `eslint` | ✅ clean |
+| Container counts | **dev 9 · mvp 0** at every step |

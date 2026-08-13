@@ -111,7 +111,27 @@ BEGIN
   END IF;
 
   -- P22-4 -- ⛔ NO BACKFILL.
-  SELECT count(*) INTO v_n FROM public.class_sessions WHERE term_id IS NOT NULL;
+  --
+  -- ⚠️ REWRITTEN 2026-08-14. This leg asserted "zero sessions carry a term",
+  --    which was true only while NOTHING HAD EVER SET ONE. The
+  --    Operator's governed Add Class walkthrough then legitimately created 13
+  --    sessions WITH terms and this leg went red. ▶ §12.8's fixture-content
+  --    pin: it measured WHAT THE FIXTURE HAPPENED TO HOLD, and its red state
+  --    meant THE PRODUCT WORKS.
+  --
+  -- ⛔ WHAT NO-BACKFILL ACTUALLY MEANS is a property of the MIGRATION: the
+  --    column is nullable, carries NO DEFAULT, and sessions predating terms
+  --    still hold NULL. All three are asserted below, and none of them moves
+  --    when somebody legitimately schedules a class into a term.
+  SELECT count(*) INTO v_n FROM pg_attribute a
+   WHERE a.attrelid = 'public.class_sessions'::regclass
+     AND a.attname = 'term_id' AND a.atthasdef;
+  IF v_n <> 0 THEN
+    RAISE NOTICE 'FAIL P22-4  term_id carries a column DEFAULT -- that IS a backfill mechanism';
+  END IF;
+  -- At least one session still holds NULL: nothing swept them.
+  SELECT CASE WHEN count(*) FILTER (WHERE term_id IS NULL) > 0 THEN 0 ELSE 1 END
+    INTO v_n FROM public.class_sessions;
   SELECT count(*) INTO v_seen FROM information_schema.columns
    WHERE table_schema='public' AND table_name='class_sessions'
      AND column_name='term_id' AND is_nullable='YES';

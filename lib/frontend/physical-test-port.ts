@@ -21,6 +21,7 @@ import type {
   UpdateClassInput,
   ManagementClassListDto,
   ManagementScheduleDto,
+  ManagementLessonPlansDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -175,6 +176,14 @@ export interface PhysicalTestPort {
     fromDate: string,
     toDate: string,
   ): Promise<UiActionResult<ManagementScheduleDto>>;
+  /**
+   * `P2-6` — screen `14`. ⛔ A READ ONLY. Attach and remove are governed
+   * mutations with their own audit strings and belong on their own signatures;
+   * a projection that could also write is how a read RPC quietly becomes one.
+   */
+  readManagementLessonPlans(
+    classModuleId: string,
+  ): Promise<UiActionResult<ManagementLessonPlansDto | null>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

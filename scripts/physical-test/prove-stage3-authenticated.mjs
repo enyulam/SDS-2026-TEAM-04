@@ -694,6 +694,40 @@ const CHAIN = {
               'Fixture Module A',
             ],
           },
+          {
+            /*
+             * P2-6 — screen `14` Management Lesson Plan Management. ⛔ ITS FIRST
+             * RENDERED PROOF.
+             *
+             * ⛔ `Slides not uploaded yet` IS THE LOAD-BEARING STRING, and it is
+             * load-bearing for an unusual reason: it can ONLY paint if the
+             * per-session `material_list_for_session` RPC actually RESOLVED and
+             * returned zero rows. ▶ A refused read renders `StatePanel` instead,
+             * and an unknown module renders "could not be found" — so this string
+             * separates *the materials RPC works and this lesson has none* from
+             * both failure shapes. Chrome alone would not.
+             *
+             * ⚠️ `Weekly Lessons` proves the module header resolved; `Fixture
+             * Module A` proves the module join behind it did.
+             *
+             * ⚠️ NO `LESSON n` OR LESSON TITLE IS ASSERTED, and that is measured
+             * rather than an omission: `lesson_number` and `lesson_title` are NULL
+             * on ALL 17 live sessions, so hero `0B` omits both and the card's
+             * heading falls back to its DATE. Pinning a lesson title here would
+             * assert something the fixture cannot produce.
+             */
+            id: 'S3-M7',
+            path: `/management/classes/${FIXTURE_MODULE}/lesson-plans`,
+            loading: 'Loading lesson plans',
+            data: [
+              'Lesson Plan Management',
+              'Fixture Module A',
+              'Weekly Lessons',
+              'Slides not uploaded yet',
+              'Upload slides & materials',
+              'Back to Class Overview',
+            ],
+          },
         ]),
     {
       id: 'S3-M1',
@@ -1009,6 +1043,49 @@ async function main() {
                 fail('S3-M6-omissions', 'the control failed: `February 2026` and/or `Schedule Details` did not render, so the ten absences are uninterpretable')
               } else {
                 pass('S3-M6-omissions', 'screen 25 renders `February 2026` and `Schedule Details`, and NONE of `Showcase` / `Assist.` / `Asst.` / `Main:` / `Junior` / `Overall Grade` / the four rating labels — GC-13, A-014, A-016 and G-2, measured on the painted page over a frame that draws the first five')
+              }
+            }
+          }
+
+          /*
+           * P2-6 — SCREEN `14`'s OMISSIONS, ON THE PAINTED PAGE.
+           *
+           * ⛔ `KEY FOCUS POINTS` IS THE ONE THAT MATTERS HERE. The frame draws
+           * the column on every one of its five lesson cards; it was RAISED by
+           * this phase and DECLINED by the Operator because `D-4` names no
+           * AUTHOR for it. ▶ A code-side scan (`P26a-KEYFOCUS`) already proves
+           * the string is absent from the source — this proves it is absent from
+           * the RENDERED PAGE, which is the only place a user meets it.
+           */
+          if (id === 'S3-M7') {
+            if (text === null) {
+              notRun('S3-M7-omissions', 'the lesson-plan surface did not render, so its omissions were not measured')
+            } else {
+              const banned = [
+                'KEY FOCUS POINTS', 'Key focus', 'Showcase', 'Assist.', 'Asst.', 'Junior',
+                'persuasive speaking unit', 'Overall Grade',
+                'Mastering', 'Mastered', 'Beginning', 'Developing',
+              ]
+              const present = banned.filter((b) => text.includes(b))
+              const probe =
+                'KEY FOCUS POINTS · Key focus · Showcase · Assist. Sam Ong · Asst. Sam Ong · Junior · ' +
+                '6-week persuasive speaking unit · Overall Grade B · Mastering · Mastered · Beginning · Developing'
+              const detectorFires = banned.filter((b) => probe.includes(b)).length === banned.length
+              if (!detectorFires) {
+                fail('S3-M7-omissions', 'the omission detector did not match the strings the FRAME itself draws — every absence below would be meaningless')
+              } else if (present.length > 0) {
+                fail('S3-M7-omissions', `screen 14 rendered ${present.map((x) => JSON.stringify(x)).join(', ')} — each is a REFUSED string`)
+              } else if (!text.includes('Weekly Lessons') || !text.includes('Slides not uploaded yet')) {
+                /*
+                 * ⚠️ THE CONTROL. Without it, "none of the twelve appeared" is
+                 * equally true of a blank page, of a REFUSED read and of an
+                 * unknown module — three states this surface can genuinely reach.
+                 * `Weekly Lessons` proves the module header resolved;
+                 * `Slides not uploaded yet` proves the materials RPC returned.
+                 */
+                fail('S3-M7-omissions', 'the control failed: `Weekly Lessons` and/or `Slides not uploaded yet` did not render, so the twelve absences are uninterpretable')
+              } else {
+                pass('S3-M7-omissions', 'screen 14 renders `Weekly Lessons` and `Slides not uploaded yet`, and NONE of `KEY FOCUS POINTS` / `Key focus` / `Showcase` / `Assist.` / `Asst.` / `Junior` / the class description / `Overall Grade` / the four rating labels — the KEY FOCUS decline, GC-13, A-014, A-016, C-14 and G-2, measured on the painted page over a frame that draws KEY FOCUS on every card')
               }
             }
           }

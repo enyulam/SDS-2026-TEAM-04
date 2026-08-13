@@ -87,9 +87,10 @@ import type {
  *    HEAD. Operator AUTHORIZATION B. ⛔ `G-3` additionally bars it from any surface presenting
  *    a governed focus; it arrives with its own phase, in its own labelled position.
  * 3. ⚠️ **The per-row `Stats ›` link** — screen `16`, `P2-16`. AUTHORIZATION B.
- * 4. ⚠️ **`Manage lesson plans`** (screen `14`, `P2-6`) and **`View Overall Class Statistics`**
- *    (screen `16`, `P2-16`) are built as CONTROLS in the frame's footer position, **INERT with
- *    a stated reason**. ⚠️ This is the INERT treatment (target not yet built), **not** the
+ * 4. ✅ **`Manage lesson plans` IS NOW LIVE** (`P2-6`, 2026-08-14) — screen `14` exists, so the
+ *    stated inert reason LAPSED and keeping it would have made that reason false.
+ *    ~~built as a CONTROL, INERT with a stated reason~~. **`View Overall Class Statistics`**
+ *    (screen `16`, `P2-16`) remains INERT with a stated reason. ⚠️ This is the INERT treatment (target not yet built), **not** the
  *    ABSENT treatment (capability refused) — standing prohibition 17 keeps the two apart, and
  *    screen `27`'s absent day strip is the other side of it.
  * 5. ⚠️ **Lesson name and number** render only where recorded. **NULL means NOT RECORDED**
@@ -181,7 +182,7 @@ export function ManagementClassOverview({ classModuleId }: { readonly classModul
       {header !== null && <HeaderCard header={header} />}
       {header !== null && <StatTiles header={header} />}
 
-      <LessonTable sessions={sessions} />
+      <LessonTable sessions={sessions} classModuleId={classModuleId} />
 
       {/*
         ⛔ THE CLASS HEALTH SUMMARY — `C-17`, mandated by `CLAUDE.md` §6 and absent from the
@@ -350,7 +351,14 @@ function StatTiles({ header }: { readonly header: ClassHeaderDto }) {
  * `Stats ›` is screen `16` (`P2-16`). Operator AUTHORIZATION B — they arrive with their
  * phases, and a placeholder now would advertise data that does not exist.
  */
-function LessonTable({ sessions }: { readonly sessions: readonly ClassOverviewSessionDto[] }) {
+function LessonTable({
+  sessions,
+  classModuleId,
+}: {
+  readonly sessions: readonly ClassOverviewSessionDto[];
+  /** ⚠️ Threaded in at `P2-6` solely so the footer control can address screen `14`. */
+  readonly classModuleId: string;
+}) {
   return (
     <section
       aria-label="Lessons"
@@ -429,7 +437,30 @@ function LessonTable({ sessions }: { readonly sessions: readonly ClassOverviewSe
         capability (standing prohibition 17).
       */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-        <InertControl label="Manage lesson plans" reason="Lesson plans arrive with screen 14." />
+        {/*
+          ✅ ACTIVATED AT `P2-6`, 2026-08-14. ⚠️ This is NOT a new control and NOT a visual
+          change: `P2-4` built it here as INERT with the stated reason *"Lesson plans arrive
+          with screen 14."* ▶ **THAT REASON HAS LAPSED** — screen `14` now exists at this exact
+          route — so leaving it inert would have made the stated reason FALSE, which is worse
+          than either treatment. ⛔ The inert-versus-absent distinction is untouched (standing
+          prohibition 17); this control simply moved from one side of INERT to live.
+          ⚠️ Screen `14` has no other inbound route, and this is the control the `.html` draws
+          for it (`Manage lesson plans`, `#EC4B96`, `13px`, weight `600`) — so this is restored
+          fidelity, not an addition.
+        */}
+        {/*
+          ⚠️ THE SAME TREATMENT `InertControl` RENDERS — `min-h-11`, `gap-[5px]`, `13px`,
+          `font-semibold`, a text `›`. Only the COLOUR differs, and it differs toward the
+          frame: the `.html` draws this control at `#EC4B96`, which is the brand token.
+          ▶ Building it as a `Link` with its own spacing would have made two visually
+          different footer controls out of a row the frame draws as a matched pair.
+        */}
+        <Link
+          href={`/management/classes/${classModuleId}/lesson-plans`}
+          className="inline-flex min-h-11 items-center gap-[5px] text-[13px] font-semibold text-brand-500 no-underline transition hover:text-brand-700"
+        >
+          Manage lesson plans <span aria-hidden="true">›</span>
+        </Link>
         <InertControl
           label="View Overall Class Statistics"
           reason="Class statistics arrive with screen 16."

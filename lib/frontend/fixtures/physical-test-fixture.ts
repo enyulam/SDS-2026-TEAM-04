@@ -27,6 +27,7 @@ import {
   type CreateClassInput,
   type ManagementClassListDto,
   type ManagementScheduleDto,
+  type ManagementLessonPlansDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
@@ -1145,6 +1146,57 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       data: {
         sessions,
         monthsWithSessions: [...new Set(SESSIONS.map((session) => session.date.slice(0, 7)))].sort(),
+      },
+    };
+  }
+
+  /**
+   * `P2-6` — screen `14`.
+   *
+   * ⚠️ THIS MIRROR EXERCISES A PATH THE REAL DATA CANNOT. `lesson_number`,
+   * `lesson_title` and `room` are NULL on all 17 live fixture sessions, so
+   * against the real database only the OMIT branch (hero `0B`) is ever
+   * reached. Here `session-storytelling-lab` carries all three and the others
+   * carry none, so BOTH branches render — which is the only way the omission
+   * is proved to be a decision rather than an accident of empty data.
+   *
+   * ⛔ MATERIALS ARE EMPTY IN EVERY FIXTURE SESSION, and that is honest rather
+   * than lazy: there is no deterministic material fixture, so the surface
+   * renders its EMPTY state ("no materials uploaded yet"). Inventing a fake
+   * file here would make the empty state unreachable in the fixture mode that
+   * exists to exercise exactly those states.
+   */
+  async readManagementLessonPlans(
+    classModuleId: string,
+  ): Promise<UiActionResult<ManagementLessonPlansDto | null>> {
+    await delay(220);
+    const moduleSessions = SESSIONS.filter((session) => session.classModuleId === classModuleId);
+    // ⚠️ An unknown module is `null`, never an empty lesson list — the two are
+    // different answers and only one of them was observed (`Q-7`).
+    if (moduleSessions.length === 0) return { outcome: "success", data: null };
+    const first = moduleSessions[0]!;
+    return {
+      outcome: "success",
+      data: {
+        classModuleId,
+        moduleTitle: first.moduleName,
+        classGradeName: first.classGrade,
+        learnerCount: new Set(moduleSessions.flatMap((s) => s.students.map((st) => st.studentId))).size,
+        termLabel: null,
+        sessions: moduleSessions
+          .slice()
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .map((session) => ({
+            classSessionId: session.sessionId,
+            sessionDate: session.date,
+            startsAt: session.startTime,
+            endsAt: session.endTime,
+            lessonNumber: session.lessonNumber ?? null,
+            lessonTitle: session.lessonTitle ?? null,
+            room: session.room ?? null,
+            termLabel: null,
+            materials: [],
+          })),
       },
     };
   }

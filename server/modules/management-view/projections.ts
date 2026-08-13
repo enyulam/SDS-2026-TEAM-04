@@ -55,6 +55,7 @@ import {
   type ClassOverviewSessionDto,
 } from "@/server/modules/class-session/class-overview";
 import { readCentreScheduleCore, type ScheduleDto } from "@/server/modules/class-session/schedule";
+import { readLessonPlansCore, type LessonPlanDto } from "@/server/modules/class-session/lesson-plans";
 import {
   readClassForEditCore,
   updateClassCore,
@@ -539,6 +540,39 @@ export async function readManagementScheduleCore(
   const schedule = await readCentreScheduleCore(client, fromDate, toDate);
   if (!schedule.ok) return { outcome: "unavailable" };
   return { outcome: "success", data: schedule.rows };
+}
+
+// ---------------------------------------------------------------------
+// P2-6 — screen `14` Management Lesson Plan Management
+// ---------------------------------------------------------------------
+/**
+ * A Class Module's lessons and the materials attached to each.
+ *
+ * ⚠️ THE ROLE GATE IS DEFENCE IN DEPTH, NOT THE BOUNDARY — the same
+ * statement every read above makes. The class-shaped half is RLS-scoped, and
+ * the materials half goes through `material_list_for_session`, which
+ * re-resolves management-or-assigned-trainer authority **inside the
+ * database** for each session. ▶ A trainer reaching `readLessonPlansCore`
+ * directly still sees only the sessions they are assigned to.
+ *
+ * ⛔ THE GATE IS MANAGEMENT BECAUSE `14` IS A MANAGEMENT SURFACE, and that is
+ * NOT a claim that trainers may not read materials — `D-4` says they
+ * download. The trainer's route is a separate surface with its own phase;
+ * the RPC beneath already admits them.
+ *
+ * ⛔ A REJECTED READ IS NEVER AN EMPTY LESSON LIST. Success-with-zero renders
+ * "no lessons scheduled", a positive claim about the module (`Q-7`).
+ */
+export async function readManagementLessonPlansCore(
+  client: SupabaseClient,
+  classModuleId: string,
+): Promise<ActionResult<LessonPlanDto | null>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const plans = await readLessonPlansCore(client, classModuleId);
+  if (!plans.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: plans.rows };
 }
 
 // ---------------------------------------------------------------------

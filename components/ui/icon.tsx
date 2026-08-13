@@ -27,6 +27,8 @@ export type IconName =
   | "bell"
   | "logout"
   | "clock"
+  | "download"
+  | "upload"
   | "pin"
   | "user"
   | "chevronLeft"
@@ -113,6 +115,28 @@ const paths: Readonly<Record<IconName, ReactNode>> = {
    * that already renders an icon changes. `calendar` was already here and is
    * reused for the date row rather than duplicated.
    */
+  /*
+   * P2-6 — two ADDITIVE entries for screen `14`, matching the download arrow
+   * on each materials row and the upload arrow on the `Upload slides &
+   * materials` button in `Management - Lesson Plan Management.png`.
+   * ⚠️ ADDITIVE ONLY, exactly as P2-5's three were: no existing entry is
+   * touched, so no already-accepted screen changes. Removal reuses `close`
+   * rather than adding a third glyph.
+   */
+  download: (
+    <>
+      <path d="M12 4v11" />
+      <path d="M7.5 10.5 12 15l4.5-4.5" />
+      <path d="M5 19h14" />
+    </>
+  ),
+  upload: (
+    <>
+      <path d="M12 20V9" />
+      <path d="M7.5 13.5 12 9l4.5 4.5" />
+      <path d="M5 4h14" />
+    </>
+  ),
   clock: (
     <>
       <circle cx="12" cy="12" r="9" />

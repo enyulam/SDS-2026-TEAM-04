@@ -9162,3 +9162,170 @@ failures being the trainer/management/parent magiclink mints. No product code ch
 Desktop restart is the remedy this diagnosis points at). Then, unchanged and needing no further
 ruling: apply `P2-6`'s migration at `25 MiB` with the eight MIME types, build screen `14`
 complete, and re-run `prove:stage3-authenticated` for `S3-M6`.
+
+---
+
+## 2026-08-14 — `P2-6` SHIPPED: SCREEN `14`, THE MATERIALS SUBSTRATE, AND §12.8 REPAIRED AT SCALE
+
+**Checkpoint.** Part 2, `P2-6`. **Branch:** `develop`. **HEAD at start:** `9143879`.
+
+### Container counts at every step, as instructed
+
+| Step | dev | mvp |
+|---|---|---|
+| before re-measurement | **9** | **0** |
+| after migration applied | **9** | **0** |
+| before / after `prove:stage3-authenticated` | **9** | **0** |
+
+⛔ **The demonstration stack was never started, queried or altered** — it stayed at **0** throughout,
+per the Operator's *"it is stopped and staying stopped … Do not start it."*
+
+### ⛔ THE DIAGNOSIS LESSON, recorded on instruction
+
+> **Operator:** *"when a fix that should work does not, **widen the measurement before widening the
+> action**."*
+
+The port failure was **Windows, not Docker**: a dynamic TCP reservation `53739`–`54738` swallowed
+both project ranges. Fixed durably — `winnat` stopped, `54320`–`54439` reserved as an administered
+exclusion with `store=persistent`, `winnat` restarted.
+
+▶ **THE MISTAKE THAT DID NOT HAPPEN.** Two actions had already failed (a Kong restart, then an
+authorized `supabase start`). The tempting third step is a **bigger action** — restart Docker
+Desktop, then reboot. ⛔ Each would have been **a wider action on an unwidened measurement**, and
+**none addressed the cause**, so the failure would have survived all of them.
+
+**Two widenings, each nearly free:** counting host bindings across **all 18 containers, both
+stacks** returned **ZERO**, which ruled out the dev stack and Supabase entirely; **reading the bind
+error text** rather than the exit code ruled out Docker and pointed at the OS. ▶ A fix that should
+have worked and did not is **evidence the model is wrong**, not evidence the fix was too small.
+
+### The conditional held — re-measured at HEAD before writing anything
+
+The schema authorization was conditional on re-measuring once the stack returned. **Nothing had
+shifted while it was down:** census `30|29|56|12|30|21` · `class_session_materials` ABSENT · one
+bucket, private, `104857600` · one storage policy · registry exactly 21 with no `material.*` · no
+`key_focus` column. Four dependencies the migration would rely on were verified at source rather
+than assumed: `app_trainer_reaches_session(uuid)` exists and is `SECURITY DEFINER`,
+`audit_append_event`'s 13-argument signature matches, and both composite keys the FKs need
+(`class_sessions_id_centre_key`, `centre_memberships_id_centre_key`) are present.
+
+### `P2-6` delivered, exactly as authorized
+
+Migration `20260814090000_portal_p2_6_lesson_materials.sql`, applied with **`supabase migration
+up`** in **one transaction** — all nine assertions `M-1`…`M-9` executed inside it. ⛔ Never
+`psql -f` (the path that already broke atomicity in this project), never `db reset`.
+
+| Object | Authorized | Delivered |
+|---|---|---|
+| tables | 1 | `class_session_materials` (29 → **30**) |
+| buckets | 1 | `lesson-materials`, **private**, `26214400`, **8** MIME types |
+| storage policies | 1 | INSERT only |
+| table policies · client grants · enums | **0 · 0 · 0** | **0 · 0 · 0** |
+| registry | 21 → 23 | `material.attached`, `material.removed` |
+
+✅ **`P1-2`'s bucket invariant re-proved ACROSS BOTH buckets** — `public_buckets=0`,
+`null_limit=0` — which is what the Operator asked for and is stronger than checking the new bucket
+alone.
+
+⚠️ **`material.accessed` is RULED ABSENT and `M-2` fails the build if it appears.** `PLM-7`
+measures it live: two `material_signed_path` calls moved the audit count **by zero**.
+
+⚠️ **The caller supplies no size and no media type** — both are read from the **stored object** and
+re-validated against the ruled eight, so a caller cannot declare a 2 MiB handout and upload 40.
+
+### ⛔ `KEY FOCUS POINTS` — raised, declined, mechanised four deep
+
+Migration `M-6` (fails the build on `class_sessions.key_focus`) · `PLM-8` · `PLMa-KEYFOCUS` with a
+three-way control · `S3-M7-omissions` on the painted page. ⛔ `observations.focus_chips` is barred
+by the same list because it is a **different field** — post-session observation, not lesson-plan
+intent (`G-3`) — and substituting it is the invisible swap `D-4`'s position constraint prevents.
+
+### ⛔ §12.8 AT SCALE — six suites red from one authorized migration, and the repair that was refused
+
+`p2-2`, `p2-2-create`, `p2-2b`, `p2-3`, `p2-4`, `p2-5` each pinned a **global absolute** as their
+own phase-scoped claim; `hero-2` pinned `functions = 56`.
+
+⛔ **Bumping every number was REFUSED** — ten minutes' work that **re-arms the identical trap for
+`P2-7`** and teaches that the fix for a phase-scoped claim is to keep re-fitting it to other
+phases' work. ▶ **What each phase can honestly claim is that it REMOVED nothing.** Pins became
+**FLOORS**, with two deliberate exceptions: `enums` stays an **equality** (every phase since is
+authorized at ZERO, so movement either way is a finding), and **two RATCHETS stay EXACT by their
+own recorded design** — the route census (20 → 21) and the single global function ratchet
+(56 → 61), **both rewritten with the new entry NAMED, never deleted**, because their comments state
+that *a floor would keep passing if the census silently stopped reading*.
+
+⚠️ **`P2-5`'s own header ALREADY STATED THE RULE** — *"the registry is REPORTED, not pinned as this
+phase's claim"* — **while the code three lines below pinned `registry === "21"`.** ▶ A correct rule
+written in a comment and contradicted by the code beside it is the same shape §7.4.1 records: **the
+rule existed and was not followed.**
+
+**Two further instances, each measuring the fixture rather than a rule:** `P25a-NOMIG` pinned the
+whole migration tree (rescoped to its own window, keeping the sound reason and dropping the claim
+over the future); and **`P22-4`**, which asserted *"zero sessions carry a term"* and **went red
+because the product works** — the Operator's governed Add Class walkthrough legitimately set terms
+on 13 sessions. Rewritten to measure what *no backfill* actually means: nullable, **no DEFAULT**,
+and sessions predating terms still NULL.
+
+### ⚠️ A COLLISION I INTRODUCED, AND A LIMIT I DID NOT PAPER OVER
+
+**Leg-prefix collision.** `prove-p2-4-class-overview.sql` **already owns `P26-1`…`P26-11`**; this
+phase's suite named its legs `P26-` too. ⛔ Runners count legs **by prefix**, so the collision makes
+each suite's count meaningless the moment both outputs meet. **Renamed to `PLM-`.**
+
+⛔ **`AR-4-14` IS LEFT FAILING, DELIBERATELY.** The rule needs **≥2 fractional** `.html` values.
+This frame carries **three** — `10.50px` (*Management Portal*) and `13.50px` (nav) belong to the
+**shared portal shell**; only `11.50px` (the breadcrumb) is in this screen's own component. **Both
+routes to green were refused:** citing icon-internal geometry (`7.50px`, `5.83px`) would satisfy the
+letter while citing values the component does not build to; rewriting the shell's
+`text-[0.84375rem]` → `text-[13.5px]` is arithmetically identical but **touches a shared control on
+four ACCEPTED screens**. ▶ **A rule-versus-frame question for the Operator, not a threshold to
+lower.**
+
+*(The same sweep caught a real fidelity error: `SLIDES & MATERIALS` is **10px** in the `.html` and
+had been built at 11px. The component now builds to the frame's **measured** sizes throughout.)*
+
+### One change to an already-accepted screen, reported
+
+**Screen `13`'s `Manage lesson plans` moved from INERT to LIVE.** `P2-4` built it inert with the
+stated reason *"Lesson plans arrive with screen 14."* ▶ **That reason lapsed, and leaving it would
+have made the stated reason false.** It is the frame's own control (`.html:274`), screen `14` has
+no other inbound route, and the treatment matches `InertControl` apart from colour, which moves
+toward the frame.
+
+### Two proofs that caught real defects rather than being wrong
+
+`S3-M7-t` failed on a missing `"Loading lesson plans"`: the component passed **no `label`** to
+`LoadingSkeleton`, so its loading state painted bare bars with **no accessible text at all**. That
+is the leg working. And `PLMa-PAIR` / the `RPC_MIGRATIONS` registry guard caught the new migration
+being unpaired — the guard its own header says is the point of failure to watch.
+
+### Files changed
+
+`supabase/migrations/20260814090000_portal_p2_6_lesson_materials.sql` (new) ·
+`server/modules/class-session/lesson-plans.ts` (new) · `features/management/management-lesson-plans.tsx` (new) ·
+`app/(portals)/management/classes/[classModuleId]/lesson-plans/page.tsx` (new) ·
+`scripts/tests/portal/prove-p2-6-lesson-materials.{sql,mjs}` (new) ·
+`server/modules/management-view/projections.ts` · `server/modules/integration-adapter/{adapter-dtos,participant-actions}.ts` ·
+`lib/frontend/{contracts/physical-test.ts,physical-test-port.ts,adapters/real-participant-port.ts,fixtures/physical-test-fixture.ts}` ·
+`components/ui/icon.tsx` (2 additive entries) · `features/management/management-class-overview.tsx` ·
+`scripts/tests/portal/{artefact-read-rule,rpc-call-rule,prove-p2-1-management-classes,prove-p2-2-class-creation,prove-p2-2-terms-substrate,prove-p2-2b-trainer-assignment,prove-p2-3-class-edit,prove-p2-4-class-overview,prove-p2-5-schedule}.{mjs,sql}` ·
+`scripts/tests/hero/prove-2-parent-report-list.sql` · `scripts/physical-test/prove-stage3-authenticated.mjs` ·
+`tests/frontend/portal-navigation-active-state.mjs` · `package.json` ·
+`UI_REFERENCE_FINAL_MVP/14-management-lesson-plan-management/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§14) · `docs/progress/STATUS.md` · this file ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+**Automated verification.** `tsc --noEmit` and `eslint` clean. `prove:encoding` exit 0 after every
+structured write. **Every portal and hero suite exit 0** including the new `prove:portal-p2-6`
+(8 SQL legs + 18 runner checks). `prove:stage2-routes` **PASS, 17 checks**.
+`prove:stage3-authenticated` **39 PASS · 1 FAIL · 2 NOT-RUN** — ✅ **`S3-M7-r` and
+`S3-M7-omissions` are screen `14`'s FIRST rendered proof**, and `S3-M6` for screen `25` is green
+for the first time. The one FAIL is `S3-T1-r`, recorded above.
+⛔ **Two suites deliberately left red: `prove:artefact-read` (`AR-4-14`) and
+`prove:serving-discipline` (`D-10`).**
+
+**VISUAL acceptance:** `12` · `13` · `26` · `27` ACCEPTED at `3431981` — ⚠️ **`13` now carries the
+INERT→LIVE change above.** `25` and `14` **`NOT-RUN`** — Operator-set only.
+
+**Next permitted action:** the Operator walks screens `25` and `14`; rules `AR-4-14`; then `P2-7`
+in plan order.

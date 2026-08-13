@@ -347,6 +347,56 @@ export type ManagementScheduleDto = {
   readonly monthsWithSessions: readonly string[];
 };
 
+/**
+ * `P2-6` — screen `14` Management Lesson Plan Management.
+ *
+ * ⛔ THREE THINGS THE FRAME DRAWS THAT THIS SHAPE DELIBERATELY CANNOT CARRY:
+ *  - `KEY FOCUS POINTS` — RAISED BY THIS PHASE AND DECLINED BY THE OPERATOR.
+ *    `D-4` gives the chips a purpose and a position constraint and names no
+ *    AUTHOR; no authoring surface exists in the ratified inventory, so a read
+ *    would render a permanently empty panel. There is no
+ *    `class_sessions.key_focus` and migration assertion `M-6` fails the build
+ *    if one appears. ⚠️ `D-4`'s mention is not licence for a later phase.
+ *  - `6-week persuasive speaking unit` — no description column exists on
+ *    `class_modules`, and schema'ing one from a frame is what `A-022` bars
+ *    (`C-14` family).
+ *  - `Studio 2` on the header line — the module-level recurrence summary.
+ *    ⚠️ `room` IS carried PER SESSION, because the column exists; it is NULL
+ *    on every fixture session, so the element is omitted rather than faked
+ *    (hero `0B`).
+ */
+export type LessonMaterialDto = {
+  readonly materialId: string;
+  readonly displayName: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+  readonly createdAt: string;
+};
+
+export type LessonPlanSessionDto = {
+  readonly classSessionId: string;
+  /** `YYYY-MM-DD`. */
+  readonly sessionDate: string;
+  readonly startsAt: string | null;
+  readonly endsAt: string | null;
+  /** `null` on every fixture session at HEAD. The column exists; the value does not. */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly room: string | null;
+  readonly termLabel: string | null;
+  readonly materials: readonly LessonMaterialDto[];
+};
+
+export type ManagementLessonPlansDto = {
+  readonly classModuleId: string;
+  readonly moduleTitle: string;
+  readonly classGradeName: string;
+  readonly learnerCount: number;
+  /** `null` where the module's sessions do not agree on one term. */
+  readonly termLabel: string | null;
+  readonly sessions: readonly LessonPlanSessionDto[];
+};
+
 export type ManagementClassListDto = {
   readonly grades: readonly ClassGradeOptionDto[];
   readonly classes: readonly ManagementClassSummaryDto[];

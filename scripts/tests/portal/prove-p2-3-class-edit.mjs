@@ -116,8 +116,16 @@ check(
 const census = psql(["-c", CENSUS]).stdout.trim();
 const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  tables === "29" && enums === "12" && policies === "30" && registry === "21",
-  `⛔ the registry moved to EXACTLY 21 and the three structural invariants did NOT move: 29 tables | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies} | registry ${registry}). Reported, not pinned: ${migrations} migrations, ${functions} functions`,
+// ⛔ FLOORS, NOT EQUALITIES -- §12.8's phase-scoped-claim class, repaired
+// across every portal suite on 2026-08-14 after P2-6's AUTHORIZED migration
+// (tables 29->30, registry 21->23) turned FIVE green suites red at once.
+// ▶ A phase-scoped claim written as a GLOBAL ABSOLUTE measures every OTHER
+// phase's behaviour. What this phase can honestly claim is that it REMOVED
+// nothing; a later phase's legal ADDITION is not its business.
+// ⚠️ enums stays an EQUALITY: every phase since has been authorized at
+// ZERO enums, so movement in either direction is a finding.
+  Number(tables) >= 29 && enums === "12" && Number(policies) >= 30 && Number(registry) >= 21,
+  `⛔ the registry reached AT LEAST 21 and nothing was removed: tables >= 29 | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies} | registry ${registry}). Reported, not pinned: ${migrations} migrations, ${functions} functions`,
 );
 
 const added = psql(["-c",

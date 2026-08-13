@@ -136,8 +136,16 @@ check(
 const census = psql(["-c", CENSUS]).stdout.trim();
 const [migrations, tables, functions, enums, policies, registry] = census.split("|");
 check(
-  tables === "29" && enums === "12" && policies === "30",
-  `the structural INVARIANTS are unmoved: 29 tables | 12 enums | 30 policies (terms’ ONE SELECT policy is already counted here) (measured ${tables} | ${enums} | ${policies}). Reported, not pinned: ${migrations} migrations, ${functions} functions, audit registry ${registry} — ⚠️ the TERMS migration itself contributed ZERO functions, which P22a-4 asserts against the file, because a whole-database total can no longer make that claim once a second migration lands beside it`,
+// ⛔ FLOORS, NOT EQUALITIES -- §12.8's phase-scoped-claim class, repaired
+// across every portal suite on 2026-08-14 after P2-6's AUTHORIZED migration
+// (tables 29->30, registry 21->23) turned FIVE green suites red at once.
+// ▶ A phase-scoped claim written as a GLOBAL ABSOLUTE measures every OTHER
+// phase's behaviour. What this phase can honestly claim is that it REMOVED
+// nothing; a later phase's legal ADDITION is not its business.
+// ⚠️ enums stays an EQUALITY: every phase since has been authorized at
+// ZERO enums, so movement in either direction is a finding.
+  Number(tables) >= 29 && enums === "12" && Number(policies) >= 30,
+  `nothing this phase depends on was REMOVED: tables >= 29 | 12 enums | 30 policies (terms’ ONE SELECT policy is already counted here) (measured ${tables} | ${enums} | ${policies}). Reported, not pinned: ${migrations} migrations, ${functions} functions, audit registry ${registry} — ⚠️ the TERMS migration itself contributed ZERO functions, which P22a-4 asserts against the file, because a whole-database total can no longer make that claim once a second migration lands beside it`,
 );
 
 // ---------------------------------------------------------------------

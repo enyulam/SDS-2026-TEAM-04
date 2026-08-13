@@ -94,7 +94,7 @@ BEGIN
      AND routine_name IN ('admin_update_class_module','admin_update_class_session')
      AND grantee = 'authenticated' AND privilege_type = 'EXECUTE';
   IF v_n = 2 AND v_module IS NOT NULL AND v_session IS NOT NULL AND v_term IS NOT NULL
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 21
+     AND pg_catalog.array_length(public.audit_action_registry(), 1) >= 21
      AND 'admin.module_updated' = ANY (public.audit_action_registry())
      AND 'admin.session_updated' = ANY (public.audit_action_registry())
   THEN

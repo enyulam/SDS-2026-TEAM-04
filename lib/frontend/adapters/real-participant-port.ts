@@ -64,6 +64,7 @@ import type {
   UpdateClassInput,
   ManagementClassListDto,
   ManagementScheduleDto,
+  ManagementLessonPlansDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -116,6 +117,7 @@ import {
   adapterUpdateManagementClass,
   adapterListManagementClasses,
   adapterReadManagementSchedule,
+  adapterReadLessonPlans,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -271,6 +273,13 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       toDate: string,
     ): Promise<UiActionResult<ManagementScheduleDto>> {
       return guard(() => adapterReadManagementSchedule(fromDate, toDate));
+    },
+
+    /** `P2-6` — screen `14`. A read; the two mutations are separate signatures. */
+    readManagementLessonPlans(
+      classModuleId: string,
+    ): Promise<UiActionResult<ManagementLessonPlansDto | null>> {
+      return guard(() => adapterReadLessonPlans(classModuleId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

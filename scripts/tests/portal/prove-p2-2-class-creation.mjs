@@ -149,8 +149,14 @@ const [migrations, tables, functions, enums, policies, registry] = census.split(
  * SHOULD break this.
  */
 check(
-  tables === "29" && enums === "12" && policies === "30",
-  `the structural INVARIANTS this phase claims are unmoved: 29 tables | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies}). Reported, not pinned, because they grow with authorized phases: ${migrations} migrations, ${functions} functions, audit registry ${registry}`,
+  // ⛔ FLOORS, NOT EQUALITIES -- §12.8, repaired across every portal suite on
+  // 2026-08-14 after P2-6's AUTHORIZED migration moved tables 29 -> 30 and the
+  // registry 21 -> 23, turning five green suites red at once. This phase can
+  // honestly claim it REMOVED nothing; a later phase's legal ADDITION is not
+  // its business. ⚠️ enums stays an EQUALITY -- every phase since has been
+  // authorized at ZERO enums, so movement either way is a finding.
+  Number(tables) >= 29 && enums === "12" && Number(policies) >= 30,
+  `nothing this phase depends on was REMOVED: tables >= 29 | 12 enums | 30 policies (measured ${tables} | ${enums} | ${policies}). Reported, not pinned, because they grow with authorized phases: ${migrations} migrations, ${functions} functions, audit registry ${registry}`,
 );
 
 // ---------------------------------------------------------------------

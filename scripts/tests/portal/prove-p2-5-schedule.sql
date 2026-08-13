@@ -38,9 +38,13 @@
 --          This is the structural half of the `Assist.` omission (`A-014`,
 --          `G-7`).
 --   P25-7  ⛔ THIS PHASE MOVED NOTHING. Zero write policies and zero
---          non-SELECT client grants across the projection family, and the
---          audit registry is UNMOVED at 21 -- a read is not a governed
---          action (`A-029`).
+--          non-SELECT client grants across the projection family, and ZERO
+--          schedule/calendar-named action strings in the audit registry --
+--          a read is not a governed action (`A-029`).
+--          ⚠️ Asserted BY NAME with the total as a FLOOR, not as `= 21`.
+--          The equality measured every other phase's registry work and was
+--          broken by `P2-6`'s authorized extension; the name test is also
+--          strictly stronger, since add-one-remove-one keeps a total intact.
 --
 -- ⚠️ TRANSACTION-SCOPED, ending in ROLLBACK.
 -- =====================================================================
@@ -62,6 +66,7 @@ DECLARE
   v_assigned integer;
   v_n        integer;
   v_m        integer;
+  v_reg      integer;   -- P25-7: schedule/calendar-named registry actions, which must be ZERO
   v_hits     text;
   v_missing  text;
   v_vals     text;
@@ -81,9 +86,15 @@ BEGIN
   --    The month control offers the months that HAVE sessions; a fixture
   --    confined to one month would give it a single entry and the leg
   --    would report a working control that can go nowhere.
+  -- ⚠️ `>= 21`, NOT `= 21`. This is a NON-VACUITY precondition -- it asks that a
+  --    real registry exists to measure, not that no LATER phase ever extended
+  --    it. `P2-6` moved it to 23 under its own authorization and broke this leg,
+  --    which is the fifth instance of §12.8's phase-scoped-claim class. The
+  --    claim that this phase ADDED NOTHING is P25-7's, and it is made by NAME
+  --    there rather than by a global total.
   IF v_centre IS NOT NULL AND v_sessions > 0 AND v_months > 1 AND v_assigned > 0
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 21 THEN
-    RAISE NOTICE 'PASS P25-1  NON-VACUITY: % session(s) across % distinct month(s), % active assignment(s), registry 21 -- there is a real calendar for every leg below to measure', v_sessions, v_months, v_assigned;
+     AND pg_catalog.array_length(public.audit_action_registry(), 1) >= 21 THEN
+    RAISE NOTICE 'PASS P25-1  NON-VACUITY: % session(s) across % distinct month(s), % active assignment(s), registry % (>= 21) -- there is a real calendar for every leg below to measure', v_sessions, v_months, v_assigned, pg_catalog.array_length(public.audit_action_registry(), 1);
   ELSE
     RAISE NOTICE 'FAIL P25-1  centre=% sessions=% months=% assigned=% registry=%', v_centre, v_sessions, v_months, v_assigned, pg_catalog.array_length(public.audit_action_registry(), 1);
   END IF;
@@ -266,10 +277,27 @@ BEGIN
      AND grantee IN ('authenticated', 'anon', 'PUBLIC')
      AND privilege_type <> 'SELECT';
 
-  IF v_n = 0 AND v_m = 0 AND pg_catalog.array_length(public.audit_action_registry(), 1) = 21 THEN
-    RAISE NOTICE 'PASS P25-7  ⛔ ZERO write policies and ZERO non-SELECT client grants across the projection family; registry UNMOVED at 21 -- a read is not a governed action (`A-029`)';
+  -- ⛔ THE CLAIM IS MADE BY NAME, NOT BY A GLOBAL TOTAL.
+  --
+  -- ⚠️ This leg used to assert `= 21`, which measured every OTHER phase's
+  --    registry work: `P2-6`'s authorized `material.attached` / `material.removed`
+  --    broke it while proving nothing about the schedule projection. FIFTH
+  --    instance of §12.8's phase-scoped-claim class.
+  --
+  -- ▶ WHAT THIS PHASE ACTUALLY CLAIMS is that A READ IS NOT A GOVERNED ACTION
+  --   (`A-029`), so NO schedule/calendar action string exists at all. That is a
+  --   NAME test, and it is strictly stronger than a count: a phase that both
+  --   added `schedule.viewed` and removed some other string would keep the total
+  --   at 21 and pass the old form.
+  SELECT pg_catalog.count(*) INTO v_reg
+    FROM unnest(public.audit_action_registry()) a
+   WHERE a ~* '(schedule|calendar|timetable)';
+
+  IF v_n = 0 AND v_m = 0 AND v_reg = 0
+     AND pg_catalog.array_length(public.audit_action_registry(), 1) >= 21 THEN
+    RAISE NOTICE 'PASS P25-7  ⛔ ZERO write policies and ZERO non-SELECT client grants across the projection family; ZERO schedule/calendar action strings in a registry of % (>= 21) -- a read is not a governed action (`A-029`)', pg_catalog.array_length(public.audit_action_registry(), 1);
   ELSE
-    RAISE NOTICE 'FAIL P25-7  write policies=% non-SELECT client grants=% registry=%', v_n, v_m, pg_catalog.array_length(public.audit_action_registry(), 1);
+    RAISE NOTICE 'FAIL P25-7  write policies=% non-SELECT client grants=% schedule-named actions=% registry=%', v_n, v_m, v_reg, pg_catalog.array_length(public.audit_action_registry(), 1);
   END IF;
 END
 $suite$;

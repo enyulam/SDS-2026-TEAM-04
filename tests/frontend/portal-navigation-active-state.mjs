@@ -136,6 +136,11 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/classes/[classModuleId]", { role: "management", label: "Classes" }],
   ["/management/classes/[classModuleId]/edit", { role: "management", label: "Classes" }],
+  // `P2-6` — screen `14`. ⚠️ Two levels below `/management/classes` and still
+  // attributed to `Classes`: the rail item is non-exact, so it owns its whole
+  // sub-tree. `N-4` is what proves that is a real match rather than a string
+  // prefix accident.
+  ["/management/classes/[classModuleId]/lesson-plans", { role: "management", label: "Classes" }],
   /*
    * P2-5 — screen `25` at its canonical route. ⚠️ Its rail item is `exact: true`
    * with NO `owns`, so it must be current on ITSELF and on nothing else.

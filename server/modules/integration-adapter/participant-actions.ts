@@ -71,6 +71,7 @@ import {
   getManagementReviewCandidateCore,
   listManagementClassesCore,
   readManagementScheduleCore,
+  readManagementLessonPlansCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
@@ -125,6 +126,7 @@ import type {
   AdapterCreateClassInput,
   AdapterManagementClassListDto,
   AdapterManagementScheduleDto,
+  AdapterLessonPlanDto,
   AdapterManagementEditWordingInput,
   AdapterManagementEditWordingSuccess,
   AdapterManagementQueueRowDto,
@@ -842,6 +844,49 @@ export async function adapterReadManagementSchedule(
         trainerDisplayNames: row.trainerDisplayNames,
       })),
       monthsWithSessions: result.data.monthsWithSessions,
+    },
+  };
+}
+
+/**
+ * `P2-6` — screen `14` Management Lesson Plan Management.
+ *
+ * ⚠️ SAME ALLOW-LIST MAPPER DISCIPLINE, one field at a time. ⛔ That is what
+ * keeps a future `key_focus` column — the one this phase RAISED AND HAD
+ * DECLINED — from reaching the client by default if somebody adds it later.
+ */
+export async function adapterReadLessonPlans(
+  classModuleId: string,
+): Promise<ActionResult<AdapterLessonPlanDto | null>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementLessonPlansCore(client, classModuleId);
+  if (result.outcome !== "success") return result;
+  if (result.data === null) return { outcome: "success", data: null };
+  return {
+    outcome: "success",
+    data: {
+      classModuleId: result.data.classModuleId,
+      moduleTitle: result.data.moduleTitle,
+      classGradeName: result.data.classGradeName,
+      learnerCount: result.data.learnerCount,
+      termLabel: result.data.termLabel,
+      sessions: result.data.sessions.map((session) => ({
+        classSessionId: session.classSessionId,
+        sessionDate: session.sessionDate,
+        startsAt: session.startsAt,
+        endsAt: session.endsAt,
+        lessonNumber: session.lessonNumber,
+        lessonTitle: session.lessonTitle,
+        room: session.room,
+        termLabel: session.termLabel,
+        materials: session.materials.map((material) => ({
+          materialId: material.materialId,
+          displayName: material.displayName,
+          mediaType: material.mediaType,
+          byteSize: material.byteSize,
+          createdAt: material.createdAt,
+        })),
+      })),
     },
   };
 }

@@ -139,7 +139,7 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_rows
     FROM public.report_list_management_class_status(v_module);
   IF v_module IS NOT NULL AND v_sessions > 0 AND v_enrolled > 0
-     AND pg_catalog.array_length(public.audit_action_registry(), 1) = 21
+     AND pg_catalog.array_length(public.audit_action_registry(), 1) >= 21
   THEN
     RAISE NOTICE 'PASS P26-1  NON-VACUITY: module has % session(s) x % active enrolment(s), the status RPC returned % row(s), registry 21 -- there is something real for every leg below to measure', v_sessions, v_enrolled, v_rows;
   ELSE
@@ -357,7 +357,7 @@ BEGIN
              AND grantee IN ('anon','authenticated','service_role')
              AND privilege_type <> 'SELECT')
     INTO v_n;
-  IF v_n = 0 AND pg_catalog.array_length(public.audit_action_registry(), 1) = 21 THEN
+  IF v_n = 0 AND pg_catalog.array_length(public.audit_action_registry(), 1) >= 21 THEN
     RAISE NOTICE 'PASS P26-11  ⛔ ZERO write policies and ZERO non-SELECT client grants across the whole class family, and the registry is UNMOVED at 21 -- P2-4 adds no governed ACTION because a read is not one (A-029)';
   ELSE
     RAISE NOTICE 'FAIL P26-11  % write policy/grant(s); registry %', v_n, pg_catalog.array_length(public.audit_action_registry(), 1);

@@ -314,6 +314,50 @@ export interface AdapterManagementScheduleDto {
 }
 
 /**
+ * `P2-6` — screen `14` Management Lesson Plan Management.
+ *
+ * ⛔ NOTHING HERE IS AN ASSESSMENT FACT, AND THERE IS NO FIELD ONE COULD
+ * ARRIVE IN: no rating, roll-up, observation, attendance value, trainer note,
+ * checklist value, content hash or report status (`C-9`, `G-2`).
+ *
+ * ⛔ NO `keyFocus`. RAISED BY THIS PHASE AND DECLINED BY THE OPERATOR — the
+ * frame draws the chips, `D-4` names no author for them, and there is no
+ * `class_sessions.key_focus` to read. `D-4`'s mention is not licence.
+ *
+ * ⛔ NO `description` and NO `programme` (`C-14`, `A-016`, `A-022`) — the
+ * frame's "6-week persuasive speaking unit" has no column behind it.
+ */
+export interface AdapterLessonMaterialDto {
+  readonly materialId: string;
+  readonly displayName: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+  readonly createdAt: string;
+}
+
+export interface AdapterLessonPlanSessionDto {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly startsAt: string | null;
+  readonly endsAt: string | null;
+  /** `null` where NOT RECORDED — the card falls back to its date (hero `0B`). */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly room: string | null;
+  readonly termLabel: string | null;
+  readonly materials: readonly AdapterLessonMaterialDto[];
+}
+
+export interface AdapterLessonPlanDto {
+  readonly classModuleId: string;
+  readonly moduleTitle: string;
+  readonly classGradeName: string;
+  readonly learnerCount: number;
+  readonly termLabel: string | null;
+  readonly sessions: readonly AdapterLessonPlanSessionDto[];
+}
+
+/**
  * P2-2 — screen `26` Add Class.
  *
  * ⛔ NOTHING HERE IS AN ASSESSMENT FACT, AND THERE IS NO FIELD ONE COULD

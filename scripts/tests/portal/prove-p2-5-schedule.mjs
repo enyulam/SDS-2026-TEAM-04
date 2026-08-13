@@ -97,16 +97,54 @@ check(
 // ⛔ NO MIGRATION. Asserted, not assumed.
 // ---------------------------------------------------------------------
 const migrations = readdirSync(join(ROOT, "supabase", "migrations")).filter((f) => f.endsWith(".sql"));
+// ⛔ THE COUNT PIN IS SCOPED TO THIS PHASE'S WINDOW, not to the whole tree.
+//
+// ▶ The ORIGINAL REASON FOR PINNING A COUNT IS SOUND AND IS KEPT: *"a migration
+//   added under an unrelated filename would pass the name test alone."* What was
+//   wrong was the SCOPE -- `migrations.length === 30` measured every migration
+//   any FUTURE phase would ever add, so `P2-6`'s authorized file broke a suite
+//   that has nothing to do with it. Fifth instance of §12.8's class.
+//
+// ⚠️ The boundary is the first migration dated AFTER `P2-5` shipped. Everything
+//    below it is `P2-5`'s window and is frozen at 30; everything at or above it
+//    belongs to a later phase and is deliberately UNCOUNTED HERE.
+const P25_WINDOW_END = "20260814090000"; // `P2-6` lesson materials -- the first file after this phase
+const inWindow = migrations.filter((f) => f < P25_WINDOW_END);
 check(
-  migrations.filter((f) => /p2_5|schedule/i.test(f)).length === 0 && migrations.length === 30,
-  `P25a-NOMIG ⛔ THIS PHASE SHIPS NO MIGRATION, and the claim is MEASURED: ${migrations.length} migration files exist and NONE names p2_5 or schedule. ⚠️ Pinned at 30 as well as by name, because a migration added under an unrelated filename would pass the name test alone`,
+  migrations.filter((f) => /p2_5|schedule/i.test(f)).length === 0 && inWindow.length === 30,
+  `P25a-NOMIG ⛔ THIS PHASE SHIPS NO MIGRATION, and the claim is MEASURED: ${inWindow.length} migration files exist in this phase's window and NONE of the ${migrations.length} in the tree names p2_5 or schedule. ⚠️ The count guard is KEPT (a file added under an unrelated name passes the name test alone) but SCOPED to the window, so a later phase's authorized migration is not this suite's failure`,
 );
 
 const census = psql(["-c", CENSUS]).stdout.trim();
 const [migrationRows, tables, functions, enums, policies, registry] = census.split("|");
+// ⛔ FLOORS, NOT EQUALITIES -- and the rewrite is the FIFTH instance of §12.8's
+//    phase-scoped-claim class, caught the moment `P2-6` legitimately moved the
+//    census 29 -> 30 tables and the registry 21 -> 23.
+//
+// ⚠️ THIS FILE'S OWN HEADER ALREADY STATED THE RULE -- *"the registry is
+//    REPORTED, not pinned as this phase's claim"* -- while the code three lines
+//    down pinned `registry === "21"`. ▶ A CORRECT RULE WRITTEN IN A COMMENT AND
+//    CONTRADICTED BY THE CODE BESIDE IT is the same defect as the plan rule
+//    §7.4.1 records: the rule existed and was not followed.
+//
+// ⛔ Bumping 29 -> 30 and 21 -> 23 would have been the WRONG repair. It re-arms
+//    the identical trap for `P2-7` and teaches that the fix for a phase-scoped
+//    claim is to keep re-fitting it to other phases' work.
+//
+// ▶ WHAT `P2-5` CAN HONESTLY CLAIM is that it REMOVED nothing its projection
+//   depends on. A later phase ADDING a table, policy or registry string is
+//   legal and is none of this suite's business; a later phase DELETING one
+//   would genuinely break the six-table read this phase proves. Floors assert
+//   exactly that and nothing more.
+//
+// ⚠️ `enums` stays an EQUALITY on purpose. `P2-5` claims it added no enum, and
+//    every phase since has been authorized at zero enums -- so a change in
+//    either direction is a finding, not routine additive drift.
+const floors = { tables: 29, policies: 30, registry: 21 };
 check(
-  tables === "29" && enums === "12" && policies === "30" && registry === "21",
-  `P25a-CENSUS the structural invariants this phase claims are UNMOVED: 29 tables | 12 enums | 30 policies | registry 21 (measured ${tables} | ${enums} | ${policies} | ${registry}). Reported: ${migrationRows} applied migrations, ${functions} functions`,
+  Number(tables) >= floors.tables && enums === "12" &&
+    Number(policies) >= floors.policies && Number(registry) >= floors.registry,
+  `P25a-CENSUS ⛔ NOTHING THIS PHASE'S PROJECTION DEPENDS ON WAS REMOVED: tables >= ${floors.tables} (${tables}) | policies >= ${floors.policies} (${policies}) | registry >= ${floors.registry} (${registry}) | enums == 12 (${enums}). ⚠️ FLOORS, not equalities -- a later phase's legal ADDITION is not this suite's business, and pinning the global total made it measure every OTHER phase's behaviour. Reported: ${migrationRows} migrations, ${functions} functions`,
 );
 
 // ---------------------------------------------------------------------
