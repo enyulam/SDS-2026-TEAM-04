@@ -5,7 +5,7 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-15 · branch `develop` · HEAD `ca5cb87` · **pushed and verified from origin**
+**Regenerated:** 2026-08-15 · branch `develop` · HEAD `25aadae` · **pushed and verified from origin**
 · ✅ **two phases complete** · ⚠️ **two real defects found, both recorded rather than quietly fixed.**
 
 ## ⚠️ §15.8.1 FRESHNESS SWEEP
@@ -27,7 +27,64 @@ forward. Three lapses found; two new items opened.**
 
 ---
 
-## ⏸ TWO THINGS FOR YOU — neither blocking, and `P2-9` is running regardless
+## ⛔ THE STOP: `P2-9` (`18` Student Profile) NEEDS SCHEMA. STATED, NOTHING WRITTEN.
+
+⚠️ **First, a correction: screen `18` is Management STUDENT PROFILE, not "Class Statistics."** I
+carried that label into my last two messages. `16` is Class Statistics (`P2-16`).
+
+**Measured, not assumed.** `students`, `enrolments`, `attendance`, `terms`, `parent_student_links`,
+`parent_profiles` and `accounts` **all carry a management SELECT grant AND policy** — so Profile
+Details, Classes Enrolled and the attendance tile need **nothing**. ⛔ But `observations`,
+`observation_ratings`, `reports` and `report_versions` are **`grant=0, policies=0`** — reachable
+only through a `SECURITY DEFINER` RPC. ▶ Three elements have **no path at all**: the **`ASSESSMENTS`
+count**, the **`D-2` Growth Trend**, and the **Reports table**.
+
+⚠️ **AND THE EXISTING RPC MUST NOT BE REUSED FOR THE TREND.** `report_get_management_ratings` is
+granted and returns `TABLE(dimension_code, display_name, sort_order, rating)` — **the nine
+per-dimension ratings**. Calling it once per session to build a trend would ship the nine into a
+**profile-surface payload**, which `C-9` bars, and which is the `Q-27` error exactly: *"do not fetch
+them into the client and hide them."* ⛔ **The new read must aggregate INSIDE the database and
+return `D-2`'s score only.**
+
+| | |
+|---|---|
+| **Tables · Columns · Enums · Policies** | ⛔ **NONE** |
+| **Audit strings** | ⛔ **NONE** — it is a READ. Registry stays **23** |
+| **Functions** | **ONE** — a student-keyed cross-session management read, `SECURITY DEFINER`, `search_path=''` |
+| **Grants** | **ONE** — `EXECUTE` to `authenticated` |
+
+▶ **The plan's own `P2-9` row already calls for exactly this**: *"`D-2` host **+ a management
+cross-session read**"*, marked ✅ REQUIRED under `C-8`/`C-9`.
+
+⛔ **NOTHING ELSE ON THAT SCREEN NEEDS A RULING — all of it is already disposed:** `Skill Breakdown`
+⛔ `GC-6`/`C-9` (*"do not add a rating badge, bar, column, tile or chip"*) · `Strengths & Focus
+Areas` ⛔ your ruling of this morning · Reports `GRADE` ⛔ `G-2`, permanently · `Generate Term
+Report` ⛔ `C-11` · TA in Classes Enrolled ⛔ `A-014` · **`Date of birth`, `Contact`, `Student ID`
+have NO COLUMN** (`students` is `id · centre_id · full_name · is_active · created_at · updated_at ·
+deactivated_at`, and nothing else) and **`Good standing` is not a concept anywhere** — four
+omissions to disclose, not four questions.
+
+⚠️ **`Edit` DIFFERS FROM SCREEN `23`'s, AND THE DIFFERENCE DECIDES THE TREATMENT.** `22` Edit
+Student **exists** in the ratified 36 and lands at `P2-14`, so this control has a **known future
+destination** — **disabled with a stated reason**, exactly as `Add Trainer` was. Screen `23`'s
+`Edit` had no destination at all and stayed **absent**.
+
+---
+
+## ⏸ SO YOU CAN AUTHORIZE A BATCH IF YOU PREFER — `P2-9` … `P2-16` **ALL** NEED SCHEMA
+
+Measured, not projected: `P2-12` `20` Register Student · `P2-13` `21` Create Parent · `P2-14` `22`
+Edit Student — **no create or update path exists for a student or a parent**, exactly as none
+existed for a trainer before `P2-11`. `P2-15` `15` Lesson Statistics and `P2-16` `16` Class
+Statistics both aggregate over `observations` (and `16`'s Management Insight needs `focus_chips`),
+which is `grant=0, policies=0`.
+
+▶ **`P2-17` (`02` Trainer My Classes) is the first phase needing NONE** — all eight of its tables
+carry a grant **and** a trainer policy at HEAD. **That is where I go next unless you say otherwise.**
+
+---
+
+## ⏸ TWO MORE THINGS FOR YOU — neither blocking
 
 ### 1. `Phone` and `Employee ID` on screen `24` — ⛔ **NO COLUMN EXISTS ANYWHERE**
 
@@ -128,8 +185,8 @@ sidebar went **blank** on a page that plainly belongs to Trainers. **That is `C2
 
 | | |
 |---|---|
-| Branch · worktree · HEAD | `develop` · main worktree · `ca5cb87` · clean |
-| Pushed | ✅ **`origin/develop` = `ca5cb87` = local HEAD**, read back **from origin** |
+| Branch · worktree · HEAD | `develop` · main worktree · `25aadae` · clean |
+| Pushed | ✅ **`origin/develop` = `25aadae` = local HEAD**, read back **from origin** |
 | `main` | **UNTOUCHED** — `5eb84bc`, verified from origin |
 | Containers | **dev 9 · mvp 0** ⛔ demonstration stack never started or queried |
 | Ports | `:3000` held by your walk server; untouched by me |
@@ -141,4 +198,4 @@ sidebar went **blank** on a page that plainly belongs to Trainers. **That is `C2
 | `T-P44`/`T-P44c` · `prove:no-secrets` | **PASS, unchanged** · **CLEAN** |
 | Deliberately red | `prove:artefact-read` (`AR-4-14`/`AR-4-17`) · `prove:serving-discipline` (`D-10`, intermittent) |
 | `NOT-RUN` | `bodySizeLimit` (browser leg) · `prove:stage2-routes` · `prove:stage3-authenticated` · VISUAL on `11`/`14`/`17`/`23`/`24`/`25` |
-| ⏭ Next | **`P2-9` — screen `18` Class Statistics**, unblocked by your `B` ruling. No schema expected; it stops for authorization if that turns out to be wrong |
+| ⏭ Next | ⏸ **`P2-9` IS BLOCKED ON A SCHEMA AUTHORIZATION** — stated below. **`P2-17` (`02` Trainer My Classes) needs none** and is where I go if you would rather not batch |
