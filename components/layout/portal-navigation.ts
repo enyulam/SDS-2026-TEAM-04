@@ -137,6 +137,37 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         icon: "user",
       },
       /*
+       * P2-10 — screen `23` Management Trainers, at its canonical route.
+       *
+       * ✅ THE SLOT ABOVE SAID *"Trainers is absent because `23` has no route;
+       * its slot is not held open with a placeholder."* ▶ **That reasoning did
+       * not lapse — it was SATISFIED.** The route now exists, so the item
+       * arrives with its screen, exactly as the rule said it would.
+       *
+       * ⚠️ `exact: true` and NO `owns`. Trainer creation (`24`) is `P2-11` and
+       * ships no route yet, and there is no Edit-Trainer screen in the ratified
+       * 36 at all — so claiming a sub-tree would be a claim about routes this
+       * build does not have.
+       *
+       * ⛔ THIRD IN THE RAIL, as the frame's own sidebar draws it: Dashboard,
+       * Students, Trainers, Classes, Schedule, Reports.
+       */
+      {
+        href: "/management/trainers",
+        label: "Trainers",
+        path: "/management/trainers",
+        exact: true,
+        /*
+         * ⚠️ A RECORDED VISUAL DIVERGENCE, NOT A CHOICE MADE QUIETLY. The frame
+         * draws a MONITOR glyph for this item; the shared `Icon` set has no
+         * `monitor`, and `cap` (the graduation cap already in the set) is the
+         * nearest teaching-staff mark. ▶ Adding a new glyph is an ASSET, and
+         * `A-013`/`A-022.2` require an Operator disposition before one is copied
+         * in — so the existing set wins and the divergence is written down.
+         */
+        icon: "cap",
+      },
+      /*
        * C2C-001 / operator ruling R-C2-3. Management has EXACTLY ONE primary
        * Reports destination. The rail used to declare TWO — "Pending review" ->
        * `?status=trainer_approved` and "Corrections" -> `?status=needs_edit` —

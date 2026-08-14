@@ -68,6 +68,7 @@ import type {
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
+  ManagementTrainerListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -126,6 +127,7 @@ import {
   adapterRemoveMaterial,
   adapterReadDashboardSummary,
   adapterReadManagementStudents,
+  adapterReadManagementTrainers,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -311,6 +313,10 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** `P2-7` — screen `11`. No parameter: the centre is the caller's own. */
     readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>> {
       return guard(() => adapterReadDashboardSummary());
+    },
+
+    readManagementTrainers(): Promise<UiActionResult<ManagementTrainerListDto>> {
+      return guard(() => adapterReadManagementTrainers());
     },
 
     readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {

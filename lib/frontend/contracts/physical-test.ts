@@ -248,6 +248,34 @@ export type ManagementStudentRowDto = {
   readonly guardianName: string | null;
 };
 
+/**
+ * `P2-10` — screen `23` Management Trainers.
+ *
+ * ⛔ THREE THINGS THE FRAME DRAWS THAT THIS SHAPE CANNOT CARRY, each for its
+ * own reason and none of them "not built yet":
+ *  - the **email** under each name — the pack bars exposing authentication
+ *    details, and an email is the Auth login identifier. The column exists and
+ *    is readable; the TYPE is where the refusal lives.
+ *  - **`On leave`** — `GC-12`. `centre_membership_status` has exactly three
+ *    members and none of them is a leave state. Inventing one would be schema
+ *    from a frame (`A-022`).
+ *  - an **`Edit`** target — no Edit-Trainer screen exists in the ratified 36.
+ */
+export type ManagementTrainerRowDto = {
+  readonly membershipId: string;
+  readonly fullName: string;
+  readonly status: "active" | "deactivated";
+  /** A COUNT of class modules. ⛔ Never a rating, never a roll-up of one. */
+  readonly classCount: number;
+  /** A COUNT of actively-enrolled learners. ⛔ Never a rating. */
+  readonly studentCount: number;
+};
+
+export type ManagementTrainerListDto = {
+  readonly trainers: readonly ManagementTrainerRowDto[];
+  readonly staffCount: number;
+};
+
 export type ManagementStudentListDto = {
   readonly students: readonly ManagementStudentRowDto[];
   readonly enrolledCount: number;

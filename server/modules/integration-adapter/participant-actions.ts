@@ -128,6 +128,7 @@ import type {
   AdapterCreateClassInput,
   AdapterManagementClassListDto,
   AdapterManagementStudentListDto,
+  AdapterManagementTrainerListDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
   AdapterDashboardSummaryDto,
@@ -167,6 +168,7 @@ import {
   materialViewUrlCore,
   removeMaterialCore,
 } from "@/server/modules/class-session/material-transport";
+import { listManagementTrainersCore } from "@/server/modules/class-session/trainer-list-projections";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -952,6 +954,37 @@ export async function adapterRemoveMaterial(
     createElevatedSupabaseClient(),
     materialId,
   );
+}
+
+/**
+ * `P2-10` — screen `23` Management Trainers. ⛔ A READ ONLY; trainer creation
+ * and its invitation are `P2-11` and need an audit string this never touches.
+ *
+ * ⚠️ THE ALLOW-LIST MAPPER IS DOING REAL WORK HERE, not ceremony. The
+ * projection can read `accounts.normalized_email` — every hop is granted — and
+ * this mapper is the layer that would have to be edited before an email could
+ * reach the client. ⛔ It is refused by NOT BEING WRITTEN DOWN, which is
+ * stronger than a filter that has to remember to exclude it.
+ */
+export async function adapterReadManagementTrainers(): Promise<
+  ActionResult<AdapterManagementTrainerListDto>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await listManagementTrainersCore(client);
+  if (!result.ok) return { outcome: "unavailable" };
+  return {
+    outcome: "success",
+    data: {
+      trainers: result.rows.trainers.map((row) => ({
+        membershipId: row.membershipId,
+        fullName: row.fullName,
+        status: row.status,
+        classCount: row.classCount,
+        studentCount: row.studentCount,
+      })),
+      staffCount: result.rows.staffCount,
+    },
+  };
 }
 
 /**

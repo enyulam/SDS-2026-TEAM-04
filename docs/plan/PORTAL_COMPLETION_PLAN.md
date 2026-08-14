@@ -3801,3 +3801,110 @@ prose.
 two of them.
 ⏸ **`AR-4` second instance — still the only open rule question.**
 ▶ **Proceeding autonomously in plan order from `P2-10` (`23` Trainers).** VISUAL stays `NOT-RUN`.
+
+
+---
+
+## §23 — ✅ `P2-10` SHIPPED: SCREEN `23` MANAGEMENT TRAINERS. NO SCHEMA.
+
+### §23.1 — It needed no schema, and that was MEASURED rather than inherited
+
+The pack's dependency section reads *"**Missing** — no trainer-list projection."* ▶ **True of a
+PROJECTION and false of the DATA.** All seven tables the screen needs —
+`centre_memberships`, `accounts`, `trainer_profiles`, `class_session_assignments`,
+`class_sessions`, `class_modules`, `enrolments` — already carry an `authenticated` SELECT **grant**,
+**RLS enabled** and a **permissive SELECT policy**. `PT-2` asserts all three layers on all seven.
+
+⚠️ **§12.10 FOR THE THIRD CONSECUTIVE PHASE**, and this time the note that would have misled came
+from the pack itself. ⛔ **It was re-measured rather than inherited from `P2-8`'s result** —
+repeating a conclusion by analogy is the same mistake as trusting the note.
+
+⚠️ **`accounts.normalized_email` ALREADY EXISTS** too. The email the frame draws needed no column;
+whether it may be *displayed* is a different question, below.
+
+### §23.2 — Three refusals, and each one is a different KIND of refusal
+
+| Element | Disposition | Why, and where the refusal LIVES |
+|---|---|---|
+| **`On leave` chip** | ⛔ `REGISTERED-OMISSION` | `GC-12`, **and the schema agrees**: `centre_membership_status` is exactly `pending`/`active`/`deactivated`, measured live at `PT-6b`. Inventing a leave state would be an enum from a frame (`A-022`) that **also changes what assignment and authorization mean** — a trainer "on leave" is still an active membership |
+| **Email under each name** | ⏸ **RAISED, NOT DROPPED** | See §23.3 |
+| **`Edit` control** | ⛔ **ABSENT, not disabled** | **No Edit-Trainer screen exists in the ratified 36** — no frame, no node, no ID. ▶ A control that leads nowhere is the `P2-6` defect exactly |
+
+⛔ **THE `Edit` / `Add Trainer` DISTINCTION IS §12.12 IN ONE SCREEN, and it is worth stating.**
+`Add Trainer` **is** drawn, **disabled**, and **discloses its reason** — it has a known destination
+(`24`, phase `P2-11`) and will become live. `Edit` is **absent**, because a control that can never
+become live is not a pending feature. ▶ **Disabled means "not yet"; absent means "not a thing".**
+Rendering `Edit` as disabled would have made a permanent gap look like a delivery date.
+
+### §23.3 — ⏸ THE EMAIL: RAISED FOR THE OPERATOR, FAILED CLOSED MEANWHILE
+
+The pack's prohibited-invention clause reads *"Do not expose authentication details."* An email
+**is** the Supabase Auth login identifier for that person, so the clause plausibly reaches it.
+
+▶ **THE ARGUMENT FOR SHOWING IT IS STRONG, AND IS RECORDED SO THE OPERATOR CAN RULE ON THE REAL
+QUESTION:** management **supplies** the email when inviting the trainer (`A-020`), so displaying it
+back discloses nothing management does not already hold; it is **staff** data, not learner data;
+`A-027`'s prohibited-secret list (token, OTP, password, access/refresh token, secret hash) **does
+not include it**; and a directory that cannot tell two identically-named trainers apart is
+materially worse.
+
+⛔ **BUILT CLOSED ANYWAY, because omission is recoverable and disclosure is not.** ▶ **The refusal
+lives in the DTO**, which has no field to put an email in (`PT-5`), and the projection never selects
+the column (`PT-5b`) — **stronger than a component that merely chooses not to render it**.
+
+**RECOMMENDATION: PERMIT IT.** One Operator sentence adds a field; nothing else about the screen
+changes.
+
+### §23.4 — Two numbers that are counts, and the standing test that governs them
+
+`Classes` and `Students` are per-trainer aggregates, and `G-2` bars roll-ups. ▶ **They are COUNTS
+of rows**, on the ground the Operator's `P2-9` ruling states exactly: *"a count of assessments is
+not an assessment."* This projection reads **no rating table at all**, so neither number could
+consult one. ⛔ **The stop condition carries: if either ever becomes derived from rating VALUES
+rather than counted, that is a stop-and-ask.**
+
+⚠️ **`studentCount` counts ACTIVE enrolments only** (`PT-8c`) — the `Ruling A` boundary applied on
+its own merits rather than by analogy: a withdrawn learner is not one of this trainer's students,
+and `enrolments` keeps the withdrawn row.
+
+⛔ **`pending` MEMBERSHIPS ARE EXCLUDED** (`PT-8b`). `A-027`: *"A profile that has not completed
+activation must not be treated as an active login identity."* ▶ Listing one would assert that a
+person works here **because an email was sent**.
+
+### §23.5 — ⚠️ A CONTROL THAT PASSED WHILE PROVING NOTHING, CAUGHT IN THE SAME PASS
+
+`PT-3b`'s first draft compared management's trainer-membership count against a **TRAINER's** and
+asserted `trainer <= management`. ▶ **Both read `1`.** The leg passed, discriminating nothing —
+`1 <= 1` is equally true of a table with **no policy at all**.
+
+⛔ **Rewritten to use the PARENT as the negative**, who reads **0** trainer memberships and **1**
+account against management's **3**. ⚠️ **This is §12.15's family seen from the RLS side: a control
+that cannot come out differently is not a control.**
+
+⚠️ **AND THE FIXTURE'S LIMIT IS STATED IN THE SUITE ITSELF** (`PT-3c`): one active trainer, so
+**ordering, multi-name search and the `deactivated` chip are NOT exercised**. ▶ Recorded as
+unproven rather than implied by a green run.
+
+### §23.6 — One recorded visual divergence
+
+The frame draws a **monitor glyph** for the `Trainers` rail item. The shared `Icon` set has no
+`monitor`; `cap` is the nearest teaching-staff mark already in it. ⛔ **Adding a glyph is an ASSET,
+and `A-013`/`A-022.2` require an Operator disposition before one is copied in** — so the existing
+set wins and the divergence is written down rather than resolved quietly.
+
+✅ **The `Trainers` rail item ARRIVED WITH ITS ROUTE**, which is the standing rule — *"a rail item
+pointing at a 404 is worse than an absent one."* The `P2-8` comment that said its slot was *"not
+held open with a placeholder"* is now **satisfied, not lapsed**.
+
+### §23.7 — Position
+
+✅ **SCREEN `23` BUILT AND PROVEN.** `prove:portal-p2-10` **PASS** — 20 checks, including a
+discriminating RLS control and a stated fixture limit. **No migration, no column, no policy, no
+grant, no RPC, no registry movement.** Route census **23 → 24**.
+
+⏸ **ONE ITEM FOR THE OPERATOR: the email (§23.3).** It blocks nothing — the screen is complete
+without it.
+▶ **Next in plan order: `P2-11` (`24` Add Trainer).** ⚠️ That phase CREATES a trainer and its
+invitation, so it will need its audit strings stated in advance — `admin.profile_created` and
+`invitation.created` both already exist in the registry, which is measured at `P2-11`, not assumed
+here.

@@ -359,6 +359,31 @@ export interface AdapterManagementStudentRowDto {
   readonly guardianName: string | null;
 }
 
+/**
+ * `P2-10` — screen `23` Management Trainers.
+ *
+ * ⛔ NO EMAIL FIELD, AND ITS ABSENCE IS THE RULING BEING RESPECTED, not an
+ * oversight. `accounts.normalized_email` exists and is readable; the pack's
+ * prohibited-invention clause says *"Do not expose authentication details"*,
+ * and an email IS the Supabase Auth login identifier. ▶ **The type has nowhere
+ * to put one**, which is stronger than a component that chooses not to render
+ * it. Reported to the Operator rather than decided here.
+ *
+ * ⛔ NO `On leave`. The status union is the ratified enum minus `pending`.
+ */
+export interface AdapterManagementTrainerRowDto {
+  readonly membershipId: string;
+  readonly fullName: string;
+  readonly status: "active" | "deactivated";
+  readonly classCount: number;
+  readonly studentCount: number;
+}
+
+export interface AdapterManagementTrainerListDto {
+  readonly trainers: readonly AdapterManagementTrainerRowDto[];
+  readonly staffCount: number;
+}
+
 export interface AdapterManagementStudentListDto {
   readonly students: readonly AdapterManagementStudentRowDto[];
   readonly enrolledCount: number;

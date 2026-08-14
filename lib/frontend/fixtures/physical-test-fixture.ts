@@ -31,6 +31,7 @@ import {
   type MaterialViewUrlDto,
   type ManagementDashboardSummaryDto,
   type ManagementStudentListDto,
+  type ManagementTrainerListDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
@@ -1224,6 +1225,43 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * name would fabricate a fact about a child's family to make a column look
    * populated.
    */
+  /**
+   * `P2-10` — screen `23`.
+   *
+   * ⚠️ DERIVED FROM THE FIXTURE'S OWN SESSIONS, never hard-coded. A trainer
+   * exists in this mode by being ASSIGNED to a session, which is what
+   * `class_session_assignments` means in the real read — so the two derive the
+   * same fact from the same relationship rather than agreeing by coincidence.
+   *
+   * ⛔ EVERY ROW IS `active`. The fixture models no deactivated membership, and
+   * inventing one to exercise the second chip would be a fabricated governed
+   * state. ▶ The `deactivated` branch is therefore reachable only against real
+   * data, and that is recorded rather than papered over.
+   */
+  async readManagementTrainers(): Promise<UiActionResult<ManagementTrainerListDto>> {
+    await delay(180);
+    const byTrainer = new Map<string, { modules: Set<string>; learners: Set<string> }>();
+    for (const session of SESSIONS) {
+      if (!session.trainerName) continue;
+      const entry = byTrainer.get(session.trainerName) ?? { modules: new Set<string>(), learners: new Set<string>() };
+      entry.modules.add(session.classModuleId);
+      for (const student of session.students) entry.learners.add(student.studentId);
+      byTrainer.set(session.trainerName, entry);
+    }
+    const trainers = [...byTrainer.entries()]
+      .map(([fullName, e]) => ({
+        // The fixture has no membership id; the name is its stable key here and
+        // is never presented as one to the user.
+        membershipId: `fixture-${fullName.replace(/\s+/g, "-").toLowerCase()}`,
+        fullName,
+        status: "active" as const,
+        classCount: e.modules.size,
+        studentCount: e.learners.size,
+      }))
+      .sort((a, b) => a.fullName.localeCompare(b.fullName));
+    return { outcome: "success", data: { trainers, staffCount: trainers.length } };
+  }
+
   async readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {
     await delay(180);
     const byStudent = new Map<string, { name: string; classes: Set<string> }>();

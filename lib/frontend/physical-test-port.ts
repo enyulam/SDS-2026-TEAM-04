@@ -25,6 +25,7 @@ import type {
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
+  ManagementTrainerListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -222,6 +223,13 @@ export interface PhysicalTestPort {
   readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>>;
   /** `P2-8` — screen `17`. ⛔ A READ ONLY; registration and parent creation are `P2-12`/`P2-13`. */
   readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>>;
+  /**
+   * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
+   * needs an audit string this read does not touch.
+   * ⚠️ NO PARAMETER — the centre is the caller's own, resolved by RLS on every
+   * hop rather than filtered here.
+   */
+  readManagementTrainers(): Promise<UiActionResult<ManagementTrainerListDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because
