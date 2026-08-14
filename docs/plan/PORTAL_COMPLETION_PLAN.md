@@ -3069,6 +3069,35 @@ fails, is reported, and **awaits a ruling on the RULE**.
 shared `Avatar` offers `24 / 32 / 40 / 44 / 48 / 58` — **no `36px` size exists**. `small` (32px) is
 used. Adding a size touches a shared control on accepted screens.
 
+### §18.4a — THE `AR-4` MEASUREMENT THE OPERATOR ASKED FOR (2026-08-14)
+
+> *"Bring me, in one line each: how many fractional values each affected frame carries in its OWN
+> component versus the shared shell. I will rule the rule, not the frames."*
+
+**Measured from each `.html` by resolving every fractional `font-size` to the text node it paints,
+then classifying that node as shared-shell chrome (brand block, sidebar nav, signed-in chip,
+Logout) or the screen's own content.**
+
+**THE TWO AFFECTED FRAMES — one line each:**
+
+- **Screen `14`** — **OWN 1** (`11.50px`, the breadcrumb) · **SHELL 2** (`10.50px` *Management
+  Portal*, `13.50px` sidebar nav).
+- **Screen `17`** — **OWN 2** (`12.50px`, used in five built places; `13.50px`, whose ONLY
+  own-component use is the **UNBUILT `Add Parent`**) · **SHELL 2** (the same two). ▶ **Citable: 1.**
+
+**CONTEXT — the five that clear the bar** (own-component distinct fractional): screen `11` **5** ·
+screen `25` **4** · screen `13` **3** · screen `26` **3** · screen `27` **3**.
+
+⚠️ **A MEASUREMENT DEFECT IN THE FIRST PASS, RECORDED BECAUSE IT NEARLY MIS-STATED THE RULING'S
+INPUT.** The classifier matched shell chrome by prefix, so screen `14`'s breadcrumb
+*"Classes / Junior · Public Speaking"* was filed as the sidebar's **`Classes`** — reporting **OWN
+0** for screen `14`, which **contradicted its own `KNOWN-RED` record** (*"leaving one — `11.50px`,
+the breadcrumb"*). ▶ **The contradiction is what caught it**, and the classifier now matches
+exactly. **A number carried to a ruling is worth re-deriving against a record that already exists.**
+
+⏸ **NO RULING TAKEN.** The Operator rules the RULE after the four-screen walk. **The threshold is
+NOT lowered and NO second `KNOWN-RED` is recorded.**
+
 ### §18.5 — ⛔ `D-10`'s "LAPSED" CALL, MADE AND WITHDRAWN THE SAME DAY
 
 At `P2-7`'s close `D-10` was recorded **LAPSED** on two consecutive green runs. **It went red again
@@ -3081,6 +3110,43 @@ but **two passes cannot establish that an INTERMITTENT failure has resolved**, a
 taken moments after a teardown had cleared the machine, the condition most likely to make it pass.
 ▶ **A flaky check is closed by a diagnosed CAUSE, never by a run of green.** `D-10` is **carried,
 INTERMITTENT, and still needs a diagnosis.**
+
+### §18.7 — THREE OPERATOR RULINGS ON THIS PHASE (2026-08-14)
+
+**1. §12.10 EARNED ITS KEEP ON ITS FIRST PHASE.**
+
+> *"§12.10 paying for itself on its first phase is the finding — a plan sentence that was true of
+> one table and wrong about where the field lives, and exactly the wording a later reader trusts.
+> I would have authorized a column that was never needed. Record that it earned its keep
+> immediately."*
+
+⛔ **RECORDED.** The rule was written at `P2-7`'s close and **caught a real cost one phase later**.
+▶ The precise shape is worth keeping, because it is what makes the sentence dangerous rather than
+merely wrong: *"guardian name and contact need columns"* is **TRUE of `parent_profiles`** — that
+table carries neither — and **WRONG ABOUT WHERE THE FIELD LIVES**, which is `accounts.display_name`.
+⚠️ **A half-true note is worse than a false one**: it survives a spot-check against the table it
+names. **The Operator confirms they would have authorized the column.**
+
+**2. `AR-5` REJECTING THE QUOTED `999px` IS THE SAME RULE WORKING FROM THE OTHER DIRECTION.**
+
+> *"AR-5 rejecting the quoted 999px is the same rule working from the other direction: it caught
+> the move I refused at screen 14, rather than you catching yourself."*
+
+⛔ **RECORDED.** The screen-`14` ruling refused **citing values the component does not build to**.
+At `P2-8` that move was *made* — `999px` cited while the component uses `rounded-full` — and
+**`AR-5` failed it mechanically**. ▶ **The rule caught the author**, which is the only kind of
+catch that survives a tired session.
+
+**3. `D-10` — AN EVIDENTIARY ERROR, NOT A WRONG DIAGNOSIS.**
+
+> *"Record it as an evidentiary error rather than a wrong diagnosis — the original signature was
+> right."*
+
+⛔ **RECORDED, and the distinction is the point.** The original diagnosis — *port free, process
+tree surviving* — **was correct and remains correct**. What failed was the **evidence standard**
+applied to closing it: **two passes taken moments after a teardown had cleared the machine cannot
+establish that an intermittent failure has resolved.** ▶ `D-10` was never mis-diagnosed; it was
+prematurely **closed**.
 
 ### §18.6 — Position
 
