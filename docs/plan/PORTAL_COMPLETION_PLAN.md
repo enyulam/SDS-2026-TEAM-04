@@ -2994,3 +2994,100 @@ second instance) · `S3-T1-r` (remedy known — `?month=`; authorization missing
 
 ⚠️ **`AR-4-11` PASSES** with 4 fractional values — this phase's own artefact citation is sound, and
 the `AR-4-14` red is unrelated to it.
+
+---
+
+## §18 — `P2-8` SHIPPED: SCREEN `17`, NO SCHEMA, AND THE SECOND `AR-4` INSTANCE
+
+**Status: BUILT · PROVEN · VISUAL ACCEPTANCE `NOT-RUN`.** ⏸ **One item is ESCALATED and awaits an
+Operator ruling — `AR-4-17`, §18.4.**
+
+### §18.1 — It needed no schema, and that was measured rather than assumed
+
+⛔ **ZERO migrations, zero columns, zero policies, zero grants, zero RPCs.** All eight tables the
+projection reads carry an `authenticated` `SELECT` **grant**, **RLS enabled**, and a permissive
+`SELECT` **policy** — asserted as three layers by `PDT-2`, and exercised in both directions by
+`PDT-5`/`PDT-6` (management reads 13 learners; the parent reads exactly the 8 they hold an active
+link to, and zero unlinked learners leak).
+
+⚠️ **§12.10 PAID FOR ITSELF ON THE VERY NEXT PHASE.** This plan records *"guardian name and contact
+need columns"* — **true of `parent_profiles`, which carries neither**, and it is the wording a
+later reader trusts without re-checking. ▶ But the guardian **NAME** lives on
+**`accounts.display_name`**, reachable through `parent_student_links → parent_profiles →
+centre_memberships → accounts`, and management can already read every hop. **A schema
+authorization would have been requested for a column that was never needed.** `PDT-4` pins both
+halves so neither claim drifts. ⛔ **The columns question is NOT discharged for `P2-12`/`P2-13`**,
+which CREATE a parent and need contact fields this screen never shows.
+
+### §18.2 — Five refusals, four of which end
+
+| Frame element | Disposition |
+|---|---|
+| The **`Overall` rating chip column** | ⛔ **REFUSED, NEVER ENDS.** `C-9` — whose register row names `P2-8` — confines ratings to report DETAIL surfaces; `G-2` bars every roll-up, and this column is **labelled `Overall`**, a roll-up by name. **Both readings prohibit it.** ⚠️ **ABSENT, NOT EMPTY** — no heading, no cell, no dash. `PDT-7` proves the bar is STRUCTURAL: none of the eight tables carries a rating-shaped column at all |
+| `ID 2025-113` | **REGISTERED-OMISSION.** `students` has no code column (`PDT-3`). Ends only if a code is ratified **and** given a column — two decisions |
+| `Junior` | Not a ratified Class Grade. Labels READ from `class_grades`; `PDTa-GRADE` also bars hard-coding one |
+| `Register Student` · `Add Parent` | **ENDS at `P2-12`/`P2-13`** — destinations unbuilt |
+| `View more ›` | **ENDS at `P2-9`** — screen `18` unbuilt. ⚠️ Recorded separately from the header buttons because it is a PER-ROW control, and a later phase restoring the header actions would not necessarily notice it |
+
+### §18.3 — Two defects the shared controls caught
+
+⛔ **THE FIRST DRAFT REINVENTED `Avatar`, `SearchInput` AND `Select`**, and the avatar copy carried
+a real defect: it picked its tint **by row index**, so **a learner changed colour when the search or
+grade filter reordered the table**. The shared `Avatar` tints **deterministically from the name**.
+▶ **The control had already solved a problem the copy reintroduced** — which is what
+`prove:shared-controls` exists to prevent. `PDTa-SHARED` pins it.
+
+⚠️ **AND THE TYPE SCALE WAS GUESSED BEFORE IT WAS MEASURED.** The first draft put `13.5px` on the
+learner name and `13px` on the cells; the frame puts **`13px` on the name and `12.50px` on the
+cells** — inverted. ▶ **A plausible type scale is not a measured one**, which is precisely why
+§7.4.1 requires the `.html` to be opened.
+
+### §18.4 — ⏸ `AR-4-17`: THE SECOND INSTANCE. ESCALATED, NOT RECORDED AS SETTLED.
+
+> **Operator ruling at `P2-6`:** *"If a later frame hits the same wall, bring it to me; two
+> instances would make it a rule problem rather than a frame accident."*
+
+**A second frame has hit the same wall.** `AR-4` requires **≥6 distinct** cited values with **≥2
+fractional**. Screen `17` can honestly cite **five, of which one is fractional**:
+
+- **FRACTIONAL.** The frame carries exactly three — `10.50px`, `12.50px`, `13.50px`. **Only
+  `12.50px` is this screen's**; `10.50px` is the shell's `Management Portal` and `13.50px` is the
+  shell's sidebar nav, whose only other use is the **unbuilt** `Add Parent`.
+- **DISTINCT.** `12.50px` · `17px` · `13px` · `11px` · `18px`. ⚠️ A sixth, `999px`, was cited in the
+  first draft and **`AR-5` rejected it** — the component uses `rounded-full`, so the value was
+  **quoted, not built to**. ▶ **A leg caught the exact move the screen-`14` ruling refused**, which
+  is the rule working.
+
+⛔ **Every route to green refused, on the Operator's own reasoning:** citing icon-internal geometry
+(`1.67px` outlines, `5.83px` paths) is fabricating evidence; rewriting the shared shell touches
+accepted screens; lowering the threshold *"stops measuring the next frame"*.
+
+⚠️ **NOT recorded as a second `KNOWN-RED`** — the `P2-6` ruling expressly forbids that. `AR-4-17`
+fails, is reported, and **awaits a ruling on the RULE**.
+
+⚠️ **A related gap, recorded rather than fixed:** the frame's row avatar is **`36px`** and the
+shared `Avatar` offers `24 / 32 / 40 / 44 / 48 / 58` — **no `36px` size exists**. `small` (32px) is
+used. Adding a size touches a shared control on accepted screens.
+
+### §18.5 — ⛔ `D-10`'s "LAPSED" CALL, MADE AND WITHDRAWN THE SAME DAY
+
+At `P2-7`'s close `D-10` was recorded **LAPSED** on two consecutive green runs. **It went red again
+on the very next full battery**, with port `3419` **free** and the process tree surviving — the
+original signature exactly.
+
+⚠️ **THE ERROR WAS EVIDENTIARY, NOT FACTUAL, AND IT IS THE FRESHNESS RULE TURNED ON ITSELF.**
+§15.8.1 requires a carried limit to be re-verified before it is carried, and it *was* re-verified —
+but **two passes cannot establish that an INTERMITTENT failure has resolved**, and both passes were
+taken moments after a teardown had cleared the machine, the condition most likely to make it pass.
+▶ **A flaky check is closed by a diagnosed CAUSE, never by a run of green.** `D-10` is **carried,
+INTERMITTENT, and still needs a diagnosis.**
+
+### §18.6 — Position
+
+✅ **Screen `17` BUILT and PROVEN.** `prove:portal-p2-8` **PASS** (7 SQL legs + 18 code-side checks).
+Route census **22 → 23**, rewritten with screen `17` named. The `Students` rail item **arrived with
+its screen**, exactly as `portal-navigation.ts` has required since `P2-1`; ⛔ **Trainers (`23`)
+still ships no route and still gets no item.**
+
+⏸ **AWAITING THE OPERATOR:** the `AR-4` rule question (§18.4), and VISUAL acceptance on `11`, `14`,
+`17` and `25` — **four screens now, which is the boundary the Operator asked to be told about.**

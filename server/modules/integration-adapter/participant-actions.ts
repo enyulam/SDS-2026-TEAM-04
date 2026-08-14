@@ -73,6 +73,7 @@ import {
   readManagementScheduleCore,
   readManagementLessonPlansCore,
   readManagementDashboardSummaryCore,
+  readManagementStudentsCore,
   listManagementCorrectionTrackingCore,
   listManagementPendingReviewCore,
   listManagementSubmittedCore,
@@ -126,6 +127,7 @@ import type {
   AdapterClassCreationOutcomeDto,
   AdapterCreateClassInput,
   AdapterManagementClassListDto,
+  AdapterManagementStudentListDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
   AdapterDashboardSummaryDto,
@@ -872,6 +874,35 @@ export async function adapterReadDashboardSummary(): Promise<
       assessedStudents: result.data.assessedStudents,
       pendingApproval: result.data.pendingApproval,
       submittedReports: result.data.submittedReports,
+    },
+  };
+}
+
+/**
+ * `P2-8` — screen `17` Management Students.
+ *
+ * ⚠️ SAME ALLOW-LIST MAPPER DISCIPLINE, field by field. ⛔ It is what stops a
+ * future rating column, or a student code somebody adds to `students`, reaching
+ * this screen by default — both are refused here by NOT BEING WRITTEN DOWN,
+ * which is stronger than a filter that has to remember to exclude them.
+ */
+export async function adapterReadManagementStudents(): Promise<
+  ActionResult<AdapterManagementStudentListDto>
+> {
+  const client = await createRequestSupabaseClient();
+  const result = await readManagementStudentsCore(client);
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      students: result.data.students.map((row) => ({
+        studentId: row.studentId,
+        fullName: row.fullName,
+        classes: row.classes,
+        guardianName: row.guardianName,
+      })),
+      enrolledCount: result.data.enrolledCount,
+      grades: result.data.grades.map((grade) => ({ id: grade.id, label: grade.label })),
     },
   };
 }

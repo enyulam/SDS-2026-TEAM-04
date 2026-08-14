@@ -23,6 +23,7 @@ import type {
   ManagementScheduleDto,
   ManagementLessonPlansDto,
   ManagementDashboardSummaryDto,
+  ManagementStudentListDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -192,6 +193,8 @@ export interface PhysicalTestPort {
    * is no other centre a caller could name.
    */
   readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>>;
+  /** `P2-8` — screen `17`. ⛔ A READ ONLY; registration and parent creation are `P2-12`/`P2-13`. */
+  readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

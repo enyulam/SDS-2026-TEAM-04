@@ -9659,3 +9659,113 @@ from 43, the new leg being `S3-M8-class`; the single FAIL remains the carried `S
 **VISUAL acceptance:** `11`, `14`, `25` **`NOT-RUN`** — the Operator walks the three together.
 
 **Next permitted action:** `P2-8` in plan order. Every schema change still stops for authorization.
+
+---
+
+## 2026-08-14 (later) — `P2-8` SHIPPED: SCREEN `17`, NO SCHEMA, AND TWO ESCALATIONS
+
+**Branch:** `develop` · **starting HEAD:** `df15ad9` · **working tree at start:** clean.
+
+### Scope
+
+`P2-8` — screen `17` Management Students at `/management/students`. All three artefacts opened
+(`.png`, `.html`, the numbered pack's `screen.md`) before any code.
+
+### It needed no schema, measured rather than assumed
+
+Zero migrations, columns, policies, grants, RPCs. All eight tables carry an `authenticated`
+`SELECT` grant, RLS enabled and a permissive `SELECT` policy (`PDT-2`, three layers), exercised
+both directions by `PDT-5`/`PDT-6`.
+
+⚠️ **§12.10 paid for itself on the phase immediately after it was written.** The plan records
+*"guardian name and contact need columns"* — true of `parent_profiles`, and the wording a later
+reader trusts. But the guardian NAME lives on `accounts.display_name`, reachable through the link
+chain management already reads. **A schema authorization would have been requested for a column
+that was never needed.** Not discharged for `P2-12`/`P2-13`, which create a parent.
+
+### Five refusals
+
+The `Overall` rating chip column (`C-9`, whose register row names `P2-8`, AND `G-2` — **absent, not
+empty**; `PDT-7` proves no rating column is reachable at all) · `ID 2025-113` (no column, `PDT-3`) ·
+`Junior` (not a ratified grade) · `Register Student`/`Add Parent` (end at `P2-12`/`P2-13`) ·
+`View more ›` (ends at `P2-9`, recorded separately because it is a per-row control).
+
+### Two defects the shared controls caught
+
+The first draft reinvented `Avatar`, `SearchInput` and `Select`. The avatar copy tinted **by row
+index**, so a learner changed colour when the filter reordered the table; the shared `Avatar` tints
+deterministically from the name. ▶ **The control had already solved a problem the copy
+reintroduced.**
+
+The type scale was **guessed before it was measured** — `13.5px` on the name and `13px` on the
+cells, where the frame puts `13px` on the name and `12.50px` on the cells. Inverted. **A plausible
+type scale is not a measured one.**
+
+### ⏸ ESCALATION 1 — `AR-4-17`, the SECOND instance of the fractional-value wall
+
+The `P2-6` ruling: *"If a later frame hits the same wall, bring it to me; two instances would make
+it a rule problem rather than a frame accident."* **A second frame has.**
+
+`AR-4` needs ≥6 distinct / ≥2 fractional. Screen `17` can honestly cite **5 distinct, 1
+fractional**. The frame's three fractional values are `10.50px`, `12.50px`, `13.50px`; only
+`12.50px` is this screen's — the others are the shared shell and the **unbuilt** `Add Parent`.
+
+⚠️ **A sixth value was cited and `AR-5` REJECTED it**: `999px`, where the component uses
+`rounded-full` — **quoted, not built to**, the exact move the screen-`14` ruling refused, **caught
+by a leg rather than by me.**
+
+⛔ **NOT recorded as a second `KNOWN-RED`** — the ruling forbids it. It fails, it is reported, and
+the rule question is the Operator's.
+
+Related, recorded not fixed: the frame's row avatar is `36px`; the shared `Avatar` offers
+`24/32/40/44/48/58` and has no `36px`. `small` (32px) is used; adding a size touches a shared
+control on accepted screens.
+
+### ⛔ ESCALATION 2 — `D-10`'s lapse call, made and withdrawn the same day
+
+Recorded LAPSED at `P2-7` on two consecutive green runs; **red again on the next full battery**,
+port `3419` free and the process tree surviving — the original signature exactly.
+
+⚠️ **The error was evidentiary, and it is the freshness rule turned on itself.** §15.8.1 requires a
+carried limit to be re-verified before it is carried, and it was — but **two passes cannot
+establish that an intermittent failure has resolved**, and both were taken moments after a teardown
+had cleared the machine, the condition most likely to make it pass. ▶ **A flaky check is closed by
+a diagnosed cause, never by a run of green.** `D-10` is INTERMITTENT and carried.
+
+### Files changed
+
+**New:** `server/modules/class-session/student-list-projections.ts` ·
+`features/management/management-students-screen.tsx` ·
+`app/(portals)/management/students/page.tsx` ·
+`scripts/tests/portal/prove-p2-8-students.{sql,mjs}`
+**Modified:** `server/modules/management-view/projections.ts` ·
+`server/modules/integration-adapter/{participant-actions,adapter-dtos}.ts` ·
+`lib/frontend/{contracts/physical-test.ts,physical-test-port.ts,adapters/real-participant-port.ts,fixtures/physical-test-fixture.ts}` ·
+`components/layout/portal-navigation.ts` (the `Students` item arrived WITH its screen; Trainers
+still absent) · `scripts/tests/portal/{artefact-read-rule,prove-p2-1-management-classes}.mjs` ·
+`tests/frontend/portal-navigation-active-state.mjs` · `package.json` ·
+`UI_REFERENCE_FINAL_MVP/17-management-students/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` (§18) · `docs/progress/STATUS.md` · this file ·
+`docs/progress/OPERATOR_HANDOFF.md`
+
+### Automated verification
+
+**39 portal + hero + rule suites green by exit code**, plus `portal-navigation-active-state`,
+`post-login-destinations`, `session-eligibility`, `app-route-census` and `test:integration`.
+`prove:portal-p2-8` **PASS**. `npx tsc --noEmit` clean; `npm run build` clean and lists
+`/management/students`.
+
+**Deliberately red:** `prove:artefact-read` — **48 PASS · 2 FAIL** = `AR-4-14` (the ruled
+`KNOWN-RED`) and `AR-4-17` (**escalated, above**). `prove:serving-discipline` — `D-10`,
+INTERMITTENT.
+
+**Environment:** containers **dev 9 · mvp 0**; the demonstration stack never started or queried;
+`:3000` untouched.
+
+**VISUAL acceptance:** `11`, `14`, `17`, `25` all **`NOT-RUN`** — **four screens, which is the
+boundary the Operator asked to be told about.**
+
+⛔ **NOT PUSHED.** Push was authorized *"this phase"* for `P2-7`; `P2-8` is a new phase and that
+authorization does not carry.
+
+**Next permitted action:** the Operator's ruling on `AR-4`, and the four-screen visual walk.

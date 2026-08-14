@@ -29,6 +29,7 @@ import {
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
   type ManagementDashboardSummaryDto,
+  type ManagementStudentListDto,
   type ManagementClassSummaryDto,
   type ManagementEditWordingInput,
   type ManagementEditWordingSuccess,
@@ -1200,6 +1201,58 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         assessedStudents: assessed.size,
         pendingApproval: states.filter((state) => state === "trainer_approved").length,
         submittedReports: states.filter((state) => state === "submitted").length,
+      },
+    };
+  }
+
+  /**
+   * `P2-8` — screen `17` Management Students.
+   *
+   * ⛔ NO RATING AND NO STUDENT CODE, in the fixture as in the governed read.
+   * The fixture is the surface a physical test drives, so a rating here would
+   * paint the exact chip `C-9`/`G-2` prohibit — the DTO gives it nowhere to go,
+   * which is the point.
+   *
+   * ⚠️ THE GUARDIAN IS `null` FOR EVERY FIXTURE LEARNER, and that is DELIBERATE
+   * rather than missing: this fixture models no parent links, so `null` is the
+   * true value and it exercises the OMIT path (hero `0B`). Inventing a guardian
+   * name would fabricate a fact about a child's family to make a column look
+   * populated.
+   */
+  async readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {
+    await delay(180);
+    const byStudent = new Map<string, { name: string; classes: Set<string> }>();
+    for (const session of SESSIONS) {
+      for (const student of session.students) {
+        const entry = byStudent.get(student.studentId) ?? {
+          name: student.displayName,
+          classes: new Set<string>(),
+        };
+        // The governed projection builds `<grade> · <module>` and reads the grade
+        // label from `class_grades`; the fixture's `classGrade` is the same
+        // ratified vocabulary, never `Junior`.
+        entry.classes.add(`${session.classGrade} · ${session.moduleName}`);
+        byStudent.set(student.studentId, entry);
+      }
+    }
+    const students = [...byStudent.entries()]
+      .map(([studentId, entry]) => ({
+        studentId,
+        fullName: entry.name,
+        classes: [...entry.classes].sort((a, b) => a.localeCompare(b)),
+        guardianName: null,
+      }))
+      .sort((a, b) => a.fullName.localeCompare(b.fullName));
+    return {
+      outcome: "success",
+      data: {
+        students,
+        enrolledCount: students.length,
+        grades: [
+          { id: "grade-beginner", label: "Beginner" },
+          { id: "grade-intermediate", label: "Intermediate" },
+          { id: "grade-advanced", label: "Advanced" },
+        ],
       },
     };
   }

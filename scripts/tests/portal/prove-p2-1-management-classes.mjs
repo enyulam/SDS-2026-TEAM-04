@@ -240,14 +240,14 @@ check(
 );
 /*
  * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, 17 → 18 AT `P2-3`, 18 → 19 AT
- * `P2-4`, 19 → 20 AT `P2-5`, 20 → 21 AT `P2-6`, THEN 21 → 22 AT `P2-7`, AND WAS REWRITTEN
+ * `P2-4`, 19 → 20 AT `P2-5`, 20 → 21 AT `P2-6`, 21 → 22 AT `P2-7`, THEN 22 → 23 AT `P2-8`, AND WAS REWRITTEN
  * EACH TIME RATHER THAN DELETED. Screen `26` shipped at
  * `/management/classes/add-class`, screen `27` at
  * `/management/classes/[classModuleId]/edit`, screen `25` at
  * `/management/schedule` and screen `14` at
- * `/management/classes/[classModuleId]/lesson-plans` and screen `11` at
- * `/management/dashboard`, so the app tree really does carry six more routes
- * than it did at `P2-1`. ⚠️ `P2-7` ADDED a route without removing one:
+ * `/management/classes/[classModuleId]/lesson-plans` screen `11` at
+ * `/management/dashboard` and screen `17` at `/management/students`, so the app
+ * tree really does carry seven more routes than it did at `P2-1`. ⚠️ `P2-7` ADDED a route without removing one:
  * `/management` still ships, now as a COMPATIBILITY REDIRECT, so the census
  * counts both. ▶ The property this leg protects is
  * unchanged and is why it stays an EXACT number rather than a `>=`: the nav
@@ -262,8 +262,8 @@ check(
  * chances to relax the wrong one.
  */
 check(
-  /all 22 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 22 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3 + screen `13` at P2-4 + screen `25` at P2-5 + screen `14` at P2-6 + screen `11` at P2-7) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 23 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 23 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3 + screen `13` at P2-4 + screen `25` at P2-5 + screen `14` at P2-6 + screen `11` at P2-7 + screen `17` at P2-8) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

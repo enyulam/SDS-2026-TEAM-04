@@ -224,6 +224,36 @@ export type ReturnedReportQueueItemDto = {
   readonly correction: CorrectionRequestDto;
 };
 
+/**
+ * `P2-8` — screen `17` Management Students.
+ *
+ * ⛔ NO RATING FIELD, AND THERE IS NO PLACE TO PUT ONE. The frame draws an
+ * `Overall` chip on every row and the pack note calls it *"current B.E.S.T.
+ * Rating"*. `C-9` — whose own row names `P2-8` — confines the nine ratings to
+ * report DETAIL surfaces because ratings on a list *"invite comparison between
+ * children"*, and `G-2` bars every roll-up on every surface, permanently. A
+ * column literally labelled `Overall` is a roll-up by name.
+ *
+ * ⛔ NO STUDENT CODE. The frame draws `ID 2025-113`; `public.students` carries
+ * `id, centre_id, full_name, is_active` and timestamps and NO code column,
+ * measured at HEAD. Inventing one would be schema inferred from a frame
+ * (`A-022`). `REGISTERED-OMISSION`.
+ */
+export type ManagementStudentRowDto = {
+  readonly studentId: string;
+  readonly fullName: string;
+  /** Every ACTIVE enrolment. The note says *"Class or Classes"* — a second is rendered. */
+  readonly classes: readonly string[];
+  /** `null` where no active link exists — hero `0B` OMITS, never `Unknown`. */
+  readonly guardianName: string | null;
+};
+
+export type ManagementStudentListDto = {
+  readonly students: readonly ManagementStudentRowDto[];
+  readonly enrolledCount: number;
+  readonly grades: readonly { readonly id: string; readonly label: string }[];
+};
+
 export type ManagementQueueRowDto = {
   readonly reportId: string;
   readonly sessionId: string;

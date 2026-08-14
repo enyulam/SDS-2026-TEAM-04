@@ -118,6 +118,13 @@ const EXPECTED_BY_ROUTE = new Map([
   // `N-0b` READS the page source and fails if it does not really redirect.
   ["/management", { redirectsTo: "/management/dashboard" }],
   ["/management/dashboard", { role: "management", label: "Dashboard" }],
+  /*
+   * P2-8 -- screen `17` Management Students. The rail item arrives WITH its
+   * screen, which is the rule `portal-navigation.ts` has carried since P2-1:
+   * an item pointing at a 404 is worse than an absent one. ⛔ TRAINERS (`23`)
+   * still ships no route and still has no item.
+   */
+  ["/management/students", { role: "management", label: "Students" }],
   // P2-1 — screen `12` at its canonical route. This expectation is also what
   // proves Dashboard does NOT light up here.
   ["/management/classes", { role: "management", label: "Classes" }],

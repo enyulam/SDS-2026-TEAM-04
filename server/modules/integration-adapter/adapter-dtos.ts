@@ -344,6 +344,27 @@ export interface AdapterDashboardSummaryDto {
   readonly submittedReports: number;
 }
 
+/**
+ * `P2-8` — screen `17` Management Students.
+ *
+ * ⛔ NO RATING FIELD AND NO STUDENT CODE. The frame draws both; `C-9`/`G-2`
+ * prohibit the first and `public.students` has no column for the second. The
+ * allow-list mapper below is what keeps either from arriving by default if a
+ * column is ever added.
+ */
+export interface AdapterManagementStudentRowDto {
+  readonly studentId: string;
+  readonly fullName: string;
+  readonly classes: readonly string[];
+  readonly guardianName: string | null;
+}
+
+export interface AdapterManagementStudentListDto {
+  readonly students: readonly AdapterManagementStudentRowDto[];
+  readonly enrolledCount: number;
+  readonly grades: readonly { readonly id: string; readonly label: string }[];
+}
+
 export interface AdapterLessonMaterialDto {
   readonly materialId: string;
   readonly displayName: string;

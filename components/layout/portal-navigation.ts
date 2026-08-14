@@ -117,6 +117,26 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         icon: "dashboard",
       },
       /*
+       * P2-8 — screen `17` Management Students, at its canonical route.
+       *
+       * ⚠️ `exact: true` and NO `owns`. Student registration (`20`), parent
+       * creation (`21`) and student edit (`22`) are screens in `P2-12`…`P2-14`
+       * with no shipped route, and declaring ownership of a sub-tree that does
+       * not exist yet would be a claim about routes this build does not ship —
+       * the same reasoning `Classes` carried until `P2-2` satisfied it.
+       *
+       * ⛔ POSITIONED SECOND, as the frame's own sidebar draws it: Dashboard,
+       * Students, Trainers, Classes, Schedule, Reports. Trainers is absent
+       * because `23` has no route; its slot is not held open with a placeholder.
+       */
+      {
+        href: "/management/students",
+        label: "Students",
+        path: "/management/students",
+        exact: true,
+        icon: "user",
+      },
+      /*
        * C2C-001 / operator ruling R-C2-3. Management has EXACTLY ONE primary
        * Reports destination. The rail used to declare TWO — "Pending review" ->
        * `?status=trainer_approved` and "Corrections" -> `?status=needs_edit` —
@@ -156,8 +176,17 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
        *
        * ✅ SCHEDULE ARRIVED AT `P2-5`, exactly as that sentence anticipated,
        * and it is added below rather than by rewriting the sentence: the rule
-       * did not lapse, it was SATISFIED. ⛔ Students (`17`) and Trainers
-       * (`23`) still have no shipped route and still get no item.
+       * did not lapse, it was SATISFIED. ~~⛔ Students (`17`) and Trainers
+       * (`23`) still have no shipped route and still get no item.~~
+       *
+       * ✅ STUDENTS ARRIVED AT `P2-8` — same mechanism, recorded the same way.
+       * Screen `17` now ships `/management/students`, so the item arrives WITH
+       * its screen exactly as the rule required. ⛔ TRAINERS (`23`) STILL HAS NO
+       * SHIPPED ROUTE AND STILL GETS NO ITEM; it arrives at `P2-10`.
+       *
+       * ⚠️ The struck sentence is preserved rather than deleted because it is
+       * the RULE, not a status line: *"a rail item pointing at a 404 is worse
+       * than an absent one"* is what still governs Trainers.
        */
       {
         href: "/management/classes",

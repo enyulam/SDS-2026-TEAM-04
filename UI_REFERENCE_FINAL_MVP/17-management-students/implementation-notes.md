@@ -65,3 +65,57 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+
+---
+
+## `P2-8` — artefact-read record (2026-08-14)
+
+All three artefacts were opened. Every layout value below was derived from the `.html`, and every
+claim about what the frame draws or omits rests on the `.png`.
+
+```artefact-read
+screen: 17
+pack: Management - Students
+component: features/management/management-students-screen.tsx
+html-values: 12.50px, 17px, 13px, 11px, 18px
+screen-md-quote: Management list over the centre's students.
+```
+
+### ⛔ Refusals recorded at this screen
+
+| Frame element | Disposition |
+|---|---|
+| The `Overall` rating chip column | **REFUSED, NEVER ENDS.** `C-9` (its register row names `P2-8`) and `G-2`. **Absent, not empty** — no heading, no cell, no dash |
+| `ID 2025-113` | **REGISTERED-OMISSION.** `public.students` carries no code column, measured at HEAD (`PDT-3`) |
+| `Junior` | Not a ratified Class Grade (`A-016`, `A-026`/`A-054`). Labels are READ from `class_grades` |
+| `Register Student` · `Add Parent` | **REGISTERED-OMISSION, ENDS at `P2-12`/`P2-13`.** Destinations not built |
+| `View more ›` | **REGISTERED-OMISSION, ENDS at `P2-9`.** Screen `18` not built |
+
+### ⚠️ `AR-4-17` — SECOND INSTANCE OF THE FRACTIONAL-VALUE WALL. NOT a second `KNOWN-RED`.
+
+`AR-4` requires **≥6 distinct** values with **≥2 fractional**. Measured, this screen can honestly
+cite **five**, of which **one** is fractional.
+
+**FRACTIONAL.** The frame carries exactly three — `10.50px`, `12.50px`, `13.50px` — and **only
+`12.50px` belongs to this screen's own component**. `10.50px` is the shell's `Management Portal`;
+`13.50px` is the shell's sidebar nav, whose only other use is the **unbuilt** `Add Parent`.
+
+**DISTINCT.** `12.50px` (class cell, guardian cell, search, select) · `17px` (`All Students`) ·
+`13px` (learner name) · `11px` (pill, column headings) · `18px` (table card radius). A sixth was
+cited and **withdrawn**: `999px` was in the first draft and `AR-5` correctly rejected it — the
+component uses `rounded-full`, so the value was **quoted, not built to**. ▶ Leaving it in would
+have been the exact move the screen-`14` ruling refused, caught by a leg rather than by me.
+
+⚠️ **A related gap, recorded rather than papered over:** the frame's row avatar is **`36px`**, and
+the shared `Avatar` offers `24 / 32 / 40 / 44 / 48 / 58` — **no `36px` size exists**. The nearest
+(`small`, 32px) is used. Adding a size would touch a shared control on accepted screens, so it is
+recorded here instead of done.
+
+⛔ **Every route to green was refused, on the Operator's own screen-`14` reasoning:** citing the
+frame's icon-internal geometry (`1.67px` outlines, `5.83px` paths) is **fabricating evidence** —
+the component does not build to it; rewriting the shared shell touches accepted screens; lowering
+the threshold **"stops measuring the next frame"**.
+
+▶ **This is escalated, not recorded as settled.** The screen-`14` ruling says: *"If a later frame
+hits the same wall, bring it to me; two instances would make it a rule problem rather than a frame
+accident."* **Two instances now exist.** Awaiting the Operator's ruling on the RULE.

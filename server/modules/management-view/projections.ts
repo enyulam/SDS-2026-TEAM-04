@@ -58,6 +58,10 @@ import { readCentreScheduleCore, type ScheduleDto } from "@/server/modules/class
 import { readLessonPlansCore, type LessonPlanDto } from "@/server/modules/class-session/lesson-plans";
 import { readDashboardSummaryCore, type DashboardSummaryDto } from "@/server/modules/class-session/dashboard";
 import {
+  listManagementStudentsCore,
+  type ManagementStudentListDto,
+} from "@/server/modules/class-session/student-list-projections";
+import {
   readClassForEditCore,
   updateClassCore,
   type ClassEditDto,
@@ -872,4 +876,37 @@ export async function getManagementRatingsCore(
       rating: row.rating,
     })),
   };
+}
+
+// ---------------------------------------------------------------------
+// P2-8 — screen `17` Management Students
+// ---------------------------------------------------------------------
+/**
+ * The centre's student roll: learner, class(es) and guardian.
+ *
+ * ⚠️ THE ROLE GATE IS DEFENCE IN DEPTH, NOT THE BOUNDARY — the same statement
+ * every read above makes. Every table `listManagementStudentsCore` touches is
+ * RLS-scoped and carries its own management policy; the gate here means a
+ * non-management caller is refused BEFORE the reads rather than returned an
+ * empty roll by the database.
+ *
+ * ⛔ A REJECTED READ IS NEVER AN EMPTY ACADEMY. Success-with-zero-rows renders
+ * "no students enrolled" — a positive claim about the centre that nobody
+ * measured (`Q-7`).
+ *
+ * ⛔ NOTHING THIS RETURNS IS AN ASSESSMENT FACT. Learner name, class label and
+ * guardian name are identity and enrolment facts. The frame's `Overall` rating
+ * chip is REFUSED under `C-9` — whose own row names `P2-8` — and under `G-2`,
+ * which bars every roll-up permanently; there is no field here one could arrive
+ * in, and `PSTa-RATINGS` fails the build if that ever stops being true.
+ */
+export async function readManagementStudentsCore(
+  client: SupabaseClient,
+): Promise<ActionResult<ManagementStudentListDto>> {
+  const identity = await requireRole(client, "management");
+  if (identity.outcome !== "success") return identity;
+
+  const listed = await listManagementStudentsCore(client);
+  if (!listed.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: listed.rows };
 }
