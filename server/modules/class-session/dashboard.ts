@@ -22,7 +22,7 @@ import { readMaybeRow, type QueryOutcome } from "@/server/platform/query-diagnos
  * sighting. Migration assertion `W-5` fails the build if anybody "restores
  * fidelity" by counting the transient status.
  *
- * ⛔ NOTHING HERE IS AN ASSESSMENT FACT — four integers, and there is no
+ * ⛔ NOTHING HERE IS AN ASSESSMENT FACT — three integers, and there is no
  * field one could arrive in. Migration assertion `W-4` fails the build if the
  * read so much as NAMES a rating, panel field, trainer note, checklist value
  * or hash, matched as a BARE SUBSTRING so it catches the next rating column
@@ -30,16 +30,30 @@ import { readMaybeRow, type QueryOutcome } from "@/server/platform/query-diagnos
  * sample, so the four absences are measurements rather than four patterns
  * that can never match.
  */
+/**
+ * ⛔ THREE, NOT FOUR — `Ruling A`, Operator, 2026-08-15.
+ *
+ * `assessedStudents` was DROPPED AT THE SOURCE: *"drop the parameter properly.
+ * A forward migration under `R-1`, not an edit. **Leaving it unread is the
+ * option that rots.**"* ▶ Removing it here alone would have left the RPC
+ * returning a fourth integer nothing consumed — exactly the shape somebody
+ * later finds and re-surfaces, assuming it was wanted.
+ *
+ * ⚠️ AND `totalStudents` CHANGED MEANING WITHOUT CHANGING NAME, which is the
+ * more dangerous half. It now counts **DISTINCT ACTIVE ENROLMENTS**, not
+ * centre-resident `students` rows. ⛔ **The two were IDENTICAL at HEAD — both
+ * 13, measured** — so nothing on this screen would have looked wrong until the
+ * first learner withdrew.
+ */
 export type DashboardSummaryDto = {
+  /** ⛔ ENROLLED (active) — never centre-resident. The names coincide; the numbers will not. */
   readonly totalStudents: number;
-  readonly assessedStudents: number;
   readonly pendingApproval: number;
   readonly submittedReports: number;
 };
 
 type SummaryRow = {
   o_total_students: number | null;
-  o_assessed_students: number | null;
   o_pending_approval: number | null;
   o_submitted_reports: number | null;
 };
@@ -48,8 +62,8 @@ type SummaryRow = {
  * ⛔ FAILS CLOSED, AND THE NULL IS THE MECHANISM. The RPC returns NULLs — not
  * zeroes — to any caller without an active management membership, so a
  * REFUSAL can never be rendered as a centre with no learners (`Q-7`).
- * Measured both directions: management reads `13 · 10 · 2 · 4`, a trainer
- * reads `NULL`.
+ * Measured both directions: management reads `13 · 2 · 4` — three integers
+ * since `Ruling A`, where it was `13 · 10 · 2 · 4` — and a trainer reads `NULL`.
  *
  * ⛔ `readMaybeRow`, NOT `readRows` — AND THE DIFFERENCE WAS A LIVE DEFECT, not
  * a style choice. This function is `RETURNS record` (`proretset = false`), so
@@ -78,7 +92,6 @@ export async function readDashboardSummaryCore(
   if (
     row === null ||
     row.o_total_students === null ||
-    row.o_assessed_students === null ||
     row.o_pending_approval === null ||
     row.o_submitted_reports === null
   ) {
@@ -88,7 +101,6 @@ export async function readDashboardSummaryCore(
     ok: true,
     rows: {
       totalStudents: row.o_total_students,
-      assessedStudents: row.o_assessed_students,
       pendingApproval: row.o_pending_approval,
       submittedReports: row.o_submitted_reports,
     },

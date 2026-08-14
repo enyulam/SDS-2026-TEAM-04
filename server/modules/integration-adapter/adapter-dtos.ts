@@ -338,8 +338,8 @@ export interface AdapterManagementScheduleDto {
  * that never commits and would read zero forever. Operator ruling.
  */
 export interface AdapterDashboardSummaryDto {
+  /** ⛔ `Ruling A` — ENROLLED (active), never centre-resident. A withdrawn learner does not count. */
   readonly totalStudents: number;
-  readonly assessedStudents: number;
   readonly pendingApproval: number;
   readonly submittedReports: number;
 }

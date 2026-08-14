@@ -285,8 +285,24 @@ export function ManagementDashboardScreen() {
       {summary.kind === "failed" ? <StatePanel result={summary.result} /> : null}
 
       <section className="flex flex-wrap gap-4">
+        {/*
+          ⛔ `Total Students` COUNTS ENROLLED LEARNERS, NOT CENTRE-RESIDENT ROWS — `Ruling A`,
+          Operator, 2026-08-15: *"use ENROLLED, not centre-resident. A withdrawn learner should
+          not count, and the fixture coinciding today is exactly why this needs deciding now
+          rather than when it splits."* ⚠️ **Both readings were 13 at HEAD**, so nothing here
+          would have looked wrong until the first withdrawal — the tile would simply have started
+          overstating the roster, on a screen nobody was re-checking.
+        */}
         <KpiTile caption="Total Students" value={kpis?.totalStudents ?? null} icon="user" tone="bg-brand-100 text-brand-700" />
-        <KpiTile caption="Assessed" value={kpis?.assessedStudents ?? null} icon="check" tone="bg-[#D8F1F3] text-[#2B8F96]" />
+        {/*
+          ⛔ THE `Assessed` TILE IS REMOVED, AND SO IS THE PARAMETER BEHIND IT. `Ruling A`:
+          *"drop the parameter properly. A forward migration under `R-1`, not an edit. Leaving it
+          unread is the option that rots."* ▶ Deleting only the tile would have left the RPC
+          returning a fourth integer nothing consumed, which is how a dropped requirement comes
+          back later as a feature somebody assumes was wanted.
+          ⚠️ ITS ABSENCE IS EXPECTED AT VISUAL ACCEPTANCE, never a regression — the frame draws
+          four tiles and this build renders three.
+        */}
         <KpiTile caption="Pending Approval" value={kpis?.pendingApproval ?? null} icon="clock" tone="bg-[#FBE9D2] text-[#8A5A1E]" />
         {/*
           ⛔ `Submitted`, NOT the frame's `Approved`. See the header block: `A-036` makes

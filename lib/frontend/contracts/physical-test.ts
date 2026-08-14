@@ -391,9 +391,20 @@ export type ManagementScheduleDto = {
  * exist, which is worse than the tile being absent. Operator ruling,
  * 2026-08-14 — the third sighting of the Step 7I1D-R2 defect.
  */
+/*
+ * ⛔ THREE TILES, NOT FOUR — `Ruling A`, Operator, 2026-08-15.
+ *
+ * `assessedStudents` is gone, dropped at the SOURCE by a forward migration
+ * under `R-1` rather than left unread: *"Leaving it unread is the option that
+ * rots."*
+ *
+ * ⚠️ AND `totalStudents` NOW MEANS **ENROLLED**, not centre-resident — the same
+ * name over a different number. ⛔ **Both were 13 at HEAD**, so the change is
+ * invisible until a learner withdraws, which is exactly why it was decided now
+ * rather than when it split.
+ */
 export type ManagementDashboardSummaryDto = {
   readonly totalStudents: number;
-  readonly assessedStudents: number;
   readonly pendingApproval: number;
   readonly submittedReports: number;
 };

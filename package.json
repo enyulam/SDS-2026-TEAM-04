@@ -76,6 +76,7 @@
     "prove:portal-p2-5": "node --env-file=.env.local scripts/tests/portal/prove-p2-5-schedule.mjs",
     "prove:portal-p2-6": "node --env-file=.env.local scripts/tests/portal/prove-p2-6-lesson-materials.mjs",
     "prove:portal-p2-7": "node --env-file=.env.local scripts/tests/portal/prove-p2-7-dashboard.mjs",
+    "prove:ruling-a": "node --env-file=.env.local scripts/tests/portal/prove-ruling-a-dashboard.mjs",
     "prove:portal-p2-6r-e2e": "node --env-file=.env.local scripts/tests/portal/prove-p2-6r-upload-e2e.mjs",
     "prove:portal-p2-6r": "node scripts/tests/portal/prove-p2-6r-material-transport.mjs",
     "prove:portal-p2-8": "node --env-file=.env.local scripts/tests/portal/prove-p2-8-students.mjs"

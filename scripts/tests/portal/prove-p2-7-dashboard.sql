@@ -49,7 +49,6 @@ DO $suite$
 DECLARE
   v_centre   uuid;
   v_students integer;
-  v_assessed integer;
   v_pending  integer;
   v_subm     integer;
   v_n        integer;
@@ -60,7 +59,6 @@ DECLARE
   v_ev1      integer;
   v_t        integer;
   v_p        integer;
-  v_a        integer;
   v_ok       boolean;
 BEGIN
   SELECT c.id INTO v_centre FROM public.centres c LIMIT 1;
@@ -84,8 +82,13 @@ BEGIN
   -- =================================================================
   SET LOCAL ROLE authenticated;
   PERFORM pg_temp.as_management();
-  SELECT o_total_students, o_assessed_students, o_pending_approval, o_submitted_reports
-    INTO v_students, v_assessed, v_pending, v_subm
+  -- ⚠️ THREE COLUMNS SINCE `Ruling A` (2026-08-15), not four.
+  --    `o_assessed_students` was dropped by forward migration under `R-1`, and
+  --    this leg would otherwise fail to COMPILE -- which is the good failure
+  --    mode: a dropped OUT parameter cannot be silently ignored by a SQL
+  --    consumer the way an unused field can be by a TypeScript one.
+  SELECT o_total_students, o_pending_approval, o_submitted_reports
+    INTO v_students, v_pending, v_subm
     FROM public.report_centre_dashboard_summary();
 
   -- ⛔ THREE REFUSED CALLERS, not one. A single refusal could be an accident
@@ -101,31 +104,37 @@ BEGIN
     FROM public.report_centre_dashboard_summary() s WHERE s.o_total_students IS NOT NULL;
   RESET ROLE;
 
-  IF v_students IS NOT NULL AND v_assessed IS NOT NULL AND v_pending IS NOT NULL
+  IF v_students IS NOT NULL AND v_pending IS NOT NULL
      AND v_subm IS NOT NULL AND v_n = 0 AND v_m = 0 AND v_t = 0 THEN
-    RAISE NOTICE 'PASS PDS-2  ⛔ BOTH DIRECTIONS: MANAGEMENT reads all four integers (%|%|%|%), while a TRAINER, a PARENT and an UNIDENTIFIED caller each get NULLS -- ⚠️ NULLS, not zeroes, so a refusal can never be painted as a centre with no learners (`Q-7`)', v_students, v_assessed, v_pending, v_subm;
+    RAISE NOTICE 'PASS PDS-2  ⛔ BOTH DIRECTIONS: MANAGEMENT reads all THREE integers (%|%|%), while a TRAINER, a PARENT and an UNIDENTIFIED caller each get NULLS -- ⚠️ NULLS, not zeroes, so a refusal can never be painted as a centre with no learners (`Q-7`). ⚠️ THREE since `Ruling A`; it read FOUR until 2026-08-15', v_students, v_pending, v_subm;
   ELSE
-    RAISE NOTICE 'FAIL PDS-2  mgmt=%|%|%|% trainer_rows=% parent_rows=% anon_rows=%', v_students, v_assessed, v_pending, v_subm, v_n, v_m, v_t;
+    RAISE NOTICE 'FAIL PDS-2  mgmt=%|%|% trainer_rows=% parent_rows=% anon_rows=%', v_students, v_pending, v_subm, v_n, v_m, v_t;
   END IF;
 
   -- =================================================================
   -- PDS-3  ⛔ IT AGREES WITH THE DATABASE
   -- =================================================================
   -- ⚠️ EVERY FIGURE RE-DERIVED INDEPENDENTLY. Without this the suite would
-  --    prove only that four integers came back, which is equally true of four
+  --    prove only that three integers came back, which is equally true of three
   --    wrong ones.
-  SELECT pg_catalog.count(*) INTO v_t FROM public.students s WHERE s.centre_id = v_centre;
-  SELECT pg_catalog.count(DISTINCT o.student_id) INTO v_a
-    FROM public.observations o WHERE o.centre_id = v_centre;
+  --
+  -- ⛔ `Ruling A` (2026-08-15): TOTAL STUDENTS RE-DERIVES FROM `enrolments`,
+  --    NOT FROM `students`. ▶ THIS IS THE LEG THAT WOULD HAVE MISSED IT: both
+  --    readings were 13, so the OLD re-derivation would have AGREED with the
+  --    NEW function and passed while proving the opposite of what it says.
+  --    `RAa-2` in `prove:ruling-a` closes that by CONSTRUCTING the divergence --
+  --    withdrawing a learner and requiring the tile to follow ENROLLED.
+  SELECT pg_catalog.count(DISTINCT e.student_id) INTO v_t
+    FROM public.enrolments e WHERE e.centre_id = v_centre AND e.is_active;
   SELECT pg_catalog.count(*) INTO v_p
     FROM public.reports r WHERE r.centre_id = v_centre AND r.status = 'trainer_approved';
   SELECT pg_catalog.count(*) INTO v_n
     FROM public.reports r WHERE r.centre_id = v_centre AND r.status = 'submitted';
 
-  IF v_students = v_t AND v_assessed = v_a AND v_pending = v_p AND v_subm = v_n THEN
-    RAISE NOTICE 'PASS PDS-3  all four figures AGREE with an independent re-derivation (%|%|%|%) -- ⚠️ `assessed` is DISTINCT LEARNERS, not a row count: a learner assessed in three sessions is ONE assessed learner, and counting rows would report a number larger than the roster beside it', v_t, v_a, v_p, v_n;
+  IF v_students = v_t AND v_pending = v_p AND v_subm = v_n THEN
+    RAISE NOTICE 'PASS PDS-3  all THREE figures AGREE with an independent re-derivation (%|%|%) -- ⛔ total students re-derived from ACTIVE ENROLMENTS since `Ruling A`, never from centre-resident `students` rows, so a withdrawn learner is excluded on both sides of the comparison', v_t, v_p, v_n;
   ELSE
-    RAISE NOTICE 'FAIL PDS-3  rpc=%|%|%|% derived=%|%|%|%', v_students, v_assessed, v_pending, v_subm, v_t, v_a, v_p, v_n;
+    RAISE NOTICE 'FAIL PDS-3  rpc=%|%|% derived=%|%|%', v_students, v_pending, v_subm, v_t, v_p, v_n;
   END IF;
 
   -- =================================================================

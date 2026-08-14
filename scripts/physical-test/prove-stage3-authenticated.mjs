@@ -768,7 +768,9 @@ const CHAIN = {
       data: [
         'Overview of student assessments',
         'Total Students',
-        'Assessed',
+        // ⛔ `Assessed` REMOVED — `Ruling A`, 2026-08-15. The tile and the RPC
+        //    parameter behind it are both gone; asserting the caption here
+        //    would fail against a correct build.
         'Pending Approval',
         'Submitted',
         'Reports waiting for approval',
@@ -1238,7 +1240,16 @@ async function main() {
                 fail('S3-M8-class', `${queueRows} approval row(s) rendered but NONE carries a class -- either the session->module resolution failed or the class was dropped from the row. SAW: ${JSON.stringify(around)}`)
               }
 
-              const captions = ['Total Students', 'Assessed', 'Pending Approval', 'Submitted']
+              /*
+               * ⛔ THREE CAPTIONS SINCE `Ruling A` (2026-08-15), not four.
+               * `Assessed` and its RPC parameter were both dropped by forward
+               * migration. ⚠️ Corrected in the SAME PASS as the mechanism
+               * (§12.11): this leg would otherwise have gone RED against a
+               * correct build, and the `numeric.length !== 4` test below would
+               * have been the thing that failed — pointing at the KPI read
+               * rather than at this list.
+               */
+              const captions = ['Total Students', 'Pending Approval', 'Submitted']
               const readings = captions.map((caption) => {
                 const at = text.indexOf(caption)
                 if (at === -1) return { caption, value: null }
@@ -1254,10 +1265,10 @@ async function main() {
                 fail('S3-M8-live', `the KPI caption(s) ${missing.join(', ')} did not render, so the summary read could not be measured`)
               } else if (refused.length > 0) {
                 fail('S3-M8-live', `${refused.length} KPI tile(s) read the em-dash REFUSAL glyph — report_centre_dashboard_summary did not resolve for this management session (${seen})`)
-              } else if (numeric.length !== 4) {
+              } else if (numeric.length !== captions.length) {
                 fail('S3-M8-live', `a KPI value is neither a number nor the refusal glyph, so this leg cannot say what happened (${seen})`)
               } else {
-                pass('S3-M8-live', `all four KPI tiles carry a NUMERIC value and none reads the em-dash refusal glyph — report_centre_dashboard_summary resolved for a real management session. NO COUNT IS PINNED: the governed refusal contract is what is measured, so enrolling a learner can never turn this red`)
+                pass('S3-M8-live', `all ${captions.length} KPI tiles carry a NUMERIC value and none reads the em-dash refusal glyph — report_centre_dashboard_summary resolved for a real management session. NO COUNT IS PINNED: the governed refusal contract is what is measured, so enrolling a learner can never turn this red. ⚠️ THREE tiles since Ruling A, and the leg reads its own list rather than a literal — a hardcoded 4 was what made this message stale`)
               }
             }
           }

@@ -456,9 +456,19 @@ function LessonCard({
           otherwise."* ▶ It is stated where the control is, permanently — not surfaced only
           after a failure, when it would read as an excuse rather than as a property.
         */}
+        {/*
+          ⚠️ THE WORDING AVOIDS "beginning" DELIBERATELY, AND THE REASON IS RECORDED SO IT IS NOT
+          "improved" BACK. The first draft read *"it starts again from the beginning"* and turned
+          `PLMa-RATINGS` RED — that leg matches the four rating labels as BARE WORDS, and
+          `beginning` is one of them. ▶ Rewording was the honest fix; NARROWING THE DETECTOR TO
+          FIT THIS COPY IS THE MOVE THE OPERATOR REFUSED AT `AR-4` — *"a rule relaxed to fit one
+          frame stops measuring the next."* ⛔ The detector's bare-word shape IS a real finding —
+          `A-052` prohibits exactly it for the leak guard, because it rejects valid English — and
+          it is REPORTED rather than quietly patched here.
+        */}
         <p className="mt-2 text-[11px] text-ink-subtle">
-          PDF, Word, PowerPoint, image or text, up to 25 MB. Uploads do not resume — if one is
-          interrupted, it starts again from the beginning.
+          PDF, Word, PowerPoint, image or text, up to 25 MB. Uploads do not resume — an
+          interrupted upload must be started again from scratch.
         </p>
         {notice !== null ? (
           <p role="status" className="mt-2 text-[12px] text-ink-muted">

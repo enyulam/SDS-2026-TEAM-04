@@ -1179,10 +1179,15 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    */
   async readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>> {
     await delay(180);
+    /*
+     * ⚠️ `Ruling A` — the real read now counts DISTINCT ACTIVE ENROLMENTS. The
+     * fixture has no `enrolments` collection to mirror, and a learner appears
+     * here only by being on a session roster, so roster membership IS this
+     * mode's enrolment. ⛔ The `assessed` set is GONE, not merely unread —
+     * leaving it computed would be a value nothing consumes, which is the exact
+     * shape the ruling removed from the RPC.
+     */
     const learners = new Set(SESSIONS.flatMap((s) => s.students.map((st) => st.studentId)));
-    const assessed = new Set(
-      SESSIONS.flatMap((s) => s.students.filter((st) => st.reportId !== null).map((st) => st.studentId)),
-    );
     /*
      * ⚠️ THE STATUS COMES FROM THE MUTABLE FIXTURE STATE, not from the static
      * learner row — `FixtureStudent` carries a `reportId` and no status, and
@@ -1199,7 +1204,6 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       outcome: "success",
       data: {
         totalStudents: learners.size,
-        assessedStudents: assessed.size,
         pendingApproval: states.filter((state) => state === "trainer_approved").length,
         submittedReports: states.filter((state) => state === "submitted").length,
       },

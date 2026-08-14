@@ -212,7 +212,20 @@ BEGIN
   SELECT count(*) INTO v_rows FROM public.class_session_materials WHERE id = v_matid;
   SELECT bool_and(v.ok) INTO v_chain FROM public.audit_verify_chain(NULL, NULL, NULL) v;
 
-  IF v_ok AND v_ok2 AND v_removed AND v_n = 1 AND v_m = 1
+  -- ⚠️ FLOORS, NOT EQUALITIES -- §12.8, SIXTH INSTANCE, and this one was caught
+  --    by `P2-6R`'s end-to-end proof rather than by a reader. `v_n` and `v_m`
+  --    count EVERY `material.attached` / `material.removed` row in the table,
+  --    and the original pinned each at exactly 1: a claim about what the
+  --    fixture HAPPENED to contain, not about the governed rule.
+  --    ▶ `prove:portal-p2-6r-e2e` performs a real governed attach and remove,
+  --    so the totals moved to 3 and this leg went RED against a database that
+  --    was behaving perfectly.
+  -- ⛔ THE GOVERNED RULE IS THE DELTA, AND IT IS ALREADY ASSERTED:
+  --    `v_ev1 = v_ev0 + 1` and `v_ev2 = v_ev1 + 1` say THIS attach and THIS
+  --    removal each emitted EXACTLY ONE event. The floors below only prove the
+  --    rows carry the ratified action strings -- they were never the one-event
+  --    guarantee, which is why relaxing them costs nothing.
+  IF v_ok AND v_ok2 AND v_removed AND v_n >= 1 AND v_m >= 1
      AND v_ev1 = v_ev0 + 1 AND v_ev2 = v_ev1 + 1 AND v_rows = 0 AND v_chain THEN
     RAISE NOTICE 'PASS PLM-5  THE GOVERNED ROUND TRIP: attach emitted EXACTLY ONE `material.attached` (%->%), remove emitted EXACTLY ONE `material.removed` (%->%), the row is gone, the hash chain still verifies -- and byte_size/media_type were read from the STORED OBJECT, not from the caller', v_ev0, v_ev1, v_ev1, v_ev2;
   ELSE

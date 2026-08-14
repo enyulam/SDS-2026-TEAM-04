@@ -54,6 +54,21 @@ export const RPC_MIGRATIONS = [
   // "everything is called" -- otherwise a correction like this one would be
   // pushed toward inventing a function just to have one.
   { migration: "20260814141000_portal_p2_7_comment_fix.sql", suite: "prove-p2-7-dashboard.sql" },
+  /*
+   * `Ruling A` (2026-08-15) -- the same function, DROPPED and recreated with
+   * one fewer OUT parameter and a different definition of "total students".
+   *
+   * ⚠️ IT PAIRS TO THE SAME SUITE, and that is not a shortcut: the rule asks
+   * *"is what this migration declares actually CALLED by a suite"*, and
+   * `prove-p2-7-dashboard.sql` calls `report_centre_dashboard_summary` in five
+   * places -- ▶ and it had to be REWRITTEN for this migration, because the
+   * dropped OUT parameter made the old `SELECT ... INTO` fail to compile.
+   * A dropped OUT parameter cannot be silently ignored by a SQL consumer the
+   * way an unused field can be by a TypeScript one, which is exactly why the
+   * Operator ruled *"drop the parameter properly ... leaving it unread is the
+   * option that rots."*
+   */
+  { migration: "20260815090000_portal_ruling_a_dashboard_enrolled.sql", suite: "prove-p2-7-dashboard.sql" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

@@ -877,7 +877,6 @@ export async function adapterReadDashboardSummary(): Promise<
     outcome: "success",
     data: {
       totalStudents: result.data.totalStudents,
-      assessedStudents: result.data.assessedStudents,
       pendingApproval: result.data.pendingApproval,
       submittedReports: result.data.submittedReports,
     },

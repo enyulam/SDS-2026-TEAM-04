@@ -233,7 +233,7 @@ check(
  * copy should not imply otherwise."*
  */
 check(
-  /Uploads do not resume/.test(SCREEN) && /starts again from the beginning/.test(SCREEN),
+  /Uploads do not resume/.test(SCREEN) && /must be started again from scratch/.test(SCREEN),
   "PMT-7c ⛔ NON-RESUMABILITY IS STATED ON THE SURFACE, permanently and at the control — not surfaced only after a failure, where it would read as an excuse rather than as a property of the transport",
 );
 check(

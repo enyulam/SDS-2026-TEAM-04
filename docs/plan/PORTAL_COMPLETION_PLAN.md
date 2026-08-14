@@ -3458,3 +3458,91 @@ attempted as **two heredocs in one `bash -c`** and died at parse — the third i
 after the rule was written. ▶ **Nothing ran, verified before retrying.** Recorded because a rule
 its author breaks immediately is evidence the rule is about a real hazard rather than about
 carelessness.
+
+
+---
+
+## §20 — `RULING A`: THE DASHBOARD READS **ENROLLED**, AND ONE PARAMETER IS GONE
+
+> **Operator, 2026-08-15 (pre-authorized schema, and the authorization was its own boundary):**
+> *"forward migration dropping `o_assessed_students` from `report_centre_dashboard_summary`, and
+> Total Students changed to count ENROLLED learners rather than centre-resident students. **No
+> table, column, enum, policy, grant or audit string. Registry unmoved.** If it needs anything
+> beyond that, STOP and tell me."*
+
+⛔ **IT NEEDED NOTHING BEYOND THAT.** `RA-5`…`RA-8` fail the migration at apply time if tables,
+enums, policies or the registry move; `RAa-4` re-measures all four afterwards.
+
+### §20.1 — ⚠️ THE HARD PART WAS NOT THE DROP. IT WAS THE RENAME-THAT-ISN'T
+
+`totalStudents` **kept its name and changed its meaning**, and the two readings were **IDENTICAL AT
+HEAD — both 13, measured before the change**. ▶ **A suite asserting "total students is 13" would
+pass against BOTH the old and the new function and prove nothing.**
+
+⛔ `RAa-2` therefore **CONSTRUCTS THE DIVERGENCE**: inside one rolled-back transaction it withdraws
+a learner and requires the tile to follow ENROLLED. Measured **13 → 12 while `public.students`
+stayed at 13**. ▶ **The leg fails against the pre-ruling function and passes only against the new
+one**, which is the only shape of proof that could distinguish them.
+
+⚠️ **AND IT FOUND A CONSTRAINT NOBODY HAD NAMED.** The first attempt flipped `is_active` alone and
+the database refused it: `enrolments_active_timestamp_chk` rejects an inactive row with a NULL
+`withdrawn_at`. ▶ **The schema will not let a withdrawal be recorded as a bare flag flip**, so the
+state this ruling excludes cannot exist without its timestamp. Recorded as a finding, not a
+workaround.
+
+⚠️ **THE ONE LEG THAT WOULD HAVE MISSED IT** is `PDS-3`, the independent re-derivation. It
+re-derived total students from `students` — so after the change it would have compared 13 to 13 and
+**agreed with the new function while computing the old rule**. It is rewritten to re-derive from
+`enrolments`, and `RAa-2` exists because agreement is not discrimination.
+
+### §20.2 — The Operator's own observation, recorded because it was asked for
+
+> *"Record that removing it leaves `report_centre_dashboard_summary` doing work the other three
+> boundaries could have done — that is a real observation about the phase, and worth keeping."*
+
+`o_pending_approval` and `o_submitted_reports` are both `count(*) FROM reports WHERE status = ?`,
+and the queue reads those tiles link to already resolve the same rows under the same centre scope.
+▶ **This function's remaining justification is that it answers in ONE round trip what would
+otherwise be three, on a screen whose whole job is four numbers — not that it knows anything the
+other boundaries do not.** ⛔ **A fourth tile is therefore not a reason to widen it; it is a reason
+to ask whether that tile already has a boundary.**
+
+### §20.3 — Four things this change broke, every one a gate doing its job
+
+| | What broke | Why it is the gate working |
+|---|---|---|
+| 1 | `PDS-2`/`PDS-3` failed to **compile** — `SELECT o_assessed_students INTO` | ⛔ **A dropped `OUT` parameter cannot be silently ignored by a SQL consumer** the way an unused field can be by a TypeScript one. This is exactly why *"leaving it unread is the option that rots"* |
+| 2 | Two `prove-stage3-authenticated` legs asserted the removed `Assessed` caption | §12.11 — corrected in the **same pass**. The `numeric.length !== 4` literal is now `!== captions.length`, so the leg reads its own list |
+| 3 | `PLM-5` went red on a **correct** database | ⛔ **§12.8, SIXTH INSTANCE.** It pinned `count(*) WHERE action='material.attached'` at **exactly 1** — what the fixture *happened* to contain. The `P2-6R` end-to-end proof performed a real attach and remove, and the total moved to 3. **Repaired as FLOORS**: the governed one-event rule is the DELTA (`v_ev1 = v_ev0 + 1`), which was always asserted separately and is untouched |
+| 4 | `PLMa-RATINGS` went red on **my own honest copy** | ⚠️ **See §20.4 — this one is a finding for the Operator, not a defect I fixed** |
+
+### §20.4 — ⚠️ A BARE-WORD RATING DETECTOR, REPORTED RATHER THAN QUIETLY NARROWED
+
+The non-resumability notice first read *"it starts again from the **beginning**"*. `PLMa-RATINGS`
+matches the four rating labels **as bare words**, so ordinary English turned it red.
+
+⛔ **I REWORDED THE COPY AND LEFT THE DETECTOR ALONE**, on the Operator's own `AR-4` reasoning:
+*"a rule relaxed to fit one frame stops measuring the next."* Narrowing a detector so my sentence
+passes is the same move, from the other direction.
+
+▶ **BUT THE DETECTOR'S SHAPE IS A REAL FINDING, AND IT IS THE ONE `A-052` NAMES EXPLICITLY.**
+`CLAUDE.md` §3.4 prohibits a bare-word regex over `beginning|developing|mastering|mastered` for the
+leak guard, because *"ordinary prose stays legal — 'at the beginning of the session'"*. ⚠️ **This
+leg has that exact shape.** It will trip again on any surface whose copy contains one of those four
+words in ordinary use, and it will trip **late**, on a phase that has nothing to do with ratings.
+
+⛔ **NOT CHANGED. Reported for the Operator's ruling** — it is a rule question, like `AR-4`, not an
+implementation choice.
+
+### §20.5 — Position
+
+✅ **`RULING A` COMPLETE.** Migration `20260815090000_portal_ruling_a_dashboard_enrolled.sql` applied
+with **8 apply-time assertions**. `prove:ruling-a` **PASS** (10 legs, 2 controls). Census **UNMOVED**
+— tables 30 · enums 12 · policies 30 · registry 23 · functions 62.
+
+**All six portal suites green:** `p2-6` · `p2-6r` · `p2-6r-e2e` · `p2-7` · `p2-8` · `ruling-a`.
+lint **0 errors** · tsc clean · build clean · `T-P44`/`T-P44c` unchanged and PASS · `no-secrets`
+CLEAN.
+
+⏸ **VISUAL `NOT-RUN`** on `11`, `14`, `17`, `25` — carried, per instruction.
+⏸ **ONE NEW ESCALATION: §20.4**, the bare-word rating detector.
