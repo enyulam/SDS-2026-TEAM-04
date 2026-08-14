@@ -453,26 +453,22 @@ export type LessonPlanSessionDto = {
  * material. ⛔ Neither role inherits the other's capability from the
  * similarity.
  */
-export type MaterialUploadTicketDto = {
-  readonly materialId: string;
-  readonly classSessionId: string;
-  readonly bucket: string;
-  readonly objectPath: string;
-  readonly maxBytes: number;
-  /** Not a tuning knob — the resumable endpoint requires exactly 6 MiB parts. */
-  readonly chunkBytes: number;
-};
-
-export type MaterialUploadTicketInput = {
-  readonly classSessionId: string;
-  readonly mediaType: string;
-};
-
-export type MaterialAttachInput = {
-  readonly classSessionId: string;
-  readonly materialId: string;
-  readonly displayName: string;
-};
+/**
+ * ⛔ THERE IS NO TICKET TYPE, AND ITS ABSENCE IS THE RULING — not an omission.
+ *
+ * A first draft of this phase carried `MaterialUploadTicketDto`,
+ * `MaterialUploadTicketInput` and `MaterialAttachInput`, mirroring `D-5`'s
+ * evidence transport. The Operator then ruled the transport to be a
+ * **SERVER-ACTION RELAY**, and with the bytes passing through the server the
+ * three-step shape buys nothing: ▶ **the ticket exists only to give a browser
+ * something to upload against, and there is no longer a browser doing that.**
+ * Splitting the call would leave a window in which an object sits in the bucket
+ * referenced by no row, reachable by no read and removable by no caller.
+ *
+ * ⚠️ The upload therefore crosses as raw `FormData` — a `File` reaches a Server
+ * Action no other way — and every field in it is re-read and re-validated
+ * server-side, then re-checked again by the database.
+ */
 
 /** ⛔ A URL, never a storage path — the bucket is private and stays private. */
 export type MaterialViewUrlDto = {

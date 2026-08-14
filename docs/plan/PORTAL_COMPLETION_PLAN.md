@@ -3274,10 +3274,12 @@ still ships no route and still gets no item.**
 
 ## §19 — `P2-6R`: THE SCREEN `14` REPAIR, AND THE ONE THING IT COULD NOT FINISH
 
-⚠️ **PARTIAL, AND IT SAYS SO HERE BECAUSE §12.12 REQUIRES IT.** Two of the three controls are
-live; **UPLOAD IS STILL INERT**, pending an Operator ruling on its transport. ⛔ The phase is
-**not complete**, and reporting it as complete is precisely the defect it was authorized to
-repair.
+~~⚠️ **PARTIAL, AND IT SAYS SO HERE BECAUSE §12.12 REQUIRES IT.** Two of the three controls are
+live; **UPLOAD IS STILL INERT**, pending an Operator ruling on its transport.~~ ✅ **COMPLETE —
+2026-08-15. The Operator ruled route (b); upload is BUILT and PROVED END TO END — §19.7.**
+⛔ **The struck sentence is preserved because it is the record of this phase reporting itself
+PARTIAL while it was partial** — which is the whole point of §12.12, and the opposite of what
+`P2-6` did.
 
 ### §19.1 — What was authorized, and what it excluded
 
@@ -3365,7 +3367,94 @@ surface over an unwired path, `P2-8` shipped with a gate it never executed. **A 
 only as good as the gates the phase actually ran**, and "I ran the suite I wrote" is not the same
 as "I ran the project's gates."
 
-### §19.6 — Position
+### §19.6 — Position (superseded by §19.7)
 
-⏸ **PARTIAL — AWAITING AN OPERATOR RULING** on the upload transport, (a) or (b). Everything else
-in the authorized scope is built, proven and lint/typecheck/build clean.
+~~⏸ **PARTIAL — AWAITING AN OPERATOR RULING** on the upload transport, (a) or (b).~~ ✅ **RULED AND
+BUILT — see §19.7.**
+
+---
+
+### §19.7 — ✅ THE TRANSPORT RULING, AND THE UPLOAD PROVED END TO END
+
+> **Operator, 2026-08-15:** *"TAKE (b), THE SERVER-ACTION RELAY. Your reasoning is right and
+> `T-P44` settles it: I scoped that exception to `evidence-upload.ts` **SPECIFICALLY**, and route
+> (a) needs precisely the widening I refused. **The guard firing is the guard working.**"*
+
+⛔ **`T-P44` IS UNCHANGED. NOT ONE CHARACTER.** The relay needs no widening because the upload runs
+on the **caller's own request-scoped client** — ADR-3: *"the database role follows the credential,
+not the code location"* — so the INSERT is the `authenticated` principal the one storage policy
+already gates, and `app_management_may_attach_material` re-derives live management authority over
+the session named in the first path segment. `PMT-2d`/`PMT-2e` pin that the elevated client never
+uploads; it appears only on the cleanup path.
+
+#### The body-size figure, DERIVED rather than guessed
+
+`serverActions.bodySizeLimit` defaults to 1 MB and refuses every material. The Operator asked for
+*"what 25 MiB actually requires and no more"*, so the multipart envelope was **measured** at its
+worst case — a 255-byte filename, a 200-char display name, the longest ruled MIME type and Next's
+`$ACTION_ID` field:
+
+| | |
+|---|---|
+| measured worst-case envelope | **1,070 bytes** |
+| the ruled ceiling | 26,214,400 (25 MiB) |
+| therefore required | 26,215,470 |
+| **set to** | **26,218,496** — ceiling + 4 KiB |
+
+▶ **3.8× the measured envelope, and 0.016% above the ceiling.** ⛔ **Not rounded to `26mb` or
+`32mb`**: a transport limit generous enough to admit a file the database will then refuse converts
+a clean immediate rejection into a 25 MiB round trip that fails at the end. ⚠️ **It is a TRANSPORT
+ceiling and never a size gate** — the authority is the `CHECK` constraint, the bucket's
+`file_size_limit`, and `material_attach_confirm` reading the **stored** object.
+
+#### ⛔ THREE PORT MEMBERS, NOT FOUR — the ticket was REMOVED, and that is a decision
+
+`D-5`'s ticket → upload → attach split exists because its bytes **bypass** the server: a ticket is
+the only thing the server can hand out in advance. ▶ **Here the bytes come through the server
+anyway**, so splitting buys nothing and costs a real window in which an object sits in the bucket
+referenced by no row, reachable by no read and removable by no caller. **One call has no such
+window**, and on attach failure the elevated client cleans the object up rather than orphaning it.
+
+#### ⚠️ NON-RESUMABILITY IS STATED ON THE SURFACE, PERMANENTLY
+
+> *"State the non-resumability as a recorded limitation on the surface, in the same honest register
+> as the unscanned notice. A dropped upload retries from the start, and the copy should not imply
+> otherwise."*
+
+The control carries: *"PDF, Word, PowerPoint, image or text, up to 25 MB. Uploads do not resume —
+if one is interrupted, it starts again from the beginning."* ⛔ **At the control and always, not
+raised only after a failure**, where it would read as an excuse rather than as a property.
+`PMT-7c` fails the build if it is removed.
+
+#### The end-to-end proof — `prove:portal-p2-6r-e2e`, **18 legs PASS**
+
+> *"Prove the upload end to end, not just that the action exists — a file reaching the bucket, the
+> row written, the audit event fired, and removal working."*
+
+| Leg | Measured |
+|---|---|
+| `E-1`/`E-1b` | the file reaches the bucket **as the management principal**; `storage.objects` 0 → 1, read from the catalogue rather than inferred from a 200 |
+| `E-1c` | ⛔ **CONTROL** — the **trainer**, holding a real authenticated session, is **REFUSED** by the same policy. Without it, `E-1` would be equally true of a bucket with no policy at all |
+| `E-2`/`E-2b`/`E-2c` | attach succeeds; the row exists; **type and size were read off the STORED object**, not taken from the caller |
+| `E-3`/`E-3b` | **exactly one** audit event, carrying the ratified `material.attached` |
+| `E-4b` | the signed URL **actually returns the bytes** — the round trip is proved, not assumed from a URL being produced |
+| `E-4c` | and the read emits **nothing** (`A-029`, the `PLM-7` precedent) |
+| `E-5`…`E-5d` | removal: row gone, a second event `material.removed`, object deletable by the elevated client — the only path, since the bucket has no DELETE policy |
+| `E-6` | fixture unmoved on rows and objects; ⚠️ **`audit_events` deliberately NOT restored** — a proof that could unwind an append-only hash chain would be a proof that the chain does not hold |
+
+⚠️ **STATED LIMIT: this proof does NOT exercise Next's Server Action body pipeline**, so
+`bodySizeLimit` is **`NOT-RUN`**, not passing. That is a browser leg and needs `:3000`.
+
+### §19.8 — Position
+
+✅ **SCREEN `14` IS COMPLETE. No control on it is inert.** `prove:portal-p2-6r` **PASS** (26 checks)
+· `prove:portal-p2-6r-e2e` **PASS** (18 legs) · `PDTa-WIRED` 0 unwired · lint **0 errors** · tsc
+clean · build clean · `T-P44`/`T-P44c` **unchanged and PASS**.
+
+⏸ **VISUAL `NOT-RUN`** — carried, per the Operator's instruction not to wait for the walk.
+
+⚠️ **§12.14 FIRED ON ITS OWN AUTHOR, WITHIN THE HOUR.** The commit for this section was first
+attempted as **two heredocs in one `bash -c`** and died at parse — the third instance, minutes
+after the rule was written. ▶ **Nothing ran, verified before retrying.** Recorded because a rule
+its author breaks immediately is evidence the rule is about a real hazard rather than about
+carelessness.

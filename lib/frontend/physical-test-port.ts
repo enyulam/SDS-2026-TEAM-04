@@ -22,9 +22,6 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
-  MaterialUploadTicketDto,
-  MaterialUploadTicketInput,
-  MaterialAttachInput,
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
@@ -199,17 +196,21 @@ export interface PhysicalTestPort {
    * were reachable from no application code — an unwired write path behind a
    * `disabled` button. `PDTa-WIRED` fails the build for that shape now.
    *
-   * ⚠️ SAME FOUR-MEMBER SPLIT AS EVIDENCE, AND THE SPLIT IS THE GOVERNANCE.
-   * `createMaterialUploadTicket` mints an id and derives a path and authorizes
-   * NOTHING; the bytes then go browser-direct to a private bucket where the one
-   * INSERT policy re-derives management authority over the session named in the
-   * FIRST PATH SEGMENT, live. `attachMaterial` is the GOVERNED ACT — before it
-   * succeeds the object is referenced by no row and reachable by no read.
+   * ⚠️ THREE MEMBERS, NOT EVIDENCE'S FOUR — Operator ruling, 2026-08-15. The
+   * upload is a SERVER-ACTION RELAY, so the bytes come through the server and
+   * the ticket/attach split has nothing left to buy. ▶ `D-5` splits them
+   * because its bytes BYPASS the server; here splitting would only open a
+   * window in which an object sits in the bucket referenced by no row.
+   *
+   * ⛔ `uploadMaterial` TAKES `FormData` because a `File` crosses a Server
+   * Action boundary no other way. The upload runs on the CALLER'S OWN
+   * request-scoped client, so the one storage INSERT policy applies exactly as
+   * it would to a browser — which is why this needed no `T-P44` widening.
+   *
+   * ⚠️ IT IS NOT RESUMABLE. A dropped upload restarts from the beginning, and
+   * the surface says so rather than implying otherwise.
    */
-  createMaterialUploadTicket(
-    input: MaterialUploadTicketInput,
-  ): Promise<UiActionResult<MaterialUploadTicketDto>>;
-  attachMaterial(input: MaterialAttachInput): Promise<UiActionResult<{ readonly materialId: string }>>;
+  uploadMaterial(form: FormData): Promise<UiActionResult<{ readonly materialId: string }>>;
   readMaterialViewUrl(materialId: string): Promise<UiActionResult<MaterialViewUrlDto>>;
   removeMaterial(materialId: string): Promise<UiActionResult<{ readonly removed: boolean }>>;
   /**

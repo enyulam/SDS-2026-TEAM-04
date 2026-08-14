@@ -120,6 +120,24 @@ check(
 );
 
 // ---------------------------------------------------------------------
+// PMT-2d -- THE UPLOAD RUNS ON THE CALLER'S CLIENT. This IS the ruling.
+// ---------------------------------------------------------------------
+{
+  const fn = stripComments(TRANSPORT);
+  const upload = fn.slice(fn.indexOf("export async function uploadMaterialCore"));
+  const insertAt = upload.indexOf("client.storage.from(MATERIAL_BUCKET).upload");
+  const elevatedAt = upload.indexOf("elevated.storage");
+  check(
+    insertAt > 0 && (elevatedAt === -1 || elevatedAt > insertAt),
+    "PMT-2d ⛔ THE UPLOAD INSERT USES `client` — the caller's OWN request-scoped credential — and the elevated client appears only AFTER it, on the cleanup path. ▶ This is the whole reason route (b) needed no T-P44 widening: ADR-3 records that the database role follows the CREDENTIAL, not the code location, so the storage policy gates this INSERT exactly as it would a browser's",
+  );
+  check(
+    !/elevated\.storage\.from\(MATERIAL_BUCKET\)\.upload/.test(upload),
+    "PMT-2e ⛔ AND THE ELEVATED CLIENT NEVER UPLOADS. Using it here would BYPASS the one storage policy entirely — a governance defect wearing the costume of an optimisation",
+  );
+}
+
+// ---------------------------------------------------------------------
 // PMT-3 -- `readMaybeRow`, NOT `readRows`. All three are `RETURNS record`.
 // ---------------------------------------------------------------------
 const body = stripComments(TRANSPORT);
@@ -162,7 +180,7 @@ check(
 // PMT-6 -- ALL FOUR MEMBERS EXIST ON THE PORT, THE REAL ADAPTER AND THE
 //          FIXTURE. A port member with no fixture is a runtime hole.
 // ---------------------------------------------------------------------
-const MEMBERS = ["createMaterialUploadTicket", "attachMaterial", "readMaterialViewUrl", "removeMaterial"];
+const MEMBERS = ["uploadMaterial", "readMaterialViewUrl", "removeMaterial"];
 for (const member of MEMBERS) {
   check(
     new RegExp(`${member}\\(`).test(PORT) &&
@@ -180,12 +198,12 @@ for (const member of MEMBERS) {
  * recorded nothing — which is the same class of untruth this whole phase repairs.
  */
 const fixtureBlock = FIXTURE.slice(
-  FIXTURE.indexOf("async createMaterialUploadTicket"),
-  FIXTURE.indexOf("async createMaterialUploadTicket") + 1400,
+  FIXTURE.indexOf("async uploadMaterial"),
+  FIXTURE.indexOf("async uploadMaterial") + 1200,
 );
 check(
-  (fixtureBlock.match(/outcome: "unavailable"/g) ?? []).length >= 4,
-  "PMT-6b ⛔ and the fixture REFUSES all four rather than simulating them — an attach and a removal each emit a governed audit event, and a fixture with no chain must not report one happened",
+  (fixtureBlock.match(/outcome: "unavailable"/g) ?? []).length >= 3,
+  "PMT-6b ⛔ and the fixture REFUSES all three rather than simulating them — an attach and a removal each emit a governed audit event, and a fixture with no chain must not report one happened",
 );
 
 // ---------------------------------------------------------------------
@@ -202,17 +220,29 @@ check(
   "PMT-7b and the two `not wired in this phase` tooltips are GONE — a stale message describing a removed limitation is the §12.11 defect, corrected in the same pass as the mechanism",
 );
 /*
- * ⛔ THE HONESTY LEG. Upload remains inert pending an Operator ruling on its
- * transport, and §12.12 requires an inert control to SAY it is inert — in the
- * report and in `STATUS.md`, not only in source. ▶ This leg pins the source half
- * so a later phase cannot quietly enable the button without a transport, or
- * quietly drop the disclosure while leaving the button dead.
+ * ⛔ THE HONESTY LEG, NOW POINTED AT WHAT IS TRUE RATHER THAN AT WHAT WAS.
+ *
+ * At the first pass this asserted that the ONE inert control disclosed its
+ * reason. The Operator then ruled the transport, upload was built, and ▶ **the
+ * old leg would still have been GREEN while describing a control that no longer
+ * exists** — the §12.11 stale-message family exactly. It is rewritten in the
+ * same pass as the mechanism, which is the rule.
+ *
+ * ⛔ WHAT IT PINS NOW: non-resumability is stated ON THE SURFACE, permanently,
+ * in the Operator's words — *"A dropped upload retries from the start, and the
+ * copy should not imply otherwise."*
  */
 check(
-  /Upload needs an Operator ruling on its transport/.test(SCREEN) &&
-    /T-P44/.test(SCREEN) &&
-    /bodySizeLimit/.test(SCREEN),
-  "PMT-7c ⛔ THE ONE REMAINING INERT CONTROL DISCLOSES ITS REASON AT ITS SITE, and names BOTH candidate transports and the guard that decides between them (`T-P44`, `bodySizeLimit`) — §12.12. A phase that ships a surface over an unbuilt path is PARTIAL, and says so",
+  /Uploads do not resume/.test(SCREEN) && /starts again from the beginning/.test(SCREEN),
+  "PMT-7c ⛔ NON-RESUMABILITY IS STATED ON THE SURFACE, permanently and at the control — not surfaced only after a failure, where it would read as an excuse rather than as a property of the transport",
+);
+check(
+  !/not wired in this phase|needs an Operator ruling on its transport/.test(SCREEN),
+  "PMT-7d and NO INERT-CONTROL LANGUAGE SURVIVES anywhere on this screen — every control is live, so a message saying otherwise would be false (§12.11)",
+);
+check(
+  /port\.uploadMaterial\(/.test(screen),
+  "PMT-7e ⛔ THE UPLOAD CONTROL CALLS THE PORT — the third and last of P2-6's three dead buttons",
 );
 
 // ---------------------------------------------------------------------

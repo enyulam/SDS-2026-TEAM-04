@@ -28,7 +28,6 @@ import {
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
-  type MaterialUploadTicketDto,
   type MaterialViewUrlDto,
   type ManagementDashboardSummaryDto,
   type ManagementStudentListDto,
@@ -1310,12 +1309,7 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * a transport error rather than as the honest "not available in fixture
    * mode" the caller can render.
    */
-  async createMaterialUploadTicket(): Promise<UiActionResult<MaterialUploadTicketDto>> {
-    await delay(120);
-    return { outcome: "unavailable" };
-  }
-
-  async attachMaterial(): Promise<UiActionResult<{ readonly materialId: string }>> {
+  async uploadMaterial(): Promise<UiActionResult<{ readonly materialId: string }>> {
     await delay(120);
     return { outcome: "unavailable" };
   }

@@ -160,12 +160,10 @@ import type {
   AdapterEvidenceUploadTicketDto,
   AdapterEvidenceAttachSuccess,
   AdapterReportEvidenceClipDto,
-  AdapterMaterialUploadTicketDto,
   AdapterMaterialViewUrlDto,
 } from "@/server/modules/integration-adapter/adapter-dtos";
 import {
-  createMaterialUploadTicketCore,
-  attachMaterialCore,
+  uploadMaterialCore,
   materialViewUrlCore,
   removeMaterialCore,
 } from "@/server/modules/class-session/material-transport";
@@ -900,28 +898,33 @@ export async function adapterReadDashboardSummary(): Promise<
 // Action, and nothing governed happens until the attach succeeds.
 // ---------------------------------------------------------------------
 
-export async function adapterCreateMaterialUploadTicket(
-  input: { readonly classSessionId: string; readonly mediaType: string },
-): Promise<ActionResult<AdapterMaterialUploadTicketDto>> {
-  return createMaterialUploadTicketCore(
-    await createRequestSupabaseClient(),
-    input.classSessionId,
-    input.mediaType,
-  );
-}
-
-export async function adapterAttachMaterial(
-  input: {
-    readonly classSessionId: string;
-    readonly materialId: string;
-    readonly displayName: string;
-  },
+/**
+ * ⛔ THE UPLOAD, RELAYED. It takes `FormData` because a `File` crosses a Server
+ * Action boundary no other way — and because the bytes come through here, the
+ * ticket/attach split `D-5` needs has nothing left to buy. See
+ * `uploadMaterialCore` for why one call is fewer failure modes, not more.
+ *
+ * ⚠️ EVERY FIELD IS RE-READ AND RE-VALIDATED SERVER-SIDE. `FormData` is caller
+ * input in the plainest possible sense; nothing here trusts a name, a type or a
+ * size the browser asserted, and the database re-checks all three again.
+ */
+export async function adapterUploadMaterial(
+  form: FormData,
 ): Promise<ActionResult<{ readonly materialId: string }>> {
-  return attachMaterialCore(
+  const classSessionId = form.get("classSessionId");
+  const displayName = form.get("displayName");
+  const file = form.get("file");
+  if (typeof classSessionId !== "string" || typeof displayName !== "string") {
+    return { outcome: "unavailable" };
+  }
+  if (!(file instanceof File)) return { outcome: "unavailable" };
+
+  return uploadMaterialCore(
     await createRequestSupabaseClient(),
-    input.classSessionId,
-    input.materialId,
-    input.displayName,
+    createElevatedSupabaseClient(),
+    classSessionId,
+    file,
+    displayName,
   );
 }
 

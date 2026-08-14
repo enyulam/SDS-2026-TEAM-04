@@ -49,18 +49,15 @@ const MATERIAL_TYPES: Readonly<Record<string, string>> = {
  * file and upload a large one.
  */
 export const MATERIAL_MAX_BYTES = 26_214_400;
-export const MATERIAL_CHUNK_BYTES = 6 * 1024 * 1024;
+/*
+ * ⚠️ NO CHUNK SIZE. `D-5`'s evidence transport carries `chunkBytes` because a
+ * resumable TUS upload requires exactly 6 MiB parts. ⛔ THE RELAY IS NOT
+ * RESUMABLE and has no parts, so there is deliberately no constant here to
+ * imply otherwise — a leftover `chunkBytes` would be the stale-restatement
+ * family (§12.11), describing a mechanism this file does not have.
+ */
 export const MATERIAL_BUCKET = "lesson-materials";
 export const MATERIAL_URL_TTL_SECONDS = 120;
-
-export interface MaterialUploadTicket {
-  readonly materialId: string;
-  readonly classSessionId: string;
-  readonly bucket: string;
-  readonly objectPath: string;
-  readonly maxBytes: number;
-  readonly chunkBytes: number;
-}
 
 export interface MaterialViewUrl {
   readonly url: string;
@@ -71,45 +68,109 @@ export interface MaterialViewUrl {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /**
- * Mint an upload ticket.
+ * Derive the one object path the storage policy will admit.
  *
- * ⛔ THE PATH SHAPE IS THE POLICY'S, NOT THIS FILE'S. The storage policy admits
- * exactly `<class_session_id>/<material_id>.<ext>` with both segments UUIDs,
- * and `material_attach_confirm` finds the object by that same prefix. ▶ A path
- * built any other way is refused by the DATABASE, so this function cannot widen
- * access by getting it wrong — it can only fail to work.
+ * ⛔ THE PATH SHAPE IS THE POLICY'S, NOT THIS FILE'S. The policy admits exactly
+ * `<class_session_id>/<material_id>.<ext>` with both segments UUIDs, and
+ * `material_attach_confirm` finds the object by that same prefix. ▶ A path built
+ * any other way is refused by the DATABASE, so this function cannot widen access
+ * by getting it wrong — it can only fail to work.
  *
- * ⚠️ THE ROLE CHECK HERE DECIDES NOTHING. The storage policy re-resolves live
- * management membership for the session's centre on the INSERT, and the attach
- * re-resolves it a third time. This is the UX-honest refusal, not the gate.
+ * ⛔ THE MATERIAL ID IS MINTED HERE AND NEVER ACCEPTED FROM A CALLER. A
+ * caller-chosen id could be aimed at another session's key space.
+ *
+ * ⚠️ INTERNAL. It is deliberately NOT a port member — see `uploadMaterialCore`.
  */
-export async function createMaterialUploadTicketCore(
-  client: SupabaseClient,
+export function mintMaterialObjectPath(
   classSessionId: string,
   mediaType: string,
-): Promise<ActionResult<MaterialUploadTicket>> {
+): { readonly materialId: string; readonly objectPath: string } | null {
+  const extension = MATERIAL_TYPES[mediaType];
+  if (extension === undefined) return null;
+  if (!UUID.test(classSessionId)) return null;
+  const materialId = globalThis.crypto.randomUUID();
+  return { materialId, objectPath: `${classSessionId}/${materialId}.${extension}` };
+}
+
+/**
+ * ⛔ THE WHOLE UPLOAD, IN ONE SERVER ACTION — `P2-6R`, Operator-ruled 2026-08-15.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ WHY THIS IS ONE CALL AND NOT THE TICKET → UPLOAD → ATTACH SPLIT EVIDENCE
+ *    USES. THE SPLIT EXISTED TO SERVE A BROWSER-DIRECT UPLOAD, AND THERE IS NO
+ *    LONGER ONE.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * `D-5`'s three-step shape is right when the BYTES bypass the server: the
+ * ticket is the only thing the server can hand out in advance, and the attach is
+ * the only place the governed act can happen afterwards. ▶ **Here the bytes come
+ * through the server anyway.** Splitting the same round trip into two would buy
+ * nothing and would COST something real: a window in which an object sits in the
+ * bucket referenced by no row, reachable by no read, and cleanable by no
+ * caller. ⛔ One call has no such window.
+ *
+ * ⛔ THE UPLOAD RUNS ON THE CALLER'S OWN REQUEST-SCOPED CLIENT, NEVER THE
+ *    ELEVATED ONE. That is the entire reason this needed no `T-P44` widening:
+ *    ADR-3 records that *"the database role follows the credential, not the code
+ *    location"*, so this INSERT is the `authenticated` principal the storage
+ *    policy already gates, and `app_management_may_attach_material` re-derives
+ *    live management authority over the session named in the path. ▶ Using the
+ *    elevated client here would BYPASS that policy entirely and would be a
+ *    governance defect, not an optimisation.
+ *
+ * ⚠️ NOT RESUMABLE, AND THE SURFACE SAYS SO. A dropped upload restarts from the
+ *    beginning. `D-5`'s resumable transport was reasoned from 100 MB classroom
+ *    video over classroom wifi; a 25 MiB document is a different problem.
+ */
+export async function uploadMaterialCore(
+  client: SupabaseClient,
+  elevated: SupabaseClient,
+  classSessionId: string,
+  file: File,
+  displayName: string,
+): Promise<ActionResult<{ readonly materialId: string }>> {
   const guard = await resolveSessionIdentity(client);
   if (guard.outcome !== "success") return guard;
+  // ⛔ MANAGEMENT ONLY. A trainer DOWNLOADS a material and never attaches one.
   if (guard.data.role !== "management") return { outcome: "unauthorized" };
 
-  const extension = MATERIAL_TYPES[mediaType];
-  if (extension === undefined) return { outcome: "unavailable" };
-  if (!UUID.test(classSessionId)) return { outcome: "unavailable" };
+  /*
+   * ⚠️ EVERY CHECK BELOW IS A UX-HONEST REFUSAL, NOT A GATE. The bucket's own
+   * `file_size_limit`, the `CHECK` constraint and `material_attach_confirm`
+   * reading the STORED object each re-enforce the ceiling and the type list
+   * server-side. ▶ Refusing here only means the caller gets a clean answer
+   * instead of a 25 MiB round trip that fails at the end.
+   */
+  if (file.size <= 0 || file.size > MATERIAL_MAX_BYTES) return { outcome: "unavailable" };
+  const trimmed = displayName.trim();
+  if (trimmed.length === 0 || trimmed.length > 200) return { outcome: "unavailable" };
 
-  // ⛔ The material id is minted HERE, never accepted from the client — a
-  // client-chosen id could be aimed at another session's key space.
-  const materialId = globalThis.crypto.randomUUID();
-  return {
-    outcome: "success",
-    data: {
-      materialId,
-      classSessionId,
-      bucket: MATERIAL_BUCKET,
-      objectPath: `${classSessionId}/${materialId}.${extension}`,
-      maxBytes: MATERIAL_MAX_BYTES,
-      chunkBytes: MATERIAL_CHUNK_BYTES,
-    },
-  };
+  const minted = mintMaterialObjectPath(classSessionId, file.type);
+  if (minted === null) return { outcome: "unavailable" };
+
+  const stored = await client.storage.from(MATERIAL_BUCKET).upload(minted.objectPath, file, {
+    contentType: file.type,
+    // ⛔ NEVER UPSERT. The key encodes a session and a material id; overwriting
+    // one would swap the file under an already-attached row.
+    upsert: false,
+  });
+  // A 4xx here IS the policy refusing — a session the caller has no authority
+  // over, or a path shape the predicate rejects. It is not reported as an error.
+  if (stored.error) return { outcome: "unauthorized" };
+
+  const attached = await attachMaterialCore(client, classSessionId, minted.materialId, trimmed);
+  if (attached.outcome !== "success") {
+    /*
+     * ⛔ THE OBJECT IS CLEANED UP RATHER THAN ORPHANED. The bucket carries an
+     * INSERT policy and no DELETE policy, so the caller cannot remove what it
+     * just wrote — the elevated client does it. ⚠️ THAT IS NOT A POLICY BYPASS:
+     * it deletes an object this same call created moments ago, which is
+     * referenced by no row and readable by nobody. ▶ Leaving it would be an
+     * orphan in a private bucket with no sweeper.
+     */
+    await elevated.storage.from(MATERIAL_BUCKET).remove([minted.objectPath]);
+    return attached;
+  }
+  return { outcome: "success", data: { materialId: minted.materialId } };
 }
 
 interface AttachRow {

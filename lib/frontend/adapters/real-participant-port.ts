@@ -65,9 +65,6 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
-  MaterialUploadTicketDto,
-  MaterialUploadTicketInput,
-  MaterialAttachInput,
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
@@ -124,8 +121,7 @@ import {
   adapterListManagementClasses,
   adapterReadManagementSchedule,
   adapterReadLessonPlans,
-  adapterCreateMaterialUploadTicket,
-  adapterAttachMaterial,
+  adapterUploadMaterial,
   adapterReadMaterialViewUrl,
   adapterRemoveMaterial,
   adapterReadDashboardSummary,
@@ -300,16 +296,8 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
      * INSERT policy. ▶ What crosses HERE is the ticket, the governed attach,
      * the governed removal and the short-TTL view URL.
      */
-    createMaterialUploadTicket(
-      input: MaterialUploadTicketInput,
-    ): Promise<UiActionResult<MaterialUploadTicketDto>> {
-      return guard(() => adapterCreateMaterialUploadTicket(input));
-    },
-
-    attachMaterial(
-      input: MaterialAttachInput,
-    ): Promise<UiActionResult<{ readonly materialId: string }>> {
-      return guard(() => adapterAttachMaterial(input));
+    uploadMaterial(form: FormData): Promise<UiActionResult<{ readonly materialId: string }>> {
+      return guard(() => adapterUploadMaterial(form));
     },
 
     readMaterialViewUrl(materialId: string): Promise<UiActionResult<MaterialViewUrlDto>> {

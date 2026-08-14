@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BackLink } from "@/components/ui/back-link";
 import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -204,6 +204,23 @@ function sizeLabel(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/*
+ * ⛔ THE EIGHT RULED MIME TYPES, and this list is a PICKER FILTER ONLY. The
+ * authority is `material_attach_confirm`, which reads the type off the STORED
+ * object — a caller bypassing this input entirely is refused by the database,
+ * not by the browser.
+ */
+const ACCEPTED_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "image/png",
+  "image/jpeg",
+  "text/plain",
+].join(",");
+
 function LessonCard({
   session,
   today,
@@ -214,6 +231,7 @@ function LessonCard({
   readonly onChanged: () => void;
 }) {
   const port = usePhysicalTestPort();
+  const fileInput = useRef<HTMLInputElement>(null);
   const phase = lessonPhase(session.sessionDate, today);
   const chip = PHASE_CHIP[phase];
   const time = timeLabel(session.startsAt, session.endsAt);
@@ -242,6 +260,37 @@ function LessonCard({
       return;
     }
     globalThis.open(result.data.url, "_blank", "noopener,noreferrer");
+  }
+
+  /**
+   * ⛔ `P2-6R` — THE UPLOAD, RELAYED THROUGH A SERVER ACTION (Operator ruling).
+   *
+   * ⚠️ NOT RESUMABLE, AND THE SURFACE SAYS SO rather than letting a trainer or
+   * an administrator discover it by losing a 25 MiB transfer. The notice below
+   * is written in the same register as the unscanned notice: it states what
+   * happens, once, without softening it.
+   */
+  async function uploadMaterial(sessionId: string, file: File): Promise<void> {
+    setBusyId(sessionId);
+    setNotice(null);
+    const form = new FormData();
+    form.set("classSessionId", sessionId);
+    // ⚠️ The file's own name is the display name. It is re-trimmed, re-length-
+    // checked and re-validated server-side; nothing here is trusted.
+    form.set("displayName", file.name);
+    form.set("file", file);
+    const result = await port.uploadMaterial(form);
+    setBusyId(null);
+    if (result.outcome !== "success") {
+      /*
+       * ⛔ ONE MESSAGE FOR EVERY REFUSAL. The server does not distinguish "not
+       * your session" from "no such session", and neither does this — the
+       * non-disclosure discipline the whole adapter surface already holds.
+       */
+      setNotice(`${file.name} was not accepted. Check it is a supported document under 25 MB.`);
+      return;
+    }
+    onChanged();
   }
 
   async function removeMaterial(materialId: string, displayName: string): Promise<void> {
@@ -367,32 +416,50 @@ function LessonCard({
           </ul>
         )}
         {/*
-          ⛔ UPLOAD IS STILL INERT, AND THIS PHASE SAYS SO WHERE THE OPERATOR READS
-          (plan §12.12), NOT ONLY HERE.
+          ✅ `P2-6R` — UPLOAD IS LIVE, VIA A SERVER-ACTION RELAY (Operator ruling, 2026-08-15).
 
-          ▶ THE REASON IS A GOVERNANCE STOP, NOT AN UNFINISHED TASK. Bytes must reach the
-          private bucket before `material_attach_confirm` can read their size and MIME type
-          off the STORED object, and the only two ways to get them there are:
-            (a) a browser-direct resumable upload — which needs a second module importing
-                `lib/supabase/browser`, and `T-P44`'s ruling is explicit that the widening was
-                *"for `evidence-upload.ts` SPECIFICALLY, not as a class… a second client module
-                reaching a Supabase target must come back for its own ruling"*;
-            (b) a Server-Action relay using the caller's OWN request-scoped client — which needs
-                no widening at all (the storage policy is `TO authenticated` and ADR-3 records
-                that the database role follows the CREDENTIAL, not the code location), but does
-                need `serverActions.bodySizeLimit` raised for a 25 MiB part.
-          ⚠️ Choosing between them is the Operator's, so this control states its state rather
-          than guessing. `busyId`/`notice` above are already wired for whichever lands.
+          ⛔ ROUTE (a) — a browser-direct resumable upload — WAS REFUSED, and the guard that
+          refused it stands unchanged: *"I scoped that exception to `evidence-upload.ts`
+          SPECIFICALLY, and route (a) needs precisely the widening I refused. The guard firing
+          is the guard working."* ▶ The relay needs no widening at all, because the upload runs
+          on the CALLER'S OWN request-scoped client and ADR-3 records that the database role
+          follows the credential, not the code location.
+
+          ⚠️ `accept` IS A CONVENIENCE, NOT A GATE. It only pre-filters the OS picker; the
+          transport, the bucket, the CHECK constraint and `material_attach_confirm` each
+          re-check the type and the size server-side against the STORED object.
         */}
+        <input
+          ref={fileInput}
+          type="file"
+          accept={ACCEPTED_TYPES}
+          className="hidden"
+          onChange={(event) => {
+            const chosen = event.target.files?.[0];
+            // Reset first: picking the SAME file twice must fire `change` again.
+            event.target.value = "";
+            if (chosen) void uploadMaterial(session.classSessionId, chosen);
+          }}
+        />
         <button
           type="button"
-          disabled
-          title="Upload needs an Operator ruling on its transport — see the header block"
+          disabled={busyId !== null}
+          onClick={() => fileInput.current?.click()}
           className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 text-[13px] font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-45"
         >
           <Icon name="upload" size={16} />
-          Upload slides &amp; materials
+          {busyId === session.classSessionId ? "Uploading…" : "Upload slides & materials"}
         </button>
+        {/*
+          ⛔ THE NON-RESUMABILITY NOTICE, IN THE SAME HONEST REGISTER AS THE UNSCANNED NOTICE.
+          Operator: *"A dropped upload retries from the start, and the copy should not imply
+          otherwise."* ▶ It is stated where the control is, permanently — not surfaced only
+          after a failure, when it would read as an excuse rather than as a property.
+        */}
+        <p className="mt-2 text-[11px] text-ink-subtle">
+          PDF, Word, PowerPoint, image or text, up to 25 MB. Uploads do not resume — if one is
+          interrupted, it starts again from the beginning.
+        </p>
         {notice !== null ? (
           <p role="status" className="mt-2 text-[12px] text-ink-muted">
             {notice}
