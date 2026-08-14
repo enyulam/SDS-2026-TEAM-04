@@ -5,106 +5,122 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-15 · branch `develop` · HEAD `47735ce` · ✅ **four phases complete since
-your last message** · ⛔ **stopped at `P2-11`'s schema gate.**
+**Regenerated:** 2026-08-15 · branch `develop` · HEAD `ca5cb87` · **pushed and verified from origin**
+· ✅ **two phases complete** · ⚠️ **two real defects found, both recorded rather than quietly fixed.**
 
 ## ⚠️ §15.8.1 FRESHNESS SWEEP
 
-**Every open item re-verified against current state. Nothing copied forward. Four lapses found.**
+**Every open item, blocker and stated limit re-verified against current state. Nothing copied
+forward. Three lapses found; two new items opened.**
 
 | Carried previously | Re-measured now |
 |---|---|
-| `P2-6R` PARTIAL, upload inert | ⛔ **LAPSED — COMPLETE.** Transport ruled (b), built, proved end to end. No control on `14` is inert |
-| The upload-transport ruling OPEN | ⛔ **LAPSED — RULED.** `T-P44` unchanged, not one character |
-| `B` / `Strengths & Focus Areas` OPEN | ⛔ **LAPSED — RULED.** Not built; `P2-9` unblocked |
-| The bare-word rating detector OPEN | ⛔ **LAPSED — RULED and NARROWED**, proven in both directions |
-| `AR-4-14` `KNOWN-RED` · `AR-4-17` escalated | ✅ **BOTH STILL TRUE. CARRIED**, unchanged — **the only open rule question** |
-| `D-10` intermittent | ✅ **STILL TRUE. CARRIED.** Not re-run; a flaky check closes on a diagnosed cause, never on a run of green |
+| `P2-11` BLOCKED on its schema gate | ⛔ **LAPSED — AUTHORIZED AND COMPLETE.** One function, one grant, exactly as stated |
+| The trainer email OPEN | ⛔ **LAPSED — RULED PERMITTED.** Shipped across six layers |
+| Pushed = `3e3b316`; `47735ce` pending | ⛔ **LAPSED.** `origin/develop` = **`ca5cb87`** = local HEAD, read back **from origin**. `origin/main` = `5eb84bc`, **UNTOUCHED** |
+| `AR-4-14` + `AR-4-17` | ✅ **STILL TRUE. CARRIED** — **the only open rule question**, re-run and still red |
+| `D-10` intermittent | ✅ **STILL TRUE. CARRIED.** Not re-run: a flaky check closes on a diagnosed cause, never on a run of green |
 | `S3-T1-r` · `S3-00` · `B-G06-DET-1` · §10 Phase 1 exit (c) · `09`/`C2C-007` · the mojibake repair · `test:continuity`/`test:exit-condition-b` | ✅ **ALL STILL TRUE. CARRIED**, unchanged |
-| VISUAL walk | ✅ **STILL `NOT-RUN`** — now **five** screens: `11`, `14`, `17`, `23`, `25`. ⚠️ `11` and `14` have **changed** since you walked them |
+| VISUAL walk `NOT-RUN` | ✅ **STILL TRUE** — now **six** screens: `11`, `14`, `17`, `23`, **`24`**, `25`. ⚠️ `23` **changed** since you last saw it (the email, and `Add Trainer` went live) |
+| — | 🆕 **`Phone` / `Employee ID` on screen `24` — ONE DECISION FOR YOU.** Below |
+| — | 🆕 **The 7-day invitation lifetime — a DISCLOSED DEFAULT, not a ruling.** Below |
 
 ---
 
-## ⛔ THE STOP: `P2-11` (`24` Add Trainer) NEEDS SCHEMA. STATED, NOTHING WRITTEN.
+## ⏸ TWO THINGS FOR YOU — neither blocking, and `P2-9` is running regardless
 
-**Measured, not assumed:** there is **no create path of any kind**. `invitations` has **NO grant to
-`authenticated` at all**; `accounts` and `centre_memberships` are **SELECT-only**; and no
-`admin_create_*` function exists — the only `admin_*` RPC is `admin_assign_session_trainer`.
+### 1. `Phone` and `Employee ID` on screen `24` — ⛔ **NO COLUMN EXISTS ANYWHERE**
 
-✅ **THE AUDIT STRINGS ALREADY EXIST — measured in the live registry, not proposed.**
-`admin.profile_created` and `invitation.created` are both present. ⛔ **The registry does NOT move.**
+Measured across `accounts`, `centre_memberships`, `trainer_profiles` and `invitations`. ▶ **This is
+the one item on that screen that is a genuine decision rather than a governance refusal:** no rule
+forbids a staff phone number or a payroll id — there is simply **nowhere to put one**, and two
+columns is a schema change of its own.
 
-**PROPOSED, and awaiting your authorization:**
+The other four omissions are **not** decisions and are settled: `Role` is `GC-11` (`Assistant
+Trainer` is not in the enum, so it is **unpersistable**) · `Photo` has no column, bucket or policy
+(`C-15` cited as adjacent precedent, not stretched) · `Assign Classes` is `A-016` (assignment is
+**session**-level; the chips are **modules**, aimed at a `pending` membership).
 
-| | |
-|---|---|
-| **Tables** | ⛔ **NONE created.** Rows inserted into four EXISTING tables: `accounts`, `centre_memberships`, `trainer_profiles`, `invitations` |
-| **Columns** | ⛔ **NONE** |
-| **Enums** | ⛔ **NONE** |
-| **Policies** | ⛔ **NONE** — the write is a `SECURITY DEFINER` RPC, so the tables stay SELECT-only to clients |
-| **Grants** | **ONE** — `GRANT EXECUTE ON FUNCTION public.admin_create_trainer(text, text) TO authenticated` |
-| **Functions** | **ONE** — `admin_create_trainer(p_display_name text, p_email text)`, `SECURITY DEFINER`, `search_path=''` |
-| **Audit strings** | ⛔ **NONE added.** Emits the two that already exist, **one event per governed action** (`A-029`) |
+⚠️ **All five are disclosed ON THE PAGE**, not in a source comment (§12.12), and a suite leg fails
+the build if that disclosure is removed.
 
-**What the function would do, in one transaction:** re-resolve live management membership → insert
-`accounts` with **`auth_user_id` NULL** (⛔ a profile is not a login — `A-020`/`A-025`) → insert
-`centre_memberships` at **`pending`** → insert `trainer_profiles` → insert `invitations` with the
-normalized email and `expires_at` → emit `admin.profile_created` and `invitation.created`.
+### 2. The **7-day invitation lifetime** — ⚠️ **STATED, NOT RULED**
 
-⛔ **It stores no token, OTP, password or secret hash** (`A-027` — the tables have no column that
-could hold one). ⛔ **It creates no Auth user** — Supabase Auth owns the credential, and the
-recipient establishes their own.
+`A-027` makes application-invitation expiry a real mechanism, separate from Auth-link expiry — and
+**no instrument names a duration**, measured across the tree before writing. **7 days is this
+build's choice**, held in one named constant so a ruling changes one line.
 
-⚠️ **ONE THING I WOULD NEED YOU TO SETTLE WITH IT:** the frame for `24` draws a **photo** field,
-which `C-15` defers, and possibly a role selector. I will state both against the `.png` when you
-authorize the phase.
+### 3. `AR-4` second instance — the only open **rule** question, unchanged.
 
 ---
 
-## ⏸ ALSO WAITING ON YOU — neither blocking
+## ✅ WHAT SHIPPED
 
-### 1. The trainer EMAIL on screen `23` — raised, built closed, **recommend PERMIT**
+**THE TRAINER EMAIL, ruled permitted.** Six layers, **one column wide**. ⚠️ `PT-5`/`PT-5b` asserted
+the field's **absence** and were **inverted in the same pass** — a leg left behind would have gone
+red on a correct build and read like a leak. ⛔ **What they assert now is not "the email is
+present"** — that is one line and proves nothing — but that **the widening is exactly one column
+wide at every layer**: no `auth_user_id`, no `select("*")`. Rendered in `text-ink`, not the frame's
+`#AEB6C4` (**2.041:1** against SC 1.4.3's 4.5:1 floor) — the `F-01c` treatment, **no token
+redefined**. ⚠️ **§7.4.1 again:** the pack's `.md` names **no email anywhere** while the `.png` draws
+one under every name and the `.html` carries eight — **a note-derived build would never have raised
+the question, and your ruling would not exist.**
 
-The frame draws an email under each name. `accounts.normalized_email` **already exists and is
-readable** — nothing is missing. ▶ The pack says *"Do not expose authentication details"*, and an
-email **is** the Auth login identifier, so I **built it closed**: the refusal lives **in the DTO**,
-which has no field for one, rather than in a component that chooses not to render it.
+**`P2-11` — screen `24`.** One `SECURITY DEFINER` function, one `EXECUTE` grant. Census **T=30 E=12
+P=30 R=23**, unmoved. Four rows in one transaction; **no credential of any kind**, and neither the
+name nor the email reaches an audit label or payload.
 
-▶ **I recommend permitting it.** Management **supplies** the email when inviting the trainer
-(`A-020`), so it discloses nothing they do not already hold; it is **staff** data, not learner data;
-`A-027`'s prohibited-secret list does not include it; and a directory that cannot separate two
-identically-named trainers is materially worse. **One sentence adds the field.**
-
-### 2. `AR-4` second instance — the only open **rule** question, unchanged.
+⛔ **YOUR BOUNDARY, PROVEN WITH A CONTROL THAT DISCRIMINATES.** `PA-4` shows the **same management
+identity READING** all three tables; `PA-4b` shows **that same identity REFUSED on every write**,
+read off **PostgreSQL's own error stream** rather than a verdict the suite composed. `PA-5` pins the
+four privilege sets as **exact sets** — ⚠️ and **`invitations` holds NO grant at all**, *narrower*
+than your wording, so the expectation is pinned to **what is true** rather than to the paraphrase.
 
 ---
 
-## ✅ WHAT SHIPPED — four phases
+## ⚠️ TWO DEFECTS THIS PHASE SURFACED — both recorded, neither quietly fixed
 
-**`P2-6R`** — the upload transport, ruled **(b)**. `T-P44` unchanged. `bodySizeLimit` **derived**:
-the multipart envelope measured at **1,070 bytes** worst case, so the limit is **26,218,496** =
-ceiling + 4 KiB, 3.8× the envelope. **Three port members, not evidence's four** — the ticket/attach
-split exists because `D-5`'s bytes bypass the server, and here they do not. Non-resumability stated
-**at the control, permanently**. **18 end-to-end legs**, including the **trainer refused by the same
-policy**.
+### 1. ⛔ **A migration that verifies its own SHAPE has not verified that it WORKS**
 
-**`RULING A`** — the dashboard reads **ENROLLED**; `o_assessed_students` dropped by forward
-migration; tile removed. ⛔ **The hard part was the rename-that-isn't**: both readings were **13**,
-so `RAa-2` **constructs** the divergence — withdrawing a learner moves the tile **13 → 12** while
-`students` stays **13**. It **fails against the pre-ruling function**. Found a constraint nobody had
-named: **the database will not let a withdrawal be a bare flag flip**.
+`20260815120000` **applied cleanly, printed NINE PASS notices, and shipped a function that could not
+run**: `pg_catalog.coalesce(text, unknown) does not exist`.
 
-**The rating detector, narrowed.** ⛔ **Attribution, not adjacency — `A-052`'s own legal example
-(*"has mastered maintaining eye contact"*) puts the label four words from a dimension name**, so an
-adjacency rule would have re-created the very false positive the ruling removes. Grammar, not
-distance. Proven **both directions on every run**; the screen-`14` sentence is pinned as a
-must-NOT-fire sample rather than avoided by rewording alone.
+Two mechanisms lined up. **`plpgsql` does not resolve function names at `CREATE` time** — and the
+**same file's earlier** `position(… IN …)` fault *was* caught, because it was a **syntax** error
+rather than a **resolution** one. ▶ **The two are indistinguishable while writing and opposite at
+runtime.** And **all nine assertions were structural** — signature, posture, grant, privilege sets,
+census — so **not one called the function**, and every one was true of a body that raises on its
+first statement.
 
-**`P2-10`** — screen `23`, **no schema**, seven tables re-measured at three layers. Three refusals,
-each a different kind: `On leave` (`GC-12`, and the enum agrees) · `Edit` **absent, not disabled**
-(▶ *disabled means "not yet"; absent means "not a thing"*) · the email, raised. ⚠️ **A control that
-passed while proving nothing**, caught same-pass: `PT-3b` compared management against a trainer and
-**both read 1**; rewritten to the **parent** (0 vs 3).
+✅ **Corrected by forward migration `20260815130000` (`R-1`, never an edit)**, which adds the missing
+**kind**: **`PC-10` EXECUTES the function** and requires the fail-closed `not_permitted` — it runs as
+owner, so the caller gate returns **three lines before** the failing statement, which is exactly
+enough coverage and writes nothing. `PC-11` generalises to the class.
+
+▶ **New standing rule (plan §25.1): every migration that declares a function must EXECUTE it at
+apply time.** ⚠️ What caught it was `prove:portal-p2-11` — the only proof that calls the function as
+a **real caller in a real role**.
+
+### 2. ⛔ **§12.13's THIRD instance — the route ratchet was red for a whole phase**
+
+`/management/trainers` shipped at `P2-10`; the navigation census reported the missing expectation
+**immediately**; and **`P2-10` was reported complete without `prove:portal-p2-1` being re-run.**
+
+| # | Phase | Gate not run | Shipped anyway |
+|---|---|---|---|
+| 1 | `P2-6` | RPC-caller rule | a surface over three unwired write paths |
+| 2 | `P2-8` | `lint` | an **error**, committed AND pushed |
+| 3 | `P2-10` | `prove:portal-p2-1` | a route no expectation covered |
+
+⛔ **The gate worked every time. It was not read.** ▶ Three consecutive phases makes it a pattern
+about **which suites run at the end of a phase**: a phase is complete when **every suite whose
+subject it touched** is green, and adding a route touches the route census whether or not the
+phase's name mentions navigation.
+
+⚠️ **AND IT HID A REAL DEFECT.** With the child route finally asserted, `N-2` reported
+**`/management/trainers/add`: 0 current item(s)** — the rail item carried `exact: true`, so the
+sidebar went **blank** on a page that plainly belongs to Trainers. **That is `C2C-002`, which
+`Classes` already hit at `P2-2`.**
 
 ---
 
@@ -112,16 +128,17 @@ passed while proving nothing**, caught same-pass: `PT-3b` compared management ag
 
 | | |
 |---|---|
-| Branch · worktree · HEAD | `develop` · main worktree · `47735ce` · clean |
-| Pushed | `origin/develop` = `3e3b316` at the last push; **`47735ce` pending this checkpoint's push** |
+| Branch · worktree · HEAD | `develop` · main worktree · `ca5cb87` · clean |
+| Pushed | ✅ **`origin/develop` = `ca5cb87` = local HEAD**, read back **from origin** |
 | `main` | **UNTOUCHED** — `5eb84bc`, verified from origin |
 | Containers | **dev 9 · mvp 0** ⛔ demonstration stack never started or queried |
 | Ports | `:3000` held by your walk server; untouched by me |
-| Migrations added since your last message | **1** — `20260815090000_portal_ruling_a_dashboard_enrolled.sql` (Ruling A, pre-authorized) |
-| Census | tables **30** · enums **12** · policies **30** · registry **23** · functions **62** |
-| Portal suites | `p2-5` · `p2-6` · `p2-6r` · `p2-6r-e2e` · `p2-7` · `p2-8` · `p2-10` · `ruling-a` — **all PASS** |
-| `tsc --noEmit` · `next build` · `lint` | clean · clean · **0 errors** |
+| Migrations added | **2** — `20260815120000` (`P2-11`) and `20260815130000` (its `R-1` forward correction) |
+| Census | tables **30** · enums **12** · policies **30** · registry **23** · functions **63** |
+| Portal suites | `p2-1` · `p2-2` · `p2-2b` · `p2-3` · `p2-4` · `p2-5` · `p2-6` · `p2-6r` · `p2-6r-e2e` · `p2-7` · `p2-8` · `p2-10` · `p2-11` · `ruling-a` — **all 14 PASS** |
+| Navigation census | **all proofs passed**; 25 routes, 27 routes-and-aliases |
+| `tsc --noEmit` · `next build` · `lint` · `prove:encoding` | clean · clean · **0 errors** · PASS |
 | `T-P44`/`T-P44c` · `prove:no-secrets` | **PASS, unchanged** · **CLEAN** |
 | Deliberately red | `prove:artefact-read` (`AR-4-14`/`AR-4-17`) · `prove:serving-discipline` (`D-10`, intermittent) |
-| `NOT-RUN` | `bodySizeLimit` (browser leg) · `prove:stage2-routes` · `prove:stage3-authenticated` · VISUAL on `11`/`14`/`17`/`23`/`25` |
-| ⏸ Next | **`P2-11` — BLOCKED on the schema authorization above.** `P2-9` is unblocked and could run first if you prefer |
+| `NOT-RUN` | `bodySizeLimit` (browser leg) · `prove:stage2-routes` · `prove:stage3-authenticated` · VISUAL on `11`/`14`/`17`/`23`/`24`/`25` |
+| ⏭ Next | **`P2-9` — screen `18` Class Statistics**, unblocked by your `B` ruling. No schema expected; it stops for authorization if that turns out to be wrong |
