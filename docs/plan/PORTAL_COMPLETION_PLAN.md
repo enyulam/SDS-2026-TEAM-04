@@ -3546,3 +3546,97 @@ CLEAN.
 
 ⏸ **VISUAL `NOT-RUN`** on `11`, `14`, `17`, `25` — carried, per instruction.
 ⏸ **ONE NEW ESCALATION: §20.4**, the bare-word rating detector.
+
+
+---
+
+## §21 — ⏸ **B**: WHAT `Strengths & Focus Areas` ON SCREEN `18` ACTUALLY IS. MEASURED, NOT INFERRED
+
+> **Operator, 2026-08-15:** *"SCREEN 18 — do NOT start it. Report on Strengths & Focus Areas
+> first: measure whether it is OD-4 panel text or a derived summary. **That decides whether the
+> panel is permitted at all**, and I will not authorize the phase without it."*
+
+⛔ **NOTHING WAS BUILT. This section is a measurement and a recommendation.**
+
+### §21.1 — Artefacts opened (§7.4.1 — every claim below names one)
+
+| Artefact | What it gave |
+|---|---|
+| `reference/Management - Student Profile/….png` | ⛔ **the answer.** Chip colours, bucket membership, and the adjacent Skill Breakdown |
+| `…/….html` | the two bucket headings as rendered text: `STRENGTHS`, `AREAS TO GROW` |
+| `…/….md` | *"**Strengths & Focus Areas** tags … separates strong criteria from areas needing attention"* |
+
+⚠️ **THE `.md` ALONE WOULD HAVE BEEN AMBIGUOUS AND NEARLY MISLEADING.** *"separates strong criteria
+from areas needing attention"* is compatible with **both** readings — it never says the tags are
+**dimension names**, and it never says what decides which bucket a tag lands in. ▶ **The `.png` is
+what settles it**, which is §7.4.1 working exactly as written: *a prose note lists what a screen
+contains; it does not enumerate what a screen encodes.*
+
+### §21.2 — ⛔ THE ANSWER: A DERIVED RATING SUMMARY. **NOT** OD-4 PANEL TEXT.
+
+The card draws **five chips carrying DIMENSION NAMES**, in two labelled buckets:
+
+| Bucket | Chips | Chip colour |
+|---|---|---|
+| `STRENGTHS` | Eye contact · Emotional expression · Body language | **green** |
+| `AREAS TO GROW` | Vocal projection · Tonality | **amber** |
+
+⛔ **CROSS-CHECKED AGAINST THE SKILL BREAKDOWN SITTING BESIDE IT ON THE SAME FRAME**, and the two
+agree exactly. That chart draws eight dimensions as bars: Eye contact and Emotional expression
+**green and longest** · Body language, Speech structure, Sentence flow, Audience awareness **teal
+and mid** · Tonality **amber** · Vocal projection **red and shortest**.
+
+▶ **The three `STRENGTHS` chips are the three highest bars. The two `AREAS TO GROW` chips are the
+two lowest.** ⛔ **It is the SAME DATA AS SKILL BREAKDOWN, THRESHOLDED INTO TWO BUCKETS** — the same
+per-dimension ratings at lower resolution.
+
+⚠️ **IT IS NOT `OD-4`'s `Strengths` PANEL, AND THE NAME COLLISION IS A TRAP WORTH NAMING.** `OD-4`'s
+`Strengths` is **narrative prose about ONE session's report**, authored through the governed
+lifecycle. This card is **dimension NAMES partitioned by rating, aggregated across a TERM** (the
+frame's own header reads `Term 1, 2035`, and a term selector sits on the Growth Trend). ▶ **Same
+word, different kind of thing.** A reader matching on the word alone would conclude the panel was
+already-governed report content and build a rating projection by accident.
+
+### §21.3 — ⛔ IT IS ALREADY RULED OUT. TWICE OVER, AND ONE OF THEM NAMES THIS SHAPE
+
+**1. `C-9`.** Screen `18` is a **profile** surface, not a report detail surface. The plan's own
+`P2-9` row already says so: *"`C-9` bites here: `18` is a profile surface, not report detail —
+Skill Breakdown gets no per-dimension ratings."* ▶ **Strengths & Focus Areas is that same data.**
+Prohibiting the bar chart and permitting the chip partition would be a distinction without a
+difference — it is the identical disclosure at coarser granularity.
+
+**2. `G-2`, and the register ALREADY NAMES IT.** The `GC-6` row reads: *"`D-1` permits Management to
+view the nine — ⛔ but `C-9` confines that to REPORT DETAIL surfaces, so `11` `15` `16` `17` `18`
+are **still blocked**. **The `"Overall"` / `"Strongest / Focus area"` columns stay `G-2`**."*
+▶ **`Strongest / Focus area` IS this card**, under a different layout. ⚠️ The register wrote it as
+*columns on a list* and this is *a card on a profile* — a difference of presentation, not of
+disclosure.
+
+**And it is a ROLL-UP in its own right.** Partitioning nine dimensions into strong/weak **across a
+term** is an aggregate judgement over many sessions' ratings. `G-2` bars roll-ups anywhere, and
+this is one even before `C-9` is reached.
+
+### §21.4 — Recommendation, and what it costs
+
+⛔ **`Strengths & Focus Areas` — DO NOT BUILD. `REGISTERED-OMISSION`.** On the same footing as Skill
+Breakdown, which `P2-9` already carries.
+
+⚠️ **CONSEQUENCE, STATED HONESTLY: the right-hand column of screen `18` loses BOTH its cards.**
+Skill Breakdown was already prohibited; with this one gone, the frame's whole analytics column is
+`Growth Trend` (a `D-2` line, no number/band/grade) plus `Classes Enrolled` and `Profile Details`.
+▶ **`Q-27`'s precedent applies to the layout**: Profile Details promotes upward into the vacated
+space; **no blank rectangle, no invented filler card**, and the absence is `EXPECTED / REQUIRED` at
+visual acceptance rather than a regression.
+
+⚠️ **AND THREE MORE THINGS ON THIS FRAME ARE RATING PROJECTIONS THE PHASE WILL HAVE TO ANSWER FOR**,
+flagged now rather than at build time: the **`ASSESSMENTS 24`** tile and the **`ATTENDANCE 96%`**
+tile are term roll-ups, and the **Reports table's `GRADE` column** (drawing `Mastering` /
+`Developing` chips) is already ruled prohibited by `G-2`. ▶ **`ATTENDANCE 96%` is not a rating and
+may well survive; `ASSESSMENTS 24` is a count of observations, not of ratings.** Neither is decided
+here — they are named so `P2-9` opens with them on the table rather than discovering them.
+
+### §21.5 — Position
+
+⏸ **`P2-9` REMAINS BLOCKED, awaiting the Operator's ruling on §21.2–§21.4.** Nothing built.
+▶ **Proceeding to `P2-10` (`23` Trainers), which has no dependency**, per the standing instruction
+to report a blocked phase and move to the next unblocked one.
