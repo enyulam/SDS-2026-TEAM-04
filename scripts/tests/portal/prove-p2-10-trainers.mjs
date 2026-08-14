@@ -179,13 +179,28 @@ const trainerDto = contracts.slice(
   contracts.indexOf("export type ManagementTrainerRowDto"),
   contracts.indexOf("export type ManagementTrainerListDto"),
 );
+/*
+ * ⚠️ PT-5 AND PT-5b ARE INVERTED, IN THE SAME PASS AS THE RULING THAT INVERTED THEM
+ * (§12.11). They previously asserted the email's ABSENCE at both layers, which was
+ * correct while the question was open and is FALSE the moment it was answered — a
+ * leg left behind would have gone red on a correct build and read like a leak.
+ *
+ * ⛔ WHAT THEY ASSERT NOW IS NOT "the email is present" — that is one line and proves
+ * nothing. They assert THE WIDENING IS EXACTLY ONE COLUMN WIDE at every layer, which
+ * is the part a later phase could quietly lose.
+ */
 check(
-  trainerDto.length > 40 && !/email/i.test(trainerDto),
-  `PT-5   ⛔ THE DTO CARRIES NO EMAIL FIELD (${trainerDto.length} chars read) — the pack bars exposing authentication details, and an email is the Auth login identifier. ▶ The refusal is in the TYPE, so a component could not render one even by trying`,
+  /readonly email: string \| null/.test(trainerDto),
+  "PT-5   ✅ THE DTO CARRIES `email: string | null` — Operator-ruled 2026-08-15: an identifier a manager already typed is not a disclosure to that manager. ⛔ `| null` is load-bearing: NULL means NOT RECORDED and the line is OMITTED (hero 0B)",
 );
 check(
-  !/normalized_email/.test(built),
-  "PT-5b  and the PROJECTION never selects `normalized_email` either — the column exists and is readable, so this is a decision rather than an impossibility",
+  /normalized_email/.test(built) && !/auth_user_id/.test(built) && !/select\(\s*"\*/.test(built),
+  "PT-5b  and the PROJECTION reads `normalized_email` — ⛔ AND NOTHING ELSE FROM `accounts`: no `auth_user_id`, no `select(\"*\")`. The ruling widened ONE column, and the audience boundary is where the widening stops",
+);
+const screen = stripComments(readFileSync(join(ROOT, "features", "management", "management-trainers-screen.tsx"), "utf8"));
+check(
+  /row\.email === null \? null :/.test(screen) && /row\.email\.toLowerCase\(\)\.includes\(needle\)/.test(screen),
+  "PT-5c  ⛔ AND THE SCREEN OMITS THE LINE ON NULL rather than rendering an empty one (hero 0B), ⚠️ and the SEARCH was widened in the same pass — the field the row displays is the field the search matches, so a result is always explainable by something on screen (§12.11)",
 );
 check(
   !/on\s*leave/i.test(built) && !/On leave/.test(trainerDto),
@@ -199,7 +214,6 @@ check(
   `PT-6b  and the LIVE ENUM confirms it: ${statusValues} — three members, measured in the catalogue rather than read off the migration`,
 );
 
-const screen = stripComments(readFileSync(join(ROOT, "features", "management", "management-trainers-screen.tsx"), "utf8"));
 check(
   !/>\s*Edit\s*</.test(screen),
   "PT-7   ⛔ NO `Edit` CONTROL — there is no Edit-Trainer screen in the ratified 36, so it has no destination at all. ▶ A control that leads nowhere is the P2-6 defect (§12.12); ABSENT is correct, and `disabled` would be wrong because it can never become live",

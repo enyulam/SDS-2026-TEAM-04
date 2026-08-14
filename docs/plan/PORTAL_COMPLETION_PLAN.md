@@ -2055,6 +2055,24 @@ measuring the replacement.
 ⛔ **All three are the same family — a green leg that establishes nothing — and they fail in three
 different places, so a check written against one does not catch the others.**
 
+#### ⚠️ A FOURTH INSTANCE, FROM THE RLS SIDE — `PT-3b` (Operator-ruled, 2026-08-15)
+
+> *"`PT-3b` is another instance: **`1 <= 1` is true of a table with no policy**. Record it with the
+> other comparison-that-cannot-discriminate entries."*
+
+`P2-10`'s first draft proved RLS scoping by comparing management's trainer-membership count against
+a **TRAINER's**, asserting `trainer <= management`. ▶ **The fixture holds exactly ONE trainer, so
+both read `1`.** The leg passed. It also passes against a table with **no policy at all**, against
+a policy that admits everyone, and against a policy that admits nobody-but-happens-to-return-one.
+
+⛔ **THE NEGATIVE MUST BE ABLE TO COME OUT DIFFERENTLY.** Rewritten to the **PARENT**, who reads
+**0** trainer memberships and **1** account against management's **3**.
+
+▶ **This is §12.15 from the ACCESS-CONTROL direction rather than the definition direction**, and it
+generalises: ⚠️ **when you pick an identity to be the negative in an RLS proof, pick the one whose
+answer MUST differ — and check that it does, on this fixture, rather than on the schema you have in
+your head.**
+
 ### The trigger, stated so it is recognisable
 
 ▶ **Any change where a name survives and its definition does not.** A rename is safe: the compiler
@@ -3908,3 +3926,83 @@ without it.
 invitation, so it will need its audit strings stated in advance — `admin.profile_created` and
 `invitation.created` both already exist in the registry, which is measured at `P2-11`, not assumed
 here.
+
+
+---
+
+## §24 — THREE OPERATOR RULINGS, 2026-08-15
+
+### §24.1 — ⛔ THE DETECTOR: **ADJACENCY IS SUPERSEDED BY LABEL-FIRST-VERSUS-VERB**
+
+> **Operator, superseding their own instruction:** *"the detector reasoning is better than my
+> ruling. **Adjacency would have rebuilt `A-052`'s false positive one layer deeper** — 'has mastered
+> maintaining eye contact' is four words from a dimension name and legal. **Label-first versus
+> verb-with-subject is the real distinction.** Record it as superseding my adjacency instruction,
+> with the reason."*
+
+**What was instructed, 2026-08-15 (earlier the same day):** *"Match the labels only where they
+appear as a rating — **adjacent to a dimension name**, in a chip, or in a rating-shaped context."*
+
+⛔ **THE `adjacent to a dimension name` CLAUSE IS SUPERSEDED. The other two survive unchanged.**
+
+**Why, stated once so it is not re-derived:** `A-052` supplies its own counter-example —
+*"has mastered maintaining eye contact"* is **EXPRESSLY LEGAL** and places `mastered` **four words**
+from a dimension name. ▶ An adjacency rule would therefore have **re-created the exact false
+positive the narrowing existed to remove**, one layer deeper, where the next reader would find it
+inside a "narrowed" detector and trust it.
+
+▶ **THE IMPLEMENTED DISCRIMINATOR: is the label PRESENTED AS A VALUE?**
+
+| Sample | Verdict | What separates it |
+|---|---|---|
+| `Mastered eye contact, clear projection` | ⛔ FIRES | **label-first** — the shape a chip or a summary row renders |
+| `Beginning on sentence flow & pace` | ⛔ FIRES | label-first |
+| `has mastered maintaining eye contact` | ✅ legal | a **verb with a subject in front of it** |
+| `at the beginning of the session` | ✅ legal | the label is an ordinary noun behind an article |
+
+⚠️ **GRAMMAR, NOT DISTANCE.** The leading boundary (`^`, `>`, `,`, `;`, `·`, `|`, `-`) is the whole
+mechanism: it is what `has ` fails and what a chip's opening satisfies.
+
+⚠️ **RECORDED AS A SUPERSESSION RATHER THAN A REFINEMENT, DELIBERATELY.** A later reader comparing
+the ruling text against the code would otherwise find a clause the implementation ignores and
+"restore" it — which is precisely how a corrected rule gets un-corrected in this project's history.
+
+---
+
+### §24.2 — ✅ THE TRAINER EMAIL IS **PERMITTED** — Operator ruling, with the reason
+
+> *"**PERMIT IT.** Your reasoning holds: management supplies that email when inviting the trainer,
+> it is staff data not learner data, and `A-027`'s secret list does not include it. **An identifier
+> a manager already typed is not a disclosure to that manager.** … note that **failing closed first
+> was correct** — I would rather see a closed field with a question than an open one with an
+> assumption."*
+
+⛔ **THE PACK'S CLAUSE IS NOT WEAKENED.** *"Do not expose authentication details"* still bars every
+token, OTP, password, session and secret hash — `A-027` guarantees the tables have no column that
+could hold one. ▶ **What this ruling settles is that an EMAIL is not in that class for THIS
+audience**, on the Operator's own formulation: **an identifier a manager already typed is not a
+disclosure to that manager.**
+
+⚠️ **THE BOUNDARY IS THE AUDIENCE, AND IT DOES NOT GENERALISE.** This permits the email on a
+**MANAGEMENT** staff directory. ⛔ It says nothing about a Parent surface, nothing about a Trainer
+seeing another trainer's email, and nothing about a learner's or a guardian's email — **each is its
+own question** and reaches this file only through its own ruling.
+
+✅ **AND THE PROCESS IS RATIFIED, WHICH MATTERS MORE THAN THE FIELD:** *"failing closed first was
+correct."* ▶ **A closed field with a question beats an open one with an assumption** — because the
+first costs one sentence to reverse and the second is not recoverable at all.
+
+---
+
+### §24.3 — ✅ `P2-11` SCHEMA AUTHORIZED, WITH A BOUNDARY TO ASSERT
+
+> *"AUTHORIZED as stated: **one `SECURITY DEFINER` function, one `EXECUTE` grant, no table, column,
+> enum, policy or audit string. Registry unmoved**, since both strings exist. ⚠️ **Assert the
+> boundary:** the function must not widen anything beyond the invitation it creates. **No grant to
+> `authenticated` on `invitations`, `accounts` or `centre_memberships` — they stay SELECT-only.**
+> **Prove the deny with a control that discriminates, and do NOT let it read like `PT-3b`.**"*
+
+⛔ **THE `PT-3b` INSTRUCTION IS THE HARD PART OF THIS AUTHORIZATION**, and it is not satisfied by a
+leg that merely reports zero. ▶ **A deny proof must show the SAME caller succeeding somewhere the
+policy permits**, so a zero is discrimination rather than blindness — the shape `D1a-6` established
+and `PT-3b` failed to hold.

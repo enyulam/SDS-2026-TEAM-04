@@ -50,15 +50,24 @@ import type { ManagementTrainerListDto } from "@/lib/frontend/contracts/physical
  *    assignment and authorization mean. ▶ `REGISTERED-OMISSION`. It ends only if the academy
  *    ratifies a leave concept, which is a schema authorization of its own.
  *
- * 2. ⛔ THE EMAIL UNDER EACH NAME — **RAISED, NOT SILENTLY DROPPED.** `accounts.normalized_email`
- *    EXISTS and is readable; nothing about this is a missing column. ▶ The pack's
+ * 2. ✅ THE EMAIL UNDER EACH NAME — **RAISED CLOSED, THEN RULED PERMITTED (Operator, 2026-08-15).**
+ *    `P2-10` shipped with the field REFUSED IN THE DTO while the question was open: the pack's
  *    prohibited-invention clause reads *"Do not expose authentication details"*, and an email IS
- *    the Supabase Auth login identifier for that person. ⚠️ **Fail-closed while it is ambiguous:**
- *    the argument FOR showing it is strong — management SUPPLIES it when inviting the trainer
- *    (`A-020`), so it discloses nothing management does not already hold, and a directory with two
- *    identically-named trainers is materially worse without it. **It is reported to the Operator
- *    with that recommendation rather than decided here**, and the refusal lives in the DTO, which
- *    has no field to put one in — stronger than a component that chooses not to render it.
+ *    the Supabase Auth login identifier. ▶ **The Operator permitted it, with the reason:** *"An
+ *    identifier a manager already typed is not a disclosure to that manager."* Management SUPPLIES
+ *    the email when inviting the trainer (`A-020`), it is STAFF data rather than learner data, and
+ *    `A-027`'s prohibited-secret list (token, OTP, password, access/refresh token, secret hash)
+ *    does not include it. ⛔ **THE AUDIENCE IS THE BOUNDARY: this permits the email on a
+ *    MANAGEMENT staff directory and generalises to no other role and no other person's email.**
+ *    ⚠️ **THE PROCESS WAS RATIFIED TOO, AND IT OUTLASTS THE FIELD:** *"failing closed first was
+ *    correct — I would rather see a closed field with a question than an open one with an
+ *    assumption."* ▶ Reversing a closed field cost one sentence; an assumed disclosure is not
+ *    recoverable at all.
+ *
+ *    ⚠️ **§7.4.1 AGAIN, AND THE `.md` MISSED IT AGAIN.** This pack's prose note names **no email
+ *    anywhere** — a case-insensitive search over it returns nothing — while the `.png` draws one
+ *    under every name and the `.html` carries eight, at `11px` / `#AEB6C4`. ▶ **A note-derived
+ *    build would never have raised the question**, and the ruling that settled it would not exist.
  *
  * 3. ⛔ THE `Edit` CONTROL — **no Edit-Trainer screen exists in the ratified 36.** `P2-11` builds
  *    `24` Add Trainer; there is no `Edit Trainer` frame, node or ID. ▶ Rendering a control that
@@ -86,7 +95,7 @@ import type { ManagementTrainerListDto } from "@/lib/frontend/contracts/physical
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  *
  * MEASURED VALUES (all from the `.html`): page title `22px` · `All Trainers` `17px` · pill,
- * column headings and status chip `11px` · trainer name and `Add Trainer` `13px` · the two counts
+ * column headings, status chip and the email line `11px` · trainer name and `Add Trainer` `13px` · the two counts
  * `12.50px` · `Edit` `12px` · avatar initials `11.50px` · card radius `18px` · chip/pill radius
  * `999px` · brand `#EC4B96`, pill fill `#FCE7F0`, row rule `#F3F5F9`.
  */
@@ -126,12 +135,22 @@ export function ManagementTrainersScreen() {
   const rows = useMemo(() => {
     if (data === null) return [];
     const needle = search.trim().toLowerCase();
-    // ⚠️ NAME ONLY. The frame's field also matches the email it draws; this one
-    // has no email to match, and searching a field the user cannot see would be
-    // a hidden behaviour.
+    /*
+     * ✅ NAME **AND EMAIL**, WIDENED IN THE SAME PASS AS THE RULING (§12.11 — a stale
+     * leg or comment is corrected by the change that made it stale, never left for a
+     * later reader to trip over). ⛔ The earlier text read *"this one has no email to
+     * match, and searching a field the user cannot see would be a hidden behaviour"* —
+     * both halves lapsed the moment the field was permitted, and the SECOND half is
+     * the rule that decides the widening: **the search matches exactly what the row
+     * displays**, so a result is always explainable by something on screen.
+     */
     return needle === ""
       ? data.trainers
-      : data.trainers.filter((row) => row.fullName.toLowerCase().includes(needle));
+      : data.trainers.filter(
+          (row) =>
+            row.fullName.toLowerCase().includes(needle) ||
+            (row.email !== null && row.email.toLowerCase().includes(needle)),
+        );
   }, [data, search]);
 
   return (
@@ -216,8 +235,21 @@ export function ManagementTrainersScreen() {
                             here for free by re-implementing it.
                           */}
                           <Avatar displayName={row.fullName} size="small" />
-                          {/* ⛔ NO EMAIL LINE. See the header — reported, not silently dropped. */}
-                          <span className="text-[13px] font-semibold text-ink">{row.fullName}</span>
+                          <span className="flex flex-col gap-px">
+                            <span className="text-[13px] font-semibold text-ink">{row.fullName}</span>
+                            {/*
+                              ✅ RULED PERMITTED — see the header. ⛔ `null` OMITS THE LINE rather
+                              than rendering an empty one or a placeholder (hero `0B`: NULL means
+                              NOT RECORDED). ⚠️ `text-ink`, NOT the frame's `#AEB6C4`, which
+                              measures **2.041:1** on this canvas against SC 1.4.3's 4.5:1 floor
+                              for normal-size text — the `F-01c` treatment already applied on
+                              `page-heading` and the management dashboard: hue preserved,
+                              luminance moved, ⛔ NO TOKEN VALUE REDEFINED.
+                            */}
+                            {row.email === null ? null : (
+                              <span className="text-[11px] font-normal text-ink">{row.email}</span>
+                            )}
+                          </span>
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-[12.5px] text-ink-muted">{row.classCount}</td>

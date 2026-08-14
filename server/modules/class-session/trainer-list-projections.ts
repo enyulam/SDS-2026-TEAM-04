@@ -17,9 +17,20 @@ import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics
  * ⚠️ §12.10 AGAIN, AND IT PAID FOR ITSELF A THIRD TIME. The frame draws an
  * email under each trainer's name, and the pack's dependency section says
  * *"Missing — no trainer-list projection."* ▶ **`accounts.normalized_email`
- * ALREADY EXISTS.** Nothing needed a column. (Whether it may be DISPLAYED is a
- * separate question, answered below and deliberately not answered by this
- * file's ability to read it.)
+ * ALREADY EXISTS.** Nothing needed a column.
+ *
+ * ✅ **AND DISPLAYING IT IS NOW RULED — Operator, 2026-08-15.** `P2-10` shipped
+ * with the field REFUSED while the question was open, on the pack's *"Do not
+ * expose authentication details"* clause. The Operator permitted it: *"An
+ * identifier a manager already typed is not a disclosure to that manager"* —
+ * management SUPPLIES the email when inviting the trainer (`A-020`), it is
+ * STAFF data rather than learner data, and `A-027`'s prohibited-secret list
+ * (token, OTP, password, access/refresh token, secret hash) does not include it.
+ *
+ * ⛔ **THE AUDIENCE IS THE BOUNDARY AND IT DOES NOT GENERALISE.** This permits
+ * the email on a MANAGEMENT staff directory. It says nothing about a Parent
+ * surface, about a trainer seeing another trainer's email, or about a learner's
+ * or guardian's email — each is its own question.
  *
  * ⛔ THE ROLE IS READ FROM `centre_memberships`, NEVER FROM AN IDENTITY ROW.
  * The pack's prohibited-invention clause is explicit — *"Do not display or
@@ -32,6 +43,12 @@ import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics
 export type ManagementTrainerRowDto = {
   readonly membershipId: string;
   readonly fullName: string;
+  /**
+   * ⛔ **RULED PERMITTED, 2026-08-15** — see the header. `null` where the account
+   * carries none, and hero `0B` applies: the LINE IS OMITTED rather than shown
+   * empty or as a placeholder.
+   */
+  readonly email: string | null;
   /**
    * ⛔ `active` or `deactivated` — the ratified `centre_membership_status`
    * vocabulary, minus `pending`, which is an INVITED trainer who has not
@@ -61,6 +78,7 @@ interface MembershipRow {
 interface AccountRow {
   readonly id: string;
   readonly display_name: string | null;
+  readonly normalized_email: string | null;
 }
 interface AssignmentRow {
   readonly class_session_id: string;
@@ -104,7 +122,10 @@ export async function listManagementTrainersCore(
   }
 
   const accounts = await readRows<AccountRow>("listManagementTrainersCore:accounts", () =>
-    client.from("accounts").select("id, display_name").in("id", staff.map((m) => m.account_id)),
+    client
+      .from("accounts")
+      .select("id, display_name, normalized_email")
+      .in("id", staff.map((m) => m.account_id)),
   );
   const assignments = await readRows<AssignmentRow>("listManagementTrainersCore:assignments", () =>
     client
@@ -149,6 +170,7 @@ export async function listManagementTrainersCore(
   }
 
   const nameByAccount = new Map(accounts.rows.map((a) => [a.id, a.display_name]));
+  const emailByAccount = new Map(accounts.rows.map((a) => [a.id, a.normalized_email]));
   const modulesByMembership = new Map<string, Set<string>>();
   for (const a of assignments.rows) {
     const moduleId = moduleBySession.get(a.class_session_id);
@@ -172,6 +194,7 @@ export async function listManagementTrainersCore(
         // staff directory entry with no name asserts a person exists and
         // identifies nobody.
         fullName: nameByAccount.get(m.account_id) ?? "",
+        email: emailByAccount.get(m.account_id) ?? null,
         status: m.status as "active" | "deactivated",
         classCount: modules.size,
         // ⚠️ DISTINCT ACROSS MODULES. A learner enrolled in two of this

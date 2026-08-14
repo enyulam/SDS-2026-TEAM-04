@@ -960,11 +960,11 @@ export async function adapterRemoveMaterial(
  * `P2-10` — screen `23` Management Trainers. ⛔ A READ ONLY; trainer creation
  * and its invitation are `P2-11` and need an audit string this never touches.
  *
- * ⚠️ THE ALLOW-LIST MAPPER IS DOING REAL WORK HERE, not ceremony. The
- * projection can read `accounts.normalized_email` — every hop is granted — and
- * this mapper is the layer that would have to be edited before an email could
- * reach the client. ⛔ It is refused by NOT BEING WRITTEN DOWN, which is
- * stronger than a filter that has to remember to exclude it.
+ * ✅ THE EMAIL IS MAPPED BY OPERATOR RULING (2026-08-15), and the allow-list
+ * discipline is what made adding it a ONE-LINE, VISIBLE change rather than a
+ * field that had been arriving all along. ⛔ Every OTHER account column stays
+ * refused by not being written down — `auth_user_id`, `status`,
+ * `deactivated_at` and anything a later phase adds.
  */
 export async function adapterReadManagementTrainers(): Promise<
   ActionResult<AdapterManagementTrainerListDto>
@@ -978,6 +978,7 @@ export async function adapterReadManagementTrainers(): Promise<
       trainers: result.rows.trainers.map((row) => ({
         membershipId: row.membershipId,
         fullName: row.fullName,
+        email: row.email,
         status: row.status,
         classCount: row.classCount,
         studentCount: row.studentCount,

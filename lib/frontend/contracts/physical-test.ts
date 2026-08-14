@@ -253,9 +253,13 @@ export type ManagementStudentRowDto = {
  *
  * ⛔ THREE THINGS THE FRAME DRAWS THAT THIS SHAPE CANNOT CARRY, each for its
  * own reason and none of them "not built yet":
- *  - the **email** under each name — the pack bars exposing authentication
- *    details, and an email is the Auth login identifier. The column exists and
- *    is readable; the TYPE is where the refusal lives.
+ *  ~~- the **email** under each name — the pack bars exposing authentication
+ *    details…~~ ✅ **PERMITTED — Operator ruling, 2026-08-15.** *"An identifier a
+ *    manager already typed is not a disclosure to that manager."* ⛔ **MANAGEMENT
+ *    ONLY**; it generalises to no other role and no other person's email.
+ *    ⚠️ The Operator also ratified the PROCESS: *"failing closed first was
+ *    correct — I would rather see a closed field with a question than an open
+ *    one with an assumption."*
  *  - **`On leave`** — `GC-12`. `centre_membership_status` has exactly three
  *    members and none of them is a leave state. Inventing one would be schema
  *    from a frame (`A-022`).
@@ -264,6 +268,8 @@ export type ManagementStudentRowDto = {
 export type ManagementTrainerRowDto = {
   readonly membershipId: string;
   readonly fullName: string;
+  /** ⛔ `null` renders as an OMITTED line, never an empty one (hero `0B`). */
+  readonly email: string | null;
   readonly status: "active" | "deactivated";
   /** A COUNT of class modules. ⛔ Never a rating, never a roll-up of one. */
   readonly classCount: number;

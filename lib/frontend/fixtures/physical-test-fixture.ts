@@ -1254,6 +1254,13 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
         // is never presented as one to the user.
         membershipId: `fixture-${fullName.replace(/\s+/g, "-").toLowerCase()}`,
         fullName,
+        /*
+         * ⛔ `null`, DELIBERATELY. The fixture models no account row, so there is
+         * no email to report — and inventing a plausible one would make the
+         * OMITTED-line branch (hero `0B`) unreachable in the very mode that
+         * exists to exercise it.
+         */
+        email: null,
         status: "active" as const,
         classCount: e.modules.size,
         studentCount: e.learners.size,

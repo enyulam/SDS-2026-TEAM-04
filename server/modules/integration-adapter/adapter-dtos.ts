@@ -362,18 +362,19 @@ export interface AdapterManagementStudentRowDto {
 /**
  * `P2-10` — screen `23` Management Trainers.
  *
- * ⛔ NO EMAIL FIELD, AND ITS ABSENCE IS THE RULING BEING RESPECTED, not an
- * oversight. `accounts.normalized_email` exists and is readable; the pack's
- * prohibited-invention clause says *"Do not expose authentication details"*,
- * and an email IS the Supabase Auth login identifier. ▶ **The type has nowhere
- * to put one**, which is stronger than a component that chooses not to render
- * it. Reported to the Operator rather than decided here.
+ * ✅ THE EMAIL IS PRESENT BY OPERATOR RULING, 2026-08-15. `P2-10` shipped it
+ * REFUSED while the question was open — the pack bars *"authentication
+ * details"* and an email is the Auth login identifier. ▶ The Operator permitted
+ * it for THIS audience: *"An identifier a manager already typed is not a
+ * disclosure to that manager."* ⛔ **MANAGEMENT ONLY. It generalises to no
+ * other role and to no other person's email.**
  *
  * ⛔ NO `On leave`. The status union is the ratified enum minus `pending`.
  */
 export interface AdapterManagementTrainerRowDto {
   readonly membershipId: string;
   readonly fullName: string;
+  readonly email: string | null;
   readonly status: "active" | "deactivated";
   readonly classCount: number;
   readonly studentCount: number;
