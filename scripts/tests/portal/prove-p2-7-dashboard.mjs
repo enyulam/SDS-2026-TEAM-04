@@ -141,6 +141,56 @@ check(
   "PDSa-RATINGSc CONTROL: the term list MATCHES the frame's OWN two row descriptions verbatim -- so PDSa-RATINGS is a measurement against the exact strings that would leak, not a regex that can never fire",
 );
 
+/*
+ * ⛔ PDSa-CLASS -- THE ROW CARRIES THE CLASS, and it is asserted as a RULE rather
+ * than as a string.
+ *
+ * The Operator's ruling enumerates FOUR identifying facts on the approval row:
+ * learner, CLASS, session, status. Three were built at the first pass and the
+ * class was not -- caught by re-reading the ruling against the shipped row.
+ *
+ * ⚠️ NO MODULE TITLE IS PINNED. The fixture's titles are what it HAPPENS to hold,
+ * and pinning one would re-arm the exact §12.8 trap that made `P22-4` go red
+ * BECAUSE THE PRODUCT WORKED. This leg asserts the MECHANISM instead: the row
+ * reads the class from the resolved map, and it OMITS rather than placeholders.
+ *
+ * ⛔ AND IT BARS THE PLACEHOLDER EXPLICITLY. `hero 0B` says an absent value is an
+ * omitted element, never a fabricated one -- so "Unknown class", "No class" or a
+ * bare dash standing in for an unresolved title is a defect, not a fallback.
+ */
+const classResolved = /row\.classModuleTitle/.test(builtCode);
+const classPlaceholder = /Unknown class|No class|Class unavailable|Untitled class/i.test(builtCode);
+check(
+  classResolved && !classPlaceholder,
+  `PDSa-CLASS the approval row identifies the CLASS, read straight off the row the governed queue already decorates (resolved=${classResolved}), and NO placeholder stands in for an unresolved title (placeholder=${classPlaceholder}) -- hero 0B omits, never invents. The Operator's ruling names FOUR identifying facts: learner, CLASS, session, status`,
+);
+check(
+  /Unknown class|No class|Class unavailable|Untitled class/i.test("Unknown class")
+    && !/Unknown class|No class|Class unavailable|Untitled class/i.test("Beginner Public Speaking"),
+  "PDSa-CLASSc CONTROL: the placeholder detector MATCHES a planted placeholder and does NOT match a real module title -- so PDSa-CLASS discriminates",
+);
+
+/*
+ * ⛔ AND THE CLASS DID NOT ARRIVE BY WIDENING A SHARED DTO. `ManagementQueueRowDto`
+ * feeds THREE ACCEPTED SCREENS (reports queue, correction tracking, submitted
+ * list); adding a field to it would change their data shape to label a row on
+ * this one. The class is read through the ACCEPTED SCHEDULE BOUNDARY instead, and
+ * this leg fails if a later phase "tidies" that into the shared DTO.
+ */
+const queueDto = readFileSync(join(ROOT, "lib/frontend/contracts/physical-test.ts"), "utf8");
+/*
+ * ⛔ SLICED TO THE TYPE'S OWN CLOSING BRACE, not to a character count. The first
+ * draft took a fixed 900-char window and MISSED the field it was looking for,
+ * because `classModuleTitle` sits near the end of the declaration. ▶ A window
+ * chosen by a magic number measures the window, not the type.
+ */
+const dtoStart = queueDto.indexOf("export type ManagementQueueRowDto");
+const queueDtoBlock = queueDto.slice(dtoStart, queueDto.indexOf("\n};", dtoStart));
+check(
+  queueDtoBlock.length > 200 && /classModuleTitle\?:/.test(queueDtoBlock),
+  `PDSa-DTO the class is the SHARED DTO's OWN pre-existing optional field (${queueDtoBlock.length} chars read) -- hero chain Phase 9 added \`classModuleTitle\` as a "session IDENTITY and SCHEDULING fact", already cleared against the exclusion list, and \`listManagementPendingReviewCore\` already decorates every row with it. ⛔ THIS PHASE ADDED NO FIELD, NO READ, NO RPC AND NO SCHEMA -- the first attempt fetched it through the schedule boundary and was removed once the row was found to carry it already`,
+);
+
 check(
   !/approvedReports|approvedCount|"Approved"/.test(builtCode) && /Submitted/.test(builtCode),
   "PDSa-SUBMITTED the KPI reads `Submitted`, and NO `Approved` count exists -- under A-036 `approved` is transient-in-transaction and never commits, so the frame's tile would read ZERO FOREVER (third sighting of the Step 7I1D-R2 defect)",

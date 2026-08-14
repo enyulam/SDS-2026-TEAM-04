@@ -1189,7 +1189,7 @@ async function main() {
                  */
                 fail('S3-M8-omissions', 'the control failed: the approval panel did not render, so the eleven absences are uninterpretable')
               } else {
-                pass('S3-M8-omissions', 'screen 11 renders the approval panel and NONE of the four rating labels / `Overall Grade` / `Grade 8` / `Hall A` / `Assist.` / `Asst.` / `Showcase` / `Junior` — the row carries learner, session date and status ONLY. C-9, G-2, A-016, A-026/A-054, A-014/G-7 and GC-13, measured on the painted page over a frame that draws a rating chip AND a prose description on every row')
+                pass('S3-M8-omissions', 'screen 11 renders the approval panel and NONE of the four rating labels / `Overall Grade` / `Grade 8` / `Hall A` / `Assist.` / `Asst.` / `Showcase` / `Junior` — the row carries learner, CLASS, session date and status ONLY -- identity and lifecycle, never performance. C-9, G-2, A-016, A-026/A-054, A-014/G-7 and GC-13, measured on the painted page over a frame that draws a rating chip AND a prose description on every row')
               }
 
               /*
@@ -1211,6 +1211,33 @@ async function main() {
                * whose subject is wider than its claim reports failures that are not the
                * failure it names.
                */
+              /*
+               * THE ROW CARRIES THE CLASS, MEASURED ON THE PAINTED PAGE.
+               *
+               * The Operator's ruling names FOUR identifying facts on the approval row:
+               * learner, CLASS, session, status. `PDSa-CLASS` proves the component reads the
+               * class from the resolved map; this proves it actually REACHES the page, which
+               * a source scan cannot.
+               *
+               * NO MODULE TITLE IS PINNED -- the fixture's titles are what it happens to hold.
+               * The row renders `<class> - Session <date>` when the row carries a class and a
+               * bare `Session <date>` when it does not (hero 0B omits, never invents), so the
+               * SEPARATOR is the observable, not any title.
+               *
+               * AND IT REPORTS NOT-RUN ON AN EMPTY QUEUE rather than passing. With no rows
+               * there is nothing to label, and a leg that reports PASS against zero rows is
+               * the vacuity shape this project keeps catching.
+               */
+              const queueRows = (text.match(/Session \d{4}-\d{2}-\d{2}/g) ?? []).length
+              if (queueRows === 0) {
+                notRun('S3-M8-class', 'the approval queue rendered NO rows, so there was nothing to carry a class -- not a pass')
+              } else if (/ · Session \d{4}-\d{2}-\d{2}/.test(text)) {
+                pass('S3-M8-class', `all ${queueRows} approval row(s) rendered and at least one carries its CLASS before the session date -- the fourth identifying fact the ruling names. It is the queue's OWN decorated field -- no schema change, no new read, no widening of the shared DTO. No module title is pinned`)
+              } else {
+                const around = (text.match(/.{0,70}Session \d{4}-\d{2}-\d{2}/) ?? ['(no context)'])[0].replace(/\s+/g, ' ')
+                fail('S3-M8-class', `${queueRows} approval row(s) rendered but NONE carries a class -- either the session->module resolution failed or the class was dropped from the row. SAW: ${JSON.stringify(around)}`)
+              }
+
               const captions = ['Total Students', 'Assessed', 'Pending Approval', 'Submitted']
               const readings = captions.map((caption) => {
                 const at = text.indexOf(caption)

@@ -9577,3 +9577,85 @@ released.
 
 **Next permitted action:** `P2-8` in plan order. Every schema change still stops for Operator
 authorization.
+
+---
+
+## 2026-08-14 (correction) — `P2-7`'s RULING RE-READ: THE CITATION'S NEGATION, AND THE CLASS ON THE ROW
+
+**Branch:** `develop` · **starting HEAD:** `8aebad6` · **working tree at start:** clean.
+
+### Scope
+
+The four `P2-7` rulings were re-read word by word against the shipped screen. **Two gaps, both
+closed. Neither was found by a failing suite** — they were found by comparing the ruling's own
+wording to the built artefact.
+
+### Gap 1 — the citation was missing its negation
+
+The ruling: *"say so explicitly in the citation: the frame's row descriptions are assessment
+substance. **This is not a copy preference.**"* The built citation carried *"which is ASSESSMENT
+SUBSTANCE"* and stopped there.
+
+▶ **The negation is the load-bearing half.** Without it a later reader can accept "assessment
+substance" as a description and still treat the omission as a wording choice to revisit —
+softening the sentence and keeping it. The citation now states outright that **no rewording of a
+rating band is permitted, because the BAND ITSELF is the disclosure**.
+
+### Gap 2 — the row did not carry the class
+
+The ruling enumerates **four** identifying facts — learner, **class**, session, status. Three were
+built.
+
+⛔ **THE FIRST FIX WAS WRONG AND IS RECORDED AS SUCH.** Measured that the three
+`report_list_management_*` RPCs return no module title, then built a second read through the
+accepted schedule boundary, keyed to the queue's own min..max dates, in new component state. It was
+defensible at every step and **still rendered nothing**. The rendered leg `S3-M8-class` reported
+`2 approval row(s) rendered but NONE carries a class`, and chasing that produced the real fact:
+
+**`ManagementQueueRowDto` has carried `classModuleTitle` since hero chain Phase 9** — recorded
+there as a *"session IDENTITY and SCHEDULING fact"*, already cleared against the exclusion list —
+and **`listManagementPendingReviewCore` already decorates every row with it** through
+`decorateQueueRows`.
+
+⚠️ **LESSON: before adding a read for a field, check whether the row already carries it.** The
+second read, its state and its effect were removed. **This phase added no field, no read, no RPC
+and no schema for the class.** `PDSa-DTO` asserts exactly that and fails if a later phase
+re-introduces either the extra fetch or a duplicate field.
+
+### ⚠️ The stale-message defect almost shipped with the fix
+
+After the mechanism changed, three leg messages still described the removed schedule-boundary
+approach, and `S3-M8-omissions` still said the row carries *"learner, session date and status
+ONLY"* when it now carries the class as well. ▶ **A green leg whose message describes a mechanism
+that no longer exists is the stale-restatement family.** All four corrected in the same pass.
+
+⚠️ A smaller instance in the same pass: `PDSa-DTO`'s first draft sliced the DTO with a **fixed
+900-character window** and missed the field it was looking for, because `classModuleTitle` sits
+near the end of the declaration. **A window chosen by a magic number measures the window, not the
+type.** Re-sliced to the type's own closing brace.
+
+### Files changed
+
+`features/management/management-dashboard-screen.tsx` · `scripts/tests/portal/prove-p2-7-dashboard.mjs`
+(`PDSa-CLASS`, `PDSa-CLASSc`, `PDSa-DTO`) · `scripts/physical-test/prove-stage3-authenticated.mjs`
+(`S3-M8-class`) · `docs/plan/PORTAL_COMPLETION_PLAN.md` (§17.8) · `docs/progress/STATUS.md` ·
+this file · `docs/progress/OPERATOR_HANDOFF.md`
+
+### Automated verification
+
+**All 38 portal + hero + rule suites green by exit code**, plus `portal-navigation-active-state`,
+`post-login-destinations`, `session-eligibility`, `app-route-census` and `test:integration`.
+`prove:portal-p2-7` **PASS**. `prove:stage3-authenticated` **44 PASS · 1 FAIL · 2 NOT-RUN** — up
+from 43, the new leg being `S3-M8-class`; the single FAIL remains the carried `S3-T1-r`.
+`prove:artefact-read` **44 PASS · 1 FAIL** — `AR-4-14`, the ruled `KNOWN-RED`, unchanged;
+**`AR-4-11` passes.** `npx tsc --noEmit` clean; `npm run build` clean.
+
+⚠️ **`D-10` re-measured GREEN** and corrected in `STATUS.md` before the handoff was derived
+(§15.8.1). Recorded as *lapsed*, not *never a problem*.
+
+**Environment:** containers **dev 9 · mvp 0**; the demonstration stack never started or queried;
+`:3000` untouched.
+
+**VISUAL acceptance:** `11`, `14`, `25` **`NOT-RUN`** — the Operator walks the three together.
+
+**Next permitted action:** `P2-8` in plan order. Every schema change still stops for authorization.

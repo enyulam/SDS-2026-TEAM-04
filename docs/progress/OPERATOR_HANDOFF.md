@@ -5,7 +5,7 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-14 · branch `develop` · ✅ **`P2-7` COMPLETE — screen `11` built and proven.**
+**Regenerated:** 2026-08-14 (second pass) · branch `develop` · ✅ **`P2-7` COMPLETE — screen `11` built, proven, and CORRECTED against a re-read of your ruling.**
 
 ## ⚠️ §15.8.1 FRESHNESS SWEEP
 
@@ -37,7 +37,7 @@ ratified `R-B1` precedent.
 
 | Ruling | Executed as |
 |---|---|
-| **1 — chips AND row descriptions, one leak** | Row carries **learner · session date · status** only. **Both omissions cited together at the same site**, descriptions named as **assessment substance, not a copy preference**. Guards bar the **vocabulary**, so one detector catches chip and sentence alike |
+| **1 — chips AND row descriptions, one leak** | Row carries **learner · class · session date · status** only — the four identifying facts your ruling names. **Both omissions cited together at the same site**, descriptions named as **assessment substance, not a copy preference**. Guards bar the **vocabulary**, so one detector catches chip and sentence alike |
 | **2 — `Approved` → `Submitted`** | Third Step 7I1D-R2 sighting, cited **as an Operator ruling** |
 | **3 — schema, centre scope** | `20260814140000`: **1** `SECURITY DEFINER` read · **0** tables/columns/enums/policies/client-grants · **registry unmoved at 23** · four `V-4` bars **plus a control proving each fires** |
 | **4 — route option 2** | Canonical route + redirect + rail re-pointed to the **destination** |
@@ -77,6 +77,35 @@ the same moment**.
 
 ---
 
+## ⛔ YOUR RULING RE-READ AGAINST THE SHIPPED ROW — TWO GAPS I HAD MISSED
+
+Found by comparing your wording to what actually shipped, **not** by a failing suite.
+
+**1. The citation was missing its negation.** You asked for *"This is not a copy preference"*
+**explicitly**. I had written *"which is ASSESSMENT SUBSTANCE"* and stopped. ▶ The negation is the
+load-bearing half — without it a later reader can accept the description and still treat the
+omission as a wording choice to revisit. The citation now states there is **no rewording of a
+rating band that is permitted, because the band ITSELF is the disclosure**.
+
+**2. The row did not carry the class.** Your ruling names **four** identifying facts — learner,
+**class**, session, status. I built three.
+
+⛔ **And my first fix was wrong, which is the part worth your time.** Having measured that the
+three `report_list_management_*` RPCs return no module title, I built a second read through the
+accepted schedule boundary. It was defensible at every step and **still rendered nothing** — the
+new `S3-M8-class` leg is what said so. Chasing that found the real fact: **the shared queue DTO has
+carried `classModuleTitle` since hero chain Phase 9**, and the pending-review projection **already
+decorates every row with it**.
+
+⚠️ **Lesson recorded: before adding a read for a field, check whether the row already carries it.**
+The second read was removed. **No field, no read, no RPC and no schema was added for the class.**
+
+⚠️ **The stale-message defect almost shipped with the fix** — three leg messages still described
+the removed approach, and one still said the row carries *"learner, session date and status ONLY"*.
+Corrected in the same pass.
+
+---
+
 ## ⏸ WHAT NEEDS YOU
 
 1. **VISUAL acceptance on `11`, `14` and `25`** — all three `NOT-RUN`. You said you would walk them
@@ -102,7 +131,7 @@ still stops for your authorization.
 | Audit registry | **23, unmoved** |
 | Portal + hero suites | **34 / 34 green** |
 | `prove:portal-p2-7` | **PASS** (0 failed checks) |
-| stage 3 | **43 PASS · 1 FAIL · 2 NOT-RUN** — the FAIL is the carried `S3-T1-r` |
+| stage 3 | **44 PASS · 1 FAIL · 2 NOT-RUN** — up from 43 (the new `S3-M8-class`); the FAIL is the carried `S3-T1-r` |
 | `integrated-route-security` | **26 / 26**, `canonicalRoutes: 18`, `guardedPortalRoutes: 16` |
 | Deliberately red | `prove:artefact-read` (`AR-4-14`, `KNOWN-RED`). ⚠️ `AR-4-11` — **this phase's own artefact citation — PASSES** |
 | `tsc --noEmit` · `npm run build` | clean; the build lists `/management/dashboard` |

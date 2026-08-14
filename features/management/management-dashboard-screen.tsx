@@ -180,6 +180,24 @@ export function ManagementDashboardScreen() {
   const [schedule, setSchedule] = useState<ResourceState<readonly ScheduleSessionSummaryDto[]>>({
     kind: "loading",
   });
+  /*
+   * ⛔ THE APPROVAL ROW'S CLASS NEEDS NO READ OF ITS OWN. The Operator's ruling
+   * enumerates what the row identifies — **learner, CLASS, session, status** — so
+   * the class is one of the four identifying facts, not decoration.
+   *
+   * ⚠️ IT ALREADY ARRIVES ON THE ROW. `listManagementPendingReviewCore` ends by
+   * calling `decorateQueueRows`, which attaches `classModuleTitle` to a queue that
+   * has ALREADY passed its governed gate — the contract records these as *"session
+   * IDENTITY and SCHEDULING facts only"*, explicitly cleared against the exclusion
+   * list. So the field is read straight off `row`.
+   *
+   * ⛔ RECORDED BECAUSE THE FIRST ATTEMPT GOT IT WRONG: this screen briefly fetched
+   * the class through the schedule boundary, keyed to the queue's date range, and
+   * held it in a second piece of state. That worked at the database and STILL
+   * rendered nothing — and it was solving a problem that did not exist. ▶ **Before
+   * adding a read for a field, check whether the row already carries it.** The
+   * rendered leg `S3-M8-class` is what exposed the difference.
+   */
 
   const today = useMemo(() => isoDate(new Date()), []);
   const [focus, setFocus] = useState(() => {
@@ -230,6 +248,7 @@ export function ManagementDashboardScreen() {
 
   const kpis = summary.kind === "ready" ? summary.data : null;
   const pending = queue.kind === "ready" ? queue.data : [];
+
   /*
    * ⚠️ MEMOISED, and the lint rule that demanded it was RIGHT. A fresh `[]` on every
    * render makes both `useMemo`s below recompute every time, which quietly defeats the
@@ -316,21 +335,34 @@ export function ManagementDashboardScreen() {
                     {initialsOf(row.studentDisplayName)}
                   </span>
                   {/*
-                    ⛔⛔ THE ROW CARRIES IDENTITY AND LIFECYCLE ONLY — learner, session date,
-                    status. NOTHING ABOUT HOW THE CHILD PERFORMED.
+                    ⛔⛔ THE ROW CARRIES IDENTITY AND LIFECYCLE ONLY — learner, CLASS, session
+                    date, status. NOTHING ABOUT HOW THE CHILD PERFORMED.
                     ⚠️ THE FRAME DRAWS TWO MORE THINGS HERE AND NEITHER MAY BE BUILT, EVER:
                       (a) a RATING CHIP (`C-9` as a per-dimension rating on a list surface;
                           `G-2` as a roll-up — both readings prohibit it), and
-                      (b) a ONE-LINE DESCRIPTION, which is ASSESSMENT SUBSTANCE and carries the
-                          same vocabulary in prose (*"Mastered eye contact"*).
+                      (b) a ONE-LINE DESCRIPTION, which carries the same vocabulary in prose
+                          (*"Mastered eye contact"*).
+                    ⛔ THE FRAME'S ROW DESCRIPTIONS ARE ASSESSMENT SUBSTANCE. ⛔ THIS IS NOT A
+                    COPY PREFERENCE. Stating that explicitly is the point: a later phase reading
+                    this must not mistake the omission for a wording choice it may revisit, or
+                    for a sentence that could be softened and kept. There is no rewording of a
+                    rating band that is permitted here — the BAND ITSELF is the disclosure.
                     ⛔ THEY ARE ONE LEAK WITH TWO RENDERINGS. Removing either alone leaves the
-                    leak in place and makes the panel LOOK clean. Operator ruling, 2026-08-14.
+                    leak in place and makes the panel LOOK clean — which is worse than not
+                    fixing it, because it looks complete. BOTH are cited HERE, at ONE site, so
+                    neither can be removed while believing the panel is clean.
+                    Operator ruling, 2026-08-14.
                   */}
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[13.5px] font-semibold text-ink">
                       {row.studentDisplayName}
                     </span>
-                    <span className="block text-[11px] text-ink-subtle">Session {row.sessionDate}</span>
+                    <span className="block truncate text-[11px] text-ink-subtle">
+                      {/* hero 0B: the class is OMITTED when absent, never a placeholder. */}
+                      {row.classModuleTitle
+                        ? `${row.classModuleTitle} · Session ${row.sessionDate}`
+                        : `Session ${row.sessionDate}`}
+                    </span>
                   </span>
                   <span className="text-[11px] text-ink-subtle">{relativeDay(row.sessionDate, today)}</span>
                   <Link

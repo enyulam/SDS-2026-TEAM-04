@@ -2853,9 +2853,45 @@ this note. ▶ **Reported for a ruling, exactly as the `S3-00` precedent handles
 real but outside the authorized change.** Its one live edit this phase was its `homeHref`, moved to
 the destination with the other six call sites so it stays correct if it is ever mounted again.
 
+### §17.8 — ⛔ THE RULING RE-READ AGAINST THE SHIPPED ROW, AND TWO GAPS FOUND
+
+**Recorded because the gaps were found by re-reading the ruling word by word against what
+actually shipped, not by a failing suite.** Both are now closed.
+
+**GAP 1 — the citation was missing its NEGATION.** The ruling says: *"say so explicitly in the
+citation: the frame's row descriptions are assessment substance. **This is not a copy
+preference.**"* The built citation carried *"which is ASSESSMENT SUBSTANCE"* and **stopped there**.
+▶ **The negation is the load-bearing half.** Without it a later reader can accept "assessment
+substance" as a description and still treat the omission as a wording choice they may revisit —
+softening the sentence and keeping it. The citation now states outright that there is **no
+rewording of a rating band that is permitted**, because **the band itself is the disclosure**.
+
+**GAP 2 — the row did not carry THE CLASS.** The ruling enumerates **four** identifying facts —
+*"the learner, the class, the session and the status"* — and the shipped row carried **three**.
+
+⛔ **AND THE FIRST FIX WAS WRONG, WHICH IS THE PART WORTH KEEPING.** Measured that the three
+`report_list_management_*` RPCs return no module title, then built a second read through the
+accepted schedule boundary, keyed to the queue's own date range, held in new component state. It
+was defensible at every step and it **still rendered nothing** — and the rendered leg `S3-M8-class`
+is what said so. ▶ Chasing that failure led to the actual fact: **`ManagementQueueRowDto` HAS
+CARRIED `classModuleTitle` SINCE HERO CHAIN PHASE 9**, recorded there as a *"session IDENTITY and
+SCHEDULING fact"* already cleared against the exclusion list, and
+**`listManagementPendingReviewCore` ALREADY DECORATES EVERY ROW WITH IT** via `decorateQueueRows`.
+
+⚠️ **THE LESSON, STATED PLAINLY: BEFORE ADDING A READ FOR A FIELD, CHECK WHETHER THE ROW ALREADY
+CARRIES IT.** The second read was removed entirely. **This phase added no field, no read, no RPC
+and no schema for the class** — `PDSa-DTO` now asserts exactly that, and would fail if a later
+phase re-introduced either the extra fetch or a duplicate field.
+
+⚠️ **AND THE STALE-MESSAGE DEFECT ALMOST SHIPPED WITH IT.** After the mechanism changed, three leg
+messages still described the removed schedule-boundary approach, and `S3-M8-omissions` still said
+the row carries *"learner, session date and status ONLY"* when it now carries the class as well.
+▶ **A green leg whose message describes a mechanism that no longer exists is the stale-restatement
+family** — corrected in the same pass rather than left to read as documentation.
+
 ### §17.7 — Position
 
-✅ **Screen `11` BUILT and PROVEN.** `prove:portal-p2-7` **PASS**; stage 3 **43 PASS · 1 FAIL · 2
+✅ **Screen `11` BUILT and PROVEN.** `prove:portal-p2-7` **PASS**; stage 3 **44 PASS · 1 FAIL · 2
 NOT-RUN**, the single FAIL being the carried `S3-T1-r`. All 34 portal + hero suites green.
 
 ⏸ **VISUAL acceptance `NOT-RUN` for `11`, `14` and `25`** — the Operator will walk the three
