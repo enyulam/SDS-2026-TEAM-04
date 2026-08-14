@@ -1836,6 +1836,95 @@ OWED before any migration is written**, and the authorization should be read as 
 
 ---
 
+## §12.10 — ⛔ BEFORE ADDING A READ FOR A FIELD, CHECK WHETHER THE ROW ALREADY CARRIES IT
+
+> **Operator ruling, 2026-08-14:** *"Gap 2 is the finding of this phase, and I want the rule stated
+> plainly: BEFORE ADDING A READ FOR A FIELD, CHECK WHETHER THE ROW ALREADY CARRIES IT. You built a
+> second read that was defensible at every step and rendered nothing, and only a new leg reporting
+> '2 rows rendered but NONE carries a class' surfaced that `classModuleTitle` had been on the DTO
+> since hero chain Phase 9. Record it in §12. It will pay for itself repeatedly across the
+> remaining phases."*
+
+### The rule
+
+⛔ **BEFORE ADDING A READ FOR A FIELD, CHECK WHETHER THE ROW ALREADY CARRIES IT.**
+
+Read the DTO **to its closing brace** and read what the projection **already decorates** onto it,
+before concluding a field has no source. ▶ Both are cheap. The read you avoid is not.
+
+### What happened, in order, because the order is the lesson
+
+The Operator's `P2-7` ruling enumerates **four** identifying facts on the approval row — learner,
+**class**, session, status. Three were built.
+
+1. **Measured** that all three `report_list_management_*` RPCs return **no module title**. True.
+2. **Measured** that `class_sessions` and `class_modules` each carry a management `SELECT` policy
+   **and** its matching grant, so the class was reachable **without a schema change**. True.
+3. **Rejected** widening the shared `ManagementQueueRowDto`, because three **accepted** screens
+   consume it. Sound reasoning.
+4. **Built** a second read through the accepted schedule boundary, keyed to the queue's own
+   min..max dates, held in new component state, failing soft to an omitted class.
+5. **It rendered nothing.**
+
+⚠️ **EVERY STEP WAS DEFENSIBLE AND THE CONCLUSION WAS WRONG.** Step 1 measured the *queue's own
+RPCs* and step 3 rejected *widening* the DTO — and **neither asks whether the DTO already has the
+field**. It did: **`classModuleTitle` has been on `ManagementQueueRowDto` since hero chain Phase
+9**, recorded there as a *"session IDENTITY and SCHEDULING fact"* already cleared against the
+exclusion list, and **`listManagementPendingReviewCore` has been decorating every row with it**
+through `decorateQueueRows` — a helper written to be fail-soft and to run last precisely so a label
+can never gate a governed row.
+
+### ⚠️ WHY NOTHING BUT A RENDERED LEG COULD HAVE CAUGHT IT
+
+The second read was **correct in isolation**. It resolved at the database, it was RLS-scoped, it
+failed soft. ▶ **A source scan would have found a component that reads a class and renders it.** A
+SQL leg would have found a session→module join that returns the right row. **Only the painted page
+could show that the value never arrived**, and only because `S3-M8-class` had been written to say
+*"N rows rendered but NONE carries a class"* rather than to assert a module title.
+
+⛔ **This is the second time in one phase that a rendered leg caught what every other class of proof
+missed** — the first being the `RETURNS record` / `SETOF` shape defect (§17.3). ▶ **Two independent
+instances, same phase, same conclusion: a surface's own rendered output is not a formality on top
+of the SQL and source proofs. It is the only leg that sees what the user sees.**
+
+### The closure, pinned
+
+`PDSa-DTO` asserts that `classModuleTitle` is the **shared DTO's own pre-existing optional field**
+and that **this phase added no field, no read, no RPC and no schema** for it. ⛔ **It fails if a
+later phase re-introduces either the duplicate field or the extra fetch** — which is the Operator's
+stated closure: *"Pinning that the second read stays removed — `PDSa-DTO` failing if a later phase
+reintroduces the field or the RPC — is the right closure."*
+
+⚠️ **`PDSa-DTO`'s own first draft sliced the DTO with a fixed 900-character window and missed the
+field it was looking for**, because `classModuleTitle` sits near the end of the declaration. ▶ **A
+window chosen by a magic number measures the window, not the type.** Re-sliced to the type's own
+closing brace. *(The same defect in miniature: a check that reads part of a thing and concludes
+about the whole.)*
+
+---
+
+## §12.11 — THE STALE LEG MESSAGE, CAUGHT IN THE SAME PASS
+
+> **Operator ruling, 2026-08-14:** *"The stale leg messages are the same family: three green legs
+> describing a mechanism that had just been removed. Record that they were caught in the same pass
+> rather than after — that is the freshness rule working at the level it was written for."*
+
+When the class stopped arriving through the schedule boundary and started being read off the row,
+**three leg messages still described the removed mechanism**, and `S3-M8-omissions` still asserted
+the row carries *"learner, session date and status ONLY"* when it had just gained the class.
+
+⛔ **ALL FOUR WERE GREEN.** A passing leg whose message describes a mechanism that no longer exists
+is **not a cosmetic problem**: leg messages are what a later phase reads to learn how a thing works,
+and this project's own history is a catalogue of stale restatements outranking corrected originals.
+
+✅ **THEY WERE CORRECTED IN THE SAME PASS AS THE MECHANISM CHANGE, NOT AFTER.** ▶ **That is the
+freshness obligation (`CLAUDE.md` §15.8.1) operating at the level it was written for** — the rule
+says a lapsed claim is corrected in its source *before* anything derives from it, and a leg message
+is a source that later phases derive from. **The window in which a stale message is cheap to fix is
+the pass that made it stale.**
+
+---
+
 ## 13.1 What the `.png` draws
 
 Breadcrumb `Classes / Junior · Public Speaking / Lesson Plans` · title `Lesson Plan Management` ·
