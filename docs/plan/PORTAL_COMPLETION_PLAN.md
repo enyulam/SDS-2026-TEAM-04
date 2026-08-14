@@ -1984,6 +1984,59 @@ the pass that made it stale.**
 
 ---
 
+## §12.13 — ⛔ THE GATE-DISCIPLINE PATTERN. TWICE IN CONSECUTIVE PHASES, AND IT IS NOT TWO ACCIDENTS
+
+> **Operator ruling, 2026-08-15:** *"The `student-list-projections` lint error is the same family as
+> the `P2-6` defect: a phase reported complete without running the gate that would have contradicted
+> it, and shipped **AND PUSHED** with it. Record it as such — that is now twice in consecutive
+> phases, and it is **a pattern about gate discipline, not two accidents**."*
+
+| Phase | What was reported | What was never run |
+|---|---|---|
+| `P2-6` | COMPLETE | no gate existed asking *does application code reach these RPCs* — and the phase did not notice it was asserting something no gate covered |
+| `P2-8` | COMPLETE, **committed and pushed** | `npm run lint` — which returns a `@next/next/no-assign-module-variable` **ERROR**, caught on the next phase's routine run |
+
+⛔ **THE COMMON SHAPE, STATED SO IT IS RECOGNISABLE NEXT TIME: I ran the suite I had just written,
+and reported the phase on it.** In both cases the phase's own new suite was green and told the truth
+about what it measured. ▶ **The defect is the inference from *my suite is green* to *the phase is
+complete***, which is only valid if the project's standing gates ran too.
+
+⛔ **THEREFORE, AT EVERY PHASE BOUNDARY, BEFORE ANY COMPLETION CLAIM:** the phase's own suite **plus**
+`npm run lint`, `npx tsc --noEmit`, `npx next build`, and the standing rule suites. **A gate not run
+is `NOT-RUN`, and a phase reported complete on `NOT-RUN` gates is reported on nothing.**
+
+⚠️ **AND THE SECOND ONE REACHED `origin`.** A defect that is merely committed is a local finding; one
+that is pushed has been published. ▶ **The push authorization is per-phase precisely so this
+boundary is a moment of attention, and it was not used as one.**
+
+---
+
+## §12.14 — ⚠️ THE SHELL-HEREDOC FAILURE, SECOND INSTANCE. USE THE `Write` TOOL FOR FILE CONTENT
+
+> **Operator ruling, 2026-08-15:** *"Write tool, not a shell heredoc. That is the second heredoc
+> failure; record it."*
+
+**Instance 1.** A `node -e` heredoc **stripped a backslash level**, turning `\.rpc\(\s*` into an
+unterminated regex group inside `rpc-call-rule.mjs`.
+
+**Instance 2.** A `node -e` heredoc regenerating `OPERATOR_HANDOFF.md` **died at bash parse time** —
+`unexpected EOF while looking for matching '`. ⚠️ **Node never ran, so the file was never opened and
+was NOT damaged** — but that was luck about *where* it failed, not a property of the approach.
+Measured afterwards: `git diff HEAD` on the handoff was **empty**, 102 lines, header intact.
+
+⛔ **THE RULE: FILE CONTENT IS WRITTEN WITH THE `Write` TOOL, NEVER THROUGH A SHELL HEREDOC.** ▶ A
+heredoc puts **three** parsers between the intent and the bytes — bash, the here-document, and the
+target language's own string layer — and each one silently rewrites backticks, backslashes and
+quotes. **The failure mode is not "it errors"; it is "it writes something subtly different and
+reports success"**, which is the first instance exactly.
+
+⚠️ **This does not bar a heredoc for a `git commit -F -` message or a `psql` script**, where the
+content is inert text and a mangling would be visible in the artefact it produces. **It bars them
+for source, for JSON, and for any file another tool parses** — the `CLAUDE.md` encoding-safety rule
+(`Q-28`) reaches the same conclusion from the encoding direction.
+
+---
+
 ## 13.1 What the `.png` draws
 
 Breadcrumb `Classes / Junior · Public Speaking / Lesson Plans` · title `Lesson Plan Management` ·
