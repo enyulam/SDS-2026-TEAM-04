@@ -23,6 +23,7 @@ import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-
 import { unpairedMigrations, uncalledFunctions, rpcShapeMismatches } from "./rpc-call-rule.mjs";
 import { emittedLegs } from "./suite-output-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
+import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -129,16 +130,15 @@ const builtCode = SOURCES.map(([file]) => stripComments(readFileSync(join(ROOT, 
  * both renderings with one detector -- a chip and a sentence are the same
  * string to a scanner.
  */
-const RATING_TERMS = ["beginning", "developing", "mastering", "mastered", "competency_rating", "overallGrade", "ratingLevel"];
-const leakedRatings = RATING_TERMS.filter((term) => new RegExp(term, "i").test(builtCode));
+const leakedRatings = ratingLeaks(builtCode);
 check(
   leakedRatings.length === 0,
-  `PDSa-RATINGS the dashboard names NO rating vocabulary in ANY form (${leakedRatings.join(", ") || "none"}) -- neither as a CHIP nor inside a PROSE DESCRIPTION. C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up; the frame draws BOTH renderings and the Operator ruled them ONE leak`,
+  `PDSa-RATINGS the dashboard names NO rating vocabulary in any RATING-SHAPED context (${leakedRatings.map((h) => `${h.term} [${h.context}]`).join(", ") || "none"}) -- neither as a CHIP nor inside a PROSE DESCRIPTION. C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up; the frame draws BOTH renderings and the Operator ruled them ONE leak`,
 );
+const narrowing = proveNarrowing();
 check(
-  RATING_TERMS.some((t) => new RegExp(t, "i").test("Mastered eye contact, clear projection"))
-    && RATING_TERMS.some((t) => new RegExp(t, "i").test("Beginning on sentence flow & pace")),
-  "PDSa-RATINGSc CONTROL: the term list MATCHES the frame's OWN two row descriptions verbatim -- so PDSa-RATINGS is a measurement against the exact strings that would leak, not a regex that can never fire",
+  narrowing.ok,
+  `PDSa-RATINGSc CONTROL: the NARROWED detector fires on every real-rating sample -- ⚠️ INCLUDING THIS FRAME'S OWN TWO ROW DESCRIPTIONS, "Mastered eye contact, clear projection" and "Beginning on sentence flow & pace", which are must-fire entries in the rule's control set -- and on NO ordinary-English sample (missed: ${narrowing.missed.join("; ") || "none"}; false positives: ${narrowing.falsePositives.join("; ") || "none"})`,
 );
 
 /*

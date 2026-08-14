@@ -25,6 +25,7 @@ import {
 } from "./rpc-call-rule.mjs";
 import { emittedLegs } from "./suite-output-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
+import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -131,16 +132,15 @@ const builtCode = SOURCES.map(([file]) => stripComments(readFileSync(join(ROOT, 
  * roll-up permanently. `PDT-7` proves no rating column is even reachable; this
  * proves the SURFACE names none of the vocabulary either.
  */
-const RATING_TERMS = ["beginning", "developing", "mastering", "mastered", "competency_rating", "overallGrade", "ratingLevel"];
-const leaked = RATING_TERMS.filter((term) => new RegExp(term, "i").test(builtCode));
+const leaked = ratingLeaks(builtCode);
 check(
   leaked.length === 0,
-  `PDTa-RATINGS screen 17 names NO rating vocabulary in any form (${leaked.join(", ") || "none"}) -- the frame's Overall column and the pack note's "current B.E.S.T. Rating" are REFUSED under C-9 (whose register row names P2-8) and G-2`,
+  `PDTa-RATINGS screen 17 names NO rating vocabulary in any RATING-SHAPED context (${leaked.map((h) => `${h.term} [${h.context}]`).join(", ") || "none"}) -- the frame's Overall column and the pack note's "current B.E.S.T. Rating" are REFUSED under C-9 (whose register row names P2-8) and G-2`,
 );
+const narrowing = proveNarrowing();
 check(
-  RATING_TERMS.some((t) => new RegExp(t, "i").test("Mastering")) &&
-    RATING_TERMS.some((t) => new RegExp(t, "i").test("Beginning")),
-  "PDTa-RATINGSc CONTROL: the term list MATCHES the frame's own chip labels, so PDTa-RATINGS is a measurement and not a regex that can never fire",
+  narrowing.ok,
+  `PDTa-RATINGSc CONTROL: the NARROWED detector fires on every real-rating sample -- ⚠️ including \`<span class="chip">Mastering</span>\`, the frame's OWN chip shape, which is a must-fire entry -- and on NO ordinary-English sample (missed: ${narrowing.missed.join("; ") || "none"}; false positives: ${narrowing.falsePositives.join("; ") || "none"})`,
 );
 
 /*

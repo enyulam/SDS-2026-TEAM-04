@@ -23,6 +23,7 @@ import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-
 import { unpairedMigrations, uncalledFunctions } from "./rpc-call-rule.mjs";
 import { emittedLegs } from "./suite-output-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
+import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -166,15 +167,21 @@ check(
 );
 
 // ⛔ NO RATING VOCABULARY (`C-9`, `G-2`).
-const RATING_TERMS = ["beginning", "developing", "mastering", "mastered", "competency_rating", "overallGrade"];
-const leakedRatings = RATING_TERMS.filter((term) => new RegExp(term, "i").test(builtCode));
+/*
+ * ⚠️ NARROWED 2026-08-15 BY OPERATOR RULING, AND THIS SCREEN IS WHY. The
+ * bare-word version turned RED on screen `14`'s own honest copy -- *"an
+ * interrupted upload must be started again from the beginning"* -- which is
+ * exactly the false positive `A-052` prohibits.
+ */
+const leakedRatings = ratingLeaks(builtCode);
 check(
   leakedRatings.length === 0,
-  `PLMa-RATINGS ⛔ the lesson-plan surface names NO rating vocabulary at all (${leakedRatings.join(", ") || "none"}) -- C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up, and this DTO has no field one could arrive in`,
+  `PLMa-RATINGS ⛔ the lesson-plan surface names NO rating vocabulary in any RATING-SHAPED context (${leakedRatings.map((h) => `${h.term} [${h.context}]`).join(", ") || "none"}) -- C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up, and this DTO has no field one could arrive in`,
 );
+const narrowing = proveNarrowing();
 check(
-  RATING_TERMS.some((term) => new RegExp(term, "i").test("competency_rating mastering")),
-  "PLMa-RATINGSc CONTROL: the same term list MATCHES a planted `competency_rating mastering`, so PLMa-RATINGS is a measurement",
+  narrowing.ok,
+  `PLMa-RATINGSc CONTROL: the NARROWED detector fires on every real-rating sample and on NO ordinary-English sample (missed: ${narrowing.missed.join("; ") || "none"}; false positives: ${narrowing.falsePositives.join("; ") || "none"}) -- ⛔ one of its must-NOT-fire samples is THIS SCREEN'S non-resumability notice, so the regression that produced the ruling is pinned`,
 );
 
 // ⛔ THE PROJECTION WRITES NOTHING. Attach and remove are governed mutations

@@ -28,6 +28,7 @@ import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-
 import { unpairedMigrations, uncalledFunctions } from "./rpc-call-rule.mjs";
 import { emittedLegs } from "./suite-output-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
+import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { projectId: PROJECT_ID, dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -187,15 +188,15 @@ check(
 );
 
 // ⛔ THE RATING BAR (`C-9`, `G-2`) -- there must be no field one could arrive in.
-const RATING_TERMS = ["beginning", "developing", "mastering", "mastered", "rating", "competency"];
-const ratingHits = RATING_TERMS.filter((term) => new RegExp(term, "i").test(serverCode));
+const ratingHits = ratingLeaks(serverCode);
 check(
   ratingHits.length === 0,
-  `P25a-RATINGS ⛔ the schedule projection names NO rating vocabulary at all (${ratingHits.length ? ratingHits.join(", ") : "none"}) -- C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up, and this DTO has no field one could arrive in`,
+  `P25a-RATINGS ⛔ the schedule projection names NO rating vocabulary in any RATING-SHAPED context (${ratingHits.map((h) => `${h.term} [${h.context}]`).join(", ") || "none"}) -- C-9 confines the nine ratings to report DETAIL surfaces and G-2 bars every roll-up, and this DTO has no field one could arrive in`,
 );
+const narrowing = proveNarrowing();
 check(
-  RATING_TERMS.some((term) => new RegExp(term, "i").test("competency_rating mastering")),
-  "P25a-RATINGSc CONTROL: the same term list MATCHES a planted `competency_rating mastering`, so P25a-RATINGS is a measurement",
+  narrowing.ok,
+  `P25a-RATINGSc CONTROL: the NARROWED detector fires on every real-rating sample and on NO ordinary-English sample (missed: ${narrowing.missed.join("; ") || "none"}; false positives: ${narrowing.falsePositives.join("; ") || "none"}) -- ⛔ bare-word matching over the four labels is PROHIBITED by A-052/§3.4, and a narrowing is a LOOSENING until it is proven in BOTH directions`,
 );
 
 // ⛔ NO DUPLICATED EVENT RECORD (`A-016`) -- the projection must READ, never WRITE.

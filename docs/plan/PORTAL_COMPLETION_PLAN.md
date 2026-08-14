@@ -2011,6 +2011,62 @@ boundary is a moment of attention, and it was not used as one.**
 
 ---
 
+## §12.15 — ⛔ A PROOF OF A CHANGED MEANING MUST **CONSTRUCT THE DIVERGENCE**, NEVER OBSERVE THE AGREEMENT
+
+> **Operator ruling, 2026-08-15:** *"`RAa-2` is the finding: `totalStudents` kept its name and
+> changed its meaning, both readings were 13, and the obvious assertion would have passed against
+> the old function. Record it beside the anti-tautology entries — **a proof of a changed meaning
+> must construct the divergence, not observe the agreement.**"*
+
+### The shape
+
+`Ruling A` changed `report_centre_dashboard_summary.o_total_students` from *centre-resident
+`students` rows* to *distinct ACTIVE enrolments*. ⛔ **At HEAD both readings were 13.** So:
+
+| The obvious assertion | What it actually proves |
+|---|---|
+| `total_students = 13` | **NOTHING.** True of the old function and the new one alike |
+| `rpc_total = (SELECT count(*) FROM students)` | **THE OLD RULE.** It would have passed after the change, while computing the thing the change removed |
+| `rpc_total = (SELECT count(DISTINCT student_id) FROM enrolments WHERE is_active)` | Better, and **still 13 = 13** — agreement, not discrimination |
+
+⚠️ **THE THIRD ROW IS THE DANGEROUS ONE**, because it looks exactly like a correct re-derivation and
+is the shape `PDS-3` already used. ▶ **Two formulas that happen to return the same number cannot be
+distinguished by comparing their outputs.**
+
+### The rule
+
+⛔ **WHEN AN ASSERTION'S SUBJECT CHANGES MEANING WITHOUT CHANGING NAME, THE PROOF MUST CREATE THE
+STATE IN WHICH THE OLD AND NEW DEFINITIONS DISAGREE, AND REQUIRE THE NEW ANSWER.**
+
+`RAa-2` does exactly that: inside one rolled-back transaction it **withdraws a learner** and
+requires the tile to move **13 → 12 while `public.students` stays at 13**. ▶ **That leg FAILS
+against the pre-ruling function.** A leg that cannot fail against the thing it replaced is not
+measuring the replacement.
+
+### ⚠️ Why this belongs beside §12.8 and the anti-tautology entries, and is not the same rule
+
+- **§12.8** — a suite pinning what the fixture *happens to contain* rather than a governed rule.
+  ▶ *The claim is about the wrong thing.*
+- **The `before = after` tautology** (§0's `counts moved mid-transaction` leg) — a comparison that
+  passed *because the two formats differed*. ▶ *The comparison cannot fail.*
+- **§12.15, this one** — a comparison that CAN fail, IS about the right thing, and is satisfied
+  **identically by the definition being replaced**. ▶ *The comparison cannot DISCRIMINATE.*
+
+⛔ **All three are the same family — a green leg that establishes nothing — and they fail in three
+different places, so a check written against one does not catch the others.**
+
+### The trigger, stated so it is recognisable
+
+▶ **Any change where a name survives and its definition does not.** A rename is safe: the compiler
+finds every site. **A redefinition is the hazard**, because nothing anywhere is required to move.
+⚠️ `Ruling A` also carried the compiler-visible half — the dropped `OUT` parameter made
+`PDS-2`/`PDS-3` fail to **compile**, which is what forced them to be re-read at all. ⛔ **Had the
+ruling ONLY redefined `totalStudents` and dropped nothing, no gate in this project would have
+noticed**, and the tile would have gone on reporting the old rule under the new name until a
+learner withdrew.
+
+---
+
 ## §12.14 — ⚠️ THE SHELL-HEREDOC FAILURE, SECOND INSTANCE. USE THE `Write` TOOL FOR FILE CONTENT
 
 > **Operator ruling, 2026-08-15:** *"Write tool, not a shell heredoc. That is the second heredoc
@@ -3640,3 +3696,108 @@ here — they are named so `P2-9` opens with them on the table rather than disco
 ⏸ **`P2-9` REMAINS BLOCKED, awaiting the Operator's ruling on §21.2–§21.4.** Nothing built.
 ▶ **Proceeding to `P2-10` (`23` Trainers), which has no dependency**, per the standing instruction
 to report a blocked phase and move to the next unblocked one.
+
+
+---
+
+## §22 — ✅ THE THREE `P2-9` RULINGS, AND THE NARROWED RATING DETECTOR
+
+### §22.1 — Screen `18`'s remaining rating projections — RULED 2026-08-15
+
+> **Operator:** *"`ASSESSMENTS 24` — **PERMITTED**. A count of assessments is not an assessment,
+> same ground as the class-health counts. `ATTENDANCE 96%` — **PERMITTED**. Attendance is not a
+> rating. Reports `GRADE` column — **PROHIBITED**. `G-2`, permanently. **If any of those turns out
+> to be derived from ratings rather than counted, STOP and tell me rather than building it.**"*
+
+| Element | Ruling | The standing test `P2-9` must apply |
+|---|---|---|
+| `ASSESSMENTS 24` | ✅ **PERMITTED** | ⛔ It must be a **COUNT of observations**. The moment it is derived from rating VALUES it is a roll-up — **STOP** |
+| `ATTENDANCE 96%` | ✅ **PERMITTED** | A ratio over `attendance` rows. ⛔ Nothing about it may consult a rating — **STOP** |
+| Reports `GRADE` column | ⛔ **PROHIBITED, PERMANENTLY** | `G-2`. `REGISTERED-OMISSION` that never ends |
+| `Strengths & Focus Areas` | ⛔ **DO NOT BUILD** (§21) | `C-9` + `G-2` |
+| `Skill Breakdown` | ⛔ **PROHIBITED** (already) | `C-9` |
+
+⚠️ **THE CONDITION IS ON THE DERIVATION, NOT ON THE LABEL.** *"A count of assessments is not an
+assessment"* holds only while the number is genuinely counted. ▶ **`P2-9` must MEASURE the
+derivation before building either tile**, and a derivation that reaches a rating is a stop-and-ask
+rather than a judgement the phase makes about its own work.
+
+✅ **Consequence accepted by the Operator:** screen `18` loses **both** right-column analytics
+cards. `Q-27`'s precedent applies — Profile Details promotes up, **no filler card**, and the
+absence is `EXPECTED / REQUIRED` at visual acceptance.
+
+---
+
+### §22.2 — ⛔ THE RATING DETECTOR, NARROWED BY RULING — AND WHY ADJACENCY WAS REFUSED
+
+> **Operator:** *"RULING: narrow it. Match the labels only where they appear **as a rating** —
+> adjacent to a dimension name, in a chip, or in a rating-shaped context — never as bare words in
+> prose. **Prove the narrowed detector still fires on a real rating and no longer fires on 'at the
+> beginning of the session'.**"*
+
+✅ **`scripts/tests/portal/rating-leak-rule.mjs` — ONE module, replacing FOUR divergent copies.**
+`P2-5`, `P2-6`, `P2-7` and `P2-8` each carried their own bare-word list. ⚠️ **A narrowing applied to
+three of four files is worse than no narrowing**, because the surviving copy fails LATE and looks
+like a real finding.
+
+#### ⛔ THE DISCRIMINATOR IS ATTRIBUTION, NOT ADJACENCY — AND `A-052`'S OWN EXAMPLE PROVES IT
+
+The ruling offers *"adjacent to a dimension name"* as one of the three shapes. ▶ **I did not
+implement adjacency, and the reason is that `A-052` supplies the counter-example itself:**
+
+> *"Ordinary prose stays legal — 'at the beginning of the session', **'has mastered maintaining eye
+> contact'**."*
+
+⚠️ **That second example puts `mastered` FOUR WORDS from a dimension name and is EXPRESSLY LEGAL.**
+An adjacency rule would have re-created the exact false positive this ruling exists to remove — one
+layer deeper, where it is harder to see.
+
+▶ **What actually separates them is whether the label is PRESENTED AS A VALUE.** `Mastered eye
+contact` is **label-first**, the shape a chip or a summary row renders. `has mastered maintaining
+eye contact` is a **verb with a subject in front of it**. ⛔ **Grammar, not distance.** The
+implemented rule keeps the ruling's *intent* — catch it where it is a rating — by a mechanism that
+survives A-052's own test case.
+
+#### The four rating-shaped contexts
+
+| Context | Fires on | Rationale |
+|---|---|---|
+| `value-literal` | `"mastering"` as the WHOLE string literal | how a rating VALUE appears in code, an enum or a fixture |
+| `attribution` | `rating: Mastered` · `rated as Beginning` · `Mastering level` | `A-052`'s named attribution and taxonomy-disclosure shapes |
+| `isolated-element` | `<span>Mastering</span>` | `A-052`'s *"isolated raw label presented as a rating value"* |
+| `label-first-dimension` | `Mastered eye contact` · `Beginning on sentence flow` | label OPENS the phrase, dimension follows — ⛔ the leading boundary is what excludes `has mastered …` |
+
+⛔ **Structural identifiers** (`competency_rating`, `overallGrade`, `ratingLevel`, …) stay matched
+**BARE and always** — nobody writes them in prose, so there is no false positive to avoid and
+narrowing them would only open a hole.
+
+#### ⛔ PROVEN IN BOTH DIRECTIONS, ON EVERY RUN
+
+`proveNarrowing()` is exported and called by all four suites. ⚠️ **A narrowing is a LOOSENING until
+it is shown to still catch what it caught before**, so both lists run together:
+
+**9 MUST-FIRE**, including the two planted samples `P2-7` already used verbatim
+(`Mastered eye contact, clear projection`, `Beginning on sentence flow & pace`), the frame's own
+chip shape, and every `A-052` attribution form.
+
+**6 MUST-NOT-FIRE**, including:
+- `at the beginning of the session` — `A-052`'s own legal example, **named in the ruling**
+- `has mastered maintaining eye contact` — `A-052`'s other legal example, and **the one that
+  refuted adjacency**
+- ⛔ **the exact sentence that produced this ruling** — screen `14`'s non-resumability notice
+- `a developing country's education policy` · `Beginning next term, classes run on Tuesdays` —
+  the label as an ordinary adjective, and label-initial with **no dimension following**
+
+✅ **All four suites PASS with the narrowed rule.** ⚠️ **The screen `14` copy was NOT reverted** —
+it now reads *"must be started again from scratch"*, and the original wording is pinned as a
+must-NOT-fire sample instead, so the regression is caught by the rule rather than avoided by the
+prose.
+
+---
+
+### §22.3 — Position
+
+✅ **`B` RULED. `P2-9` IS UNBLOCKED**, with three elements decided and a stated stop condition on
+two of them.
+⏸ **`AR-4` second instance — still the only open rule question.**
+▶ **Proceeding autonomously in plan order from `P2-10` (`23` Trainers).** VISUAL stays `NOT-RUN`.
