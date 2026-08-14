@@ -26,6 +26,8 @@ import type {
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementTrainerListDto,
+  CreateTrainerInput,
+  TrainerInvitationOutcomeDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -230,6 +232,16 @@ export interface PhysicalTestPort {
    * hop rather than filtered here.
    */
   readManagementTrainers(): Promise<UiActionResult<ManagementTrainerListDto>>;
+  /**
+   * `P2-11` — screen `24`. The governed trainer invitation.
+   *
+   * ⛔ IT CREATES A PROFILE, NEVER A LOGIN. `accounts.auth_user_id` is NULL and
+   * the membership is `pending`; the recipient establishes their own
+   * credential (`A-020`, `A-025`, `A-027`). **No password, token or secret
+   * crosses this signature in either direction** — and there is no column that
+   * could hold one if it did.
+   */
+  createTrainer(input: CreateTrainerInput): Promise<UiActionResult<TrainerInvitationOutcomeDto>>;
   /**
    * P2-3 — the governed edit. ⛔ `27` can CHANGE a class and cannot DESTROY
    * one: the input type carries no session removal and no unassign, because

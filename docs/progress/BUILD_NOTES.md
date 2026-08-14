@@ -9823,3 +9823,123 @@ Operator's.
 
 **Next authorized step:** the Operator's ruling on the upload transport, (a) or (b). Then task **A**
 (screen `11` KPI wiring), then report **B**'s Strengths question. **Nothing committed yet.**
+
+
+---
+
+## 2026-08-15 — `P2-10`'s trainer email (ruled), `P2-11` screen `24`, and two defects the phase surfaced
+
+**Branch/worktree:** `develop`, main worktree. **Starting HEAD:** `47735ce`. **Ending HEAD:** this
+checkpoint. **Migrations added:** 2 (`20260815120000`, `20260815130000` — the second is the `R-1`
+forward correction of the first).
+
+### 1. The trainer email — Operator ruling, applied across six layers
+
+`P2-10` shipped the field **refused in the DTO** while the question was open: the pack bars
+*"authentication details"* and an email is the Auth login identifier. The Operator permitted it,
+with the reason recorded: *"An identifier a manager already typed is not a disclosure to that
+manager."* Management supplies the email when inviting the trainer (`A-020`); it is staff data, not
+learner data; `A-027`'s prohibited-secret list does not include it.
+
+**The audience is the boundary** — this permits the email on a management staff directory and
+generalises to no other role and no other person's email. The Operator also ratified the process:
+*"failing closed first was correct — I would rather see a closed field with a question than an open
+one with an assumption."*
+
+`PT-5`/`PT-5b` asserted the field's **absence**; they were inverted in the same pass (§12.11),
+because a leg left behind would have gone red on a correct build and read like a leak. What they
+assert now is not that the email is present — that is one line and proves nothing — but that **the
+widening is exactly one column wide at every layer**: no `auth_user_id`, no `select("*")`. `PT-5c`
+adds the screen: the line is omitted on `null` (hero `0B`) and the search was widened in the same
+pass, because the field the row displays is the field the search matches.
+
+Rendered in `text-ink`, not the frame's `#AEB6C4`, which measures **2.041:1** against SC 1.4.3's
+4.5:1 floor for normal-size text — the `F-01c` treatment already applied on `page-heading` and the
+management dashboard: hue preserved, luminance moved, no token value redefined.
+
+**§7.4.1 again, and the `.md` missed it again.** The pack's prose note names no email anywhere,
+while the `.png` draws one under every name and the `.html` carries eight. A note-derived build
+would never have raised the question, and the ruling that settled it would not exist.
+
+### 2. `P2-11` — screen `24`, one function and one grant
+
+Exactly the authorized shape: one `SECURITY DEFINER` function, one `EXECUTE` grant, no table,
+column, enum, policy or audit string, registry unmoved at 23 (both strings already existed).
+
+Four rows in one transaction — `accounts` with the Auth linkage unwritten, `centre_memberships` at
+`pending`, `trainer_profiles`, `invitations` — then two ordered audit events. No credential of any
+kind is created or stored; the tables have no column that could hold one.
+
+**The boundary was proven with a control that discriminates**, which was the Operator's explicit
+instruction (*"do NOT let it read like `PT-3b`"*). `PA-4` shows the same management identity
+**reading** accounts, memberships and profiles; `PA-4b` shows **that same identity refused on every
+write**, read off PostgreSQL's own error stream rather than a verdict the suite composed. `PA-5`
+pins the four privilege sets as **exact sets** — and `invitations` in fact holds **no grant at all**,
+narrower than the authorization's wording, so the expectation is pinned to what is true rather than
+to the paraphrase. `PA-7` is the discriminating pair: the identical call, management through, a
+trainer refused.
+
+**Five refusals, five different kinds**, all disclosed on the page rather than in a comment (§12.12):
+`Role` is `GC-11` (`Assistant Trainer` is not in the enum, so unpersistable) · **`Phone` and
+`Employee ID` have no column anywhere — the one genuine open Operator decision on this screen** ·
+`Photo` has no column, bucket or policy (`C-15` cited as the adjacent precedent, not stretched) ·
+`Assign Classes` is `A-016` (assignment is session-level; the chips are modules, aimed at a
+`pending` membership).
+
+**One disclosed default:** the 7-day invitation lifetime. `A-027` makes expiry a mechanism and no
+instrument names a duration — measured across the tree before writing. It lives in one constant.
+
+### 3. ⛔ A migration that verifies its own SHAPE has not verified that it WORKS
+
+`20260815120000` applied cleanly, printed nine PASS notices, and shipped a function that could not
+run: `function pg_catalog.coalesce(text, unknown) does not exist`.
+
+Two mechanisms had to line up. **`plpgsql` does not resolve function names at `CREATE` time** — and
+the same file's earlier `position(… IN …)` fault *was* caught, because it was a syntax error rather
+than a resolution one. The two are indistinguishable while writing. And **all nine assertions were
+structural** — signature, posture, grant, privilege sets, census — so **not one called the
+function**, and every one was true of a body that raises on its first statement.
+
+Corrected by forward migration `20260815130000` under `R-1`, never an edit. It adds the missing kind
+of assertion: **`PC-10` executes the function** and requires the fail-closed `not_permitted`. It
+runs as owner, so the caller gate returns three lines *before* the failing statement — exactly
+enough coverage, and it writes nothing. `PC-11` generalises to the class: `coalesce`,
+`position(… IN …)`, `extract`, `overlay` and `nullif` are SQL grammar and may never be qualified,
+while `btrim`/`lower`/`length`/`strpos`/`split_part` must be under `search_path = ''`.
+
+**New standing rule (plan §25.1): every migration that declares a function must execute it at apply
+time.** What caught this was `prove:portal-p2-11` — the only proof that calls the function as a real
+caller in a real role, and the first `.mjs` suite ever paired in `rpc-call-rule.mjs`.
+
+### 4. ⛔ §12.13's third instance — the route ratchet was red for a whole phase
+
+`/management/trainers` shipped at `P2-10`. The navigation census reported the missing expectation
+immediately, and `P2-10` was reported complete **without `prove:portal-p2-1` being re-run**.
+
+Three consecutive phases now: `P2-6` (RPC-caller rule → a surface over three unwired write paths),
+`P2-8` (`lint` → an error committed and pushed), `P2-10` (route census). **The gate worked every
+time; it was not read.** A phase is complete when every suite whose *subject* it touched is green —
+adding a route touches the route census whether or not the phase's name mentions navigation.
+
+It also hid a real defect: with the child route finally asserted, `N-2` reported
+`/management/trainers/add`: **0 current items**. The rail item carried `exact: true`, so the sidebar
+went blank on a page that plainly belongs to Trainers — `C2C-002`, which `Classes` already hit at
+`P2-2`. `exact` dropped; `N-2` now covers 27 routes and aliases, and the `P2-1` ratchet moved
+23 → 25.
+
+### Verification
+
+`prove:portal-p2-1` · `p2-2` · `p2-2b` · `p2-3` · `p2-4` · `p2-5` · `p2-6` · `p2-6r` · `p2-6r-e2e` ·
+`p2-7` · `p2-8` · `p2-10` · `p2-11` · `prove:ruling-a` — **all PASS**. Navigation active-state suite
+all proofs passed. `test:runtime-profile` `T-P44`/`T-P44c` PASS, unchanged. `prove:no-secrets`
+CLEAN. `tsc --noEmit` clean. `lint` 0 errors. `next build` clean.
+
+**Deliberately red, carried:** `prove:artefact-read` (`AR-4-14`/`AR-4-17` — the only open rule
+question) · `prove:serving-discipline` (`D-10`, intermittent, not re-run: a flaky check closes on a
+diagnosed cause, never on a run of green).
+
+**Not run, stated as such:** `prove:stage2-routes` / `prove:stage3-authenticated` — `:3000` is held
+by the Operator's walk server. **VISUAL acceptance is `NOT-RUN` on `11`, `14`, `17`, `23`, `24`,
+`25`** and remains the Operator's.
+
+**Next authorized step:** `P2-9` (screen `18` Class Statistics), unblocked by the `B` ruling.

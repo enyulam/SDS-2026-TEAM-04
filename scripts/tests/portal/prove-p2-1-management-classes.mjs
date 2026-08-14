@@ -239,8 +239,19 @@ check(
   `P21a-13 the portal navigation suite exits 0 with the new route (exit ${nav.status}) -- exactly one active rail item on /management/classes`,
 );
 /*
+ * ⛔ THE RATCHET WENT RED AT `P2-10` AND STAYED RED FOR A WHOLE PHASE, AND
+ * THAT IS THE FINDING — §12.13's THIRD INSTANCE. `/management/trainers`
+ * shipped, this census immediately reported *"1 shipped portal route has NO
+ * expectation and was therefore never asserted"*, and `P2-10` was reported
+ * complete WITHOUT `prove:portal-p2-1` being re-run. ▶ **The gate worked; it
+ * was not read.** It is recorded here rather than quietly corrected, because
+ * the pattern is about which suites get run at the end of a phase, not about
+ * this number.
+ *
  * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, 17 → 18 AT `P2-3`, 18 → 19 AT
- * `P2-4`, 19 → 20 AT `P2-5`, 20 → 21 AT `P2-6`, 21 → 22 AT `P2-7`, THEN 22 → 23 AT `P2-8`, AND WAS REWRITTEN
+ * `P2-4`, 19 → 20 AT `P2-5`, 20 → 21 AT `P2-6`, 21 → 22 AT `P2-7`, 22 → 23 AT `P2-8`,
+ * THEN 23 → 24 AT `P2-10` AND 24 → 25 AT `P2-11` — the last two together, in the
+ * pass that noticed. AND IT WAS REWRITTEN
  * EACH TIME RATHER THAN DELETED. Screen `26` shipped at
  * `/management/classes/add-class`, screen `27` at
  * `/management/classes/[classModuleId]/edit`, screen `25` at
@@ -262,8 +273,8 @@ check(
  * chances to relax the wrong one.
  */
 check(
-  /all 23 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 23 routes from the app tree (16 + screen `26` at P2-2 + screen `27` at P2-3 + screen `13` at P2-4 + screen `25` at P2-5 + screen `14` at P2-6 + screen `11` at P2-7 + screen `17` at P2-8) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 25 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 25 routes from the app tree (16 + `26` at P2-2 + `27` at P2-3 + `13` at P2-4 + `25` at P2-5 + `14` at P2-6 + `11` at P2-7 + `17` at P2-8 + `23` at P2-10 + `24` at P2-11) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

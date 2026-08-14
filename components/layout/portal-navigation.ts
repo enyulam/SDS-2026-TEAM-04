@@ -156,7 +156,18 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         href: "/management/trainers",
         label: "Trainers",
         path: "/management/trainers",
-        exact: true,
+        /*
+         * ⛔ `exact` WAS DROPPED AT `P2-11`, when screen `24` shipped at
+         * `/management/trainers/add`. ⚠️ This is the `C2C-002` defect, and
+         * `Classes` already hit it once at `P2-2`: under `exact: true` a child
+         * route resolves to **ZERO** active rail items, so the sidebar goes
+         * blank on a page that plainly belongs to Trainers.
+         *
+         * ▶ It was CAUGHT rather than reasoned about: `N-2` reported
+         * *"0 current item(s) [none]; expected exactly 1"* the first time the
+         * child route was asserted. **The rule that the item arrives WITH its
+         * route is what makes that assertion exist at all.**
+         */
         /*
          * ⚠️ A RECORDED VISUAL DIVERGENCE, NOT A CHOICE MADE QUIETLY. The frame
          * draws a MONITOR glyph for this item; the shared `Icon` set has no

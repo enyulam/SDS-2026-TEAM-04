@@ -69,6 +69,23 @@ export const RPC_MIGRATIONS = [
    * option that rots."*
    */
   { migration: "20260815090000_portal_ruling_a_dashboard_enrolled.sql", suite: "prove-p2-7-dashboard.sql" },
+  /*
+   * `P2-11` — the trainer invitation. ⚠️ ITS SUITE IS `.mjs`, NOT `.sql`, and
+   * that is the first time this rule has paired to one. ▶ The rule asks *"is
+   * what this migration declares actually CALLED by its proof"*, and the answer
+   * has to be able to come from a JavaScript harness: this function's
+   * governed behaviour is only observable ACROSS role changes and rolled-back
+   * transactions, which a plain `.sql` file cannot orchestrate and assert on.
+   */
+  { migration: "20260815120000_portal_p2_11_admin_create_trainer.sql", suite: "prove-p2-11-add-trainer.mjs" },
+  /*
+   * The `R-1` forward correction: `coalesce` is SQL GRAMMAR and cannot be
+   * schema-qualified, so the shipped body raised on its FIRST statement while
+   * all nine of its structural assertions passed. ⚠️ Same function, same
+   * suite — and the suite is what CAUGHT it, because it is the only proof that
+   * ever executes the function as a real caller.
+   */
+  { migration: "20260815130000_portal_p2_11_coalesce_fix.sql", suite: "prove-p2-11-add-trainer.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

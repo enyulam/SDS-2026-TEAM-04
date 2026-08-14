@@ -129,6 +129,8 @@ import type {
   AdapterManagementClassListDto,
   AdapterManagementStudentListDto,
   AdapterManagementTrainerListDto,
+  AdapterCreateTrainerInput,
+  AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
   AdapterDashboardSummaryDto,
@@ -169,6 +171,7 @@ import {
   removeMaterialCore,
 } from "@/server/modules/class-session/material-transport";
 import { listManagementTrainersCore } from "@/server/modules/class-session/trainer-list-projections";
+import { createTrainerCore } from "@/server/modules/identity-access/trainer-invitation";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -984,6 +987,38 @@ export async function adapterReadManagementTrainers(): Promise<
         studentCount: row.studentCount,
       })),
       staffCount: result.rows.staffCount,
+    },
+  };
+}
+
+/**
+ * `P2-11` — screen `24` Management Add Trainer. The governed write.
+ *
+ * ⛔ THE MAPPER RETURNS TWO IDS AND A REASON. It does NOT echo the name or
+ * the email back — the caller supplied both, so returning them proves nothing
+ * and only widens what a compromised client can read out of a response.
+ *
+ * ⚠️ NO SANITISATION HERE BEYOND TRIMMING. Unlike `P2-2`'s `weekdays`, there
+ * is no representable-but-wrong input to normalise away: the RPC re-validates
+ * the name and the address over the values the DATABASE receives, and the
+ * `CHECK` constraints refuse anything it misses.
+ */
+export async function adapterCreateTrainer(
+  input: AdapterCreateTrainerInput,
+): Promise<ActionResult<AdapterTrainerInvitationOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await createTrainerCore(client, {
+    firstName: input.firstName,
+    lastName: input.lastName,
+    email: input.email,
+  });
+  if (result.outcome !== "success") return result;
+  return {
+    outcome: "success",
+    data: {
+      membershipId: result.data.membershipId,
+      invitationId: result.data.invitationId,
+      reason: result.data.reason,
     },
   };
 }

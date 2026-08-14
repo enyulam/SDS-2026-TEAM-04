@@ -25,6 +25,7 @@ import {
   type UpdateClassInput,
   type ClassCreationOutcomeDto,
   type CreateClassInput,
+  type TrainerInvitationOutcomeDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1267,6 +1268,25 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
       }))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
     return { outcome: "success", data: { trainers, staffCount: trainers.length } };
+  }
+
+  /**
+   * `P2-11` — screen `24`. ⛔ THE FIXTURE REFUSES, AND THAT IS THE HONEST
+   * ANSWER RATHER THAN A GAP.
+   *
+   * ▶ Creating a trainer writes FOUR governed rows and emits TWO audit events
+   * through a `SECURITY DEFINER` RPC. A fixture cannot do any of that, and a
+   * fixture that returned a plausible id would report a governed creation THAT
+   * NEVER HAPPENED — the worst failure mode this port has, because the screen
+   * would show a success banner and the academy would believe an invitation
+   * was sent.
+   *
+   * ⚠️ `unavailable`, not `unauthorized`: the caller is permitted, the
+   * capability is absent. The two are different answers and the screen says so.
+   */
+  async createTrainer(): Promise<UiActionResult<TrainerInvitationOutcomeDto>> {
+    await delay(120);
+    return { outcome: "unavailable" };
   }
 
   async readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {

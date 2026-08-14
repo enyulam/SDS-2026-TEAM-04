@@ -282,6 +282,43 @@ export type ManagementTrainerListDto = {
   readonly staffCount: number;
 };
 
+/**
+ * `P2-11` — screen `24` Management Add Trainer.
+ *
+ * ⛔ THREE FIELDS. The frame draws SIX plus a photo and a class picker, and the
+ * other five are absent for five DIFFERENT reasons — all recorded at
+ * `server/modules/identity-access/trainer-invitation.ts`, none of them "not
+ * built yet":
+ *
+ *  - **`Role`** — `GC-11`: `Assistant Trainer` is not a member of
+ *    `centre_membership_role`, so the option cannot be persisted at all. TA is
+ *    a deferred persona (`A-014`, `G-7`). The role is pinned inside the RPC.
+ *  - **`Phone`** and **`Employee ID`** — ⛔ NO COLUMN EXISTS on any of the four
+ *    tables, measured. ▶ **The one genuine Operator decision on this screen**:
+ *    nothing forbids a staff phone number, there is simply nowhere to put one,
+ *    and two columns is a schema change of its own.
+ *  - **`Upload photo`** — no column, no bucket, no policy; `C-15` is the
+ *    adjacent precedent, cited rather than stretched to cover this.
+ *  - **`Assign Classes`** — `A-016` makes assignment authoritative at CLASS
+ *    SESSION level and the chips are class MODULES, aimed at a `pending`
+ *    membership. Assignment has its own governed path.
+ *
+ * ⚠️ `firstName` AND `lastName` JOIN INTO ONE `accounts.display_name`. Two
+ * inputs, one column — the schema already represents a person's name once.
+ */
+export type CreateTrainerInput = {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+};
+
+export type TrainerInvitationOutcomeDto = {
+  readonly membershipId: string;
+  readonly invitationId: string;
+  /** `created`. ⛔ A refusal never arrives here — it arrives as a failure. */
+  readonly reason: string;
+};
+
 export type ManagementStudentListDto = {
   readonly students: readonly ManagementStudentRowDto[];
   readonly enrolledCount: number;

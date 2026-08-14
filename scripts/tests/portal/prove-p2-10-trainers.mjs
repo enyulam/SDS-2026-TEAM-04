@@ -218,9 +218,18 @@ check(
   !/>\s*Edit\s*</.test(screen),
   "PT-7   ⛔ NO `Edit` CONTROL — there is no Edit-Trainer screen in the ratified 36, so it has no destination at all. ▶ A control that leads nowhere is the P2-6 defect (§12.12); ABSENT is correct, and `disabled` would be wrong because it can never become live",
 );
+/*
+ * ⚠️ PT-7b IS INVERTED BY `P2-11`, IN THE SAME PASS THAT INVERTED IT (§12.11).
+ * It asserted `Add Trainer` was DISABLED with a stated reason, which was correct
+ * while screen `24` did not exist and is false now that it does. ▶ A leg left
+ * behind would have gone red on a correct build; a DISCLOSURE left behind would
+ * have been worse — a working button still promising it "arrives with screen 24".
+ */
 check(
-  /Add Trainer/.test(screen) && /disabled/.test(screen) && /title="Adding a trainer arrives with screen 24"/.test(screen),
-  "PT-7b  ⚠️ but `Add Trainer` IS drawn, DISABLED and DISCLOSED — it has a known destination (24, phase P2-11) and will become live. The distinction between it and `Edit` is the whole of §12.12",
+  /href="\/management\/trainers\/add"/.test(screen)
+    && !/disabled/.test(screen)
+    && !/arrives with screen 24/.test(screen),
+  "PT-7b  ✅ `Add Trainer` IS NOW A LIVE LINK to /management/trainers/add — ⛔ and the `arrives with screen 24` disclosure is GONE, retired by the phase that made it false. The distinction from `Edit` still holds: disabled meant \"not yet\", absent means \"not a thing\"",
 );
 
 // ---------------------------------------------------------------------

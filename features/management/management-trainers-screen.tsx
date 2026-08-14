@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeading } from "@/components/ui/page-heading";
@@ -73,8 +74,14 @@ import type { ManagementTrainerListDto } from "@/lib/frontend/contracts/physical
  *    `24` Add Trainer; there is no `Edit Trainer` frame, node or ID. ▶ Rendering a control that
  *    leads nowhere is the `P2-6` defect exactly — a surface over an unbuilt path — and §12.12 now
  *    makes that a PARTIAL phase rather than a complete one. **Omitted, and the screen is complete
- *    without it.** ⚠️ `Add Trainer` is drawn as **disabled with a stated reason**, because it has
- *    a known destination (`P2-11`) and will become live; `Edit` has no destination at all.
+ *    without it.**
+ *
+ *    ⚠️ `Add Trainer` WAS drawn **disabled with a stated reason**, because it had a KNOWN
+ *    destination and would become live. ✅ **`P2-11` built that destination, so it is now a LIVE
+ *    LINK to `/management/trainers/add`** — and the disclosure was retired in the SAME pass that
+ *    made it false (§12.11). ⛔ `Edit` is unchanged and still ABSENT: it has no destination in
+ *    the ratified 36 at all, which is the whole distinction — **disabled means "not yet";
+ *    absent means "not a thing".**
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  * ⚠️ TWO NUMBERS THE FRAME DRAWS THAT ARE COUNTS, NOT RATINGS — AND WHY THAT MATTERS HERE
@@ -180,20 +187,23 @@ export function ManagementTrainersScreen() {
             className="w-full sm:w-[14.375rem]"
           />
           {/*
-            ⚠️ DISABLED WITH A STATED REASON, and §12.12 is why the distinction matters:
-            `Add Trainer` has a KNOWN destination (`24`, phase `P2-11`) and will become live, so
-            it is drawn and disclosed. ⛔ `Edit` has NO destination in the ratified 36 and is
-            therefore ABSENT, not disabled — a control that can never become live is not a
-            pending feature.
+            ✅ LIVE AS OF `P2-11`. It shipped DISABLED WITH A STATED REASON while `24` did not
+            exist, and §12.12 is why that distinction mattered: `Add Trainer` had a KNOWN
+            destination and would become live, so it was drawn and disclosed. ▶ **The
+            destination now exists**, and the disclosure was retired IN THE SAME PASS that
+            made it false — a stale "arrives with screen 24" tooltip on a working button is
+            §12.11's defect, not a harmless leftover.
+
+            ⛔ `Edit` IS STILL ABSENT, and nothing here changes that. It has NO destination in
+            the ratified 36 at all — a control that can never become live is not a pending
+            feature, and rendering it disabled would make a permanent gap look like a date.
           */}
-          <button
-            type="button"
-            disabled
-            title="Adding a trainer arrives with screen 24"
-            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-brand-500 px-4 text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
+          <Link
+            href="/management/trainers/add"
+            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-brand-500 px-4 text-[13px] font-semibold text-white hover:bg-brand-600"
           >
             + Add Trainer
-          </button>
+          </Link>
         </div>
       </div>
 

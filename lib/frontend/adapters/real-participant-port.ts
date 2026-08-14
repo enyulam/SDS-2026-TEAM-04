@@ -69,6 +69,8 @@ import type {
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementTrainerListDto,
+  CreateTrainerInput,
+  TrainerInvitationOutcomeDto,
   ManagementEditWordingInput,
   ManagementEditWordingSuccess,
   ManagementQueueRowDto,
@@ -128,6 +130,7 @@ import {
   adapterReadDashboardSummary,
   adapterReadManagementStudents,
   adapterReadManagementTrainers,
+  adapterCreateTrainer,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -317,6 +320,15 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
 
     readManagementTrainers(): Promise<UiActionResult<ManagementTrainerListDto>> {
       return guard(() => adapterReadManagementTrainers());
+    },
+
+    /**
+     * `P2-11` — screen `24`. ⛔ Three fields, because the input type has
+     * nowhere to put a role, a phone, an employee id or a photo. Creating a
+     * PROFILE, never a login.
+     */
+    createTrainer(input: CreateTrainerInput): Promise<UiActionResult<TrainerInvitationOutcomeDto>> {
+      return guard(() => adapterCreateTrainer(input));
     },
 
     readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {

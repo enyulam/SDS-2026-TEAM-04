@@ -4006,3 +4006,128 @@ first costs one sentence to reverse and the second is not recoverable at all.
 leg that merely reports zero. ▶ **A deny proof must show the SAME caller succeeding somewhere the
 policy permits**, so a zero is discrimination rather than blindness — the shape `D1a-6` established
 and `PT-3b` failed to hold.
+
+
+---
+
+## §25 — `P2-11` AS BUILT, AND THE TWO DEFECTS IT SURFACED
+
+### §25.1 — ⛔ **A MIGRATION THAT VERIFIES ITS OWN SHAPE HAS NOT VERIFIED THAT IT WORKS**
+
+**The measurement.** `20260815120000_portal_p2_11_admin_create_trainer.sql` applied cleanly, printed
+**nine PASS notices**, and shipped a function that **could not run**:
+
+```
+ERROR:  function pg_catalog.coalesce(text, unknown) does not exist
+LINE 1: v_name := pg_catalog.btrim(pg_catalog.coalesce(p_display_nam...
+```
+
+⚠️ **TWO MECHANISMS HAD TO LINE UP, AND BOTH ARE GENERAL.**
+
+1. **`plpgsql` DOES NOT RESOLVE FUNCTION NAMES AT `CREATE` TIME.** It syntax-checks the body and
+   defers name resolution to first execution. ▶ The **same file's earlier** `position(… IN …)` fault
+   *was* caught at `CREATE` — because it was a **SYNTAX** error rather than a **RESOLUTION** one.
+   ⛔ **Those two faults are indistinguishable while writing and opposite at runtime**, and the near
+   miss is what makes this worth recording: one of the pair was caught for free and the other was
+   not, from the same misconception in the same file.
+2. **ALL NINE ASSERTIONS WERE STRUCTURAL.** Signature · security posture · `search_path` · the grant ·
+   four exact privilege sets · four census equalities. ▶ **Not one CALLED the function**, so every
+   one of them was TRUE of a function that raises on its first statement.
+
+⛔ **THE MISSING KIND OF ASSERTION, NOW WRITTEN — `PC-10`:**
+
+```sql
+SELECT o_reason INTO v_reason FROM public.admin_create_trainer('Assert Probe', 'assert@example.test');
+IF v_reason IS DISTINCT FROM 'not_permitted' THEN RAISE EXCEPTION ...
+```
+
+▶ The `DO` block runs as the **owner**, so `app_current_account_id()` is NULL and the function
+returns at its **first gate**. ⚠️ **That is exactly enough coverage and no more:** the failing
+statement sat *three lines past* that gate, so a resolution error **anywhere in the body** raises
+here rather than returning a reason. ⛔ **And it writes nothing** — the probe is a refusal.
+
+`PC-11` generalises it to the **class**: `coalesce`, `position(… IN …)`, `extract`, `overlay` and
+`nullif` are **SQL GRAMMAR, not callable functions**, and none may be schema-qualified — while
+`btrim`, `lower`, `length`, `strpos` and `split_part` **must** be, because under `search_path = ''`
+an unqualified one resolves to nothing. ⚠️ **The two categories look identical in source.**
+
+> ### ⛔ **THE RULE: EVERY MIGRATION THAT DECLARES A FUNCTION MUST EXECUTE IT AT APPLY TIME.**
+> One call, asserting the governed answer — a refusal is ideal, because it needs no cleanup and
+> still traverses the body. **A structural assertion cannot see a runtime resolution error, and a
+> function that raises is not a function that shipped.**
+
+⚠️ **WHAT ACTUALLY CAUGHT IT:** `prove:portal-p2-11`, because it is the only proof that calls the
+function **as a real caller in a real role**. ▶ The `.mjs` suite pairing in `rpc-call-rule.mjs` is a
+first — every earlier pair is a `.sql` file — and it is the right pairing precisely because this
+function's behaviour is only observable **across role changes and rolled-back transactions**.
+
+---
+
+### §25.2 — ⛔ §12.13's **THIRD** INSTANCE: THE RATCHET WENT RED AT `P2-10` AND NOBODY READ IT
+
+**Measured, not inferred.** `/management/trainers` shipped at `P2-10`. The navigation census
+immediately reported:
+
+```
+FAIL N-0: shipped portal route(s) have NO expectation in this suite and were therefore never asserted
+```
+
+▶ **`P2-10` was reported complete without `prove:portal-p2-1` being re-run**, so the ratchet stayed
+red for an entire phase and was found only when `P2-11` added a second route.
+
+⚠️ **THIS IS THE THIRD CONSECUTIVE OCCURRENCE OF ONE PATTERN**, and the third is what makes it a
+pattern about **which suites run at the end of a phase**, not three accidents:
+
+| # | Phase | The gate that was not run | What shipped anyway |
+|---|---|---|---|
+| 1 | `P2-6` | the RPC-caller rule | a surface over three unwired write paths |
+| 2 | `P2-8` | `lint` | a `no-assign-module-variable` **error**, committed AND pushed |
+| 3 | `P2-10` | `prove:portal-p2-1` | a route no navigation expectation covered |
+
+⛔ **THE GATE WORKED EVERY TIME. IT WAS NOT READ.** ▶ A phase is not complete when its own suite is
+green; it is complete when **every suite whose subject it touched** is green. Adding a route touches
+the route census whether or not the phase's name mentions navigation.
+
+⚠️ **AND IT SURFACED A REAL DEFECT, NOT ONLY BOOKKEEPING.** With the child route finally asserted,
+`N-2` reported *"`/management/trainers/add`: **0 current item(s)**; expected exactly 1"* — the rail
+item carried `exact: true`, so the sidebar went **blank** on a page that plainly belongs to
+Trainers. ▶ **That is `C2C-002` exactly, and `Classes` already hit it at `P2-2`.** The ratchet being
+red for a phase is what delayed finding it.
+
+---
+
+### §25.3 — WHAT `P2-11` REFUSED, AND WHY EACH REFUSAL IS A DIFFERENT KIND
+
+The frame draws **six fields, a photo and a class picker**. Three are built.
+
+| Drawn | Disposition | Ground |
+|---|---|---|
+| First / Last name | ✅ built | joined into ONE `accounts.display_name` — two inputs, one column, no schema change needed to represent a name once |
+| Email | ✅ built | `accounts.normalized_email` + `invitations.email_normalized`, normalized once in the RPC so the two rows cannot disagree |
+| **`Role`** | ⛔ `REGISTERED-OMISSION` | **`GC-11`** (pack `24`, `Q-24`) — `Assistant Trainer` is **not in `centre_membership_role`**, so it is **UNPERSISTABLE**, not unbuilt. Cited, not re-derived |
+| **`Phone`**, **`Employee ID`** | ⏸ **OPEN OPERATOR DECISION** | ⛔ **NO COLUMN EXISTS** on any of the four tables, measured. ▶ **No rule forbids a staff phone number — there is simply nowhere to put one**, and two columns is a schema change of its own |
+| **`Upload photo`** | ⛔ omitted | no column, no bucket, no policy. `C-15` cited as the **adjacent precedent**, not stretched to cover a trainer |
+| **`Assign Classes`** | ⛔ omitted | `A-016` puts assignment at **CLASS SESSION** level; the chips are class **MODULES**, aimed at a **`pending`** membership. Assignment has its own governed path (`admin_assign_session_trainer`) |
+
+⚠️ **THE FRAME'S CHIPS READ `Junior · Public Speaking`.** `Junior` is **not a ratified Class Grade**
+(`Beginner` / `Intermediate` / `Advanced`, `A-016`), and one chip is drawn **twice**. Mock
+inconsistencies, recorded so a later reader does not take them for a vocabulary.
+
+⛔ **AND THE OMISSIONS ARE ON THE PAGE, NOT ONLY IN A COMMENT (§12.12).** A screen that silently
+drops four drawn fields looks finished. `PA-11` asserts the disclosure renders.
+
+⚠️ **THE SUCCESS COPY IS HONEST IN THREE PLACES**, and `PA-11b` pins all three: the membership is
+**`pending`** (not staff yet) · the recipient sets their **own** password (`A-020`/`A-027` — none is
+generated, shown or stored) · **the invitation email is NOT SENT**, because external delivery is
+deferred. ▶ **Claiming otherwise would leave an academy waiting for a message that does not exist** —
+the same class of lie as a fixture reporting a creation that never happened, which is why the
+fixture's `createTrainer` returns `unavailable` rather than a plausible id.
+
+---
+
+### §25.4 — ⚠️ ONE DISCLOSED DEFAULT: THE INVITATION LIFETIME
+
+`A-027` makes application-invitation expiry a **real mechanism, separate from Auth-link expiry** —
+and **no instrument names a duration**, measured across the tree before writing. ▶ **7 days is this
+build's choice**, held in ONE named constant, asserted by `PA-6d`, and recorded here and in
+`STATUS.md` as **STATED, NOT RULED**. A ruling changes one line.

@@ -121,10 +121,26 @@ const EXPECTED_BY_ROUTE = new Map([
   /*
    * P2-8 -- screen `17` Management Students. The rail item arrives WITH its
    * screen, which is the rule `portal-navigation.ts` has carried since P2-1:
-   * an item pointing at a 404 is worse than an absent one. ⛔ TRAINERS (`23`)
-   * still ships no route and still has no item.
+   * an item pointing at a 404 is worse than an absent one. ~~⛔ TRAINERS (`23`)
+   * still ships no route and still has no item.~~ ✅ SUPERSEDED at `P2-10`.
    */
   ["/management/students", { role: "management", label: "Students" }],
+  /*
+   * `P2-10` -- screen `23` Management Trainers, and `P2-11` -- screen `24` Add
+   * Trainer, at a LITERAL child of it.
+   *
+   * ⚠️ BOTH ROWS ARRIVE LATE, AND THE LATENESS IS THE FINDING. `N-0` went
+   * red the moment `/management/trainers` shipped at `P2-10` and STAYED red
+   * through the whole phase, because `prove:portal-p2-1` -- the suite that
+   * runs this census -- was not re-run before `P2-10` was reported complete.
+   * ▶ The ratchet did its job; nobody read it. Recorded as §12.13's THIRD
+   * instance rather than quietly fixed.
+   *
+   * ⛔ The `Trainers` rail item is NOT `exact`, so this child must resolve to
+   * the same single item -- which is exactly what `N-2` and `N-4` measure.
+   */
+  ["/management/trainers", { role: "management", label: "Trainers" }],
+  ["/management/trainers/add", { role: "management", label: "Trainers" }],
   // P2-1 — screen `12` at its canonical route. This expectation is also what
   // proves Dashboard does NOT light up here.
   ["/management/classes", { role: "management", label: "Classes" }],

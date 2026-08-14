@@ -380,6 +380,24 @@ export interface AdapterManagementTrainerRowDto {
   readonly studentCount: number;
 }
 
+export interface AdapterCreateTrainerInput {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+}
+
+/**
+ * ⛔ IDS AND A REASON, AND NOTHING ELSE. No email, no display name, no
+ * invitation token — the last of which cannot exist, because `A-027` gives the
+ * table no column able to hold one. ▶ The client learns THAT an invitation was
+ * created, never anything that would let it impersonate one.
+ */
+export interface AdapterTrainerInvitationOutcomeDto {
+  readonly membershipId: string;
+  readonly invitationId: string;
+  readonly reason: string;
+}
+
 export interface AdapterManagementTrainerListDto {
   readonly trainers: readonly AdapterManagementTrainerRowDto[];
   readonly staffCount: number;
