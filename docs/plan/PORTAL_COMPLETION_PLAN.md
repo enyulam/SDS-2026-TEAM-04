@@ -4056,6 +4056,21 @@ an unqualified one resolves to nothing. ⚠️ **The two categories look identic
 > still traverses the body. **A structural assertion cannot see a runtime resolution error, and a
 > function that raises is not a function that shipped.**
 
+✅ **PROMOTED TO `CLAUDE.md` §12 VERBATIM, 2026-08-15**, under an explicit bounded Operator
+instruction: *"'A migration that verifies its own SHAPE has not verified that it WORKS' belongs in
+§12 verbatim, and the standing rule — every migration declaring a function executes it at apply time
+— is the right closure."*
+
+⚠️ **AND IT IS THE SAME FAMILY AS THE RPC-CALLER RULE, ONE LAYER DOWN.** The Operator's framing,
+recorded because it is what makes the pair coherent and neither instrument said it:
+
+> *"the RPC-caller rule proves SQL reaches it, this one proves it runs at all."*
+
+▶ **THREE LAYERS NOW, AND EACH IS BLIND TO THE ONE BELOW IT:** the paired-suite rule proves a
+declared function is **called by its SQL proof** · the RPC-caller rule proves it is **reachable from
+application code** · **this rule proves it EXECUTES.** ⛔ `admin_create_trainer` satisfied the first
+two and raised on its first statement.
+
 ⚠️ **WHAT ACTUALLY CAUGHT IT:** `prove:portal-p2-11`, because it is the only proof that calls the
 function **as a real caller in a real role**. ▶ The `.mjs` suite pairing in `rpc-call-rule.mjs` is a
 first — every earlier pair is a `.sql` file — and it is the right pairing precisely because this
@@ -4091,8 +4106,22 @@ the route census whether or not the phase's name mentions navigation.
 ⚠️ **AND IT SURFACED A REAL DEFECT, NOT ONLY BOOKKEEPING.** With the child route finally asserted,
 `N-2` reported *"`/management/trainers/add`: **0 current item(s)**; expected exactly 1"* — the rail
 item carried `exact: true`, so the sidebar went **blank** on a page that plainly belongs to
-Trainers. ▶ **That is `C2C-002` exactly, and `Classes` already hit it at `P2-2`.** The ratchet being
-red for a phase is what delayed finding it.
+Trainers. ▶ **That is `C2C-002` exactly, and `Classes` already hit it at `P2-2`.**
+
+> ### ⛔ **AN UNREAD GATE DOES NOT JUST MISS ITS OWN FINDING — IT MASKS WHATEVER IT WOULD HAVE SURFACED.**
+>
+> *(Operator, 2026-08-15, ruling on this instance. Recorded as the general form because it is what
+> makes an unread gate expensive rather than merely untidy.)*
+
+⚠️ **THE COST IS COMPOUND, AND THAT IS THE POINT.** The route census's OWN finding was one missing
+expectation — cheap, and correctable in a line. ▶ **What it was HIDING was a blank sidebar on a real
+page**, and that defect was **invisible to every other gate in the project**: `tsc` is happy,
+`lint` is happy, the build compiles, and the page renders. **Only the assertion that was never run
+could see it.**
+
+⛔ **SO THE COST OF SKIPPING A GATE IS NOT BOUNDED BY WHAT THAT GATE REPORTS.** It is bounded by
+everything downstream of the assertion that never ran — which is unknowable in advance, and is
+exactly why *"the phase's own suite is green"* is not a completion criterion.
 
 ---
 
@@ -4131,3 +4160,154 @@ fixture's `createTrainer` returns `unavailable` rather than a plausible id.
 and **no instrument names a duration**, measured across the tree before writing. ▶ **7 days is this
 build's choice**, held in ONE named constant, asserted by `PA-6d`, and recorded here and in
 `STATUS.md` as **STATED, NOT RULED**. A ruling changes one line.
+
+
+---
+
+## §26 — `P2-9` AS BUILT, AND THE LIMIT IT FOUND IN THE RULE `P2-11` JUST CREATED
+
+### §26.1 — ⛔ **THE APPLY-TIME EXECUTION RULE HAS A CEILING, AND IT IS THE FIRST GATE**
+
+`P2-11` closed a defect by adding *"every migration that declares a function must EXECUTE it at
+apply time."* ▶ **`P2-9` shipped a function that passed that new leg and still raised for a real
+caller.**
+
+```
+ERROR:  column cg.label does not exist
+HINT:   Perhaps you meant to reference the column "t.label".
+```
+
+⚠️ **`VP-2` DID execute both functions and DID fail closed — correctly.** But an apply-time probe
+runs as the **OWNER**, so `app_current_account_id()` is NULL and the function returns at its **first
+gate**. This body sits behind **three** (`app_current_account_id`, the management membership, the
+centre-scoped learner), and **`plpgsql` resolves lazily** — so the query was never reached.
+
+⛔ **`P2-11`'s DEFECT WAS CAUGHT BY THAT LEG ONLY BECAUSE ITS FAILING STATEMENT WAS THREE LINES PAST
+THE GATE.** That is luck of placement, not coverage — and reading it as coverage is exactly what
+`P2-9` did.
+
+> ### ⛔ **THE RULE HAS TWO LEGS, AND NEITHER SUBSTITUTES FOR THE OTHER.**
+>
+> 1. **APPLY TIME** — execute the function. Proves it resolves **up to its first gate**, and that
+>    the gate fails closed. Cheap, always available, **and bounded by the gate**.
+> 2. **THE PAIRED SUITE** — execute it **as a real authorized caller, past every gate, against
+>    fixture data**, and assert on the returned rows. **Only this reaches the body.**
+>
+> ⚠️ Leg 1 cannot reach the body; leg 2 does not run when a migration is applied to a fresh
+> database. **A function guarded by only one of them is guarded halfway.**
+
+▶ **`PS-3`/`PS-3b` are leg 2**, and their own messages say which defect they exist for.
+
+---
+
+### §26.2 — ⛔ WHERE THE `V-4` ASSERTION HAD TO MOVE, AND WHY THAT IS **STRICTER**, NOT LOOSER
+
+`V-4` (`P2-4`) bars the string `rating` from a function's **whole definition**. ▶ **A verbatim copy
+would have failed `P2-9` on its own correct implementation**, because the ruling *is* that this body
+reads `observation_ratings` and aggregates them.
+
+The Operator's wording names the right locus exactly: *"the **RETURNED SHAPE** must carry no rating
+value, band or dimension-keyed score."*
+
+| Where | What it asserts |
+|---|---|
+| `VP-4a` | both **RESULT TYPES pinned string for string** — a column added, renamed, reordered or retyped fails the migration |
+| `VP-4b` | no barred name in either **result type**, naming the rule so a failure explains itself |
+| `VP-4c` | `V-4`'s classic **body** bar, minus the rating family **only** — every panel, note, checklist, approval and hash still barred |
+| `PS-4` | the shapes again, from the suite, at HEAD |
+| **`PS-4b`** | ⛔ **and no returned VALUE is a rating label** — because a `text` column can carry `Mastering` without the shape ever changing |
+
+⛔ **FOUR ASSERTIONS WHERE `V-4` HAD ONE**, and the strongest of them (`VP-4a`) cannot be satisfied
+by anything except the exact contract. **A later phase wanting a rating here must DELETE an
+assertion, which is visible in a diff.**
+
+⚠️ **AND THE BODY BAR CAUGHT ITS OWN AUTHOR AGAIN.** `VP-4c` scans definitions **comments and all**
+— `V-4`'s deliberate design — and the first dry run failed because the body **documented** that it
+carries no checklist. ▶ The prose moved to the migration header, which is not part of any function
+definition. **This is the second time in two phases an assertion has fired on its own
+documentation**, and both times the fix was to move the prose, never to weaken the scan.
+
+---
+
+### §26.3 — `D-2` RENDERED AS A LINE, ASSERTED IN THREE LAYERS
+
+*"The trend is a line with no number, band or grade rendered anywhere, to any role."*
+
+`sessionScore` enters `trendGeometry()` and leaves as `x`/`y`. **`PS-7b` scans for FORMATTING, not
+for the identifier** — the identifier must be present, it is the coordinate — and bars `toFixed`, a
+percent-suffixed score in a text node, the score inside an `aria-label` or a `title`, the score as
+element content, and any band label.
+
+⚠️ **`aria-label` IS IN THAT LIST DELIBERATELY.** A screen reader is a role, so announcing
+*"78 percent"* would breach the same rule the visual layer obeys. The chart is labelled by what it
+**is** — a trend across dated sessions — and the axis carries **dates**, which are not ratings.
+
+⛔ **`PS-7c` IS WHAT STOPS AN EMPTIED CHART FROM PASSING**: it asserts `trendGeometry` is called, an
+SVG `path` is drawn, and `sessionScore` is consumed. ▶ **The hero-chain lesson on a different
+field** — a block that renders nothing satisfies every prohibition perfectly.
+
+⚠️ **`PS-3c` MAKES THE VALUE ITSELF FALSIFIABLE** (§12.15). The fixture's observation is
+deliberately MIXED, so a correct `D-2` mean lands **strictly between the band floors and not on
+one** — measured `44.44` and `63.89`. ▶ A hard-coded constant, an unmapped `NULL` coerced to zero,
+or a count-instead-of-average would **all** land on a band boundary and fail.
+
+---
+
+### §26.4 — ✅ THE `exact: true` TRAP, CAUGHT BY LOOKING
+
+`Classes` hit `C2C-002` at `P2-2`. `Trainers` hit it at `P2-11`, found by a red `N-2`. ▶ **`Students`
+would have hit it at `P2-9`, and this time it was found by CHECKING before shipping the child
+route.**
+
+> ⛔ **A rail item is `exact` only while it has no child route, and SHIPPING A CHILD IS THE MOMENT TO
+> CHECK.** Three occurrences in three phases makes it a checklist item, not a coincidence.
+
+✅ **AND THE ROUTE RATCHET FIRED *DURING* THIS PHASE RATHER THAN A PHASE LATE** — red on the same run
+that shipped screen `18`, read, and moved before the phase closed. ▶ **That is §12.13's correction
+working: the gate was always fine; what changed is that it was run at the end of the phase that
+touched its subject.**
+
+---
+
+### §26.5 — WHAT SCREEN `18` REFUSED
+
+| Drawn | Disposition | Ground |
+|---|---|---|
+| **Skill Breakdown** (nine bars) | ⛔ PROHIBITED | `GC-6` / `C-9` — `D-1` reaches **report DETAIL surfaces only**; a profile is not one |
+| **Strengths & Focus Areas** (six chips) | ⛔ PROHIBITED | Operator-ruled on a **measurement**: the greens are the three highest bars, the ambers the two lowest — **the Skill Breakdown thresholded** |
+| **Reports `GRADE` column** | ⛔ PROHIBITED | `G-2`, permanently, on every surface |
+| **`Generate Term Report`** | ⛔ not built | `C-11` defers `28`; term generation is out of MVP scope (§8) |
+| **TA line in Classes Enrolled** | ⛔ prohibited | `A-014` / `G-7` — the DTO carries one `trainerName` |
+| **`Date of birth` · `Contact` · `Student ID`** | ⛔ no column | `students` is `id · centre_id · full_name · is_active · created_at · updated_at · deactivated_at`, measured |
+| **`Good standing` chip** | ⛔ not a concept | no enum, no column, nothing derivable |
+| **`Edit`** | ⏸ **disabled with a reason** | ⚠️ **UNLIKE screen `23`'s**: `22` Edit Student EXISTS in the ratified 36 and lands at `P2-14`, so it has a **known destination**. *Disabled means "not yet"; absent means "not a thing"* |
+
+▶ **`Q-27`'s precedent governs the layout**: Profile Details promotes up into the vacated right
+column, and **no blank rectangle and no invented filler card** takes the place of what was removed.
+Their absence is **`EXPECTED / REQUIRED`** at visual acceptance.
+
+---
+
+### §26.6 — FUNCTIONS AND GRANTS ADDED UNDER THE BATCH AUTHORIZATION
+
+*(The Operator asked for the list, not a count, in every phase report under the batch.)*
+
+| Function | Grant |
+|---|---|
+| `public.report_management_student_trend(uuid)` | `EXECUTE` → `authenticated` |
+| `public.report_management_student_reports(uuid)` | `EXECUTE` → `authenticated` |
+
+⛔ **AND NOTHING ELSE.** No table, column, enum, policy, client table grant or audit string. Census
+`T=30 E=12 P=30 R=23`, asserted as equalities by both migrations and re-measured independently by
+`PS-5`. `PS-5b` proves **zero client table grants** on `observations`, `observation_ratings`,
+`reports` and `report_versions` — they stay reachable only through a reviewed RPC, which is why
+these two exist.
+
+⚠️ **TWO FUNCTIONS RATHER THAN THE ONE PROPOSED, and the reason is the ruled assertion itself.** The
+screen needs two genuinely different shapes. ▶ The alternative — one function returning `jsonb` —
+would have made *"assert the returned shape"* **IMPOSSIBLE**: you cannot assert a shape over an
+opaque blob. **Typed `TABLE(...)` returns are what let the boundary be proven at all.**
+
+✅ **AND ONE FEWER THAN PROPOSED, BY §12.10.** The `ASSESSMENTS` tile was going to be a third read.
+The trend already carries it: `A-017` makes all nine dimensions mandatory and the RPC drops any
+session without exactly nine, so the tile is `trend.length`.

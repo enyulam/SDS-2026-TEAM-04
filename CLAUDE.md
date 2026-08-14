@@ -721,6 +721,41 @@ Proceed autonomously on implementation details (component structure, exact query
 - **Re-attempting a failed destructive, billable, security-sensitive or production-facing operation.** One honest failure is a finding; a retry loop against a live or costly system is a hazard. Fix the diagnosed cause, or stop and ask. **Never work around a fail-closed refusal by weakening the thing that refused** — that is how a credential path, a preflight or a grounding gate gets quietly disabled.
 - **Committing, and anything touching shared git state.** Local commits at coherent checkpoints remain expected during an **authorized implementation** phase (§11 Git discipline). But **during a documentation, governance or analysis run, do not commit** — leave the diff for operator review, as Phase A and OD-4 both did. Never `push`, add a remote, `reset`, `rebase`, `amend`, force, `stash`, `tag`, `gc`, `prune`, or `checkout` another branch **in a working tree that already holds work**: branch history is the audit record, and the only history-touching operation compatible with SHA-cited evidence is a **forward `git revert`**. *(Narrow carve-out: `git worktree add` — including with `-b` — is permitted where §14.3 requires a new isolated worktree, because it creates a fresh tree and moves no existing one. Creating or deleting a worktree is otherwise an Operator decision.)* Never run `supabase db reset` — it destroys the three synthetic Auth identities, whose recreation needs an interactive password prompt no agent may handle.
 
+### ⛔ A MIGRATION THAT VERIFIES ITS OWN SHAPE HAS NOT VERIFIED THAT IT WORKS
+
+*(Added 2026-08-15 under an explicit bounded Operator instruction naming this section and this
+sentence: **"belongs in §12 verbatim, and the standing rule — every migration declaring a function
+executes it at apply time — is the right closure."** **Process only — no product rule changes.**)*
+
+**⛔ EVERY MIGRATION THAT DECLARES A FUNCTION MUST EXECUTE IT AT APPLY TIME**, asserting a governed
+answer. **One call is enough**, and a **REFUSAL is the ideal one** — it traverses the body and writes
+nothing.
+
+⚠️ **MEASURED, NOT HYPOTHETICAL.** `supabase/migrations/20260815120000_portal_p2_11_admin_create_trainer.sql`
+applied cleanly, printed **NINE PASS notices**, and shipped a function that **could not run**:
+`function pg_catalog.coalesce(text, unknown) does not exist`. Two mechanisms had to line up, and
+**both are general**:
+
+1. **`plpgsql` DOES NOT RESOLVE FUNCTION NAMES AT `CREATE` TIME.** It syntax-checks the body and
+   defers resolution to first execution. ▶ The **same file's** earlier `position(… IN …)` fault *was*
+   caught — because it was a **SYNTAX** error rather than a **RESOLUTION** one. ⚠️ **The two are
+   indistinguishable while writing and opposite at runtime.**
+2. **ALL NINE ASSERTIONS WERE STRUCTURAL** — signature, security posture, `search_path`, the grant,
+   four exact privilege sets, four census equalities. ▶ **Not one CALLED the function**, so every one
+   was TRUE of a body that raises on its first statement.
+
+⚠️ **AND IT IS THE SAME FAMILY AS THE RPC-CALLER RULE, ONE LAYER DOWN** — the Operator's framing,
+recorded because it is what makes the pair coherent: **the RPC-caller rule proves SQL REACHES a
+function; this rule proves it RUNS AT ALL.** A function can be declared, granted, called by its SQL
+suite and reached from application code, and still raise on its first statement.
+
+⛔ **SQL GRAMMAR IS NOT A CALLABLE FUNCTION AND MAY NEVER BE SCHEMA-QUALIFIED** — `coalesce`,
+`position(… IN …)`, `extract`, `overlay`, `nullif`, `substring(… FROM …)`, `trim(… FROM …)`. ⚠️ And
+under `search_path = ''` an ordinary function (`btrim`, `lower`, `length`, `strpos`, `split_part`)
+**must** be qualified or it resolves to nothing. **The two categories look identical in source.**
+
+Full record: `docs/plan/PORTAL_COMPLETION_PLAN.md` §25.1.
+
 When in doubt, a short question to the orchestrator costs little; a governance mechanism — or a professional standard — built quietly wrong costs a rebuild.
 
 ---

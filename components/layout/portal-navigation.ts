@@ -133,7 +133,19 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         href: "/management/students",
         label: "Students",
         path: "/management/students",
-        exact: true,
+        /*
+         * ⛔ `exact` DROPPED AT `P2-9`, when screen `18` shipped at
+         * `/management/students/[studentId]`. ⚠️ **THE SAME `C2C-002` TRAP
+         * `Trainers` HIT ONE PHASE AGO, CAUGHT BEFORE IT SHIPPED THIS TIME** —
+         * under `exact: true` a child route resolves to **ZERO** active rail
+         * items and the sidebar goes blank on a page that plainly belongs to
+         * Students.
+         *
+         * ▶ `Classes` hit it at `P2-2` and `Trainers` at `P2-11`; this is the
+         * third occurrence, and the only one found by LOOKING rather than by a
+         * red assertion. **The pattern is: a rail item is `exact` only while it
+         * has no child route, and shipping a child is the moment to check.**
+         */
         icon: "user",
       },
       /*

@@ -68,6 +68,7 @@ import type {
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
+  ManagementStudentProfileDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -131,6 +132,7 @@ import {
   adapterReadManagementStudents,
   adapterReadManagementTrainers,
   adapterCreateTrainer,
+  adapterReadManagementStudentProfile,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -333,6 +335,13 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
 
     readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>> {
       return guard(() => adapterReadManagementStudents());
+    },
+
+    /** `P2-9` — screen `18`. ⛔ No rating field exists in the returned type. */
+    readManagementStudentProfile(
+      studentId: string,
+    ): Promise<UiActionResult<ManagementStudentProfileDto>> {
+      return guard(() => adapterReadManagementStudentProfile(studentId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

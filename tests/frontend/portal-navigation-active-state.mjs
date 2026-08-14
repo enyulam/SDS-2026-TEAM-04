@@ -126,6 +126,16 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/students", { role: "management", label: "Students" }],
   /*
+   * `P2-9` -- screen `18` Student Profile, at a DYNAMIC child of Students.
+   *
+   * ⚠️ THE RAIL ITEM DROPPED `exact` IN THE SAME PASS, and this row is what
+   * makes that change MEASURED rather than assumed: under the old `exact: true`
+   * this route resolves to ZERO active items -- `C2C-002`, which `Classes` hit
+   * at `P2-2` and `Trainers` at `P2-11`. ▶ Third occurrence, and the first one
+   * caught by LOOKING before it shipped rather than by a red assertion.
+   */
+  ["/management/students/[studentId]", { role: "management", label: "Students" }],
+  /*
    * `P2-10` -- screen `23` Management Trainers, and `P2-11` -- screen `24` Add
    * Trainer, at a LITERAL child of it.
    *

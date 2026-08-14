@@ -81,7 +81,8 @@
     "prove:portal-p2-6r-e2e": "node --env-file=.env.local scripts/tests/portal/prove-p2-6r-upload-e2e.mjs",
     "prove:portal-p2-6r": "node scripts/tests/portal/prove-p2-6r-material-transport.mjs",
     "prove:portal-p2-8": "node --env-file=.env.local scripts/tests/portal/prove-p2-8-students.mjs",
-    "prove:portal-p2-11": "node --env-file=.env.local scripts/tests/portal/prove-p2-11-add-trainer.mjs"
+    "prove:portal-p2-11": "node --env-file=.env.local scripts/tests/portal/prove-p2-11-add-trainer.mjs",
+    "prove:portal-p2-9": "node --env-file=.env.local scripts/tests/portal/prove-p2-9-student-profile.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

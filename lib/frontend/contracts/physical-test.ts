@@ -319,6 +319,76 @@ export type TrainerInvitationOutcomeDto = {
   readonly reason: string;
 };
 
+
+/**
+ * `P2-9` — screen `18` Management Student Profile.
+ *
+ * ⛔ NO RATING FIELD EXISTS ANYWHERE IN THIS SHAPE, AND THAT IS STRUCTURAL.
+ * `GC-6` on pack `18` reads *"do not add a rating badge, bar, column, tile or
+ * chip"*, and the frame draws three things that would be one: the nine-bar
+ * **Skill Breakdown**, the **Strengths & Focus Areas** chips (Operator-ruled
+ * 2026-08-15 — they are the Skill Breakdown thresholded), and the Reports
+ * **GRADE** column (`G-2`, permanently). ▶ **None of them has a field here.**
+ *
+ * ⚠️ `sessionScore` IS `D-2` AND IT IS A COORDINATE. It exists so the Growth
+ * Trend can be drawn. ⛔ **It must never be rendered as a number, a band or a
+ * grade, on any surface, to any role** — the suite asserts that on the screen,
+ * because rendering is where the constraint lives.
+ */
+export type StudentTrendPointDto = {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonTitle: string | null;
+  readonly sessionScore: number;
+};
+
+export type StudentReportRowDto = {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly classLabel: string;
+  readonly lessonTitle: string | null;
+  readonly termLabel: string | null;
+  /**
+   * ⚠️ A LIFECYCLE STATE, NEVER A GRADE. `A-038` requires the row to gate on
+   * it: `submitted` links to the canonical report, `trainer_approved` to the
+   * management final-review surface, and every earlier status exposes no
+   * report content at all.
+   */
+  readonly reportState: string;
+  readonly submittedAt: string | null;
+};
+
+export type StudentClassRowDto = {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly gradeLabel: string;
+  readonly schedule: string | null;
+  /** ⛔ ONE trainer. `A-014`/`G-7` — no Trainer Assistant line, ever. */
+  readonly trainerName: string | null;
+};
+
+/**
+ * ⛔ FOUR FIELDS THE FRAME DRAWS THAT HAVE NO COLUMN, so they have no field
+ * here either: `Date of birth`, `Contact`, `Student ID 2025-113`, and the
+ * `Good standing` chip — which is not a concept anywhere in this system.
+ * `students` is `id · centre_id · full_name · is_active · created_at ·
+ * updated_at · deactivated_at`, measured. **Disclosed on the page, not
+ * invented.**
+ */
+export type ManagementStudentProfileDto = {
+  readonly studentId: string;
+  readonly fullName: string;
+  readonly isActive: boolean;
+  readonly guardianName: string | null;
+  readonly enrolledOn: string | null;
+  readonly attendancePresent: number;
+  readonly attendanceTotal: number;
+  readonly classes: readonly StudentClassRowDto[];
+  readonly trend: readonly StudentTrendPointDto[];
+  readonly reports: readonly StudentReportRowDto[];
+};
+
 export type ManagementStudentListDto = {
   readonly students: readonly ManagementStudentRowDto[];
   readonly enrolledCount: number;

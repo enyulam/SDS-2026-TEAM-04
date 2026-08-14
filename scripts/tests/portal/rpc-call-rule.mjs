@@ -86,6 +86,16 @@ export const RPC_MIGRATIONS = [
    * ever executes the function as a real caller.
    */
   { migration: "20260815130000_portal_p2_11_coalesce_fix.sql", suite: "prove-p2-11-add-trainer.mjs" },
+  /*
+   * `P2-9` — the two student-profile reads, and their own `R-1` forward
+   * correction. ⚠️ The second exists because `class_grades.label` does not:
+   * the first migration passed TEN assertions, including the new
+   * execute-at-apply-time leg, and still shipped a query that raises — because
+   * an owner-probe returns at the FIRST gate and this body sits behind three.
+   * ▶ **The suite is what reached it**, by calling as a real management caller.
+   */
+  { migration: "20260815150000_portal_p2_9_student_profile_reads.sql", suite: "prove-p2-9-student-profile.mjs" },
+  { migration: "20260815160000_portal_p2_9_class_label_fix.sql", suite: "prove-p2-9-student-profile.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

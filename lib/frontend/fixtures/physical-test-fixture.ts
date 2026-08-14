@@ -26,6 +26,7 @@ import {
   type ClassCreationOutcomeDto,
   type CreateClassInput,
   type TrainerInvitationOutcomeDto,
+  type ManagementStudentProfileDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1284,6 +1285,24 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * ⚠️ `unavailable`, not `unauthorized`: the caller is permitted, the
    * capability is absent. The two are different answers and the screen says so.
    */
+  /**
+   * `P2-9` — screen `18`. ⛔ THE FIXTURE REFUSES, AND IT IS THE HONEST ANSWER.
+   *
+   * ▶ The Growth Trend is `D-2`, computed from the nine per-dimension ratings
+   * INSIDE the database and never leaving it. A fixture cannot compute it
+   * without holding the nine — and holding them in a browser-side fixture is
+   * the `C-9`/`Q-27` shape this phase exists to avoid. **A plausible invented
+   * trend would also be a graph of nothing**, presented to management as a
+   * learner's progress.
+   *
+   * ⚠️ `unavailable`, not `unauthorized`: the caller is permitted, the
+   * capability is absent, and the screen says which.
+   */
+  async readManagementStudentProfile(): Promise<UiActionResult<ManagementStudentProfileDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
   async createTrainer(): Promise<UiActionResult<TrainerInvitationOutcomeDto>> {
     await delay(120);
     return { outcome: "unavailable" };

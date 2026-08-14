@@ -9943,3 +9943,100 @@ by the Operator's walk server. **VISUAL acceptance is `NOT-RUN` on `11`, `14`, `
 `25`** and remains the Operator's.
 
 **Next authorized step:** `P2-9` (screen `18` Class Statistics), unblocked by the `B` ruling.
+
+
+---
+
+## 2026-08-15 (later) — `P2-9` screen `18`, and the ceiling of the rule `P2-11` had just written
+
+**Branch/worktree:** `develop`, main worktree. **Starting HEAD:** `d6b0305`. **Migrations added:** 2
+(`20260815150000`, and `20260815160000` — its `R-1` forward correction).
+
+### Functions and grants added under the batch authorization — named, not counted
+
+| Function | Grant |
+|---|---|
+| `public.report_management_student_trend(uuid)` | `EXECUTE` → `authenticated` |
+| `public.report_management_student_reports(uuid)` | `EXECUTE` → `authenticated` |
+
+Nothing else: no table, column, enum, policy, client table grant or audit string. Census
+`T=30 E=12 P=30 R=23`, and `PS-5b` proves zero client table grants on `observations`,
+`observation_ratings`, `reports` and `report_versions`.
+
+### The aggregation happens inside the database
+
+`report_get_management_ratings` is already granted to `authenticated` and would have worked. Using
+it per session would have been the defect: nine rating values arriving in a profile-surface payload,
+hidden by a component that chose not to render them — `Q-27`'s shape, one role over.
+
+**Two functions rather than the one proposed**, and the reason is the ruled assertion itself: the
+alternative — one function returning `jsonb` — would have made *"assert the returned shape"*
+impossible. Typed `TABLE(...)` returns are what let the boundary be proven. **And one fewer than
+proposed**, by §12.10: the `ASSESSMENTS` tile is `trend.length`, because `A-017` makes all nine
+dimensions mandatory and the RPC drops any session without exactly nine.
+
+### The `V-4` assertion had to move, and moving it made it stricter
+
+`V-4` bars `rating` from a whole function definition. A verbatim copy would have failed this
+migration on its own correct implementation — the ruling *is* that this body aggregates ratings. The
+Operator's wording names the locus: the **returned shape**. Four assertions where `V-4` had one:
+`VP-4a` pins both result types string for string, `VP-4b` names the rule so a failure explains
+itself, `VP-4c` keeps the body bar minus the rating family only, and `PS-4b` scans the returned
+**values** — because a `text` column can carry `Mastering` without the shape ever changing.
+
+The body bar caught its own author again: the first dry run failed because the body *documented*
+that it carries no checklist. The prose moved to the migration header, which is not part of any
+function definition. Second time in two phases; both times the fix was to move the prose.
+
+### ⛔ The apply-time execution rule has a ceiling, and it is the first gate
+
+`P2-11` closed a defect by requiring every migration that declares a function to execute it at apply
+time — now in `CLAUDE.md` §12. **`P2-9` then shipped a function that passed that leg and still
+raised for a real caller**: `column cg.label does not exist`. `class_grades` carries `display_name`;
+`terms.label` sat four lines away in the same `SELECT`.
+
+`VP-2` executed both functions and failed closed, correctly. But an owner-probe returns at the
+**first gate**, this body sits behind three, and `plpgsql` resolves lazily — so the query was never
+reached. `P2-11`'s defect was caught by that leg only because its failing statement was three lines
+*past* the gate: luck of placement, not coverage.
+
+**The rule now has two legs and neither substitutes for the other.** Apply-time execution proves
+resolution up to the first gate and that the gate fails closed. The paired suite must execute the
+function **as a real authorized caller, past every gate, against fixture data**. `PS-3`/`PS-3b` are
+that leg and are what caught this. Corrected by forward migration under `R-1`, whose `VQ-2` runs the
+failing query verbatim at apply time.
+
+### `D-2` rendered as a line, asserted in three layers
+
+`PS-7b` scans for **formatting**, not for the identifier — the identifier must be present, it is the
+coordinate. It bars `toFixed`, a percent-suffixed score in a text node, the score inside an
+`aria-label` **or** a `title` (a screen reader is a role), the score as element content, and any band
+label. `PS-7c` asserts the chart still renders, because an emptied chart satisfies every prohibition
+perfectly. `PS-3c` makes the value falsifiable: the mixed fixture yields `44.44` and `63.89`,
+strictly between band floors and not on one, so a constant, an unmapped NULL or a
+count-instead-of-average would all fail.
+
+### The `exact: true` trap, caught by looking
+
+`Classes` hit `C2C-002` at `P2-2`; `Trainers` at `P2-11`. `Students` would have hit it here, and
+this time it was checked before the child route shipped. A rail item is `exact` only while it has no
+child route, and shipping a child is the moment to check.
+
+**And the route ratchet fired during this phase rather than a phase late** — red on the same run
+that shipped screen `18`, read, and moved before the phase closed. That is §12.13's correction
+working.
+
+### Verification
+
+All 15 portal suites PASS (`p2-1` · `p2-2` · `p2-2b` · `p2-3` · `p2-4` · `p2-5` · `p2-6` · `p2-6r` ·
+`p2-6r-e2e` · `p2-7` · `p2-8` · **`p2-9`** · `p2-10` · `p2-11` · `ruling-a`). Navigation active-state
+all proofs passed, 26 routes. `tsc --noEmit` clean, `lint` 0 errors, `next build` clean,
+`prove:encoding` PASS.
+
+**Deliberately red, carried:** `prove:artefact-read` (`AR-4-14`/`AR-4-17`) · `prove:serving-discipline`
+(`D-10`, intermittent).
+
+**VISUAL `NOT-RUN`** on `11`, `14`, `17`, `18`, `23`, `24`, `25`.
+
+**Next authorized step:** `P2-12` (`20` Register Student). ⚠️ It is a **write** path and therefore
+falls **outside** the read-only batch — it stops for authorization.

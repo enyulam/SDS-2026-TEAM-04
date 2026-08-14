@@ -130,6 +130,7 @@ import type {
   AdapterManagementStudentListDto,
   AdapterManagementTrainerListDto,
   AdapterCreateTrainerInput,
+  AdapterManagementStudentProfileDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -172,6 +173,7 @@ import {
 } from "@/server/modules/class-session/material-transport";
 import { listManagementTrainersCore } from "@/server/modules/class-session/trainer-list-projections";
 import { createTrainerCore } from "@/server/modules/identity-access/trainer-invitation";
+import { readStudentProfileCore } from "@/server/modules/management-view/student-profile-projections";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -987,6 +989,60 @@ export async function adapterReadManagementTrainers(): Promise<
         studentCount: row.studentCount,
       })),
       staffCount: result.rows.staffCount,
+    },
+  };
+}
+
+/**
+ * `P2-9` — screen `18` Management Student Profile.
+ *
+ * ⚠️ SAME ALLOW-LIST MAPPER DISCIPLINE, field by field, and here it is doing
+ * the heaviest work of any mapper in the file: the projection reads twelve
+ * relations and two `SECURITY DEFINER` RPCs, and **not one rating value exists
+ * anywhere in what it can return** — the migration pins both RPC result types
+ * string for string, and this mapper names no rating field because there is
+ * none to name.
+ */
+export async function adapterReadManagementStudentProfile(
+  studentId: string,
+): Promise<ActionResult<AdapterManagementStudentProfileDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readStudentProfileCore(client, studentId);
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      studentId: d.studentId,
+      fullName: d.fullName,
+      isActive: d.isActive,
+      guardianName: d.guardianName,
+      enrolledOn: d.enrolledOn,
+      attendancePresent: d.attendancePresent,
+      attendanceTotal: d.attendanceTotal,
+      classes: d.classes.map((c) => ({
+        classModuleId: c.classModuleId,
+        title: c.title,
+        gradeLabel: c.gradeLabel,
+        schedule: c.schedule,
+        trainerName: c.trainerName,
+      })),
+      trend: d.trend.map((t) => ({
+        classSessionId: t.classSessionId,
+        sessionDate: t.sessionDate,
+        lessonTitle: t.lessonTitle,
+        sessionScore: t.sessionScore,
+      })),
+      reports: d.reports.map((r) => ({
+        reportId: r.reportId,
+        classSessionId: r.classSessionId,
+        sessionDate: r.sessionDate,
+        classLabel: r.classLabel,
+        lessonTitle: r.lessonTitle,
+        termLabel: r.termLabel,
+        reportState: r.reportState,
+        submittedAt: r.submittedAt,
+      })),
     },
   };
 }

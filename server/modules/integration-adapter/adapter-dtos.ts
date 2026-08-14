@@ -380,6 +380,50 @@ export interface AdapterManagementTrainerRowDto {
   readonly studentCount: number;
 }
 
+/**
+ * `P2-9` — screen `18`. ⛔ The allow-list stops at these fields. A rating
+ * column added to any underlying relation later cannot reach the client until
+ * someone writes its name here, which is a visible act in a diff.
+ */
+export interface AdapterStudentTrendPointDto {
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly lessonTitle: string | null;
+  readonly sessionScore: number;
+}
+
+export interface AdapterStudentReportRowDto {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly sessionDate: string;
+  readonly classLabel: string;
+  readonly lessonTitle: string | null;
+  readonly termLabel: string | null;
+  readonly reportState: string;
+  readonly submittedAt: string | null;
+}
+
+export interface AdapterStudentClassRowDto {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly gradeLabel: string;
+  readonly schedule: string | null;
+  readonly trainerName: string | null;
+}
+
+export interface AdapterManagementStudentProfileDto {
+  readonly studentId: string;
+  readonly fullName: string;
+  readonly isActive: boolean;
+  readonly guardianName: string | null;
+  readonly enrolledOn: string | null;
+  readonly attendancePresent: number;
+  readonly attendanceTotal: number;
+  readonly classes: readonly AdapterStudentClassRowDto[];
+  readonly trend: readonly AdapterStudentTrendPointDto[];
+  readonly reports: readonly AdapterStudentReportRowDto[];
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

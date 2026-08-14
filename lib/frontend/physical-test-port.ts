@@ -25,6 +25,7 @@ import type {
   MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
+  ManagementStudentProfileDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -225,6 +226,14 @@ export interface PhysicalTestPort {
   readManagementDashboardSummary(): Promise<UiActionResult<ManagementDashboardSummaryDto>>;
   /** `P2-8` — screen `17`. ⛔ A READ ONLY; registration and parent creation are `P2-12`/`P2-13`. */
   readManagementStudents(): Promise<UiActionResult<ManagementStudentListDto>>;
+  /**
+   * `P2-9` — screen `18`. ⛔ Carries no rating of any kind: the Skill
+   * Breakdown, the Strengths chips and the Reports GRADE column all have no
+   * field in the returned type (`GC-6`, `C-9`, `G-2`).
+   */
+  readManagementStudentProfile(
+    studentId: string,
+  ): Promise<UiActionResult<ManagementStudentProfileDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.
