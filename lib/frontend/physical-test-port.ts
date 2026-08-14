@@ -22,6 +22,10 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
+  MaterialUploadTicketDto,
+  MaterialUploadTicketInput,
+  MaterialAttachInput,
+  MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementEditWordingInput,
@@ -186,6 +190,28 @@ export interface PhysicalTestPort {
   readManagementLessonPlans(
     classModuleId: string,
   ): Promise<UiActionResult<ManagementLessonPlansDto | null>>;
+  /**
+   * ⛔ `P2-6R` — THE THREE WRITES THE READ ABOVE WAS SHIPPED WITHOUT.
+   *
+   * The comment above says attach and remove "belong on their own signatures".
+   * ▶ `P2-6` wrote that sentence and then did not write the signatures, so the
+   * three RPCs existed in the database, were granted to `authenticated`, and
+   * were reachable from no application code — an unwired write path behind a
+   * `disabled` button. `PDTa-WIRED` fails the build for that shape now.
+   *
+   * ⚠️ SAME FOUR-MEMBER SPLIT AS EVIDENCE, AND THE SPLIT IS THE GOVERNANCE.
+   * `createMaterialUploadTicket` mints an id and derives a path and authorizes
+   * NOTHING; the bytes then go browser-direct to a private bucket where the one
+   * INSERT policy re-derives management authority over the session named in the
+   * FIRST PATH SEGMENT, live. `attachMaterial` is the GOVERNED ACT — before it
+   * succeeds the object is referenced by no row and reachable by no read.
+   */
+  createMaterialUploadTicket(
+    input: MaterialUploadTicketInput,
+  ): Promise<UiActionResult<MaterialUploadTicketDto>>;
+  attachMaterial(input: MaterialAttachInput): Promise<UiActionResult<{ readonly materialId: string }>>;
+  readMaterialViewUrl(materialId: string): Promise<UiActionResult<MaterialViewUrlDto>>;
+  removeMaterial(materialId: string): Promise<UiActionResult<{ readonly removed: boolean }>>;
   /**
    * `P2-7` — screen `11`. ⛔ NO PARAMETER, and that is the authorization
    * boundary rather than a convenience: the centre is resolved from the

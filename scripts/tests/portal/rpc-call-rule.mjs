@@ -165,3 +165,94 @@ export function unpairedMigrations(root, pairs = RPC_MIGRATIONS) {
   }
   return missing;
 }
+
+/**
+ * ⛔ THE THIRD STANDING RULE, ADDED 2026-08-14 BY OPERATOR RULING AFTER `P2-6`
+ *    SHIPPED A SURFACE OVER AN UNWIRED WRITE PATH AND REPORTED COMPLETE.
+ *
+ * > *"rpc-call-rule proves a function runs in SQL. It cannot prove any
+ * >  application path reaches it. Extend it: every RPC declared in a migration
+ * >  must be called from APPLICATION code — a port method, adapter action or
+ * >  server action — not only from its SQL suite. A function reachable only
+ * >  from a test is an unwired write path."*
+ *
+ * ▶ THE DEFECT IT CLOSES. `P2-6` shipped `class_session_materials`, a private
+ *   bucket, a storage policy and five functions — all correct, all granted,
+ *   all CALLED BY THEIR SQL SUITE, so both existing rules passed. The screen
+ *   rendered three DISABLED controls. **Nothing in the application ever called
+ *   `material_attach_confirm`, `material_signed_path` or `material_remove`:
+ *   every mention was inside a comment.**
+ *
+ * ⛔ SOME FUNCTIONS ARE LEGITIMATELY UNCALLED FROM THE APPLICATION, and the
+ *   exemption is PROVEN, NEVER DECLARED. An allow-list would let the next
+ *   unwired path be waved through by adding a name to it. Instead a function
+ *   with no application caller must be shown to be INTERNAL — referenced by an
+ *   RLS policy expression or by another function's body, read from the live
+ *   catalogue:
+ *     · `app_management_may_attach_material` — the predicate of the
+ *       lesson-materials storage policy (policy=1)
+ *     · `audit_action_registry` — read by two other function bodies
+ *   Neither is reachable from a client, and neither should be.
+ *
+ * ⚠️ AND THE FIRST DRAFT OF THAT PROOF WAS WRONG, which is kept because the
+ *    trap is subtle: it matched with `LIKE '%name%'`, and in SQL `LIKE` the
+ *    UNDERSCORE IS A SINGLE-CHARACTER WILDCARD. `'%material_remove%'` therefore
+ *    matched the audit string `material.removed`, and `material_remove` — a
+ *    genuinely unwired write path — was reported as internally referenced and
+ *    would have been EXEMPTED BY ITS OWN DETECTOR. ▶ Use `strpos`, which has no
+ *    pattern language. **A detector whose matcher silently wildcards is worse
+ *    than no detector, because it fails toward "fine".**
+ *
+ * @param root repository root
+ * @param isInternal `(fnName) => boolean` — supplied by the caller from the
+ *   live catalogue (policy expressions + other function bodies, matched with
+ *   `strpos`). ⛔ Never a hard-coded list.
+ */
+export function rpcsWithoutApplicationCaller(root, isInternal, pairs = RPC_MIGRATIONS) {
+  const roots = ["server", "lib", "features", "app"];
+  const sources = [];
+  const walk = (path) => {
+    let entries;
+    try {
+      entries = readdirSync(path, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const full = join(path, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name !== "node_modules") walk(full);
+      } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
+        sources.push(stripSourceComments(readFileSync(full, "utf8")));
+      }
+    }
+  };
+  for (const dir of roots) walk(join(root, dir));
+  const application = sources.join("\n");
+
+  const unwired = [];
+  const internal = [];
+  let declaredCount = 0;
+  const seen = new Set();
+  for (const { migration } of pairs) {
+    const sql = readFileSync(join(root, "supabase", "migrations", migration), "utf8");
+    for (const name of declaredFunctions(sql)) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      declaredCount += 1;
+      // A CALL is `.rpc("name"` — the only way application code reaches one.
+      if (new RegExp(`\\.rpc\\(\\s*["']${name}["']`).test(application)) continue;
+      if (isInternal(name)) internal.push(name);
+      else unwired.push(`${name} (${migration})`);
+    }
+  }
+  return { declaredCount, unwired, internal };
+}
+
+/** Comment-stripper, local so this rule never depends on a suite's copy. */
+function stripSourceComments(src) {
+  return src
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+}

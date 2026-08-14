@@ -160,7 +160,15 @@ import type {
   AdapterEvidenceUploadTicketDto,
   AdapterEvidenceAttachSuccess,
   AdapterReportEvidenceClipDto,
+  AdapterMaterialUploadTicketDto,
+  AdapterMaterialViewUrlDto,
 } from "@/server/modules/integration-adapter/adapter-dtos";
+import {
+  createMaterialUploadTicketCore,
+  attachMaterialCore,
+  materialViewUrlCore,
+  removeMaterialCore,
+} from "@/server/modules/class-session/material-transport";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -876,6 +884,72 @@ export async function adapterReadDashboardSummary(): Promise<
       submittedReports: result.data.submittedReports,
     },
   };
+}
+
+// ---------------------------------------------------------------------
+// ⛔ P2-6R — THE LESSON-MATERIAL WRITE PATH, WHICH P2-6 DID NOT BUILD.
+//
+// `P2-6` shipped the whole database half and named these three RPCs in the
+// application ONLY INSIDE COMMENTS. The screen rendered three permanently
+// disabled buttons and the phase reported COMPLETE. ▶ `PDTa-WIRED` exists
+// because of this, and these four functions are what make it pass honestly.
+//
+// ⚠️ SAME BOUNDED ADR-3 EXCEPTION AS EVIDENCE: the BYTES go browser-direct to
+// a private bucket under one RLS INSERT policy, and the GOVERNED ACT — the
+// attach — comes back through the server. No file passes through a Server
+// Action, and nothing governed happens until the attach succeeds.
+// ---------------------------------------------------------------------
+
+export async function adapterCreateMaterialUploadTicket(
+  input: { readonly classSessionId: string; readonly mediaType: string },
+): Promise<ActionResult<AdapterMaterialUploadTicketDto>> {
+  return createMaterialUploadTicketCore(
+    await createRequestSupabaseClient(),
+    input.classSessionId,
+    input.mediaType,
+  );
+}
+
+export async function adapterAttachMaterial(
+  input: {
+    readonly classSessionId: string;
+    readonly materialId: string;
+    readonly displayName: string;
+  },
+): Promise<ActionResult<{ readonly materialId: string }>> {
+  return attachMaterialCore(
+    await createRequestSupabaseClient(),
+    input.classSessionId,
+    input.materialId,
+    input.displayName,
+  );
+}
+
+/**
+ * ⛔ NO DOWNLOAD OPTION IS PASSED, and the control that calls this is labelled
+ * VIEW. `D-5` refuses a download control for every role; that ruling is about
+ * per-child evidence, and this is centre-owned teaching material — but the URL
+ * is minted the same way regardless, so the option is not added here for a
+ * surface that has no need of it.
+ */
+export async function adapterReadMaterialViewUrl(
+  materialId: string,
+): Promise<ActionResult<AdapterMaterialViewUrlDto>> {
+  return materialViewUrlCore(
+    await createRequestSupabaseClient(),
+    createElevatedSupabaseClient(),
+    materialId,
+  );
+}
+
+export async function adapterRemoveMaterial(
+  materialId: string,
+): Promise<ActionResult<{ readonly removed: boolean }>> {
+  return removeMaterialCore(
+    await createRequestSupabaseClient(),
+    createElevatedSupabaseClient(),
+    materialId,
+  );
 }
 
 /**

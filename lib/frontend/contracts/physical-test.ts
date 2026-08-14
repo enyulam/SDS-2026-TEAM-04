@@ -438,6 +438,49 @@ export type LessonPlanSessionDto = {
   readonly materials: readonly LessonMaterialDto[];
 };
 
+/**
+ * ⛔ `P2-6R` — THE MATERIAL TRANSPORT CONTRACTS, WHICH `P2-6` DID NOT SHIP.
+ *
+ * `P2-6` built `LessonMaterialDto` above and the read that fills it, and then
+ * left the three write RPCs reachable from no application code at all. ▶ The
+ * three controls on screen `14` rendered `disabled` with a tooltip, and the
+ * phase reported COMPLETE — the limit stated in a source comment and nowhere
+ * the Operator reads. These types are the repair, and `§12.12` is the rule.
+ *
+ * ⚠️ The shape mirrors `EvidenceUploadTicketDto` deliberately. Same
+ * ticket-then-attach discipline, different owner: evidence is TRAINER-only
+ * per-child media, a material is MANAGEMENT-only centre-owned teaching
+ * material. ⛔ Neither role inherits the other's capability from the
+ * similarity.
+ */
+export type MaterialUploadTicketDto = {
+  readonly materialId: string;
+  readonly classSessionId: string;
+  readonly bucket: string;
+  readonly objectPath: string;
+  readonly maxBytes: number;
+  /** Not a tuning knob — the resumable endpoint requires exactly 6 MiB parts. */
+  readonly chunkBytes: number;
+};
+
+export type MaterialUploadTicketInput = {
+  readonly classSessionId: string;
+  readonly mediaType: string;
+};
+
+export type MaterialAttachInput = {
+  readonly classSessionId: string;
+  readonly materialId: string;
+  readonly displayName: string;
+};
+
+/** ⛔ A URL, never a storage path — the bucket is private and stays private. */
+export type MaterialViewUrlDto = {
+  readonly url: string;
+  readonly mediaType: string;
+  readonly expiresInSeconds: number;
+};
+
 export type ManagementLessonPlansDto = {
   readonly classModuleId: string;
   readonly moduleTitle: string;

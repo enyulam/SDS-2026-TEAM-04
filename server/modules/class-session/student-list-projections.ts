@@ -173,16 +173,23 @@ export async function listManagementStudentsCore(
 
   const classesByStudent = new Map<string, string[]>();
   for (const row of enrolments.rows) {
-    const module = moduleById.get(row.class_module_id);
-    if (module === undefined) continue;
-    const grade = gradeById.get(module.class_grade_id);
+    /*
+     * ⚠️ `classModule`, NOT `module` — `@next/next/no-assign-module-variable`.
+     * ▶ `P2-8` SHIPPED AND WAS PUSHED WITH THIS AS A LINT ERROR, caught here on
+     * the NEXT phase's routine `npm run lint`. It is the same disclosure family
+     * as the defect this phase repairs: the phase reported complete without the
+     * gate that would have contradicted it having been run.
+     */
+    const classModule = moduleById.get(row.class_module_id);
+    if (classModule === undefined) continue;
+    const grade = gradeById.get(classModule.class_grade_id);
     /*
      * ⛔ `Beginner · <module>`, and the grade label is READ from `class_grades`.
      * The frame writes `Junior · Public Speaking`; `Junior` is NOT a ratified
      * Class Grade — the vocabulary is Beginner/Intermediate/Advanced (`A-016`,
      * `A-026`/`A-054`) — so no grade label is ever a literal in this file.
      */
-    const label = grade ? `${grade.display_name} · ${module.title}` : module.title;
+    const label = grade ? `${grade.display_name} · ${classModule.title}` : classModule.title;
     const list = classesByStudent.get(row.student_id) ?? [];
     list.push(label);
     classesByStudent.set(row.student_id, list);

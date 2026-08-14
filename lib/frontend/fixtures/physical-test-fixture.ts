@@ -28,6 +28,8 @@ import {
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
+  type MaterialUploadTicketDto,
+  type MaterialViewUrlDto,
   type ManagementDashboardSummaryDto,
   type ManagementStudentListDto,
   type ManagementClassSummaryDto,
@@ -1290,6 +1292,42 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
           })),
       },
     };
+  }
+
+  /**
+   * ⛔ `P2-6R` — ALL THREE WRITES REFUSE, for the same reason the three evidence
+   * writes below refuse. A material attach and a material removal each emit a
+   * GOVERNED AUDIT EVENT (`material.attached`, `material.removed`), and this
+   * fixture has no database, no bucket and no audit chain. ▶ A simulated
+   * success on an audited write is strictly worse than a refusal: it teaches
+   * the operator that the transport works on a path that recorded nothing —
+   * which is precisely the class of defect `P2-6` shipped and this phase
+   * repairs.
+   *
+   * ⚠️ `createMaterialUploadTicket` refuses too, even though minting a ticket
+   * authorizes nothing. A ticket handed back here would send the browser at a
+   * bucket that does not exist in this mode, and the failure would surface as
+   * a transport error rather than as the honest "not available in fixture
+   * mode" the caller can render.
+   */
+  async createMaterialUploadTicket(): Promise<UiActionResult<MaterialUploadTicketDto>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async attachMaterial(): Promise<UiActionResult<{ readonly materialId: string }>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async readMaterialViewUrl(): Promise<UiActionResult<MaterialViewUrlDto>> {
+    await delay(120);
+    return { outcome: "unavailable" };
+  }
+
+  async removeMaterial(): Promise<UiActionResult<{ readonly removed: boolean }>> {
+    await delay(120);
+    return { outcome: "unavailable" };
   }
 
   async listManagementClasses(): Promise<UiActionResult<ManagementClassListDto>> {

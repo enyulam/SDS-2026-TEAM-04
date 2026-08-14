@@ -1903,6 +1903,65 @@ about the whole.)*
 
 ---
 
+## §12.12 — ⛔ THE DISCLOSURE RULE: AN INERT CONTROL MEANS THE PHASE IS PARTIAL, AND IT SAYS SO WHERE THE OPERATOR READS
+
+> **Operator ruling, 2026-08-14, after `P2-6`:** *"A limitation recorded only where the Operator
+> does not look is not a disclosure. … a phase that ships a surface over an unbuilt path must state
+> that limit in its REPORT and in `STATUS.md`, not only in source. If a control is inert, the phase
+> is not complete — it is partial, and it says so where I read."*
+
+### The rule
+
+⛔ **A PHASE THAT SHIPS A SURFACE OVER AN UNBUILT PATH STATES THAT LIMIT IN ITS OPERATOR REPORT AND
+IN `STATUS.md`.** Not only in a source comment. Not only in a pack note.
+
+⛔ **AN INERT CONTROL MEANS THE PHASE IS `PARTIAL`, NOT `COMPLETE`.** *Disabled with an honest
+tooltip* is the right RENDER — it always was — but it is **not** a substitute for the disclosure,
+and it does not make the phase complete.
+
+### What happened, because the shape is the lesson
+
+`P2-6` shipped screen `14` with **three disabled controls** — upload, download, remove. The
+database half was **correct and complete**: one table, a private bucket, a storage policy, five
+functions, all granted. **Nothing in the application ever called three of them**; every mention was
+inside a comment.
+
+⚠️ **THE LIMIT WAS DISCLOSED — IN EXACTLY ONE PLACE THE OPERATOR DOES NOT READ.** The component
+carried *"the browser transport for them is not part of this phase."* Searched afterwards:
+**`STATUS.md`, `BUILD_NOTES.md`, plan §14 and the screen `14` pack say nothing about it.** The
+phase was reported **COMPLETE**.
+
+▶ **The Operator authorized the schema, the RPCs, the bucket, the policy and the size limit, and
+learned the upload did not work by clicking it.**
+
+### ⛔ Why every existing gate passed
+
+- **`rpc-call-rule`** requires each declared function to be **called by its paired SQL suite**. All
+  five were. ▶ **That proves the function RUNS IN SQL — never that an application path reaches it.**
+- **`PLMa-*`** asserted the surface's ruled omissions and the migration's own objects. Neither is a
+  claim about a caller.
+- **The rendered stage-3 leg** asserted `Slides not uploaded yet` — which is the READ path
+  resolving correctly, and is equally true when no write path exists.
+
+⛔ **`PDTa-WIRED` now closes it** (§12.12a): every RPC a migration declares must be reachable from
+**application** code, or be **provably internal** — an RLS policy predicate or a function read by
+another function's body, read from the live catalogue, **never an allow-list**.
+
+### §12.12a — the two traps found while building that gate
+
+⚠️ **`LIKE` WILDCARDS ON UNDERSCORE.** The first exemption proof matched
+`LIKE '%' || proname || '%'`, and in SQL `LIKE` the **underscore is a single-character wildcard** —
+so `material_remove` matched the audit string `material.removed` and **would have been EXEMPTED BY
+ITS OWN DETECTOR**. `strpos` has no pattern language. ▶ **A matcher that silently wildcards fails
+toward "fine", which is the worst direction for a gate.**
+
+⚠️ **AN EXEMPTION MUST BE PROVEN, NOT DECLARED.** Two functions legitimately have no application
+caller. An allow-list naming them would let the next unwired path through by adding a name. Instead
+the rule asks the catalogue *"is this referenced by a policy or another function?"* — and
+`PDTa-WIREDc` plants the opposite answer to prove the rule fires at all.
+
+---
+
 ## §12.11 — THE STALE LEG MESSAGE, CAUGHT IN THE SAME PASS
 
 > **Operator ruling, 2026-08-14:** *"The stale leg messages are the same family: three green legs
@@ -3157,3 +3216,103 @@ still ships no route and still gets no item.**
 
 ⏸ **AWAITING THE OPERATOR:** the `AR-4` rule question (§18.4), and VISUAL acceptance on `11`, `14`,
 `17` and `25` — **four screens now, which is the boundary the Operator asked to be told about.**
+
+---
+
+## §19 — `P2-6R`: THE SCREEN `14` REPAIR, AND THE ONE THING IT COULD NOT FINISH
+
+⚠️ **PARTIAL, AND IT SAYS SO HERE BECAUSE §12.12 REQUIRES IT.** Two of the three controls are
+live; **UPLOAD IS STILL INERT**, pending an Operator ruling on its transport. ⛔ The phase is
+**not complete**, and reporting it as complete is precisely the defect it was authorized to
+repair.
+
+### §19.1 — What was authorized, and what it excluded
+
+Operator, 2026-08-14: *"THEN REPAIR SCREEN 14 as its own authorized phase, not folded into
+A/B/C. Build the application layer over the five existing functions: port, adapter, server
+actions, upload transport, and the surface wired to them. **No schema — the database layer is
+correct and complete.**"*
+
+⛔ **NOT ONE DDL STATEMENT WAS WRITTEN**, and `PMT-8`/`PMT-8b` pin that. The database half was
+re-measured before a line of the repair was written and was found correct and complete: one
+table, a private bucket at `26214400`, one INSERT-only storage policy, five functions, all
+granted — and `prove-p2-6-lesson-materials.sql` legs `PLM-5`/`PLM-6`/`PLM-7` already exercise
+attach → signed_path → remove for **both** roles with the audit delta measured in both
+directions. ▶ **None of that was wrong. None of it saw the defect**, because the defect was
+that no application code reached any of it.
+
+### §19.2 — The six layers built
+
+| Layer | File | What it carries |
+|---|---|---|
+| transport | `server/modules/class-session/material-transport.ts` | ticket mint · attach · signed URL · remove. `server-only`. |
+| adapter | `server/modules/integration-adapter/participant-actions.ts` | four Server Actions over it |
+| DTOs | `adapter-dtos.ts` · `lib/frontend/contracts/physical-test.ts` | ticket, attach input, view URL |
+| port | `lib/frontend/physical-test-port.ts` | four members |
+| real adapter | `lib/frontend/adapters/real-participant-port.ts` | four bindings |
+| fixture | `lib/frontend/fixtures/physical-test-fixture.ts` | four **refusals** — see below |
+
+⛔ **THE FIXTURE REFUSES ALL FOUR, AND THAT IS THE DESIGN.** An attach and a removal each emit a
+governed audit event, and the fixture has no database, no bucket and no chain. ▶ A simulated
+success on an **audited** write teaches the operator that a transport works on a path that
+recorded nothing — the same class of untruth this phase repairs. `PMT-6b` pins it.
+
+### §19.3 — ⛔ THE STOP: THE UPLOAD TRANSPORT COLLIDES WITH `T-P44`'s RULING
+
+Bytes must reach the private bucket **before** `material_attach_confirm` can read their size and
+MIME type off the **stored** object. There are exactly two ways, and **choosing between them is
+the Operator's**:
+
+**(a) Browser-direct resumable upload**, mirroring `lib/frontend/evidence-upload.ts`. ⛔ **This
+needs a second client module importing `lib/supabase/browser`, and `T-P44`'s ruling forecloses it
+without a fresh ruling.** Operator, 2026-08-13, verbatim in the guard: *"extend for
+`evidence-upload.ts` **SPECIFICALLY, not as a class**. Any other module importing either one still
+fails."* And, on the guard itself: *"A guard whose premise lapsed still needs a ruling, because
+'the premise lapsed' is exactly what someone says when they want the guard out of the way."*
+⚠️ `T-P44c` **plants** an unauthorized importer and requires the guard to fire on it — so this is
+not a soft convention, it fails the build.
+
+**(b) Server-Action relay** using the caller's **own request-scoped client**. ⚠️ This needs **no
+widening at all**: the storage policy is `FOR INSERT TO authenticated`, and ADR-3 records that
+*"the database role follows the credential, not the code location"* — so a server relay carrying
+the caller's cookies is the **same `authenticated` principal** the policy already gates, and
+`app_management_may_attach_material` re-derives live management authority over the session in the
+path exactly as before. ⛔ **No elevated client, no policy bypass.** Its cost: `next.config.ts`
+needs `experimental.serverActions.bodySizeLimit` raised (default `1mb`) for a 25 MiB part, and the
+transfer is **not resumable**.
+
+▶ **Measured argument for (b), stated because it decides the trade:** `D-5`'s exception was
+reasoned from **100 MB classroom video on a classroom network**. A lesson material is capped at
+**25 MiB** and is a slide deck or a PDF. The resumability that justified widening ADR-3 for
+evidence is worth much less here, and (b) keeps ADR-3's default instead of extending its
+exception a second time.
+
+⛔ **NEITHER WAS BUILT.** The surface states its own limit at the control, names both candidates
+and names the guard that decides between them; `PMT-7c` fails the build if that disclosure is
+removed while the button stays dead.
+
+### §19.4 — What IS live, and proven
+
+`readMaterialViewUrl` and `removeMaterial` are wired to real handlers on screen `14`. The two
+`not wired in this phase` tooltips are **gone** (§12.11 — a stale message describing a removed
+limitation is corrected in the same pass as the mechanism). Removal **re-reads** rather than
+splicing local state, because the server is authoritative about what is attached.
+
+`prove:portal-p2-6r` — **PASS**, 22 checks including two controls. `PDTa-WIRED` **3 unwired → 0**.
+
+### §19.5 — ⚠️ A DEFECT IN THE PREVIOUS PHASE, FOUND BY THIS PHASE'S ROUTINE LINT
+
+`server/modules/class-session/student-list-projections.ts:176` assigned to a variable named
+`module`, which `@next/next/no-assign-module-variable` rejects. ⛔ **`P2-8` SHIPPED AND WAS
+PUSHED WITH A LINT ERROR.** Renamed to `classModule`; `npm run lint` is now **0 errors**.
+
+▶ **It is the same family as the defect this phase repairs.** In both cases the phase reported
+complete without the check that would have contradicted it having been run — `P2-6` shipped a
+surface over an unwired path, `P2-8` shipped with a gate it never executed. **A phase report is
+only as good as the gates the phase actually ran**, and "I ran the suite I wrote" is not the same
+as "I ran the project's gates."
+
+### §19.6 — Position
+
+⏸ **PARTIAL — AWAITING AN OPERATOR RULING** on the upload transport, (a) or (b). Everything else
+in the authorized scope is built, proven and lint/typecheck/build clean.

@@ -9769,3 +9769,57 @@ boundary the Operator asked to be told about.**
 authorization does not carry.
 
 **Next permitted action:** the Operator's ruling on `AR-4`, and the four-screen visual walk.
+
+---
+
+## 2026-08-14 — `P2-6R`: the screen `14` repair. **PARTIAL.**
+
+**Branch** `develop`. **Scope:** the application layer over the five lesson-material functions.
+**No schema** — the Operator's authorization was explicit, and `PMT-8`/`PMT-8b` pin that not one
+DDL statement was written.
+
+**Order executed, as instructed:** gate extension → §12.12 disclosure rule → screen `14` repair.
+
+**The gate extension.** `rpcsWithoutApplicationCaller` added to `rpc-call-rule.mjs` — every RPC a
+migration declares must be called from **application** code, not only from its SQL suite. Wired as
+`PDTa-WIRED` with two controls. It reported **14 declared · 3 unwired · 2 provably internal**; the
+three were exactly the material writes. It now reports **0 unwired**. ⚠️ The exemption is proven
+from the **live catalogue** (policy predicates + other function bodies, matched with `strpos`
+because SQL `LIKE`'s underscore is a wildcard and `material_remove` would otherwise have been
+exempted by its own detector), never from an allow-list.
+
+**Built.** `server/modules/class-session/material-transport.ts` (ticket · attach · signed URL ·
+remove, `server-only`, `readMaybeRow` throughout because all three are `RETURNS record`) · four
+Server Actions · DTOs on both sides · four port members · real-adapter bindings · four fixture
+**refusals** (an attach and a removal each emit a governed audit event and the fixture has no
+chain) · download and remove wired to real handlers on screen `14`, with a re-read rather than a
+local splice.
+
+**⛔ THE STOP — and it is a governance stop, not an unfinished task.** Bytes must reach the private
+bucket before `material_attach_confirm` can read their size and MIME off the **stored** object.
+Route (a), a browser-direct resumable upload, needs a second module importing
+`lib/supabase/browser`, and `T-P44`'s ruling forecloses it: *"extend for `evidence-upload.ts`
+SPECIFICALLY, not as a class. Any other module importing either one still fails."* `T-P44c` plants
+against exactly that and the guard fires. Route (b), a Server-Action relay on the caller's **own**
+request-scoped client, needs no widening at all — the storage policy is `FOR INSERT TO
+authenticated` and ADR-3 records that the database role follows the credential, not the code
+location — but needs `serverActions.bodySizeLimit` raised and is not resumable. **Neither built.**
+The surface discloses its own limit at the control and `PMT-7c` fails the build if that disclosure
+is removed while the button stays dead.
+
+**⚠️ A `P2-8` DEFECT FOUND BY THIS PHASE'S ROUTINE LINT.** `student-list-projections.ts:176`
+assigned to `module` — a `@next/next/no-assign-module-variable` **error**, not a warning. `P2-8`
+shipped **and was pushed** with it. Renamed to `classModule`; lint is now 0 errors. ▶ Same family
+as the defect being repaired: in both cases the phase reported complete without running the gate
+that would have contradicted it.
+
+**Verification.** `prove:portal-p2-6r` PASS (22 checks, 2 controls) · `prove:portal-p2-8` PASS
+(`PDTa-WIRED` green, both controls firing) · `prove:portal-p2-6` PASS · `test:runtime-profile`
+`T-P44`/`T-P44c` PASS · `prove:no-secrets` CLEAN · `tsc --noEmit` clean · `next build` clean.
+
+**Not run, and stated as such:** `prove:stage2-routes` / `prove:stage3-authenticated` — `:3000` is
+still held by the Operator's walk server. VISUAL acceptance on `11`, `14`, `17`, `25` remains the
+Operator's.
+
+**Next authorized step:** the Operator's ruling on the upload transport, (a) or (b). Then task **A**
+(screen `11` KPI wiring), then report **B**'s Strengths question. **Nothing committed yet.**

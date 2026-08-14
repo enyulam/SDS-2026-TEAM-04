@@ -676,6 +676,30 @@ export interface AdapterCanonicalReportDto {
  * the `storage.objects` INSERT policy re-derives trainer authority over the
  * report named in the first path segment, live, on the actual INSERT.
  */
+/**
+ * `P2-6R` — the lesson-material transport DTOs.
+ *
+ * ⛔ NO CHILD DATUM ANYWHERE, and that is structural rather than filtered: a
+ * material is keyed to a SESSION, so there is no learner field to omit. ⚠️ The
+ * shape is deliberately the same as evidence's above — different owner, same
+ * ticket-then-attach discipline — so a reader comparing the two sees one
+ * pattern, not two conventions.
+ */
+export interface AdapterMaterialUploadTicketDto {
+  readonly materialId: string;
+  readonly classSessionId: string;
+  readonly bucket: string;
+  readonly objectPath: string;
+  readonly maxBytes: number;
+  readonly chunkBytes: number;
+}
+
+export interface AdapterMaterialViewUrlDto {
+  readonly url: string;
+  readonly mediaType: string;
+  readonly expiresInSeconds: number;
+}
+
 export interface AdapterEvidenceUploadTicketDto {
   readonly evidenceId: string;
   readonly reportId: string;

@@ -65,6 +65,10 @@ import type {
   ManagementClassListDto,
   ManagementScheduleDto,
   ManagementLessonPlansDto,
+  MaterialUploadTicketDto,
+  MaterialUploadTicketInput,
+  MaterialAttachInput,
+  MaterialViewUrlDto,
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementEditWordingInput,
@@ -120,6 +124,10 @@ import {
   adapterListManagementClasses,
   adapterReadManagementSchedule,
   adapterReadLessonPlans,
+  adapterCreateMaterialUploadTicket,
+  adapterAttachMaterial,
+  adapterReadMaterialViewUrl,
+  adapterRemoveMaterial,
   adapterReadDashboardSummary,
   adapterReadManagementStudents,
   adapterReadAddClassOptions,
@@ -284,6 +292,32 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       classModuleId: string,
     ): Promise<UiActionResult<ManagementLessonPlansDto | null>> {
       return guard(() => adapterReadLessonPlans(classModuleId));
+    },
+
+    /*
+     * ⛔ `P2-6R` — the three bindings `P2-6` never wrote. The bytes do NOT pass
+     * through here; they go browser-direct to the private bucket under the one
+     * INSERT policy. ▶ What crosses HERE is the ticket, the governed attach,
+     * the governed removal and the short-TTL view URL.
+     */
+    createMaterialUploadTicket(
+      input: MaterialUploadTicketInput,
+    ): Promise<UiActionResult<MaterialUploadTicketDto>> {
+      return guard(() => adapterCreateMaterialUploadTicket(input));
+    },
+
+    attachMaterial(
+      input: MaterialAttachInput,
+    ): Promise<UiActionResult<{ readonly materialId: string }>> {
+      return guard(() => adapterAttachMaterial(input));
+    },
+
+    readMaterialViewUrl(materialId: string): Promise<UiActionResult<MaterialViewUrlDto>> {
+      return guard(() => adapterReadMaterialViewUrl(materialId));
+    },
+
+    removeMaterial(materialId: string): Promise<UiActionResult<{ readonly removed: boolean }>> {
+      return guard(() => adapterRemoveMaterial(materialId));
     },
 
     /** `P2-7` — screen `11`. No parameter: the centre is the caller's own. */

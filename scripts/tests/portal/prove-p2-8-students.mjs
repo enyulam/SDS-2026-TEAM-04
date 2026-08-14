@@ -17,7 +17,12 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
-import { unpairedMigrations, uncalledFunctions, rpcShapeMismatches } from "./rpc-call-rule.mjs";
+import {
+  unpairedMigrations,
+  uncalledFunctions,
+  rpcShapeMismatches,
+  rpcsWithoutApplicationCaller,
+} from "./rpc-call-rule.mjs";
 import { emittedLegs } from "./suite-output-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
 
@@ -220,6 +225,67 @@ const { inspected, mismatches } = rpcShapeMismatches(ROOT, (fn) => setReturning.
 check(
   setReturning.size > 0 && inspected > 0 && mismatches.length === 0,
   `PDTa-SHAPE all ${inspected} RPC consumer(s) match their function's RESULT SHAPE (${mismatches.join("; ") || "no mismatch"}) -- the rule P2-7's own defect produced`,
+);
+
+/*
+ * ⛔ PDTa-WIRED -- THE GATE THE `P2-6` DISCLOSURE FAILURE FORCED.
+ *
+ * Operator ruling, 2026-08-14: *"every RPC declared in a migration must be
+ * called from APPLICATION code -- a port method, adapter action or server
+ * action -- not only from its SQL suite. A function reachable only from a test
+ * is an unwired write path."*
+ *
+ * ⛔ THE EXEMPTION IS PROVEN FROM THE LIVE CATALOGUE, NEVER DECLARED. A
+ * function with no application caller passes ONLY if it is shown to be
+ * INTERNAL -- the predicate of an RLS policy, or read by another function's
+ * body. An allow-list would let the next unwired path be waved through by
+ * adding a name to it.
+ *
+ * ⚠️ MATCHED WITH `strpos`, NOT `LIKE`. The first draft used
+ * `LIKE '%' || name || '%'`, and in SQL LIKE the UNDERSCORE IS A
+ * SINGLE-CHARACTER WILDCARD -- so `material_remove` matched the audit string
+ * `material.removed` and would have been EXEMPTED BY ITS OWN DETECTOR. A
+ * matcher that silently wildcards fails toward "fine".
+ */
+const INTERNAL = psql(["-c",
+  "SELECT p.proname || '=' || ("
+  + "  (SELECT count(*) FROM pg_policies pol WHERE strpos(coalesce(pol.qual,'') || coalesce(pol.with_check,''), p.proname) > 0)"
+  + "+ (SELECT count(*) FROM pg_proc p2 JOIN pg_namespace n2 ON n2.oid = p2.pronamespace"
+  + "    WHERE n2.nspname = 'public' AND p2.proname <> p.proname AND strpos(coalesce(p2.prosrc,''), p.proname) > 0)"
+  + ") FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public';"]).stdout.trim();
+const internalRefs = new Map(
+  INTERNAL.split(/\r?\n/).filter(Boolean).map((line) => {
+    const [name, count] = line.split("=");
+    return [name, Number(count) > 0];
+  }),
+);
+const isInternal = (fn) => internalRefs.get(fn) === true;
+const wiring = rpcsWithoutApplicationCaller(ROOT, isInternal);
+check(
+  internalRefs.size > 0 && wiring.unwired.length === 0,
+  `PDTa-WIRED every one of the ${wiring.declaredCount} portal-era RPC(s) is reachable from APPLICATION code, or is PROVABLY INTERNAL (${wiring.internal.join(", ") || "none"} — policy predicates and functions read by other function bodies). UNWIRED: ${wiring.unwired.join(", ") || "none"}. ⛔ A function reachable only from its SQL suite is an unwired write path, which is exactly what P2-6 shipped`,
+);
+
+/*
+ * ⛔ THE CONTROL: A PLANTED DECLARED-BUT-UNCALLED FUNCTION MUST FAIL THE RULE.
+ * Without it, `unwired.length === 0` is equally true of a rule that can never
+ * fire -- and this rule exists precisely because two earlier rules passed over
+ * the defect.
+ */
+const planted = rpcsWithoutApplicationCaller(
+  ROOT,
+  () => false, // nothing is internal, so an uncalled function has nowhere to hide
+  [{ migration: "20260814090000_portal_p2_6_lesson_materials.sql", suite: "prove-p2-6-lesson-materials.sql" }],
+);
+check(
+  planted.unwired.length > 0,
+  `PDTa-WIREDc CONTROL: told nothing is internal, the rule FIRES on the P2-6 migration and names ${planted.unwired.length} uncalled function(s) — so PDTa-WIRED is a measurement, not a predicate that always passes`,
+);
+check(
+  rpcsWithoutApplicationCaller(ROOT, () => true, [
+    { migration: "20260814090000_portal_p2_6_lesson_materials.sql", suite: "prove-p2-6-lesson-materials.sql" },
+  ]).unwired.length === 0,
+  "PDTa-WIREDc2 CONTROL: and told everything is internal it reports NONE — so the exemption is what decides the verdict, not the scan failing to read the sources",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

@@ -207,13 +207,58 @@ function sizeLabel(bytes: number): string {
 function LessonCard({
   session,
   today,
+  onChanged,
 }: {
   readonly session: LessonPlanSessionDto;
   readonly today: string;
+  readonly onChanged: () => void;
 }) {
+  const port = usePhysicalTestPort();
   const phase = lessonPhase(session.sessionDate, today);
   const chip = PHASE_CHIP[phase];
   const time = timeLabel(session.startsAt, session.endsAt);
+
+  /*
+   * ⛔ `P2-6R` — ONE `busy` id AND ONE `notice`, NOT A MAP. Only one material
+   * control can be in flight at a time on this card, and the refusal message is
+   * rendered rather than swallowed: `Q-7` — a refusal is an answer, and a
+   * control that fails silently is the defect this phase exists to repair.
+   */
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  /*
+   * ⚠️ THE URL IS OPENED, NEVER STORED AND NEVER RENDERED. It is short-TTL and
+   * server-minted; putting it in the document would leave a live storage URL in
+   * the DOM for as long as the page is open.
+   */
+  async function openMaterial(materialId: string, displayName: string): Promise<void> {
+    setBusyId(materialId);
+    setNotice(null);
+    const result = await port.readMaterialViewUrl(materialId);
+    setBusyId(null);
+    if (result.outcome !== "success") {
+      setNotice(`${displayName} could not be opened.`);
+      return;
+    }
+    globalThis.open(result.data.url, "_blank", "noopener,noreferrer");
+  }
+
+  async function removeMaterial(materialId: string, displayName: string): Promise<void> {
+    // ⛔ A GOVERNED, AUDITED DELETION (`material.removed`) — confirmed first.
+    if (!globalThis.confirm(`Remove ${displayName} from this lesson?`)) return;
+    setBusyId(materialId);
+    setNotice(null);
+    const result = await port.removeMaterial(materialId);
+    setBusyId(null);
+    if (result.outcome !== "success") {
+      setNotice(`${displayName} could not be removed.`);
+      return;
+    }
+    // Re-read rather than splicing local state: the server is authoritative
+    // about what is attached, and a local splice would diverge on a partial.
+    onChanged();
+  }
 
   /*
    * ⚠️ THE CARD'S IDENTITY, hero `0B`. Where a lesson number and title exist the frame's
@@ -291,28 +336,27 @@ function LessonCard({
                     <span className="block text-[10px] text-ink-subtle">{sizeLabel(material.byteSize)}</span>
                   </span>
                   {/*
-                    ⚠️ BOTH CONTROLS ARE DISABLED AND SAY SO. The governed mutations
-                    (`material_attach_confirm`, `material_remove`) and the signed-URL mint are
-                    shipped and proved in the database; the browser transport for them is not
-                    part of this phase. ⛔ A control that LOOKS live and silently does nothing is
-                    worse than one that states it is unavailable, so the disabled state is the
-                    honest render rather than a placeholder.
+                    ✅ `P2-6R` — BOTH CONTROLS ARE NOW LIVE. `P2-6` rendered them `disabled`
+                    with a tooltip while the RPCs behind them sat granted and unreachable from
+                    any application code, and reported the phase COMPLETE — the limit stated in
+                    a source comment and nowhere the Operator reads. ⛔ That is the defect
+                    `PDTa-WIRED` and plan §12.12 now exist to prevent.
                   */}
                   <button
                     type="button"
-                    disabled
-                    title="Download is not wired in this phase"
-                    className="inline-flex min-h-9 items-center gap-1 rounded-[8px] px-2 text-ink-subtle disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={busyId !== null}
+                    onClick={() => void openMaterial(material.materialId, material.displayName)}
+                    className="inline-flex min-h-9 items-center gap-1 rounded-[8px] px-2 text-ink-subtle transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
                   >
                     <Icon name="download" size={16} />
-                    <span className="sr-only">Download {material.displayName}</span>
+                    <span className="sr-only">Open {material.displayName}</span>
                   </button>
                   {/* ⛔ OPERATOR ADDITION — the frame draws no removal. See the header block. */}
                   <button
                     type="button"
-                    disabled
-                    title="Remove is not wired in this phase"
-                    className="inline-flex min-h-9 items-center rounded-[8px] px-2 text-ink-subtle disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={busyId !== null}
+                    onClick={() => void removeMaterial(material.materialId, material.displayName)}
+                    className="inline-flex min-h-9 items-center rounded-[8px] px-2 text-ink-subtle transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
                   >
                     <Icon name="close" size={16} />
                     <span className="sr-only">Remove {material.displayName}</span>
@@ -322,15 +366,38 @@ function LessonCard({
             })}
           </ul>
         )}
+        {/*
+          ⛔ UPLOAD IS STILL INERT, AND THIS PHASE SAYS SO WHERE THE OPERATOR READS
+          (plan §12.12), NOT ONLY HERE.
+
+          ▶ THE REASON IS A GOVERNANCE STOP, NOT AN UNFINISHED TASK. Bytes must reach the
+          private bucket before `material_attach_confirm` can read their size and MIME type
+          off the STORED object, and the only two ways to get them there are:
+            (a) a browser-direct resumable upload — which needs a second module importing
+                `lib/supabase/browser`, and `T-P44`'s ruling is explicit that the widening was
+                *"for `evidence-upload.ts` SPECIFICALLY, not as a class… a second client module
+                reaching a Supabase target must come back for its own ruling"*;
+            (b) a Server-Action relay using the caller's OWN request-scoped client — which needs
+                no widening at all (the storage policy is `TO authenticated` and ADR-3 records
+                that the database role follows the CREDENTIAL, not the code location), but does
+                need `serverActions.bodySizeLimit` raised for a 25 MiB part.
+          ⚠️ Choosing between them is the Operator's, so this control states its state rather
+          than guessing. `busyId`/`notice` above are already wired for whichever lands.
+        */}
         <button
           type="button"
           disabled
-          title="Upload is not wired in this phase"
+          title="Upload needs an Operator ruling on its transport — see the header block"
           className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 text-[13px] font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-45"
         >
           <Icon name="upload" size={16} />
           Upload slides &amp; materials
         </button>
+        {notice !== null ? (
+          <p role="status" className="mt-2 text-[12px] text-ink-muted">
+            {notice}
+          </p>
+        ) : null}
       </section>
     </article>
   );
@@ -340,6 +407,13 @@ export function ManagementLessonPlans({ classModuleId }: { readonly classModuleI
   const port = usePhysicalTestPort();
   const [state, setState] = useState<ResourceState<ManagementLessonPlansDto | null>>({ kind: "loading" });
   const today = useMemo(() => isoDate(new Date()), []);
+  /*
+   * ⛔ `P2-6R` — A RE-READ COUNTER, NOT A LOCAL SPLICE. After a governed removal
+   * the SERVER is authoritative about what is attached; editing the list in
+   * place would diverge from it on any partial failure and show management a
+   * material that is still there, or hide one that is.
+   */
+  const [reloads, setReloads] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -359,7 +433,7 @@ export function ManagementLessonPlans({ classModuleId }: { readonly classModuleI
     return () => {
       cancelled = true;
     };
-  }, [port, classModuleId]);
+  }, [port, classModuleId, reloads]);
 
   const plans = state.kind === "ready" ? state.data : null;
 
@@ -460,7 +534,12 @@ export function ManagementLessonPlans({ classModuleId }: { readonly classModuleI
           ) : (
             <div className="flex flex-col gap-4">
               {plans.sessions.map((session) => (
-                <LessonCard key={session.classSessionId} session={session} today={today} />
+                <LessonCard
+                  key={session.classSessionId}
+                  session={session}
+                  today={today}
+                  onChanged={() => setReloads((n) => n + 1)}
+                />
               ))}
             </div>
           )}
