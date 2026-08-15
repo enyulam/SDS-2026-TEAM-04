@@ -69,6 +69,7 @@ import type {
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementStudentProfileDto,
+  LessonStatisticsDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -133,6 +134,7 @@ import {
   adapterReadManagementTrainers,
   adapterCreateTrainer,
   adapterReadManagementStudentProfile,
+  adapterReadLessonStatistics,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -342,6 +344,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
       studentId: string,
     ): Promise<UiActionResult<ManagementStudentProfileDto>> {
       return guard(() => adapterReadManagementStudentProfile(studentId));
+    },
+
+    /** `P2-15` — screen `15`. ⛔ Counts only. */
+    readLessonStatistics(classSessionId: string): Promise<UiActionResult<LessonStatisticsDto>> {
+      return guard(() => adapterReadLessonStatistics(classSessionId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

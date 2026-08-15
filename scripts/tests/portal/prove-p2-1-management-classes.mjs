@@ -251,7 +251,7 @@ check(
  * ⚠️ THE PIN MOVED 16 → 17 AT `P2-2`, 17 → 18 AT `P2-3`, 18 → 19 AT
  * `P2-4`, 19 → 20 AT `P2-5`, 20 → 21 AT `P2-6`, 21 → 22 AT `P2-7`, 22 → 23 AT `P2-8`,
  * THEN 23 → 24 AT `P2-10` AND 24 → 25 AT `P2-11` — the last two together, in the
- * pass that noticed — AND 25 → 26 AT `P2-9`.
+ * pass that noticed — AND 25 → 26 AT `P2-9`, AND 26 → 27 AT `P2-15`.
  *
  * ✅ **AND `P2-9` IS THE FIRST TIME THIS LEG FIRED *DURING* A PHASE RATHER THAN
  * A PHASE LATE.** It went red on the same run that shipped
@@ -280,8 +280,8 @@ check(
  * chances to relax the wrong one.
  */
 check(
-  /all 26 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 26 routes from the app tree (16 + `26` at P2-2 + `27` at P2-3 + `13` at P2-4 + `25` at P2-5 + `14` at P2-6 + `11` at P2-7 + `17` at P2-8 + `23` at P2-10 + `24` at P2-11 + `18` at P2-9) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 27 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 27 routes from the app tree (16 + `26` at P2-2 + `27` at P2-3 + `13` at P2-4 + `25` at P2-5 + `14` at P2-6 + `11` at P2-7 + `17` at P2-8 + `23` at P2-10 + `24` at P2-11 + `18` at P2-9 + `15` at P2-15) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

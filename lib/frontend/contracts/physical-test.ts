@@ -389,6 +389,45 @@ export type ManagementStudentProfileDto = {
   readonly reports: readonly StudentReportRowDto[];
 };
 
+
+/**
+ * `P2-15` — screen `15` Management Lesson Statistics.
+ *
+ * ⛔ FIVE OF THE FRAME'S SIX CARDS ARE PROHIBITED, AND NONE HAS A FIELD HERE:
+ * **Skill Averages** (nine labelled percentage bars) · **Status Distribution**
+ * (a donut counting `Mastering` / `Mastered` / `Developing` / `Beginning` —
+ * the four ratified labels as legend values) · **`Class Average 82%`** (a
+ * roll-up, and `D-2`'s *"never rendered as a number"*) · **Student Breakdown's
+ * `Strongest` / `Focus area` / `Overall`** (`G-2` names those exact limbs) ·
+ * **`Trainer & Assistant`** (`A-014`/`G-7`, plus five invented fields with no
+ * columns). `GC-6` on this pack carries the ruling and the two independent
+ * grounds, `C-9` and `G-2`.
+ *
+ * ✅ WHAT SURVIVES IS ALL COUNTS: who taught it, how many are enrolled, how
+ * many were present, how many were assessed, how many reports are submitted.
+ * ⛔ **The standing test applies** — if any becomes derived from rating VALUES
+ * rather than counted, that is a stop-and-ask.
+ */
+export type LessonStatisticsDto = {
+  readonly classSessionId: string;
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly startsAt: string | null;
+  readonly endsAt: string | null;
+  readonly room: string | null;
+  /** ⛔ ONE trainer. `A-014`/`G-7` — there is no field for an Assistant. */
+  readonly trainerName: string | null;
+  readonly enrolledCount: number;
+  readonly presentCount: number;
+  readonly attendanceRecorded: number;
+  readonly assessedCount: number;
+  readonly submittedCount: number;
+  readonly awaitingCount: number;
+};
+
 export type ManagementStudentListDto = {
   readonly students: readonly ManagementStudentRowDto[];
   readonly enrolledCount: number;

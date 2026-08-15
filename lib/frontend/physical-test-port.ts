@@ -26,6 +26,7 @@ import type {
   ManagementDashboardSummaryDto,
   ManagementStudentListDto,
   ManagementStudentProfileDto,
+  LessonStatisticsDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -234,6 +235,11 @@ export interface PhysicalTestPort {
   readManagementStudentProfile(
     studentId: string,
   ): Promise<UiActionResult<ManagementStudentProfileDto>>;
+  /**
+   * `P2-15` — screen `15`. ⛔ Counts only; the returned type has no field for
+   * a rating, an average, a distribution or a per-child roll-up.
+   */
+  readLessonStatistics(classSessionId: string): Promise<UiActionResult<LessonStatisticsDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

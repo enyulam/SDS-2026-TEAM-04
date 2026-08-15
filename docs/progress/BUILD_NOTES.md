@@ -10040,3 +10040,76 @@ all proofs passed, 26 routes. `tsc --noEmit` clean, `lint` 0 errors, `next build
 
 **Next authorized step:** `P2-12` (`20` Register Student). ⚠️ It is a **write** path and therefore
 falls **outside** the read-only batch — it stops for authorization.
+
+
+---
+
+## 2026-08-16 — `P2-15` screen `15` Management Lesson Statistics · **ZERO SCHEMA UNDER A BATCH THAT PERMITTED IT**
+
+**Branch** `develop`, main worktree. **Starting HEAD** `a76afa0`.
+
+### Scope
+
+Screen `15` at `/management/classes/[classModuleId]/sessions/[sessionId]/lesson-statistics`, under
+the Operator's `P2-9`…`P2-16` batch authorization (read-side `SECURITY DEFINER` functions and their
+minimum matching `EXECUTE` grants, pre-authorized; anything else stops).
+
+### ⛔ Functions and grants added under the batch — **the list is empty**
+
+**None.** No migration ships in this phase. No table, column, enum, policy, client table grant,
+write path or audit string. Census re-measured `T=30 E=12 P=30 R=23`.
+
+§12.10 for the fifth consecutive phase: `report_list_management_class_status(p_class_module_id)`
+already returns per-session, per-learner rows carrying `class_session_id`, `report_id` and
+`report_state`. Filtered to one session it answers every count the screen may show. The read that
+was *not* added would have created a second definition of "assessed" and "submitted", free to drift
+from the one screen `13` uses.
+
+### Files
+
+* `server/modules/management-view/lesson-statistics-projections.ts` — NEW. `readLessonStatisticsCore`,
+  `LessonStatisticsDto` (16 count-and-label fields). Reuses `readClassStatusRowsCore`.
+* `features/management/management-lesson-statistics-screen.tsx` — NEW. Lesson strip, four KPI cards,
+  a Delivery card, and a card disclosing the five prohibited panels (§12.12 — the disclosure is on
+  the page, not in a comment).
+* `app/(portals)/management/classes/[classModuleId]/sessions/[sessionId]/lesson-statistics/page.tsx` — NEW.
+* `lib/frontend/contracts/physical-test.ts`, the port and its adapters — the new read wired through.
+* `tests/frontend/portal-navigation-active-state.mjs` — the deep route added to the census.
+* `scripts/tests/portal/prove-p2-1-management-classes.mjs` — route ratchet 26 → 27.
+* `scripts/tests/portal/prove-p2-15-lesson-statistics.mjs` — NEW, 18 checks.
+* `docs/plan/PORTAL_COMPLETION_PLAN.md` — §27.
+
+### Verification
+
+`prove:portal-p2-15` **PASS** (18/18). Full portal regression **20 suites, all PASS**. Navigation
+census **PASS** — 27 canonical routes, 29 with aliases, all four legs green. `tsc` clean · `next
+build` clean · `eslint` **0 errors** (4 pre-existing warnings) · `prove:encoding` **PASS** ·
+`prove:no-secrets` **CLEAN**.
+
+### One defect, and it is instructive
+
+`PL-2` selected its target module **inside** the `authenticated` transaction, by joining
+`public.reports`:
+
+```
+ERROR:  permission denied for table reports
+HINT:   GRANT SELECT ON public.reports TO authenticated;
+```
+
+The deny leg refused my own suite. Fixed by resolving the module as owner **before** the role
+switch. Two things worth keeping: a test that builds its fixture inside the role under test can fail
+for a reason unrelated to the thing being tested, and the failure reads as a product defect until
+you check which role raised it — and the error's own HINT is a trap, since following it would have
+granted a client read on `reports` to make a test pass.
+
+### Decisions
+
+Five of the frame's six cards refused under `GC-6`, carried independently by `C-9` and `G-2`. The
+Status Distribution donut is the one worth naming: its legend renders the four ratified rating
+labels as values, and a count *of a rating* is not the *"count of assessments"* the Operator
+permitted. What survives is six counts, every one on the Operator's own ground.
+
+### Next
+
+`P2-16` (`16` Class Statistics) under the batch. Then `P2-12`/`P2-13`/`P2-14` stated together as
+write paths outside the batch, then `P2-17` which needs no schema.

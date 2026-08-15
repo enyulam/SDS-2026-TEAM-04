@@ -136,6 +136,17 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/students/[studentId]", { role: "management", label: "Students" }],
   /*
+   * `P2-15` -- screen `15` Lesson Statistics, a DEEP child of Classes.
+   * ⚠️ `Classes` already dropped `exact` at `P2-2`, so no rail change was
+   * needed here -- VERIFIED rather than assumed, because `C2C-002` has now
+   * bitten three rail items in three phases. This row is what makes the
+   * verification a measurement.
+   */
+  [
+    "/management/classes/[classModuleId]/sessions/[sessionId]/lesson-statistics",
+    { role: "management", label: "Classes" },
+  ],
+  /*
    * `P2-10` -- screen `23` Management Trainers, and `P2-11` -- screen `24` Add
    * Trainer, at a LITERAL child of it.
    *

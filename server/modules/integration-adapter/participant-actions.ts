@@ -131,6 +131,7 @@ import type {
   AdapterManagementTrainerListDto,
   AdapterCreateTrainerInput,
   AdapterManagementStudentProfileDto,
+  AdapterLessonStatisticsDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -174,6 +175,7 @@ import {
 import { listManagementTrainersCore } from "@/server/modules/class-session/trainer-list-projections";
 import { createTrainerCore } from "@/server/modules/identity-access/trainer-invitation";
 import { readStudentProfileCore } from "@/server/modules/management-view/student-profile-projections";
+import { readLessonStatisticsCore } from "@/server/modules/management-view/lesson-statistics-projections";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -1043,6 +1045,43 @@ export async function adapterReadManagementStudentProfile(
         reportState: r.reportState,
         submittedAt: r.submittedAt,
       })),
+    },
+  };
+}
+
+/**
+ * `P2-15` — screen `15` Management Lesson Statistics.
+ *
+ * ⚠️ THE ALLOW-LIST IS SIXTEEN COUNT-AND-LABEL FIELDS AND NOT ONE MORE. ⛔ No
+ * rating, no average, no distribution, no per-child roll-up — each refused by
+ * NOT BEING WRITTEN DOWN, which survives a later column appearing upstream.
+ */
+export async function adapterReadLessonStatistics(
+  classSessionId: string,
+): Promise<ActionResult<AdapterLessonStatisticsDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readLessonStatisticsCore(client, classSessionId);
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      classSessionId: d.classSessionId,
+      classModuleId: d.classModuleId,
+      classLabel: d.classLabel,
+      sessionDate: d.sessionDate,
+      lessonNumber: d.lessonNumber,
+      lessonTitle: d.lessonTitle,
+      startsAt: d.startsAt,
+      endsAt: d.endsAt,
+      room: d.room,
+      trainerName: d.trainerName,
+      enrolledCount: d.enrolledCount,
+      presentCount: d.presentCount,
+      attendanceRecorded: d.attendanceRecorded,
+      assessedCount: d.assessedCount,
+      submittedCount: d.submittedCount,
+      awaitingCount: d.awaitingCount,
     },
   };
 }

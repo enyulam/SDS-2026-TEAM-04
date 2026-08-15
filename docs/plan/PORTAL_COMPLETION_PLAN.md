@@ -4371,3 +4371,95 @@ opaque blob. **Typed `TABLE(...)` returns are what let the boundary be proven at
 ✅ **AND ONE FEWER THAN PROPOSED, BY §12.10.** The `ASSESSMENTS` tile was going to be a third read.
 The trend already carries it: `A-017` makes all nine dimensions mandatory and the RPC drops any
 session without exactly nine, so the tile is `trend.length`.
+
+
+---
+
+## §27 — `P2-15` AS BUILT: THE FIRST PHASE UNDER THE BATCH THAT ADDED **NOTHING**
+
+**Screen `15` Management Lesson Statistics.** Route
+`/management/classes/[classModuleId]/sessions/[sessionId]/lesson-statistics`.
+Suite `prove:portal-p2-15` — **18 checks, all PASS**.
+
+### §27.1 — ✅ FUNCTIONS AND GRANTS ADDED UNDER THE BATCH: **ZERO. THE LIST IS EMPTY.**
+
+| Function | Grant |
+|---|---|
+| *(none)* | *(none)* |
+
+⛔ **AND NOTHING ELSE EITHER** — no table, column, enum, policy, client table grant, write path or
+audit string. Census re-measured `T=30 E=12 P=30 R=23`, asserted by `PL-1b`.
+
+⚠️ **AN EMPTY LIST IS A DECISION HERE, NOT AN ABSENCE, AND THAT IS WHY `PL-1` ASSERTS IT.** The
+batch pre-authorizes read-side functions, so a `report_lesson_statistics(uuid)` would have been
+**trivially authorizable** — nobody would have queried it. ▶ **§12.10 for the FIFTH consecutive
+phase:** `report_list_management_class_status(p_class_module_id)` already returns per-session,
+per-learner rows carrying `class_session_id`, `report_id` and `report_state`. Filtered to one
+session, it answers every count this screen may show.
+
+▶ **The cost of the read that was NOT added is not the read.** It is that "assessed" and "submitted"
+would have acquired a **second definition**, in a second body, free to drift from the one screen
+`13` uses. Two governed reads answering the same question is how two management screens come to
+disagree about the same lesson.
+
+### §27.2 — ⛔ FIVE OF THE FRAME'S SIX CARDS ARE PROHIBITED
+
+`GC-6` on this pack, grounds re-attributed under `C-18`, ends: *"do not add a rating badge, bar,
+column, tile or chip, and do not read `D-1` as permitting one here."* **Two independent grounds
+carry it, either sufficient** — **`C-9`** (`D-1` reaches report **DETAIL** surfaces only; a
+statistics surface *"invites comparison between children"*) and **`G-2`** (roll-ups permanently
+excluded on every surface).
+
+| # | Card in the `.png` | Refused because |
+|---|---|---|
+| 1 | **Skill Averages** — nine labelled percentage bars | the per-dimension rating surface `GC-6` names by description |
+| 2 | **Status Distribution** — a donut legended `Mastering 15 · Mastered 8 · Developing 6 · Beginning 3` | ▶ **the four ratified rating labels rendered as values.** A count *of a rating* is not the *"count of assessments"* the Operator permitted — it discloses the distribution of the ratings themselves |
+| 3 | **`Class Average 82%`** | a roll-up (`G-2`), **and separately** `D-2`: *"never rendered as a number on any surface, to any role"* |
+| 4 | **Student Breakdown's `Strongest` / `Focus area` / `Overall`** | `G-2` names those exact limbs; `Overall` additionally renders a rating label **per child in a comparison table**, which is `C-9`'s stated harm verbatim |
+| 5 | **`Trainer & Assistant · This Lesson`** | the Assistant half is `A-014`/`G-7`; ▶ and the Trainer half's fields — `Session delivered`, `Sent to parents`, `On time`, `Materials prepped`, `Learner check-ins` — are **invented concepts with no columns** (`A-022`) |
+
+⚠️ **`Student ID 2025-113` has no column either** — same finding as screens `18` and `24`.
+
+**`PL-5`/`PL-6` assert the refusals at the TYPE and at the SCREEN. `PL-7` is the companion the
+vacuity family requires** — a prohibition proof needs a leg proving the surface still exists.
+
+### §27.3 — ✅ WHY WHAT SURVIVES IS A SURFACE RATHER THAN A REMNANT
+
+Who taught the lesson · enrolled · present · assessed · submitted · awaited. ▶ **Every one is a
+COUNT**, on the Operator's own ground: *"a count of assessments is not an assessment"* and
+*"attendance is not a rating."* That answers what a manager actually opens this screen to ask —
+**did this lesson get taught, attended, assessed and written up?** — disclosing no rating at all.
+
+⛔ **THE STANDING TEST:** if any of these ever becomes derived from rating **VALUES** rather than
+counted, that is a stop-and-ask.
+
+**Two honesty details in the counts.** `Present` is `n / attendanceRecorded`, **not** `n /
+enrolled` — a roster never opened has recorded nothing, and dividing by the enrolment would report
+every learner absent, which is *a lie about the lesson rather than a gap in the data*; it renders
+`—` with *"Attendance not taken yet"*. And `assessed = reportId !== null` is **structural, not
+assumed**: `assessment_save_complete_and_open_report` is the only path that persists an observation
+and it opens the report in the same transaction.
+
+### §27.4 — ⛔ THE GUARD FIRED ON THE **TEST**, FROM AN UNEXPECTED DIRECTION
+
+`PL-2` first picked its target module inside the `authenticated` transaction by joining
+`public.reports` — **the exact table this phase exists because clients cannot read**:
+
+```
+ERROR:  permission denied for table reports
+HINT:   GRANT SELECT ON public.reports TO authenticated;
+```
+
+▶ **The deny leg proved itself by refusing my own suite.** The module is now resolved as owner
+**before** the role switch. ⚠️ **Worth recording because the shape recurs:** a test that sets up its
+fixture *inside* the role it is testing can fail for a reason that has nothing to do with the thing
+under test — and the failure looks like a product defect until you read which role raised it. The
+hint in that error is a **trap**: taking it would have granted a client read on `reports` to make a
+test pass.
+
+### §27.5 — `exact: true`, CHECKED AGAIN
+
+`Classes` hit `C2C-002` at `P2-2`; `Trainers` at `P2-11`; `Students` was checked at `P2-9`. **This
+phase ships a child route under `Classes`, which is already non-exact** — checked, not assumed. The
+navigation census now stands at **27 canonical routes, 29 with aliases**, and the `P2-1` ratchet was
+moved with it.

@@ -27,6 +27,7 @@ import {
   type CreateClassInput,
   type TrainerInvitationOutcomeDto,
   type ManagementStudentProfileDto,
+  type LessonStatisticsDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1299,6 +1300,18 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * capability is absent, and the screen says which.
    */
   async readManagementStudentProfile(): Promise<UiActionResult<ManagementStudentProfileDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-15` — screen `15`. ⛔ THE FIXTURE REFUSES, for the same reason as
+   * screen `18`: `assessedCount` and `submittedCount` come from a governed
+   * `SECURITY DEFINER` read over tables no client may touch, and a fixture
+   * that manufactured them would report an assessment coverage figure that
+   * corresponds to nothing.
+   */
+  async readLessonStatistics(): Promise<UiActionResult<LessonStatisticsDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

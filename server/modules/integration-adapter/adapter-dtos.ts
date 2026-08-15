@@ -424,6 +424,25 @@ export interface AdapterManagementStudentProfileDto {
   readonly reports: readonly AdapterStudentReportRowDto[];
 }
 
+export interface AdapterLessonStatisticsDto {
+  readonly classSessionId: string;
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly startsAt: string | null;
+  readonly endsAt: string | null;
+  readonly room: string | null;
+  readonly trainerName: string | null;
+  readonly enrolledCount: number;
+  readonly presentCount: number;
+  readonly attendanceRecorded: number;
+  readonly assessedCount: number;
+  readonly submittedCount: number;
+  readonly awaitingCount: number;
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;
