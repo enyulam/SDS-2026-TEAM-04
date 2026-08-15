@@ -5,130 +5,160 @@
 > measurement. **Where this and `STATUS.md` disagree, `STATUS.md` WINS and this file is STALE.**
 > Written at every stop and **OVERWRITTEN, never appended** (`FINAL_MVP_G06_GROUNDING_RULING.md` §H-8).
 
-**Regenerated:** 2026-08-15 · branch `develop` · HEAD `a76afa0` · **pushed and verified from origin**
-· ✅ **`P2-9` complete under the batch** · ⏸ **`P2-12` … `P2-14` are WRITE paths and stop.**
+**Regenerated:** 2026-08-16 · branch `develop` · HEAD `eeb4a31` · **pushed and verified from origin**
+· ✅ **`P2-15`, `P2-16`, `P2-17` all complete** · ⏸ **THREE THINGS WAIT ON YOU.**
 
-## ⚠️ §15.8.1 FRESHNESS SWEEP
+## ⚠️ §15.8.1 FRESHNESS SWEEP — **THREE LAPSES, AND ONE OF THEM WAS A BLOCKER THAT WASN'T**
 
-**Every open item, blocker and stated limit re-verified. Nothing copied forward. Two lapses.**
+**Every open item, blocker and stated limit re-verified against current state. Nothing copied forward.**
 
 | Carried previously | Re-measured now |
 |---|---|
-| `P2-9` BLOCKED on schema | ⛔ **LAPSED — AUTHORIZED AND COMPLETE.** Two read functions, two grants |
-| Pushed = `d6b0305` | ⛔ **LAPSED.** `origin/develop` = **`a76afa0`** = local HEAD, read from origin. `origin/main` = `5eb84bc`, **UNTOUCHED** |
+| `prove:stage2-routes` · `prove:stage3-authenticated` **NOT-RUN** — *"`:3000` held by your walk server"* | ⛔ **LAPSED. `:3000` IS FREE.** ▶ **Both were RUN.** `stage2` **PASS, 17 checks**. `stage3` **44 PASS · 1 FAIL · 2 NOT-RUN** — and it now covers **44** legs where the last record covered 34 |
+| `S3-T1-r` carried as an open failure, cause undiagnosed | ⛔ **DIAGNOSED — IT IS FIXTURE VINTAGE, NOT A DEFECT.** See below |
+| Pushed = `a76afa0` | ⛔ **LAPSED.** `origin/develop` = **`eeb4a31`**, read from origin. `origin/main` = `5eb84bc`, **UNTOUCHED** |
 | `Phone` / `Employee ID` on `24` | ✅ **STILL OPEN. CARRIED** — no column exists; still your decision |
-| The 7-day invitation lifetime | ✅ **STILL A DISCLOSED DEFAULT. CARRIED** — no instrument names a duration |
-| `AR-4-14` + `AR-4-17` | ✅ **STILL TRUE. CARRIED** — the only open **rule** question |
-| `D-10` intermittent | ✅ **STILL TRUE. CARRIED.** Not re-run: a flaky check closes on a diagnosed cause, never on a run of green |
-| `S3-T1-r` · `S3-00` · `B-G06-DET-1` · §10 Phase 1 exit (c) · `09`/`C2C-007` · the mojibake repair · `test:continuity`/`test:exit-condition-b` | ✅ **ALL STILL TRUE. CARRIED** |
-| VISUAL walk `NOT-RUN` | ✅ **STILL TRUE** — now **seven**: `11`, `14`, `17`, **`18`**, `23`, `24`, `25` |
+| The 7-day invitation lifetime | ✅ **STILL A DISCLOSED DEFAULT. CARRIED** |
+| `AR-4-14` + `AR-4-17` | ⚠️ **STILL TRUE BUT NO LONGER THE ONLY ONE** — `P2-16`'s slot 2 is now a second open rule question |
+| `D-10` intermittent · `prove:serving-discipline` red | ✅ **STILL RED, RE-MEASURED** (exit 1). Not closed on a run of green — a flaky check closes on a diagnosed cause |
+| `prove:artefact-read` red (`AR-4-14`/`AR-4-17`) | ✅ **STILL RED, RE-MEASURED** (exit 1) |
+| `S3-00` · `B-G06-DET-1` · §10 Phase 1 exit (c) · `09`/`C2C-007` · the mojibake repair · `test:continuity`/`test:exit-condition-b` | ✅ **ALL STILL TRUE. CARRIED** |
+| VISUAL walk `NOT-RUN` | ⚠️ **NOW TEN**: `11`, `14`, `17`, `18`, `23`, `24`, `25`, **`15`**, **`16`**, **`02`** |
 
 ---
 
-## ⏸ THE NEXT STOP, STATED EARLY: `P2-12` … `P2-14` ARE **WRITE** PATHS
+## ⛔ READ THIS BEFORE YOU WALK ANYTHING: **THE FIXTURE HAS AGED OUT OF ITS OWN CALENDAR**
 
-Your batch is *"any phase needing ONLY read-side schema"*. ▶ `P2-12` (`20` Register Student),
-`P2-13` (`21` Create Parent Account) and `P2-14` (`22` Edit Student) each need a **write** RPC —
-measured: **no create or update path exists for a student or a parent**, exactly as none existed for
-a trainer before `P2-11`. ⛔ **They fall outside the batch and will stop for you, stated with tables,
-columns, policies, grants and audit strings.**
+**Measured, not inferred:**
 
-✅ **`P2-15` (`15` Lesson Statistics) and `P2-16` (`16` Class Statistics) ARE inside the batch** —
-both are read-only aggregates. **That is where I go next**, so the three write phases stop **once,
-together**, rather than three times.
-
----
-
-## ✅ `P2-9` — SCREEN `18` MANAGEMENT STUDENT PROFILE
-
-### Functions and grants added under the batch — **named, not counted**
-
-| Function | Grant |
+| | Measured |
 |---|---|
-| `public.report_management_student_trend(uuid)` | `EXECUTE` → `authenticated` |
-| `public.report_management_student_reports(uuid)` | `EXECUTE` → `authenticated` |
+| Every fixture `class_sessions.session_date` | **2026-01, 2026-02, 2026-03 — nothing else** |
+| Today | **2026-08-15** |
+| Term containing today | **`Term 3, 2026`** |
+| Sessions in that term | **0** |
+| Upcoming sessions anywhere | **0** |
 
-⛔ **And nothing else.** No table, column, enum, policy, client table grant or audit string. Census
-`T=30 E=12 P=30 R=23`. **`PS-5b` proves ZERO client table grants** on `observations`,
-`observation_ratings`, `reports` and `report_versions`.
+⛔ **Screen `02` Trainer My Classes will render its EMPTY STATE** — *"You have no assigned classes in
+Term 3, 2026"*. ▶ **That is CORRECT behaviour over stale fixture data, not a defect.**
+**Select `Term 1, 2026` in the dropdown to see populated cards.**
 
-⚠️ **TWO functions rather than the one proposed, and the reason is your own ruling.** One function
-returning `jsonb` would have made *"assert the returned shape"* **impossible** — you cannot assert a
-shape over an opaque blob. ✅ **And one FEWER than proposed**, by §12.10: the `ASSESSMENTS` tile is
-`trend.length`, because `A-017` makes all nine mandatory and the RPC drops any session without
-exactly nine.
+⛔ **The frame's pink `Next session:` line will never appear over this fixture, on any card, in any
+term** — there are no upcoming sessions at all, and hero `0B` omits a NULL rather than showing it
+empty.
 
-### The ruled assertion, four deep
+✅ **AND IT EXPLAINS `S3-T1-r`**, which has been carried as an open failure without a cause:
+`/trainer/schedule` is asserted against the selectors *"Class sessions in February 2026"* and
+*"Fixture Module A"*. The schedule defaults to the **current** month, which genuinely has no
+sessions. ▶ **A date-pinned assertion over data that does not move.** It has almost certainly been
+failing for this reason since roughly April 2026.
 
-`VP-4a` pins both result types **string for string** · `VP-4b` bars every rating / band / panel /
-hash name from the result types · `VP-4c` keeps `V-4`'s body bar **minus the rating family only** ·
-⛔ **`PS-4b` scans the returned VALUES**, because a `text` column can carry `Mastering` without the
-shape ever changing.
-
-⚠️ **`V-4`'s verbatim form would have failed this migration on its own correct implementation** —
-the ruling *is* that this body aggregates ratings. Your wording named the right locus, and moving
-the assertion there made it **stricter**: four checks where `V-4` had one, and the strongest cannot
-be satisfied by anything but the exact contract.
-
-### `D-2` never rendered — three layers
-
-`PS-7b` bars `toFixed`, a `%`-suffixed score in a text node, the score in an `aria-label` **or** a
-`title` (⚠️ **a screen reader is a role**), the score as element content, and any band label.
-⛔ **`PS-7c` asserts the chart STILL RENDERS** — an emptied chart satisfies every prohibition
-perfectly. **`PS-3c` makes the value falsifiable**: the mixed fixture yields **`44.44` and `63.89`**,
-strictly between band floors and **not on one**, so a constant, an unmapped `NULL` or a
-count-instead-of-average would all fail.
-
-### Eight refusals on that screen
-
-Skill Breakdown (`GC-6`/`C-9`) · Strengths chips (your ruling — they are the Breakdown thresholded) ·
-Reports `GRADE` (`G-2`) · `Generate Term Report` (`C-11`) · the TA line (`A-014`) · `Date of birth`,
-`Contact`, `Student ID` (**no column**, measured) · `Good standing` (not a concept anywhere) ·
-`Edit` **disabled-with-a-reason** — ⚠️ **unlike screen `23`'s ABSENT one**, because `22` Edit
-Student **exists** in the ratified 36 and lands at `P2-14`.
+⛔ **I DID NOT FIX IT**, on three independent grounds: re-dating fixtures is a **fixture change
+needing its own authorization**; it would invalidate every other suite pinning a fixture date; and
+**silently defaulting screen `02` to a different term would be dishonest** — *"no classes this term"*
+is true, and hiding that to avoid an empty-looking screen asserts something the trainer never asked
+for. ⚠️ **The decision is yours:** re-date the fixture around today (what a demo needs), rewrite the
+date-pinned assertions to be relative, or both.
 
 ---
 
-## ⛔ THE RULE YOU PUT IN §12 HAS A CEILING — FOUND BY THE VERY NEXT PHASE
+## ⏸ THE THREE THINGS THAT WAIT ON YOU
 
-`P2-11`'s closure was *"every migration declaring a function executes it at apply time."* ▶ **`P2-9`
-shipped a function that PASSED that leg and still raised for a real caller**:
+### 1. `P2-12` · `P2-13` · `P2-14` — stated in full as a set (plan §29)
 
-```
-ERROR:  column cg.label does not exist
-```
+**`P2-12` and `P2-13` share ONE shape. `P2-14` is the outlier, and only because of the registry.**
 
-⚠️ **`VP-2` executed both functions and failed closed CORRECTLY.** But an owner-probe returns at the
-**first gate**, this body sits behind **three**, and `plpgsql` resolves lazily. ⛔ **`P2-11`'s defect
-was caught by that leg only because its failing statement was THREE LINES PAST the gate** — luck of
-placement, not coverage, and reading it as coverage is exactly what `P2-9` did.
+| | Table | Column | Enum | Policy | Client grant | **Write RPC** | **EXECUTE** | **Audit string** |
+|---|---|---|---|---|---|---|---|---|
+| **`P2-12`** `20` Register Student | — | — | — | — | — | **1** `admin_create_student` | **1** | ✅ **0 NEW** |
+| **`P2-13`** `21` Create Parent Account | — | — | — | — | — | **1** `admin_create_parent` | **1** | ✅ **0 NEW** |
+| **`P2-14`** `22` Edit Student | — | — | — | — | — | **1–2** `admin_update_student` (+ withdraw) | **1–2** | ⛔ **1 NEW → registry 23 → 24** |
 
-> ### ⛔ **THE RULE HAS TWO LEGS AND NEITHER SUBSTITUTES FOR THE OTHER.**
-> **1. Apply time** — proves resolution **up to the first gate**, and that the gate fails closed.
-> **2. The paired suite** — executes it **as a real authorized caller, past every gate, against
-> fixture data**. **Only this reaches the body.**
+⚠️ **The registry already anticipated two of the three, and I checked rather than assumed:**
+`admin.student_created` · `admin.enrolment_changed` · `admin.profile_created` · `invitation.created`
+· `admin.parent_link_changed` **all already exist**. ⛔ `P2-14` alone needs
+**`admin.student_updated`** — there is `admin.module_updated` and `admin.session_updated` and no
+student equivalent.
 
-`PS-3`/`PS-3b` are leg 2 and are what caught this. Corrected forward under `R-1`; `VQ-2` now runs
-the failing query verbatim at apply time. ▶ **Recorded in plan §26.1. `CLAUDE.md` §12's text stays
-correct as written — it is a floor, and this is its ceiling.**
+**Fields with NO columns — the real decision, and NOT schema I am proposing:** `Date of birth` ·
+`Gender` (no column, no enum, never raised before) · `Student ID` (**the fifth screen to draw it**) ·
+`Guardian name/contact/email/home address` (⚠️ **and these are screen `21`'s job — collecting them on
+`20` would create a second, unlinked copy of the guardian**) · `Photo` (`C-15`) · **`Relationship`**
+on `21` ⚠️ **which has a DECOY**: `parent_student_links.parent_role` looks like it and is
+`centre_membership_role` CHECK-pinned to `'parent'`, a composite-FK component — ▶ **reading it as
+`Relationship` would have shipped `Mother` into a role column** · `Phone` (same open question as
+`24`'s). ⚠️ **`22`'s *"Can be undone within 30 days"* has NO mechanism** — the withdrawal is
+buildable, the 30-day window is not recorded anywhere.
+
+### 2. `P2-16`'s Management Insight **slot 2** (plan §28.3)
+
+`CLAUDE.md` §6 mandates *"the dimension with the largest positive **average-rating change** between
+the first half and second half"*. ⛔ **That is computed from rating values, averaged across children,
+differenced over time** — and `G-2` excludes roll-ups permanently on every surface.
+
+⚠️ **Both readings are serious.** Excluded: its INPUT is the nine ratings across children, which is
+what `C-9` keeps off a statistics surface. Permitted: its **OUTPUT is a DIMENSION NAME** — never a
+value, band or number — which is exactly the structure you **authorized** in `D-2`.
+
+**Slots 1 and 3 are BUILT** (slot 1 reuses `report_class_health_summary`, which §6 *requires*).
+**Slot 2 is held and disclosed on the page.**
+
+### 3. `P2-18` (`03` Trainer Lesson Plan) — a `G-3`/`D-4` scope question
+
+`G-3` prohibits SLIDES and the lesson-plan control **as drawn on `06`**; `D-4` narrows that only for
+materials **tagged to a specific class session**. Screen `03` is module-level. ⚠️ **Not measured in
+depth yet** — flagged so it is not mistaken for ready.
 
 ---
 
-## ✅ THE `exact: true` TRAP, CAUGHT BY LOOKING
+## ✅ WHAT SHIPPED THIS STRETCH — THREE PHASES, **ZERO SCHEMA IN ALL THREE**
 
-`Classes` hit `C2C-002` at `P2-2`; `Trainers` at `P2-11`, found by a red leg after the ratchet went
-unread for a phase. ▶ **`Students` would have hit it here, and it was checked before the child route
-shipped.** ⛔ **A rail item is `exact` only while it has no child route, and shipping a child is the
-moment to check.**
+**Functions and grants added under the batch, named not counted: `P2-15` NONE · `P2-16` NONE ·
+`P2-17` NONE.** Census unmoved throughout at **`T=30 E=12 P=30 R=23`**.
 
-✅ **And the route ratchet fired *during* this phase** — red on the same run that shipped screen
-`18`, read, and moved before the phase closed. ▶ **That is §12.13's correction working:** the gate
-was always fine; what changed is that it ran at the end of the phase that touched its subject.
+▶ **§12.10 for the fifth, sixth and seventh consecutive phases.** On `P2-16` reuse was not merely
+economical — **`CLAUDE.md` §6 REQUIRES it**: slot 1 must be *"the exact same computation … never
+computed two different ways"*.
 
-⚠️ **Your framing is recorded in plan §25.2 as the general rule:** *an unread gate does not just miss
-its own finding, it masks whatever it would have surfaced.* The route census's own finding was one
-missing expectation — cheap. What it hid was a **blank sidebar on a real page**, invisible to `tsc`,
-to `lint`, to the build and to the page itself.
+| Screen | What it refused |
+|---|---|
+| **`15`** Lesson Statistics | **5 of 6 cards** — Skill Averages · the Status Distribution donut · `Class Average 82%` · Strongest/Focus/Overall · Trainer & Assistant. **Six counts survive** |
+| **`16`** Class Statistics · **`PARTIAL`** | **ALL 3 drawn cards** — and **2 panels the frame OMITS are BUILT** under `C-17` |
+| **`02`** Trainer My Classes | rating chips, `Assist.`/TA, the frame's `Junior` grade literal |
+
+### ⚠️ AND I GOT `P2-16` MATERIALLY WRONG BEFORE MEASURING — SELF-CORRECTED
+
+I first wrote `P2-16` up as a **hard stop on a new question**, because the pack's `GC-10` records two
+mandated panels the frame omits. ⛔ **`C-17` ALREADY RULED IT** — *"GOVERNANCE WINS. Build the two
+panels"* — and **`P2-4` had already built its half**, using the very function that computes slot 1.
+
+> ⛔ **THE RULE IT EARNS: a conflict register records that a conflict EXISTED; it is not evidence the
+> conflict is still OPEN.** Check the ruling set before escalating a register row.
+
+---
+
+## ⛔ FOUR DEFECTS IN MY OWN CHECKING, AND THEY ARE THE BEST FINDINGS HERE
+
+1. ⛔ **I WAS READING BUILD SUCCESS OUT OF A `grep`, AND IT SAID `Compiled successfully` ON A BUILD
+   THAT FAILED.** Next.js prints that line and *then* type-checks; the worker exited **1** several
+   lines later. ▶ **`npm run build | grep Compiled` is a substring search that returns true on
+   failure.** **Every gate is now read from its EXIT CODE.** *(Re-verified: the tree builds clean by
+   exit code, so the code is sound — the METHOD was not.)*
+2. **I typechecked, then edited, then did not re-typecheck.** The rail edit landed after `tsc` and
+   broke the build. ▶ **A green gate is green for the tree it ran against, not the one you ship.**
+3. ⛔ **A PROOF SLICE THAT READ 4.7× WHAT IT NAMED.** `P2-9`'s `PS-8` sliced the contracts file to
+   *whatever type was declared next*; `P2-17` inserted three types into that gap and a trainer's
+   **class grade** turned it red. ⚠️ **It had been failing the dangerous way all along — 2090
+   characters read while its message claimed "THE PROFILE DTO".** Bounded: **441**.
+   > ⛔ **A check that reports a bigger scope than it names is as wrong when it passes.**
+4. ⚠️ **The `grab` regex truncated a live measurement** — `([^ \n]*)` cut `Eye contact|Vocal
+   projection` to **`Eye`**, and the check **passed while asserting over the truncated value**.
+   Fourth instance of that family, first that NARROWED rather than broke.
+
+**And a real mapping defect §12.10 caught:** `P2-16`'s first draft keyed its lookup by dimension
+**code**, but `focus_chips` holds **free display text** (`Eye contact`). ▶ A code-keyed lookup would
+have matched **nothing, every time**, rendering Management Insight with two sentences silently
+missing — **no error, no exception, no red test**.
 
 ---
 
@@ -136,17 +166,19 @@ to `lint`, to the build and to the page itself.
 
 | | |
 |---|---|
-| Branch · worktree · HEAD | `develop` · main worktree · `a76afa0` · clean |
-| Pushed | ✅ **`origin/develop` = `a76afa0` = local HEAD**, read back from origin |
+| Branch · worktree · HEAD | `develop` · main worktree · `eeb4a31` · **clean** |
+| Pushed | ✅ **`origin/develop` = `eeb4a31`**, read back from origin |
 | `main` | **UNTOUCHED** — `5eb84bc`, verified from origin |
 | Containers | **dev 9 · mvp 0** ⛔ demonstration stack never started or queried |
-| Ports | `:3000` held by your walk server; untouched by me |
-| Migrations added this stretch | **4** — `P2-11` + its `R-1` fix, `P2-9` + its `R-1` fix |
+| Ports | ⚠️ **`:3000` is now FREE** — your walk server is no longer running |
+| Migrations added this stretch | **ZERO** |
 | Census | tables **30** · enums **12** · policies **30** · registry **23** |
-| Portal suites | `p2-1` … `p2-11` + `ruling-a` — **all 15 PASS** |
-| Navigation census | **all proofs passed**; 26 routes, 28 with aliases |
-| `tsc` · `build` · `lint` · `prove:encoding` | clean · clean · **0 errors** · PASS |
-| `T-P44`/`T-P44c` · `prove:no-secrets` | **PASS, unchanged** · **CLEAN** |
-| Deliberately red | `prove:artefact-read` (`AR-4-14`/`AR-4-17`) · `prove:serving-discipline` (`D-10`) |
-| `NOT-RUN` | `bodySizeLimit` (browser leg) · `prove:stage2-routes` · `prove:stage3-authenticated` · VISUAL on `11`/`14`/`17`/`18`/`23`/`24`/`25` |
-| ⏭ Next | **`P2-15` (`15` Lesson Statistics)** then **`P2-16` (`16` Class Statistics)** — both read-only, both inside the batch. ⏸ **`P2-12`/`13`/`14` will stop together**, as write paths |
+| Portal suites | **26 — ALL PASS, verified by EXIT CODE** (not by grep) |
+| Navigation census | **PASS** — 29 canonical routes, 31 with aliases, **11 rail items** |
+| `tsc` · `build` · `lint` · `prove:encoding` | exit 0 · exit 0 · **0 errors** (4 pre-existing warnings) · PASS |
+| `prove:no-secrets` | **CLEAN** |
+| `prove:stage2-routes` | ✅ **PASS, 17 checks** — newly run |
+| `prove:stage3-authenticated` | **44 PASS · 1 FAIL (`S3-T1-r`, fixture vintage) · 2 NOT-RUN** — newly run |
+| Deliberately red | `prove:artefact-read` (`AR-4-14`/`AR-4-17`) · `prove:serving-discipline` (`D-10`) — **both re-measured red** |
+| `NOT-RUN` | `bodySizeLimit` (browser leg) · `S3-MUT` · `S3-A-password` · **VISUAL on ten screens** |
+| ⏭ Next | ⏸ **STOPPED at a clean phase boundary.** `P2-19` (`01` Trainer Dashboard) and `P2-20` (`04` Trainer Students) are read-only and would continue under the batch; `P2-18` needs the `G-3`/`D-4` answer; `P2-12`/`13`/`14` and `P2-16` slot 2 need your rulings |

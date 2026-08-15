@@ -4860,3 +4860,76 @@ reproduces the frame: both Public Speaking cards pink, both Speech and Drama tea
 ⚠️ **`class_grades.display_name` and `terms.label`** — two adjacent tables, **opposite column
 names**, and guessing wrong is precisely the defect that broke `P2-9`'s migration at runtime. Both
 measured before use.
+
+
+---
+
+## §32 — ⛔ THE FIXTURE HAS **AGED OUT OF ITS OWN CALENDAR**, AND IT EXPLAINS A CARRIED FAILURE
+
+*(Found during the `§15.8.1` freshness sweep at the `P2-17` checkpoint, 2026-08-16. **Nothing was
+changed to accommodate it** — this is a measurement and a warning, not a fix.)*
+
+### §32.1 — TWO CARRIED `NOT-RUN`s HAD **LAPSED**, AND RUNNING THEM IS WHAT SURFACED THIS
+
+`prove:stage2-routes` and `prove:stage3-authenticated` were carried `NOT-RUN` **because the
+Operator's walk server held `:3000`**. ▶ **Measured at this checkpoint, `:3000` is FREE** — the
+reason had lapsed, and §15.8.1 requires re-verifying a carried limit rather than copying it forward.
+
+Both were run:
+
+| | Result |
+|---|---|
+| `prove:stage2-routes` | ✅ **PASS — 17 checks.** Every Stage 2 chain route served; every portal route refuses an anonymous caller server-side |
+| `prove:stage3-authenticated` | **44 PASS · 1 FAIL · 2 NOT-RUN** (`S3-MUT`, `S3-A-password` — mutation legs and the Operator-credential sign-in, neither claimable from a green run) |
+
+⚠️ **Stage 3 now covers 44 legs where the last recorded run covered 34** — it picked up the screens
+built since.
+
+### §32.2 — ⛔ THE SINGLE `FAIL` IS **FIXTURE VINTAGE, NOT A PRODUCT DEFECT**
+
+```
+FAIL  S3-T1-r  /trainer/schedule — hydrated but 2/3 selector(s) MISSING:
+               "Class sessions in February 2026", "Fixture Module A"
+```
+
+**Measured, not inferred:**
+
+| | Measured |
+|---|---|
+| Every fixture `class_sessions.session_date` | **2026-01, 2026-02, 2026-03 — and nothing else** |
+| Today | **2026-08-15** |
+| Term containing today | **`Term 3, 2026`** |
+| Sessions in that term | **0** |
+| Upcoming sessions anywhere (`session_date >= today`) | **0** |
+
+▶ **The trainer schedule defaults to the current month, which genuinely contains no sessions.** The
+selector pins **February 2026**, a month that passed five months ago. ⛔ **The surface is behaving
+correctly and the EXPECTATION has rotted.**
+
+⚠️ **This is a DATE-PINNED ASSERTION over data that does not move**, so it has almost certainly been
+failing for this reason since roughly April 2026 — and it was carried forward as an open item without
+its cause being diagnosed. **The freshness obligation exists for exactly this.**
+
+### §32.3 — ⚠️ **WHAT THE OPERATOR WILL SEE ON A VISUAL WALK, STATED BEFORE THEY WALK IT**
+
+⛔ **Screen `02` Trainer My Classes will render its EMPTY STATE today** — *"You have no assigned
+classes in Term 3, 2026"* — and that is **CORRECT behaviour over stale fixture data, not a defect.**
+The term containing today has zero sessions.
+
+⛔ **The frame's pink `Next session:` line will never appear over this fixture**, on any card, in any
+term: `UPCOMING_SESSIONS = 0`. Under hero `0B` a NULL is omitted rather than shown empty, so the line
+is simply absent.
+
+▶ **Selecting `Term 1, 2026` in the term dropdown is what shows populated cards.** Any date-relative
+surface built later — the `01` dashboard's *Today's Schedule*, its calendar — will have the same
+property.
+
+⛔ **I DID NOT "FIX" THIS.** Three reasons, and each is sufficient: moving fixture dates is a
+**fixture change requiring its own authorization**; it would invalidate every other suite that pins a
+fixture date; and **silently defaulting screen `02` to a different term when the current one is empty
+would be dishonest** — *"no classes this term"* is TRUE, and a screen that quietly shows a different
+term to avoid looking empty is asserting something the trainer did not ask for.
+
+⚠️ **The decision is the Operator's**, and it is a real one: either the fixture is re-dated to sit
+around the current date (which is what a demo needs), or the date-pinned assertions are rewritten to
+be relative, or both. **Neither is in this batch.**
