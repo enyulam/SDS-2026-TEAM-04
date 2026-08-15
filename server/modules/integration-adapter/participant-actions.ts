@@ -133,6 +133,7 @@ import type {
   AdapterManagementStudentProfileDto,
   AdapterLessonStatisticsDto,
   AdapterClassStatisticsDto,
+  AdapterTrainerMyClassesDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -178,6 +179,7 @@ import { createTrainerCore } from "@/server/modules/identity-access/trainer-invi
 import { readStudentProfileCore } from "@/server/modules/management-view/student-profile-projections";
 import { readLessonStatisticsCore } from "@/server/modules/management-view/lesson-statistics-projections";
 import { readClassStatisticsCore } from "@/server/modules/management-view/class-statistics-projections";
+import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2011,6 +2013,48 @@ export async function adapterReadClassStatistics(
         reportId: r.reportId,
         reportState: r.reportState,
         evidenceCount: r.evidenceCount,
+      })),
+    },
+  };
+}
+
+
+/**
+ * `P2-17` — screen `02` Trainer My Classes.
+ *
+ * ⛔ NO RATING, NO REPORT STATE, NO ASSESSMENT FIELD crosses this boundary.
+ * The card carries a label, a count, a schedule string and a date.
+ *
+ * ⚠️ `todayIso` is resolved SERVER-SIDE. A browser-supplied "today" would let
+ * the caller choose which sessions count as upcoming.
+ */
+export async function adapterReadTrainerMyClasses(
+  termId: string | null,
+): Promise<ActionResult<AdapterTrainerMyClassesDto>> {
+  const client = await createRequestSupabaseClient();
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const result = await readTrainerMyClassesCore(client, todayIso, termId);
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      terms: d.terms.map((t) => ({
+        termId: t.termId,
+        label: t.label,
+        startsOn: t.startsOn,
+        endsOn: t.endsOn,
+      })),
+      selectedTermId: d.selectedTermId,
+      cards: d.cards.map((c) => ({
+        classModuleId: c.classModuleId,
+        title: c.title,
+        gradeLabel: c.gradeLabel,
+        displayLabel: c.displayLabel,
+        initials: c.initials,
+        studentCount: c.studentCount,
+        scheduleSummary: c.scheduleSummary,
+        nextSessionDate: c.nextSessionDate,
       })),
     },
   };

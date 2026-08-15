@@ -147,6 +147,20 @@ const EXPECTED_BY_ROUTE = new Map([
     { role: "management", label: "Classes" },
   ],
   /*
+   * `P2-17` -- screen `02` Trainer My Classes, and a NEW trainer rail item.
+   *
+   * ⚠️ THE RAIL HAD NO `My Classes` ITEM AT ALL, so this route would have
+   * resolved to ZERO active items -- `C2C-002`'s blank sidebar, arriving by a
+   * different door than the three `exact: true` cases. ▶ The item is
+   * deliberately NOT `exact`, because screen `03` Trainer Lesson Plan is
+   * already known to be a child route at `P2-18`.
+   *
+   * ✅ AND `N-0`/`N-3` WENT RED DURING THIS PHASE, on the run that shipped the
+   * screen -- read and fixed before the phase closed, which is §12.13 working
+   * as corrected rather than a gate discovered a phase late.
+   */
+  ["/trainer/my-classes", { role: "trainer", label: "My Classes" }],
+  /*
    * `P2-16` -- screen `16` Class Statistics, a child of Classes.
    * ⚠️ Unlike `15`, this route IS reachable from the UI: the `View Overall
    * Class Statistics` control on screen `13` was built INERT at `P2-4` with

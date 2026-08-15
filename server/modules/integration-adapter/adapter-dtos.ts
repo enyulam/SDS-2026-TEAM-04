@@ -455,6 +455,30 @@ export interface AdapterClassStatisticsDto {
   readonly followUpRows: readonly AdapterClassOverviewRowDto[];
 }
 
+export interface AdapterTrainerTermDto {
+  readonly termId: string;
+  readonly label: string;
+  readonly startsOn: string;
+  readonly endsOn: string;
+}
+
+export interface AdapterTrainerClassCardDto {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly gradeLabel: string;
+  readonly displayLabel: string;
+  readonly initials: string;
+  readonly studentCount: number;
+  readonly scheduleSummary: string | null;
+  readonly nextSessionDate: string | null;
+}
+
+export interface AdapterTrainerMyClassesDto {
+  readonly terms: readonly AdapterTrainerTermDto[];
+  readonly selectedTermId: string | null;
+  readonly cards: readonly AdapterTrainerClassCardDto[];
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

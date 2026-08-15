@@ -29,6 +29,7 @@ import {
   type ManagementStudentProfileDto,
   type LessonStatisticsDto,
   type ClassStatisticsDto,
+  type TrainerMyClassesDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1323,6 +1324,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * a manufactured one would name a dimension nothing measured.
    */
   async readClassStatistics(): Promise<UiActionResult<ClassStatisticsDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-17` — screen `02`. ⛔ THE FIXTURE REFUSES: a manufactured class list
+   * would show a trainer classes they are not assigned to, which is the one
+   * thing `A-016` makes authoritative.
+   */
+  async readTrainerMyClasses(): Promise<UiActionResult<TrainerMyClassesDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

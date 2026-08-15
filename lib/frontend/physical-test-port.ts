@@ -28,6 +28,7 @@ import type {
   ManagementStudentProfileDto,
   LessonStatisticsDto,
   ClassStatisticsDto,
+  TrainerMyClassesDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -244,6 +245,9 @@ export interface PhysicalTestPort {
 
   /** `P2-16` — screen `16`. ⛔ Counts, two mandated panels, no rating. */
   readClassStatistics(classModuleId: string): Promise<UiActionResult<ClassStatisticsDto>>;
+
+  /** `P2-17` — screen `02`. ⛔ No rating, no report state. */
+  readTrainerMyClasses(termId: string | null): Promise<UiActionResult<TrainerMyClassesDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

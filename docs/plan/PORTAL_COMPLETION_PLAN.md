@@ -4744,3 +4744,119 @@ the first space**. `Eye contact|Vocal projection` arrived as **`Eye`**, and the 
 asserting over a truncated value**. ▶ **The first instance in this suite set where that regex
 silently NARROWED a live measurement rather than breaking one** — a delimiter-bracketed reader
 (`KEY<…>`) replaces it.
+
+
+---
+
+## §31 — `P2-17` AS BUILT, AND **THREE DEFECTS IN MY OWN CHECKING**
+
+**Screen `02` Trainer My Classes.** Route `/trainer/my-classes`. Suite
+`prove:portal-p2-17` — **19 checks, all PASS**.
+
+### §31.1 — ✅ FUNCTIONS AND GRANTS ADDED UNDER THE BATCH: **ZERO, A THIRD TIME**
+
+| Function | Grant |
+|---|---|
+| *(none)* | *(none)* |
+
+⛔ No migration, table, column, enum, policy, client table grant, write path or audit string. Census
+`T=30 E=12 P=30 R=23`.
+
+▶ **§12.10 FOR THE SEVENTH CONSECUTIVE PHASE.** Measured at HEAD before a line was written: all
+eight tables carry grant + RLS + a trainer policy, and **`class_modules_select_trainer` IS
+`app_trainer_reaches_module(id)`** — assignment-scoped, not centre-scoped, so "my classes" is
+already what RLS returns. `PT17-2b` pins that policy body rather than trusting the row count.
+
+⚠️ **The assignment filter is still written explicitly** through `class_session_assignments` (own,
+active) → sessions → modules. **`A-016` makes trainer assignment authoritative at SESSION level**, so
+that is the join that decides the answer; RLS agreeing is a second layer, not the reason the query is
+right.
+
+### §31.2 — ⚠️ THE TERM FILTER IS BY **DATE**, AND THE REASON IS MEASURED
+
+`class_sessions.term_id` is **nullable**, and **4 of 17 fixture sessions carry none**. ▶ A `term_id`
+filter would have made those four **silently vanish from a trainer's own class list** because an
+administrator did not set a field. The filter is the term's **date window against `session_date`**, a
+column every session has. `D-3` frames terms as scheduling structure, which is what a date window is.
+
+⚠️ **And the default term falls back to the LAST term, not the first**, when today sits outside every
+window — a trainer opening this in the holidays should land on the term that just ended.
+
+### §31.3 — ⛔ `Lesson plan` IS DISABLED-WITH-A-REASON, AND THE DISTINCTION IS THE WHOLE POINT
+
+The frame draws a full-width `Lesson plan` control on every card. ⚠️ **It is NOT `G-3`'s prohibited
+"View lesson plan":** its destination, **screen `03` Trainer Lesson Plan**, is one of the ratified 36
+and lands at **`P2-18`**. ▶ That makes it screen `18`'s `Edit` case, not screen `23`'s — **absent
+says "not a thing", disabled says "not yet", and only one of those is true here.**
+
+⛔ Whether `03`'s **content** is buildable is `P2-18`'s question: `G-3` prohibits SLIDES and the
+lesson-plan control **as drawn on `06`**, and `D-4` narrows that only for materials **tagged to a
+specific class session**.
+
+### §31.4 — ⛔ THE RAIL HAD NO `My Classes` ITEM AT ALL — `C2C-002` BY A DIFFERENT DOOR
+
+The trainer rail carried **Schedule** and **Returned reports** only, so `/trainer/my-classes` would
+have resolved to **ZERO active items** — the blank sidebar, arriving not through `exact: true` but
+through **an item that did not exist**.
+
+✅ **The item is deliberately NOT `exact`, decided before it could bite.** Screen `03` is *already
+known* to be a child route (`/trainer/my-classes/lesson-plan`). ▶ Four rail items, four different
+outcomes: `Classes` bitten at `P2-2`, `Trainers` bitten at `P2-11`, `Students` caught by looking at
+`P2-9`, and this one **decided correctly in advance**.
+
+✅ **And `N-0`/`N-3` went red DURING this phase** — on the run that shipped the screen, read and
+fixed before the phase closed. §12.13 working as corrected.
+
+⚠️ **A stale comment corrected in the same pass** (§12.11): the rail read *"screens 02/04 are
+deferred, A-044"*. Screen `02` is no longer deferred; `04` still is, at `P2-20`.
+
+⚠️ **Visual divergence recorded, not resolved silently:** the frame draws a **book** glyph; `IconName`
+has none, and adding one is an **asset needing an `A-013` disposition** — the treatment `P2-10` used
+when the monitor glyph became `cap`. `document` is used. ⛔ **`calendar` was deliberately avoided
+even though the MANAGEMENT `Classes` item uses it**, because on this rail `calendar` already belongs
+to Schedule and reusing it would put one glyph on two items.
+
+### §31.5 — ⛔ THREE DEFECTS IN MY OWN CHECKING, AND ALL THREE ARE WORTH MORE THAN THE SCREEN
+
+**1. I typechecked, then edited, then did not re-typecheck.** `tsc` ran clean immediately *before*
+the navigation edit and was never re-run after it. ▶ **The build then FAILED**:
+`Type '"classes"' is not assignable to type 'IconName | undefined'`. **A green gate is green for the
+tree it ran against, not for the tree you ship.**
+
+**2. ⛔ I WAS READING BUILD SUCCESS OUT OF A `grep`, AND THE `grep` SAID "Compiled successfully" ON A
+BUILD THAT FAILED.** Next.js prints `✓ Compiled successfully` and *then* runs the type check; the
+worker exited **1** several lines later. ▶ **`npm run build | grep Compiled` is not a build check —
+it is a substring search that returns true on failure.** Every gate is now read from its **EXIT
+CODE**. *(Re-verified afterwards: the current tree contains `P2-15`, `P2-16` and `P2-17` and builds
+clean by exit code, so the code from those phases is sound — but the METHOD by which I reported them
+clean was not, and that is what is recorded here.)*
+
+**3. ⛔ AND A PROOF SLICE THAT READ 4.7× WHAT IT NAMED.** `P2-9`'s `PS-8` sliced the contracts file
+from `ManagementStudentProfileDto` **to whatever type happened to be declared next**. `P2-17`
+inserted three types into that gap, and `TrainerClassCardDto.gradeLabel` turned it red — a trainer's
+**class grade** (`Beginner`/`Intermediate`/`Advanced`, `A-016`), which has nothing to do with a `G-2`
+roll-up. ⚠️ **The red was the check's fault, not the build's — and it had been failing in the more
+dangerous direction all along:** it read **2090** characters while its own message claimed to have
+read "THE PROFILE DTO". Now bounded at the first column-zero `};`: **441** characters.
+
+> ### ⛔ **A CHECK THAT REPORTS A BIGGER SCOPE THAN IT NAMES IS AS WRONG WHEN IT PASSES.**
+> Its greens were never evidence about the thing it claimed to be measuring. ▶ This is the same
+> family as the vacuity entries and as `§26.1`'s ceiling: **the question is never only "did it
+> pass", it is "what exactly did it execute over".**
+
+### §31.6 — WHAT ELSE THE SCREEN REFUSES
+
+⛔ **No `Assist.` / TA** (`A-014`/`G-7`) — ⚠️ and **the frame draws none here either**: measured, the
+`.html` contains `Assist` **zero** times, so this is agreement rather than a refusal, and recording
+it as a refusal would have overstated the conflict. ⛔ No rating, score, band or assessment field in
+the DTO or on the screen. ⚠️ **`Junior` is not a ratified Class Grade** — the frame writes `Junior ·
+Public Speaking`; the grade rendered is whatever `class_grades.display_name` holds, never the frame's
+literal (same finding as `P2-8`).
+
+⚠️ **The avatar tint is keyed by module TITLE, never by row index** — `P2-8` shipped exactly that
+defect, where a learner changed colour when the filter reordered the table. Keying off the title also
+reproduces the frame: both Public Speaking cards pink, both Speech and Drama teal.
+
+⚠️ **`class_grades.display_name` and `terms.label`** — two adjacent tables, **opposite column
+names**, and guessing wrong is precisely the defect that broke `P2-9`'s migration at runtime. Both
+measured before use.

@@ -84,7 +84,8 @@
     "prove:portal-p2-11": "node --env-file=.env.local scripts/tests/portal/prove-p2-11-add-trainer.mjs",
     "prove:portal-p2-9": "node --env-file=.env.local scripts/tests/portal/prove-p2-9-student-profile.mjs",
     "prove:portal-p2-15": "node --env-file=.env.local scripts/tests/portal/prove-p2-15-lesson-statistics.mjs",
-    "prove:portal-p2-16": "node --env-file=.env.local scripts/tests/portal/prove-p2-16-class-statistics.mjs"
+    "prove:portal-p2-16": "node --env-file=.env.local scripts/tests/portal/prove-p2-16-class-statistics.mjs",
+    "prove:portal-p2-17": "node --env-file=.env.local scripts/tests/portal/prove-p2-17-trainer-my-classes.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

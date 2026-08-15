@@ -10199,3 +10199,82 @@ B and unbuilt. §27 did not record this and should have.
 ### Next
 
 `P2-17` (`02` Trainer My Classes), measured at HEAD as needing no schema.
+
+
+---
+
+## 2026-08-16 — `P2-17` screen `02` Trainer My Classes · zero schema · three defects in my own checking
+
+**Branch** `develop`, main worktree. **Starting HEAD** `b6737ee`.
+
+### Functions and grants added under the batch — **the list is empty, a third time**
+
+**None.** No migration. Census `T=30 E=12 P=30 R=23`.
+
+Measured at HEAD before writing: all eight tables carry grant + RLS + a trainer policy, and
+`class_modules_select_trainer` is `app_trainer_reaches_module(id)` — assignment-scoped. The
+assignment filter is still written explicitly through `class_session_assignments`, because `A-016`
+makes assignment authoritative at session level.
+
+### Files
+
+* `server/modules/class-session/trainer-my-classes.ts` — NEW.
+* `features/trainer/trainer-my-classes-screen.tsx` — NEW.
+* `app/(portals)/trainer/my-classes/page.tsx` — NEW.
+* `components/layout/portal-navigation.ts` — new `My Classes` rail item, not `exact`; stale
+  "screens 02/04 are deferred" comment corrected.
+* contracts / port / real adapter / fixture / adapter DTO / server action — wired.
+* `tests/frontend/portal-navigation-active-state.mjs`, `prove-p2-1-…` — census and ratchet 28 → 29.
+* `scripts/tests/portal/prove-p2-17-trainer-my-classes.mjs` — NEW, 19 checks.
+* `scripts/tests/portal/prove-p2-9-student-profile.mjs` — `PS-8` slice bounded (see below).
+* `docs/plan/PORTAL_COMPLETION_PLAN.md` — §31.
+
+### Three defects in my own checking, and they matter more than the screen
+
+**1. I typechecked, then edited, then did not re-typecheck.** `tsc` ran clean immediately before the
+navigation edit and was never re-run after it. The build then failed:
+`Type '"classes"' is not assignable to type 'IconName | undefined'`. A green gate is green for the
+tree it ran against, not the tree you ship.
+
+**2. I was reading build success out of a grep, and the grep said "Compiled successfully" on a build
+that failed.** Next.js prints `✓ Compiled successfully` and then runs the type check; the worker
+exited 1 several lines later. `npm run build | grep Compiled` is a substring search that returns true
+on failure. Every gate is now read from its exit code. Re-verified afterwards: the current tree
+contains P2-15, P2-16 and P2-17 and builds clean by exit code, so that code is sound — the method by
+which I reported those phases clean was not, which is what is recorded.
+
+**3. P2-9's `PS-8` read 4.7× what it named.** It sliced the contracts file from
+`ManagementStudentProfileDto` to whatever type happened to be declared next. P2-17 inserted three
+types into that gap and `TrainerClassCardDto.gradeLabel` turned it red — a trainer's class grade
+(`Beginner`/`Intermediate`/`Advanced`, `A-016`), unrelated to a `G-2` roll-up. The red was the
+check's fault, and it had been failing in the more dangerous direction all along: 2090 characters
+read while its own message claimed "THE PROFILE DTO". Bounded to its own declaration: 441. A check
+that reports a bigger scope than it names is as wrong when it passes.
+
+### Decisions
+
+The term filter is by date window, not `term_id`: 4 of 17 sessions carry no `term_id`, and an
+id-based filter would have made them silently vanish from a trainer's own class list.
+
+`Lesson plan` is disabled-with-a-reason, not absent and not prohibited — screen `03` is one of the
+ratified 36 and lands at P2-18. Whether `03`'s content is buildable is that phase's question.
+
+The trainer rail had no `My Classes` item at all, so the route would have resolved to zero active
+items. The new item is deliberately not `exact`, since screen `03` is already known to be its child.
+
+Visual divergence: the frame's book glyph became `document`; `IconName` has no book and adding one
+needs an `A-013` disposition. `calendar` was avoided despite the management `Classes` item using it,
+because on this rail it already belongs to Schedule.
+
+### Verification
+
+`prove:portal-p2-17` PASS (19/19). **27 suites verified by exit code, 0 failures.** Navigation census
+PASS — 29 canonical routes, 31 with aliases, 11 rail items. `tsc` exit 0 · `next build` exit 0 ·
+`eslint` 0 errors (4 pre-existing warnings) · `prove:encoding` PASS · `prove:no-secrets` CLEAN.
+
+### Next
+
+⏸ **`P2-18`** (`03` Trainer Lesson Plan) depends on a `G-3`/`D-4` scope question. `P2-19` (`01`
+Trainer Dashboard) and `P2-20` (`04` Trainer Students) follow `P2-17` and need measuring at HEAD.
+`P2-12`/`P2-13`/`P2-14` remain stated and waiting (plan §29); `P2-16`'s slot 2 remains held
+(plan §28.3).

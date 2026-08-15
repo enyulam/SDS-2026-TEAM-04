@@ -443,6 +443,37 @@ export type LessonStatisticsDto = {
  * refused by NOT BEING WRITTEN DOWN, which survives a later column appearing
  * upstream.
  */
+
+/**
+ * `P2-17` — screen `02` Trainer My Classes.
+ * ⛔ NO rating, report state or assessment field. A label, a count, a schedule
+ * string and a date.
+ */
+export type TrainerTermDto = {
+  readonly termId: string;
+  readonly label: string;
+  readonly startsOn: string;
+  readonly endsOn: string;
+};
+
+export type TrainerClassCardDto = {
+  readonly classModuleId: string;
+  readonly title: string;
+  readonly gradeLabel: string;
+  readonly displayLabel: string;
+  readonly initials: string;
+  readonly studentCount: number;
+  readonly scheduleSummary: string | null;
+  /** ⛔ NULL means no upcoming session — the line is omitted (hero `0B`). */
+  readonly nextSessionDate: string | null;
+};
+
+export type TrainerMyClassesDto = {
+  readonly terms: readonly TrainerTermDto[];
+  readonly selectedTermId: string | null;
+  readonly cards: readonly TrainerClassCardDto[];
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;

@@ -311,9 +311,28 @@ check(
 // PS-8 -- THE THREE PROHIBITED SURFACES ARE ABSENT.
 // ---------------------------------------------------------------------
 const contracts = stripComments(readFileSync(join(ROOT, "lib", "frontend", "contracts", "physical-test.ts"), "utf8"));
+/*
+ * ⚠️ BOUNDED TO ITS OWN DECLARATION — CORRECTED AT `P2-17`, 2026-08-16.
+ *
+ * ⛔ The first form sliced from `ManagementStudentProfileDto` to
+ * `ManagementStudentListDto`, i.e. to WHATEVER TYPE HAPPENED TO BE DECLARED
+ * NEXT. ▶ It therefore scanned every type anyone later inserted between the
+ * two, and `P2-17`'s `TrainerClassCardDto.gradeLabel` turned it red — a
+ * **trainer's class grade**, which is `Beginner`/`Intermediate`/`Advanced`
+ * (`A-016`) and has nothing to do with a `G-2` roll-up.
+ *
+ * ⚠️ **THE FAILURE WAS THE CHECK'S, NOT THE BUILD'S**, and it was failing
+ * OPEN in the more dangerous direction too: while it read five types it also
+ * claimed in its own message to have read "THE PROFILE DTO". A check that
+ * reports a bigger scope than it names is as wrong when it passes.
+ *
+ * ▶ Now bounded at the first column-zero `};`, which terminates exactly one
+ * top-level type declaration.
+ */
+const profileStart = contracts.indexOf("export type ManagementStudentProfileDto");
 const profileDto = contracts.slice(
-  contracts.indexOf("export type ManagementStudentProfileDto"),
-  contracts.indexOf("export type ManagementStudentListDto"),
+  profileStart,
+  contracts.indexOf("\n};", profileStart) + 3,
 );
 check(
   profileDto.length > 100 && !/rating|grade|band|skill|strength|focus/i.test(profileDto),

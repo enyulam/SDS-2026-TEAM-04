@@ -80,12 +80,45 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         exact: true,
         /*
          * The roster and the assessment surface are entered FROM the schedule and
-         * have no rail item of their own (screens 02/04 are deferred, A-044).
-         * Attributing `/trainer/sessions/*` to Schedule is what gives those two
-         * deep routes exactly one active item instead of zero.
+         * have no rail item of their own. Attributing `/trainer/sessions/*` to
+         * Schedule is what gives those two deep routes exactly one active item
+         * instead of zero.
+         *
+         * ⚠️ CORRECTED AT `P2-17`, 2026-08-16 (§12.11): this read *"screens
+         * 02/04 are deferred, A-044"*. ▶ **Screen `02` is no longer deferred —
+         * it ships in this phase and has its own item below.** Screen `04`
+         * Trainer Students remains deferred, at `P2-20`.
          */
         owns: ["/trainer/sessions"],
         icon: "calendar",
+      },
+      {
+        /*
+         * `P2-17` — screen `02` Trainer My Classes.
+         *
+         * ⛔ NOT `exact`, DELIBERATELY, AND DECIDED BEFORE IT COULD BITE.
+         * `C2C-002` has now hit three rail items in three phases — `Classes`
+         * at `P2-2`, `Trainers` at `P2-11`, and `Students` was caught by
+         * looking at `P2-9`. ▶ **Screen `03` Trainer Lesson Plan is a child of
+         * this route** (`/trainer/my-classes/lesson-plan`, `P2-18`), so an
+         * `exact` item here would give that child ZERO active items and a
+         * blank sidebar the moment it ships. **A rail item is `exact` only
+         * while it has no child route, and this one already knows it has one.**
+         */
+        href: "/trainer/my-classes",
+        label: "My Classes",
+        path: "/trainer/my-classes",
+        /*
+         * ⚠️ `document`, NOT the frame's open-book glyph, and NOT `calendar`.
+         * The frame draws a book icon; `IconName` has no book, and adding one
+         * is an ASSET needing an `A-013` disposition — the same treatment
+         * `P2-10` recorded when the monitor glyph became `cap`.
+         * ▶ `calendar` is deliberately avoided even though the MANAGEMENT
+         * `Classes` item uses it: on this rail `calendar` already belongs to
+         * Schedule, and reusing it would put the same glyph on two items.
+         * Recorded as a visual divergence rather than resolved silently.
+         */
+        icon: "document",
       },
       {
         href: "/trainer/reports?status=needs_edit",
