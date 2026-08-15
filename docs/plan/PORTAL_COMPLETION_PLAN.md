@@ -5104,3 +5104,183 @@ the current date**, which is exactly why this is a product question and not a te
    DISHONEST.** *"No classes this term"* is **true**, and a screen that quietly shows a different
    term to avoid looking empty asserts something the trainer never asked for. ▶ **The empty state is
    the correct behaviour and must stay correct after the fixture is re-dated.**
+
+
+---
+
+## §35 — `P2-12` · `P2-13` · `P2-14` STATED IN FULL, WITH PER-FIELD COSTS AND A **DECOY REGISTER**
+
+*(Operator instruction, 2026-08-16: state all three fully — tables, columns, policies, grants, audit
+strings — with the no-column fields **listed individually with what each would cost**, and **name any
+other near-miss of the `parent_role` kind** before ruling. **Nothing is built.** This supersedes §29,
+which was correct as far as it went and is corrected in two places below.)*
+
+### §35.1 — THE SCHEMA ASK, WHICH IS SMALL
+
+| | Table | Column | Enum | Policy | Client table grant | **Write RPC** | **EXECUTE** | **Audit string** |
+|---|---|---|---|---|---|---|---|---|
+| **`P2-12`** `20` Register Student | — | — | — | — | — | **1** `admin_create_student` | **1** | ✅ **0 NEW** |
+| **`P2-13`** `21` Create Parent Account | — | — | — | — | — | **1** `admin_create_parent` | **1** | ✅ **0 NEW** |
+| **`P2-14`** `22` Edit Student | — | — | — | — | — | **1–2** `admin_update_student` (+ withdraw) | **1–2** | ⛔ **1 NEW → registry 23 → 24** |
+
+⚠️ **`P2-12` AND `P2-13` SHARE ONE SHAPE; `P2-14` IS THE OUTLIER, AND ONLY BECAUSE OF THE REGISTRY.**
+Measured live, the 23 strings already carry **`admin.student_created`** · **`admin.enrolment_changed`**
+· **`admin.profile_created`** · **`invitation.created`** · **`admin.parent_link_changed`** — every
+governed action the first two perform **already has its name**, and adding a second name for an action
+that has one would itself be a §12 stop-and-ask (`A-029`, one event per governed action).
+
+⛔ **`P2-14` needs `admin.student_updated`** — `admin.module_updated` and `admin.session_updated` exist
+and there is no student equivalent. **Open sub-question I did not decide:** whether **withdraw** is
+that same string or a second one.
+
+✅ **CORRECTION TO §29, MEASURED SINCE:** §29 said `P2-13`'s email lives at
+`invitations.email_normalized`. ▶ **`accounts.normalized_email` ALSO EXISTS**, is `NOT NULL` on all
+three fixture accounts, carries a validating `CHECK` (lowercased, trimmed, `@` past position 1), and
+**`admin_create_trainer` already writes it**. **The durable home is `accounts`; the invitation copy is
+acceptance-time proof** (`A-027`). No new column either way.
+
+### §35.2 — ⛔ THE DECOY REGISTER: **SEVEN COLUMNS OF THE `parent_role` SHAPE, NOT ONE**
+
+*(The Operator asked for any other near-miss to be named. A systematic scan of every `CHECK`
+constraint pinning a column to a single literal found the whole family.)*
+
+> ### ⛔ **THE SHAPE: A COLUMN WHOSE NAME READS LIKE A FIELD, AND WHOSE `CHECK` SAYS IT IS A COMPOSITE-FK COMPONENT.**
+> Every one exists to make a **multi-column foreign key** provable — the role is carried alongside the
+> id so the FK can assert *"this membership is a trainer of this centre"* in the database rather than
+> in code. ▶ **None is a semantic field, none is editable, and every one will refuse the value a
+> frame wants to put in it.**
+
+| # | Column | `CHECK` pins it to | Why it is a near-miss |
+|---|---|---|---|
+| **1** | **`parent_student_links.parent_role`** | `'parent'` | ⛔ **THE ONE ALREADY FLAGGED.** Screen `21` draws **`Relationship`** with `Mother`; this reads exactly like it. **Writing `Mother` here fails the CHECK** |
+| **2** | **`trainer_profiles.membership_role`** | `'trainer'` | ⚠️ **THE MOST DANGEROUS AFTER `parent_role`**, because `GC-11` already records that screen `24` draws a **Role dropdown** and it must not be built. ▶ **This is the column someone would reach for to build it** |
+| **3** | `parent_profiles.membership_role` | `'parent'` | the same, on the parent side |
+| **4** | `class_session_assignments.trainer_role` | `'trainer'` | reads like *"what role is this person in this session"* — a natural place to try to seat an `Assist.`/TA, which `A-014`/`G-7` bar |
+| **5** | `observations.trainer_role` | `'trainer'` | same shape on the assessment record |
+| **6** | `attendance.recorded_by_role` | `NULL` **or** `'trainer'` | ⚠️ reads like *"who marked attendance"*, and **semantically it is** — but it can never say `management`. A frame showing *"Marked by: Management"* would find this column and be refused |
+| **7** | `invitations.invited_by_role` · `report_correction_requests.requester_role` / `resolver_role` · `report_versions.submitted_by_role` | `'management'` / `'trainer'` | the same pattern across the governed workflow. **`submitted_by_role` is pinned by `A-040` DELIBERATELY** — narrowing it was a ratified decision, not an accident |
+
+⛔ **THE GENERAL RULE THIS EARNS:** *before writing to a `*_role` column, read its `CHECK`. In this
+schema every one of them is a **composite-FK component**, and none is a place to store what a person
+is to somebody.*
+
+### §35.3 — ⚠️ A **SECOND** NEAR-MISS CLASS, FOUND WHILE SCANNING FOR THE FIRST
+
+**Columns that exist and hold nothing** — so a build reads the schema, sees the field, and assumes the
+data:
+
+| Column | Measured |
+|---|---|
+| `class_sessions.lesson_title` | ⛔ **NULL in 17 of 17 rows** |
+| `class_sessions.room` | ⛔ **NULL in 17 of 17 rows** |
+
+▶ **The surfaces are already correct** — hero `0B` omits a NULL rather than showing it empty — but it
+means screen `02`'s schedule line renders **weekday only**, and screen `15`'s lesson strip shows
+neither title nor room, **on every session in the fixture**. ⚠️ **Another thing that will look like a
+defect on a visual walk and is not**, and it belongs beside §34's time-pinning finding: *a column
+existing is not evidence the datum does.*
+
+### §35.4 — ⛔ THE FIELDS WITH NO COLUMNS, INDIVIDUALLY, WITH WHAT EACH WOULD COST
+
+`students` is, measured: `id · centre_id · full_name · is_active · created_at · updated_at ·
+deactivated_at`. **Nothing else.**
+
+| Field | Screens | Cost to build it | My reading |
+|---|---|---|---|
+| **First / Last name** | `20` `22` | ✅ **NOTHING** — joined into `students.full_name`, exactly as `P2-11` joined into `accounts.display_name` | build |
+| **Date of birth** | `20` `22` (+ `18`) | **1 column** (`date`). No enum, no policy | ⚠️ **A child's DOB is personal data.** `C-13` already permits DOB on the **Parent** surface `30`, so the concept is contemplated — but ADR-6 keeps every environment synthetic, and this is your call, not an inference |
+| **Gender** | `20` `22` | **1 enum + 1 column** — or 1 column with a `CHECK`. ⚠️ **The enum's value set is a product decision nobody has made**, and `A-026` says a closed, non-runtime-editable vocabulary is an enum | ⛔ **Never raised before this statement.** Smallest real cost, largest unstated decision |
+| **`Student ID 2025-113`** | ⛔ **`15` `17` `18` `20` `21` `22` — SIX screens** | **1 column + 1 unique index + a GENERATION RULE.** ▶ The column is trivial; **who mints it, in what format, and whether it is stable across centres, is not** | ⚠️ **The most-drawn missing field in the whole estate.** Either it becomes a real identifier or it is frame furniture — and six screens is enough that leaving it undecided keeps costing |
+| **Guardian name · contact · email · home address** | `20` `22` | ⛔ **4 columns on `students` — AND A SECOND, UNLINKED COPY OF THE GUARDIAN.** Screen `21` already creates the guardian as an `accounts` row linked through `parent_student_links` | ⛔ **RECOMMEND REFUSE.** The cost is not the columns, it is **two guardians for one child that nothing keeps in step** |
+| **Photo** | `20` `22` | **A storage bucket + its policies + an upload transport + a `students` column** — the whole `P1-2`/`P2-6R` substrate again | ⛔ **Already deferred by `C-15`.** Largest cost on this list by an order of magnitude |
+| **`Relationship`** (`Mother`) | `21` | **1 enum + 1 column** on `parent_student_links`. ⚠️ **NOT `parent_role`** — see §35.2 | The field is real and small; the vocabulary is a product decision |
+| **`Phone`** | `21` `24` | **1 column**, plus a decision on **where it lives**: `accounts` (one number per person, shared across roles) or the profile table (one per role) | ⚠️ **Already open from `P2-11`.** The placement question is the whole of it |
+| **`22`'s *"Can be undone within 30 days"*** | `22` | ⛔ **NOT A COLUMN — A RETENTION MECHANISM.** `is_active`/`deactivated_at`/`withdrawn_at` all exist, so **the withdrawal itself is buildable today**; the 30-day window needs a recorded deadline **and something that acts on it** | ⛔ **RECOMMEND: build the withdrawal, drop the sentence.** Phase 4 owns retention (`CLAUDE.md` §10), and rendering that copy asserts a guarantee nothing enforces — the `P2-11` seven-day-invitation shape exactly |
+
+### §35.5 — WHAT I AM **NOT** ASKING FOR, RESTATED
+
+⛔ **No table. No column. No enum. No policy. No client table grant.** All three phases are buildable
+at their **measured** columns with write RPCs and their grants alone, plus `P2-14`'s one registry
+string. ▶ **Every row in §35.4 is a separate decision you may take or decline independently**, and
+declining them all still leaves three working screens with their omissions disclosed on the page.
+
+
+---
+
+## §36 — `P2-19` MEASURED AT HEAD, **NOT BUILT** — AND ITS REFUSALS ARE ALREADY KNOWN
+
+*(Measured 2026-08-16 at the checkpoint. ⛔ **Nothing built.** Recorded so the next stretch starts
+from a measurement rather than re-deriving one — and because two of its findings are decisions, not
+implementation detail.)*
+
+### §36.1 — ARTEFACTS OPENED
+
+`reference/Trainer - Dashboard/….png` (geometry) · the numbered pack's `implementation-notes.md`
+(where `GC-7` lives). ⚠️ **The `.html` has NOT been opened** — that is `P2-19`'s first task, and this
+section makes no claim about measured values.
+
+### §36.2 — ⛔ `GC-7` ALREADY DECIDES THE BIGGEST CARD ON THE SCREEN
+
+The `.png` draws **`My Recent Report`** as three rows, each carrying a **coloured rating chip** —
+`Mastering`, `Beginning`, `Developing` — beside prose like *"Mastered eye contact, clear
+projection"* and *"Beginning on pacing and flow"*.
+
+**`GC-7`, recorded on this pack, is explicit:** *"The frame shows competency ratings in a
+'Level'/chips column while this pack's own `screen.md` §8 declares the screen **'Not rating-bearing'**.
+GOVERNANCE WINS … **DO NOT BUILD the rating column.**"*
+
+⛔ **AND THE PROSE FALLS WITH THE CHIPS.** *"Mastered eye contact"* is a **rating attributed in
+words** — `A-052`'s contextual-attribution shape — and rendering it would leak the same fact the chip
+does, in a form a chip-shaped check would not catch.
+
+⚠️ **A separate ground reaches the chip even if `GC-7` did not:** one chip standing for a whole report
+is a **roll-up rating**, which `G-2` excludes permanently on every surface **regardless of audience**.
+▶ **The trainer authored these ratings, so this is not a disclosure question** — it is that no
+roll-up exists to render.
+
+✅ **WHAT SURVIVES OF THAT CARD:** learner, class, and a relative timestamp, linking to the report.
+**A recency list is a real trainer surface** — *what did I just send?* — and it discloses no rating.
+
+### §36.3 — ⛔ A SECOND ENTITY THE SCHEMA DOES NOT HAVE
+
+The `.png`'s **`Today's Schedule`** lists `08:00 Advanced · Public Speaking`, `09:00 Intermediate`
+… and **`13:30 Staff Meeting · Staff Room`**.
+
+⛔ **There is no staff-meeting entity.** The calendar is a projection of `class_sessions`
+(`A-016`: *"calendars are projections of class-session records … management and trainer calendars
+must not store separate duplicated event records"*). ▶ **Building it needs a second event entity**,
+which is the shape `GC-13` barred on screen `25`. **Recommend `REGISTERED-OMISSION`, disclosed.**
+
+⚠️ **`Start Class` is NOT in that class** — it navigates to `/trainer/sessions/[sessionId]/roster`,
+which exists and is live. It is a real control with a real destination.
+
+⚠️ **The frame's calendar reads `March 2035`** — a frame artefact, nine years out. Not a
+requirement; the built calendar shows real months.
+
+### §36.4 — THE DATA PATH, MEASURED
+
+| Need | Reachable at HEAD? |
+|---|---|
+| My Classes list · student counts | ✅ **`P2-17`'s projection already returns exactly this** — §12.10's eighth outing |
+| Today's schedule (class sessions) | ✅ trainer policies on `class_sessions` / `class_session_assignments` |
+| Month calendar | ✅ same source, no new read |
+| **Pending Reviews count** · **My Recent Report** | ⛔ **NO.** `reports`, `report_versions` and `observations` are all **`grants=0, policies=0`**, measured |
+
+⛔ **SO `P2-19` NEEDS READ-SIDE SCHEMA — WHICH THE BATCH PRE-AUTHORIZES.** ⚠️ **But not naively:**
+the existing trainer pattern (`listReturnedReportsCore`) walks **assigned sessions × enrolled
+students**, calling `report_get_working` once per pair. ▶ **On a dashboard that is an N×M fan-out of
+RPCs to render two numbers**, and the honest answer is one governed trainer-scoped read returning the
+counts and the recent rows — the same shape `report_list_management_class_status` gives management.
+
+⛔ **AND THE `Q-27`-SHAPED TRAP IS THE SAME ONE `P2-9` HAD:** such a read must return **counts and
+identifiers**, never the ratings behind them. `report_get_working` returns full working content;
+reusing it to build a dashboard tile would ship report bodies into a landing-page payload.
+
+### §36.5 — WHY IT IS NOT BUILT IN THIS STRETCH
+
+⚠️ **Stated plainly rather than left implicit: I stopped at a phase boundary with context remaining
+for a measurement but not for a six-region screen plus its proof suite.** ▶ **Starting `P2-19` and
+abandoning it half-built would have been worse than a clean stop** — it would leave an unproven
+surface in the tree and break the checkpoint rule the Operator set. **The measurement above is the
+part that was worth doing now**, because it converts `P2-19` from "unknown" into "one governed read,
+two known refusals, and an `.html` still to open".
