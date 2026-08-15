@@ -70,6 +70,7 @@ import type {
   ManagementStudentListDto,
   ManagementStudentProfileDto,
   LessonStatisticsDto,
+  ClassStatisticsDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -135,6 +136,7 @@ import {
   adapterCreateTrainer,
   adapterReadManagementStudentProfile,
   adapterReadLessonStatistics,
+  adapterReadClassStatistics,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -349,6 +351,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** `P2-15` — screen `15`. ⛔ Counts only. */
     readLessonStatistics(classSessionId: string): Promise<UiActionResult<LessonStatisticsDto>> {
       return guard(() => adapterReadLessonStatistics(classSessionId));
+    },
+
+    /** `P2-16` — screen `16`. ⛔ Counts and the two mandated panels. */
+    readClassStatistics(classModuleId: string): Promise<UiActionResult<ClassStatisticsDto>> {
+      return guard(() => adapterReadClassStatistics(classModuleId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

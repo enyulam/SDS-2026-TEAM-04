@@ -280,8 +280,8 @@ check(
  * chances to relax the wrong one.
  */
 check(
-  /all 27 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
-  "P21a-14 …and its census READ 27 routes from the app tree (16 + `26` at P2-2 + `27` at P2-3 + `13` at P2-4 + `25` at P2-5 + `14` at P2-6 + `11` at P2-7 + `17` at P2-8 + `23` at P2-10 + `24` at P2-11 + `18` at P2-9 + `15` at P2-15) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
+  /all 28 portal routes derived from app\/\*\*\/page\.tsx carry an expectation/.test(nav.stdout ?? ""),
+  "P21a-14 …and its census READ 28 routes from the app tree (16 + `26` at P2-2 + `27` at P2-3 + `13` at P2-4 + `25` at P2-5 + `14` at P2-6 + `11` at P2-7 + `17` at P2-8 + `23` at P2-10 + `24` at P2-11 + `18` at P2-9 + `15` at P2-15 + `16` at P2-16) -- the ratchet SAW the new route rather than passing over a list that never mentioned it",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed check${bad === 1 ? "" : "s"})`);

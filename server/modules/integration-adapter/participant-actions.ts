@@ -132,6 +132,7 @@ import type {
   AdapterCreateTrainerInput,
   AdapterManagementStudentProfileDto,
   AdapterLessonStatisticsDto,
+  AdapterClassStatisticsDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -176,6 +177,7 @@ import { listManagementTrainersCore } from "@/server/modules/class-session/train
 import { createTrainerCore } from "@/server/modules/identity-access/trainer-invitation";
 import { readStudentProfileCore } from "@/server/modules/management-view/student-profile-projections";
 import { readLessonStatisticsCore } from "@/server/modules/management-view/lesson-statistics-projections";
+import { readClassStatisticsCore } from "@/server/modules/management-view/class-statistics-projections";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -1967,4 +1969,49 @@ export async function adapterListReportEvidence(
   const context = await resolveReportContextCore(client, reportId);
   if (context.outcome !== "success") return context;
   return listEvidenceForParentCore(client, context.data.sessionId, context.data.studentId);
+}
+
+
+/**
+ * `P2-16` — screen `16` Management Class Statistics.
+ *
+ * ⚠️ THE ALLOW-LIST CARRIES NO RATING, NO AVERAGE, NO DISTRIBUTION AND NO
+ * PER-CHILD ROLL-UP. ⛔ Each is refused by **not being written down**, which
+ * survives a later column appearing upstream.
+ *
+ * ⛔ `followUpRows` carries the SAME row shape screen `13` already sends —
+ * `report_id` and `report_state` for the `A-038` gate, and nothing else about
+ * the report. **No panel text, no note, no rating, no hash.**
+ */
+export async function adapterReadClassStatistics(
+  classModuleId: string,
+): Promise<ActionResult<AdapterClassStatisticsDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readClassStatisticsCore(client, classModuleId);
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      classModuleId: d.classModuleId,
+      classLabel: d.classLabel,
+      enrolledCount: d.enrolledCount,
+      assessedCount: d.assessedCount,
+      submittedCount: d.submittedCount,
+      mainFollowUpDimension: d.mainFollowUpDimension,
+      recommendedAction: d.recommendedAction,
+      insightTrendHeld: true,
+      followUpRows: d.followUpRows.map((r) => ({
+        classSessionId: r.classSessionId,
+        sessionDate: r.sessionDate,
+        lessonNumber: r.lessonNumber,
+        lessonTitle: r.lessonTitle,
+        studentId: r.studentId,
+        studentDisplayName: r.studentDisplayName,
+        reportId: r.reportId,
+        reportState: r.reportState,
+        evidenceCount: r.evidenceCount,
+      })),
+    },
+  };
 }

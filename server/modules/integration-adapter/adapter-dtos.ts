@@ -443,6 +443,18 @@ export interface AdapterLessonStatisticsDto {
   readonly awaitingCount: number;
 }
 
+export interface AdapterClassStatisticsDto {
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  readonly enrolledCount: number;
+  readonly assessedCount: number;
+  readonly submittedCount: number;
+  readonly mainFollowUpDimension: string | null;
+  readonly recommendedAction: string | null;
+  readonly insightTrendHeld: true;
+  readonly followUpRows: readonly AdapterClassOverviewRowDto[];
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

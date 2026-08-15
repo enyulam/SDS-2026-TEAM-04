@@ -4463,3 +4463,284 @@ test pass.
 phase ships a child route under `Classes`, which is already non-exact** — checked, not assumed. The
 navigation census now stands at **27 canonical routes, 29 with aliases**, and the `P2-1` ratchet was
 moved with it.
+
+
+---
+
+## §28 — `P2-16`: THREE CARDS REFUSED, TWO PANELS MANDATED, **AND EXACTLY ONE SENTENCE OPEN**
+
+**Screen `16` Management Class Statistics.**
+
+> ### ⚠️ **A SELF-CORRECTION RECORDED BEFORE ANYTHING ELSE, BECAUSE IT IS THE MORE USEFUL FINDING**
+>
+> The first draft of this section stated `P2-16` as a **hard stop on a new question**, on the ground
+> that the pack's `GC-10` records two mandated panels the frame omits. ⛔ **THAT WAS WRONG, AND IT
+> WAS WRONG IN THE EXACT SHAPE THIS PROJECT KEEPS RECORDING: I read a conflict register and did not
+> check whether the conflict had already been ruled.**
+>
+> **`C-17` rules it, verbatim:** *"✅ **GOVERNANCE WINS.** Build the two panels `CLAUDE.md` mandates.
+> Record them as **governance-mandated additions the frame omits**, cited."* — **binding `P2-4`
+> (`GC-9`) and `P2-16` (`GC-10`)**. ▶ **`GC-10` is not an open question. It is a ruled instruction to
+> BUILD**, and presenting it as a stop would have parked a phase the Operator had already cleared.
+>
+> ⚠️ **And the measurement went further than the ruling:** `P2-4` **already built** its half, and the
+> function it built — **`report_class_health_summary`** — **already computes Management Insight's
+> slot 1**. A stop-and-ask would have been raised over a computation that was **already shipped,
+> already ruled, and explicitly mandated for reuse**.
+>
+> ⛔ **THE RULE THIS EARNS:** *a conflict register records that a conflict EXISTED; it is not evidence
+> the conflict is still OPEN.* Check the ruling set before escalating a register row — the same
+> discipline §12.10 applies to data, applied to governance.
+
+### §28.1 — ⛔ ALL THREE CARDS THE FRAME DRAWS ARE REFUSED (this part was right)
+
+Measured from the **`.png`**, confirmed in the **`.html`**:
+
+| Card in the `.png` | What it draws | Refused because |
+|---|---|---|
+| **Skill Averages** | the nine dimensions as labelled bars, `Body 84% … Audience awareness 76%`, subtitled *"Class average across rubric criteria — Term 1"* | `GC-6`, on `C-9` (a statistics surface is not a report **detail** surface) **and** `G-2` (a class average **is** the roll-up) |
+| **Ongoing Performance** | a donut reading **`82% avg`**, legended **`Mastering 15 · Mastered 8 · Developing 6 · Beginning 3`** | ▶ **the four ratified rating labels rendered as values**; `82% avg` is `G-2`'s roll-up **and** `D-2`'s *"never rendered as a number to any role"* |
+| **Student Breakdown** | per learner: `Student ID`, `Strongest`, `Focus area`, **`Overall`** as a coloured rating chip | ⛔ **`G-2` names `Strongest`/`Focus area`/`Overall` as those exact limbs**; a rating chip **per child in a comparison table** is `C-9`'s stated harm verbatim |
+
+⚠️ **A drafting divergence recorded in passing:** the reference `.md` calls card 2 *"Status
+Distribution"*; the `.png` and `.html` both title it **`Ongoing Performance`**. The `.png` wins
+(§7.4.1). It matters only because `15`'s equivalent card **is** called Status Distribution — the same
+prohibited shape under two titles.
+
+✅ **`GC-10` MEASURED RATHER THAN TAKEN ON THE NOTE'S WORD** (§7.4.1): in the `.html`, `Insight` = **0**,
+`Follow-up` = **0**, `Needing` = **0**. The two mandated panels really are absent from the frame.
+
+### §28.2 — ✅ MANAGEMENT INSIGHT: **THREE SLOTS, THREE DIFFERENT ANSWERS**
+
+`CLAUDE.md` §6 fixes the panel as a **fixed three-sentence deterministic template**, ⛔ **never
+AI-authored prose** — generating it would silently pull the §8-deferred Weekly Class Health Brief
+into scope.
+
+| Slot | Template sentence | Status | Basis |
+|---|---|---|---|
+| **1** *Main follow-up area* | *"[Dimension] remains the main follow-up area."* | ✅ **BUILD — and with ZERO new schema** | ⚠️ **`report_class_health_summary` ALREADY COMPUTES IT**, shipped at `P2-4`, one string, **inside the database**, under the Operator's own ruling that *"minimise what crosses the boundary, not what is displayed"*. ▶ **And `CLAUDE.md` §6 does not merely permit reuse, it REQUIRES it:** *"reuses the exact same computation … Same underlying fact stated consistently on both screens, never computed two different ways."* |
+| **2** *Most-improved dimension* | *"[Dimension] is improving across recent sessions."* | ⛔ **HELD — THE ONE OPEN ITEM** | see §28.3 |
+| **3** *Recommended action* | *"Recommended next action: [looked-up sentence]."* | ✅ **BUILD** | a **fixed nine-row lookup table**, keyed to slot 1's dimension. `CLAUDE.md` §6 carries all nine sentences verbatim. **No data of its own; it stands with slot 1** |
+
+⚠️ **Returning the underlying `focus_chips` for a "richer breakdown" is PROHIBITED and is a §12
+stop-and-ask, not an enhancement** — the constraint `P2-4` recorded on the same function, carried
+forward here unchanged.
+
+### §28.3 — ⛔ **SLOT 2 IS THE ONLY OPEN QUESTION, AND IT IS ONE SENTENCE WIDE**
+
+`CLAUDE.md` §6, verbatim: *"the dimension with the largest positive **average-rating change** between
+the first half and second half of the selected date range."*
+
+⛔ **That is computed from rating VALUES, averaged across children, differenced over time.** It is
+what the standing test recorded at `P2-15` §27.3 names as a stop-and-ask, and `G-2` excludes roll-ups
+**permanently, on every surface**.
+
+⚠️ **BUT THE COLLISION IS NOT OBVIOUS, AND I WILL NOT RESOLVE IT BY INFERENCE. Both readings are
+serious:**
+
+| Reading | Argument |
+|---|---|
+| ⛔ **Excluded by `G-2`** | it is an aggregate **derived from the nine ratings across children**, which is the substance `C-9` keeps off a statistics surface. The fact that its *output* is a word does not change what its *input* is |
+| ✅ **Permitted, and `D-2`-shaped** | ▶ **its output is a DIMENSION NAME, never a rating value, never a band, never a number.** That is precisely the structure the Operator **authorized** in `D-2`: *a score computed from the nine solely to drive a trend, never rendered as a number to any role.* `G-2` excludes an **"Overall Grade"** — a rating standing for a person — and this stands for no one |
+
+▶ **The precedence question underneath it:** `CLAUDE.md` §6 mandates this sentence *"confirmed by the
+orchestrator"*; `G-2` is a **later** Operator ruling and sits **above** `CLAUDE.md` on §1's ladder.
+**A later ruling narrowing an earlier one is ordinary; a later ruling silently deleting a mandated
+panel-slot is not.** That is the Operator's call, not mine.
+
+**`Students Needing Follow-up`** — `CLAUDE.md` §6 mandates the table and pins `A-038`'s row-action
+gating to it, but ▶ **never says what makes a learner "need follow-up."** ✅ **A STATUS reading needs
+no ruling and is the natural one** — `A-038` gating is *about report status*, and pinning it to this
+table only makes sense if the rows are selected by status. **Built that way, and the reading is
+disclosed on the page.** ⛔ **A RATING-based selection would be `C-9` and is not built.**
+
+### §28.4 — ✅ THE DISPOSITION: **BUILD, `PARTIAL`, WITH SLOT 2 DISCLOSED**
+
+⚠️ **Not parked.** Everything except slot 2 is ruled, and three of the four mandated parts need
+**no new schema at all**. Parking the whole screen over one sentence would have been the same error
+as the draft this section opens by correcting.
+
+⛔ **The phase is `PARTIAL` and says so WHERE THE OPERATOR READS** (§12.12a) — on the page, not in a
+comment. Slot 2 is **absent with its reason named**, never an empty sentence and never a silent
+two-sentence panel pretending to be the mandated three.
+
+---
+
+## §29 — `P2-12` · `P2-13` · `P2-14` STATED IN FULL, AS THE OPERATOR ASKED — **AND TWO OF THE THREE SHARE ONE SHAPE**
+
+**Stated together so they can be ruled as a set rather than three times.** Nothing is built.
+
+### §29.1 — ⛔ THE ANSWER TO *"WHICH SHARE SCHEMA"*: **`P2-12` AND `P2-13` ARE ONE SET. `P2-14` IS THE OUTLIER, AND ONLY BECAUSE OF THE REGISTRY.**
+
+| | New table | New column | New enum | New policy | Client table grant | **Write RPC** | **EXECUTE grant** | **Audit string** |
+|---|---|---|---|---|---|---|---|---|
+| **`P2-12`** `20` Register Student | none | none | none | none | none | **1** — `admin_create_student` | **1** | ✅ **0 NEW** |
+| **`P2-13`** `21` Create Parent Account | none | none | none | none | none | **1** — `admin_create_parent` | **1** | ✅ **0 NEW** |
+| **`P2-14`** `22` Edit Student | none | none | none | none | none | **1–2** — `admin_update_student` (+ withdraw) | **1–2** | ⛔ **1 NEW — registry 23 → 24** |
+
+⚠️ **THE REGISTRY ALREADY ANTICIPATED TWO OF THE THREE, AND I CHECKED RATHER THAN ASSUMED.**
+Measured live, the 23 strings already include **`admin.student_created`** · **`admin.enrolment_changed`**
+· **`admin.profile_created`** · **`invitation.created`** · **`admin.parent_link_changed`**. ▶ Every
+governed action `P2-12` and `P2-13` perform **already has its name**, so `A-029`'s one-event-per-action
+rule is satisfied **without extending the registry** — and adding a second name for an action that
+already has one would itself be a §12 stop-and-ask.
+
+⛔ **`P2-14` IS THE EXCEPTION: there is `admin.module_updated` and `admin.session_updated`, and NO
+student equivalent.** Editing a learner needs **`admin.student_updated`** — **exactly one string, the
+count declared in advance**, as `P2-3` did. Whether **withdraw** is that same string or a second one
+is a sub-question I will put with the phase rather than decide.
+
+### §29.2 — ⛔ THE FIELDS WITH NO COLUMNS — THE REAL DECISION, AND IT IS **NOT** SCHEMA I AM PROPOSING
+
+`students` is, measured: `id · centre_id · full_name · is_active · created_at · updated_at ·
+deactivated_at`. **Nothing else.** Screens `20` and `22` draw the same nine-field form:
+
+| Field on `20` / `22` | Column? | Disposition |
+|---|---|---|
+| First name · Last name | ✅ `students.full_name` | joined into one, exactly as `P2-11` joined into `accounts.display_name` |
+| **Date of birth** | ⛔ none | already a `REGISTERED-OMISSION` on `18` |
+| **Gender** | ⛔ none (no column, no enum) | **never raised before** |
+| **Student ID `2025-113`** | ⛔ none | ▶ **the FIFTH screen to draw it** — `15`, `17`, `18`, `24`, and now `20`/`22` |
+| **Guardian name · contact · Email · Home address** | ⛔ none on `students` | ⚠️ **and these four are screen `21`'s job** — guardian identity lives on `accounts` via `parent_student_links`. Collecting them here would create a **second, unlinked copy of the guardian** |
+| **Photo** | ⛔ none | already deferred by `C-15` |
+| Assign Classes (multi-select) | ✅ `enrolments` | `admin.enrolment_changed` exists |
+
+**Screen `21` Create Parent Account:**
+
+| Field | Column? | Disposition |
+|---|---|---|
+| Full name | ✅ `accounts.display_name` | as `P2-11` |
+| Email address | ✅ `invitations.email_normalized` | as `P2-11` |
+| Linked Student | ✅ `parent_student_links` | `admin.parent_link_changed` exists |
+| **Relationship** (`Mother`) | ⛔ **NONE — AND THERE IS A DECOY** | ⚠️ **`parent_student_links.parent_role` LOOKS like this field and IS NOT.** Measured: its type is **`centre_membership_role`**, `CHECK (parent_role = 'parent')`, and it is a **composite-FK component** to `centre_memberships(id, centre_id, role)` — referential integrity, not a relationship kind. ▶ **Reading it as `Relationship` would have shipped `Mother` into a role column pinned to `'parent'`.** A real `Relationship` needs a **column and probably an enum** — ⛔ **outside the batch** |
+| **Phone** | ⛔ none | **the same open question as `24`'s Phone**, still yours |
+| **`Send email invite` toggle** | ⛔ n/a | ⚠️ **INERT BY CONSTRUCTION.** No email is sent anywhere in this system — `P2-11`'s success banner says so explicitly. A toggle governing something that does not happen is §12.12's inert control. **Recommend: not built, disclosed on the page** |
+
+⚠️ **`22`'s `Withdraw student` says *"Can be undone within 30 days."*** ⛔ **There is no 30-day
+mechanism.** `students.is_active`/`deactivated_at` and `enrolments.is_active`/`withdrawn_at` all
+exist, so the withdrawal itself is buildable — but **nothing enforces or records a 30-day window**,
+and rendering that sentence would assert a guarantee the system does not make. **Same class as
+`P2-11`'s 7-day invitation lifetime: disclosed, not invented.**
+
+### §29.3 — WHAT I AM **NOT** ASKING FOR
+
+⛔ **No table. No column. No enum. No policy. No client table grant.** The three phases are
+buildable at their measured columns with **write RPCs and their grants alone**, plus `P2-14`'s one
+registry string. ▶ **If you want any of the missing fields to exist, that is a separate and larger
+ruling** — columns, an enum for Gender and for Relationship, and a decision about whether `Student
+ID` is a real identifier or frame furniture — and I am not folding it into these three.
+
+
+---
+
+## §30 — `P2-16` AS BUILT: **`PARTIAL`**, ONE SENTENCE HELD, AND STILL ZERO SCHEMA
+
+**Screen `16` Management Class Statistics.** Route
+`/management/classes/[classModuleId]/class-statistics`. Suite
+`prove:portal-p2-16` — **25 checks, all PASS**.
+
+### §30.1 — ✅ FUNCTIONS AND GRANTS ADDED UNDER THE BATCH: **ZERO AGAIN. THE LIST IS EMPTY.**
+
+| Function | Grant |
+|---|---|
+| *(none)* | *(none)* |
+
+⛔ **No table, column, enum, policy, client table grant, write path or audit string.** Census
+re-measured `T=30 E=12 P=30 R=23` (`PC16-1b`).
+
+▶ **§12.10 FOR THE SIXTH CONSECUTIVE PHASE**, and here it is not merely economical —
+**`CLAUDE.md` §6 REQUIRES the reuse**: slot 1 *"reuses the exact same computation as Class
+Overview's Main follow-up area … Same underlying fact stated consistently on both screens, **never
+computed two different ways**."* Both reads already existed: **`report_class_health_summary`**
+(built at `P2-4`) and **`report_list_management_class_status`**.
+
+### §30.2 — ⛔ THE DEFECT §12.10 CAUGHT THIS TIME WAS A **MAPPING**, NOT A MISSING READ
+
+The first draft keyed the slot-3 lookup as `rawTag in DIMENSION_LABEL`, on the assumption that
+`main_follow_up_area` returns a **dimension code**. ⛔ **IT DOES NOT.** Measured live:
+
+| | Measured |
+|---|---|
+| `observations.focus_chips` | `Eye contact` · `Vocal projection` — **free display text** |
+| `assessment_dimensions.code` | `body … audience_awareness` — **snake_case codes** |
+| `strength_chips` (for contrast) | `Clear structure` · `Confident posture` — **not dimensions at all** |
+
+▶ **A code-keyed lookup would have matched NOTHING, every time**, and rendered Management Insight
+with its first and third sentences silently missing — **no error, no exception, no red test.** The
+panel would simply have been shorter than the one `CLAUDE.md` §6 mandates.
+
+⚠️ **`PC16-3` is the control that makes this a measurement rather than a memory**, and `PC16-3d`/`3e`
+are the **non-vacuity companion**: the fixture module used by every other leg returns a **NULL** tag,
+so the whole mapping was reachable only through its "no tag" branch. A module returning
+**`Eye contact`** is selected deliberately, normalised to **`Eye Contact`**, and shown to reach the
+real §6 sentence *"Include partner-facing eye contact practice in the next lesson."*
+
+⛔ **And the resolution FAILS CLOSED:** a tag matching none of the nine renders **no sentence at
+all**, because §6's template is *"[**Dimension**] remains the main follow-up area"* — rendering a
+non-dimension there would assert the tag is one.
+
+### §30.3 — ⛔ ALL THREE DRAWN CARDS REFUSED · ✅ TWO OMITTED PANELS BUILT
+
+Refusals per §28.1, unchanged: **Skill Averages** · **Ongoing Performance** (`82% avg` + the four
+rating labels as legend values) · **Student Breakdown's** `Strongest`/`Focus area`/`Overall`.
+`Student ID` has no column — **the fifth screen to draw it**.
+
+Built under **`C-17`**, each labelled on the page as *"Required by governance; not drawn in this
+screen's design"*:
+
+- **Management Insight** — slot 1 from the governed aggregate, slot 3 from a **fixed nine-row
+  lookup carried verbatim** (`PC16-7c` checks all nine). ⛔ **`PC16-7d` proves no model is reachable
+  from the projection at all** — generating this prose would pull the §8-deferred Weekly Class
+  Health Brief into scope.
+- **Students Needing Follow-up** — **selected by REPORT STATUS**, started-but-not-submitted.
+  `A-038`'s four outcomes are checked **independently per row** (`PC16-9`), because §6 forbids one
+  generic view-report handler shared across rows and screens. ⛔ A rating-based selection would be
+  `C-9` and is not built. ⚠️ **§6 never says what "needing follow-up" means**; the status reading is
+  the one that needs no ruling, and it is disclosed on the page.
+
+### §30.4 — ⏸ THE HELD SENTENCE, AND WHY IT IS HELD **ON THE PAGE**
+
+Slot 2 — *"the dimension with the largest positive **average-rating change**"* — is **not built**,
+pending §28.3's ruling. It is carried as a real field (`insightTrendHeld`) through the projection and
+the contract, and **disclosed in the panel itself**:
+
+> **One sentence of this panel is not built.** The most-improved-dimension trend is computed from
+> average rating change across the class, and whether that survives the standing exclusion on
+> roll-ups is an open decision. It is left out rather than approximated.
+
+⛔ **Not an empty sentence, and not a silent two-sentence panel pretending to be the mandated
+three** (§12.12a). `PC16-8b` asserts both halves.
+
+### §30.5 — ✅ A LAPSED INERT REASON CORRECTED IN THE SAME PASS — **THE SECOND TIME IN THIS FOOTER**
+
+Screen `13` carried `View Overall Class Statistics` as an **InertControl** reading *"Class statistics
+arrive with screen 16."* ▶ **That reason lapsed the moment screen `16` shipped**, and §12.11 requires
+the correction in the same pass. Activated, matched to `Manage lesson plans` — which `P2-6` activated
+for **exactly the same reason** one phase earlier.
+
+⚠️ **AND SCREEN `16` HAS NO OTHER INBOUND ROUTE.** The frame's per-row `Stats ›` column is
+**AUTHORIZATION B** and unbuilt, so without this control the screen would be reachable only by typing
+its URL.
+
+⛔ **REGISTERED-OMISSION, CARRIED BACK TO `P2-15`:** screen **`15` Lesson Statistics has NO inbound
+link at all** and is reachable only by URL, for the same reason — `Stats ›` is Authorization B. **§27
+did not record this and should have.** ⚠️ **A measured attribution question sits underneath it:**
+`P2-4`'s comments attribute the per-row `Stats ›` to screen **`16`**, but the row is a **LESSON** row,
+which points at screen **`15`**. **Not resolved by inference** — both remain unbuilt under
+Authorization B either way, so nothing turns on it today.
+
+### §30.6 — ⚠️ THE LINT WARNING THAT WAS WORTH READING
+
+Activating the control left **`InertControl` dead** — both of that footer's inert controls have now
+been activated by the phases that built their targets. The helper was removed, and the removal
+recorded inline. ⛔ **STANDING PROHIBITION 17 IS UNTOUCHED:** the inert-versus-absent distinction is
+a **rule**, not that function — screen `18`'s `Edit` and screen `13`'s reminder button still render
+present-and-disabled-with-a-reason today.
+
+### §30.7 — ⚠️ AND THE `grab` REGEX TRUNCATED A LIVE MEASUREMENT — FOURTH INSTANCE
+
+`PC16-3`'s first form read the chip list through `grab(blob, "CHIPS")`, whose `([^ \n]*)` **stops at
+the first space**. `Eye contact|Vocal projection` arrived as **`Eye`**, and the check **passed while
+asserting over a truncated value**. ▶ **The first instance in this suite set where that regex
+silently NARROWED a live measurement rather than breaking one** — a delimiter-bracketed reader
+(`KEY<…>`) replaces it.

@@ -28,6 +28,7 @@ import {
   type TrainerInvitationOutcomeDto,
   type ManagementStudentProfileDto,
   type LessonStatisticsDto,
+  type ClassStatisticsDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1312,6 +1313,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * corresponds to nothing.
    */
   async readLessonStatistics(): Promise<UiActionResult<LessonStatisticsDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-16` — screen `16`. ⛔ THE FIXTURE REFUSES, same reason: the follow-up
+   * area is computed inside the database over tables no client may touch, and
+   * a manufactured one would name a dimension nothing measured.
+   */
+  async readClassStatistics(): Promise<UiActionResult<ClassStatisticsDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

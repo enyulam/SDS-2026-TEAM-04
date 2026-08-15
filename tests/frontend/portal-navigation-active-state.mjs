@@ -147,6 +147,17 @@ const EXPECTED_BY_ROUTE = new Map([
     { role: "management", label: "Classes" },
   ],
   /*
+   * `P2-16` -- screen `16` Class Statistics, a child of Classes.
+   * ⚠️ Unlike `15`, this route IS reachable from the UI: the `View Overall
+   * Class Statistics` control on screen `13` was built INERT at `P2-4` with
+   * the stated reason "Class statistics arrive with screen 16", and `P2-16`
+   * activated it because that reason lapsed (§12.11).
+   */
+  [
+    "/management/classes/[classModuleId]/class-statistics",
+    { role: "management", label: "Classes" },
+  ],
+  /*
    * `P2-10` -- screen `23` Management Trainers, and `P2-11` -- screen `24` Add
    * Trainer, at a LITERAL child of it.
    *

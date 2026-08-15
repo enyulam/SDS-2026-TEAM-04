@@ -10113,3 +10113,89 @@ permitted. What survives is six counts, every one on the Operator's own ground.
 
 `P2-16` (`16` Class Statistics) under the batch. Then `P2-12`/`P2-13`/`P2-14` stated together as
 write paths outside the batch, then `P2-17` which needs no schema.
+
+
+---
+
+## 2026-08-16 — `P2-16` screen `16` Management Class Statistics · **`PARTIAL`** · zero schema again
+
+**Branch** `develop`, main worktree. **Starting HEAD** `09dd0b7`.
+
+### Scope
+
+Screen `16` at `/management/classes/[classModuleId]/class-statistics`, under the batch. Also:
+`P2-12`/`P2-13`/`P2-14` stated in full as a set (plan §29), and screen `13`'s last inert control
+activated.
+
+### Functions and grants added under the batch — **the list is empty, again**
+
+**None.** No migration. No table, column, enum, policy, client table grant, write path or audit
+string. Census `T=30 E=12 P=30 R=23`.
+
+`report_class_health_summary` (built at `P2-4`) and `report_list_management_class_status` already
+answer everything. `CLAUDE.md` §6 does not merely permit reuse of the first, it requires it: slot 1
+must be "the exact same computation … never computed two different ways".
+
+### The self-correction, recorded because it is the more useful finding
+
+I first wrote `P2-16` up as a hard stop on a new question, because the pack's `GC-10` records two
+mandated panels the frame omits. That was wrong. `C-17` already ruled it — "GOVERNANCE WINS. Build
+the two panels `CLAUDE.md` mandates" — and `P2-4` had already built its half using the very function
+that computes slot 1. A stop-and-ask would have parked a phase the Operator had already cleared.
+
+The rule it earns: a conflict register records that a conflict existed; it is not evidence the
+conflict is still open. Check the ruling set before escalating a register row.
+
+Plan §28 was rewritten in place before it stood, opening with the correction.
+
+### The defect the measurement caught
+
+The first draft keyed slot 3's lookup as `rawTag in DIMENSION_LABEL`, assuming `main_follow_up_area`
+returns a dimension code. It does not. Measured: `focus_chips` holds free display text
+(`Eye contact`, `Vocal projection`); the codes are `body … audience_awareness`. A code-keyed lookup
+would have matched nothing every time and rendered Management Insight with its first and third
+sentences missing — no error, no exception, no red test.
+
+`PC16-3` is the control. `PC16-3d`/`3e` are the non-vacuity companion: the fixture module every other
+leg uses returns a NULL tag, so the mapping was otherwise reachable only through its "no tag" branch.
+A module returning `Eye contact` is selected deliberately and shown to reach the real §6 sentence.
+
+### Files
+
+* `server/modules/management-view/class-statistics-projections.ts` — NEW.
+* `features/management/management-class-statistics-screen.tsx` — NEW.
+* `app/(portals)/management/classes/[classModuleId]/class-statistics/page.tsx` — NEW.
+* `features/management/management-class-overview.tsx` — `View Overall Class Statistics` activated
+  (§12.11, its stated inert reason lapsed); `InertControl` removed as dead, caught by lint.
+* contracts / port / real adapter / fixture / adapter DTO / server action — the new read wired.
+* `tests/frontend/portal-navigation-active-state.mjs`, `scripts/tests/portal/prove-p2-1-…` — census
+  and ratchet 27 → 28.
+* `scripts/tests/portal/prove-p2-16-class-statistics.mjs` — NEW, 25 checks.
+* `docs/plan/PORTAL_COMPLETION_PLAN.md` — §28 (rewritten), §29, §30.
+
+### Verification
+
+`prove:portal-p2-16` PASS (25/25). Portal regression **25 suites, all PASS**. Navigation census PASS
+— 28 canonical routes, 30 with aliases. `tsc` clean · `next build` clean · `eslint` 0 errors (4
+pre-existing warnings) · `prove:encoding` PASS · `prove:no-secrets` CLEAN.
+
+### Held, stated, not built
+
+Slot 2 of Management Insight — "the dimension with the largest positive average-rating change" — is
+a rating roll-up across children over time. Whether it survives `G-2` is the Operator's decision
+(plan §28.3). Held, disclosed in the panel itself.
+
+`P2-12`/`P2-13`/`P2-14` stated in full (plan §29): `P2-12` and `P2-13` share one shape — one write
+RPC and one EXECUTE grant each, **zero new audit strings**, because the registry already carries
+`admin.student_created`, `admin.enrolment_changed`, `admin.profile_created`, `invitation.created`
+and `admin.parent_link_changed`. `P2-14` is the outlier: it alone needs a new string
+(`admin.student_updated`), moving the registry 23 → 24.
+
+### Registered omission carried back to `P2-15`
+
+Screen `15` has no inbound link and is reachable only by URL — the per-row `Stats ›` is Authorization
+B and unbuilt. §27 did not record this and should have.
+
+### Next
+
+`P2-17` (`02` Trainer My Classes), measured at HEAD as needing no schema.

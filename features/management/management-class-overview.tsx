@@ -461,10 +461,30 @@ function LessonTable({
         >
           Manage lesson plans <span aria-hidden="true">›</span>
         </Link>
-        <InertControl
-          label="View Overall Class Statistics"
-          reason="Class statistics arrive with screen 16."
-        />
+        {/*
+          ✅ ACTIVATED AT `P2-16`, 2026-08-16 — the SECOND time this exact
+          correction has been made in this footer, and for the same reason.
+          ⚠️ `P2-4` built this INERT with the stated reason *"Class statistics
+          arrive with screen 16."* ▶ **THAT REASON HAS NOW LAPSED** — screen
+          `16` exists at this exact route — and §12.11 requires a stale
+          disclosure to be corrected in the same pass as the change that made
+          it stale. ⛔ Leaving it inert would have made its own stated reason
+          FALSE, which is worse than either treatment.
+
+          ⚠️ Screen `16` HAS NO OTHER INBOUND ROUTE. The frame's per-row
+          `Stats ›` column remains AUTHORIZATION B and unbuilt, so without this
+          control the screen would be reachable only by typing its URL.
+
+          ⚠️ Matched to `Manage lesson plans` above — same `min-h-11`,
+          `gap-[5px]`, `13px`, `font-semibold`, text `›` and `#EC4B96`, because
+          the `.html` draws the two as a matched pair.
+        */}
+        <Link
+          href={`/management/classes/${classModuleId}/class-statistics`}
+          className="inline-flex min-h-11 items-center gap-[5px] text-[13px] font-semibold text-brand-500 no-underline transition hover:text-brand-700"
+        >
+          View Overall Class Statistics <span aria-hidden="true">›</span>
+        </Link>
       </div>
     </section>
   );
@@ -499,20 +519,25 @@ function ReportProgressChip({
   );
 }
 
-/** A frame control whose target screen is not built yet. Present, disabled, and it says why. */
-function InertControl({ label, reason }: { readonly label: string; readonly reason: string }) {
-  return (
-    <button
-      type="button"
-      disabled
-      title={reason}
-      className="inline-flex min-h-11 cursor-not-allowed items-center gap-[5px] text-[13px] font-semibold text-neutral-on"
-    >
-      {label} <span aria-hidden="true">›</span>
-      <span className="sr-only"> — {reason}</span>
-    </button>
-  );
-}
+/*
+ * ⚠️ `InertControl` WAS DEFINED HERE AND IS REMOVED AT `P2-16`, 2026-08-16 —
+ * because BOTH of this footer's inert controls have now been activated by the
+ * phases that built their targets: `Manage lesson plans` at `P2-6` (screen
+ * `14`) and `View Overall Class Statistics` at `P2-16` (screen `16`).
+ *
+ * ▶ **The lint warning is what caught it**, on the same run that activated the
+ * second one, and it is worth recording as the useful kind: the component
+ * became dead the instant its last user did, and leaving it would have left a
+ * helper on this screen whose entire purpose — *"a frame control whose target
+ * is not built yet"* — no longer described anything on it.
+ *
+ * ⛔ STANDING PROHIBITION 17 IS UNTOUCHED. The inert-versus-absent distinction
+ * is a RULE, not this function: a control whose target genuinely does not
+ * exist is still rendered present-and-disabled with its reason stated. Screen
+ * `18`'s `Edit` and screen `13`'s reminder button both do exactly that today.
+ * ▶ Removing the helper removes a helper, not the discipline — and if another
+ * screen on this surface needs one again, it is six lines.
+ */
 
 /**
  * ⛔ A GOVERNANCE-MANDATED ADDITION THE FRAME OMITS — `CLAUDE.md` §6 names this table directly

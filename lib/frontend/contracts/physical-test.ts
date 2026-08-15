@@ -428,6 +428,36 @@ export type LessonStatisticsDto = {
   readonly awaitingCount: number;
 };
 
+/**
+ * `P2-16` — screen `16` Management Class Statistics. **`PARTIAL`.**
+ *
+ * ⛔ ALL THREE CARDS THE FRAME DRAWS ARE REFUSED — Skill Averages, the
+ * Ongoing Performance donut (`82% avg` + the four rating labels as legend
+ * values) and Student Breakdown’s Strongest / Focus area / Overall.
+ * `GC-6` on `C-9` and `G-2`.
+ *
+ * ✅ AND TWO PANELS THE FRAME OMITS ARE BUILT, by ruling `C-17`.
+ * ⛔ Neither is ever AI-authored prose.
+ *
+ * ⚠️ THE ALLOW-LIST CARRIES NO RATING, NO AVERAGE AND NO DISTRIBUTION —
+ * refused by NOT BEING WRITTEN DOWN, which survives a later column appearing
+ * upstream.
+ */
+export type ClassStatisticsDto = {
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  readonly enrolledCount: number;
+  readonly assessedCount: number;
+  readonly submittedCount: number;
+  /** ⛔ A DIMENSION LABEL — never a rating, never a score. */
+  readonly mainFollowUpDimension: string | null;
+  readonly recommendedAction: string | null;
+  /** ⏸ Slot 2 held. A FIELD, so the screen can disclose it (§12.12a). */
+  readonly insightTrendHeld: true;
+  /** ⛔ Selected by REPORT STATUS, never by rating. */
+  readonly followUpRows: readonly ClassOverviewRowDto[];
+};
+
 export type ManagementStudentListDto = {
   readonly students: readonly ManagementStudentRowDto[];
   readonly enrolledCount: number;
