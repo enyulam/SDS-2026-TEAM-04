@@ -4933,3 +4933,174 @@ term to avoid looking empty is asserting something the trainer did not ask for.
 ⚠️ **The decision is the Operator's**, and it is a real one: either the fixture is re-dated to sit
 around the current date (which is what a demo needs), or the date-pinned assertions are rewritten to
 be relative, or both. **Neither is in this batch.**
+
+
+---
+
+## §33 — SLOT 2 **BUILT** BY OPERATOR RULING, AND THE GROUND IS THE SHAPE — NOT §6
+
+*(Operator ruling, 2026-08-16, superseding §28.3's hold and §28.4's `PARTIAL` disposition.)*
+
+### §33.1 — ⛔ THE RULING, VERBATIM, AND WHY IT IS QUOTED RATHER THAN SUMMARISED
+
+> *"**P2-16 SLOT 2 — BUILD IT.** Its input is ratings across children; its output is a dimension name
+> and never a value. That is `D-2`'s exact structure and `D-2` is permitted on precisely that ground:
+> the aggregation happens server-side and no rating, band or number is rendered.
+> `G-2` bars a roll-up **RATING**. A dimension name is not a rating — it names where attention goes,
+> not how anyone performed.
+> Assert it: the returned shape carries no rating value, band or score, and the surface renders none.
+> Same form as `VP-4`. **Cite the ruling with this reasoning so a later phase does not read §6's
+> mandate as the only ground.**"*
+
+⛔ **THE LAST SENTENCE IS AN INSTRUCTION ABOUT THE RECORD, AND IT IS THE MOST IMPORTANT PART.** The
+permission does **not** rest on `CLAUDE.md` §6 mandating this sentence. It rests on the **SHAPE**:
+aggregate inside the database, emit an **identifier**, render **no value**. ▶ **A future slot that
+mandated a NUMBER would not inherit this ruling**, however clearly §6 mandated it.
+
+**The reasoning is carried into the migration header, the `COMMENT ON`, the projection's DTO comment
+and the screen** — four places a later phase might read, none of which cites §6 as the ground.
+
+### §33.2 — ⛔ THE `D-2` MAPPING HAD TO MOVE, AND NOT MOVING IT WOULD HAVE BROKEN A RULING
+
+**Measured before writing a line:** `D-2`'s band → percentage mapping existed in **exactly one
+place**, inline in `report_management_student_trend`. ▶ **`D-2` requires it to be held in one place.**
+A second inline `CASE` in the new function would have been **a direct `D-2` violation** *and* the
+"second definition free to drift" defect §12.10 keeps catching.
+
+**So the mapping was extracted** into `public.competency_score(competency_rating)` — `IMMUTABLE`,
+**ungranted** — and `report_management_student_trend` was **recreated by forward migration** to call
+it. ⛔ **`PI-2`/`PJ-3` assert at apply time that no other function inlines it**, so the constraint
+survives future phases rather than depending on memory.
+
+⚠️ **THE HELPER TAKES NO GRANT, DELIBERATELY.** It is called only from inside `SECURITY DEFINER`
+bodies, which execute as owner. ▶ **Granting it to satisfy a wiring rule would widen the client
+surface for no caller** — a test rule pushing the build in the wrong direction.
+
+### §33.3 — ⛔ §26.1's CEILING PROVED ITSELF A **SECOND** TIME, IN THE PHASE THAT RULED ON IT
+
+`20260816090000` applied with **seven PASS notices**, one of which (`PI-6`) **executed the
+function**. It still could not run for any real caller:
+
+```
+ERROR:  CREATE TABLE AS is not allowed in a non-volatile function
+CONTEXT: ... line 29 at SQL statement
+```
+
+▶ **Why `PI-6` passed anyway:** as `postgres` there is no application account, so the body returns at
+its **first gate** — twenty lines above the offending statement. ⛔ **Apply-time execution proves
+resolution up to the first gate and nothing beyond it.** The leg that caught this was the
+**suite-as-real-caller** leg.
+
+⚠️ **AND THE CAUSE IS GENERAL: a `STABLE` function may not `CREATE TABLE AS`.** The declaration and
+the body were **each individually correct** — `STABLE` is right for a read, a temp table is an
+ordinary technique — and they are incompatible. **`CREATE FUNCTION` accepts the pair without
+complaint.** Corrected forward under R-1; the temp table became a CTE, which is what it should have
+been.
+
+### §33.4 — ⛔ AND THE MAIN PATH WAS UNREACHED BY THE FIXTURE — CONSTRUCTED, NOT OBSERVED
+
+**Every fixture module has fewer than two SUBMITTED sessions**, so the function's entire computation
+was reachable only through its `< 2` floor. ▶ **The zero-row vacuity member, in a new place.**
+
+`PC16-8f` **constructs the divergence** (§12.15): inside a **rolled-back** transaction a second
+session is promoted to `submitted`, and the function then returns **`eye_contact | 2`** — one of the
+nine canonical codes, computed inside the database from ratings across children. ⛔ **What crossed
+the boundary is an identifier and a count.**
+
+⚠️ **`PC16-8g` is the regression leg the RPC-caller rule FORCED, and it earned its place.** The rule
+observed that the migration declares a function its paired suite never called — correct, because
+**the phase that changes a function is the phase that must prove it still works.** The recreated
+trend is **value-identical: `44.44, 63.89`**, the same figures `PS-3c` measured before the
+extraction. ▶ **No shape assertion could have told you that**: a mapping extracted wrongly changes
+every score silently.
+
+### §33.5 — THREE CASES, AND THE THIRD IS DELIBERATE
+
+| Case | Rendered |
+|---|---|
+| `< 2` submitted sessions | ✅ §6's replacement, **verbatim**: *"Not enough session data yet to identify a trend."* |
+| a dimension improved | ✅ *"[Dimension] is improving across recent sessions."* |
+| enough data, **nothing improved** | ⚠️ **§6 DOES NOT SPECIFY THIS CASE.** Reported rather than resolved silently, and it **fails toward saying LESS**: no dimension is named, because none qualifies |
+
+⛔ **A REFUSAL RETURNS NO ROW AT ALL** and is therefore distinguishable from *"not enough data"* —
+which is why the count crosses the boundary alongside the dimension. Rendering §6's *"not enough
+session data"* over a class the caller could not read would be a fabricated finding (`Q-7`).
+
+### §33.6 — WHAT THIS PHASE ADDED, NAMED NOT COUNTED
+
+| Function | Grant |
+|---|---|
+| `public.report_class_improved_dimension(uuid)` | `EXECUTE` → `authenticated` |
+| `public.competency_score(competency_rating)` | ⛔ **NONE, by design** |
+
+⛔ **And nothing else** — no table, column, enum, policy, client table grant or audit string. Census
+`T=30 E=12 P=30 R=23`.
+
+⚠️ **§30.1's *"ZERO FUNCTIONS AND ZERO GRANTS"* IS SUPERSEDED FOR `P2-16`** and is corrected in the
+same pass (§12.11), as are the suite header and `PC16-1`. ✅ **What §12.10 still bought is most of the
+screen**: slots 1 and 3, the three counts and the follow-up table add nothing.
+
+⚠️ **A test-rule duplication fixed on the way through:** the "provably-internal" allow-list was an
+inline regex **copied into four suites**. It is now `PROVABLY_INTERNAL` in `rpc-call-rule.mjs`, once,
+with a stated reason per entry — ▶ **the same one-definition discipline the `D-2` mapping is held
+to, applied to a test rule.**
+
+---
+
+## §34 — ⛔ THE FIXTURE IS **TIME-PINNED AND THE PRODUCT IS NOT**. A PRODUCT-SHAPED FINDING.
+
+*(Operator ruling, 2026-08-16: **do not re-date the fixture now**; record the diagnosis against
+`S3-T1-r`; record the general property as its own item. The re-dating will be authorized as its own
+bounded run.)*
+
+### §34.1 — `S3-T1-r`: CARRIED OPEN FOR WEEKS, AND THE CAUSE WAS NEVER DIAGNOSED
+
+```
+FAIL  S3-T1-r  /trainer/schedule — hydrated but 2/3 selector(s) MISSING:
+               "Class sessions in February 2026", "Fixture Module A"
+```
+
+| | Measured 2026-08-16 |
+|---|---|
+| Every fixture `class_sessions.session_date` | **2026-01, 2026-02, 2026-03 — nothing else** |
+| Today | **2026-08-15** |
+| Term containing today | **`Term 3, 2026`** |
+| Sessions in that term | **0** |
+| Upcoming sessions anywhere | **0** |
+
+▶ **The schedule defaults to the current month, which genuinely has no sessions.** The selector pins
+**February 2026**. ⛔ **The surface behaves correctly; the EXPECTATION rotted**, and it has been
+failing for this reason since roughly **April 2026** — carried forward as an open item all that time
+**without its cause being diagnosed**. ⚠️ **This is precisely what §15.8.1's freshness obligation
+exists to prevent.**
+
+### §34.2 — ⛔ THE GENERAL PROPERTY, WHICH IS THE PART THAT MATTERS
+
+> ### ⛔ **THE FIXTURE IS PINNED IN TIME AND THE PRODUCT IS NOT, SO EVERY DATE-RELATIVE SURFACE DEGRADES SILENTLY AS THE CALENDAR MOVES.**
+>
+> *(The Operator's framing, recorded verbatim because it reframes this from a test problem into a
+> product-shaped one: **"that is a real product-shaped finding, not only a test problem."**)*
+
+**It is not one broken assertion.** Every surface whose content is *"today"*, *"this term"*,
+*"upcoming"* or *"next"* returns **empty** against this fixture, correctly, and will keep doing so —
+and each will look like a defect to anyone walking the product:
+
+| Surface | Today's behaviour over the fixture |
+|---|---|
+| `05` Trainer Schedule | current month is empty |
+| `02` Trainer My Classes | ⛔ **empty state** — *"You have no assigned classes in Term 3, 2026"* |
+| any card's `Next session:` line | ⛔ **never renders, in any term** — there are no upcoming sessions at all |
+| `01` Trainer Dashboard (`P2-19`) — *Today's Schedule*, the month calendar | will have the same property when built |
+
+▶ **Selecting `Term 1, 2026` is what shows populated data.** ⚠️ **A demo needs the data to sit around
+the current date**, which is exactly why this is a product question and not a test-maintenance one.
+
+### §34.3 — ⛔ WHY IT WAS NOT FIXED, AND THE THREE GROUNDS ARE INDEPENDENT
+
+1. **Re-dating fixtures is a fixture change needing its own authorization** — the Operator has
+   confirmed this and will authorize it as **its own bounded run**.
+2. **It would invalidate every suite pinning a fixture date.**
+3. ⛔ **Silently defaulting screen `02` to a different term when the current one is empty would be
+   DISHONEST.** *"No classes this term"* is **true**, and a screen that quietly shows a different
+   term to avoid looking empty asserts something the trainer never asked for. ▶ **The empty state is
+   the correct behaviour and must stay correct after the fixture is re-dated.**

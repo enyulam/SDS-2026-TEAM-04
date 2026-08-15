@@ -129,16 +129,31 @@ export function ManagementClassStatisticsScreen({ classModuleId }: { readonly cl
               )}
 
               {/*
-                ⏸ SLOT 2 — HELD, AND DISCLOSED WHERE THE OPERATOR READS.
-                ⛔ NOT an empty sentence and NOT a silent two-sentence panel
-                pretending to be the mandated three.
+                ✅ SLOT 2 — BUILT 2026-08-16 BY OPERATOR RULING, previously held.
+                ⛔ THE RULING'S GROUND, AND IT IS NOT §6's MANDATE: *"its output
+                is a dimension name and never a value. That is `D-2`'s exact
+                structure … `G-2` bars a roll-up RATING. A dimension name is not
+                a rating — it names where attention goes, not how anyone
+                performed."*
+                ⚠️ Three distinguishable cases, and the third is deliberate.
               */}
-              <p className="rounded-[10px] bg-[#FFF6E5] px-3 py-2 text-[12.5px] leading-5 text-ink-strong">
-                <strong>One sentence of this panel is not built.</strong> The most-improved-dimension
-                trend is computed from average rating change across the class, and whether that
-                survives the standing exclusion on roll-ups is an open decision. It is left out
-                rather than approximated.
-              </p>
+              {data.trendSessionsConsidered !== null && data.trendSessionsConsidered < 2 ? (
+                /* §6's own replacement sentence, verbatim. */
+                <p className="text-ink">Not enough session data yet to identify a trend.</p>
+              ) : data.improvedDimension !== null ? (
+                <p>{data.improvedDimension} is improving across recent sessions.</p>
+              ) : data.trendSessionsConsidered !== null ? (
+                /*
+                  ⚠️ ENOUGH DATA, NOTHING IMPROVED. `CLAUDE.md` §6 does not
+                  specify this case — it gives a replacement only for the
+                  under-two-sessions floor. ▶ Reported to the Operator rather
+                  than resolved silently, and it FAILS TOWARD SAYING LESS: no
+                  dimension is named, because none qualifies.
+                */
+                <p className="text-ink">
+                  No dimension shows a clear improvement across recent sessions yet.
+                </p>
+              ) : null}
 
               {data.recommendedAction !== null && (
                 <p>Recommended next action: {data.recommendedAction}</p>

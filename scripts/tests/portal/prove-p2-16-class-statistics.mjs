@@ -1,19 +1,31 @@
 #!/usr/bin/env node
 // =====================================================================
-// PORTAL PHASE P2-16 -- screen `16` Management Class Statistics. PARTIAL.
-// ⛔ ZERO FUNCTIONS AND ZERO GRANTS ADDED, UNDER A BATCH THAT PERMITS THEM.
+// PORTAL PHASE P2-16 -- screen `16` Management Class Statistics. COMPLETE.
 // =====================================================================
-// ⚠️ §12.10 FOR THE SIXTH PHASE RUNNING. Two governed reads already shipped
-//    answer everything this screen may show:
+// ⚠️ HEADER CORRECTED 2026-08-16 IN THE SAME PASS AS THE RULING (§12.11).
+//    It read "ZERO FUNCTIONS AND ZERO GRANTS ADDED" and "ONE SENTENCE IS
+//    HELD". ▶ Both were TRUE while slot 2 was held and are FALSE now.
+//
+// ⛔ FUNCTIONS AND GRANTS ADDED, NAMED NOT COUNTED (`PC16-1c` asserts it):
+//      `public.report_class_improved_dimension(uuid)` -- ONE `EXECUTE` grant
+//      `public.competency_score(competency_rating)`   -- NO grant, by design
+//    And nothing else: no table, column, enum, policy or audit string.
+//
+// ✅ §12.10 STILL BOUGHT MOST OF THE SCREEN. Slots 1 and 3, the three counts
+//    and the follow-up table add NOTHING -- they read
 //    `report_class_health_summary` (built at `P2-4`) and
-//    `report_list_management_class_status`. ▶ And reusing the first is
-//    MANDATORY, not economical: `CLAUDE.md` §6 requires slot 1 to be "the
-//    exact same computation ... never computed two different ways".
+//    `report_list_management_class_status`. ▶ Reusing the first is MANDATORY,
+//    not economical: `CLAUDE.md` §6 requires "the exact same computation ...
+//    never computed two different ways".
 //
 // ⛔ ALL THREE CARDS THE FRAME DRAWS ARE REFUSED (`GC-6` on `C-9` and `G-2`).
 // ✅ AND TWO PANELS THE FRAME OMITS ARE BUILT, by ruling `C-17`.
-// ⏸ ONE SENTENCE IS HELD -- slot 2, the average-rating-change trend -- and
-//    `PC16-8` asserts it is DISCLOSED ON THE PAGE rather than silently absent.
+// ✅ SLOT 2 IS BUILT BY OPERATOR RULING, 2026-08-16 -- and the permission
+//    rests on the SHAPE, not on §6: *"its output is a dimension name and never
+//    a value. That is `D-2`'s exact structure ... `G-2` bars a roll-up RATING.
+//    A dimension name is not a rating."* `PC16-8`/`8b` assert that shape in
+//    `VP-4`'s form; `PC16-8f` CONSTRUCTS the divergence so the computation is
+//    actually exercised (§12.15).
 //
 // ⛔ Exit code is the only verdict.
 //
@@ -46,6 +58,9 @@ const psql = (sql) =>
     encoding: "utf8",
   }).stdout ?? "").trim();
 const grab = (blob, key) => (blob.match(new RegExp(key + "=([^ \\n]*)")) ?? [])[1] ?? "";
+/* ⚠️ DELIMITER-BRACKETED, because `grab`'s `([^ \n]*)` STOPS AT THE FIRST
+   SPACE and silently truncated a live measurement to its first word. */
+const between = (blob, key) => (blob.match(new RegExp(key + "<([^>]*)>")) ?? [])[1] ?? "";
 const read = (rel) => readFileSync(join(ROOT, ...rel.split("/")), "utf8");
 
 const MGMT = "d0000000-0000-4000-8000-000000000001";
@@ -55,10 +70,40 @@ const claims = (sub) => `{"sub":"${sub}","role":"authenticated"}`;
 // ---------------------------------------------------------------------
 // ⛔ PC16-1 -- NO SCHEMA, ASSERTED NOT CLAIMED.
 // ---------------------------------------------------------------------
+/*
+ * ⚠️ CORRECTED 2026-08-16 IN THE SAME PASS AS THE RULING (§12.11).
+ *
+ * ⛔ THIS LEG PREVIOUSLY ASSERTED "THIS PHASE SHIPS NO MIGRATION", and that
+ * was TRUE when slot 2 was held. ▶ The Operator then RULED SLOT 2 BUILDABLE,
+ * so the phase now ships exactly two migrations, and leaving the old assertion
+ * would have made the suite enforce a state the ruling had superseded.
+ *
+ * ✅ WHAT §12.10 STILL BOUGHT, AND IT IS MOST OF THE SCREEN: slots 1 and 3,
+ * the three counts and the follow-up table all still add NOTHING — they read
+ * `report_class_health_summary` (built at `P2-4`) and
+ * `report_list_management_class_status`. ⛔ And reusing the first is MANDATORY,
+ * not economical: `CLAUDE.md` §6 requires *"the exact same computation …
+ * never computed two different ways"*.
+ */
 const migrations = readdirSync(join(ROOT, "supabase", "migrations")).filter((f) => f.endsWith(".sql"));
+const mine = migrations.filter((f) => /p2_16/i.test(f));
 check(
-  migrations.length > 30 && migrations.filter((f) => /p2_16|class_stat/i.test(f)).length === 0,
-  `PC16-1 ⛔ THIS PHASE SHIPS NO MIGRATION — ${migrations.length} files and NONE names p2_16 or class_stat. ⚠️ §12.10 for the SIXTH phase: \`report_class_health_summary\` already computes slot 1, and \`CLAUDE.md\` §6 REQUIRES that exact computation be reused rather than restated`,
+  mine.length === 2 && mine.some((f) => /improved_dimension\.sql$/.test(f)) && mine.some((f) => /_fix\.sql$/.test(f)),
+  `PC16-1 this phase ships exactly TWO migrations, and the second is a forward correction under R-1: ${mine.join(", ") || "(none)"}`,
+);
+const added = psql(`
+SELECT 'FNS<' || string_agg(p.proname, ',' ORDER BY p.proname) || '>'
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname='public' AND p.proname IN ('competency_score','report_class_improved_dimension');
+SELECT 'HELPER_GRANTS<' || pg_catalog.count(*) || '>' FROM information_schema.role_routine_grants
+ WHERE specific_schema='public' AND routine_name='competency_score' AND grantee IN ('authenticated','anon','PUBLIC','service_role');`);
+check(
+  between(added, "FNS") === "competency_score,report_class_improved_dimension" && between(added, "HELPER_GRANTS") === "0",
+  `PC16-1c ⛔ THE FUNCTIONS AND GRANTS ADDED, NAMED NOT COUNTED: \`report_class_improved_dimension(uuid)\` with ONE \`EXECUTE\` to \`authenticated\`, and \`competency_score(competency_rating)\` with **${between(added, "HELPER_GRANTS")} grants** — ⚠️ the helper is ungranted deliberately: it is called only from inside \`SECURITY DEFINER\` bodies, which run as owner, so granting it would widen the client surface for no caller`,
+);
+check(
+  Number(psql(`SELECT pg_catalog.count(*) FROM (SELECT p.prosrc FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind='f' AND p.proname <> 'competency_score') z WHERE z.prosrc ~ 'WHEN\\s+''mastering''\\s+THEN\\s+75';`)) === 0,
+  "PC16-1d ⛔ AND `D-2`'s MAPPING IS STILL HELD IN EXACTLY ONE PLACE — ⚠️ `D-2` REQUIRES that, and a second inline `CASE` here would have been both a direct violation and the \"second definition free to drift\" defect §12.10 keeps catching. The existing trend function was recreated by FORWARD migration to call the shared helper",
 );
 const census = psql(`
 SELECT 'T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE')
@@ -124,7 +169,6 @@ check(
 const chipLines = psql(`
 SELECT 'CHIPS<' || coalesce(string_agg(DISTINCT c, '|'), '(none)') || '>' FROM (SELECT unnest(focus_chips) AS c FROM public.observations) z;
 SELECT 'CODES<' || string_agg(code::text, '|' ORDER BY sort_order) || '>' FROM public.assessment_dimensions;`);
-const between = (blob, key) => (blob.match(new RegExp(key + "<([^>]*)>")) ?? [])[1] ?? "";
 const chips = between(chipLines, "CHIPS").split("|").filter(Boolean);
 const codes = between(chipLines, "CODES").split("|").filter(Boolean);
 check(
@@ -265,13 +309,127 @@ check(
 // ---------------------------------------------------------------------
 // ⏸ PC16-8 -- THE HELD SENTENCE IS DISCLOSED WHERE THE OPERATOR READS.
 // ---------------------------------------------------------------------
+/*
+ * ✅ PC16-8 -- SLOT 2, BUILT BY OPERATOR RULING 2026-08-16 (previously HELD).
+ *
+ * ⛔ THE RULING'S GROUND, ASSERTED RATHER THAN QUOTED: the permission does NOT
+ * rest on `CLAUDE.md` §6 mandating the sentence. It rests on the SHAPE --
+ * *"its input is ratings across children; its output is a dimension name and
+ * never a value. That is `D-2`'s exact structure … `G-2` bars a roll-up
+ * RATING. A dimension name is not a rating."* ▶ So the legs below assert the
+ * SHAPE, in `VP-4`'s form: the returned type carries no rating value, band or
+ * score, and the surface renders none.
+ */
+const slot2 = psql(`
+SELECT 'RESULT<' || pg_catalog.pg_get_function_result(p.oid) || '>'
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname='public' AND p.proname='report_class_improved_dimension';
+SELECT 'GRANTS<' || pg_catalog.count(*) || '>' FROM information_schema.role_routine_grants
+ WHERE specific_schema='public' AND routine_name='report_class_improved_dimension' AND grantee='authenticated' AND privilege_type='EXECUTE';`);
+const slot2Result = between(slot2, "RESULT");
 check(
-  /insightTrendHeld/.test(proj) && /insightTrendHeld/.test(contracts),
-  "PC16-8 slot 2 is carried as a FIELD through the projection and the contract, not left as a comment",
+  slot2Result === "TABLE(improved_dimension dimension_code, sessions_considered integer)",
+  `PC16-8 ⛔ THE RETURNED SHAPE IS PINNED STRING-FOR-STRING (\`VP-4\`'s form): \`${slot2Result}\` — one dimension IDENTIFIER and one count, and **there is no column here capable of carrying a rating, a band or a score**`,
 );
 check(
-  /One sentence of this panel is not built/.test(screen) && !/toFixed|improving across recent sessions/.test(stripComments(screen)),
-  "PC16-8b ⏸ AND IT IS DISCLOSED ON THE PAGE (§12.12a) while the held sentence itself is NOT rendered — ⛔ not an empty sentence, not a silent two-sentence panel pretending to be the mandated three",
+  !/(rating|band|score|beginning|developing|mastering|mastered|percent|avg|delta)/i.test(slot2Result) &&
+    between(slot2, "GRANTS") === "1",
+  `PC16-8b ⛔ …no rating-family term appears in that result type at all, and it carries exactly ${between(slot2, "GRANTS")} EXECUTE grant to \`authenticated\``,
+);
+check(
+  /improvedDimension/.test(proj) && /improvedDimension/.test(contracts) && !/insightTrendHeld/.test(contracts),
+  "PC16-8c slot 2 is carried through the projection and the contract as a DIMENSION LABEL, and the old held-flag is gone",
+);
+/*
+ * ⚠️ THE PROHIBITION IS ON RENDERING A NUMBER, NOT ON THE WORD "average".
+ * The first form banned `/average/i` outright and went red on the disclosure
+ * sentence *"never averaged across a class"* — ▶ **a refusal being explained
+ * is not the thing being refused**, and a check that cannot tell those apart
+ * would push the screen toward saying less about what it does not do.
+ */
+const rendered = stripComments(screen);
+check(
+  /is improving across recent sessions/.test(rendered) &&
+    /Not enough session data yet to identify a trend/.test(rendered),
+  "PC16-8d ✅ THE SURFACE RENDERS §6's SENTENCE AND ITS UNDER-TWO-SESSIONS REPLACEMENT VERBATIM",
+);
+check(
+  !/toFixed|\{[^}]*(delta|Score|Average|Avg)[^}]*\}|%`|>\s*\{[^}]*percent/i.test(rendered),
+  "PC16-8d2 ⛔ …and NO computed number reaches the page — no `toFixed`, no interpolated delta, score, average or percentage. ▶ `D-2`'s constraint holds for slot 2 exactly as it does for the trend line: the value is computed server-side and never rendered to any role",
+);
+
+/*
+ * ⛔ PC16-8e/8f -- THE MAIN PATH IS EXERCISED, BY CONSTRUCTING THE DIVERGENCE.
+ * ⚠️ §12.15, and the zero-row vacuity member: EVERY fixture module has fewer
+ * than two SUBMITTED sessions, so without this leg the function's whole
+ * computation is unreached and only its `< 2` floor is ever proven. ▶ A second
+ * session is promoted to `submitted` INSIDE A ROLLED-BACK TRANSACTION.
+ */
+const floorCase = psql(`
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
+SELECT 'FLOOR<' || coalesce(r.improved_dimension::text,'(null)') || '|' || r.sessions_considered || '>'
+  FROM public.report_class_improved_dimension('${targetModule}'::uuid) r;
+ROLLBACK;`);
+check(
+  between(floorCase, "FLOOR").startsWith("(null)|"),
+  `PC16-8e §6's FLOOR is real on this fixture: \`${between(floorCase, "FLOOR")}\` — fewer than two submitted sessions yields a NULL dimension and the count, ⚠️ **a ROW rather than an empty set**, because an empty set is the REFUSAL signal and the caller must tell the two apart`,
+);
+const constructed = psql(`
+BEGIN;
+UPDATE public.reports SET status='submitted'
+ WHERE id IN (
+   SELECT rp.id FROM public.reports rp
+     JOIN public.class_sessions cs ON cs.id = rp.class_session_id
+     JOIN public.class_modules cm ON cm.id = cs.class_module_id
+    WHERE cm.title LIKE '%Module B%' AND rp.status <> 'submitted'
+      AND cs.id NOT IN (SELECT cs2.id FROM public.class_sessions cs2 JOIN public.reports r2 ON r2.class_session_id=cs2.id WHERE r2.status='submitted')
+    LIMIT 2);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
+SELECT 'BUILT<' || coalesce(r.improved_dimension::text,'(null)') || '|' || r.sessions_considered || '>'
+  FROM public.class_modules m CROSS JOIN LATERAL public.report_class_improved_dimension(m.id) r
+ WHERE m.title LIKE '%Module B%';
+ROLLBACK;`);
+const built = between(constructed, "BUILT");
+const NINE_CODES = ["body","emotion","speech","tonality","eye_contact","vocal_projection","emotional_expression","sentence_flow","audience_awareness"];
+/*
+ * ⛔ PC16-8g -- THE RECREATED TREND STILL RETURNS THE SAME VALUES.
+ *
+ * ⚠️ THIS MIGRATION RECREATED `report_management_student_trend`, swapping its
+ * INLINE `CASE` for a call to the shared `competency_score` helper -- because
+ * `D-2` requires its mapping to live in ONE place and a second inline copy
+ * would have been a direct violation. ▶ **That is a real regression risk**:
+ * a mapping extracted wrongly changes every score silently, and the shape
+ * assertions above would all still pass.
+ *
+ * ⛔ SO THE VALUES ARE PINNED, NOT THE SHAPE. `44.44` and `63.89` are the
+ * same figures `PS-3c` measured before the extraction — and they sit STRICTLY
+ * BETWEEN band floors, so a constant, an off-by-one mapping or an unmapped
+ * NULL would each move them.
+ *
+ * ⚠️ AND THE RPC-CALLER RULE IS WHAT FORCED THIS LEG. It observed that the
+ * migration declares a function its paired suite never called, which is
+ * exactly right: **the phase that changes a function is the phase that must
+ * prove it still works.**
+ */
+const learner = psql(`SELECT 'SID<' || o.student_id || '>' FROM public.observations o GROUP BY o.student_id ORDER BY pg_catalog.count(*) DESC LIMIT 1;`);
+const trend = psql(`
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
+SELECT 'SCORES<' || coalesce(string_agg(t.session_score::text, ',' ORDER BY t.session_date), '(none)') || '>'
+  FROM public.report_management_student_trend('${between(learner, "SID")}'::uuid) t;
+ROLLBACK;`);
+check(
+  between(trend, "SCORES") === "44.44,63.89",
+  `PC16-8g ⛔ THE RECREATED TREND IS VALUE-IDENTICAL: \`${between(trend, "SCORES")}\` — ▶ the \`D-2\` mapping was extracted into a shared helper and **every score is unchanged**, which no shape assertion above could have told you`,
+);
+
+check(
+  built.endsWith("|2") && NINE_CODES.includes(built.split("|")[0]),
+  `PC16-8f ⛔ AND WITH TWO SUBMITTED SESSIONS THE COMPUTATION RUNS AND NAMES A REAL DIMENSION: \`${built || "(none)"}\` — ▶ it is one of the nine canonical codes, computed INSIDE the database from ratings across children, and **what crossed the boundary is an identifier and a count**. The transaction rolled back`,
 );
 
 // ---------------------------------------------------------------------

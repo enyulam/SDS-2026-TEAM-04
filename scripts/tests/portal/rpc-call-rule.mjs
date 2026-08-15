@@ -41,6 +41,40 @@ const CREATE_FN = /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z0-9_]+)\
  * is called"*, or it would push a future phase toward adding a function just
  * to have one.
  */
+/**
+ * ⛔ THE PROVABLY-INTERNAL FUNCTIONS — declared, granted narrowly or not at
+ * all, and CORRECTLY unreachable from application code.
+ *
+ * ⚠️ THIS LIST LIVES HERE, ONCE, AND THAT IS THE POINT. It was previously an
+ * inline regex COPIED INTO FOUR SUITES, so adding an entry meant editing four
+ * files and forgetting one meant a suite that disagreed with its siblings
+ * about what the rule permits. ▶ Same discipline the `D-2` mapping is held to,
+ * applied to a test rule: **one definition, or it drifts.**
+ *
+ * ⛔ AN ENTRY HERE IS A CLAIM THAT NO CLIENT SHOULD EVER CALL IT, and each one
+ * states why. This is a narrowing of a safety rule, so it is never a place to
+ * park something merely not wired up YET.
+ */
+export const PROVABLY_INTERNAL = [
+  // Called only from inside a policy; never a client entry point.
+  "app_management_may_attach_material",
+  // The governed action registry itself — read by triggers, not by callers.
+  "audit_action_registry",
+  /*
+   * `D-2`'s band → percentage mapping, and THE ONE PLACE it is held.
+   * ⛔ It carries NO GRANT, so no client could call it even if one wanted to,
+   * and it is invoked only from inside `SECURITY DEFINER` bodies which run as
+   * owner. ▶ Granting it to satisfy a wiring rule would widen the client
+   * surface for no caller — the rule pushing a build the wrong way.
+   */
+  "competency_score",
+];
+
+/** True when `name` is one of the provably-internal functions above. */
+export function isProvablyInternal(name) {
+  return PROVABLY_INTERNAL.some((n) => name === n || name.startsWith(`${n}(`) || name.startsWith(`${n} `));
+}
+
 export const RPC_MIGRATIONS = [
   { migration: "20260812230000_portal_d3_terms_substrate.sql", suite: "prove-p2-2-terms-substrate.sql" },
   { migration: "20260813090000_portal_p2_2_class_creation.sql", suite: "prove-p2-2-class-creation.sql" },
@@ -96,6 +130,36 @@ export const RPC_MIGRATIONS = [
    */
   { migration: "20260815150000_portal_p2_9_student_profile_reads.sql", suite: "prove-p2-9-student-profile.mjs" },
   { migration: "20260815160000_portal_p2_9_class_label_fix.sql", suite: "prove-p2-9-student-profile.mjs" },
+  /*
+   * `P2-16` slot 2 — the most-improved dimension, and the shared `D-2` helper.
+   *
+   * ⚠️ ONE OF THE TWO FUNCTIONS THIS MIGRATION DECLARES HAS NO APPLICATION
+   * CALLER AND NEVER WILL. `competency_score(competency_rating)` is the single
+   * place `D-2`'s band → percentage mapping is held, and it is called ONLY
+   * from inside `SECURITY DEFINER` bodies, which run as owner. ▶ It carries
+   * no grant, so no client could call it even if one wanted to — and granting
+   * it to satisfy a pairing rule would widen the client surface for no caller,
+   * which is the rule pushing a build in the wrong direction.
+   *
+   * ⛔ THE PAIRING IS SATISFIED BY THE MIGRATION'S OTHER FUNCTION,
+   * `report_class_improved_dimension`, which the suite executes as a real
+   * management caller — including a CONSTRUCTED two-session case, because
+   * every fixture module has fewer than two submitted sessions and the
+   * computation would otherwise never be reached (§12.15).
+   */
+  { migration: "20260816090000_portal_p2_16_improved_dimension.sql", suite: "prove-p2-16-class-statistics.mjs" },
+  /*
+   * The `R-1` forward correction, and it is §26.1's ceiling proving itself a
+   * SECOND time — in the phase where the Operator ruled on it.
+   *
+   * ⛔ The first migration applied with SEVEN PASS notices, one of which
+   * EXECUTED the function, and it still could not run for any real caller:
+   * `CREATE TABLE AS is not allowed in a non-volatile function`. ▶ As
+   * `postgres` there is no application account, so the body returned at its
+   * FIRST GATE — twenty lines above the offending statement. **The suite is
+   * the only leg that reaches the body.**
+   */
+  { migration: "20260816093000_portal_p2_16_improved_dimension_fix.sql", suite: "prove-p2-16-class-statistics.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

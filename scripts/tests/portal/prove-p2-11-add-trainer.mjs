@@ -30,7 +30,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
-import { unpairedMigrations, rpcsWithoutApplicationCaller } from "./rpc-call-rule.mjs";
+import { unpairedMigrations, rpcsWithoutApplicationCaller, isProvablyInternal } from "./rpc-call-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
 import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
@@ -405,9 +405,7 @@ check(
   `PA-12  every portal-era migration still has a paired suite (${unpairedMigrations(ROOT).join(", ") || "none unpaired"})`,
 );
 const wiring = rpcsWithoutApplicationCaller(ROOT, () => false);
-const stillUnwired = wiring.unwired.filter(
-  (n) => !/^(app_management_may_attach_material|audit_action_registry)/.test(n),
-);
+const stillUnwired = wiring.unwired.filter((n) => !isProvablyInternal(n));
 check(
   stillUnwired.length === 0,
   `PA-12b and every portal-era RPC is reachable from application code (${wiring.declaredCount} declared; unwired beyond the provably-internal: ${stillUnwired.join(", ") || "none"}) — ⚠️ THIS is the leg that would have caught admin_create_trainer shipping with no caller`,

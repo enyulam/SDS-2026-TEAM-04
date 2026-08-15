@@ -451,7 +451,8 @@ export interface AdapterClassStatisticsDto {
   readonly submittedCount: number;
   readonly mainFollowUpDimension: string | null;
   readonly recommendedAction: string | null;
-  readonly insightTrendHeld: true;
+  readonly improvedDimension: string | null;
+  readonly trendSessionsConsidered: number | null;
   readonly followUpRows: readonly AdapterClassOverviewRowDto[];
 }
 

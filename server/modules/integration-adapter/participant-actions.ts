@@ -2002,7 +2002,8 @@ export async function adapterReadClassStatistics(
       submittedCount: d.submittedCount,
       mainFollowUpDimension: d.mainFollowUpDimension,
       recommendedAction: d.recommendedAction,
-      insightTrendHeld: true,
+      improvedDimension: d.improvedDimension,
+      trendSessionsConsidered: d.trendSessionsConsidered,
       followUpRows: d.followUpRows.map((r) => ({
         classSessionId: r.classSessionId,
         sessionDate: r.sessionDate,

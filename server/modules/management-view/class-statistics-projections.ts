@@ -136,12 +136,30 @@ export interface ClassStatisticsDto {
   /** ⛔ SLOT 3 — looked up from slot 1. NULL exactly when slot 1 is NULL. */
   readonly recommendedAction: string | null;
   /**
-   * ⏸ SLOT 2, HELD. Always `true` in this build. Carried as a FIELD rather
-   * than as a comment so the screen can disclose the gap to the Operator
-   * (§12.12a) instead of quietly rendering a two-sentence panel that looks
-   * like the mandated three.
+   * ✅ SLOT 2 — BUILT 2026-08-16 BY OPERATOR RULING. Previously held.
+   *
+   * ⛔ THE RULING'S REASONING, RECORDED HERE SO A LATER PHASE DOES NOT READ
+   * §6's MANDATE AS THE ONLY GROUND: *"Its input is ratings across children;
+   * its output is a dimension name and never a value. That is `D-2`'s exact
+   * structure and `D-2` is permitted on precisely that ground: the aggregation
+   * happens server-side and no rating, band or number is rendered. `G-2` bars
+   * a roll-up RATING. A dimension name is not a rating — it names where
+   * attention goes, not how anyone performed."*
+   *
+   * ▶ **The permission rests on the SHAPE, not on §6.** A future slot
+   * mandating a NUMBER would not inherit this ruling.
+   *
+   * ⛔ A DIMENSION LABEL. NULL when there is no improving dimension.
    */
-  readonly insightTrendHeld: true;
+  readonly improvedDimension: string | null;
+  /**
+   * §6's own floor: *"If fewer than 2 sessions of **submitted** data exist in
+   * range, this sentence is replaced with 'Not enough session data yet to
+   * identify a trend.'"* ⚠️ Carried as the COUNT so the screen can tell the
+   * three cases apart — and so a refusal (which returns no row at all) is
+   * never mistaken for "not enough data".
+   */
+  readonly trendSessionsConsidered: number | null;
   /**
    * ⛔ `Students Needing Follow-up`, selected by REPORT STATUS.
    *
@@ -159,11 +177,19 @@ export async function readClassStatisticsCore(
   client: SupabaseClient,
   classModuleId: string,
 ): Promise<{ readonly ok: true; readonly data: ClassStatisticsDto } | { readonly ok: false }> {
-  const [moduleRow, enrolments, health, statusRows] = await Promise.all([
+  const [moduleRow, enrolments, health, statusRows, improved] = await Promise.all([
     client.from("class_modules").select("id, title, class_grade_id").eq("id", classModuleId).maybeSingle(),
     client.from("enrolments").select("student_id").eq("class_module_id", classModuleId).eq("is_active", true),
     readClassHealthCore(client, classModuleId),
     readClassStatusRowsCore(client, classModuleId),
+    /*
+     * ⛔ SLOT 2. `RETURNS TABLE(...)` → `proretset = true` → PostgREST sends an
+     * ARRAY, so the row is taken at [0]. ⚠️ ZERO ROWS IS THE REFUSAL SIGNAL
+     * and resolves to `null`/`null` — deliberately NOT to "0 sessions", which
+     * would render §6's *"not enough session data"* over a class the caller
+     * could not read at all (`Q-7`).
+     */
+    client.rpc("report_class_improved_dimension", { p_class_module_id: classModuleId }),
   ]);
 
   const mod = moduleRow.data as { id: string; title: string; class_grade_id: string } | null;
@@ -181,6 +207,20 @@ export async function readClassStatisticsCore(
   const rawTag = health.ok && health.rows !== null ? health.rows.mainFollowUpArea : null;
   const dimensionKey = resolveDimensionKey(rawTag);
 
+  /*
+   * ⛔ SLOT 2's CODE IS A `dimension_code` ENUM, not a display phrase — the
+   * OPPOSITE of slot 1's `focus_chips` free text. ⚠️ They are two different
+   * shapes reaching the same nine dimensions, and collapsing them into one
+   * resolver would have made one of them silently wrong.
+   */
+  const improvedRow = (improved.data ?? [])[0] as
+    | { improved_dimension: string | null; sessions_considered: number }
+    | undefined;
+  const improvedKey =
+    improvedRow?.improved_dimension != null && improvedRow.improved_dimension in DIMENSION_LABEL
+      ? improvedRow.improved_dimension
+      : null;
+
   return {
     ok: true,
     data: {
@@ -191,7 +231,8 @@ export async function readClassStatisticsCore(
       submittedCount: rows.filter((r) => r.reportState === "submitted").length,
       mainFollowUpDimension: dimensionKey === null ? null : DIMENSION_LABEL[dimensionKey],
       recommendedAction: dimensionKey === null ? null : RECOMMENDED_ACTION[dimensionKey],
-      insightTrendHeld: true,
+      improvedDimension: improvedKey === null ? null : DIMENSION_LABEL[improvedKey],
+      trendSessionsConsidered: improvedRow === undefined ? null : improvedRow.sessions_considered,
       /*
        * ⛔ "NEEDING FOLLOW-UP" = STARTED BUT NOT SUBMITTED. A learner with no
        * report at all is NOT here: `CLAUDE.md` §6 says a `No Report` row gets

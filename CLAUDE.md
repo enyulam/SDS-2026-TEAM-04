@@ -756,6 +756,55 @@ under `search_path = ''` an ordinary function (`btrim`, `lower`, `length`, `strp
 
 Full record: `docs/plan/PORTAL_COMPLETION_PLAN.md` §25.1.
 
+### ⛔ A GATE IS READ FROM ITS **EXIT CODE**, NEVER FROM ITS OUTPUT
+
+*(Added 2026-08-16 under an explicit bounded Operator instruction naming this section and this rule:
+**"Record it in §12 with the rule stated plainly: a gate is read from its exit code, never from its
+output. It belongs beside the pipe-to-tail instance and the sed instance; that is now three ways of
+putting a filter between a gate and its signal."** **Process only — no product rule changes.**)*
+
+**⛔ NEVER DECIDE WHETHER A GATE PASSED BY LOOKING AT WHAT IT PRINTED.** Run it, read `$?`. If a
+command's output must also be inspected, inspect it **in addition to** the exit code, never instead
+of it.
+
+⚠️ **MEASURED, NOT HYPOTHETICAL, AND THE WORST OF THE THREE — because the phrase it matched was
+TRUE.** Phases were reported complete on:
+
+```
+npm run build 2>&1 | grep -E "Compiled|error"     # ⛔ NOT A BUILD CHECK
+```
+
+Next.js prints **`✓ Compiled successfully`** and **then runs the type check**. The compile really had
+succeeded; the worker exited **1** several lines later on
+`Type '"classes"' is not assignable to type 'IconName | undefined'`. ▶ **The filter did not hide a
+failure message — it showed an accurate message that was the WRONG SIGNAL.** No amount of care in
+choosing grep patterns fixes that, because the string being matched was never the verdict.
+
+⛔ **THIS IS THE THIRD WAY THE SAME MISTAKE HAS BEEN MADE, AND THE THREE ARE ONE FAMILY: A FILTER
+PLACED BETWEEN A GATE AND ITS SIGNAL.**
+
+| # | Form | How the signal was lost |
+|---|---|---|
+| 1 | `… \| tail -2 && git commit` | ⛔ **A pipeline's exit status is the LAST command's.** `tail` succeeded, so `&&` proceeded — and the commit was made over a printed `RESULT: FAIL` |
+| 2 | `… \| sed … \|\| echo "none"` | ⛔ **`sed` always exits 0**, so the `\|\|` branch could never fire and an empty result was indistinguishable from a broken command |
+| 3 | `… \| grep "Compiled"` | ⛔ **The matched phrase was TRUE and the build had FAILED.** The exit code was grep's, not the build's |
+
+▶ **In all three the command's own verdict existed and was discarded before it was read.** Prefer the
+bare invocation. Where output is genuinely needed, capture the status first:
+
+```sh
+npm run build >/dev/null 2>&1; echo "BUILD_EXIT=$?"      # ✅ the verdict
+```
+
+⚠️ **AND THE SAME DEFECT HAS A NON-SHELL FORM, RECORDED HERE BECAUSE IT IS THE SAME ERROR ONE LAYER
+UP: A CHECK THAT REPORTS A WIDER SCOPE THAN IT CLAIMS IS AS WRONG WHEN IT PASSES.** A proof leg
+sliced a contracts file from one type declaration *to whatever type happened to be declared next*,
+scanned **2090** characters, and reported in its own message that it had read *"THE PROFILE DTO"* —
+**441** characters. Every green it ever produced was evidence about something other than the thing it
+named. ▶ **State what a check executes over, and bound it to exactly that.**
+
+Full record: `docs/plan/PORTAL_COMPLETION_PLAN.md` §12.16.
+
 When in doubt, a short question to the orchestrator costs little; a governance mechanism — or a professional standard — built quietly wrong costs a rebuild.
 
 ---

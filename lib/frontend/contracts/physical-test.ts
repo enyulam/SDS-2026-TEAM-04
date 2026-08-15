@@ -483,8 +483,14 @@ export type ClassStatisticsDto = {
   /** ⛔ A DIMENSION LABEL — never a rating, never a score. */
   readonly mainFollowUpDimension: string | null;
   readonly recommendedAction: string | null;
-  /** ⏸ Slot 2 held. A FIELD, so the screen can disclose it (§12.12a). */
-  readonly insightTrendHeld: true;
+  /**
+   * ✅ SLOT 2 — BUILT by Operator ruling 2026-08-16. ⛔ A DIMENSION LABEL,
+   * never a value: *"a dimension name is not a rating — it names where
+   * attention goes, not how anyone performed."*
+   */
+  readonly improvedDimension: string | null;
+  /** §6's under-two-sessions floor. NULL when the read REFUSED (`Q-7`). */
+  readonly trendSessionsConsidered: number | null;
   /** ⛔ Selected by REPORT STATUS, never by rating. */
   readonly followUpRows: readonly ClassOverviewRowDto[];
 };
