@@ -1052,6 +1052,39 @@ non-empty docker error carrying no legs, and *another suite's* legs, and **accep
 — the positive clause matters, or "the guard fires" would be equally true of a predicate that
 rejects everything.
 
+### ⛔ THE THIRD MEMBER OF THIS FAMILY — `PS-7c` (Operator-ruled, 2026-08-15)
+
+> *"`PS-7c` is the finding beside it: **an emptied chart satisfies every prohibition perfectly.**
+> Record it with the empty-string and zero-row entries — **a prohibition proof needs a companion
+> proving the thing still exists.**"*
+
+`P2-9`'s `PS-7b` bars `D-2` from being rendered as a number, a band or a grade: no `toFixed`, no
+percent-suffixed score in a text node, nothing in an `aria-label` or a `title`, no band label.
+▶ **Every one of those clauses is satisfied by DELETING THE CHART.**
+
+⚠️ **AND THE THREE ARE ONE SHAPE SEEN THREE WAYS** — which is why they belong together:
+
+| Instance | The vacuous pass |
+|---|---|
+| **empty string** | *"ran to completion"* and *"0 FAIL"* are both true of **no output at all** |
+| **zero rows** | `A-038`'s NULL branch reported *"0 rows with No Report"* against a fixture where **the case did not exist** |
+| **`PS-7c`** | a prohibition on rendering is **perfectly satisfied by rendering nothing** |
+
+> ### ⛔ **A PROHIBITION PROOF NEEDS A COMPANION PROVING THE THING STILL EXISTS.**
+> **Trigger: any leg whose assertion is an ABSENCE.** Ask what it would say if the surface it
+> guards were deleted — and if the answer is `PASS`, it is half a proof.
+
+▶ `PS-7c` is the companion: `trendGeometry` is CALLED, an SVG `path` IS drawn, and `sessionScore`
+IS consumed. **The hero chain established this shape on the carried-focus block** — asserting no
+lesson token inside it, *and* asserting it still renders `carriedFocus`, because an emptied block
+satisfies the first assertion perfectly. **`P2-9` is the same rule on a different field.**
+
+⚠️ **AND `PS-3c` IS ITS QUANTITATIVE TWIN**, Operator-named: *"a trend value landing on a band floor
+would be a grade wearing a number's clothes."* ▶ A leg asserting merely *"a number came back"* passes
+against a hard-coded `100`, an unmapped `NULL` coerced to `0`, or a body that COUNTED instead of
+averaging — **and every one of those lands ON a band floor.** The measured `44.44` / `63.89` can
+only come from a genuine mean of a mixed set.
+
 ### Gates
 
 | Gate | Result |
@@ -4056,6 +4089,13 @@ an unqualified one resolves to nothing. ⚠️ **The two categories look identic
 > still traverses the body. **A structural assertion cannot see a runtime resolution error, and a
 > function that raises is not a function that shipped.**
 
+> ⛔ **THE CLAUSE *"still traverses the body"* IS SUPERSEDED BY §26.1 (Operator-ruled, 2026-08-15).**
+> **IT DOES NOT.** An apply-time probe traverses only **up to the function's FIRST GATE**, and
+> `P2-11`'s defect was caught by this leg **by luck of placement** — its failing statement sat three
+> lines past that gate. `P2-9`'s sat behind three gates and was missed. ▶ **Read §26.1 before relying
+> on this rule for anything.** The rule itself stands and is still required; only its claimed reach
+> was wrong.
+
 ✅ **PROMOTED TO `CLAUDE.md` §12 VERBATIM, 2026-08-15**, under an explicit bounded Operator
 instruction: *"'A migration that verifies its own SHAPE has not verified that it WORKS' belongs in
 §12 verbatim, and the standing rule — every migration declaring a function executes it at apply time
@@ -4167,6 +4207,26 @@ build's choice**, held in ONE named constant, asserted by `PA-6d`, and recorded 
 ## §26 — `P2-9` AS BUILT, AND THE LIMIT IT FOUND IN THE RULE `P2-11` JUST CREATED
 
 ### §26.1 — ⛔ **THE APPLY-TIME EXECUTION RULE HAS A CEILING, AND IT IS THE FIRST GATE**
+
+> ⛔ **RECORDED AS SUPERSEDING §25.1's SCOPE, NOT SUPPLEMENTING IT — Operator, 2026-08-15:**
+>
+> *"THE CEILING IS A REAL CORRECTION TO MY RULE and I want it recorded as **superseding, not
+> supplementing**: apply-time execution proves resolution only up to the FIRST GATE. `P2-11`'s defect
+> was caught by **luck of placement** — its failing statement sat three lines past the gate — and
+> `P2-9`'s was not, because its body sits behind three."*
+>
+> *"Two legs is right. **Keeping §12's text as the floor and recording the ceiling at §26.1 is the
+> correct structure — a rule rewritten to cover its own exception usually covers less.**"*
+
+⚠️ **SO THE STRUCTURE IS DELIBERATE AND MUST NOT BE "TIDIED".** `CLAUDE.md` §12 keeps the rule as a
+**FLOOR** — every migration declaring a function executes it — stated plainly, with no exception
+clause. **This section is its CEILING.** ▶ A later reader who finds §12 simple and this section long
+is seeing the intended shape: **rewriting §12 to carry the caveat would make the floor harder to read
+and, in practice, lower.**
+
+⛔ **AND §25.1's *"still traverses the body"* IS THE SPECIFIC CLAUSE SUPERSEDED.** It is annotated in
+place rather than deleted, so a reader arriving from §12's pointer meets the correction before the
+claim.
 
 `P2-11` closed a defect by adding *"every migration that declares a function must EXECUTE it at
 apply time."* ▶ **`P2-9` shipped a function that passed that new leg and still raised for a real
