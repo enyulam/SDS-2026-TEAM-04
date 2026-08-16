@@ -179,6 +179,13 @@ export const RPC_MIGRATIONS = [
    * of this body a mistake would silently turn into a rating VALUE.
    */
   { migration: "20260816140000_portal_p2_20_trainer_students.sql", suite: "prove-p2-20-trainer-students.mjs" },
+  /*
+   * P2-12 — the first governed WRITE of Part 2 that adds no audit string.
+   * Its apply-time leg exercises the REFUSAL path only (not_permitted at gate
+   * 1); the suite is the only leg that reaches the inserts, the two audit
+   * emissions and the hash chain, as a real management caller.
+   */
+  { migration: "20260816160000_portal_p2_12_admin_create_student.sql", suite: "prove-p2-12-register-student.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

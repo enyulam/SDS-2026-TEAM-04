@@ -31,6 +31,8 @@ import type {
   TrainerMyClassesDto,
   TrainerDashboardDto,
   TrainerStudentsDto,
+  RegisterStudentInput,
+  RegisterStudentOutcomeDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -256,6 +258,9 @@ export interface PhysicalTestPort {
 
   /** `P2-20` — screen `04`. ⛔ No rating: the `Level` column is refused. */
   readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>>;
+
+  /** `P2-12` — screen `20`. A GOVERNED WRITE: student + enrolments + audit, one transaction. */
+  registerStudent(input: RegisterStudentInput): Promise<UiActionResult<RegisterStudentOutcomeDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

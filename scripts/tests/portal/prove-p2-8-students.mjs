@@ -177,9 +177,33 @@ check(/\bJunior\b/.test("Junior · Public Speaking"), "PDTa-GRADEc CONTROL: the 
  */
 const registerRoute = existsSync(join(ROOT, "app/(portals)/management/students/register/page.tsx"));
 const parentRoute = existsSync(join(ROOT, "app/(portals)/management/parents/page.tsx"));
+const registerShown = /Register Student/.test(builtCode);
+const parentShown = /Add Parent/.test(builtCode);
+/*
+ * ⚠️ CORRECTED AT `P2-12`, 2026-08-16 (§12.11, and §44's shape in a PROOF).
+ * This leg's own message said *"if a later phase ships those routes this leg
+ * still passes; it is the CONTROL WITHOUT A DESTINATION that is barred"* —
+ * and its assertion was `!registerRoute && !parentRoute && !rendered`, which
+ * **fails the moment a route ships**. ▶ The message and the code disagreed,
+ * and the message was the correct one. **A correct comment sitting on
+ * incorrect code is worse than no comment**, and here it sat on a proof.
+ *
+ * ⛔ THE BARRED THING IS ONE-DIRECTIONAL AND PER CONTROL: `rendered → the
+ * destination exists`. Omitting a control whose route exists is a lapsed
+ * omission, not a breach — but it IS a §12.11 correction, which is exactly
+ * how `Register Student` came to be built in this pass.
+ */
 check(
-  !registerRoute && !parentRoute && !/Register Student|Add Parent/.test(builtCode),
-  `PDTa-ACTIONS neither "Register Student" nor "Add Parent" is rendered, and neither destination route exists (register=${registerRoute}, parent=${parentRoute}) -- REGISTERED-OMISSIONs that END at P2-12/P2-13. ⛔ If a later phase ships those routes this leg still passes; it is the CONTROL WITHOUT A DESTINATION that is barred`,
+  (!registerShown || registerRoute) && (!parentShown || parentRoute),
+  `PDTa-ACTIONS ⛔ NEITHER CONTROL POINTS AT A ROUTE THAT DOES NOT EXIST — Register Student: shown=${registerShown} route=${registerRoute} · Add Parent: shown=${parentShown} route=${parentRoute}. ▶ A control pointing at a 404 is the defect the Operator named at \`P2-3\`; a control ABSENT while its route exists is a lapsed omission for §12.11, not a breach of this leg`,
+);
+check(
+  registerRoute === registerShown,
+  `PDTa-ACTIONSb ✅ …and \`Register Student\`'s omission ENDED exactly when \`P2-12\` shipped its route (route=${registerRoute}, shown=${registerShown}) — ⚠️ **THE PROOF NOTICED, NOT A READER**: this leg went red on the run that shipped \`/management/students/register\`, which is a lift condition written to FIRE rather than to be remembered`,
+);
+check(
+  !parentShown && !parentRoute,
+  `PDTa-ACTIONSc ⏸ \`Add Parent\` REMAINS OMITTED and its route remains absent (shown=${parentShown}, route=${parentRoute}) — screen \`21\` is \`P2-13\`. ▶ This leg will go red the moment that route ships, which is the whole design`,
 );
 
 /* ⛔ NO DIRECT CLIENT DML, and no write of any kind: screen 17 is a read. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchInput, Select } from "@/components/ui/field";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -215,10 +216,27 @@ export function ManagementStudentsScreen() {
           </label>
 
           {/*
-            ⏸ `Add Parent` and `Register Student` are NOT rendered. Screens `21` and `20`,
-            phases `P2-13` and `P2-12`, neither built — see the header. A button that points
-            nowhere is worse than an absent one.
+            ✅ `Register Student` IS NOW RENDERED — its omission's stated end
+            condition arrived. `P2-12` shipped `/management/students/register`,
+            so the reason for omitting it ("points nowhere") has lapsed and
+            §12.11 requires the correction in the same pass.
+
+            ⚠️ IT WAS THE PROOF THAT NOTICED, NOT A READER. `PDTa-ACTIONS` went
+            red on the run that shipped the route, naming `register=true,
+            parent=false`. ▶ That is a lift condition written to FIRE rather
+            than to be remembered — the same discipline `AR-1b` now applies to
+            the artefact register.
+
+            ⏸ `Add Parent` STAYS OMITTED. Screen `21` is `P2-13` and
+            `/management/students/parents/new` does not exist at HEAD; a
+            control that points nowhere is still worse than an absent one.
           */}
+          <Link
+            href="/management/students/register"
+            className="inline-flex min-h-11 items-center rounded-[10px] bg-brand-600 px-4 text-[13.5px] font-semibold text-white no-underline"
+          >
+            Register Student
+          </Link>
         </div>
       </div>
 

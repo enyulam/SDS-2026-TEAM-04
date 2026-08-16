@@ -136,6 +136,8 @@ import type {
   AdapterTrainerMyClassesDto,
   AdapterTrainerDashboardDto,
   AdapterTrainerStudentsDto,
+  AdapterRegisterStudentInput,
+  AdapterRegisterStudentOutcomeDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -184,6 +186,7 @@ import { readClassStatisticsCore } from "@/server/modules/management-view/class-
 import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
 import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
 import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
+import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2148,5 +2151,25 @@ export async function adapterReadTrainerStudents(): Promise<ActionResult<Adapter
       })),
       classes: d.classes.map((c) => ({ classModuleId: c.classModuleId, classLabel: c.classLabel })),
     },
+  };
+}
+
+
+/**
+ * `P2-12` — screen `20` Register New Student.
+ *
+ * ⛔ A GOVERNED REFUSAL IS REPORTED AS `unavailable`, NEVER AS A SUCCESS
+ * CARRYING A REASON. The screen must not be able to render "registered" over
+ * a row that does not exist.
+ */
+export async function adapterRegisterStudent(
+  input: AdapterRegisterStudentInput,
+): Promise<ActionResult<AdapterRegisterStudentOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await registerStudentCore(client, input);
+  if (!result.ok) return { outcome: "unavailable" };
+  return {
+    outcome: "success",
+    data: { studentId: result.studentId, enrolments: result.enrolments, reason: result.reason },
   };
 }

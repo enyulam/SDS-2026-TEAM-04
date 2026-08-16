@@ -5846,3 +5846,131 @@ green (8 values, 2 fractional).
 `tsc<0>` · `lint<0>` · `build<0>` · `prove:portal-p2-20<0>` (28 checks) · nav census `<0>` (31 routes,
 13 rail items) · 20 further suites `<0>`. `prove:artefact-read` exits 1 on the two ruled `KNOWN-RED`s
 only. ⛔ **VISUAL: `NOT-RUN`.**
+
+---
+
+## §46 — ⛔ **A MECHANISM WHOSE BYPASS IS UNGATED IS A CONVENTION**
+
+*(Operator ruling, 2026-08-16, on the `AR-1b` controls. **Process only.**)*
+
+> **The ruling, verbatim:** *"`AR-1c`/`AR-1d` catching the exemption is the better half — forgetting
+> fails loudly, exempting yourself goes green, and gating the escape hatch is what makes it a
+> control."*
+
+**The two controls are not two tests of one thing. They test opposite failure modes, and only one of
+them is quiet:**
+
+| Control | What was done | What happened | Volume |
+|---|---|---|---|
+| 1 | screen `01`'s block removed — **a phase forgets** | `FAIL AR-1b … (UNREGISTERED: 01)`, and `AR-1`'s double entry went red too | ⚠️ **LOUD** |
+| 2 | `01` added to `PRE_GATE` — **a phase exempts itself** | ✅ `AR-1b` went **GREEN** · `AR-1c`+`AR-1d` red | ⛔ **SILENT, at the gate itself** |
+
+▶ **`AR-1b` PASSING under control 2 is correct behaviour, and that is exactly the danger.** An
+exemption list does what it says. A gate that ships with an ungated exemption list has not moved the
+decision from *remembering* to *enforcing* — it has moved it from *remembering to add yourself* to
+*remembering not to exempt yourself*, which is the same class of thing wearing a mechanism's clothes.
+
+> ### ⛔ **EVERY ESCAPE HATCH IS ITSELF A GATE, OR THE GATE IT SITS IN IS A CONVENTION.**
+>
+> The forcing function must point **inward**: `AR-1c` pins `PRE_GATE.length === 10` and asserts no
+> member carries a block, so the list can only ever **shrink**. There is no green state reachable by
+> adding an entry.
+
+⚠️ **AND THE SAME TEST APPLIES BACKWARDS TO EVERY GATE THIS PROJECT ALREADY HAS.** Ask of each: *what
+is its exemption path, and what fails when someone takes it?* Where the answer is "nothing", the gate
+is enforcing the honest cases and trusting the rest — which is the shape `MEASURED` had for three
+phases before anyone looked.
+
+---
+
+## §43.1 — ⛔ **THE CONSTRUCTED DIVERGENCE WAS ITSELF VACUOUS** (a new layer on §43)
+
+*(Operator ruling, 2026-08-16: **"`PT20-3c` is a new layer and belongs in §43."**)*
+
+§43 recorded three phases where the honest proof had to **manufacture** the case the fixture could
+not supply — `RAa-2`, `PC16-8g`, `PT19-3c`. **`PT20-3c` adds the failure mode one level up: the
+manufacture itself can be empty.**
+
+**Measured.** The construction deactivated **13 of the 17 active session assignments** — and moved the
+function's output by **nothing**, because the module it picked (`Beginner - Dance`, selected by
+`ORDER BY class_module_id LIMIT 1`) carries **ZERO enrolments**. ▶ The largest possible-looking
+intervention in the fixture, with no observable consequence.
+
+⛔ **AND IT WOULD HAVE PASSED UNDER `after <= rows`.** That assertion is true when `after === rows`.
+Only `after < rows` — and now the **exact expected drop**, `after === rows - targetRows` with modules
+`− 1` — could tell "the scope held" apart from "nothing happened."
+
+> ### ⛔ **A CONSTRUCTED DIVERGENCE NEEDS ITS OWN NON-VACUITY CHECK, EXACTLY LIKE THE THING IT CONSTRUCTS.**
+>
+> ▶ The construction is **evidence-generating apparatus**, and apparatus is subject to every rule
+> evidence is. A proof that manufactures its own case has **two** things that can be empty — the
+> assertion, and the manufacture — and this project has now been bitten by both. The remedy is the
+> same in both places: **assert the expected magnitude, not merely the expected direction.**
+
+The target is now read **from the function's own output**, so the thing removed is guaranteed to be
+something the thing under test actually reports.
+
+---
+
+## §37.3 — ⛔ **`class_grades.code` — THE MOST DANGEROUS ENTRY IN THE REGISTER**
+
+*(Operator ruling, 2026-08-16. Promoted to its own subsection rather than a table row, because the
+register's other entries mislead by NAME and this one misleads by **VALUE**.)*
+
+| | |
+|---|---|
+| **Column** | `class_grades.code` |
+| **Holds** | `beginner` · `intermediate` · `advanced` — **Class Grade** |
+| **Reads like** | the refused `Level` column: `Beginning` · `Developing` · `Mastering` · `Mastered` |
+
+⛔ **`Beginner` AND `Beginning` ARE ONE LETTER APART**, and `A-054` states plainly that the two
+vocabularies are different things to be classified by context — *"global keyword replacement is
+prohibited."*
+
+▶ **WHY IT OUTRANKS THE SEVEN `*_role` DECOYS.** Those mislead by **name**: a reader who opens the
+column finds a composite-FK component and stops. This one **survives being opened.** The column is
+real, its values are real, and rendered into the refused chip it produces a page that *matches the
+frame closely enough to be reported as faithful* — while displaying **a Class Grade dressed as a
+competency rating.**
+
+⚠️ **The refusal would be violated in appearance while not even being the same datum.** Neither a
+rating-vocabulary scan nor a visual comparison against the frame reliably catches it: the scan sees
+`Beginner`, not `Beginning`; the eye sees a chip in the right place with a plausible word in it.
+
+✅ **`P2-20` checked the register before sourcing, which is the whole reason it exists.**
+
+---
+
+## §47 — ⚠️ **A QUOTING FAULT THAT *PARSES* IS WORSE THAN ONE THAT DOES NOT**
+
+*(Operator ruling, 2026-08-16, on the third §12.14 instance. **Process only.**)*
+
+> **The ruling, verbatim:** *"the two earlier heredoc failures were parse errors and therefore loud;
+> this one SUCCEEDED, reported exit 0, and deleted backticks from `STATUS.md`. Record the asymmetry
+> explicitly: a quoting fault that parses is worse than one that does not, because only the loud one
+> announces itself."*
+
+| # | Form | Failure | Signal |
+|---|---|---|---|
+| 1 | heredoc broken by an apostrophe in `A-038`'s text | parse error | ⚠️ **LOUD** — nothing ran |
+| 2 | JS template literal broken by backticks | parse error | ⚠️ **LOUD** — nothing ran |
+| 3 | `node -e "…"` **double-quoted**, backticks command-substituted | ⛔ **RAN, SUCCEEDED, exit 0** | ⛔ **SILENT** |
+
+**What instance 3 actually did:** the shell substituted every `` `token` `` before Node ever saw the
+string, so the edit landed with `` `artefact-read` ``, `` `AR-1b` ``, `` `PRE_GATE` ``, the ten-screen
+list and three screen ids **deleted**, leaving *"THE  REGISTER IS NOW MECHANICAL"* and *"is FROZEN at
+ten** ()"* in the **canonical status file**. The command printed `OK` and returned **0**.
+
+> ### ⛔ **THE LOUD FAILURES ARE THE LUCKY ONES.**
+>
+> Instances 1 and 2 cost a retry. Instance 3 cost a **silently corrupted canonical record**, and was
+> found only because the next command happened to read the line back. ▶ **The severity of a quoting
+> fault is inverse to its noise**, and §12.14's rule is therefore not a style preference: *file
+> content goes through the Write tool, never a shell string* — **including a `node -e` one, and
+> including one that reports success.**
+
+⚠️ **THIS IS THE SAME ASYMMETRY §42 RECORDED THE SAME DAY**, in a different medium: three checks
+that fired on their own compliance were loud and were fixed within the hour, while the dangerous
+direction — the same confusion **passing** — is the one nothing announces. ▶ **Two independent
+instances of one principle on one day: the failure mode worth engineering against is never the one
+that shouts.**

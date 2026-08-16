@@ -136,6 +136,14 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/students/[studentId]", { role: "management", label: "Students" }],
   /*
+   * `P2-12` -- screen `20` Register New Student, a LITERAL child of Students.
+   * ⚠️ NO RAIL CHANGE WAS NEEDED, and this row is what makes that a
+   * MEASUREMENT rather than an assumption: `Students` already dropped `exact`
+   * at `P2-9`, so this route resolves to the one item. Under the old
+   * `exact: true` it would have resolved to ZERO (`C2C-002`).
+   */
+  ["/management/students/register", { role: "management", label: "Students" }],
+  /*
    * `P2-15` -- screen `15` Lesson Statistics, a DEEP child of Classes.
    * ⚠️ `Classes` already dropped `exact` at `P2-2`, so no rail change was
    * needed here -- VERIFIED rather than assumed, because `C2C-002` has now

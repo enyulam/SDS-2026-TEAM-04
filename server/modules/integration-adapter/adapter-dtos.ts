@@ -526,6 +526,18 @@ export interface AdapterTrainerStudentsDto {
   readonly classes: readonly { readonly classModuleId: string; readonly classLabel: string }[];
 }
 
+export interface AdapterRegisterStudentInput {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly classModuleIds: readonly string[];
+}
+
+export interface AdapterRegisterStudentOutcomeDto {
+  readonly studentId: string;
+  readonly enrolments: number;
+  readonly reason: string;
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

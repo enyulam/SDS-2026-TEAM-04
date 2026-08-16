@@ -40,3 +40,19 @@ Acceptance status:
 ## Entries
 
 *(none yet)*
+
+---
+
+## `P2-12` — artefact-read record (2026-08-16)
+
+All three artefacts were opened. Every layout value below was derived from the `.html`, and every
+claim about what the frame draws or omits rests on the `.png`.
+
+```artefact-read
+screen: 20
+pack: Management - Register Student
+component: features/management/management-register-student-screen.tsx
+html-values: 15px, 12px, 13px, 12.50px, 11.50px, 22px, 16px, 999px
+screen-md-quote: Not rating-bearing.
+```
+

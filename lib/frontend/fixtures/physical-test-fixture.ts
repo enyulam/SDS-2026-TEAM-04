@@ -32,6 +32,8 @@ import {
   type TrainerMyClassesDto,
   type TrainerDashboardDto,
   type TrainerStudentsDto,
+  type RegisterStudentInput,
+  type RegisterStudentOutcomeDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1356,6 +1358,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * manufactured `last assessed` date would claim an assessment happened.
    */
   async readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-12` — screen `20`. ⛔ THE FIXTURE REFUSES, AND A WRITE IS THE CASE
+   * WHERE REFUSING MATTERS MOST: a fabricated success would tell an operator a
+   * child is registered and enrolled when no row exists anywhere.
+   */
+  async registerStudent(_input: RegisterStudentInput): Promise<UiActionResult<RegisterStudentOutcomeDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

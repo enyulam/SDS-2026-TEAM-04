@@ -534,6 +534,26 @@ export type TrainerStudentsDto = {
   readonly classes: readonly { readonly classModuleId: string; readonly classLabel: string }[];
 };
 
+
+/**
+ * `P2-12` — screen `20` Register New Student.
+ * ⛔ TWO FIELDS AND A CLASS LIST. The frame's seven other profile fields have
+ * no column and are CITED on the page, not modelled here — a DTO field with
+ * nowhere to go is how an invented column starts.
+ */
+export type RegisterStudentInput = {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly classModuleIds: readonly string[];
+};
+
+export type RegisterStudentOutcomeDto = {
+  readonly studentId: string;
+  readonly enrolments: number;
+  /** `created`. ⛔ A refusal never arrives here — it arrives as a failure. */
+  readonly reason: string;
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;
