@@ -373,9 +373,28 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
   },
   parent: {
     label: "Parent",
-    home: "/parent",
+    /*
+     * ⛔ `P2-22` — RETARGETED FROM `/parent` TO THE CANONICAL ROUTE, under an
+     * Operator ruling (2026-08-17, option 3). It read `home: "/parent"` with a
+     * rail item `href: "/parent"` / `label: "Home"`.
+     *
+     * ⚠️ THE COUPLING IS THE RULING'S REASON. Leaving the rail at `/parent`
+     * while screen `30` lives at `/parent/dashboard` would manufacture the
+     * navigation dead end `P2-21` closed one phase earlier — an item naming
+     * one surface and reaching another.
+     *
+     * ▶ `R-B1`'s shape, third and last portal root: `/parent` redirects, and
+     * the rail names the DESTINATION. A rail item pointing at a route that
+     * redirects away could never be the current one.
+     *
+     * ✅ `exact: true` IS CHECKED, NOT ASSUMED — `C2C-002` has bitten four rail
+     * items. Nothing in the ratified 36 hangs beneath `/parent/dashboard`;
+     * screens `31` and `32` are siblings at `/parent/calendar` and
+     * `/parent/reports`, and `33` is owned by Reports below.
+     */
+    home: "/parent/dashboard",
     navigation: [
-      { href: "/parent", label: "Home", path: "/parent", exact: true, icon: "dashboard" },
+      { href: "/parent/dashboard", label: "Overview", path: "/parent/dashboard", exact: true, icon: "dashboard" },
       {
         href: "/parent/reports",
         label: "Reports",

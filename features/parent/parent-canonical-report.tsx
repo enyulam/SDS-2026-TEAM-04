@@ -154,7 +154,7 @@ export function ParentCanonicalReport() {
     return (
       <StatePanel
         result={state.result}
-        homeHref="/parent"
+        homeHref="/parent/dashboard"
         homeLabel="Return to Parent workspace"
       />
     );

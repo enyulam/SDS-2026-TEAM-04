@@ -649,7 +649,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-19** | `01` Trainer Dashboard | Trainer landing at `/trainer/dashboard` | P2-17 | `GC-7` — no rating column |
 | **P2-20** | `04` Trainer Students | Trainer student list | P2-17 | `GC-7` |
 | ~~**P2-21**~~ ✅ **BUILT 2026-08-16** | `09` Trainer Reports | ⛔ **`C2C-007` FIXED**, then the frame's table | — | `GC-7`, `GC-8` — **both refused**; §56 |
-| ~~**P2-22**~~ ⏸ **BUILT AND NOT ROUTED — 2026-08-17** | `30` Parent Dashboard | Profile Details promoted, selector, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27` held at FOUR layers; ⛔ **no TA field** (§6.2 — and the FRAME agrees; the pack's PROSE NOTE did not, §7.4.1). ⏸ **ONE STOP OPEN: the `/parent` route-compatibility treatment, §57.6** |
+| ~~**P2-22**~~ ✅ **COMPLETE — 2026-08-17** | `30` Parent Dashboard | Profile Details promoted, selector, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27` held at FOUR layers; ⛔ **no TA field** (§6.2 — the FRAME agrees; the pack's PROSE NOTE did not, §7.4.1). ✅ **THE ROUTE STOP WAS RULED OPTION 3** — canonical `/parent/dashboard`, `/parent` redirects on `R-B1`, rail `Home` → `Overview`; §58 |
 | **P2-23** | `31` Parent Calendar | **Only what §6.1 lists as surviving** | P2-22 | ⛔ **`C-12` — report delivered, ruling owed** |
 | **P2-24** | `28` Term Report | ⛔ **DEFERRED by `C-11` — do not build** | — | ⚠️ **`A-044` noted and unmet, deliberately** |
 
@@ -7422,3 +7422,196 @@ installed.**
 | `RENDERED` proof | ⛔ **`NOT-RUN`** — and it **cannot** run for screen `30` until the route exists |
 
 ⚠️ **`S3-T1-r` remains the single known-red**, unchanged.
+
+---
+
+## §58 — `P2-22` CLOSED: the route ruling, and **four findings recorded by instruction**
+
+*(Operator ruling and four recording instructions, 2026-08-17.)*
+
+### 58.1 The ruling, and everything it moved
+
+> *"**OPTION 3** — canonical `/parent/dashboard`, `/parent` redirects, rail
+> retargeted with `Home` → `Overview`. Same ruling as `/management` at `P2-7`,
+> and your reasoning decides it: leaving the rail pointing at `/parent` while
+> the screen lives elsewhere manufactures the exact dead end `P2-21` just
+> closed."*
+
+**Everything that resolves against `/parent`, measured before building:**
+
+| # | Moved | From → to |
+|---|---|---|
+| 1 | `app/(portals)/parent/page.tsx` | renders `ParentDashboard` → **`redirect("/parent/dashboard")`** |
+| 2 | `app/(portals)/parent/dashboard/page.tsx` | **NEW** — renders `ParentDashboardScreen` |
+| 3 | `portal-navigation.ts` **portal home** | `home: "/parent"` → `"/parent/dashboard"` |
+| 4 | `portal-navigation.ts` **first rail item** | `href`/`path` `/parent` → `/parent/dashboard`; `label` **`Home` → `Overview`**; `exact: true` **re-checked, not assumed** |
+| 5 | three `homeHref="/parent"` call sites | `parent-canonical-report.tsx` · `parent-dashboard.tsx` · `parent-reports-list.tsx` → `/parent/dashboard` |
+| 6 | nav expectation table | `["/parent", { label: "Home" }]` → `["/parent/dashboard", { label: "Overview" }]` |
+| 7 | nav **redirect-only** register | `/parent → /parent/dashboard` added; **`N-0b` reads the page source** and proves the redirect is real, so the exemption is measured |
+| 8 | route-census ratchet (`P21a-14`) | **34 → 35**, attributed |
+
+**Checked and deliberately NOT moved:**
+
+- **`proxy.ts`** — its parent entries are **portal-prefix matchers**
+  (`/parent`, `/parent/:path*`), so the new route was inside the authenticated
+  boundary before it existed. Checked, not assumed.
+- **`portal-destinations.ts`** — a parent sign-in already lands on
+  `/parent/reports` (screen `32`, `C2C-012`), never on this route.
+- **`features/parent/parent-dashboard.tsx`** — retained; see §58.2.
+
+⚠️ **`/parent` IS THE THIRD AND LAST PORTAL ROOT TO TAKE `R-B1`'s SHAPE**, after
+`/trainer → /trainer/schedule` and `/management → /management/dashboard`. The
+pattern is now closed: there is no fourth portal.
+
+### 58.2 ⚠️ THE RULING ORPHANED RULED COPY — recorded, not resolved
+
+`/parent` previously rendered `features/parent/parent-dashboard.tsx`, the R-10
+availability card. **It is retained and must not be deleted** — two live suites
+assert over it: `prove:hero-13` on its **Operator-ruled three-state empty copy**
+(`linked_unavailable` naming management as the actor that ends the wait,
+`none_yet` stating the real condition, and the fail-closed rule that keeps
+`none_yet` unreachable from a rejected read) and `prove:p1-1b` on its `Q-27`
+rating-free-ness.
+
+▶ **No route renders it now, so that ruled copy is unreachable.** That is a
+**consequence** of the route ruling, not a decision taken inside it. `P22-9c`
+pins the situation — component present, named by neither page — so it reds if
+anyone deletes it or quietly re-routes it.
+
+⛔ **Where the copy belongs is a ruling, not an inference.** Screen `32` Parent
+Reports is the natural candidate, since the state it describes is *"do you have
+reports yet"* and `32` is the reports surface a parent already lands on. **Not
+moved, not invented.**
+
+### 58.3 ⛔ A DEFECT THAT DROPS EVIDENCE LEAVES A **FALSE ENTITY**, NOT A GAP
+
+*(Operator instruction, 2026-08-17, recorded in their own framing because the
+framing is the finding: **"§12.16 instance 4 did not cost evidence — it
+manufactured a phantom issue that I carried as a separate unknown for a whole
+phase, when the leg name alone would have identified `D-10`."**)*
+
+> ### ⛔ **A GAP IS INERT. A FALSE ENTITY IS REASONED ABOUT.**
+>
+> An empty red does not read as *"evidence missing"* — it reads as
+> *"an unexplained failure"*, which is a **thing**, and a thing gets a name, a
+> row in the open-items register, a hypothesis, and a place in the next
+> planning decision. ▶ **The Operator carried `prove:serving-discipline` as a
+> separate unknown flake for an entire phase.** It never existed.
+
+⚠️ **THE COST IS NOT PROPORTIONAL TO THE EVIDENCE LOST.** One line of dropped
+output produced: a new open-item row, a standing capture instruction, a
+hypothesis about what makes that suite special, and a phase's worth of the
+Operator's attention — all about an entity that was `D-10` wearing no label.
+
+▶ **The standing consequence, and it is stronger than §12.16's own fix:** when a
+gate reports a failure it cannot explain, the honest output is
+**"NO EVIDENCE CAPTURED"**, stated as such. **Silence is read as a fact.**
+
+### 58.4 `D-10` — merged, open, unchased, and the surface is named
+
+Correct on all three: **merged not closed**, **no remedy**, **not being chased
+now**. Two additions the Operator instructed:
+
+1. ⛔ **It is the ONLY leg that has ever failed in `prove:serving-discipline`.**
+   Three occurrences now (`P2-7`-era, `P2-21`, and twice during `P2-22`), and
+   every one is `D-10`.
+2. ⛔ **It concerns a SURVIVING CHILD PROCESS AFTER TEARDOWN, and when it is
+   eventually chased THAT IS THE WHOLE SURFACE.** The suite serves a real
+   Next.js child on `127.0.0.1:3419` and samples its process tree; the failure
+   is always the teardown assertion, with the port measurably free and a
+   `node.exe` outliving it. ▶ **Anyone picking this up starts at process
+   lifetime, not at the port and not at the server.**
+
+### 58.5 ⚠️ `sessionsForChild` — the wrong child's data behind the right child's name
+
+*(Operator instruction: record it **with the `Q-27` entries**, because it is that
+shape even though it is not a rating.)*
+
+The projection's first draft carried a flat `sessions` array plus
+`sessionsForChild(data, studentId)` — **which ignored its own `studentId` and
+returned every session**. On a screen whose entire subject is *which of my
+children am I looking at*, that renders **one child's timetable under another
+child's name**.
+
+> ### ⛔ **THE `Q-27` FAMILY IS NOT "RATINGS ON A PARENT SURFACE". IT IS *THE WRONG CHILD'S DATA BEHIND THE RIGHT CHILD'S NAME*.**
+>
+> A rating leak is one instance: assessment substance reaching a reader who may
+> not have it. **A cross-child leak is the same failure with a different
+> payload** — and on a parent surface it is arguably worse, because the reader
+> has no way to detect it. A parent shown another family's schedule under their
+> own child's name sees nothing wrong.
+
+⚠️ **AND IT WOULD HAVE PASSED EVERY OTHER GATE.** `tsc` types it correctly — the
+signature takes a `studentId`. The DTO carries no rating, so every `Q-27` leg in
+this suite stays green. The page renders. ▶ **The signature read as though it
+filtered**, which is why it survived writing. The fix is structural rather than
+careful: **sessions are nested per child**, so there is no array to hand the
+wrong child and no filter to get wrong.
+
+### 58.6 ⚠️ FOUR FALSE REDS IN ONE SUITE IS A **RATE**, AND IT IS BEING WATCHED
+
+*(Operator: **"§12.18 says loud is not automatically safe, and four in one suite
+is a rate, not an accident. If the next phase does it again, tell me and I will
+treat it as a pattern rather than noise."**)*
+
+Six legs of `prove:portal-p2-22` went red on correct code; **four were the
+false-red direction**:
+
+| Leg | The over-read |
+|---|---|
+| `P22-3a` | `stripComments` strips **JavaScript** comments; the subject was **SQL** |
+| `P22-7a` | anchored on an exact class attribute; one block carried `mt-4 ` first |
+| `P22-7d` | `/progress/i` matched the frame's own page title, *"Alicia's Progress"* |
+| `P22-10a` | fired on the comment **recording** a removed helper |
+
+⛔ **THREE OF THE FOUR SHARE ONE ROOT: THE DETECTOR WAS WRITTEN AGAINST THE
+CONCEPT AND RUN AGAINST THE TEXT.** *"Names a rating"*, *"has a progress bar"*,
+*"still uses the helper"* — each is a claim about **code**, and each was tested
+against a string that also contains **prose, titles and the record of the
+prohibition itself**. ▶ The repairs are all the same move: **bound the subject
+to code before scanning it**, and name **shapes** rather than words.
+
+**Recorded as a rate under watch. If `P2-23` produces false reds again, it is
+reported as a pattern rather than as this phase's noise.**
+
+### 58.7 ✅ §7.4.1 HAS PAID FOR ITSELF MORE THAN ANY OTHER RULE
+
+*(Operator: **"the fifth or sixth time."**)* This phase's instance: the pack's
+prose note states Profile Details shows *"assigned Trainer, **Trainer Assistant
+(TA)**, and enrolment date"*; the `.png` draws no TA row and the `.html` holds
+**`Assist` ×0**. ▶ A note-derived build would have added a field **`A-014`
+prohibits** — and would have reported a clean match.
+
+### 58.8 ⚠️ NINETEEN §12.14 INSTANCES — and one was **one redirect from silent corruption**
+
+*(Operator: **"luck is not a control, and that one was one redirect away from
+silent corruption of the file the type gate depends on."**)*
+
+The eighteenth instance — a backtick inside a `node -e` string — threw a
+`SyntaxError` and **short-circuited an `&&` chain whose next command was
+`npx supabase gen types … > server/db/database.types.ts`**.
+
+⛔ **`>` TRUNCATES BEFORE THE COMMAND RUNS.** Had the failure landed one link
+later, or had the chain used `;` instead of `&&`, the generated-types file would
+have been **emptied by a redirect whose command never executed**.
+
+> ### ⛔ **`ADR-8` MAKES THAT FILE AUTHORITATIVE FOR APPLICATION DATA TYPES, AND `prove:types-current` COMPARES IT AGAINST THE LIVE SCHEMA.** A truncated file fails that gate **loudly** — but only *after* `tsc` has already produced a wall of errors that read as application defects. ▶ **The gate would have caught it; the diagnosis would have gone the wrong way first.**
+
+**The control that replaced the luck, applied immediately afterwards:**
+generation went **to a scratch file**, was **verified to contain the new
+function**, and only **then** was installed over the tracked file. ⛔ **Never
+redirect a generator's stdout directly over a tracked artefact.**
+
+### 58.9 Gates
+
+| Gate | Verdict |
+|---|---|
+| `tsc --noEmit` | ✅ **0** |
+| `next build` | ✅ **0** |
+| `prove:portal-p2-22` | ✅ **34 PASS · 0 FAIL** |
+| `portal-navigation-active-state` | ✅ **6 PASS**, `N-0b` now proving **three** redirect-only roots |
+| **`prove:all`** | ✅ **66 PASS · 1 known-red · 0 NOT-RUN · exit 0** (194s) |
+| VISUAL / `RENDERED` | ⛔ **`NOT-RUN`** — the Operator walks `20`, `21`, `22`, `24`, `30` and `31` in one pass at the end of the batch |
+
+⚠️ **`prove:serving-discipline` went red TWICE during this phase and green on the
+final sweep** — `D-10` each time. Unchanged, unchased, recorded.

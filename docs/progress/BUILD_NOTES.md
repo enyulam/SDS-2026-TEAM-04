@@ -10993,3 +10993,89 @@ before writing. Only the Trainer row was unreachable (`class_session_assignments
 **Next: the `/parent` route-compatibility treatment awaits an Operator ruling
 (plan §57.6, three options, recommendation option 3), and `P2-23` (`31` Parent
 Calendar) owes the `C-12` ruling at that boundary.**
+
+---
+
+## 2026-08-17 — `P2-22` closed: the `/parent` route ruling (option 3)
+
+**Branch** `develop` · **HEAD in** `b907f2f` · **HEAD out** *(this commit)* ·
+ledger **48/48**, unchanged (no schema).
+
+### The ruling
+
+Operator, 2026-08-17: **option 3** — canonical `/parent/dashboard`, `/parent`
+redirects, rail retargeted `Home` → `Overview`. Same treatment `/management`
+received at `P2-7` on the ratified `R-B1` precedent. ▶ `/parent` is the **third
+and last** portal root to take that shape; the pattern is now closed.
+
+### What moved — measured before building
+
+1. `app/(portals)/parent/page.tsx` → `redirect("/parent/dashboard")`
+2. `app/(portals)/parent/dashboard/page.tsx` — **new**
+3. `portal-navigation.ts` `home: "/parent"` → `"/parent/dashboard"`
+4. the first rail item — `href`/`path` retargeted, `label` `Home` → `Overview`,
+   `exact: true` re-checked rather than assumed
+5. three `homeHref="/parent"` call sites
+6. the nav expectation table
+7. the nav **redirect-only** register (`N-0b` proves the redirect at source)
+8. the route-census ratchet, **34 → 35**, attributed
+
+**Checked and unchanged:** `proxy.ts` (portal-prefix matchers already cover
+`/parent/:path*`) and `portal-destinations.ts` (a parent sign-in lands on
+`/parent/reports`, `C2C-012`).
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:portal-p2-22` **34 PASS** ·
+`portal-navigation-active-state` **6 PASS** ·
+**`prove:all` 66 PASS · 1 known-red · 0 NOT-RUN · exit 0** (194s).
+VISUAL and `RENDERED` remain **`NOT-RUN`**.
+
+### Findings
+
+1. **The ruling orphaned Operator-ruled copy, and it is recorded rather than
+   resolved.** `/parent` used to render `parent-dashboard.tsx`, the R-10
+   availability card whose three-state empty copy `prove:hero-13` asserts and
+   whose `Q-27` rating-free-ness `prove:p1-1b` asserts. The component is
+   **retained** — deleting it breaks both suites — and is now rendered by **no
+   route**, so that copy is unreachable. `P22-9c` pins the situation. Where the
+   copy belongs (screen `32` is the natural candidate) is a ruling, not an
+   inference.
+
+2. **A defect that drops evidence leaves a FALSE ENTITY, not a gap** — the
+   Operator's framing, recorded because the framing is the finding. An empty red
+   reads as *"an unexplained failure"*, which is a thing: it got a name, a
+   register row, a capture instruction and a phase of attention. It was `D-10`
+   wearing no label. ▶ When a gate cannot explain a failure, the honest output is
+   **"NO EVIDENCE CAPTURED"**; silence is read as a fact. Plan §58.3.
+
+3. **`D-10` — the surface is named for whoever eventually chases it.** It is the
+   **only leg that has ever failed** in `prove:serving-discipline` (three
+   occurrences, two of them during this phase), and it concerns a **surviving
+   child process after teardown**. Start at process lifetime, not the port and
+   not the server. Still merged, still open, still no remedy, still not chased.
+
+4. **`sessionsForChild` is the `Q-27` family with a different payload.** Recorded
+   with the `Q-27` entries by instruction: *the wrong child's data behind the
+   right child's name*. It would have passed `tsc` (the signature takes a
+   `studentId`), every `Q-27` leg (no rating in the DTO) and the render. A
+   parent shown another family's schedule under their own child's name **sees
+   nothing wrong**. Fixed structurally by nesting sessions per child.
+
+5. **Four false reds in one suite is a rate under watch**, not this phase's
+   noise. Three of the four share one root: **the detector was written against
+   the concept and run against the text** — prose, page titles and the record of
+   the prohibition itself all sat in the subject. If `P2-23` does it again it is
+   reported as a pattern.
+
+6. **Nineteen §12.14 instances, and one was one redirect from silent
+   corruption.** The eighteenth short-circuited an `&&` whose next command was
+   `npx supabase gen types … > server/db/database.types.ts`. `>` truncates
+   **before** the command runs, so one link later — or a `;` instead of `&&` —
+   would have emptied the file `ADR-8` calls authoritative. **Luck is not a
+   control.** The replacement control: generate to scratch, verify the expected
+   symbol is present, then install. Never redirect a generator's stdout directly
+   over a tracked artefact.
+
+**Next: `P2-23` (`31` Parent Calendar) under the batch, with the `C-12` reading
+brought at that boundary as instructed.**

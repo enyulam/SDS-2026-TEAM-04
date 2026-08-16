@@ -130,6 +130,12 @@ const EXPECTED_BY_ROUTE = new Map([
   // onto `/trainer/schedule` under `R-B1`. ⚠️ `redirectsTo` is not a free pass:
   // `N-0b` READS the page source and fails if it does not really redirect.
   ["/management", { redirectsTo: "/management/dashboard" }],
+  /*
+   * P2-22, Operator ruling 2026-08-17 (option 3): the THIRD and LAST portal
+   * root to take R-B1s shape. redirectsTo is not a free pass here either --
+   * N-0b reads the page source and requires the redirect to be real.
+   */
+  ["/parent", { redirectsTo: "/parent/dashboard" }],
   ["/management/dashboard", { role: "management", label: "Dashboard" }],
   /*
    * P2-8 -- screen `17` Management Students. The rail item arrives WITH its
@@ -285,7 +291,13 @@ const EXPECTED_BY_ROUTE = new Map([
   ["/management/reports/[reportId]/review", { role: "management", label: "Reports" }],
   ["/management/reports/[reportId]/edit", { role: "management", label: "Reports" }],
   // Parent.
-  ["/parent", { role: "parent", label: "Home" }],
+  /*
+   * P2-22, Operator ruling option 3: /parent is now a COMPATIBILITY REDIRECT
+   * onto the canonical /parent/dashboard, and the rail names the destination.
+   * The third and last portal root to take R-B1's shape, after /trainer and
+   * /management.
+   */
+  ["/parent/dashboard", { role: "parent", label: "Overview" }],
   ["/parent/reports", { role: "parent", label: "Reports" }],
   [
     "/parent/students/[studentId]/sessions/[sessionId]/report",

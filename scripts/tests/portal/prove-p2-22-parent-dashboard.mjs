@@ -13,9 +13,12 @@
 //    the rating tables at the GRANT layer), the FUNCTION's result type, the
 //    DTO, and the rendered page.
 //
-// ⛔ THE ROUTE IS NOT BUILT AND THAT IS A STATED STOP, NOT AN OMISSION --
-//    `P22-9` asserts its ABSENCE so this suite cannot go quietly green on a
-//    screen nobody can reach. See the phase report and plan §57.
+// ⛔ THE ROUTE STOP WAS RULED (Operator, 2026-08-17, option 3): canonical
+//    `/parent/dashboard`, `/parent` a compatibility redirect on the ratified
+//    `R-B1` precedent, rail retargeted `Home` -> `Overview`. `P22-9` asserted
+//    the route's ABSENCE while the stop was open and now asserts the RULED
+//    SHAPE -- ▶ the leg was written to go red the moment the route shipped,
+//    and it did, which is what brought it back to be rewritten.
 //
 // ⛔ Exit code is the only verdict.
 //
@@ -347,15 +350,46 @@ check(
 //    omission nobody noticed. This leg goes RED the moment the route ships,
 //    which is the reminder to come back and remove it.
 // ---------------------------------------------------------------------
-const routeShipped = existsSync(join(ROOT, "app", "(portals)", "parent", "dashboard", "page.tsx"));
-const nav = read("components/layout/portal-navigation.ts");
+const routePage = read("app/(portals)/parent/dashboard/page.tsx");
+const entryPage = read("app/(portals)/parent/page.tsx");
+const nav = stripComments(read("components/layout/portal-navigation.ts"));
+const parentRail = nav.slice(nav.indexOf("parent: {"), nav.indexOf("parent: {") + 420);
 check(
-  routeShipped === false && !/\/parent\/dashboard/.test(stripComments(nav)),
-  `P22-9 ⛔ THE CANONICAL ROUTE /parent/dashboard IS DELIBERATELY NOT BUILT (page.tsx present: ${routeShipped}) and the rail does not name it — ▶ shipping it requires converting /parent into a compatibility redirect, which \`CLAUDE.md\` §12 names a stop-and-ask ("execute a route-compatibility treatment ... without its own authorization"). The identical question was STATED AND STOPPED at P2-7 for /management and ruled option 2. ⚠️ THIS LEG REDS THE MOMENT THE ROUTE SHIPS, which is the reminder to delete it`,
+  /<ParentDashboardScreen \/>/.test(routePage),
+  "P22-9 ✅ THE CANONICAL ROUTE /parent/dashboard RENDERS SCREEN 30 — the stop stated at plan §57.6 was RULED option 3 on 2026-08-17",
 );
 check(
-  existsSync(join(ROOT, "app", "(portals)", "parent", "page.tsx")),
-  "P22-9a ⚠️ …and /parent is UNTOUCHED — no treatment was executed, not even a partial one. Every existing parent entry point still works",
+  /redirect\("\/parent\/dashboard"\)/.test(entryPage) && !/<Parent/.test(entryPage),
+  "P22-9a ⛔ …and /parent is a COMPATIBILITY REDIRECT that renders nothing — R-B1's shape, the THIRD and LAST portal root after /trainer and /management. The file is deliberately NOT deleted: /parent is a destination delivered surfaces already link to",
+);
+check(
+  /home: "\/parent\/dashboard"/.test(parentRail) &&
+    /href: "\/parent\/dashboard", label: "Overview"/.test(parentRail) &&
+    !/href: "\/parent",/.test(parentRail),
+  "P22-9b ⛔ AND THE RAIL MOVED WITH IT, WHICH IS THE RULING'S OWN REASON — portal home and the first item both name the DESTINATION. ▶ Leaving the rail at /parent while the screen lives elsewhere would manufacture EXACTLY the navigation dead end P2-21 closed one phase earlier: an item naming one surface and reaching another",
+);
+/*
+ * ⚠️ THE RULING ORPHANED RULED COPY, AND THIS LEG EXISTS SO THAT FACT CANNOT
+ * GO QUIET.
+ *
+ * `/parent` used to render `features/parent/parent-dashboard.tsx`, the R-10
+ * availability card. It is RETAINED — `prove:hero-13` asserts its
+ * Operator-ruled three-state empty copy and `prove:p1-1b` asserts its `Q-27`
+ * rating-free-ness — but **no route renders it now**, so that ruled copy is
+ * unreachable.
+ *
+ * ▶ That is a CONSEQUENCE of the route ruling, not a decision taken inside it.
+ * Where the copy belongs (screen `32`, the reports surface, is the natural
+ * candidate) is a ruling, not an inference — so this leg pins the situation
+ * rather than resolving it, and reds if anyone deletes the component or
+ * quietly re-routes it.
+ */
+const orphan = read("features/parent/parent-dashboard.tsx");
+check(
+  /export function ParentDashboard\(/.test(orphan) &&
+    !/ParentDashboard\b/.test(entryPage) &&
+    !/ParentDashboard\b/.test(routePage),
+  "P22-9c ⚠️ RECORDED, NOT RESOLVED: parent-dashboard.tsx is RETAINED (prove:hero-13 and prove:p1-1b both assert over it) and is now rendered by NO route, so its Operator-ruled availability copy is unreachable. ▶ A consequence of the route ruling; where that copy belongs is a ruling, not an inference",
 );
 
 // ---------------------------------------------------------------------
