@@ -6428,3 +6428,162 @@ cannot be exercised is not a recovery path.**
   Had any of the eight been *partially* applied, repair would freeze that gap permanently and remove
   the only signal. ▶ **That is why diagnosis came first, and it is the reason to keep that order every
   time.**
+
+## §12.17 — ⛔ **A CONTROL DERIVED FROM LIVE STATE IS POLLUTED BY THE VERY FAULT IT DETECTS**
+
+*(Operator ruling, 2026-08-16: **"it generalises well past this gate, and every constructed-divergence
+leg in this project is exposed to it."** Placed in §12 for that reason.)*
+
+> ### **A SENTINEL THAT CAN OCCUR IN REALITY IS NOT SYNTHETIC.**
+
+**What happened, measured.** `prove:ledger-current` asserts divergence in both directions and carries
+a control per direction. The first draft built both from the **live** sets —
+`divergence(ledger.slice(1), files)` and `divergence([...ledger, "29990101000000"], files)`. ▶ Planting
+a **real** gap as `29990101000000_planted_gap.sql` made **both controls go red alongside the real
+finding**: the gap control saw two gaps instead of one, and the orphan sentinel **collided with the
+plant**, so the control that was supposed to prove the detector could see an orphan proved nothing.
+
+**Two distinct faults, and both generalise:**
+
+1. ⛔ **DERIVATION.** A control built by mutating live state inherits every live fault. Its verdict
+   then means *"the detector works **and** reality is clean"* — two claims in one boolean, and the
+   reader cannot tell which half failed. ▶ **A control must be able to pass while the measurement
+   fails**; that is the whole point of having both.
+2. ⛔ **COLLISION.** A sentinel drawn from the same value space as real data is not a sentinel. A
+   future date, a plausible id, a "clearly fake" name — any of them can arrive for real.
+
+**The repair:** fixed literals (`00000000000001`, `00000000000002`, `00000000000009`) that cannot
+collide with any real migration version, in sets that are constructed rather than sampled.
+
+### ⚠️ WHY THE PLANTING INSTRUCTION IS THE ARGUMENT, NOT A FORMALITY
+
+The Operator required the gate be proved *"by planting a gap and by planting an orphan"*. ▶ **A
+synthetic-only proof would have passed** — the controls were green on a clean tree and stayed green
+right up to the moment a real fault existed. **The defect was only observable while the thing being
+detected was actually present**, which is precisely the state a synthetic control never enters.
+
+⛔ **THIS IS THE STANDING TEST FOR EVERY CONSTRUCTED-DIVERGENCE LEG IN THIS PROJECT** — `RAa-2`,
+`PC16-8f`, `PC16-8g`, `PT19-3c`, `PT20-3c`, `PE-3e`, `AR-1b`'s omission proofs and the `PDSa-SHAPEc`
+family all construct a case to prove a check can fire. **Ask of each: does its construction start
+from live state, and could its sentinel occur for real?** §43.1 already recorded that a construction
+can be **vacuous**; this records that it can also be **contaminated**, which is the harder one to see
+because the leg still moves.
+---
+
+## §53 — ⛔ THE `.rpc()` ARGUMENT GUARD, AND WHY THE TYPE SYSTEM STOPPED COVERING IT
+
+*(Built 2026-08-16 under an explicit Operator instruction. **Process only — no product rule changes.**)*
+
+### 53.1 The instruction, and the cost it exists to pay for
+
+> *"ADD A GUARD FOR THE CLASS, since the type system no longer covers it: every
+> `.rpc()` call site's argument set checked against the live function signature,
+> the way `prove:projection-columns` checks columns against the live catalogue.
+> Same reasoning — the generated types are not the authority, the database is."*
+
+▶ **THE OPERATOR NAMED THE HAZARD AS THEIR OWN RULING'S COST, AND THAT FRAMING IS
+THE RECORD:** *"Dropping `Functions` from `AppDatabase` is what lets a stale
+three-arg `.rpc()` compile. I accepted that trade to remove twelve false errors,
+and this is its cost surfacing exactly where you say — invisible to compile,
+visible only on the page."*
+
+⛔ **THE FAILURE SHAPE, EXACTLY.** Changing a function's parameter list is a
+`DROP` + `CREATE`, so the **old signature ceases to exist**. A caller still
+passing the old argument set:
+
+| Layer | What it sees |
+|---|---|
+| `tsc` | ✅ clean — `AppDatabase` leaves `Functions` permissive **by design** |
+| the SQL suite | ✅ clean — it calls the function directly, not through the caller |
+| `prove:projection-columns` | ✅ clean — it checks **columns**, and this is an **argument** |
+| the page | ⛔ **empty state** |
+
+The runtime error is `PGRST202 Could not find the function … in the schema
+cache`, which a projection converts to `{ok:false}` and a screen converts to an
+empty state. ▶ **This is screen `23`'s wrong-column defect one layer over:
+silent, green in every gate, visible only on the page.**
+
+### 53.2 What it measures
+
+`scripts/tests/portal/rpc-argument-rule.mjs` + `prove:rpc-arguments`. It reads
+each call site's argument set from the **source** and compares it against
+`pg_get_function_arguments` from the **live catalogue** — never
+`database.types.ts`, which has been stale once and no longer types `Functions` at
+all.
+
+Two exclusions, both load-bearing:
+
+- **`OUT` parameters** — a caller never passes them. Counting them would red
+  every correct site.
+- **`DEFAULT` parameters** — omitting one is legal, so they are **accepted** but
+  not **required**. `report_save_edit.p_reaffirm_correction_request_id` and all
+  three of `audit_verify_chain`'s are exactly this.
+
+Measured at build: **73 live functions · 58 parsed call sites · 0 mismatches ·
+1 site named as unchecked.**
+
+### 53.3 ⚠️ THE CONTROLS CAUGHT TWO REAL DEFECTS IN THE GATE ITSELF, IN OPPOSITE DIRECTIONS
+
+**Neither was hypothetical, and neither would have been visible from a green
+run.** They are recorded because the pair is the point: a parser can fail by
+reading **too little** or **too much**, and only one of those is loud.
+
+| # | Defect | Direction | Caught by |
+|---|---|---|---|
+| 1 | Keys had to start their own line, so a **single-line multi-key** call lost every key after the first | **UNDER-read** → false `MISSING ARGUMENT` | `PR-3`, as a red |
+| 2 | A **ternary's colon** was read as a key separator — `hasId ? input.expectedObservationId : null` yielded `expectedObservationId` and `null` as arguments | **OVER-read** → false `UNKNOWN ARGUMENT` | `PR-4`, on real source |
+
+⛔ **DEFECT 2 IS THE MORE INSTRUCTIVE.** It fired on
+`assessment_save_complete_and_open_report` — a call site that is **entirely
+correct** — and reported three arguments that do not exist. ▶ **A false red on
+correct code is how a gate stops being read** (§12.13), so the over-read is not
+the safe direction merely because it is loud. Both were repaired by recognising a
+key **by POSITION** — the start of the object, or immediately after a depth-1
+comma — **never by its colon**.
+
+⚠️ **AND THE FIX ITSELF SHIPPED A DEAD BRANCH FOR ONE ITERATION.** The
+computed-key detector was tested **after** the depth increment, where `[` had
+already been consumed as a depth change, so the branch was unreachable. ▶ **A
+dead detector reports no faults, which is indistinguishable from finding none** —
+§43.1's family, in miniature, inside the gate written to prevent it.
+
+### 53.4 The controls, and why they are fixed literals
+
+`PR-2a` stale (shorter) call site · `PR-2b` removed/renamed parameter · `PR-2c`
+vanished function · `PR-3` correct set and defaulted set both silent · `PR-3b`
+the scanner's own behaviour on single-line, nested and spread forms.
+
+⛔ **`CTRL_SIGS` IS A FIXED SYNTHETIC MAP, NOT A SLICE OF THE LIVE ONE** —
+**§12.17**, recorded one pass earlier from the ledger gate, where controls derived
+from live state went red alongside the very finding they existed to detect. The
+first ledger draft is the precedent; this gate was built with it already in hand.
+
+### 53.5 ⚠️ STATED LIMITS — and the unchecked site is NAMED, never counted
+
+- **`PR-5`** — a site building its argument object dynamically (spread, computed
+  or quoted key) is **not statically knowable** and is reported as unchecked.
+  **One exists**, and it is **named in the output, not folded into a number**:
+  `server/modules/report-workflow/core.ts: report_save_edit()`, whose conditional
+  spread supplies the `DEFAULT` parameter only when present. ▶ **An unchecked
+  site that hides inside a count is an omission the reader cannot see.**
+- **`PR-6`** — this checks argument **NAMES**, not **TYPES** or **VALUES**. A
+  caller passing a `text` where the function takes `uuid` is invisible here and
+  surfaces as a runtime cast error.
+
+### 53.6 Where it sits among the standing gates
+
+`tsc` · `prove:projection-columns` · `prove:rpc-arguments` · `prove:types-current`
+· `prove:ledger-current` cover **five different halves** and **none subsumes
+another**. ⛔ **Do not retire one on the strength of another being green.**
+
+| Gate | Catches | ⛔ Provably cannot catch |
+|---|---|---|
+| `tsc` | wrong table; wrong column in a **filter** | a wrong column in `.select()` alone; any `.rpc()` argument |
+| `prove:projection-columns` | any unknown column in a select **or** a filter | anything about a function's arguments |
+| **`prove:rpc-arguments`** | **a stale, renamed or vanished `.rpc()` argument set** | **argument TYPES; a dynamically-built argument object** |
+| `prove:types-current` | a stale generated `database.types.ts` | whether the code USES it correctly |
+| `prove:ledger-current` | migration history divergence | migration CONTENT (`PL-6`) |
+
+**There is deliberately no aggregate runner.** Each is invoked by name, as its
+siblings are; inventing an aggregate here would add a construct rather than
+repair one.
