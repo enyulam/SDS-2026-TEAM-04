@@ -199,6 +199,11 @@ const EXPECTED_BY_ROUTE = new Map([
    * as corrected rather than a gate discovered a phase late.
    */
   ["/trainer/my-classes", { role: "trainer", label: "My Classes" }],
+  // ⛔ Screen `03` (`P2-18`). It resolves to `My Classes` BECAUSE that item is
+  // non-exact — the `owns`-prefix behaviour `N-4` discriminates. A new rail
+  // item for a sub-page of My Classes would be a second treatment for one
+  // place in the hierarchy.
+  ["/trainer/my-classes/lesson-plan", { role: "trainer", label: "My Classes" }],
   /*
    * `P2-19` -- screen `01` Trainer Dashboard, and a NEW trainer rail item, the
    * same shape as `My Classes` one phase earlier: the rail carried no

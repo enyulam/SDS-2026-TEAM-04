@@ -33,6 +33,7 @@ import {
   type TrainerDashboardDto,
   type TrainerStudentsDto,
   type ParentDashboardDto,
+  type TrainerLessonPlanDto,
   type TrainerReportsDto,
   type RegisterStudentInput,
   type CreateParentInput,
@@ -1388,6 +1389,19 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * PERSONAL RECORD about a named child, and an honest `unavailable` is
    * strictly better than a plausible one.
    */
+  /**
+   * `P2-18` — screen `03`. ⛔ THE FIXTURE REFUSES. A manufactured lesson plan
+   * would put invented lesson titles against invented dates on the surface a
+   * trainer uses to prepare — and, worse, would make the two panels this phase
+   * REPORTS AS BLOCKED look built.
+   */
+  async readTrainerLessonPlan(
+    _classModuleId: string | null,
+  ): Promise<UiActionResult<TrainerLessonPlanDto | null>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
   async readParentDashboard(): Promise<UiActionResult<ParentDashboardDto>> {
     await delay(140);
     return { outcome: "unavailable" };

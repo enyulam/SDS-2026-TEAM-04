@@ -92,7 +92,10 @@ export const UNMEASURED = [
   // values read from the `.html` during that phase. ⚠️ It is the first screen
   // to leave BOTH this list and `PRE_GATE` in one phase, which is what the
   // grandfather header's "only shrinks" clause anticipated.
-  "02", "03", "05", "06", "07", "08", "10",
+  // ⛔ `03` LEFT THIS LIST AT `P2-18` — BUILT under the rule, its measured
+  // values read from the `.html` DURING that phase and recorded in the
+  // component header.
+  "02", "05", "06", "07", "08", "10",
   // ⛔ `17` LEFT THIS LIST AT `P2-8` — by being BUILT UNDER THE RULE, which is
   // the only exit this list has. It was never annotated out.
   // ⛔ `21` LEFT THIS LIST AT `P2-13`, built under the rule.
@@ -105,7 +108,7 @@ export const UNMEASURED = [
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["01", "04", "09", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27", "30", "31"];
+export const MEASURED = ["01", "03", "04", "09", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27", "30", "31"];
 
 /*
  * =====================================================================

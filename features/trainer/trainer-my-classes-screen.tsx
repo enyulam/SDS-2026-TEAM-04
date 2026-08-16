@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { PageHeading } from "@/components/ui/page-heading";
@@ -30,13 +31,19 @@ import type { TrainerMyClassesDto, TrainerClassCardDto } from "@/lib/frontend/co
  *   vertical padding, white `12.50px/600`.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * ⛔ THE `Lesson plan` BUTTON IS DISABLED-WITH-A-REASON, NOT ABSENT
+ * ~~⛔ THE `Lesson plan` BUTTON IS DISABLED-WITH-A-REASON, NOT ABSENT~~
+ * ✅ **ENABLED AT `P2-18` — THE REASON LAPSED WHEN THE DESTINATION SHIPPED**
  * ═══════════════════════════════════════════════════════════════════════════
  * ⚠️ **It is NOT `G-3`'s prohibited "View lesson plan".** Its destination —
- * **screen `03` Trainer Lesson Plan** — is one of the ratified 36 and lands at
- * **`P2-18`**. ▶ That makes it screen `18`'s `Edit` case rather than screen
- * `23`'s: **a destination that exists but is not built yet.** Absent would say
- * *"not a thing"*; disabled says *"not yet"*, and only one of those is true.
+ * **screen `03` Trainer Lesson Plan** — is one of the ratified 36 and landed at
+ * **`P2-18`**. ▶ That made it screen `18`'s `Edit` case rather than screen
+ * `23`'s: **a destination that exists but is not built yet.** Absent would have
+ * said *"not a thing"*; disabled said *"not yet"*, and only one was true.
+ *
+ * ▶ **`P2-18` built it, so the control now opens** at
+ * `/trainer/my-classes/lesson-plan?module=<id>`. **The pattern discharged
+ * exactly as designed** — the affordance was never removed, so nothing had to
+ * be re-invented, only unlocked.
  *
  * ⛔ **NO `Assist.` / TA** (`A-014`/`G-7`) — and the frame draws none here
  * either: measured, the `.html` contains `Assist` **0** times.
@@ -186,22 +193,26 @@ function ClassCard({ card }: { readonly card: TrainerClassCardDto }) {
       </div>
 
       {/*
-        ⛔ DISABLED WITH A REASON, NOT ABSENT — screen `03` Trainer Lesson Plan
-        is one of the ratified 36 and arrives at `P2-18`. Absent would say
-        "not a thing"; only "not yet" is true.
+        ✅ ENABLED AT `P2-18` — the destination now exists.
+
+        ⚠️ `P2-17` shipped this DISABLED WITH A REASON rather than absent,
+        because screen `03` was one of the ratified 36 and merely unbuilt:
+        *"absent would say 'not a thing'; only 'not yet' is true."* ▶ `P2-18`
+        built it, so the reason has lapsed and the control opens. **That is the
+        disabled-with-a-reason pattern discharging exactly as designed** — the
+        affordance was never removed, so nothing had to be re-invented for it.
+
+        ⛔ It is STILL NOT `G-3`'s prohibited "View lesson plan". That control is
+        the roster's, beside the governed carried-over focus; this one is the
+        route to a ratified screen and carries no focus content at all.
       */}
-      <button
-        type="button"
-        disabled
-        title="Lesson plans open with the Trainer Lesson Plan screen, which is not built yet."
-        className="mt-auto inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-[10px] bg-neutral-soft py-2.5 text-[12.5px] font-semibold text-neutral-on"
+      <Link
+        href={`/trainer/my-classes/lesson-plan?module=${encodeURIComponent(card.classModuleId)}`}
+        className="mt-auto inline-flex min-h-11 w-full items-center justify-center rounded-[10px] bg-ink-strong py-2.5 text-[12.5px] font-semibold text-white no-underline transition hover:bg-ink"
       >
         Lesson plan
-        <span className="sr-only">
-          {" "}
-          — not available yet; the Trainer Lesson Plan screen is not built.
-        </span>
-      </button>
+        <span className="sr-only"> for {card.displayLabel}</span>
+      </Link>
     </Card>
   );
 }

@@ -645,7 +645,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-15** | `15` Lesson Statistics | Lesson-level aggregates | P2-4 | ⛔ **`C-9` — no ratings** |
 | **P2-16** | `16` Class Statistics | Class aggregates **+ Management Insight + Students Needing Follow-up** | P2-15 | ⛔ **`C-9`**; `C-17` (`GC-10`) |
 | **P2-17** | `02` Trainer My Classes | Trainer class cards, term selector | P2-2 | `G-7` — no TA |
-| **P2-18** | `03` Trainer Lesson Plan | `D-4` download + **KEY FOCUS in a distinct position** | P2-6, P2-17 | `D-4`'s hard constraint |
+| ~~**P2-18**~~ ✅ **COMPLETE — 2026-08-17** | `03` Trainer Lesson Plan | **The lesson spine only.** ⛔ KEY FOCUS chips **RULED IN SCOPE** and **NOT BUILT — they need a column, an author and an authoring surface**; `SLIDES & MATERIALS` **blocked on a trainer policy + grant**. Both stops STATED, per the ruling | P2-6, P2-17 | ✅ **`D-4` RULED FOR THIS SCREEN 2026-08-17** — the surviving prohibition is about POSITION, and `03` carries no governed focus line; §62 |
 | **P2-19** | `01` Trainer Dashboard | Trainer landing at `/trainer/dashboard` | P2-17 | `GC-7` — no rating column |
 | **P2-20** | `04` Trainer Students | Trainer student list | P2-17 | `GC-7` |
 | ~~**P2-21**~~ ✅ **BUILT 2026-08-16** | `09` Trainer Reports | ⛔ **`C2C-007` FIXED**, then the frame's table | — | `GC-7`, `GC-8` — **both refused**; §56 |
@@ -8014,3 +8014,127 @@ Unchanged, unchased, recorded.
 ⛔ **`15px` WAS READ AND DELIBERATELY NOT CITED** — 14 occurrences in the
 `.html`, **none in the component**. Citing a value the component does not build
 to is precisely what `AR-5` rejects, and the pack's block records the decision.
+
+---
+
+## §62 — `P2-18`: screen `03` Trainer Lesson Plan, and the two schema stops
+
+*(2026-08-17. Closes Part 2 at **23 of 24**, with `P2-24` ruled out by `C-11`.)*
+
+### ⛔ CITATION 3 OF 3 — THE `G-3`/`D-4` RULING FOR SCREEN `03`
+
+The Operator required this ruling recorded **in the component, in the DTO and
+here**, because *"a later reader seeing chips near a lesson will check `G-3` and
+find a prohibition."* The reasoning is the part that must survive, not the
+verdict:
+
+> ⛔ **RULING ON `G-3`/`D-4` FOR SCREEN 03 — BUILD THE KEY FOCUS CHIPS.**
+>
+> *"The surviving prohibition is about POSITION, and it protects §10 Phase 1
+> exit (c) — the governed carried-over previous-session focus. Screen 03 is the
+> lesson-plan surface. It is not the roster and carries no governed focus line,
+> so there is nothing there for the chips to displace or be mistaken for. `D-4`
+> permitted them 'in a distinct visual position with a distinct label'. On 03
+> that condition is satisfied trivially, because the position they would have
+> contended for does not exist on this screen."*
+
+**Its four constraints, absolute:**
+
+1. The chips are **LESSON-PLAN INTENT** and must **never** be sourced from
+   `observations.focus_chips` — the trainer's governed assessment data, and
+   `G-3`'s whole point. *Check the decoy register before sourcing anything.*
+2. Screen `03` must carry **NO governed previous-session-focus line, now or
+   later.** If a phase ever adds one, **the chips move or go.**
+3. The label must distinguish them from the governed focus **by NAME**, not only
+   by position.
+4. **If they need a column, STOP and state it. This ruling authorizes the chips,
+   not the schema.**
+
+### ⛔ STOP 1 — THE KEY FOCUS CHIPS NEED A COLUMN, AN AUTHOR AND A SURFACE
+
+**They need one.** Measured at HEAD: an exhaustive catalogue sweep for
+`%focus%`, `%chip%`, `%objective%`, `%topic%`, `%plan%`, `%tag%`, `%outcome%`
+across all 30 tables returns **exactly two columns** — `observations.focus_chips`
+and `observations.strength_chips`. Both are the trainer's **post-session
+governed ASSESSMENT data**, which is precisely the source constraint 1 bars. The
+ratified inventory says the same independently: no lesson-plan table, enum or
+RPC exists in the 26-table / 12-enum census.
+
+⚠️ **AND THE FRAME ITSELF SHOWS WHY THE PROHIBITION READS AS IT DOES — this is
+the finding, not the blocker.** The `.html`'s own chip values are
+`Audience awareness`, `Sentence flow`, `Eye contact`, `Vocal projection`,
+`Tonality`, `Emotional expression` — **six of the nine B.E.S.T dimension names,
+verbatim.** ▶ The chips are *drawn in the assessment vocabulary*, so an
+implementer sourcing them reaches for the assessment table **by the shortest
+honest-looking path**, and the result would look correct on the rendered page.
+That is the conflation `G-3` exists to prevent, and it is why the column
+question is a governance question rather than a plumbing one.
+
+⛔ **A COLUMN ALONE WOULD NOT BE ENOUGH.** `PLMa-KEYFOCUS` records the Operator
+declining this panel at `P2-6` because *"`D-4` names no author, no authoring
+surface exists, and a read for a field nobody can write is a permanently empty
+panel."* Nothing has changed that: the chips need **a column, an author and an
+authoring surface**, and the third is a screen nobody has ruled on.
+
+### ⛔ STOP 2 — `SLIDES & MATERIALS` NEEDS A TRAINER POLICY AND GRANT
+
+`class_session_materials` **exists** (`P2-6` built the management upload side)
+but returns **`permission denied for table`** for the fixture trainer and holds
+**0** rows. It needs a trainer policy with its minimum matching grant, or a read
+RPC. Measured at HEAD, not assumed.
+
+⚠️ **The frame's empty copy — *"Slides not uploaded yet"* — is DELIBERATELY NOT
+USED.** It would be false: it asserts the materials are absent when the truth is
+that this screen cannot read them. **`P2-10`'s rule one layer along** — *"not
+yet"* and *"cannot see"* are different facts, and only one of them is true here.
+
+### What was built
+
+The **lesson spine**, which needed nothing new: lesson number, title, date, room
+and a date-derived `completed` / `this_week` / `upcoming` state, over the
+trainer's own `class_session_assignments` rows (`A-016`). **Tenth consecutive
+phase with zero schema** (§12.10).
+
+Both omissions are **disclosed on the page** (§12.12), naming the panels and
+saying they are *not built* rather than *empty*.
+
+### Findings
+
+1. **`P2-22`'s nesting decision paid off a SECOND time, and this is worth its own
+   line.** At `P2-23` it saved the calendar from needing `class_module_id`. Here
+   the same shape made the module-scoped read natural. ▶ **Decisions that cost
+   nothing at the time and pay later are the ones nobody records** — so it is
+   recorded, twice, at the phases that collected.
+
+2. **The triple citation and the prohibition detectors were in direct tension,
+   and three legs went red on it.** A citation that NAMES the decoy makes a
+   raw-source scan fire on the very sentence that refuses it. ▶ **Prohibitions
+   scan the STRIPPED source; citations scan the raw.** One root, three legs,
+   repaired at the scan target rather than by softening the citation — softening
+   it would have removed the thing the Operator asked for.
+
+3. **§60 bit twice more, both on this phase's own legs, and both were patterns
+   written against the concept.** The ruling anchor spanned a block-comment line
+   break, so **no multi-word phrase from it could ever match**; and the governed
+   focus is named `previousSessionFocus` / `carriedFocus` in the roster, while
+   the detector scanned for `previousFocus` — **a string that appears nowhere in
+   this codebase.** ▶ The second is the purer case: it would have passed as a
+   negative assertion forever without its positive control.
+
+4. **A true red on a wrong expectation, the `PC23-6` shape again.** `P18-9c`
+   asserted no lesson title existed anywhere in the fixture file; the fixture
+   legitimately carries `lessonTitle: "Expressive Delivery"` for screens that DO
+   render one. ▶ **The assertion was narrowed to the method, not the selector to
+   a subset** — the requirement was always *"this method invents nothing"*.
+
+5. **`AR-5` fired on three cited values and was right.** `22px` and `11.50px` are
+   built by the shared `PageHeading`, not by this component; `999px` is built as
+   `rounded-full`, so the literal never appears. **The shape is built; the
+   literal is not written, so it is not claimed.** Recorded in the pack, as
+   `15px` was at `P2-23`.
+
+6. **Screen `02`'s `Lesson plan` control is now ENABLED, and the pattern
+   discharged exactly as designed.** `P2-17` shipped it *disabled with a reason*
+   rather than absent, because the destination was ratified but unbuilt. ▶ The
+   affordance was never removed, so **nothing had to be re-invented, only
+   unlocked** — which is the whole argument for preferring disabled over absent.

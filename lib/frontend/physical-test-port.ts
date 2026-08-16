@@ -32,6 +32,7 @@ import type {
   TrainerDashboardDto,
   TrainerStudentsDto,
   ParentDashboardDto,
+  TrainerLessonPlanDto,
   TrainerReportsDto,
   RegisterStudentInput,
   CreateParentInput,
@@ -268,6 +269,9 @@ export interface PhysicalTestPort {
 
   /** `P2-21` — screen `09` Trainer Reports. */
   readTrainerReports(): Promise<UiActionResult<TrainerReportsDto>>;
+
+  /** Screen `03` Trainer Lesson Plan (`P2-18`). Carries no focus field — `G-3`. */
+  readTrainerLessonPlan(classModuleId: string | null): Promise<UiActionResult<TrainerLessonPlanDto | null>>;
 
   /** Screen `30` Parent Dashboard (`P2-22`). Carries no rating — `Q-27`. */
   readParentDashboard(): Promise<UiActionResult<ParentDashboardDto>>;

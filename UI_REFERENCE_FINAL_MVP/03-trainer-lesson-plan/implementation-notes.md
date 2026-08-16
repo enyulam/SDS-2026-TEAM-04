@@ -40,3 +40,96 @@ Acceptance status:
 ## Entries
 
 *(none yet)*
+---
+
+## `P2-18` — screen `03` built, 2026-08-17
+
+**Route** `/trainer/my-classes/lesson-plan` (canonical, per `SCREEN_INDEX.md`;
+`?module=<id>` is presentation selection only — `A-045`). **Component**
+`features/trainer/trainer-lesson-plan-screen.tsx`.
+
+### ⛔ TWO PANELS THE FRAME DRAWS ARE NOT BUILT, AND BOTH ARE SCHEMA STOPS
+
+Neither is a design gap. The frame draws them; the database cannot supply them.
+
+**1. `KEY FOCUS POINTS` — ruled IN SCOPE, blocked on a column.**
+
+⚠️ **Operator ruling, 2026-08-17: BUILD THE KEY FOCUS CHIPS.** The reasoning
+matters more than the verdict, because a later reader will check `G-3` and find
+a prohibition: *"the surviving prohibition is about POSITION, and it protects
+§10 Phase 1 exit (c) — the governed carried-over previous-session focus. Screen
+03 is the lesson-plan surface. It is not the roster and carries no governed
+focus line, so there is nothing there for the chips to displace or be mistaken
+for. `D-4` permitted them 'in a distinct visual position with a distinct label'.
+On 03 that condition is satisfied trivially, because the position they would
+have contended for does not exist on this screen."*
+
+▶ **They are in scope and are still not built**, because the same ruling made
+the schema separate: *"If they need a column, STOP and state it. This ruling
+authorizes the chips, not the schema."* They need one. Measured at HEAD — an
+exhaustive catalogue sweep for `%focus%`, `%chip%`, `%objective%`, `%topic%`,
+`%plan%`, `%tag%`, `%outcome%` across all 30 tables returns **exactly two
+columns**, `observations.focus_chips` and `observations.strength_chips`, and
+both are the trainer's post-session governed ASSESSMENT data — the `G-3` decoy.
+
+⚠️ **AND THE FRAME ITSELF SHOWS WHY THE PROHIBITION READS AS IT DOES.** The
+`.html`'s own chip values are `Audience awareness`, `Sentence flow`, `Eye
+contact`, `Vocal projection`, `Tonality`, `Emotional expression` — **six of the
+nine B.E.S.T dimension names, verbatim.** ▶ The chips are drawn in the
+assessment vocabulary, so an implementer sourcing them reaches for the
+assessment table by the shortest honest-looking path. That is the conflation
+`G-3` exists to prevent.
+
+⛔ **A COLUMN ALONE WOULD NOT BE ENOUGH.** `PLMa-KEYFOCUS` records the Operator
+declining this panel at `P2-6` because *"`D-4` names no author, no authoring
+surface exists, and a read for a field nobody can write is a permanently empty
+panel."* The chips need a column, an author and an authoring surface.
+
+**2. `SLIDES & MATERIALS` — blocked on a policy and grant.**
+
+`class_session_materials` EXISTS (`P2-6` built the management upload side) but
+returns `permission denied for table` for the fixture trainer and holds **0**
+rows. It needs a trainer policy with its minimum matching grant, or a read RPC.
+Measured at HEAD, not assumed.
+
+⚠️ **The frame's empty copy for this panel — *"Slides not uploaded yet"* — is
+DELIBERATELY NOT USED.** It would be false: it asserts the materials are absent
+when the truth is that this screen cannot read them. `P2-10`'s rule one layer
+along — *"not yet"* and *"cannot see"* are different facts, and only one is true.
+
+### ⛔ THE SCREEN CARRIES NO GOVERNED PREVIOUS-SESSION-FOCUS LINE
+
+The ruling's third constraint: **if a phase ever adds one, the chips move or
+go.** Nothing on this page presents the trainer's carried-over focus — the
+roster (screen `06`) does, and that is the surface `G-3` protects.
+
+### Screen `02`'s `Lesson plan` control is now ENABLED
+
+`P2-17` shipped it **disabled with a reason** rather than absent, because the
+destination was ratified but unbuilt. ▶ `P2-18` built it, so the reason lapsed
+and the control opens. **The pattern discharged exactly as designed** — the
+affordance was never removed, so nothing had to be re-invented, only unlocked.
+
+### ⛔ THREE MEASURED VALUES WERE READ AND DELIBERATELY NOT CITED
+
+`AR-5` rejects a citation the component does not build to, and it was right to
+fire on the first draft of this block. The decision, recorded rather than
+quietly dropped:
+
+* **`22px`** (page title) and **`11.50px`** (breadcrumb) are measured in this
+  `.html` and are real — but they are built by the shared `PageHeading`, not by
+  this component, and are already cited where they are built. Citing them here
+  would claim credit this file cannot support.
+* **`999px`** (the timing badges' radius) is built as Tailwind's `rounded-full`,
+  which is that value — but the literal never appears in the source, and a
+  citation the scanner cannot find in the code is exactly the mismatch `AR-5`
+  exists to catch. **The shape is built; the literal is not written, so it is
+  not claimed.**
+
+```artefact-read
+screen: 03
+pack: Trainer - Lesson Plan
+component: features/trainer/trainer-lesson-plan-screen.tsx
+html-values: 20px, 16px, 13px, 12px, 11px, 10px
+screen-md-quote: Not rating-bearing.
+```

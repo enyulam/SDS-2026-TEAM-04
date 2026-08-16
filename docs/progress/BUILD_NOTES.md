@@ -11225,3 +11225,101 @@ VISUAL and `RENDERED` **`NOT-RUN`**.
 **Next: `P2-18` (`03` Trainer Lesson Plan) still awaits the `G-3`/`D-4` scope
 answer; `P2-24` (`28`) is DO NOT BUILD (`C-11`). Twenty-two of the twenty-four
 Part 2 phases are complete.**
+
+---
+
+## 2026-08-17 — `P2-18`: screen `03` Trainer Lesson Plan, and TWO SCHEMA STOPS
+
+**Branch** `develop` · ledger **48/48** unchanged · **ZERO SCHEMA** (§12.10,
+tenth consecutive phase). **Closes Part 2 at 23 of 24**, with `P2-24` ruled out
+by `C-11`.
+
+### ⛔ THE RULING WAS TO BUILD THE CHIPS. THE CHIPS ARE NOT BUILT
+
+The Operator ruled *"BUILD THE KEY FOCUS CHIPS"* on the reasoning that `G-3`'s
+surviving prohibition is about **position**, and screen `03` carries no governed
+focus line for them to displace. ▶ **They are in scope.** The same ruling made
+the schema separate — *"If they need a column, STOP and state it."* **They need
+one, and the stop is stated rather than worked around.**
+
+Both stops are recorded in full at plan **§62** and in the pack's notes, with the
+ruling cited in three places as instructed (component · both DTO mirrors · plan).
+
+**Stop 1 — KEY FOCUS chips need a column, an author and an authoring surface.**
+An exhaustive catalogue sweep across all 30 tables returns exactly
+`observations.focus_chips` and `observations.strength_chips` — the `G-3` decoy.
+`PLMa-KEYFOCUS` adds that a column alone is insufficient: no author and no
+authoring surface exist, so a read would be a permanently empty panel.
+
+**Stop 2 — `SLIDES & MATERIALS` needs a trainer policy and grant.**
+`class_session_materials` exists but is `permission denied` for a trainer and
+holds 0 rows.
+
+### Files
+
+**New:** `server/modules/class-session/trainer-lesson-plan.ts` ·
+`features/trainer/trainer-lesson-plan-screen.tsx` ·
+`features/trainer/trainer-lesson-plan-route.tsx` ·
+`app/(portals)/trainer/my-classes/lesson-plan/page.tsx` ·
+`scripts/tests/portal/prove-p2-18-trainer-lesson-plan.mjs`
+
+**Modified:** the six wiring layers (`adapter-dtos.ts`, `physical-test.ts`,
+`participant-actions.ts`, `physical-test-port.ts`, `real-participant-port.ts`,
+`physical-test-fixture.ts`) · `features/trainer/trainer-my-classes-screen.tsx`
+(the `Lesson plan` control ENABLED) · `scripts/tests/portal/artefact-read-rule.mjs`
+(`03` UNMEASURED → MEASURED) ·
+`UI_REFERENCE_FINAL_MVP/03-trainer-lesson-plan/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` · `package.json`
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:portal-p2-18` **23 PASS** ·
+`prove:artefact-read` **99 PASS**. VISUAL and `RENDERED` **`NOT-RUN`**.
+
+### Findings
+
+1. **The triple citation and the prohibition detectors were in direct tension.**
+   A citation that NAMES the decoy makes a raw-source scan fire on the very
+   sentence that refuses it — three legs red, one root. ▶ **Prohibitions scan the
+   STRIPPED source; citations scan the raw.** Repaired at the scan target, never
+   by softening the citation.
+
+2. **§60 bit twice more, both on this phase's own legs.** The ruling anchor
+   spanned a block-comment line break, so no multi-word phrase from it could ever
+   match; and the governed focus is `previousSessionFocus`/`carriedFocus` while
+   the detector scanned `previousFocus` — **a string that appears nowhere in this
+   codebase**. The second would have passed as a negative assertion forever
+   without its positive control.
+
+3. **A true red on a wrong expectation, the `PC23-6` shape again** — the
+   assertion was narrowed to the method, not the selector to a subset.
+
+4. **`AR-5` fired on three cited values and was right** — two belong to the
+   shared `PageHeading`, one is built as `rounded-full` and never written as a
+   literal. Recorded in the pack as `15px` was at `P2-23`.
+
+5. **The frame's own chip values are six of the nine B.E.S.T dimension names,
+   verbatim.** ▶ That is why `G-3` reads as it does: the chips are drawn in the
+   assessment vocabulary, so sourcing them from the assessment table is the
+   shortest honest-looking path and would look correct on the rendered page.
+
+6. **`P2-22`'s nesting decision paid off a SECOND time.** Recorded at both phases
+   that collected — **decisions that cost nothing at the time and pay later are
+   the ones nobody records.**
+
+7. ⚠️ **THE OPEN FLAKE RECURRED, AND IT IS NOT `D-10`.** Captured before anything
+   else, as instructed. `prove:serving-discipline` failed at **`D-8`** — *"the
+   served application exited during startup (code 1)"* — leaving `D-9` and `D-10`
+   `NOT-RUN` as a consequence. Two immediate re-runs both **PASS**. ▶ **Three
+   intermittents now, all in this one suite, and the `D-8` form is the opposite
+   end of the `D-10` form**: a child that died at startup versus a child that
+   survived teardown. Both are child-process lifecycle on Windows, which supports
+   the Operator's *"they may be one thing"*.
+   ⛔ **And the cause remains uncapturable from inside the suite BY DESIGN** —
+   its own line 51 discards the served child's stdout and stderr on all three
+   streams, for credential discipline. **That is a principled trade, not a bug**,
+   and it is why this suite can fail without explaining itself. Still open, still
+   no remedy, still not chased.
+
+**Next: Part 2 is closed at 23 of 24. `P2-24` (`28`) is DO NOT BUILD (`C-11`),
+with `A-044` knowingly unmet. STOPPED for the Operator's walk.**

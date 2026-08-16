@@ -99,7 +99,8 @@
     "prove:ledger-current": "node --env-file=.env.local scripts/tests/prove-ledger-current.mjs",
     "prove:rpc-arguments": "node --env-file=.env.local scripts/tests/portal/prove-rpc-arguments.mjs",
     "prove:c14-guardian": "node --env-file=.env.local scripts/tests/portal/prove-c14-guardian.mjs",
-    "prove:all": "node --env-file=.env.local scripts/tests/prove-all.mjs"
+    "prove:all": "node --env-file=.env.local scripts/tests/prove-all.mjs",
+    "prove:portal-p2-18": "node scripts/tests/portal/prove-p2-18-trainer-lesson-plan.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

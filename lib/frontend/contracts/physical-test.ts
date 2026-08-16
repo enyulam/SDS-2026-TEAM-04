@@ -599,6 +599,39 @@ export type TrainerReportsDto = {
   readonly total: number;
 };
 
+export type LessonPlanEntryDto = {
+  readonly sessionId: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+  readonly sessionDate: string;
+  readonly room: string | null;
+  readonly timing: "completed" | "this_week" | "upcoming";
+};
+
+/**
+ * Screen `03` Trainer Lesson Plan — `P2-18`.
+ *
+ * ⛔ THERE IS NO `keyFocus` FIELD, AND ITS ABSENCE IS THE `G-3` ENFORCEMENT.
+ * ⚠️ Operator ruling 2026-08-17 — **"BUILD THE KEY FOCUS CHIPS"** — put them
+ * IN SCOPE for this
+ * screen — the surviving prohibition is about POSITION, and `03` carries no
+ * governed previous-session-focus line for them to displace. ▶ But the same
+ * ruling made the schema a SEPARATE authorization, and measurement showed the
+ * only focus columns in the whole database are `observations.focus_chips` and
+ * `observations.strength_chips` — post-session ASSESSMENT data, which is
+ * exactly what `G-3` bars. **The chips are ruled in and are not built.**
+ */
+export type TrainerLessonPlanDto = {
+  readonly classModuleId: string;
+  readonly moduleTitle: string;
+  readonly gradeLabel: string;
+  readonly displayLabel: string;
+  readonly termLabel: string | null;
+  readonly learnerCount: number;
+  readonly scheduleSummary: string | null;
+  readonly lessons: readonly LessonPlanEntryDto[];
+};
+
 export type ParentUpcomingSessionDto = {
   readonly sessionId: string;
   readonly sessionDate: string;

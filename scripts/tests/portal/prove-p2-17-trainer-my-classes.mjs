@@ -150,13 +150,28 @@ check(
 // ---------------------------------------------------------------------
 const screen = read("features/trainer/trainer-my-classes-screen.tsx");
 const stripped = stripComments(screen);
+/*
+ * ✅ UPDATED 2026-08-17 AT `P2-18` — THE REASON LAPSED, SO THE ASSERTION MOVED.
+ *
+ * ⚠️ `PT17-6` and `PT17-6b` asserted the control was PRESENT, DISABLED and
+ * carried its reason, and that it was NOT a live link *"because screen `03`
+ * does not exist yet, so a working href would 404."* ▶ `P2-18` BUILT screen
+ * `03`, so both statements became false — **the ratchet fired on its own
+ * premise expiring, which is exactly what it was for.**
+ *
+ * ⛔ THE LEGS ARE NOT DELETED. They now assert the OTHER side of the same rule:
+ * the control is present and LIVE, and points at the canonical route. Deleting
+ * them would discard the only proof that the affordance survived the
+ * transition — and the whole argument for preferring *disabled* over *absent*
+ * is that the affordance never has to be re-invented.
+ */
 check(
-  /Lesson plan/.test(stripped) && /disabled/.test(stripped) && /title="Lesson plans open with/.test(stripped),
-  "PT17-6 ⛔ `Lesson plan` renders PRESENT, DISABLED and WITH ITS REASON — ⚠️ NOT `G-3`'s prohibited control: its destination, screen `03`, is one of the ratified 36 and lands at `P2-18`. ▶ Absent would say \"not a thing\"; only \"not yet\" is true",
+  /Lesson plan/.test(stripped) && !/disabled/.test(stripped),
+  "PT17-6 ✅ `Lesson plan` renders PRESENT and NO LONGER DISABLED — its destination, screen `03`, shipped at `P2-18`, so the reason it carried has lapsed",
 );
 check(
-  !/href=.*lesson-plan/.test(stripped),
-  "PT17-6b …and it is NOT a live link — screen `03` does not exist yet, so a working href would 404",
+  /href=\{`\/trainer\/my-classes\/lesson-plan\?module=/.test(stripped),
+  "PT17-6b …and it is now a LIVE link to the canonical route, carrying the module id — the affordance was unlocked, never re-invented",
 );
 
 // ---------------------------------------------------------------------

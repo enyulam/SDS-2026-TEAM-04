@@ -535,12 +535,22 @@ const CHAIN = {
       id: 'S3-T4',
       path: '/trainer/reports',
       loading: null,
-      // ⚠️ NOT an expected-state assertion. This surface renders the generic
-      // unavailable state rather than the queue's own "No returned reports"
-      // empty state — recorded as finding F-STAGE3-1. The leg asserts what
-      // the surface ACTUALLY does so the defect stays visible; it is not
-      // dressed up as a pass of the queue.
-      data: ['It may no longer be available in this workspace'],
+      // ✅ F-STAGE3-1 IS DISCHARGED — updated 2026-08-17 at `P2-18`.
+      //
+      // ⚠️ THIS LEG EXISTED TO KEEP A DEFECT VISIBLE, AND THE DEFECT IS GONE.
+      // It read: "NOT an expected-state assertion. This surface renders the
+      // generic unavailable state rather than the queue's own empty state —
+      // recorded as finding F-STAGE3-1. The leg asserts what the surface
+      // ACTUALLY does so the defect stays visible." ▶ `P2-21` fixed exactly
+      // that: `C2C-007` found the canonical route REFUSING ITSELF, serving the
+      // returned-correction queue that returns `unavailable` unless
+      // `?status=needs_edit` is present. `/trainer/reports` now serves screen
+      // `09`'s reports list, and `?status=needs_edit` remains its alias.
+      //
+      // ⛔ THE LEG WAS NOT DELETED. A witness whose defect is fixed becomes an
+      // assertion that the FIX still holds — retiring it would discard the only
+      // rendered proof that this route serves its own screen.
+      data: ['Reports', 'All Reports'],
     },
   ],
   management: [

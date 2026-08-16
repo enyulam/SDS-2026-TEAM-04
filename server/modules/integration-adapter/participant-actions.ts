@@ -136,6 +136,7 @@ import type {
   AdapterTrainerMyClassesDto,
   AdapterTrainerDashboardDto,
   AdapterParentDashboardDto,
+  AdapterTrainerLessonPlanDto,
   AdapterTrainerReportsDto,
   AdapterTrainerStudentsDto,
   AdapterRegisterStudentInput,
@@ -193,6 +194,7 @@ import { readClassStatisticsCore } from "@/server/modules/management-view/class-
 import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
 import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
 import { readParentDashboardCore } from "@/server/modules/parent-view/parent-dashboard-projections";
+import { readTrainerLessonPlanCore } from "@/server/modules/class-session/trainer-lesson-plan";
 import { readTrainerReportsCore } from "@/server/modules/report-workflow/trainer-reports-projections";
 import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
 import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
@@ -620,6 +622,41 @@ export async function adapterGetDraftGenerationContext(
  * so a rating cannot arrive on a Parent surface even if a later phase widens
  * the read. A field nobody writes down does not travel.
  */
+/**
+ * Screen `03` — `P2-18`. ⛔ The allow-list mapper names NO focus field, so the
+ * `G-3` refusal survives even if a later phase widens the projection.
+ */
+export async function adapterReadTrainerLessonPlan(
+  classModuleId: string | null,
+): Promise<ActionResult<AdapterTrainerLessonPlanDto | null>> {
+  const client = await createRequestSupabaseClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const result = await readTrainerLessonPlanCore(client, today, classModuleId);
+  if (!result.ok) return { outcome: "unavailable" };
+  if (result.data === null) return { outcome: "success", data: null };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      classModuleId: d.classModuleId,
+      moduleTitle: d.moduleTitle,
+      gradeLabel: d.gradeLabel,
+      displayLabel: d.displayLabel,
+      termLabel: d.termLabel,
+      learnerCount: d.learnerCount,
+      scheduleSummary: d.scheduleSummary,
+      lessons: d.lessons.map((l) => ({
+        sessionId: l.sessionId,
+        lessonNumber: l.lessonNumber,
+        lessonTitle: l.lessonTitle,
+        sessionDate: l.sessionDate,
+        room: l.room,
+        timing: l.timing,
+      })),
+    },
+  };
+}
+
 export async function adapterReadParentDashboard(): Promise<ActionResult<AdapterParentDashboardDto>> {
   const client = await createRequestSupabaseClient();
   const result = await readParentDashboardCore(client);
