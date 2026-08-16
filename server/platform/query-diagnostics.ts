@@ -81,8 +81,77 @@ export function reportQueryFailure(context: string, failure: QueryFailure | null
  */
 export type QueryOutcome<T> = { readonly ok: true; readonly rows: T } | { readonly ok: false };
 
-/** The shape a `@supabase/supabase-js` builder resolves to. */
-interface QueryResponse {
+/**
+ * The shape a `@supabase/supabase-js` builder resolves to, **carrying the row
+ * type the builder inferred from the schema**.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⛔ `data` WAS `unknown`, AND THAT ONE WORD DEFEATED THE WHOLE TYPED CLIENT
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Operator ruling, 2026-08-16: *"Type EVERY Supabase client as
+ * `SupabaseClient<AppDatabase>`, so a wrong column fails `tsc`."* Typing the
+ * clients was necessary and **not sufficient**, and the reason is here.
+ *
+ * ⚠️ A wrong column does NOT make `supabase-js` raise at the call site. It
+ * resolves `data` to a BRANDED ERROR TYPE —
+ * `SelectQueryError<"column 'membership_id' does not exist on
+ * 'class_session_assignments'.">` — which surfaces only when the data is
+ * CONSUMED by property access. ▶ Measured with a three-arm control: the wrong
+ * column produced **zero** errors when the result was merely returned or
+ * passed along, and `TS2339` naming the column the moment a field was read.
+ *
+ * ⛔ With `data: unknown`, every builder satisfied this interface, the branded
+ * error was discarded at the seam, and the caller then HAND-DECLARED its own
+ * `TRow` — so the hand-written interface, which is exactly where the wrong
+ * name was typed, was never checked against the schema at all.
+ *
+ * ▶ Making `data` the generic closes it: an explicit `readRows<AssignmentRow>`
+ * now checks that hand-written shape against what the builder really returns,
+ * and a `SelectQueryError` is not assignable to it.
+ *
+ * ⚠️ `screen 23` shipped on this gap — `class_session_assignments.membership_id`
+ * (real name `trainer_membership_id`) reached production, failed at runtime
+ * with PostgREST `42703`, and rendered an empty Trainers list.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⛔ TWO RESPONSE TYPES, AND THE SPLIT IS THE WHOLE DESIGN
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ MEASURED, NOT REASONED — the first attempt used ONE type for both and
+ * both single settings were wrong:
+ *
+ * - `TRow[] | null` — detection WORKS (`TS2322` on the wrong column), but four
+ *   CORRECT `.rpc()` call sites went red, because an `OUT`-parameter function
+ *   with `proretset` false resolves to a BARE RECORD, exactly as
+ *   `readMaybeRow`'s own body already documented. ▶ **A gate that is red for
+ *   false reasons is a gate that gets ignored** (§12.13).
+ * - `TRow[] | TRow | null` — the RPC sites pass and ⛔ **DETECTION IS LOST**:
+ *   the control's wrong-column arm went GREEN again. *(An earlier draft of this
+ *   comment asserted the widening was safe "verified rather than assumed". It
+ *   was not verified, it was wrong, and the control caught it — corrected here
+ *   in the same pass, §12.11.)*
+ *
+ * ▶ So the shape is split by what the caller actually reads:
+ * **`QueryResponse` — TABLE SELECTS, strictly `TRow[]`**, which is where the
+ * defect class lives and where detection must hold; **`RpcResponse` — the
+ * bare-or-array RPC shape**, which cannot carry the same guarantee and says so.
+ */
+interface QueryResponse<TRow> {
+  readonly data: TRow[] | null;
+  readonly error: QueryFailure | null;
+}
+
+/**
+ * ⛔ THE LOOSE SHAPE, FOR `.rpc()` ONLY — and it is loose because PostgREST
+ * genuinely returns either form, not because it is convenient.
+ *
+ * ⚠️ **STATED LIMIT: this shape CANNOT catch a wrong column**, because the bare
+ * `TRow` position accepts what the strict array position rejects. RPC results
+ * are protected by the migration's own apply-time assertions and by each
+ * suite's real-caller leg (§26.1's two legs) instead. ▶ Recorded rather than
+ * implied, so a later reader does not take an `RpcResponse` call site as
+ * carrying the guarantee its neighbour does.
+ */
+interface RpcResponse {
   readonly data: unknown;
   readonly error: QueryFailure | null;
 }
@@ -113,7 +182,7 @@ interface QueryResponse {
  */
 export async function readRows<TRow>(
   context: string,
-  run: () => PromiseLike<QueryResponse>,
+  run: () => PromiseLike<QueryResponse<TRow>>,
 ): Promise<QueryOutcome<TRow[]>> {
   const { data, error } = await run();
 
@@ -129,6 +198,43 @@ export async function readRows<TRow>(
     return { ok: false };
   }
   return { ok: true, rows: data as TRow[] };
+}
+
+/**
+ * ⛔ THE ARRAY-RETURNING RPC COUNTERPART OF `readRows`.
+ *
+ * ⚠️ IT EXISTS BECAUSE THE TWO HAVE DIFFERENT GUARANTEES, NOT DIFFERENT STYLES.
+ * `readRows` takes the builder's INFERRED row type, so a wrong column fails
+ * `tsc`. An RPC has no inferred row type here — `AppDatabase` deliberately
+ * leaves `Functions` permissive, because the generator renders `Args`
+ * non-nullable and `OUT`-parameter `Returns` as `Record<string, unknown>`, and
+ * typing them produced twelve FALSE errors (see `server/db/app-database.ts`).
+ *
+ * ▶ **STATED LIMIT: this helper CANNOT catch a wrong column or a wrong argument.**
+ * RPC correctness is carried by §26.1's two legs — the migration EXECUTES the
+ * function at apply time, and the paired suite CALLS it as a real authorized
+ * caller — which is stronger than any shape check available here.
+ *
+ * ⛔ Use `readRows` for a TABLE select. Reaching for this one to silence a table
+ * error would discard the only guarantee that caught screen `23`'s defect.
+ */
+export async function readRpcRows<TRow>(
+  context: string,
+  run: () => PromiseLike<RpcResponse>,
+): Promise<QueryOutcome<TRow[]>> {
+  const { data, error } = await run();
+  if (error) {
+    reportQueryFailure(context, error);
+    return { ok: false };
+  }
+  if (data === null || data === undefined) {
+    reportQueryFailure(context, {
+      code: null,
+      message: "the driver returned neither rows nor an error",
+    });
+    return { ok: false };
+  }
+  return { ok: true, rows: (Array.isArray(data) ? data : [data]) as TRow[] };
 }
 
 /**
@@ -158,12 +264,29 @@ export async function readRows<TRow>(
  */
 export async function readMaybeRow<TRow>(
   context: string,
-  run: () => PromiseLike<QueryResponse>,
+  run: () => PromiseLike<RpcResponse>,
 ): Promise<QueryOutcome<TRow | null>> {
-  const outcome = await readRows<TRow>(context, run);
-  if (!outcome.ok) return { ok: false };
+  /*
+   * ⛔ THE THREE CASES ARE DECIDED HERE RATHER THAN DELEGATED, and only because
+   * `readRows` now demands the STRICT array shape this one cannot satisfy. ▶ The
+   * SEMANTICS below are unchanged and must stay identical to `readRows`':
+   * a rejection is `{ ok: false }`, a driver returning neither rows nor a reason
+   * is `{ ok: false }`, and `null` means an OBSERVED absence and nothing else.
+   */
+  const { data: raw, error } = await run();
+  if (error) {
+    reportQueryFailure(context, error);
+    return { ok: false };
+  }
+  if (raw === null || raw === undefined) {
+    reportQueryFailure(context, {
+      code: null,
+      message: "the driver returned neither rows nor an error",
+    });
+    return { ok: false };
+  }
   // Mirrors `firstRow`: an RPC may resolve to an array or to a bare object.
-  const data: unknown = outcome.rows;
+  const data: unknown = raw;
   if (Array.isArray(data)) return { ok: true, rows: data.length > 0 ? (data[0] as TRow) : null };
   if (data && typeof data === "object") return { ok: true, rows: data as TRow };
   return { ok: true, rows: null };

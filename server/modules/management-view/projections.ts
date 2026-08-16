@@ -34,6 +34,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
@@ -75,7 +76,8 @@ import {
   type ClassCreationOutcome,
   type CreateClassInput,
 } from "@/server/modules/class-session/class-creation";
-import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import { readMaybeRow, readRows,
+  readRpcRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import type { DimensionCode, RatingLevel } from "@/server/modules/framework/dimensions";
 import {
   firstRow,
@@ -193,7 +195,7 @@ interface PairRow {
  *
  * It now returns a `QueryOutcome`, and every caller returns `unavailable`.
  */
-async function listCentrePairs(client: SupabaseClient): Promise<QueryOutcome<PairRow[]>> {
+async function listCentrePairs(client: SupabaseClient<AppDatabase>): Promise<QueryOutcome<PairRow[]>> {
   const sessions = await readRows<{ id: string; session_date: string; class_module_id: string }>(
     "listCentrePairs:class_sessions",
     () =>
@@ -254,7 +256,7 @@ async function listCentrePairs(client: SupabaseClient): Promise<QueryOutcome<Pai
  * open. `null` now means an OBSERVED absence and nothing else.
  */
 async function gatedReview(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<QueryOutcome<ManagementReviewRow | null>> {
@@ -285,7 +287,7 @@ async function gatedReview(
  * cosmetic one.
  */
 async function decorateQueueRows(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   rows: readonly ManagementQueueRowDto[],
 ): Promise<readonly ManagementQueueRowDto[]> {
   if (rows.length === 0) return rows;
@@ -316,7 +318,7 @@ async function decorateQueueRows(
 // R-6 — the pending-final-review queue (CP-3's resolution)
 // ---------------------------------------------------------------------
 export async function listManagementPendingReviewCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
@@ -391,7 +393,7 @@ export async function listManagementCorrectionsFromRpc(
 }
 
 export async function listManagementCorrectionTrackingCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
   // The role gate is what turns a wrong-role caller's empty list into the
   // contract's `unauthorized` outcome at the action boundary. It is a
@@ -460,7 +462,7 @@ export async function listManagementSubmittedFromRpc(
 }
 
 export async function listManagementSubmittedCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly ManagementQueueRowDto[]>> {
   // As with correction tracking, the role gate is what turns a wrong-role
   // caller's empty list into the contract's `unauthorized` outcome at the
@@ -500,7 +502,7 @@ export async function listManagementSubmittedCore(
  * schema by inference from a frame (`A-022`).
  */
 export async function listManagementClassesCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<ClassListDto>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
@@ -535,7 +537,7 @@ export async function listManagementClassesCore(
  * academy. `Q-7`: the two are different values and only one was observed.
  */
 export async function readManagementScheduleCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   fromDate: string,
   toDate: string,
 ): Promise<ActionResult<ScheduleDto>> {
@@ -563,7 +565,7 @@ export async function readManagementScheduleCore(
  * painted as a centre with no learners and nothing assessed (`Q-7`).
  */
 export async function readManagementDashboardSummaryCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<DashboardSummaryDto>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
@@ -595,7 +597,7 @@ export async function readManagementDashboardSummaryCore(
  * "no lessons scheduled", a positive claim about the module (`Q-7`).
  */
 export async function readManagementLessonPlansCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<ActionResult<LessonPlanDto | null>> {
   const identity = await requireRole(client, "management");
@@ -621,7 +623,7 @@ export async function readManagementLessonPlansCore(
  * surface and a non-management caller has no business being offered it.
  */
 export async function readManagementAddClassOptionsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<AddClassOptionsDto>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
@@ -646,7 +648,7 @@ export async function readManagementAddClassOptionsCore(
  * string the Operator did not name, and it is STOPPED.
  */
 export async function createManagementClassCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: CreateClassInput,
 ): Promise<ActionResult<ClassCreationOutcome>> {
   const identity = await requireRole(client, "management");
@@ -669,7 +671,7 @@ export async function createManagementClassCore(
  * definition of *pending* in a second place.
  */
 export async function readManagementClassOverviewCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<ActionResult<{
   readonly header: ClassHeaderDto | null;
@@ -720,7 +722,7 @@ export async function readManagementClassOverviewCore(
  * surface too.
  */
 export async function readManagementClassForEditCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<ActionResult<ClassEditDto>> {
   const identity = await requireRole(client, "management");
@@ -740,7 +742,7 @@ export async function readManagementClassForEditCore(
  * and refuse anything else with one non-disclosing string.
  */
 export async function updateManagementClassCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: UpdateClassInput,
 ): Promise<ActionResult<ClassUpdateOutcome>> {
   const identity = await requireRole(client, "management");
@@ -752,7 +754,7 @@ export async function updateManagementClassCore(
 // R-8 — the safe final-review candidate
 // ---------------------------------------------------------------------
 export async function getManagementReviewCandidateCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<ManagementReviewDto>> {
@@ -848,14 +850,14 @@ export type ReportRatingSnapshotDto = {
 };
 
 export async function getManagementRatingsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<readonly ReportRatingSnapshotDto[]>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;
 
-  const rows = await readRows<ManagementRatingRow>(
+  const rows = await readRpcRows<ManagementRatingRow>(
     "getManagementRatingsCore:report_get_management_ratings",
     () =>
       client.rpc("report_get_management_ratings", {
@@ -901,7 +903,7 @@ export async function getManagementRatingsCore(
  * in, and `PSTa-RATINGS` fails the build if that ever stops being true.
  */
 export async function readManagementStudentsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<ManagementStudentListDto>> {
   const identity = await requireRole(client, "management");
   if (identity.outcome !== "success") return identity;

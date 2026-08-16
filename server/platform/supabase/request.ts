@@ -18,15 +18,16 @@ import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getPublicSupabaseConfig } from "@/lib/supabase/public-config";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * Build a fresh request-scoped Supabase client using the current request cookies.
  */
-export async function createRequestSupabaseClient(): Promise<SupabaseClient> {
+export async function createRequestSupabaseClient(): Promise<SupabaseClient<AppDatabase>> {
   const cookieStore = await cookies();
   const { url, publishableKey } = getPublicSupabaseConfig();
 
-  return createServerClient(url, publishableKey, {
+  return createServerClient<AppDatabase>(url, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

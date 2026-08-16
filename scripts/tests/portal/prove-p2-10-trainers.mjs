@@ -22,6 +22,7 @@ import { dirname, join } from "node:path";
 import { assertConfigProjectId, resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
 import { unpairedMigrations, rpcsWithoutApplicationCaller, isProvablyInternal } from "./rpc-call-rule.mjs";
 import { stripComments } from "./artefact-read-rule.mjs";
+import { extractQueries, unknownColumns } from "./projection-column-rule.mjs";
 import { ratingLeaks, proveNarrowing } from "./rating-leak-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -141,6 +142,72 @@ check(
 check(
   trainerMemberships >= 1,
   `PT-3c  ⚠️ STATED LIMIT: the fixture holds ${trainerMemberships} active trainer, so ORDERING, multi-name SEARCH and the \`deactivated\` chip are NOT exercised by this suite. ▶ Recorded as unproven rather than implied by a green run`,
+);
+
+// ---------------------------------------------------------------------
+// PT-3d -- ⛔ THE LEG PT-3/PT-3b NEVER WERE.
+// ---------------------------------------------------------------------
+/*
+ * ⛔ OPERATOR RULING, 2026-08-16, RECORDED VERBATIM BECAUSE IT NAMES THE DEFECT
+ * PRECISELY: *"a control repaired for 'can this come out differently' is not
+ * repaired for 'does this exercise the code the screen runs.'"*
+ *
+ * `PT-3b`'s first draft compared management against a TRAINER and both read 1,
+ * so it discriminated nothing. It was repaired to compare against a PARENT,
+ * which DOES discriminate — and the repair fixed the wrong axis. ▶ Both legs
+ * run RAW SQL: they prove the TABLES are readable and never call
+ * `listManagementTrainersCore`, so screen `23` shipped a query naming
+ * `class_session_assignments.membership_id` — a column that does not exist —
+ * and every leg here stayed green while the page showed no trainers at all.
+ *
+ * ⚠️ THE QUERIES BELOW ARE EXTRACTED FROM THE PROJECTION SOURCE, NEVER RETYPED.
+ * A hand-copied query is a second definition free to drift from the first,
+ * which is the defect this project keeps recording; deriving them means this
+ * leg cannot pass while the real code is wrong.
+ */
+const PROJECTION = "server/modules/class-session/trainer-list-projections.ts";
+const projQueries = extractQueries(readFileSync(join(ROOT, PROJECTION), "utf8"));
+check(
+  projQueries.length >= 4,
+  `PT-3d0 ⚠️ NON-VACUITY FIRST: ${projQueries.length} quer(ies) extracted from ${PROJECTION} — ▶ if the parser returned nothing, PT-3d below would validate an EMPTY SET and report a green meaning "the projection has no queries"`,
+);
+
+const catalogueRaw = psql(
+  "SELECT table_name || '|' || column_name FROM information_schema.columns WHERE table_schema='public';",
+);
+const catalogue = new Map();
+for (const line of catalogueRaw.split("\n")) {
+  const [t, c] = line.trim().split("|");
+  if (!t || !c) continue;
+  if (!catalogue.has(t)) catalogue.set(t, new Set());
+  catalogue.get(t).add(c);
+}
+const unknown = unknownColumns(projQueries, catalogue);
+check(
+  catalogue.size >= 20 && unknown.length === 0,
+  `PT-3d  ⛔ EVERY COLUMN THE PROJECTION NAMES EXISTS: ${unknown.length} unknown reference(s)${unknown.length ? " — " + unknown.map((u) => `${u.table}.${u.column} [${u.where}]`).join(", ") : ""} — ▶ this is the leg that would have caught the empty Trainers list, and neither PT-3 nor PT-3b could, because both read the TABLES rather than the CODE`,
+);
+
+/*
+ * ⛔ AND THE READ MUST ACTUALLY RESOLVE AS THE MANAGEMENT CALLER. Column
+ * existence is necessary and not sufficient: a correct name behind a missing
+ * grant or policy still returns nothing.
+ */
+const assignmentQuery = projQueries.find((q) => q.table === "class_session_assignments");
+const resolved = assignmentQuery
+  ? psql(`
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
+SELECT 'ASSIGNED=' || count(*) FROM public.class_session_assignments a
+  WHERE a.${assignmentQuery.filters[0] ?? "trainer_membership_id"} IN (
+    SELECT id FROM public.centre_memberships WHERE role='trainer' AND status='active');
+ROLLBACK;`)
+  : "";
+const assignedRows = Number((resolved.match(/^ASSIGNED=(\d+)$/m) ?? [])[1] ?? NaN);
+check(
+  assignmentQuery !== undefined && assignedRows > 0,
+  `PT-3e  ⛔ …AND IT RESOLVES FOR A REAL MANAGEMENT CALLER: the projection's own filter column (\`${assignmentQuery?.filters[0] ?? "NONE EXTRACTED"}\`) returns ${assignedRows} assignment row(s) — ▶ a name that exists but reaches nothing renders the same empty page`,
 );
 
 // ---------------------------------------------------------------------

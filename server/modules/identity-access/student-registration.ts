@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-12` — screen `20` Register New Student.
@@ -22,7 +23,7 @@ export type StudentRegistrationResult =
   | { readonly ok: false; readonly reason: string };
 
 export async function registerStudentCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: { readonly firstName: string; readonly lastName: string; readonly classModuleIds: readonly string[] },
 ): Promise<StudentRegistrationResult> {
   const result = await client.rpc("admin_create_student", {

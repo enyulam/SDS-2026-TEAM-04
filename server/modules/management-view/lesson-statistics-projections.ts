@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { readClassStatusRowsCore } from "@/server/modules/class-session/class-overview";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-15` — screen `15` Management Lesson Statistics.
@@ -93,7 +94,7 @@ export interface LessonStatisticsDto {
 }
 
 export async function readLessonStatisticsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classSessionId: string,
 ): Promise<{ readonly ok: true; readonly data: LessonStatisticsDto } | { readonly ok: false }> {
   const session = await client
@@ -196,7 +197,7 @@ export async function readLessonStatisticsCore(
 }
 
 async function resolveTrainerName(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   membershipId: string | null,
 ): Promise<string | null> {
   if (membershipId === null) return null;

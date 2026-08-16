@@ -55,6 +55,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * One Class Grade, as the screen's level tabs read it.
@@ -155,7 +156,7 @@ interface AccountRow {
  * failure; losing a name is a cosmetic one.
  */
 export async function listClassModulesCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<ClassListDto>> {
   const grades = await readRows<ClassGradeRow>("listClassModulesCore:class_grades", () =>
     client
@@ -261,7 +262,7 @@ export async function listClassModulesCore(
  * resolve to.
  */
 async function readTrainersByModule(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   moduleIds: readonly string[],
 ): Promise<ReadonlyMap<string, readonly string[]>> {
   const empty = new Map<string, readonly string[]>();

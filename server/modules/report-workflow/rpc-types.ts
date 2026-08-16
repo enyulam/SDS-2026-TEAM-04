@@ -130,7 +130,7 @@ export interface TrainerObservationRow {
 
 /**
  * The minimal structural dependency of every core: something that can call a
- * governed RPC and report `{ data, error }`. A `SupabaseClient` satisfies it
+ * governed RPC and report `{ data, error }`. A `SupabaseClient<AppDatabase>` satisfies it
  * directly; the integration suite satisfies it with a psql-backed caller on
  * the DISPOSABLE database.
  */

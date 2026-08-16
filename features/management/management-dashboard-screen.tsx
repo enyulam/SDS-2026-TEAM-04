@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { MonthCalendar } from "@/components/ui/month-calendar";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
@@ -112,11 +113,6 @@ function isoDate(value: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTH_SHORT = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 /** The frame's `2h ago` / `Yesterday` / `3d ago` column, from a date alone. */
@@ -228,6 +224,13 @@ export function ManagementDashboardScreen() {
     };
   }, [port]);
 
+  /*
+   * ⛔ `focus` STAYS ON THIS SCREEN because it is not presentation here: the
+   * schedule is REFETCHED for the focused month, so the month is a query
+   * parameter that the calendar happens to display. ▶ `MonthCalendar` is
+   * therefore CONTROLLED from here, and the trainer dashboard — whose read
+   * takes no month — uses it uncontrolled and gets no chevrons.
+   */
   const monthStart = `${focus.year}-${`${focus.month + 1}`.padStart(2, "0")}-01`;
   const monthEnd = isoDate(new Date(focus.year, focus.month + 1, 0));
 
@@ -259,24 +262,11 @@ export function ManagementDashboardScreen() {
     [schedule],
   );
 
-  /* The frame's dotted dates: days this month that actually carry a session. */
-  const daysWithSessions = useMemo(
-    () => new Set(sessions.map((session) => Number(session.sessionDate.slice(8, 10)))),
-    [sessions],
-  );
   const todaysSessions = useMemo(
     () => sessions.filter((session) => session.sessionDate === today),
     [sessions, today],
   );
 
-  const monthGrid = useMemo(() => {
-    const first = new Date(focus.year, focus.month, 1);
-    const daysInMonth = new Date(focus.year, focus.month + 1, 0).getDate();
-    const cells: (number | null)[] = Array.from({ length: first.getDay() }, () => null);
-    for (let day = 1; day <= daysInMonth; day += 1) cells.push(day);
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  }, [focus]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -394,66 +384,29 @@ export function ManagementDashboardScreen() {
         </section>
 
         <div className="flex w-full shrink-0 flex-col gap-5 xl:w-[340px]">
+          {/*
+            ⛔ ONE CONSTRUCTION, SHARED WITH THE TRAINER DASHBOARD (Operator ruling,
+            2026-08-16). This screen's calendar was already correct — a month
+            initialised to today, decorated by sessions — and the trainer's was built
+            the other way round and rendered nothing at all when a month was empty.
+            ▶ Extracting rather than copying is the point: two calendars that merely
+            LOOK alike is how the two diverged in the first place.
+            ⚠️ One behaviour changed here, deliberately — the shared component scopes
+            marked days to the FOCUSED MONTH. This screen keyed the Set on
+            day-of-month alone, which was safe only while its query happened to be
+            month-scoped: a correctness dependency living outside the component that
+            draws it.
+          */}
           <section className="rounded-[16px] border border-line bg-surface p-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-[14.5px] font-bold text-ink">
-                {MONTH_NAMES[focus.month]} {focus.year}
-              </h2>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  aria-label="Previous month"
-                  onClick={() =>
-                    setFocus((prev) =>
-                      prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 },
-                    )
-                  }
-                  className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-line text-ink-muted transition hover:bg-surface-muted"
-                >
-                  <Icon name="chevronLeft" size={14} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next month"
-                  onClick={() =>
-                    setFocus((prev) =>
-                      prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 },
-                    )
-                  }
-                  className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-line text-ink-muted transition hover:bg-surface-muted"
-                >
-                  <Icon name="chevronRight" size={14} />
-                </button>
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-7 gap-1 text-center">
-              {WEEKDAY_LABELS.map((label, index) => (
-                <span key={`${label}-${index}`} className="text-[10px] font-semibold text-ink-subtle">
-                  {label}
-                </span>
-              ))}
-              {monthGrid.map((day, index) => {
-                if (day === null) return <span key={`pad-${index}`} className="h-8" />;
-                const iso = `${focus.year}-${`${focus.month + 1}`.padStart(2, "0")}-${`${day}`.padStart(2, "0")}`;
-                const isToday = iso === today;
-                const hasSession = daysWithSessions.has(day);
-                return (
-                  <span
-                    key={iso}
-                    className={`flex h-8 w-8 items-center justify-center justify-self-center rounded-full text-[12.5px] ${
-                      isToday
-                        ? "bg-brand-500 font-bold text-white"
-                        : hasSession
-                          ? "bg-brand-100 font-semibold text-brand-700"
-                          : "text-ink-muted"
-                    }`}
-                  >
-                    {day}
-                  </span>
-                );
-              })}
-            </div>
+            <MonthCalendar
+              sessionDates={sessions.map((session) => session.sessionDate)}
+              today={today}
+              label="Centre schedule"
+              focus={focus}
+              onFocusChange={setFocus}
+            />
           </section>
+
 
           <section className="rounded-[16px] border border-line bg-surface p-4">
             <div className="flex items-center justify-between gap-2">

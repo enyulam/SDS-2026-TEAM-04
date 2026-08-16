@@ -42,6 +42,7 @@ export type Database = {
           display_name: string
           id: string
           normalized_email: string
+          phone: string | null
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
         }
@@ -52,6 +53,7 @@ export type Database = {
           display_name: string
           id?: string
           normalized_email: string
+          phone?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
         }
@@ -62,6 +64,7 @@ export type Database = {
           display_name?: string
           id?: string
           normalized_email?: string
+          phone?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
         }
@@ -541,6 +544,67 @@ export type Database = {
           },
         ]
       }
+      class_session_materials: {
+        Row: {
+          byte_size: number
+          centre_id: string
+          class_session_id: string
+          created_at: string
+          display_name: string
+          id: string
+          media_type: string
+          storage_object_path: string
+          uploaded_by_account_id: string
+          uploaded_by_membership_id: string
+        }
+        Insert: {
+          byte_size: number
+          centre_id: string
+          class_session_id: string
+          created_at?: string
+          display_name: string
+          id?: string
+          media_type: string
+          storage_object_path: string
+          uploaded_by_account_id: string
+          uploaded_by_membership_id: string
+        }
+        Update: {
+          byte_size?: number
+          centre_id?: string
+          class_session_id?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          media_type?: string
+          storage_object_path?: string
+          uploaded_by_account_id?: string
+          uploaded_by_membership_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_session_materials_account_fk"
+            columns: ["uploaded_by_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_session_materials_membership_fk"
+            columns: ["uploaded_by_membership_id", "centre_id"]
+            isOneToOne: false
+            referencedRelation: "centre_memberships"
+            referencedColumns: ["id", "centre_id"]
+          },
+          {
+            foreignKeyName: "class_session_materials_session_fk"
+            columns: ["class_session_id", "centre_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id", "centre_id"]
+          },
+        ]
+      }
       class_sessions: {
         Row: {
           centre_id: string
@@ -548,8 +612,12 @@ export type Database = {
           created_at: string
           ends_at: string | null
           id: string
+          lesson_number: number | null
+          lesson_title: string | null
+          room: string | null
           session_date: string
           starts_at: string | null
+          term_id: string | null
           updated_at: string
         }
         Insert: {
@@ -558,8 +626,12 @@ export type Database = {
           created_at?: string
           ends_at?: string | null
           id?: string
+          lesson_number?: number | null
+          lesson_title?: string | null
+          room?: string | null
           session_date: string
           starts_at?: string | null
+          term_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -568,8 +640,12 @@ export type Database = {
           created_at?: string
           ends_at?: string | null
           id?: string
+          lesson_number?: number | null
+          lesson_title?: string | null
+          room?: string | null
           session_date?: string
           starts_at?: string | null
+          term_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -579,6 +655,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_modules"
             referencedColumns: ["id", "centre_id"]
+          },
+          {
+            foreignKeyName: "class_sessions_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1022,6 +1105,96 @@ export type Database = {
           },
         ]
       }
+      report_evidence: {
+        Row: {
+          byte_size: number
+          centre_id: string
+          created_at: string
+          id: string
+          media_type: string
+          report_id: string
+          storage_object_path: string
+          uploaded_by_account_id: string
+          uploaded_by_membership_id: string
+        }
+        Insert: {
+          byte_size: number
+          centre_id: string
+          created_at?: string
+          id?: string
+          media_type: string
+          report_id: string
+          storage_object_path: string
+          uploaded_by_account_id: string
+          uploaded_by_membership_id: string
+        }
+        Update: {
+          byte_size?: number
+          centre_id?: string
+          created_at?: string
+          id?: string
+          media_type?: string
+          report_id?: string
+          storage_object_path?: string
+          uploaded_by_account_id?: string
+          uploaded_by_membership_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_evidence_account_fk"
+            columns: ["uploaded_by_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_evidence_membership_fk"
+            columns: ["uploaded_by_membership_id"]
+            isOneToOne: false
+            referencedRelation: "centre_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_evidence_report_fk"
+            columns: ["report_id", "centre_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id", "centre_id"]
+          },
+        ]
+      }
+      report_source_map: {
+        Row: {
+          created_at: string
+          id: string
+          output_section: string
+          report_version_id: string
+          source_dimension_code: Database["public"]["Enums"]["dimension_code"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          output_section: string
+          report_version_id: string
+          source_dimension_code: Database["public"]["Enums"]["dimension_code"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          output_section?: string
+          report_version_id?: string
+          source_dimension_code?: Database["public"]["Enums"]["dimension_code"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_source_map_version_fk"
+            columns: ["report_version_id"]
+            isOneToOne: false
+            referencedRelation: "report_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_version_approvals: {
         Row: {
           approved_at: string
@@ -1377,8 +1550,11 @@ export type Database = {
         Row: {
           centre_id: string
           created_at: string
+          date_of_birth: string | null
           deactivated_at: string | null
           full_name: string
+          guardian_contact: string | null
+          guardian_name: string | null
           id: string
           is_active: boolean
           updated_at: string
@@ -1386,8 +1562,11 @@ export type Database = {
         Insert: {
           centre_id: string
           created_at?: string
+          date_of_birth?: string | null
           deactivated_at?: string | null
           full_name: string
+          guardian_contact?: string | null
+          guardian_name?: string | null
           id?: string
           is_active?: boolean
           updated_at?: string
@@ -1395,8 +1574,11 @@ export type Database = {
         Update: {
           centre_id?: string
           created_at?: string
+          date_of_birth?: string | null
           deactivated_at?: string | null
           full_name?: string
+          guardian_contact?: string | null
+          guardian_name?: string | null
           id?: string
           is_active?: boolean
           updated_at?: string
@@ -1404,6 +1586,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "students_centre_fk"
+            columns: ["centre_id"]
+            isOneToOne: false
+            referencedRelation: "centres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terms: {
+        Row: {
+          centre_id: string
+          created_at: string
+          ends_on: string
+          id: string
+          is_active: boolean
+          label: string
+          starts_on: string
+          updated_at: string
+        }
+        Insert: {
+          centre_id: string
+          created_at?: string
+          ends_on: string
+          id?: string
+          is_active?: boolean
+          label: string
+          starts_on: string
+          updated_at?: string
+        }
+        Update: {
+          centre_id?: string
+          created_at?: string
+          ends_on?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          starts_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terms_centre_id_fkey"
             columns: ["centre_id"]
             isOneToOne: false
             referencedRelation: "centres"
@@ -1448,6 +1671,77 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_assign_session_trainer: {
+        Args: { p_class_session_id: string; p_trainer_membership_id: string }
+        Returns: Record<string, unknown>
+      }
+      admin_create_class_module: {
+        Args: { p_class_grade_id: string; p_title: string }
+        Returns: Record<string, unknown>
+      }
+      admin_create_class_session: {
+        Args: {
+          p_class_module_id: string
+          p_ends_at: string
+          p_room: string
+          p_session_date: string
+          p_starts_at: string
+          p_term_id: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_create_parent: {
+        Args: {
+          p_display_name: string
+          p_email: string
+          p_student_ids: string[]
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_create_student: {
+        Args: {
+          p_class_module_ids: string[]
+          p_first_name: string
+          p_last_name: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_create_trainer: {
+        Args: { p_display_name: string; p_email: string }
+        Returns: Record<string, unknown>
+      }
+      admin_update_class_module: {
+        Args: {
+          p_class_grade_id: string
+          p_class_module_id: string
+          p_title: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_update_class_session: {
+        Args: {
+          p_class_session_id: string
+          p_ends_at: string
+          p_room: string
+          p_session_date: string
+          p_starts_at: string
+          p_term_id: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_update_student: {
+        Args: {
+          p_class_module_ids: string[]
+          p_first_name: string
+          p_last_name: string
+          p_student_id: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_withdraw_student: {
+        Args: { p_student_id: string }
+        Returns: Record<string, unknown>
+      }
       app_current_account_id: { Args: never; Returns: string }
       app_has_active_membership: {
         Args: {
@@ -1467,8 +1761,16 @@ export type Database = {
         Args: { p_membership_id: string }
         Returns: boolean
       }
+      app_management_may_attach_material: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
       app_parent_reaches_student: {
         Args: { p_student_id: string }
+        Returns: boolean
+      }
+      app_trainer_may_attach_evidence: {
+        Args: { p_object_name: string }
         Returns: boolean
       }
       app_trainer_reaches_module: {
@@ -1510,6 +1812,12 @@ export type Database = {
         }
         Returns: Record<string, unknown>
       }
+      assessment_save_follow_up_notes: {
+        Args: { p_follow_up_notes: string; p_report_id: string }
+        Returns: {
+          follow_up_notes: string
+        }[]
+      }
       assessment_save_observation: {
         Args: {
           p_class_session_id: string
@@ -1525,6 +1833,16 @@ export type Database = {
         }
         Returns: Record<string, unknown>
       }
+      attendance_set_status: {
+        Args: {
+          p_class_session_id: string
+          p_expected_status: Database["public"]["Enums"]["attendance_status"]
+          p_new_status: Database["public"]["Enums"]["attendance_status"]
+          p_student_id: string
+        }
+        Returns: Record<string, unknown>
+      }
+      audit_action_registry: { Args: never; Returns: string[] }
       audit_append_event: {
         Args: {
           p_action: string
@@ -1558,9 +1876,89 @@ export type Database = {
           ok: boolean
         }[]
       }
+      class_session_staff_identity: {
+        Args: { p_session_id: string }
+        Returns: {
+          class_session_id: string
+          trainer_display_name: string
+          trainer_membership_id: string
+        }[]
+      }
+      competency_score: {
+        Args: { p_rating: Database["public"]["Enums"]["competency_rating"] }
+        Returns: number
+      }
+      evidence_attach_confirm: {
+        Args: { p_evidence_id: string; p_report_id: string }
+        Returns: Record<string, unknown>
+      }
+      evidence_list_for_report: {
+        Args: { p_class_session_id: string; p_student_id: string }
+        Returns: {
+          byte_size: number
+          created_at: string
+          id: string
+          media_type: string
+        }[]
+      }
+      evidence_record_access: {
+        Args: { p_evidence_id: string }
+        Returns: Record<string, unknown>
+      }
+      evidence_remove: {
+        Args: { p_evidence_id: string }
+        Returns: Record<string, unknown>
+      }
+      material_attach_confirm: {
+        Args: {
+          p_class_session_id: string
+          p_display_name: string
+          p_material_id: string
+        }
+        Returns: boolean
+      }
+      material_list_for_session: {
+        Args: { p_class_session_id: string }
+        Returns: {
+          o_byte_size: number
+          o_created_at: string
+          o_display_name: string
+          o_material_id: string
+          o_media_type: string
+        }[]
+      }
+      material_remove: {
+        Args: { p_material_id: string }
+        Returns: Record<string, unknown>
+      }
+      material_signed_path: {
+        Args: { p_material_id: string }
+        Returns: Record<string, unknown>
+      }
       report_cancel_draft: {
         Args: { p_expected_lock_version: number; p_report_id: string }
         Returns: Record<string, unknown>
+      }
+      report_centre_dashboard_summary: {
+        Args: never
+        Returns: Record<string, unknown>
+      }
+      report_class_health_summary: {
+        Args: { p_class_module_id: string }
+        Returns: {
+          evidence_missing: number
+          main_follow_up_area: string
+          pending_reports: number
+          submitted_reports: number
+          total_reports: number
+        }[]
+      }
+      report_class_improved_dimension: {
+        Args: { p_class_module_id: string }
+        Returns: {
+          improved_dimension: Database["public"]["Enums"]["dimension_code"]
+          sessions_considered: number
+        }[]
       }
       report_content_hash_v1: {
         Args: {
@@ -1600,6 +1998,27 @@ export type Database = {
           submitted_at: string
         }[]
       }
+      report_get_canonical_context: {
+        Args: { p_class_session_id: string; p_student_id: string }
+        Returns: {
+          class_grade_label: string
+          class_module_title: string
+          lesson_number: number
+          lesson_title: string
+          session_date: string
+          student_display_name: string
+          trainer_display_name: string
+        }[]
+      }
+      report_get_management_ratings: {
+        Args: { p_class_session_id: string; p_student_id: string }
+        Returns: {
+          dimension_code: Database["public"]["Enums"]["dimension_code"]
+          display_name: string
+          rating: Database["public"]["Enums"]["competency_rating"]
+          sort_order: number
+        }[]
+      }
       report_get_management_review: {
         Args: { p_class_session_id: string; p_student_id: string }
         Returns: {
@@ -1615,6 +2034,14 @@ export type Database = {
           strengths: string
           submitted_at: string
           wording_hash: string
+        }[]
+      }
+      report_get_source_map: {
+        Args: { p_report_id: string }
+        Returns: {
+          output_section: string
+          report_version_id: string
+          source_dimension_code: Database["public"]["Enums"]["dimension_code"]
         }[]
       }
       report_get_working: {
@@ -1640,6 +2067,20 @@ export type Database = {
           status: Database["public"]["Enums"]["report_status"]
           strengths: string
           submitted_at: string
+        }[]
+      }
+      report_list_management_class_status: {
+        Args: { p_class_module_id: string }
+        Returns: {
+          class_session_id: string
+          evidence_count: number
+          lesson_number: number
+          lesson_title: string
+          report_id: string
+          report_state: Database["public"]["Enums"]["report_status"]
+          session_date: string
+          student_display_name: string
+          student_id: string
         }[]
       }
       report_list_management_corrections: {
@@ -1670,6 +2111,29 @@ export type Database = {
           student_display_name: string
           student_id: string
           submitted_at: string
+        }[]
+      }
+      report_list_trainer_reports: {
+        Args: never
+        Returns: {
+          class_label: string
+          class_session_id: string
+          report_id: string
+          report_state: Database["public"]["Enums"]["report_status"]
+          session_date: string
+          student_id: string
+          student_name: string
+          updated_at: string
+        }[]
+      }
+      report_list_trainer_students: {
+        Args: never
+        Returns: {
+          class_label: string
+          class_module_id: string
+          last_assessed: string
+          student_id: string
+          student_name: string
         }[]
       }
       report_management_approve_and_submit: {
@@ -1704,6 +2168,28 @@ export type Database = {
           p_report_id: string
         }
         Returns: Record<string, unknown>
+      }
+      report_management_student_reports: {
+        Args: { p_student_id: string }
+        Returns: {
+          class_label: string
+          class_session_id: string
+          lesson_title: string
+          report_id: string
+          report_state: Database["public"]["Enums"]["report_status"]
+          session_date: string
+          submitted_at: string
+          term_label: string
+        }[]
+      }
+      report_management_student_trend: {
+        Args: { p_student_id: string }
+        Returns: {
+          class_session_id: string
+          lesson_title: string
+          session_date: string
+          session_score: number
+        }[]
       }
       report_mark_observation_saved: {
         Args: { p_expected_lock_version: number; p_report_id: string }
@@ -1749,6 +2235,10 @@ export type Database = {
           p_strengths: string
         }
         Returns: Record<string, unknown>
+      }
+      report_store_source_map: {
+        Args: { p_entries: Json; p_report_version_id: string }
+        Returns: number
       }
       report_trainer_approve: {
         Args: {

@@ -194,6 +194,7 @@ import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-
 import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
 import { createParentAccountCore } from "@/server/modules/identity-access/parent-account-creation";
 import { updateStudentCore, withdrawStudentCore } from "@/server/modules/identity-access/student-edit";
+import type { AppDatabase } from "@/server/db/app-database";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -250,7 +251,7 @@ function correctionToUi(correction: {
  *   promised could not happen.
  */
 async function readWorking(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<QueryOutcome<WorkingReportRow | null>> {
@@ -289,7 +290,7 @@ async function readWorking(
  * ▶ The boundary did not move; only the silence was removed.
  */
 async function readSessionDate(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
 ): Promise<string | null> {
   const rows = await readRows<{ session_date?: string }>(
@@ -301,7 +302,7 @@ async function readSessionDate(
 }
 
 async function readStudentName(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   studentId: string,
 ): Promise<string | null> {
   const rows = await readRows<{ full_name?: string }>(
@@ -325,7 +326,7 @@ const UNREAD_SESSION_DATE = "";
  * the single non-disclosing denial for every reason at once.
  */
 async function resolveContext(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   reportId: string,
 ): Promise<ActionResult<{ readonly sessionId: string; readonly studentId: string }>> {
   return resolveReportContextCore(client, reportId);
@@ -438,7 +439,7 @@ export async function adapterGetSessionRoster(
  * instrument, never what the database permits.
  */
 async function assessmentEntryRefusal(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<never> | null> {

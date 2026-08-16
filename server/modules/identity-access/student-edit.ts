@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-14` — screen `22` Edit Student.
@@ -19,7 +20,7 @@ export type UpdateStudentResult =
   | { readonly ok: false; readonly reason: string };
 
 export async function updateStudentCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: {
     readonly studentId: string;
     readonly firstName: string;
@@ -48,7 +49,7 @@ export type WithdrawStudentResult =
   | { readonly ok: false; readonly reason: string };
 
 export async function withdrawStudentCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   studentId: string,
 ): Promise<WithdrawStudentResult> {
   const result = await client.rpc("admin_withdraw_student", { p_student_id: studentId });

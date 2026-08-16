@@ -16,6 +16,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { mapSqlErrorToResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
@@ -194,7 +195,7 @@ interface SessionRow {
  * learns why, and never claims an emptiness it has not established.**
  */
 async function listAssignedSessions(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<SessionRow[]>> {
   // class_sessions_select_trainer already scopes rows to the caller's live
   // active assignments, so a plain select IS the assigned-session list.
@@ -232,7 +233,7 @@ async function listAssignedSessions(
  * anything could check it and every learner silently became "Student".
  */
 async function listEnrolledStudents(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   moduleId: string,
 ): Promise<QueryOutcome<Array<{ studentId: string; displayName: string }>>> {
   const enrolments = await readRows<{ student_id: string }>(
@@ -274,7 +275,7 @@ async function listEnrolledStudents(
  * OBSERVED absence and nothing else; a rejection is `{ ok: false }`.
  */
 async function workingState(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<QueryOutcome<WorkingReportRow | null>> {
@@ -290,7 +291,7 @@ async function workingState(
 // R-1 — trainer dashboard and assigned sessions
 // ---------------------------------------------------------------------
 export async function listTrainerSessionsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly TrainerSessionSummaryDto[]>> {
   const identity = await requireRole(client, "trainer");
   if (identity.outcome !== "success") return identity;
@@ -392,7 +393,7 @@ export async function listTrainerSessionsCore(
 // focus continuity
 // ---------------------------------------------------------------------
 export async function getSessionRosterCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
 ): Promise<ActionResult<readonly RosterEntryDto[]>> {
   const identity = await requireRole(client, "trainer");
@@ -482,7 +483,7 @@ export async function getSessionRosterCore(
 // detail: scope, dimension AND reason — the trainer surface owns the reason)
 // ---------------------------------------------------------------------
 export async function getTrainerWorkingReportCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<TrainerWorkingReportDto>> {
@@ -574,7 +575,7 @@ export async function getTrainerWorkingReportCore(
 // R-4 — the returned-correction queue
 // ---------------------------------------------------------------------
 export async function listReturnedReportsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly ReturnedReportQueueItemDto[]>> {
   const identity = await requireRole(client, "trainer");
   if (identity.outcome !== "success") return identity;

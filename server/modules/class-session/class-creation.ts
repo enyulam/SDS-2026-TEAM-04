@@ -56,6 +56,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /** One Class Grade, carrying the id the create RPC takes as a parameter. */
 export interface ClassGradeChoiceDto {
@@ -139,7 +140,7 @@ interface TrainerAccountRow {
  * grant, and `class_grades` carries the same pair. The narrower instrument.
  */
 export async function readAddClassOptionsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<AddClassOptionsDto>> {
   const grades = await readRows<ClassGradeRow>("readAddClassOptionsCore:class_grades", () =>
     client
@@ -201,7 +202,7 @@ export async function readAddClassOptionsCore(
  * rows the caller's own policies already admit, and it makes no
  * authorization decision.
  */
-async function readAssignableTrainers(client: SupabaseClient): Promise<readonly TrainerChoiceDto[]> {
+async function readAssignableTrainers(client: SupabaseClient<AppDatabase>): Promise<readonly TrainerChoiceDto[]> {
   const memberships = await readRows<TrainerMembershipRow>(
     "readAssignableTrainers:centre_memberships",
     () => client.from("centre_memberships").select("id, account_id").eq("role", "trainer").eq("status", "active"),
@@ -310,7 +311,7 @@ interface AssignRpcRow {
  * no learners, which is exactly what it is.
  */
 export async function createClassCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: CreateClassInput,
 ): Promise<ActionResult<ClassCreationOutcome>> {
   const moduleCall = await client.rpc("admin_create_class_module", {
@@ -394,7 +395,7 @@ export async function createClassCore(
  * nothing and produces no dates.
  */
 async function resolveOccurrences(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: CreateClassInput,
 ): Promise<readonly string[]> {
   if (!input.termId || input.weekdays.length === 0) return [];

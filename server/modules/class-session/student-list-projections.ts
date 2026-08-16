@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-8` — screen `17` Management Students.
@@ -92,7 +93,7 @@ interface AccountRow {
  * the management queue, applied to the same class of problem.
  */
 export async function listManagementStudentsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<ManagementStudentListDto>> {
   const students = await readRows<StudentRow>("listManagementStudentsCore:students", () =>
     client

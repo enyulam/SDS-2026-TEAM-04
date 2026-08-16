@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { readTrainerMyClassesCore, type TrainerClassCardDto } from "@/server/modules/class-session/trainer-my-classes";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-19` — screen `01` Trainer Dashboard.
@@ -113,7 +114,7 @@ type ReportRow = {
 const PENDING = new Set(["draft_ready", "needs_edit"]);
 
 export async function readTrainerDashboardCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   nowIso: string,
 ): Promise<{ readonly ok: true; readonly data: TrainerDashboardDto } | { readonly ok: false }> {
   const todayIso = nowIso.slice(0, 10);
@@ -200,7 +201,7 @@ export async function readTrainerDashboardCore(
  * sum higher, so the two readings genuinely differ here.
  */
 async function countDistinctLearners(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   moduleIds: readonly string[],
 ): Promise<number> {
   if (moduleIds.length === 0) return 0;
@@ -213,7 +214,7 @@ async function countDistinctLearners(
 }
 
 async function readTodaySessions(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   todayIso: string,
   nowIso: string,
 ): Promise<readonly TrainerTodaySessionDto[]> {
@@ -273,7 +274,7 @@ async function readTodaySessions(
 }
 
 async function readMonthSessionDates(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   todayIso: string,
 ): Promise<readonly string[]> {
   const first = `${todayIso.slice(0, 7)}-01`;

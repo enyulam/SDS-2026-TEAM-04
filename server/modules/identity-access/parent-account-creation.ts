@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-13` — screen `21` Create Parent Account.
@@ -28,7 +29,7 @@ export type ParentAccountResult =
   | { readonly ok: false; readonly reason: string };
 
 export async function createParentAccountCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: { readonly fullName: string; readonly email: string; readonly studentIds: readonly string[] },
 ): Promise<ParentAccountResult> {
   const result = await client.rpc("admin_create_parent", {

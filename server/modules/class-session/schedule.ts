@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-5` — screen `25` Management Schedule.
@@ -131,7 +132,7 @@ interface DateOnlyRow {
  * would need a migration, which this phase does not have.
  */
 export async function readCentreScheduleCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   fromDate: string,
   toDate: string,
 ): Promise<QueryOutcome<ScheduleDto>> {

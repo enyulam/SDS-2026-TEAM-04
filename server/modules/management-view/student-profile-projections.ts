@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-9` — screen `18` Management Student Profile.
@@ -93,8 +94,21 @@ export interface StudentProfileDto {
   readonly studentId: string;
   readonly fullName: string;
   readonly isActive: boolean;
-  /** ⛔ `null` where no parent is linked — the line is OMITTED (hero `0B`). */
+  /**
+   * ⛔ THE LINKED ACCOUNT'S NAME WHERE ONE EXISTS, otherwise the pre-link text
+   * captured at registration. `null` where neither — the line is OMITTED
+   * (hero `0B`), never rendered as `Unknown` or `—`.
+   */
   readonly guardianName: string | null;
+  /**
+   * ⛔ PRE-LINK ONLY, AND `null` THE MOMENT A PARENT IS LINKED. The linked
+   * account is the living record; `accounts.phone` is where a linked
+   * guardian's contact lives, and showing a stale registration string beside a
+   * live account would be the two-sources defect wearing a different label.
+   */
+  readonly guardianContact: string | null;
+  /** ⛔ `null` where not captured — omitted, never a placeholder date. */
+  readonly dateOfBirth: string | null;
   /** The earliest active enrolment, or `null`. */
   readonly enrolledOn: string | null;
   readonly attendancePresent: number;
@@ -123,16 +137,23 @@ interface ReportRow {
 }
 
 export async function readStudentProfileCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   studentId: string,
 ): Promise<{ readonly ok: true; readonly data: StudentProfileDto } | { readonly ok: false }> {
   const student = await client
     .from("students")
-    .select("id, full_name, is_active")
+    .select("id, full_name, is_active, date_of_birth, guardian_name, guardian_contact")
     .eq("id", studentId)
     .maybeSingle();
   if (student.error || student.data === null) return { ok: false };
-  const row = student.data as { id: string; full_name: string; is_active: boolean };
+  const row = student.data as {
+    id: string;
+    full_name: string;
+    is_active: boolean;
+    date_of_birth: string | null;
+    guardian_name: string | null;
+    guardian_contact: string | null;
+  };
 
   /*
    * ⚠️ SEVEN SMALL READS, NOT ONE JOIN — the `P2-10` shape, for the same reason:
@@ -265,7 +286,31 @@ export async function readStudentProfileCore(
       studentId: row.id,
       fullName: row.full_name,
       isActive: row.is_active,
-      guardianName: guardians,
+      /*
+       * ═══════════════════════════════════════════════════════════════════
+       * ⛔ THE PRECEDENCE RULE — A LINKED ACCOUNT ALWAYS WINS
+       * ═══════════════════════════════════════════════════════════════════
+       * Operator ruling, 2026-08-16, verbatim: *"a linked account always wins;
+       * the free-text fields are what registration captured before a link
+       * existed."*
+       *
+       * ⚠️ IT EXISTS BECAUSE ONE DISPLAYED FACT NOW HAS TWO POSSIBLE SOURCES,
+       * and `C-14` warned about exactly this shape for email. Screen `20`
+       * captures a guardian name BEFORE any parent account exists, so the
+       * column is real and necessary; the moment a `parent_student_links` row
+       * exists, the ACCOUNT is the living record and the captured text is a
+       * historical artefact of registration.
+       *
+       * ▶ WITHOUT THIS ORDERING both would claim to be current, and they would
+       * disagree the first time a parent corrects their own name.
+       *
+       * ⛔ Asserted with a DIVERGENT case (`prove:portal-c14`): a learner where
+       * both exist and differ must show the ACCOUNT value. A test where they
+       * agree would pass under either ordering and prove nothing (§12.15).
+       */
+      guardianName: guardians ?? row.guardian_name,
+      guardianContact: guardians !== null ? null : row.guardian_contact,
+      dateOfBirth: row.date_of_birth,
       enrolledOn,
       attendancePresent: attendanceRows.filter((a) => a.status === "present").length,
       attendanceTotal: attendanceRows.length,
@@ -282,7 +327,7 @@ export async function readStudentProfileCore(
  * rather than arbitrary, and stated because the frame cannot express the case.
  */
 async function resolveGuardian(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   links: readonly { parent_membership_id: string }[],
 ): Promise<string | null> {
   if (links.length === 0) return null;
@@ -301,7 +346,7 @@ async function resolveGuardian(
 }
 
 async function resolveTrainerNames(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   membershipIds: readonly string[],
 ): Promise<Map<string, string | null>> {
   const unique = [...new Set(membershipIds)];

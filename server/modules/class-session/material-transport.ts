@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { readMaybeRow } from "@/server/platform/query-diagnostics";
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-6R` — the APPLICATION layer over the lesson-materials functions.
@@ -122,8 +123,8 @@ export function mintMaterialObjectPath(
  *    video over classroom wifi; a 25 MiB document is a different problem.
  */
 export async function uploadMaterialCore(
-  client: SupabaseClient,
-  elevated: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
+  elevated: SupabaseClient<AppDatabase>,
   classSessionId: string,
   file: File,
   displayName: string,
@@ -193,7 +194,7 @@ interface RemoveRow {
  * tiles to exactly this, and `PDSa-SHAPE` now fails the build for it.
  */
 export async function attachMaterialCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classSessionId: string,
   materialId: string,
   displayName: string,
@@ -233,8 +234,8 @@ export async function attachMaterialCore(
  * authorization succeeds.
  */
 export async function materialViewUrlCore(
-  client: SupabaseClient,
-  elevated: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
+  elevated: SupabaseClient<AppDatabase>,
   materialId: string,
 ): Promise<ActionResult<MaterialViewUrl>> {
   if (!UUID.test(materialId)) return { outcome: "unavailable" };
@@ -273,8 +274,8 @@ export async function materialViewUrlCore(
  * surviving row pointing at nothing a reader could fetch.
  */
 export async function removeMaterialCore(
-  client: SupabaseClient,
-  elevated: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
+  elevated: SupabaseClient<AppDatabase>,
   materialId: string,
 ): Promise<ActionResult<{ readonly removed: boolean }>> {
   if (!UUID.test(materialId)) return { outcome: "unavailable" };

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { MonthCalendar } from "@/components/ui/month-calendar";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Card } from "@/components/ui/surface";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -46,9 +47,57 @@ import type { TrainerDashboardDto, TrainerRecentReportDto } from "@/lib/frontend
  * `#FCE7F0`, text `13px/600` · other rows `#F5F6FA`, `radius 12px`.
  */
 
+/**
+ * The frame's `2h ago` / `4h ago` / `Yesterday`.
+ *
+ * ⛔ IT DEGRADES TO AN ABSOLUTE DATE RATHER THAN INVENTING PRECISION. Past a
+ * week, *"8 days ago"* tells a trainer less than the date does, and hero `0B`
+ * governs the unparseable case: an unreadable timestamp renders NOTHING, never
+ * a placeholder that looks like a real one.
+ */
+function relativeTime(iso: string, nowMs: number): string {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const mins = Math.floor((nowMs - then) / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  return iso.slice(0, 10);
+}
+
 export function TrainerDashboardScreen() {
   const port = usePhysicalTestPort();
   const [state, setState] = useState<ResourceState<TrainerDashboardDto>>({ kind: "loading" });
+  /*
+   * ⚠️ `now` IS SAMPLED ONCE, IN AN EFFECT, NOT DURING RENDER. A `useMemo(() =>
+   * Date.now(), [])` reads the same once per mount in practice and the lint
+   * caught it correctly anyway: `Date.now` during render is impure, and an
+   * output that can differ between two renders of the same state is exactly
+   * what makes a rendered assertion unreliable.
+   * ⛔ `null` until the effect runs, and hero `0B` governs that window: the
+   * timestamp element is OMITTED rather than shown as a placeholder.
+   */
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    /*
+     * ⚠️ SAMPLED IN A TASK, NOT SYNCHRONOUSLY IN THE EFFECT. A synchronous
+     * `setState` here triggers a cascading render, which the lint flags and
+     * which is real: the first paint would be discarded immediately. The clock
+     * is deliberately NOT part of the first paint — `null` renders no timestamp
+     * (hero `0B`), and the value arrives on the next tick.
+     */
+    const id = setTimeout(() => setNowMs(Date.now()), 0);
+    return () => clearTimeout(id);
+  }, []);
+  const todayIso = useMemo(() => {
+    if (nowMs === null) return null;
+    const d = new Date(nowMs);
+    return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
+  }, [nowMs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,7 +183,22 @@ export function TrainerDashboardScreen() {
                   <ul className="mt-3 flex flex-col">
                     {data.recent.map((r) => (
                       <li key={r.reportId} className="border-t border-line py-3 first:border-t-0">
-                        <p className="text-[13px] font-semibold text-ink-strong">{r.studentName}</p>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-[13px] font-semibold text-ink-strong">{r.studentName}</p>
+                          {/*
+                            ⛔ THE FRAME DRAWS A RELATIVE TIMESTAMP ON EVERY ROW
+                            (`2h ago`, `4h ago`, `Yesterday`) and it was unrendered
+                            while `updatedAt` was ALREADY on the DTO and already
+                            returned by `report_list_trainer_reports()` — §12.10
+                            again: the row already carried it.
+                            ⚠️ It is a LIFECYCLE timestamp, not assessment
+                            substance. The frame's rating chips and rating prose on
+                            these same rows stay REFUSED (`GC-7`; `G-2`; `A-052`).
+                          */}
+                          {nowMs === null ? null : (
+                            <span className="shrink-0 text-[11px] text-ink-muted">{relativeTime(r.updatedAt, nowMs)}</span>
+                          )}
+                        </div>
                         <p className="text-[11.5px] text-ink">
                           {r.classLabel} · {r.sessionDate} · {stateLabel(r)}
                         </p>
@@ -150,9 +214,27 @@ export function TrainerDashboardScreen() {
             </div>
 
             <div className="flex flex-col gap-5">
+              {/*
+                ⛔ ONE CONSTRUCTION, SHARED WITH THE MANAGEMENT DASHBOARD (Operator
+                ruling, 2026-08-16). The month is an INPUT initialised to today and
+                the sessions merely decorate it. ▶ The local `MonthGrid` this
+                replaces derived its month from `dates[0]`, so an empty month
+                produced no grid at all — and with the fixture aged out of its own
+                calendar (plan §34) that is the NORMAL state, not an edge case.
+                ⚠️ `monthLabel` is no longer rendered here: the calendar names its
+                own focused month, and two month captions that can disagree is the
+                defect one construction exists to remove.
+              */}
               <Card className="p-5">
-                <h2 className="text-[16px] font-semibold text-ink-strong">{data.monthLabel}</h2>
-                <MonthGrid dates={data.monthSessionDates} monthLabel={data.monthLabel} />
+                {todayIso === null ? (
+                  <LoadingSkeleton rows={2} label="Loading your calendar" />
+                ) : (
+                  <MonthCalendar
+                    sessionDates={data.monthSessionDates}
+                    today={todayIso}
+                    label="Your sessions"
+                  />
+                )}
               </Card>
 
               <Card className="p-5">
@@ -246,44 +328,3 @@ function Kpi({ label, value }: { readonly label: string; readonly value: string 
   );
 }
 
-/**
- * The frame's month grid. ⛔ A PROJECTION OF CLASS SESSIONS (`A-016`) — it
- * stores nothing and duplicates no event record.
- */
-function MonthGrid({ dates, monthLabel }: { readonly dates: readonly string[]; readonly monthLabel: string }) {
-  if (dates.length === 0) {
-    return (
-      <p className="mt-3 text-[12.5px] text-ink">No sessions are scheduled in {monthLabel}.</p>
-    );
-  }
-  const first = `${dates[0].slice(0, 7)}-01`;
-  const start = new Date(`${first}T00:00:00Z`);
-  const daysInMonth = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
-  const lead = start.getUTCDay();
-  const marked = new Set(dates.map((d) => Number(d.slice(8, 10))));
-
-  return (
-    <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px]">
-      {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-        <span key={`${d}${i}`} className="py-1 text-ink-muted">
-          {d}
-        </span>
-      ))}
-      {Array.from({ length: lead }, (_, i) => (
-        <span key={`lead${i}`} aria-hidden="true" />
-      ))}
-      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
-        <span
-          key={day}
-          className={
-            marked.has(day)
-              ? "rounded-full bg-brand-100 py-1 font-semibold text-brand-700"
-              : "py-1 text-ink"
-          }
-        >
-          {day}
-        </span>
-      ))}
-    </div>
-  );
-}

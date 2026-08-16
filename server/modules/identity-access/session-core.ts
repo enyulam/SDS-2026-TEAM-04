@@ -25,6 +25,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
+import type { AppDatabase } from "@/server/db/app-database";
 
 export type SessionRole = "trainer" | "management" | "parent";
 
@@ -53,7 +54,7 @@ const ROLES: readonly SessionRole[] = ["trainer", "management", "parent"];
  * cookie fails here rather than being trusted.
  */
 export async function resolveSessionIdentity(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<SessionIdentity>> {
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData?.user) {
@@ -112,7 +113,7 @@ export async function resolveSessionIdentity(
  * no identity at all.
  */
 export async function requireRole(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   role: SessionRole,
 ): Promise<ActionResult<SessionIdentity>> {
   const resolved = await resolveSessionIdentity(client);

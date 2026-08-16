@@ -1,7 +1,9 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import { readMaybeRow, readRows,
+  readRpcRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-6` — screen `14` Management Lesson Plan Management.
@@ -116,7 +118,7 @@ function one<T>(value: T | T[] | null): T | null {
  * the module has no schedule when it is merely unreadable (`Q-7`).
  */
 export async function readLessonPlansCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<QueryOutcome<LessonPlanDto | null>> {
   const moduleFound = await readMaybeRow<ModuleRow>("readLessonPlansCore.module", () =>
@@ -156,7 +158,7 @@ export async function readLessonPlansCore(
    */
   const materialsBySession = new Map<string, readonly LessonMaterialDto[]>();
   for (const session of sessionsFound.rows) {
-    const found = await readRows<MaterialRow>("readLessonPlansCore.materials", () =>
+    const found = await readRpcRows<MaterialRow>("readLessonPlansCore.materials", () =>
       client.rpc("material_list_for_session", { p_class_session_id: session.id }),
     );
     if (!found.ok) return { ok: false };

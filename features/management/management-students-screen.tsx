@@ -289,6 +289,18 @@ export function ManagementStudentsScreen() {
                   <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
                     Guardian
                   </th>
+                  {/*
+                    ⛔ THE ROW ACTION THE FRAME DRAWS — `View more`, ×10, once per learner row,
+                    at the END of the row. Operator walk, 2026-08-16: WITHOUT IT screens `18`
+                    Student Profile and `22` Edit Student were BOTH UNREACHABLE — built, proven,
+                    and openable only by typing a URL. ▶ A screen with no inbound route is not
+                    shipped, however green its suite is.
+                    ⚠️ The header cell is deliberately unlabelled: the frame prints no heading
+                    over this column, and inventing one would be a visible divergence.
+                  */}
+                  <th className="px-5 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -324,6 +336,20 @@ export function ManagementStudentsScreen() {
                         child's family is not a display convenience.
                       */}
                       {row.guardianName ?? ""}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      {/*
+                        ⛔ `18` IS A READ SURFACE AND THIS LINK GRANTS NOTHING. Screen `18`
+                        re-authorizes on its own — RLS plus its two `SECURITY DEFINER` reads —
+                        so the affordance is navigation, never permission (`A-022`: a frame
+                        authorizes no access).
+                      */}
+                      <Link
+                        href={`/management/students/${row.studentId}`}
+                        className="text-[12.50px] font-semibold text-brand-700 underline"
+                      >
+                        View more
+                      </Link>
                     </td>
                   </tr>
                 ))}

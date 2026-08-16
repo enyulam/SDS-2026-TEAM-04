@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ActionResult } from "@/server/contracts/action-result";
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-11` — screen `24` Management Add Trainer. The governed trainer
@@ -118,7 +119,7 @@ export const TRAINER_INVITATION_REASONS = [
  * a user sees and would let nothing through.
  */
 export async function createTrainerCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: CreateTrainerInput,
 ): Promise<ActionResult<TrainerInvitationOutcome>> {
   const guard = await resolveSessionIdentity(client);

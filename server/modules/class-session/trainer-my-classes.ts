@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-17` — screen `02` Trainer My Classes.
@@ -86,7 +87,7 @@ type SessionRow = {
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export async function readTrainerMyClassesCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   todayIso: string,
   requestedTermId: string | null,
 ): Promise<{ readonly ok: true; readonly data: TrainerMyClassesDto } | { readonly ok: false }> {

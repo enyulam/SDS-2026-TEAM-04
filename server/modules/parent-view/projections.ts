@@ -35,6 +35,7 @@ import type { ActionResult } from "@/server/contracts/action-result";
 import { requireRole } from "@/server/modules/identity-access/session-core";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
 import { firstRow, type CanonicalReportRow } from "@/server/modules/report-workflow/rpc-types";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /** Row shape of `report_get_canonical_context` (hero Phase 1). */
 interface CanonicalContextRow {
@@ -137,7 +138,7 @@ export interface CanonicalReportDto {
  * FAULT is no longer reported as a FACT about the family.
  */
 async function listLinkedStudents(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<Array<{ studentId: string; displayName: string }>>> {
   const links = await readRows<{ student_id: string }>(
     "listLinkedStudents:parent_student_links",
@@ -188,7 +189,7 @@ async function listLinkedStudents(
  * omitted elements, never as a denial and never as a placeholder.
  */
 async function readCanonicalContext(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<CanonicalReportContextDto | null> {
@@ -218,7 +219,7 @@ async function readCanonicalContext(
 // R-9 — the submitted-report list
 // ---------------------------------------------------------------------
 export async function listParentReportsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<readonly ParentReportListItemDto[]>> {
   const identity = await requireRole(client, "parent");
   if (identity.outcome !== "success") return identity;
@@ -296,7 +297,7 @@ export async function listParentReportsCore(
 // R-10 — availability, expressed as a state
 // ---------------------------------------------------------------------
 export async function getParentAvailabilityCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<ActionResult<AvailabilityState>> {
   const identity = await requireRole(client, "parent");
   if (identity.outcome !== "success") return identity;
@@ -367,7 +368,7 @@ export async function getParentAvailabilityCore(
 const CANONICAL_READ_DENIED: ActionResult<never> = { outcome: "unavailable" };
 
 export async function getCanonicalReportCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<CanonicalReportDto>> {

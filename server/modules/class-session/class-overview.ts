@@ -1,7 +1,8 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { readMaybeRow, readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import { readMaybeRow, readRows, readRpcRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /*
  * ⛔ THE FOUR CONDITIONS LIVE IN `lib/shared/class-health.ts`, NOT HERE. They
@@ -105,10 +106,10 @@ type HealthRow = {
  * management the roster is empty when it is merely unreadable (`Q-7`).
  */
 export async function readClassStatusRowsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<QueryOutcome<readonly ClassOverviewRowDto[]>> {
-  const found = await readRows<StatusRow>("readClassStatusRowsCore", () =>
+  const found = await readRpcRows<StatusRow>("readClassStatusRowsCore", () =>
     client.rpc("report_list_management_class_status", { p_class_module_id: classModuleId }),
   );
   if (!found.ok) return { ok: false };
@@ -129,10 +130,10 @@ export async function readClassStatusRowsCore(
 }
 
 export async function readClassHealthCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<QueryOutcome<ClassHealthDto | null>> {
-  const found = await readRows<HealthRow>("readClassHealthCore", () =>
+  const found = await readRpcRows<HealthRow>("readClassHealthCore", () =>
     client.rpc("report_class_health_summary", { p_class_module_id: classModuleId }),
   );
   if (!found.ok) return { ok: false };
@@ -240,7 +241,7 @@ function agreed<T>(values: readonly (T | null)[]): T | null {
 }
 
 export async function readClassHeaderCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<QueryOutcome<ClassHeaderDto | null>> {
   const classModule = await readMaybeRow<ModuleRow>("readClassHeaderCore:class_modules", () =>
@@ -316,7 +317,7 @@ export async function readClassHeaderCore(
  * still renders.
  */
 async function readTrainerNames(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionIds: readonly string[],
 ): Promise<readonly string[]> {
   if (sessionIds.length === 0) return [];

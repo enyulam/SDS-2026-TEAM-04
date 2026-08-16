@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readRows, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-10` — screen `23` Management Trainers.
@@ -80,9 +81,25 @@ interface AccountRow {
   readonly display_name: string | null;
   readonly normalized_email: string | null;
 }
+/**
+ * ⛔ THE COLUMN IS `trainer_membership_id`, NOT `membership_id` — screen `23`
+ * SHIPPED THE WRONG NAME AND SHOWED NO TRAINERS AT ALL.
+ *
+ * PostgREST answered `42703 column class_session_assignments.membership_id
+ * does not exist`, `readRows` returned `{ok:false}`, the projection returned
+ * `{ok:false}`, the action returned `unavailable` — so the page rendered its
+ * failure state with `data === null` and the table never drew. ▶ **It was
+ * never an empty list; it was a failed read wearing one.**
+ *
+ * ⚠️ It survived three layers that each looked like they covered it: the
+ * generated types were STALE, no client carried `<Database>`, and `PT-3`/`PT-3b`
+ * asserted the same counts in raw `psql` — proving the TABLES were readable
+ * while never calling this function. All three are closed; see
+ * `projection-column-rule.mjs`.
+ */
 interface AssignmentRow {
   readonly class_session_id: string;
-  readonly membership_id: string;
+  readonly trainer_membership_id: string;
 }
 interface SessionRow {
   readonly id: string;
@@ -102,7 +119,7 @@ interface EnrolmentRow {
  * widening gets written by accident.
  */
 export async function listManagementTrainersCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<ManagementTrainerListDto>> {
   const memberships = await readRows<MembershipRow>("listManagementTrainersCore:memberships", () =>
     client.from("centre_memberships").select("id, account_id, status").eq("role", "trainer"),
@@ -130,8 +147,19 @@ export async function listManagementTrainersCore(
   const assignments = await readRows<AssignmentRow>("listManagementTrainersCore:assignments", () =>
     client
       .from("class_session_assignments")
-      .select("class_session_id, membership_id")
-      .in("membership_id", staff.map((m) => m.id)),
+      .select("class_session_id, trainer_membership_id")
+      .in("trainer_membership_id", staff.map((m) => m.id))
+      /*
+       * ⛔ ACTIVE ASSIGNMENTS ONLY. Operator ruling, 2026-08-16: *"an
+       * unassigned trainer counting toward classCount is a wrong number on a
+       * screen, not a latent risk."*
+       * ⚠️ `class_session_assignments` KEEPS the row and stamps
+       * `unassigned_at` — the same shape as `enrolments`, whose withdrawn rows
+       * this function already filters four reads below. ▶ Without this the
+       * counts would report classes a trainer no longer teaches and learners
+       * they no longer see, on a staff directory a manager reads as current.
+       */
+      .eq("is_active", true),
   );
   if (!accounts.ok || !assignments.ok) return { ok: false };
 
@@ -175,9 +203,9 @@ export async function listManagementTrainersCore(
   for (const a of assignments.rows) {
     const moduleId = moduleBySession.get(a.class_session_id);
     if (moduleId === undefined) continue;
-    const set = modulesByMembership.get(a.membership_id) ?? new Set<string>();
+    const set = modulesByMembership.get(a.trainer_membership_id) ?? new Set<string>();
     set.add(moduleId);
-    modulesByMembership.set(a.membership_id, set);
+    modulesByMembership.set(a.trainer_membership_id, set);
   }
 
   const trainers = staff

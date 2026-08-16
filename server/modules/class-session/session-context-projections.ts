@@ -49,6 +49,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * The academic context of one class session.
@@ -88,7 +89,7 @@ interface SessionContextRow {
  * be able to hide a report that management is required to review.
  */
 export async function getSessionContextsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionIds: readonly string[],
 ): Promise<ReadonlyMap<string, SessionAcademicContextDto>> {
   const out = new Map<string, SessionAcademicContextDto>();

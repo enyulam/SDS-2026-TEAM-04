@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 import {
   readClassHealthCore,
@@ -174,7 +175,7 @@ export interface ClassStatisticsDto {
 }
 
 export async function readClassStatisticsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<{ readonly ok: true; readonly data: ClassStatisticsDto } | { readonly ok: false }> {
   const [moduleRow, enrolments, health, statusRows, improved] = await Promise.all([
@@ -213,9 +214,17 @@ export async function readClassStatisticsCore(
    * shapes reaching the same nine dimensions, and collapsing them into one
    * resolver would have made one of them silently wrong.
    */
-  const improvedRow = (improved.data ?? [])[0] as
-    | { improved_dimension: string | null; sessions_considered: number }
-    | undefined;
+  /*
+   * ⚠️ NARROWED THROUGH `Array.isArray`, NOT INDEXED BLIND. `AppDatabase` leaves
+   * `Functions` permissive on purpose (see `server/db/app-database.ts`), so an
+   * RPC's `data` is `unknown` here — and `unknown[0]` is exactly the silent
+   * shape assumption this project keeps paying for. The guard makes the
+   * assumption explicit and fails toward NO ROW rather than toward a wrong one.
+   */
+  const improvedRows = Array.isArray(improved.data)
+    ? (improved.data as { improved_dimension: string | null; sessions_considered: number }[])
+    : [];
+  const improvedRow = improvedRows[0];
   const improvedKey =
     improvedRow?.improved_dimension != null && improvedRow.improved_dimension in DIMENSION_LABEL
       ? improvedRow.improved_dimension

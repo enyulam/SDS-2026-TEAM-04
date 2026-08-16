@@ -26,7 +26,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { resolveSessionIdentity } from "@/server/modules/identity-access/session-core";
-import { readRows } from "@/server/platform/query-diagnostics";
+import { readRpcRows, readRows } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * ⚠️ C-16's ceiling, restated here so the surface can NAME it in a refusal.
@@ -89,7 +90,7 @@ export function evidenceObjectPath(
 
 /** Read the evidence attached to one report. Trainer or management only. */
 export async function listEvidenceCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
   studentId: string,
 ): Promise<ActionResult<readonly EvidenceItemDto[]>> {
@@ -116,7 +117,7 @@ export async function listEvidenceCore(
   const guard = await resolveSessionIdentity(client);
   if (guard.outcome !== "success") return guard;
 
-  const rows = await readRows<EvidenceRow>("listEvidenceCore:evidence_list_for_report", () =>
+  const rows = await readRpcRows<EvidenceRow>("listEvidenceCore:evidence_list_for_report", () =>
     client.rpc("evidence_list_for_report", {
       p_class_session_id: sessionId,
       p_student_id: studentId,
@@ -167,8 +168,8 @@ export const EVIDENCE_URL_TTL_SECONDS = 120;
  * included — and it would do so invisibly, in an options object.
  */
 export async function mintEvidenceViewUrlCore(
-  client: SupabaseClient,
-  elevated: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
+  elevated: SupabaseClient<AppDatabase>,
   evidenceId: string,
 ): Promise<ActionResult<{ readonly url: string; readonly expiresInSeconds: number }>> {
   const guard = await resolveSessionIdentity(client);
@@ -244,7 +245,7 @@ export type EvidenceUploadTicket = {
  * name. **The governed act is the attach, and the attach is server-side.**
  */
 export async function createEvidenceUploadTicketCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   reportId: string,
   mediaType: string,
   byteSize: number,
@@ -299,7 +300,7 @@ export type EvidenceAttachOutcome = {
 };
 
 export async function confirmEvidenceAttachCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   reportId: string,
   evidenceId: string,
 ): Promise<ActionResult<EvidenceAttachOutcome>> {
@@ -338,8 +339,8 @@ export async function confirmEvidenceAttachCore(
  * trainer the clip is still attached when it is not.
  */
 export async function removeEvidenceCore(
-  client: SupabaseClient,
-  elevated: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
+  elevated: SupabaseClient<AppDatabase>,
   evidenceId: string,
 ): Promise<ActionResult<{ readonly removed: boolean }>> {
   const guard = await resolveSessionIdentity(client);

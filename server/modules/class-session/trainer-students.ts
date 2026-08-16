@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-20` — screen `04` Trainer Students.
@@ -53,7 +54,7 @@ function initialsOf(name: string): string {
 }
 
 export async function readTrainerStudentsCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<{ readonly ok: true; readonly data: TrainerStudentsDto } | { readonly ok: false }> {
   const result = await client.rpc("report_list_trainer_students");
   if (result.error !== null) return { ok: false };

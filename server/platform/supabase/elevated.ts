@@ -17,16 +17,17 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getServerConfig } from "@/server/platform/env";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * Build a fresh, session-free elevated Supabase client. Session persistence,
  * automatic refresh, and URL session detection are all disabled so the client
  * holds no user session state.
  */
-export function createElevatedSupabaseClient(): SupabaseClient {
+export function createElevatedSupabaseClient(): SupabaseClient<AppDatabase> {
   const config = getServerConfig();
 
-  return createClient(config.supabase.url, config.supabase.secretKey, {
+  return createClient<AppDatabase>(config.supabase.url, config.supabase.secretKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

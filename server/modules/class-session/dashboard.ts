@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readMaybeRow, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * `P2-7` — screen `11` Management Dashboard KPI tiles.
@@ -82,7 +83,7 @@ type SummaryRow = {
  * place the difference is observable.
  */
 export async function readDashboardSummaryCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
 ): Promise<QueryOutcome<DashboardSummaryDto>> {
   const found = await readMaybeRow<SummaryRow>("readDashboardSummaryCore", () =>
     client.rpc("report_centre_dashboard_summary"),

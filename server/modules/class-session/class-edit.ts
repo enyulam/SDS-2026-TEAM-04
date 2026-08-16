@@ -35,6 +35,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { readRows, readMaybeRow, type QueryOutcome } from "@/server/platform/query-diagnostics";
+import type { AppDatabase } from "@/server/db/app-database";
 
 export interface EditableSessionDto {
   readonly classSessionId: string;
@@ -97,7 +98,7 @@ interface AccountRow {
  * resolved is omitted, and the class still edits.
  */
 export async function readClassForEditCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   classModuleId: string,
 ): Promise<QueryOutcome<ClassEditDto | null>> {
   const classModule = await readMaybeRow<ModuleRow>("readClassForEditCore:class_modules", () =>
@@ -160,7 +161,7 @@ export async function readClassForEditCore(
  * form would silently propose overwriting an arrangement it never showed.
  */
 async function readAssignedTrainer(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionIds: readonly string[],
 ): Promise<{ membershipId: string | null; displayName: string | null }> {
   const none = { membershipId: null, displayName: null };
@@ -242,7 +243,7 @@ interface AssignRpcRow {
  * save" rather than claiming an edit that never happened.
  */
 export async function updateClassCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   input: UpdateClassInput,
 ): Promise<ActionResult<ClassUpdateOutcome>> {
   const moduleCall = await client.rpc("admin_update_class_module", {

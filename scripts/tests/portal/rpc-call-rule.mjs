@@ -283,13 +283,25 @@ export function rpcShapeMismatches(root, isSetReturning) {
          * so one pattern spanning them is enough, and it cannot pair a helper
          * with an RPC from a different statement.
          */
-        const CALL = /\b(readRows|readMaybeRow)\s*<[^>]*>\s*\(\s*"[^"]*"\s*,\s*\(\)\s*=>\s*[a-zA-Z_$][\w$]*\s*\.rpc\(\s*"([a-z0-9_]+)"/g;
+        /*
+         * ⚠️ `readRpcRows` JOINED THIS SET ON 2026-08-16, AND THE CONTROL IS
+         * WHAT NOTICED. When the five `readRows`-over-`.rpc()` sites moved to
+         * the new helper, this pattern matched none of them and
+         * `PDSa-SHAPEc` went red — ▶ **the rule had no subject left, and the
+         * control said so instead of the rule passing over an empty set.**
+         * That is the `parentRoute` lesson from `P2-8`: a check whose subject
+         * moved is worse than one that fails.
+         * ⛔ `readRpcRows` returns an ARRAY, so it carries the same obligation
+         * as `readRows`: a `RETURNS record` function resolves to a BARE OBJECT
+         * and must be read with `readMaybeRow`.
+         */
+        const CALL = /\b(readRows|readRpcRows|readMaybeRow)\s*<[^>]*>\s*\(\s*"[^"]*"\s*,\s*\(\)\s*=>\s*[a-zA-Z_$][\w$]*\s*\.rpc\(\s*"([a-z0-9_]+)"/g;
         for (const [, helper, fn] of source.matchAll(CALL)) {
           const setReturning = isSetReturning(fn);
           if (setReturning === undefined) continue; // not a function this run can see
           inspected += 1;
-          if (!setReturning && helper === "readRows") {
-            mismatches.push(`${entry.name}:${fn} is RETURNS record (a bare object) but is read with readRows`);
+          if (!setReturning && (helper === "readRows" || helper === "readRpcRows")) {
+            mismatches.push(`${entry.name}:${fn} is RETURNS record (a bare object) but is read with ${helper}`);
           }
         }
       }

@@ -392,6 +392,21 @@ function LessonTable({
                 >
                   Report status
                 </th>
+                {/*
+                  ⛔ THE FRAME'S UNLABELLED `Stats ›` COLUMN — BUILT, AND ITS TARGET IS
+                  RULED. Operator, 2026-08-16: *"a lesson row points at LESSON statistics,
+                  so it targets 15."* ▶ `P2-4`'s record attributed it to screen `16` and
+                  is SUPERSEDED; the correction is at plan §30.5.
+                  ⚠️ AND IT WAS THE ONLY INBOUND ROUTE SCREEN `15` COULD HAVE. The
+                  Operator's walk found `15` reachable only by typing a URL, and reported
+                  the affordance as belonging on screen `14` — measured against that
+                  frame's `.png`, screen `14` DRAWS NO STATS CONTROL AT ALL, so building
+                  it there would have been an invention. It is drawn HERE.
+                  ⚠️ The header is deliberately unlabelled, exactly as the frame draws it.
+                */}
+                <th scope="col" className="px-[14px] pb-0.5">
+                  <span className="sr-only">Lesson statistics</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -416,11 +431,24 @@ function LessonTable({
                       </span>
                     )}
                   </td>
-                  <td className="rounded-e-[12px] px-[14px] py-3">
+                  <td className="px-[14px] py-3">
                     <ReportProgressChip
                       submitted={session.submittedCount}
                       learners={session.learnerCount}
                     />
+                  </td>
+                  <td className="rounded-e-[12px] px-[14px] py-3 text-right">
+                    {/*
+                      ⛔ NAVIGATION, NEVER PERMISSION. Screen `15` re-authorizes on its
+                      own — RLS plus the reads it already uses — so this link grants
+                      nothing (`A-022`: a frame authorizes no access).
+                    */}
+                    <Link
+                      href={`/management/classes/${classModuleId}/sessions/${session.classSessionId}/lesson-statistics`}
+                      className="whitespace-nowrap text-[12px] font-semibold text-brand-700 underline"
+                    >
+                      Stats ›
+                    </Link>
                   </td>
                 </tr>
               ))}

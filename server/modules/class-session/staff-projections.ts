@@ -42,6 +42,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/server/contracts/action-result";
 import { firstRow } from "@/server/modules/report-workflow/rpc-types";
+import type { AppDatabase } from "@/server/db/app-database";
 
 /**
  * The assigned trainer for one class session.
@@ -74,7 +75,7 @@ interface StaffIdentityRow {
  * function has no role test of its own to get out of step with the RPC's.
  */
 export async function getSessionStaffIdentityCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionId: string,
 ): Promise<ActionResult<SessionStaffIdentityDto>> {
   const { data, error } = await client.rpc("class_session_staff_identity", {
@@ -118,7 +119,7 @@ export async function getSessionStaffIdentityCore(
  * asking only about sessions it enumerated through its own scope.
  */
 export async function getSessionStaffIdentitiesCore(
-  client: SupabaseClient,
+  client: SupabaseClient<AppDatabase>,
   sessionIds: readonly string[],
 ): Promise<ActionResult<ReadonlyMap<string, SessionStaffIdentityDto>>> {
   const out = new Map<string, SessionStaffIdentityDto>();
