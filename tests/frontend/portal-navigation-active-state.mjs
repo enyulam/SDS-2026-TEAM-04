@@ -107,10 +107,23 @@ const EXPECTED_BY_ROUTE = new Map([
     "/trainer/sessions/[sessionId]/students/[studentId]/assess",
     { role: "trainer", label: "Schedule" },
   ],
-  ["/trainer/reports", { role: "trainer", label: "Returned reports" }],
-  ["/trainer/reports/[reportId]/generate", { role: "trainer", label: "Returned reports" }],
-  ["/trainer/reports/[reportId]/review", { role: "trainer", label: "Returned reports" }],
-  ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Returned reports" }],
+  /*
+   * P2-21: the trainer rail item was RETARGETED from the alias to the
+   * canonical route, and its label from "Returned reports" to "Reports".
+   *
+   * The old spelling named the ALIAS as though it were the screen: the rail
+   * pointed at /trainer/reports?status=needs_edit, so a trainer had no way
+   * to reach screen 09 at all -- which is C2C-007, and this table recorded
+   * the defect as the expectation.
+   *
+   * The three [reportId] sub-routes are screen 10 and are a genuine sub-tree
+   * of this item, which is why the rail item is NOT exact -- N-4 is the leg
+   * that proves that distinction bites.
+   */
+  ["/trainer/reports", { role: "trainer", label: "Reports" }],
+  ["/trainer/reports/[reportId]/generate", { role: "trainer", label: "Reports" }],
+  ["/trainer/reports/[reportId]/review", { role: "trainer", label: "Reports" }],
+  ["/trainer/reports/[reportId]/edit", { role: "trainer", label: "Reports" }],
   // Management.
   // `P2-7` / Operator option 2: `/management` is now a COMPATIBILITY REDIRECT
   // onto the canonical `/management/dashboard`, exactly as `/trainer` redirects
@@ -288,7 +301,13 @@ const EXPECTED_BY_ROUTE = new Map([
  * has to resolve to the same single active item as its bare route.
  */
 const ALIASES = [
-  ["trainer", "/trainer/reports?status=needs_edit", "/trainer/reports", "Returned reports"],
+  /*
+   * P2-21: the alias SURVIVES and still resolves onto the same single active
+   * item -- what changed is that the item is now the canonical route rather
+   * than the alias. Two live links still point here (the trainer dashboard
+   * and the trainer review screen), so the alias is preserved, not moved.
+   */
+  ["trainer", "/trainer/reports?status=needs_edit", "/trainer/reports", "Reports"],
   ["management", "/management/reports?status=trainer_approved", "/management/reports", "Reports"],
   ["management", "/management/reports?status=needs_edit", "/management/reports", "Reports"],
   ["management", "/management/reports?status=submitted", "/management/reports", "Reports"],

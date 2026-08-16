@@ -538,6 +538,41 @@ export interface AdapterTrainerStudentsDto {
   readonly classes: readonly { readonly classModuleId: string; readonly classLabel: string }[];
 }
 
+
+/**
+ * `P2-21` — screen `09` Trainer Reports.
+ *
+ * ⛔ NO RATING FIELD, AND THE ABSENCE IS THE REFUSAL. The frame draws a
+ * `Level` column of `Mastering`/`Developing`/`Mastered`/`Beginning`;
+ * `GC-7` refuses it because this pack's own `screen.md` §8 declares the
+ * screen NOT RATING-BEARING. ▶ Held in the TYPE, which a component cannot
+ * undo — a screen that merely declines to render one is a line away from
+ * carrying it.
+ *
+ * ⛔ `reportState` IS ONE OF `A-036`'s EIGHT, never the frame's
+ * `In session` / `Draft` (`GC-8`: a status must never be added to encode
+ * UI presence).
+ */
+export interface AdapterTrainerReportRowDto {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  readonly reportState: string;
+  readonly updatedAt: string;
+  /** ⚠️ `null` where the session carries no lesson — OMITTED, never invented (hero `0B`). */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+}
+
+export interface AdapterTrainerReportsDto {
+  readonly reports: readonly AdapterTrainerReportRowDto[];
+  readonly classes: readonly { readonly label: string; readonly count: number }[];
+  readonly total: number;
+}
+
 export interface AdapterRegisterStudentInput {
   readonly firstName: string;
   readonly lastName: string;

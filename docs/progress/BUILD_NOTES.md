@@ -10770,3 +10770,121 @@ needed.
 
 **Next: `P2-21`, starting with `C2C-007` as the plan requires** — screen `09`
 refuses its canonical route (`returned-reports-queue.tsx:36`).
+
+---
+
+## 2026-08-16 — `P2-21`: screen `09` Trainer Reports, `C2C-007` closed, and the first thing `prove:all` caught
+
+**Branch** `develop` · **HEAD in** `e555660` · **HEAD out** *(this commit)* ·
+**worktree** main tree only, clean at start.
+
+### Scope
+
+`P2-21` under the `P2-9 → P2-16` batch authorization — **which it did not need.**
+Screen `09` Trainer Reports at its canonical route `/trainer/reports`, with the
+`C2C-007` fix first, as the plan requires.
+
+### ⛔ Zero schema — §12.10 for the eighth consecutive phase
+
+**Functions and grants added, named as a list: the list is empty.** No migration,
+table, column, enum, policy, client grant, write path or audit string. Census
+`T=30 E=12 P=30 R=24 F=73`, with the **function count pinned** because a
+read-side function is precisely what the batch pre-authorizes.
+
+Measured at HEAD before writing anything: `report_list_trainer_reports()` (built
+at `P2-19` for the dashboard) already returns **every** report this trainer
+authored, and `class_sessions.lesson_number` / `lesson_title` are directly
+readable by a trainer under RLS. So the lesson is joined in the **application**.
+Widening the RPC was permitted by the batch and simply not needed — and a
+signature change nobody needs is a second caller to keep in step forever, which
+is the cost §54 had just finished paying across 22 call sites.
+
+### `C2C-007`, and the half of it that was not in the plan
+
+`/trainer/reports` rendered the returned-correction queue and returned
+`unavailable` unless `?status=needs_edit` was present. The route now branches on
+the **query only**; the alias is preserved (two live links depend on it) and the
+queue component is neither moved nor deleted.
+
+**The rail was the other half.** It pointed at `/trainer/reports?status=needs_edit`
+labelled `Returned reports` — naming the alias as though it were the screen — so
+a trainer had **no route to their own reports list at all**. Retargeted to the
+canonical route, labelled `Reports`, deliberately not `exact` because screen `10`
+is a genuine child.
+
+### Files
+
+**New:** `features/trainer/trainer-reports-route.tsx` ·
+`features/trainer/trainer-reports-screen.tsx` ·
+`server/modules/report-workflow/trainer-reports-projections.ts` ·
+`scripts/tests/portal/prove-p2-21-trainer-reports.mjs`
+
+**Modified:** `app/(portals)/trainer/reports/page.tsx` ·
+`components/layout/portal-navigation.ts` ·
+`tests/frontend/portal-navigation-active-state.mjs` ·
+`lib/frontend/contracts/physical-test.ts` · `lib/frontend/physical-test-port.ts` ·
+`lib/frontend/adapters/real-participant-port.ts` ·
+`lib/frontend/fixtures/physical-test-fixture.ts` ·
+`server/modules/integration-adapter/adapter-dtos.ts` ·
+`server/modules/integration-adapter/participant-actions.ts` ·
+`scripts/tests/portal/artefact-read-rule.mjs` ·
+`scripts/tests/portal/prove-artefact-read.mjs` · `scripts/tests/prove-all.mjs` ·
+`UI_REFERENCE_FINAL_MVP/09-trainer-reports/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` · `package.json`
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | **0** |
+| `next build` | **0** |
+| `prove:portal-p2-21` | **31 PASS · 0 FAIL** |
+| `prove:artefact-read` | **84 PASS · 0 FAIL** |
+| `portal-navigation-active-state` | **6 PASS · 0 FAIL** (repaired this phase) |
+| `prove:all` | **65 PASS · 1 known-red · 0 NOT-RUN · exit 0** (214s) |
+| VISUAL / `RENDERED` | **`NOT-RUN`** — no capture was taken and no render leg ran |
+
+### Findings
+
+1. **`prove:all` caught a real defect on its first outing, and it was one no
+   `portal-p2-21`-named suite would ever have executed.** The navigation
+   expectation table still named `Returned reports` for five trainer routes, and
+   `N-3` additionally found the new `Reports` rail item unreachable. A rail
+   rename is a two-file change whose second file is a test's expectation table —
+   invisible to `tsc` and to `build`. The suite that holds it, `P21a-13`, lives
+   inside `prove:portal-p2-1`. Fixed; six legs green.
+
+2. **The sweep's own report had §12.16's defect inside it.** Its excerpt filter
+   was `/^FAIL|NOT-RUN/`, anchored at column zero; `prove:serving-discipline`
+   prints `  FAIL  D-x` indented, so its red printed **a heading with nothing
+   under it**. The verdict was right — the exit code decided it — and the
+   evidence was dropped by a pattern. Now tolerates indentation, captures
+   **stderr**, and falls back to the last six non-empty lines.
+
+3. **`prove:serving-discipline` red once and did not reproduce.** Green
+   standalone, green after `prove:ruling-a` in sequence, green on the next full
+   sweep. Its output was lost to finding 2, so the cause is **unknown**. Recorded
+   as a **flake**, not as a closed item — calling it fixed because the next run
+   was green is the reasoning this project refuses elsewhere. It is the only
+   suite that serves a real Next.js child and samples its process tree.
+
+4. **`PRE_GATE` shrank 10 → 9, the only direction it may move.** `09` was exempt
+   because its canonical **route** had shipped; what that route shipped was
+   `C2C-007`. The exemption was recording a route that existed, not a screen that
+   had been built.
+
+5. **Seventeenth §12.14 instance**, and it was the plan section recording this
+   phase: appended through a shell heredoc, rejected with `unexpected EOF while
+   looking for matching '`, and **nothing was written at all** — only a `wc -l`
+   caught it. The adopted fix (`Write` tool, then append with Node) held on the
+   retry.
+
+6. **My own mojibake guard false-positived on `STATUS.md`** — the file *documents*
+   a CP1252 detector string, so a scan for that string finds it. Same family as
+   `PT21-6a`: a prohibition scanned over a document obliged to describe the
+   prohibition fires on its own compliance. Confirmed pre-existing by counting
+   occurrences at `HEAD` (1) and after the write (1).
+
+**Next: `P2-22` (`30` Parent Dashboard) under the batch** — `C-13` applies, `Q-27`
+is absolute, and the `This Term's Skills` card is `DO_NOT_IMPLEMENT` in full with
+Profile Details promoting into the vacated space.

@@ -109,7 +109,12 @@ for (const name of scripts) {
   });
   const code = run.status ?? -1;
   const verdict = code === 0 ? "PASS" : code === 1 ? "FAIL" : code === 2 ? "NOT-RUN" : "ERROR";
-  results.push({ name, code, verdict, output: run.stdout ?? "" });
+  /*
+   * ⚠️ stderr IS KEPT. A suite that dies before printing a single FAIL line —
+   * an import error, a missing container, a thrown assertion — says everything
+   * useful on stderr, and a report built from stdout alone shows an empty red.
+   */
+  results.push({ name, code, verdict, output: `${run.stdout ?? ""}\n${run.stderr ?? ""}` });
   const expected = knownRed.has(name);
   const mark =
     verdict === "PASS" && expected ? "⛔ NOW GREEN" : verdict === "PASS" ? "PASS   " : `⛔ ${verdict}`;
@@ -127,11 +132,32 @@ const healed = results.filter((r) => r.verdict === "PASS" && knownRed.has(r.name
 console.log(`\n─────────────────────────────────────────────────────────────────`);
 console.log(`${results.filter((r) => r.verdict === "PASS").length} PASS · ${results.filter((r) => r.verdict === "FAIL").length} FAIL · ${notRun.length} NOT-RUN/ERROR   (${elapsed}s)`);
 
+/*
+ * ⛔ THE EXCERPT FALLS BACK TO THE TAIL WHEN THE PATTERN MATCHES NOTHING, AND
+ *    THAT IS NOT A NICETY — IT IS §12.16's FAMILY INSIDE THIS FILE.
+ *
+ * ⚠️ MEASURED 2026-08-16, THE FIRST TIME THIS SWEEP CAUGHT SOMETHING REAL. The
+ * excerpt was `/^FAIL|NOT-RUN/`, anchored at column zero. `prove:serving-
+ * discipline` prints `  FAIL  D-x` with a two-space indent, so its red was
+ * reported as a bare heading with **NOT ONE LINE UNDER IT** — the verdict was
+ * correct and the evidence was silently dropped by a pattern.
+ *
+ * ▶ The exit code decided the verdict, which is why the sweep was still right
+ * (§12.16). But a report that shows nothing forces the reader to re-run the
+ * suite by hand to learn what a gate already knew, and that is exactly how a
+ * red gets waved through.
+ */
+const excerpt = (output) => {
+  const matched = output.split("\n").filter((l) => /^\s*(FAIL|NOT-RUN|ERROR|✗|⛔ FAIL)/.test(l));
+  if (matched.length > 0) return matched.slice(0, 6);
+  const tail = output.split("\n").filter((l) => l.trim().length > 0).slice(-6);
+  return tail.length > 0
+    ? ["⚠️ no FAIL-shaped line matched — LAST 6 NON-EMPTY LINES instead:", ...tail]
+    : ["⚠️ the suite produced NO OUTPUT AT ALL on stdout or stderr — run it directly"];
+};
 for (const r of unexpectedRed) {
   console.log(`\n⛔ UNEXPECTED ${r.verdict}: ${r.name}`);
-  for (const line of r.output.split("\n").filter((l) => /^FAIL|NOT-RUN/.test(l)).slice(0, 6)) {
-    console.log(`     ${line}`);
-  }
+  for (const line of excerpt(r.output)) console.log(`     ${line}`);
 }
 for (const k of KNOWN_RED) {
   const r = results.find((x) => x.name === k.script);

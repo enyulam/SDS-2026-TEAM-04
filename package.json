@@ -88,6 +88,7 @@
     "prove:portal-p2-17": "node --env-file=.env.local scripts/tests/portal/prove-p2-17-trainer-my-classes.mjs",
     "prove:portal-p2-19": "node --env-file=.env.local scripts/tests/portal/prove-p2-19-trainer-dashboard.mjs",
     "prove:portal-p2-20": "node --env-file=.env.local scripts/tests/portal/prove-p2-20-trainer-students.mjs",
+    "prove:portal-p2-21": "node --env-file=.env.local scripts/tests/portal/prove-p2-21-trainer-reports.mjs",
     "prove:portal-p2-12": "node --env-file=.env.local scripts/tests/portal/prove-p2-12-register-student.mjs",
     "prove:portal-p2-13": "node --env-file=.env.local scripts/tests/portal/prove-p2-13-create-parent.mjs",
     "prove:portal-p2-14": "node --env-file=.env.local scripts/tests/portal/prove-p2-14-edit-student.mjs",

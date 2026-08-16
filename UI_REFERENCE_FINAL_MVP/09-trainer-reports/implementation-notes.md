@@ -195,3 +195,24 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+---
+
+## Artefact-read record — `P2-21`, 2026-08-16
+
+Screen `09` was **rebuilt under the `AR-1b` rule**, so it gains a block and is
+removed from `PRE_GATE`. That is the direction the rule's own header points:
+*"It SHRINKS by one route only: a screen REBUILT under the rule gains a block …
+so the forcing function points at removal, never at addition."*
+
+⚠️ It was in `PRE_GATE` because its canonical route had already shipped — but
+what it shipped was **`C2C-007`**: the route answered only `?status=needs_edit`
+and returned `unavailable` otherwise. ▶ The exemption was recording a route that
+existed, not a screen that had been built.
+
+```artefact-read
+screen: 09
+pack: Trainer - Reports
+component: features/trainer/trainer-reports-screen.tsx
+html-values: 12.50px, 12px, 13px, 11px, 17px, 999px, 14px
+screen-md-quote: Not rating-bearing.
+```

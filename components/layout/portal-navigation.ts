@@ -167,8 +167,28 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         icon: "document",
       },
       {
-        href: "/trainer/reports?status=needs_edit",
-        label: "Returned reports",
+        /*
+         * ⛔ `P2-21` — RETARGETED FROM `?status=needs_edit` TO THE CANONICAL
+         * ROUTE, BECAUSE THE CANONICAL ROUTE NOW ANSWERS.
+         *
+         * It read `href: "/trainer/reports?status=needs_edit"` / `label:
+         * "Returned reports"` — the rail pointing at the ONLY thing the route
+         * served, because `/trainer/reports` itself returned `unavailable`
+         * (`C2C-007`). ▶ The rail was describing a defect, faithfully.
+         *
+         * ⚠️ THE FRAME'S RAIL ITEM IS `Reports`, and screen `09` is what it
+         * opens. The returned-correction queue stays reachable at
+         * `?status=needs_edit` and is still linked from the trainer dashboard
+         * and the review screen — it is not orphaned, and its four inbound
+         * links are unchanged.
+         *
+         * ⚠️ DELIBERATELY NOT `exact`: `/trainer/reports/[reportId]/review`,
+         * `/edit` and `/generate` are children of this item, and an exact match
+         * would resolve them to ZERO active rail items — `C2C-002`, decided in
+         * advance rather than after it bit.
+         */
+        href: "/trainer/reports",
+        label: "Reports",
         path: "/trainer/reports",
         icon: "reports",
       },

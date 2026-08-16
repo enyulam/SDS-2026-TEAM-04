@@ -648,7 +648,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-18** | `03` Trainer Lesson Plan | `D-4` download + **KEY FOCUS in a distinct position** | P2-6, P2-17 | `D-4`'s hard constraint |
 | **P2-19** | `01` Trainer Dashboard | Trainer landing at `/trainer/dashboard` | P2-17 | `GC-7` — no rating column |
 | **P2-20** | `04` Trainer Students | Trainer student list | P2-17 | `GC-7` |
-| **P2-21** | `09` Trainer Reports | ⛔ **fix `C2C-007` first**, then the frame's table | — | `GC-7`, `GC-8` |
+| ~~**P2-21**~~ ✅ **BUILT 2026-08-16** | `09` Trainer Reports | ⛔ **`C2C-007` FIXED**, then the frame's table | — | `GC-7`, `GC-8` — **both refused**; §56 |
 | **P2-22** | `30` Parent Dashboard | Profile Details promoted, selector, calendar, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27`; ⛔ **no TA field** (§6.2) |
 | **P2-23** | `31` Parent Calendar | **Only what §6.1 lists as surviving** | P2-22 | ⛔ **`C-12` — report delivered, ruling owed** |
 | **P2-24** | `28` Term Report | ⛔ **DEFERRED by `C-11` — do not build** | — | ⚠️ **`A-044` noted and unmet, deliberately** |
@@ -1165,7 +1165,7 @@ inert treatment was chosen for.
 | ⚠️ **`test:integration` exit 1 — AND `prove:stage3-authenticated` exit 1, ONE ROOT CAUSE** | `OPEN`, **re-measured 2026-08-12 at `P2-1`** | `INT-A5` ×2, `INT-Q27`, `S3-M1-r`, `S3-P1-r`, `S3-P2-r`. ▶ **Both suites are pinned to an EMPTY-FIXTURE state the Operator's walkthrough legitimately moved** — *suite staleness, product correct*, and **neither was caused by `P2-1`**, which writes nothing. `INT-Q27` additionally expects a Parent DTO without the `context` key hero Phase 1 added. ⛔ ~~`run-integration.mjs:517` calls `pass("INT-A5")` **unconditionally** after both `fail()`s~~ ✅ **THAT NOTE IS ITSELF STALE — measured at HEAD, the block is guarded by `failuresBefore` and prints no `PASS` when it fails.** The instrument defect is closed; the two `INT-A5` failures are real and are fixture staleness. ⚠️ **`stage3` is the project's ONLY harness that renders an AUTHENTICATED surface**, so repairing it is also the precondition for giving any new screen a real render leg. ~~**Scheduled as one bounded unit before `P2-2`**~~ ✅ **DONE 2026-08-12 — BOTH SUITES EXIT 0 AND THIS ITEM IS CLOSED.** `INT-A5` now DERIVES a pre-approval report at run time with a control proving the same read returns content for the submitted pair; `INT-Q27` is corrected to the current field set and STRENGTHENED by pinning `context`’s own seven fields; `stage3`’s three render legs are STATE-DERIVED. ✅ **Two `Q-27` legs that had been `NOT-RUN` now RUN**, and **screen `12` gained the first RENDERED proof of any Part 2 surface** (`S3-M2`, plus `S3-M2-omissions` asserting the three ruled omissions and `G-2` on the painted page). ⚠️ **VISUAL acceptance stays `NOT-RUN`** — a DOM-text proof is not one |
 | ⚠️ **`RENDERED CAPTURE` `NOT-RUN` on every authenticated surface** | `OPEN` | Not closed by any phase unless one runs a capture |
 | ⚠️ **The Phase 8/11 gap** | `OPEN` | Structural consistency is **neither a visual nor a functional acceptance** |
-| ⛔ **`09` refuses its canonical route** (`C2C-007`) | `OPEN`, measured | `P2-21`, first |
+| ~~⛔ **`09` refuses its canonical route** (`C2C-007`)~~ ✅ **CLOSED 2026-08-16** | ~~`OPEN`, measured~~ ✅ **FIXED at `P2-21`, first thing, as the plan required** | `/trainer/reports` now BRANCHES: `?status=needs_edit` keeps the returned-correction queue, the bare route renders screen `09`. ⚠️ **The alias is PRESERVED, not moved** — two live links still point at it (`PT21-5b`). ⛔ The rail was ALSO retargeted: it read `/trainer/reports?status=needs_edit` / `Returned reports`, **naming the alias as though it were the screen**, so a trainer had no route to `09` at all |
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
 | ~~⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN**~~ ✅ **CLOSED** | ~~`OPEN` · **Operator decision required**~~ ✅ **RULED 2026-08-13** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section. ✅ **RULED AND CLOSED 2026-08-13 — BOUNDED §12 AUTHORIZATION.** The Operator authorized extending the allow-list **for `evidence-upload.ts` SPECIFICALLY, not as a class**, on the ground that **the premise lapsed BY AUTHORIZATION, NOT BY DRIFT**: `T-P44` pinned those modules as unimported when nothing imported them, and `D-5`'s client-direct upload — a bounded **ADR-3 exception** — legitimately does. ⛔ **Any other module importing either one still fails**, proved TWICE: `T-P44c` plants a synthetic module and requires **both detectors to see it and both allow-lists to reject it** while the one authorized module is **admitted**; and a **real file was planted on disk**, measured **exit 1**, and removed, with **exit 0** after. ⚠️ **The control shares the LIVE sets and regexes** — the first draft gave it private copies, which is the very defect its own comment warned about. ▶ **Operator: *"A guard whose premise lapsed still needs a ruling, because 'the premise lapsed' is exactly what someone says when they want the guard out of the way."*** |
 | ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ~~✅ **OPERATOR RULING: WAIT FOR SCREEN `13`** … ⛔ **If `13` draws no Edit control either, THAT IS A FINDING**~~ ✅ **CLOSED 2026-08-13 BY THE AUTHORIZATION-A REBUILD — THE CONTROL IS BUILT AND WIRED.** ~~THE PREMISE WAS FALSE AND THE FINDING IS WITHDRAWN.~~ **`Edit class` IS in frame `13`'s HEADER CARD**, top-right, beside ASSIGNED TRAINER and ASSISTANT. The *"no inbound affordance"* report was a `grep` over the pack's **prose note**, never a reading of the frame (§12). ▶ **This is `TRUE-DRIFT`, not a design gap**: the control is drawn and simply was not built. The Operator rules the rebuild |
@@ -6934,3 +6934,157 @@ treatment `PR-5` gives unchecked call sites and `PL-6` gives content drift:
 The superseded `KNOWN-RED-AR-4-14` block is **preserved verbatim** in
 `artefact-read-rule.mjs` under annotate-never-delete, with the supersession, the
 three instances and the honoured *"do not lower"* instruction recorded above it.
+
+---
+
+## §56 — `P2-21`: screen `09` Trainer Reports, and **the first thing `prove:all` caught**
+
+*(2026-08-16. `P2-21` under the `P2-9 → P2-16` batch authorization — **which it did
+not need.**)*
+
+### 56.1 ⛔ ZERO SCHEMA. §12.10 FOR THE EIGHTH CONSECUTIVE PHASE
+
+**Named as an empty list, not as a count of zero:** no function, no grant, no
+table, no column, no enum, no policy, no client table grant, no write path, no
+audit string. `PT21-1` reads the migrations directory; `PT21-1a` pins the live
+catalogue **including the function count** — `T=30 E=12 P=30 R=24 F=73` — because
+a read-side function is exactly what the batch **pre-authorizes**, and therefore
+exactly what an unmeasured phase could add without anyone noticing.
+
+**Measured at HEAD before a line was written:**
+
+| Need | Already there |
+|---|---|
+| every report this trainer authored | `report_list_trainer_reports()`, added at `P2-19` for the dashboard — it returns **all** of them; the dashboard took the most recent few |
+| the frame's `Lesson` column | `class_sessions.lesson_number` / `lesson_title`, **directly readable by a trainer under RLS** — 17 rows visible |
+
+⚠️ **SO THE LESSON IS JOINED IN THE APPLICATION, NOT ADDED TO THE RPC.** Widening
+`report_list_trainer_reports()` would have been a `DROP` + `CREATE` of a function
+the dashboard also calls. The batch *permitted* it. It was not *needed*, and a
+signature change nobody needs is a second caller to keep in step forever — which
+is precisely the cost §54 had just finished paying across 22 call sites.
+
+`PT21-2c` reads the defining migration by name (`…_p2_19_trainer_reports.sql`),
+because *"the row already carried it"* is a claim about **history** and must not
+be sourced from this phase's own notes.
+
+### 56.2 `C2C-007` — the canonical route refused itself
+
+`/trainer/reports` is screen `09`'s canonical route. It rendered the
+returned-correction queue and returned `unavailable` unless `?status=needs_edit`
+was present. ▶ **A trainer had no route to their own reports list at all.**
+
+The fix is one branch (`trainer-reports-route.tsx`) reading **the query only** —
+no role, claim, permission or membership (`A-045`: a query parameter is
+presentation selection, never authority). The queue is **not moved and not
+deleted**: `09-trainer-reports/screen.md` §1 ratifies exactly this shape, and two
+live links point at the alias.
+
+⛔ **AND THE RAIL WAS PART OF THE DEFECT.** It read
+`href: "/trainer/reports?status=needs_edit"` / `label: "Returned reports"` —
+**naming the alias as though it were the screen**. Retargeted to the canonical
+route, labelled `Reports`, and deliberately **not `exact`**, because screen `10`
+at `/trainer/reports/[reportId]/review` is a genuine child.
+
+⚠️ **THE `View ›` LINK TARGETS `/review`, AND THAT IS MEASURED RATHER THAN
+PREFERRED.** `[reportId]` carries `edit`, `generate` and `review` and **no
+`page.tsx`** — so linking to screen `10`'s canonical route would have shipped a
+404, **the same defect class as the `C2C-007` this phase exists to fix**.
+Building the index route would be building screen `10`. Recorded, not invented.
+
+### 56.3 The two refusals, at three layers each
+
+| | `GC-7` — the `Level` column | `GC-8` — the `In session` / `Draft` chips |
+|---|---|---|
+| **1. the data** | `PT21-2b` pins the RPC's result type string-for-string: **no rating column exists to read** | `PT21-4a` — the enum still holds exactly `A-036`'s eight |
+| **2. the type** | `PT21-6` — the DTO carries no rating field, over a **bounded** 459 chars | the DTO carries the real `report_state` |
+| **3. the page** | `PT21-6b` — no rating vocabulary, no `Level` heading; **absent, not empty** | `PT21-4` — 3 distinct real states render |
+
+`PT21-7` proves the frame really draws all eight refused tokens
+(`Mastering:3 Developing:3 Mastered:2 Beginning:2 Level:1 In session:1 Draft:3
+Junior:9`), so the refusals refuse **something that exists** (the `PS-7c`
+lesson). `Junior` is refused separately: it is not a ratified Class Grade
+(`A-016`, `A-054`), so the filter chips are built from the rows' own labels.
+
+⚠️ **THE `Lesson` COLUMN IS BUILT AND MEASURABLY EMPTY** — `0/17` sessions carry
+lesson data. `PT21-8` **asserts that fixture fact**, so if a session ever gains
+lesson data the leg goes red and the next reader learns the emptiness was never a
+defect. Hero `0B`: omitted, never a dash, never fabricated.
+
+### 56.4 ⛔ `AR-1c` SHRANK 10 → 9 — the frozen list moved in its only permitted direction
+
+Screen `09` was on the grandfather `PRE_GATE` list, **exempt because its canonical
+route had already shipped**. ▶ **What that route shipped was `C2C-007`.** The
+exemption was recording a route that existed, not a screen that had been built.
+
+Rebuilding it under the rule earns the block and forces the removal, exactly as
+the list's own header describes. The pin is now **9** and carries the standing
+note that **raising it is a §12 stop-and-ask** — the edit is trivial, which is
+why the prohibition sits at the assertion rather than in a comment upstream.
+
+### 56.5 ⚠️ WHAT `prove:all` CAUGHT — the Finding-3 fix earning itself in one run
+
+The sweep went red on **two** suites the old prefix-matched gate would never have
+executed:
+
+| Suite | Cause | Disposition |
+|---|---|---|
+| `prove:portal-p2-1` → `P21a-13` → `portal-navigation-active-state` | **REAL.** `N-2` and `N-3`: the expectation table still named `Returned reports` for five trainer routes, and `N-3` found the new `Reports` rail item unreachable | ✅ **FIXED** — expectations retargeted, all six legs green |
+| `prove:serving-discipline` | ⚠️ **DID NOT REPRODUCE.** Green standalone, green after `prove:ruling-a` in sequence, green on the next full sweep | ⚠️ **RECORDED AS A FLAKE, CAUSE UNKNOWN** — see below |
+
+⛔ **THE `N-2` FINDING IS THE POINT.** A rail rename is a two-file change and the
+second file is a test's expectation table. `tsc` cannot see it, `build` cannot see
+it, and **no `portal-p2-21`-named suite would have run it** — `P21a-13` lives
+inside `prove:portal-p2-1`, a phase-1 suite. ▶ **A naming convention was doing
+load-bearing work by accident** (§12.18), and the sweep that ignores names caught
+it on its first outing.
+
+### 56.6 ⛔ AND THE SWEEP'S OWN REPORT HAD §12.16's DEFECT INSIDE IT
+
+`prove:serving-discipline` failed and the report printed **its heading with not
+one line under it**. The excerpt filter was `/^FAIL|NOT-RUN/`, anchored at column
+zero; that suite prints `  FAIL  D-x` with a two-space indent.
+
+▶ **The verdict was right — the exit code decided it — and the evidence was
+silently dropped by a pattern.** That is §12.16's family (*a filter between a gate
+and its signal*) and §12.18's (*a population defined by a pattern*), inside the
+gate written to close them both.
+
+**Fixed three ways:** the pattern tolerates indentation, **stderr is captured**
+(a suite that dies before printing anything says so there), and where nothing
+matches the excerpt **falls back to the last six non-empty lines** rather than
+showing an empty red.
+
+⚠️ **THE FLAKE IS REPORTED, NOT EXPLAINED.** `prove:serving-discipline` serves a
+real Next.js child on `127.0.0.1:3419` and samples its process tree for
+non-loopback peers; it is the only suite with either property. Its output was
+lost to the excerpt defect above, and it has been green on all three runs since.
+⛔ **A suite that reds once in a 214-second sweep and cannot be reproduced is a
+finding, not a closed item** — and calling it fixed because the next run was green
+would be exactly the reasoning this plan refuses elsewhere.
+
+### 56.7 ⚠️ SEVENTEENTH §12.14 INSTANCE, AND IT WAS THIS SECTION
+
+This section's first draft was appended through a shell heredoc. Bash rejected it
+with `unexpected EOF while looking for matching '` and **wrote nothing at all** —
+the whole `cat >>` never ran, so a `wc -l` was the only reason it was noticed.
+
+▶ **The adopted fix held on the retry**: written with the `Write` tool to a file,
+appended by Node. **Seventeen instances, one operation shape.** The destination
+change is the response; care is not.
+
+### 56.8 Gates
+
+| Gate | Verdict |
+|---|---|
+| `tsc --noEmit` | ✅ **0** |
+| `next build` | ✅ **0** |
+| `prove:portal-p2-21` | ✅ **31 PASS · 0 FAIL** |
+| `prove:artefact-read` | ✅ **84 PASS · 0 FAIL** |
+| `portal-navigation-active-state` | ✅ **6 PASS · 0 FAIL** (repaired this phase) |
+| **`prove:all`** | ✅ **65 PASS · 1 known-red · 0 NOT-RUN · exit 0** (214s) |
+| VISUAL acceptance | ⛔ **`NOT-RUN`** — no capture was taken. A DOM-text proof is not a visual acceptance, and this phase ran no render leg at all |
+| `RENDERED` proof | ⛔ **`NOT-RUN`** for screen `09` |
+
+⚠️ **`S3-T1-r` remains the single known-red**, unchanged: fixture vintage, awaiting
+its own bounded authorization (§34).

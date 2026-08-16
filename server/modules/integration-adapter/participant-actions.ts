@@ -135,6 +135,7 @@ import type {
   AdapterClassStatisticsDto,
   AdapterTrainerMyClassesDto,
   AdapterTrainerDashboardDto,
+  AdapterTrainerReportsDto,
   AdapterTrainerStudentsDto,
   AdapterRegisterStudentInput,
   AdapterCreateParentInput,
@@ -190,6 +191,7 @@ import { readLessonStatisticsCore } from "@/server/modules/management-view/lesso
 import { readClassStatisticsCore } from "@/server/modules/management-view/class-statistics-projections";
 import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
 import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
+import { readTrainerReportsCore } from "@/server/modules/report-workflow/trainer-reports-projections";
 import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
 import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
 import { createParentAccountCore } from "@/server/modules/identity-access/parent-account-creation";
@@ -596,6 +598,39 @@ export async function adapterGetDraftGenerationContext(
         (await readStudentName(client, context.data.studentId)) ?? UNREAD_STUDENT_NAME,
       observationLockVersion: observation.data.observationLockVersion,
       status: working.status,
+    },
+  };
+}
+
+/**
+ * `P2-21` — screen `09` Trainer Reports.
+ *
+ * ⚠️ SAME ALLOW-LIST MAPPER DISCIPLINE, ONE FIELD AT A TIME. ⛔ It is what
+ * keeps a rating out of this surface BY CONSTRUCTION: the projection returns no
+ * rating field, and this mapper names none — so `GC-7` holds even if a later
+ * phase widens the read, because a field nobody writes down does not arrive.
+ */
+export async function adapterReadTrainerReports(): Promise<ActionResult<AdapterTrainerReportsDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readTrainerReportsCore(client);
+  if (!result.ok) return { outcome: "unavailable" };
+  return {
+    outcome: "success",
+    data: {
+      reports: result.data.reports.map((r) => ({
+        reportId: r.reportId,
+        classSessionId: r.classSessionId,
+        studentId: r.studentId,
+        studentName: r.studentName,
+        classLabel: r.classLabel,
+        sessionDate: r.sessionDate,
+        reportState: r.reportState,
+        updatedAt: r.updatedAt,
+        lessonNumber: r.lessonNumber,
+        lessonTitle: r.lessonTitle,
+      })),
+      classes: result.data.classes.map((c) => ({ label: c.label, count: c.count })),
+      total: result.data.total,
     },
   };
 }

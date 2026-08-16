@@ -32,6 +32,7 @@ import {
   type TrainerMyClassesDto,
   type TrainerDashboardDto,
   type TrainerStudentsDto,
+  type TrainerReportsDto,
   type RegisterStudentInput,
   type CreateParentInput,
   type UpdateStudentInput,
@@ -1363,6 +1364,18 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * manufactured `last assessed` date would claim an assessment happened.
    */
   async readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-21` — screen `09`. ⛔ THE FIXTURE REFUSES, for the same reason as
+   * `04`, and one stronger: a manufactured list would put invented learner
+   * names against invented REPORT STATES, and a report state is a lifecycle
+   * position (`A-036`). ▶ Fabricating one tells an operator a child's report
+   * has been submitted, or is awaiting them, when no row exists anywhere.
+   */
+  async readTrainerReports(): Promise<UiActionResult<TrainerReportsDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

@@ -110,8 +110,15 @@ check(
 const preGateWithBlocks = PRE_GATE.filter((id) => (byScreen.get(id) ?? []).length > 0);
 check(
   "AR-1c",
-  PRE_GATE.length === 10 && preGateWithBlocks.length === 0,
-  `⛔ THE PRE-GATE LIST IS CLOSED at exactly 10 (${PRE_GATE.length}) and NO member has acquired a block (${preGateWithBlocks.join(", ") || "none"}) — ⚠️ it may only SHRINK: a screen REBUILT under the rule gains a block and this leg then goes red until it is removed from the list, so the forcing function points at REMOVAL and never at addition. ⛔ An eleventh entry would be a phase exempting itself: `+
+  /*
+   * ⛔ THE PIN RATCHETS DOWN, NEVER UP. It was 10 when frozen 2026-08-16; it is
+   * 9 because `09` was REBUILT at `P2-21` and now carries its own block.
+   * ▶ A later phase raising this number is a phase exempting itself from the
+   * rule, which is a `CLAUDE.md` §12 stop-and-ask — the edit is trivial and
+   * that is precisely why the prohibition is stated at the assertion.
+   */
+  PRE_GATE.length === 9 && preGateWithBlocks.length === 0,
+  `⛔ THE PRE-GATE LIST IS CLOSED at exactly 9, RATCHETED DOWN FROM 10 (${PRE_GATE.length}) and NO member has acquired a block (${preGateWithBlocks.join(", ") || "none"}) — ⚠️ it may only SHRINK: a screen REBUILT under the rule gains a block and this leg then goes red until it is removed from the list, so the forcing function points at REMOVAL and never at addition. ⛔ An eleventh entry would be a phase exempting itself: `+
     `\`CLAUDE.md\` §12 stop-and-ask`,
 );
 

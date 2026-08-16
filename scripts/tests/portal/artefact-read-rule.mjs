@@ -88,7 +88,11 @@ export const UNMEASURED = [
   // register entry was REQUIRED rather than remembered: `AR-1b` shipped one
   // phase earlier, so omitting it would have failed the run.
   // ⛔ `20` LEFT THIS LIST AT `P2-12`, built under the rule.
-  "02", "03", "05", "06", "07", "08", "09", "10",
+  // ⛔ `09` LEFT THIS LIST AT `P2-21` — REBUILT under the rule, its seven
+  // values read from the `.html` during that phase. ⚠️ It is the first screen
+  // to leave BOTH this list and `PRE_GATE` in one phase, which is what the
+  // grandfather header's "only shrinks" clause anticipated.
+  "02", "03", "05", "06", "07", "08", "10",
   // ⛔ `17` LEFT THIS LIST AT `P2-8` — by being BUILT UNDER THE RULE, which is
   // the only exit this list has. It was never annotated out.
   // ⛔ `21` LEFT THIS LIST AT `P2-13`, built under the rule.
@@ -98,7 +102,7 @@ export const UNMEASURED = [
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["01", "04", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27"];
+export const MEASURED = ["01", "04", "09", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27"];
 
 /*
  * =====================================================================
@@ -124,7 +128,21 @@ export const MEASURED = ["01", "04", "11", "12", "13", "14", "17", "20", "21", "
  * block, and `AR-1c` then goes red until it is removed from here — so the
  * forcing function points at removal, never at addition.
  */
-export const PRE_GATE = ["02", "05", "09", "15", "16", "18", "23", "24", "29", "32"];
+/*
+ * ✅ SHRANK 10 -> 9 ON 2026-08-16, AND IN THE ONLY DIRECTION PERMITTED.
+ * `09` was REBUILT under the rule at `P2-21` and now carries its own block, so
+ * it leaves this list exactly as the header describes.
+ *
+ * ⚠️ IT WAS EXEMPT FOR A ROUTE THAT EXISTED, NOT A SCREEN THAT WAS BUILT. The
+ * canonical route `/trainer/reports` had shipped — serving `?status=needs_edit`
+ * only, and returning `unavailable` otherwise (`C2C-007`). ▶ That is worth
+ * recording, because "the route already shipped" was doing more work as an
+ * exemption than the underlying state deserved.
+ *
+ * ⛔ `AR-1c` PINS THIS AT NINE NOW. Nothing may be added; the next removal is
+ * another rebuild.
+ */
+export const PRE_GATE = ["02", "05", "15", "16", "18", "23", "24", "29", "32"];
 
 /** `screen id → { pack, route }`, parsed from the ratified route inventory. */
 export function screenInventory(root) {

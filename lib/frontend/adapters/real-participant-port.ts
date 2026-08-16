@@ -74,6 +74,7 @@ import type {
   TrainerMyClassesDto,
   TrainerDashboardDto,
   TrainerStudentsDto,
+  TrainerReportsDto,
   RegisterStudentInput,
   CreateParentInput,
   UpdateStudentInput,
@@ -150,6 +151,7 @@ import {
   adapterReadTrainerMyClasses,
   adapterReadTrainerDashboard,
   adapterReadTrainerStudents,
+  adapterReadTrainerReports,
   adapterRegisterStudent,
   adapterCreateParentAccount,
   adapterUpdateStudent,
@@ -388,6 +390,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** `P2-20` — screen `04`. */
     readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>> {
       return guard(() => adapterReadTrainerStudents());
+    },
+
+    /** `P2-21` — screen `09`. */
+    readTrainerReports(): Promise<UiActionResult<TrainerReportsDto>> {
+      return guard(() => adapterReadTrainerReports());
     },
 
     /** `P2-12` — screen `20`. */

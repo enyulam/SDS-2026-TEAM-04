@@ -564,6 +564,41 @@ export type TrainerStudentsDto = {
  * no column and are CITED on the page, not modelled here — a DTO field with
  * nowhere to go is how an invented column starts.
  */
+
+/**
+ * `P2-21` — screen `09` Trainer Reports.
+ *
+ * ⛔ NO RATING FIELD, AND THE ABSENCE IS THE REFUSAL. The frame draws a
+ * `Level` column of `Mastering`/`Developing`/`Mastered`/`Beginning`;
+ * `GC-7` refuses it because this pack's own `screen.md` §8 declares the
+ * screen NOT RATING-BEARING. ▶ Held in the TYPE, which a component cannot
+ * undo — a screen that merely declines to render one is a line away from
+ * carrying it.
+ *
+ * ⛔ `reportState` IS ONE OF `A-036`'s EIGHT, never the frame's
+ * `In session` / `Draft` (`GC-8`: a status must never be added to encode
+ * UI presence).
+ */
+export type TrainerReportRowDto = {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  readonly reportState: string;
+  readonly updatedAt: string;
+  /** ⚠️ `null` where the session carries no lesson — OMITTED, never invented (hero `0B`). */
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+};
+
+export type TrainerReportsDto = {
+  readonly reports: readonly TrainerReportRowDto[];
+  readonly classes: readonly { readonly label: string; readonly count: number }[];
+  readonly total: number;
+};
+
 export type RegisterStudentInput = {
   readonly firstName: string;
   readonly lastName: string;
