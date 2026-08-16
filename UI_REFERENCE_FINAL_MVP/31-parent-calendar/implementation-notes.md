@@ -53,3 +53,28 @@ Source of record: `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCREEN_RECONCILIATION_PLAN.m
 
 **No authoritative visual bytes (PNG or HTML) were altered by this recording.**
 
+---
+
+## Artefact-read record — `P2-23`, 2026-08-17
+
+Screen `31` was built under the `AR-1b` rule, so it leaves `UNMEASURED` by the
+only exit that list has: being built, never annotated out.
+
+⚠️ **THE PROSE NOTE NAMES THE RATING APPARATUS AND THE FRAME ENCODES IT**, which
+is the §7.4.1 point from the other direction on this screen: here the note and
+the frame AGREE, and both are refused by `GC-2`/`C-12`. Measured in the
+`.html` — `Beginning`, `Developing`, `Mastering`, `Mastered` twice each,
+`mastered days` once, `What the colours mean` once. ▶ The refusals refuse
+something that demonstrably exists.
+
+⚠️ **`15px` WAS READ AND DELIBERATELY NOT CITED** — 14 occurrences in the
+`.html`, none in the built component. Citing a value the component does not use
+is exactly what `AR-5` rejects.
+
+```artefact-read
+screen: 31
+pack: Parent - Calendar
+component: features/parent/parent-calendar-screen.tsx
+html-values: 16px, 13px, 12.50px, 11.50px, 11px, 10px, 20px, 999px, 12px
+screen-md-quote: Not rating-bearing.
+```

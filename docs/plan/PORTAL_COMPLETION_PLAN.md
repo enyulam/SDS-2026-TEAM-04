@@ -96,7 +96,7 @@ Against the `GC-1` … `GC-14` register in `UI_REFERENCE_FINAL_MVP/FINAL_MVP_SCR
 | **`C-9`** | ⛔ **`D-1` = REPORT DETAIL surfaces only.** Ratings on a list or statistics surface **invites comparison between children** and was not authorized | `P1-1` `P2-7` `P2-8` `P2-9` `P2-15` `P2-16` |
 | **`C-10`** | ✅ **All nine on `19`.** The frame's four is a selection of assessment substance with no ratified basis | `P1-1` |
 | **`C-11`** | ⛔ **`28` deferred.** ⚠️ **`A-044`'s requirement is noted and UNMET, DELIBERATELY** | `P2-24` |
-| **`C-12`** | ⚠️ **Report first, do not build** — §6.1 below is that report | `P2-23` |
+| **`C-12`** | ~~⚠️ **Report first, do not build**~~ ✅ **DISCHARGED 2026-08-17** — §6.1 below is that report; every line is dispositioned and its one design question was **ruled 2026-08-11** (both marks, nesting, SC 1.4.1). Built at `P2-23` to the SURVIVES column exactly | `P2-23` |
 | **`C-13`** | ✅ **DOB and own contact permitted on `30`.** The narrower residue is identified in §6.2 | `P2-22` |
 | **`C-14`** | ⚠️ **Field inventories listed for ratification** — §6.3 | `P2-2` `P2-11`…`P2-14` |
 | **`C-15`** | ⛔ **Student photo deferred entirely** | `P2-12` `P2-14` |
@@ -650,7 +650,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-20** | `04` Trainer Students | Trainer student list | P2-17 | `GC-7` |
 | ~~**P2-21**~~ ✅ **BUILT 2026-08-16** | `09` Trainer Reports | ⛔ **`C2C-007` FIXED**, then the frame's table | — | `GC-7`, `GC-8` — **both refused**; §56 |
 | ~~**P2-22**~~ ✅ **COMPLETE — 2026-08-17** | `30` Parent Dashboard | Profile Details promoted, selector, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27` held at FOUR layers; ⛔ **no TA field** (§6.2 — the FRAME agrees; the pack's PROSE NOTE did not, §7.4.1). ✅ **THE ROUTE STOP WAS RULED OPTION 3** — canonical `/parent/dashboard`, `/parent` redirects on `R-B1`, rail `Home` → `Overview`; §58 |
-| **P2-23** | `31` Parent Calendar | **Only what §6.1 lists as surviving** | P2-22 | ⛔ **`C-12` — report delivered, ruling owed** |
+| ~~**P2-23**~~ ✅ **COMPLETE — 2026-08-17** | `31` Parent Calendar | **Exactly what §6.1 lists as surviving** | P2-22 | ✅ **`C-12` READ AT THE BOUNDARY AND NOTHING IN IT REMAINED UNDECIDED** — the report is §6.1, every line dispositioned, and its one design question ruled 2026-08-11 with the SC 1.4.1 answer given; §61 |
 | **P2-24** | `28` Term Report | ⛔ **DEFERRED by `C-11` — do not build** | — | ⚠️ **`A-044` noted and unmet, deliberately** |
 
 ### The four Part 2 phases carrying the most governance weight
@@ -7770,3 +7770,247 @@ assertions untouched) · `prove:portal-1` **PASS** · `prove:portal-p2-22`
 
 ⛔ **VISUAL / `RENDERED`: `NOT-RUN`.** Screen `32`'s empty branch is now a
 governed surface the Operator's end-of-batch walk should include.
+
+---
+
+## §60 — ⛔ **A DETECTOR IS WRITTEN AGAINST THE TEXT, NOT THE CONCEPT**
+
+*(Operator ruling, 2026-08-17, made on the pattern rather than on a sixth
+instance: **"FIVE FALSE REDS, ONE ROOT. That is a pattern and I am ruling on the
+shape now rather than waiting for a sixth."** **Process only — no product rule
+changes.**)*
+
+> ### ⛔ **A PATTERN THAT HAS NEVER MATCHED ANYTHING IS NOT A DETECTOR. IT IS A HYPOTHESIS.**
+
+**The rule.** Before a detector is trusted, it must be **run against the actual
+source it will scan and shown to match**.
+
+**Every new detector carries a POSITIVE CONTROL demonstrating it fires on real,
+present source — not only on a synthetic plant.**
+
+| Control | What it proves | What it cannot prove |
+|---|---|---|
+| **synthetic plant** | the detector **CAN** fire | that it fires on *this* corpus |
+| **real match** | it fires on **THIS** source, as written | — |
+
+▶ **All five failures were of the second kind, and a synthetic control would have
+passed every one of them.** Each pattern was a correct expression of an intent
+that simply does not occur in the text it was pointed at.
+
+### 60.1 The five, and the one root
+
+| # | Leg | The pattern | What the text actually held |
+|---|---|---|---|
+| 1 | `P22-3a` | JS comment-stripping before scanning | the subject was **SQL** (`--`, not `//`), so the migration's own prose stayed in |
+| 2 | `P22-7a` | an exact class attribute | one block carried `mt-4 ` **before** the type utilities |
+| 3 | `P22-7d` | `/progress/i` | matched the frame's own page title, *"Alicia's Progress"* |
+| 4 | `P22-10a` | `/sessionsForChild/` over the raw file | fired on the **comment recording the helper's removal** |
+| 5 | `P22-9d` | `/availabilityState\)/` | the source reads `: availabilityState;` — that shape **never occurs** |
+
+⛔ **ONE ROOT: THE DETECTOR WAS WRITTEN AGAINST THE CONCEPT AND RUN AGAINST THE
+TEXT.** *"Names a rating"*, *"has a progress bar"*, *"still uses the helper"*,
+*"holds the state"* — each is a claim about **code**; each was tested against a
+string that also contains **prose, page titles, and the record of the
+prohibition itself**.
+
+⚠️ **AND IT IS `PC16-8d`'s FAMILY AGAIN** (Operator's identification): the
+subject of a scan is wider than the thing being asserted about, so material that
+*describes* the rule sits inside the material being *tested against* it.
+
+### 60.2 What the clause requires, concretely
+
+1. **Bound the subject to code before scanning** — strip comments **for the
+   language actually being read**, and slice to the declaration under test.
+2. **Name shapes, not words.** `role="progressbar"` and `<meter` are shapes;
+   `/progress/i` is a word that appears in English.
+3. **Run the finished pattern against the real file and record the match count.**
+   A `0` on source that should match is the finding, before the leg is written.
+4. **Carry the positive control in the suite**, so a later edit that makes the
+   pattern stop matching is caught as a red rather than as a silent green.
+
+⛔ **NOT RETROFITTED, BY RULING.** *"The existing suites are green and
+re-auditing them costs more than it returns."* ▶ This applies **going forward**;
+existing detectors are left alone.
+
+### 60.3 ⚠️ THE MOVE REPAIRED ITS DESTINATION — a finding, not a happy accident
+
+*(Operator: **"worth recording as a finding rather than a happy accident … Two
+surfaces carried the same defect and only one had been ruled on."**)*
+
+Screen `32`'s own empty copy read *"When a report is ready for **your linked
+learner**, it will appear here"* — **asserting a linked learner in a state that
+may mean there is none.**
+
+▶ **That is the identical defect the ruled `none_yet` correction fixed on screen
+`30`** — and it sat on a surface a parent **actually reaches**, while the ruled
+one sat on a surface `P2-22` had just turned into a redirect.
+
+> ### ⛔ **A RULING FIXES THE INSTANCE IT WAS MADE ABOUT. IT DOES NOT SWEEP THE CORPUS.**
+>
+> The `none_yet` correction was authored, argued and proved on one component.
+> **Nothing looked for the same sentence elsewhere**, and the second copy was
+> older, shipping, and reachable. ▶ **Only the rehousing found it, and only
+> because the two surfaces were finally brought together.**
+
+⚠️ **THE GENERAL SHAPE, WORTH MORE THAN THIS INSTANCE:** when a ruling corrects
+**copy or a claim** rather than a mechanism, **ask which other surfaces make the
+same claim.** A mechanism has one implementation; a claim can be restated
+anywhere, and the restatement is exactly what §12.18's population problem and the
+`A-038`/`GC-6` stale-restatement family are both about. **This is that family
+appearing in USER-FACING COPY rather than in governance prose.**
+
+### 60.4 ✅ THE `C-4d` SHAPE, CLIENT-SIDE
+
+*(Operator: **"the third branch is correct and I want it noted as the `C-4d`
+shape client-side: a rejected read must not resolve to a governed state."**)*
+
+> ### ⛔ **A REJECTED READ MUST NOT RESOLVE TO A GOVERNED STATE.**
+
+`C-4d` closed this server-side: `getParentAvailabilityCore` returns
+`unavailable` on a rejected link read rather than falling through to `none_yet`,
+because *"the copy this suite verifies would otherwise tell a parent no learner
+is linked to their account because of a database fault."*
+
+**Screen `32` now carries the same rule on the client.** The availability read
+resolves to **`null`**, which renders a **neutral heading** — never `none_yet`,
+never `linked_unavailable`.
+
+⚠️ **THE TWO GUARDS ARE NOT REDUNDANT.** The server one governs what the
+projection may *return*; this one governs what the component may *conclude from a
+failure it observes itself*. ▶ **A component that treats "I could not read it" as
+"there is none" manufactures a governed claim out of an outage**, and no
+server-side rule can stop it, because the failure happens after the server has
+spoken.
+
+**Standing test for every surface with an empty state: what does it render when
+the read FAILS?** If the answer is the same thing it renders when the data is
+genuinely absent, the surface is asserting a fact it does not have.
+
+---
+
+## §61 — `P2-23`: screen `31` Parent Calendar, and the `C-12` reading
+
+*(2026-08-17. Built on the `C-12` reading stated at the boundary the Operator
+set.)*
+
+### 61.1 ⚠️ THE `C-12` READING — nothing in it remains undecided
+
+**Brought at the `P2-22`/`P2-23` boundary as instructed. The reading:**
+
+| Part of `C-12` | State |
+|---|---|
+| *"Report first, do not build"* — the ask | ✅ **§6.1 IS that report**, delivered, with **every one of its thirteen lines dispositioned** |
+| the one design question the report raised | ✅ **RULED 2026-08-11**: the calendar marks days using **both ratified states, distinguishably** — *"they are different facts and a parent needs both"* |
+| the nesting of those two states | ✅ ruled — **exactly three reachable cells**, no third state invented |
+| the **SC 1.4.1** question the Operator asked to be answered | ✅ answered in §6.1: *"yes, both are distinguishable without colour carrying meaning alone"* |
+
+▶ **So the substance is settled and the only thing outstanding was the register
+line's `do not build` flag, which was set pending exactly that report and that
+ruling.** The Operator's instruction — *"bring it to me at that boundary with
+your reading, and I will rule rather than hold you"* — is satisfied by stating
+this; nothing in `C-12` needed a fresh decision.
+
+### 61.2 ⛔ ZERO SCHEMA **AND ZERO NEW SERVER CODE** — §12.10's strongest outcome yet
+
+**Named as empty lists**: no migration, function, grant, table, column, enum,
+policy, client table grant, write path, audit string, **projection, DTO or
+server action**. ▶ **The ninth consecutive phase with no schema, and the FIRST
+where the application layer also needed nothing.**
+
+Measured at HEAD before a line was written:
+
+| This screen needs | Already travels via |
+|---|---|
+| the child's sessions, by day | `readParentDashboard()` — **sessions nested per child** (`P2-22`) |
+| the grade·module label and the trainer | the same call |
+| which sessions have a submitted report | `listParentSubmittedReports()` — carries **`sessionId`** |
+
+⚠️ **AND `P2-22`'s NESTING DECISION IS WHAT MADE THAT TRUE — the payoff arrived
+one phase later.** Had sessions stayed a flat array, this screen would have
+needed `class_module_id` to attribute a day to a child: **the exact field that
+phase deliberately kept out of the client payload.** `PC23-1c` verifies the
+nesting at its source rather than restating it.
+
+### 61.3 The six `GC-2` removals, each with a positive control
+
+`GC-2` is *"the most severe conflict in the set"*. `PC23-2` proves all nine
+refused tokens are **demonstrably present in the `.html`** before any absence is
+asserted — the refusals refuse something that exists.
+
+⛔ **THE LEGEND GETS ITS OWN LEG, AND ITS OWN POSITIVE CONTROL.** Asserting the
+four labels absent is not enough: **a legend rewritten in softer words would pass
+a label-only check and still publish the taxonomy**, which is the `A-052`
+offence. `PC23-2b` shows the legend detector **firing on the frame's own text**;
+`PC23-2c` shows it silent on the component.
+
+⛔ **THE TRAINER OBSERVATION CARRIES TWO PROHIBITIONS ON ONE LINE** — `Q-27` and
+the no-internal-notes rule. `C-12` warns that *"a pass working from one would
+leave the other standing"*, so `PC23-2d` names both as the reason.
+
+### 61.4 ✅ The three reachable cells, and the fourth that cannot be built
+
+The two marks live in **one `Map<string, "session" | "report">`**, not two
+booleans. ▶ **There is no representation of *report without session*, so the
+unreachable fourth combination cannot be constructed** — and a cell that can
+never render is a cell nobody checks.
+
+✅ **SC 1.4.1 asserted, not claimed.** Every marked day states its fact **in
+words** in its accessible name (`class, report ready to read` /
+`class, no report yet`) **and** carries a **visible glyph**. Colour is a third
+carrier, never the only one.
+
+⚠️ **AND THE `C-4d` CLIENT-SIDE SHAPE HELD ON ITS FIRST OUTING AFTER BEING
+RULED** (§60.4). A rejected **report** read leaves the set empty; the day marks
+are drawn only where the **session** read succeeded, and `View report` is absent
+in both cases — so nothing is offered that cannot be opened, and no governed
+claim is manufactured from an outage.
+
+### 61.5 ⚠️ §60 BIT THE PASS THAT WROTE IT, AND THE REPAIR IS STRONGER
+
+`PC23-6` expected **one** `text-[11.5px]` paragraph and found **two**: the
+§12.12 refusal disclosure **and** the calendar's legend caption. ▶ **The count
+was assumed from the concept — "there is one disclosure" — instead of measured
+against the source.** That is §60's rule, ruled hours earlier, failing on its own
+first application.
+
+⛔ **THE REPAIR IS NOT A RELAXATION.** Both paragraphs are prose a parent reads
+about the missing apparatus, so **both** must be free of taxonomy — and **the
+caption explaining what the day marks mean is exactly where a four-level gloss
+would creep back in**. Narrowing the selector to *"the one I meant"* would have
+left the other unmeasured.
+
+⚠️ **RECORDED AS THE SIXTH OF THE FAMILY, DIFFERENT IN KIND.** The five the
+Operator ruled on were **false reds on correct code**; this one was a **true red
+on a wrong expectation**. ▶ Same root — the detector written against the concept
+— **opposite direction**, and the honest response was to widen the assertion
+rather than the selector.
+
+### 61.6 ⚠️ TWENTIETH §12.14 INSTANCE, AND IT BROKE THE RULE IT CITES
+
+A backtick pair around `C-12` **inside a `check()` template literal** — the exact
+shape the adopted fix forbids (*"plain quotes, never backticks"*). It threw a
+`SyntaxError` before anything ran; repaired with the **Edit tool**. ▶ **The rule
+was broken in the same file that cites it**, which is worth more than the
+instance: the destination change works only when it is applied, and prose about
+it does not apply it.
+
+### 61.7 Gates
+
+| Gate | Verdict |
+|---|---|
+| `tsc --noEmit` | ✅ **0** |
+| `next build` | ✅ **0** |
+| `prove:portal-p2-23` | ✅ **25 PASS · 0 FAIL** |
+| `prove:artefact-read` | ✅ **94 PASS · 0 FAIL** |
+| `portal-navigation-active-state` | ✅ **6 PASS** — 37 routes, **14** rail items |
+| route-census ratchet | **35 → 36**, attributed |
+| **`prove:all`** | ✅ **67 PASS · 1 known-red · 0 NOT-RUN · exit 0** (196s) |
+| VISUAL / `RENDERED` | ⛔ **`NOT-RUN`** — added to the Operator's end-of-batch walk |
+
+⚠️ **`prove:serving-discipline` went red once more during this phase and green on
+the final sweep — `D-10` again**, the only leg that has ever failed there.
+Unchanged, unchased, recorded.
+
+⛔ **`15px` WAS READ AND DELIBERATELY NOT CITED** — 14 occurrences in the
+`.html`, **none in the component**. Citing a value the component does not build
+to is precisely what `AR-5` rejects, and the pack's block records the decision.

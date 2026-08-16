@@ -100,11 +100,12 @@ export const UNMEASURED = [
   // ⛔ `30` LEFT THIS LIST AT `P2-22` — BUILT under the rule, its eight values
   // read from the `.html` during that phase.
   "15", "16", "18", "19", "23", "24", "28",
-  "29", "31", "32", "33", "AUTH-01", "AUTH-02", "AUTH-03",
+  // ⛔ `31` LEFT THIS LIST AT `P2-23` — BUILT under the rule.
+  "29", "32", "33", "AUTH-01", "AUTH-02", "AUTH-03",
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["01", "04", "09", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27", "30"];
+export const MEASURED = ["01", "04", "09", "11", "12", "13", "14", "17", "20", "21", "22", "25", "26", "27", "30", "31"];
 
 /*
  * =====================================================================

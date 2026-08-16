@@ -11141,3 +11141,87 @@ known-red · 0 NOT-RUN · exit 0**.
 
 **Next: `P2-23` (`31` Parent Calendar) under the batch, with the `C-12` reading
 brought at that boundary.**
+
+---
+
+## 2026-08-17 — `P2-23`: screen `31` Parent Calendar, on the `C-12` reading
+
+**Branch** `develop` · **HEAD in** `b53a1bd` · **HEAD out** *(this commit)* ·
+ledger **48/48** unchanged · **no schema, no new server code**.
+
+### The `C-12` reading, brought at the boundary
+
+§6.1 **is** the report `C-12` asked for; all thirteen lines are dispositioned;
+and its one design question was **ruled 2026-08-11** — both marks, the nesting,
+and the SC 1.4.1 answer. **Nothing in `C-12` remained undecided**; only the
+register's `do not build` flag was outstanding, set pending exactly that report
+and ruling. Discharged.
+
+### Scope
+
+Screen `31` at `/parent/calendar` — a **route creation**, not a compatibility
+treatment (the pack records `31` as having no implemented route, treatment
+`Not applicable`), so the §12 gate `P2-22` stopped on does not apply. Checked at
+source.
+
+### Files
+
+**New:** `features/parent/parent-calendar-screen.tsx` ·
+`app/(portals)/parent/calendar/page.tsx` ·
+`scripts/tests/portal/prove-p2-23-parent-calendar.mjs`
+
+**Modified:** `components/layout/portal-navigation.ts` (Calendar rail item) ·
+`tests/frontend/portal-navigation-active-state.mjs` ·
+`scripts/tests/portal/prove-p2-1-management-classes.mjs` (route census 35 → 36) ·
+`scripts/tests/portal/artefact-read-rule.mjs` ·
+`UI_REFERENCE_FINAL_MVP/31-parent-calendar/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` · `package.json`
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:portal-p2-23` **25 PASS** ·
+`prove:artefact-read` **94 PASS** · nav **6 PASS** (37 routes, 14 rail items) ·
+**`prove:all` 67 PASS · 1 known-red · 0 NOT-RUN · exit 0** (196s).
+VISUAL and `RENDERED` **`NOT-RUN`**.
+
+### Findings
+
+1. **§12.10's strongest outcome yet: zero schema AND zero new server code.**
+   Ninth consecutive phase with no schema, and the first where the application
+   layer needed nothing either — both facts this screen renders already travelled
+   through `readParentDashboard()` and `listParentSubmittedReports()`.
+
+2. **`P2-22`'s nesting decision paid off one phase later.** Had sessions stayed a
+   flat array, this screen would have needed `class_module_id` to attribute a day
+   to a child — the exact field that phase deliberately kept out of the payload.
+   Verified at its source rather than restated.
+
+3. **§60 bit the pass that wrote it.** `PC23-6` assumed one disclosure paragraph
+   and measured two. A **true red on a wrong expectation** — same root as the five
+   false reds the Operator ruled on, opposite direction. The repair widened the
+   **assertion**, not the selector: both paragraphs must be taxonomy-free, and the
+   legend caption is exactly where a four-level gloss would creep back in.
+
+4. **The legend needed its own leg and its own positive control.** Asserting the
+   four labels absent is not enough — a legend rewritten in softer words would
+   pass a label-only check and still publish the taxonomy, which is the `A-052`
+   offence. The detector is shown firing on the frame's own text before it is used
+   to clear the component.
+
+5. **The `C-4d` client-side shape held on its first outing after being ruled.** A
+   rejected report read manufactures no governed claim: the day marks are drawn
+   only where the session read succeeded, and `View report` is absent in both
+   cases, so nothing is offered that cannot be opened.
+
+6. **Twentieth §12.14 instance, and it broke the rule it cites** — a backtick pair
+   inside a `check()` template literal, the exact shape the adopted fix forbids.
+   Loud, wrote nothing, repaired with the Edit tool. The destination change works
+   only when applied; prose about it does not apply it.
+
+7. **`15px` was read and deliberately not cited** — 14 occurrences in the `.html`,
+   none in the component. Citing a value the component does not build to is what
+   `AR-5` rejects; the decision is recorded in the pack's block.
+
+**Next: `P2-18` (`03` Trainer Lesson Plan) still awaits the `G-3`/`D-4` scope
+answer; `P2-24` (`28`) is DO NOT BUILD (`C-11`). Twenty-two of the twenty-four
+Part 2 phases are complete.**

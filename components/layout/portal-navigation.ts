@@ -395,6 +395,18 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
     home: "/parent/dashboard",
     navigation: [
       { href: "/parent/dashboard", label: "Overview", path: "/parent/dashboard", exact: true, icon: "dashboard" },
+      /*
+       * ⛔ `P2-23` — screen `31` at its canonical route. The frame draws the
+       * parent rail as Overview / Calendar / Reports, in that order, and this
+       * completes it.
+       *
+       * ✅ `exact: true` DECIDED BEFORE IT COULD BITE, not after — the fifth
+       * rail item to face `C2C-002` and the second decided in advance. Nothing
+       * in the ratified 36 hangs beneath `/parent/calendar`: screen `33`, the
+       * canonical report, lives under `/parent/students` and is already owned
+       * by Reports below.
+       */
+      { href: "/parent/calendar", label: "Calendar", path: "/parent/calendar", exact: true, icon: "calendar" },
       {
         href: "/parent/reports",
         label: "Reports",

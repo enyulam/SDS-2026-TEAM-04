@@ -298,6 +298,7 @@ const EXPECTED_BY_ROUTE = new Map([
    * /management.
    */
   ["/parent/dashboard", { role: "parent", label: "Overview" }],
+  ["/parent/calendar", { role: "parent", label: "Calendar" }],
   ["/parent/reports", { role: "parent", label: "Reports" }],
   [
     "/parent/students/[studentId]/sessions/[sessionId]/report",
