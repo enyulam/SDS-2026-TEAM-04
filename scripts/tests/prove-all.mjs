@@ -151,9 +151,17 @@ const excerpt = (output) => {
   const matched = output.split("\n").filter((l) => /^\s*(FAIL|NOT-RUN|ERROR|✗|⛔ FAIL)/.test(l));
   if (matched.length > 0) return matched.slice(0, 6);
   const tail = output.split("\n").filter((l) => l.trim().length > 0).slice(-6);
+  /*
+   * ⛔ THE STANDING FORM, RULED 2026-08-17 (plan §12.16): when a gate cannot
+   * explain a failure it prints `NO EVIDENCE CAPTURED`. It NEVER prints
+   * nothing. ▶ A defect that drops evidence does not leave a gap — a gap is
+   * inert — it leaves a FALSE ENTITY that someone then reasons about. That is
+   * measured, not hypothetical: an empty red from this very function was
+   * carried as an unknown flake for a whole phase and was `D-10` all along.
+   */
   return tail.length > 0
     ? ["⚠️ no FAIL-shaped line matched — LAST 6 NON-EMPTY LINES instead:", ...tail]
-    : ["⚠️ the suite produced NO OUTPUT AT ALL on stdout or stderr — run it directly"];
+    : ["⛔ NO EVIDENCE CAPTURED — the suite produced nothing on stdout or stderr. Run it directly; do NOT reason about the cause from this line"];
 };
 for (const r of unexpectedRed) {
   console.log(`\n⛔ UNEXPECTED ${r.verdict}: ${r.name}`);

@@ -208,7 +208,15 @@ for (const [label, file] of [
 for (const [label, file] of [
   ["canonical report (33)", F("features", "parent", "parent-canonical-report.tsx")],
   ["reports list (32)", F("features", "parent", "parent-reports-list.tsx")],
-  ["dashboard (30)", F("features", "parent", "parent-dashboard.tsx")],
+  /*
+   * ⚠️ RETARGETED 2026-08-17: this entry named `parent-dashboard.tsx`, the
+   * pre-`P2-22` `/parent` landing surface. Screen `30` is now
+   * `parent-dashboard-screen.tsx` at `/parent/dashboard`, and the old file was
+   * removed once its only remaining content — the R-10 availability card — was
+   * rehoused on screen `32`. ▶ The `Q-27` assertion now runs against the
+   * surface that actually ships.
+   */
+  ["dashboard (30)", F("features", "parent", "parent-dashboard-screen.tsx")],
 ]) {
   check(
     !RENDERS_RATING.test(strip(file)),

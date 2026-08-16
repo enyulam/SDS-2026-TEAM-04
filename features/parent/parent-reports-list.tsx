@@ -9,7 +9,10 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
-import type { ParentReportListItemDto } from "@/lib/frontend/contracts/physical-test";
+import type {
+  AvailabilityStateDto,
+  ParentReportListItemDto,
+} from "@/lib/frontend/contracts/physical-test";
 
 /**
  * Screen 32 — Parent Reports list (FRONTEND RECONSTRUCTION F14 / operator checkpoint F-14).
@@ -60,17 +63,40 @@ export function ParentReportsList() {
   const [state, setState] = useState<ResourceState<readonly ParentReportListItemDto[]>>({
     kind: "loading",
   });
+  /*
+   * ⛔ THE R-10 AVAILABILITY STATE IS READ HERE FROM 2026-08-17, BY OPERATOR
+   * RULING. It used to be read by `features/parent/parent-dashboard.tsx`, the
+   * surface `/parent` rendered before `P2-22` made that route a redirect.
+   *
+   * ▶ **THE RULING'S REASON:** the state answers *"do you have reports yet"*,
+   * and this is the reports list. **That is where a parent asks the question.**
+   *
+   * ⚠️ IT IS A REHOUSING, NOT A RE-DECISION. The three-state copy below is
+   * preserved VERBATIM — it was Operator-ruled once and none of it is reopened.
+   */
+  const [availabilityState, setAvailabilityState] = useState<AvailabilityStateDto | null>(null);
 
   useEffect(() => {
     let active = true;
-    void port.listParentSubmittedReports().then((result) => {
-      if (!active) return;
-      setState(
-        result.outcome === "success"
-          ? { kind: "ready", data: result.data }
-          : { kind: "failed", result: asFailure(result) },
-      );
-    });
+    void Promise.all([port.listParentSubmittedReports(), port.getParentAvailability()]).then(
+      ([reports, availability]) => {
+        if (!active) return;
+        /*
+         * ⚠️ THE LIST DECIDES THE FAILURE PATH, NOT THE AVAILABILITY READ, and
+         * that asymmetry is deliberate. A rejected availability read leaves the
+         * state `null`, which renders the generic empty heading — it must never
+         * become `none_yet`, because that would tell a parent no learner is
+         * linked to their account because of a database fault. Same rule the
+         * projection enforces server-side (`C-4d`).
+         */
+        setState(
+          reports.outcome === "success"
+            ? { kind: "ready", data: reports.data }
+            : { kind: "failed", result: asFailure(reports) },
+        );
+        setAvailabilityState(availability.outcome === "success" ? availability.data : null);
+      },
+    );
     return () => {
       active = false;
     };
@@ -134,6 +160,20 @@ export function ParentReportsList() {
     linkedChildren.find((child) => child.studentId === selectedStudentId) ??
     (linkedChildren.length === 1 ? linkedChildren[0] : undefined);
 
+  /*
+   * ⚠️ THE `?preview=` AFFORDANCE MOVES WITH THE CARD, unchanged. It exercises
+   * the two ruled branches without needing a fixture in that state, and it is
+   * PRESENTATION ONLY — it selects which copy renders and reaches no data
+   * (`A-045`: a query parameter is never authority).
+   */
+  const preview = searchParams.get("preview");
+  const availability: AvailabilityStateDto | null =
+    preview === "none"
+      ? "none_yet"
+      : preview === "linked_unavailable"
+        ? "linked_unavailable"
+        : availabilityState;
+
   return (
     <div className="page-grid" data-testid="parent-report-list">
       {/*
@@ -193,11 +233,62 @@ export function ParentReportsList() {
 
       {visibleRows.length === 0 ? (
         <section className="card px-6 py-12 text-center" role="status">
+          {/*
+            ⛔ THE R-10 THREE-STATE AVAILABILITY CARD, REHOUSED HERE 2026-08-17
+            BY OPERATOR RULING. Its copy is preserved VERBATIM from
+            `features/parent/parent-dashboard.tsx`, which `/parent` rendered
+            until `P2-22` made that route a redirect onto screen `30`.
+
+            ⚠️ THE PREVIOUS COPY HERE CARRIED THE VERY DEFECT THE RULED COPY
+            FIXED. It read "When a report is ready for your linked learner, it
+            will appear here." — asserting a linked learner in a state that may
+            mean there is none, which is exactly what the `none_yet` correction
+            addressed on the old host. ▶ Rehousing the ruled copy therefore
+            REPAIRS this surface rather than merely relocating text.
+
+            ⚠️ BOTH BRANCHES ARE EMPTY STATES, NOT ERRORS. The failure path is
+            `state.kind === "failed"` above, which renders `StatePanel`.
+            Reaching here means the reads SUCCEEDED.
+
+            ⛔ The pre-ruling heading was "Family view unavailable", with a body
+            saying the view could not be shown and inviting a retry. That is
+            OUTAGE language. The actual state is: the learner IS linked, and no
+            report has been published yet. The retry invitation was the worst
+            part — it told a parent to keep retrying something that will never
+            change by waiting.
+
+            ▶ AN OMISSION'S STATED REASON MUST SAY WHETHER IT ENDS WHEN DATA
+            ARRIVES, OR NEVER ENDS. This one said neither and implied the wrong
+            one — a transient fault, when the truth is a pending governed act by
+            another person. Both branches name the actor and the event that ends
+            the wait.
+
+            ⛔ NO GOVERNANCE BOUNDARY MOVES HERE. Neither string reveals whether
+            a report exists in any pre-submitted state, and neither exposes a
+            rating, a panel or a lifecycle status (`Q-27`, `A-038`). A parent
+            still learns only what a parent may learn: whether something has
+            been PUBLISHED to them.
+
+            ⚠️ `none_yet` means NO LINKED LEARNER AT ALL — `listLinkedStudents`
+            returned zero. Its pre-ruling copy said "your linked learner",
+            asserting the very link whose absence produced the state.
+
+            ⚠️ AND A NULL AVAILABILITY IS NEITHER STATE. A rejected read renders
+            the neutral heading, never `none_yet`.
+          */}
           <h2 className="text-section-title font-extrabold text-ink-strong">
-            No reports available yet
+            {availability === "linked_unavailable"
+              ? "No report published yet"
+              : availability === "none_yet"
+                ? "No learner linked to this account yet"
+                : "No reports available yet"}
           </h2>
-          <p className="mt-2 text-body text-ink">
-            When a report is ready for your linked learner, it will appear here.
+          <p className="mx-auto mt-2 max-w-xl text-body leading-5 text-ink">
+            {availability === "linked_unavailable"
+              ? "Your learner is linked to this account. A report appears here once your centre’s management has completed its final review and published it. Nothing is wrong and there is nothing to retry — this page will show the report when that happens."
+              : availability === "none_yet"
+                ? "Your centre’s management links a learner to your account. Once that link exists, any report they publish will appear here."
+                : "A report appears here once your centre’s management has published it."}
           </p>
         </section>
       ) : (

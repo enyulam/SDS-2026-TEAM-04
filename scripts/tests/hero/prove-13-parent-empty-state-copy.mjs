@@ -41,7 +41,23 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const SCREEN = join(ROOT, "features", "parent", "parent-dashboard.tsx");
+/*
+ * ⛔ RETARGETED 2026-08-17 BY OPERATOR RULING — THE HOST MOVED, THE ASSERTIONS
+ * DID NOT.
+ *
+ * The R-10 three-state availability card moved from
+ * `features/parent/parent-dashboard.tsx` to screen `32`, the reports list,
+ * because the state it describes is *"do you have reports yet"* and that is
+ * where a parent asks the question. `P2-22` had made `/parent` a redirect, so
+ * the old host was rendered by no route and this suite was verifying copy that
+ * could not be reached.
+ *
+ * ⚠️ EVERY LEG BELOW IS UNCHANGED. The copy was Operator-ruled once and is
+ * preserved VERBATIM at the new host; only the file this suite reads moved.
+ * ▶ Retargeting rather than rewriting is what keeps this a REHOUSING and not a
+ * re-decision — a rewritten assertion could have silently accepted new words.
+ */
+const SCREEN = join(ROOT, "features", "parent", "parent-reports-list.tsx");
 const PROJECTION = join(ROOT, "server", "modules", "parent-view", "projections.ts");
 
 const raw = readFileSync(SCREEN, "utf8");
@@ -65,7 +81,15 @@ const check = (ok, msg) => {
 // "the string is gone" leg below would pass against nothing.
 // ---------------------------------------------------------------------
 check(
-  code.includes("export function ParentDashboard") && code.length > 3000,
+  /*
+   * ⚠️ THE EXPORT NAME MOVED WITH THE HOST — `ParentDashboard` → the reports
+   * list's own export. This is the ONE line the retarget had to touch, and it
+   * is a HOST-IDENTITY assertion, not a copy assertion: it exists so the
+   * non-vacuity leg proves the file this suite read is the real component
+   * rather than an empty or renamed shell. ▶ Every COPY assertion below is
+   * byte-for-byte unchanged, which is what makes this a rehousing.
+   */
+  code.includes("export function ParentReportsList") && code.length > 3000,
   `C-1: NON-VACUOUS — the stripped component is real (${code.length} chars) and still declares its export`,
 );
 check(

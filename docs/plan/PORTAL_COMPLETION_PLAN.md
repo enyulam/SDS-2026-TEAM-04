@@ -6494,6 +6494,38 @@ empty:**
 3. where **nothing** matches, the excerpt **falls back to the last six non-empty
    lines**, labelled as such, rather than printing an empty red.
 
+### ⛔ THE STANDING FORM: **`NO EVIDENCE CAPTURED`**
+
+*(Operator ruling, 2026-08-17: **"The false-entity extension is better than my
+framing and I am taking yours: 'NO EVIDENCE CAPTURED' as the honest output when
+a gate cannot explain a failure. Silence is read as a fact. Make it the standing
+form, not a note."**)*
+
+> ### ⛔ **WHEN A GATE REPORTS A FAILURE IT CANNOT EXPLAIN, IT PRINTS `NO EVIDENCE CAPTURED`. IT NEVER PRINTS NOTHING.**
+
+**Because a defect that drops evidence does not leave a GAP. It leaves a FALSE
+ENTITY.** A gap is inert; nobody reasons about an absence. ▶ **An unexplained red
+is a THING** — it gets a name, a row in the open-items register, a hypothesis,
+and a place in the next planning decision. **The Operator carried
+`prove:serving-discipline` as a separate unknown flake for an entire phase. It
+never existed.** It was `D-10` wearing no label.
+
+⚠️ **THE COST IS NOT PROPORTIONAL TO THE EVIDENCE LOST.** One line of dropped
+output produced a register row, a standing capture instruction, a hypothesis
+about what made that suite special, and a phase of the Operator's attention.
+
+**The form, wherever a harness summarises another process's failure:**
+
+| Situation | Required output |
+|---|---|
+| the excerpt pattern matched nothing | the **tail** of the output, labelled as a fallback |
+| the process printed nothing on stdout **or** stderr | **`NO EVIDENCE CAPTURED`**, said in those words |
+| the process could not be run at all | **`NOT-RUN`**, never `FAIL` and never silence |
+
+⛔ **AN EMPTY BLOCK UNDER A RED HEADING IS PROHIBITED.** It is indistinguishable
+from a failure that genuinely had nothing to say, and the reader cannot tell
+which — so they invent an explanation. **Silence is read as a fact.**
+
 > ### ⛔ **A REPORTING FILTER IS A GATE'S SECOND SIGNAL, AND IT NEEDS THE SAME DISCIPLINE AS THE FIRST.**
 >
 > The verdict answers *did it fail*; the excerpt answers *why*. ▶ **A pattern
@@ -6833,6 +6865,45 @@ emphasis in a `check()` message uses **plain quotes, never backticks**, and any
 line needing a regex escape is written with the **Edit tool**, which involves no
 shell at all. ⚠️ The rule stands as amended: **there is no size below which it
 lapses, and the test is destination, not length.**
+
+### ⛔ NEVER REDIRECT A GENERATOR'S STDOUT OVER A TRACKED ARTEFACT
+
+*(Operator ruling, 2026-08-17: **"the near-miss line is right and the replacement
+is a control rather than care. 'Never redirect a generator's stdout over a
+tracked artefact' belongs in §12.14 as its own clause."**)*
+
+⛔ **`>` TRUNCATES THE TARGET BEFORE THE COMMAND RUNS.** A generator that fails,
+is short-circuited, or is never reached at all still leaves the file **empty**.
+
+⚠️ **MEASURED, NOT HYPOTHETICAL — the eighteenth §12.14 instance was one link
+away from it.** A backtick inside a `node -e` string threw a `SyntaxError`, which
+short-circuited an `&&` chain whose next command was:
+
+```sh
+npx supabase gen types typescript --local > server/db/database.types.ts    # ⛔
+```
+
+▶ The chain broke **before** the redirect, so nothing happened. Had the failure
+landed one link later — or had the chain used `;` instead of `&&` — the file
+`ADR-8` calls **authoritative for application data types** would have been
+emptied by a command that never executed.
+
+⛔ **AND THE DIAGNOSIS WOULD HAVE GONE THE WRONG WAY FIRST.**
+`prove:types-current` compares that file against the live schema and would have
+caught it — but only *after* `tsc` produced a wall of errors across the
+application, every one reading as a code defect.
+
+**The control that replaces the luck:**
+
+```sh
+npx supabase gen types typescript --local > "$SCRATCH/types.ts"   # ✅ generate to scratch
+# verify the expected symbol is PRESENT, then install over the tracked file
+```
+
+⛔ **Three steps, always: generate to scratch · verify content · install.** ▶ The
+verification is not a formality — it is what distinguishes *"the generator ran"*
+from *"the generator produced what this change was supposed to produce"*. **Luck
+is not a control.**
 ---
 
 ## §12.18 — ⛔ A PIN IS ONLY AS EXACT AS THE PATTERN THAT DEFINES ITS POPULATION
@@ -7615,3 +7686,87 @@ redirect a generator's stdout directly over a tracked artefact.**
 
 ⚠️ **`prove:serving-discipline` went red TWICE during this phase and green on the
 final sweep** — `D-10` each time. Unchanged, unchased, recorded.
+
+---
+
+## §59 — THE COPY MOVE: the R-10 availability card is rehoused on screen `32`
+
+*(Operator ruling, 2026-08-17. **Its own small pass, not folded into `P2-23`**,
+as instructed.)*
+
+### 59.1 The ruling
+
+> *"Move `parent-dashboard.tsx`'s three-state availability card to screen `32`.
+> Your reading is right — the state is **"do you have reports yet"**, and `32` is
+> the reports list. **That is where a parent asks the question.** … Retarget
+> `prove:hero-13`'s assertions to the new host rather than rewriting them, and
+> keep `P22-9c`'s pin until the move lands, then update it to point at `32`.
+> ⚠️ **Preserve the Operator-ruled copy verbatim. It was ruled once — none of it
+> is being re-decided, only rehoused.**"*
+
+### 59.2 What moved
+
+| | |
+|---|---|
+| the three-state card | `features/parent/parent-dashboard.tsx` → **screen `32`'s empty branch** |
+| the `getParentAvailability()` read | added to `parent-reports-list.tsx`, beside the list read |
+| the `?preview=` affordance | moved unchanged — presentation only, reaches no data (`A-045`) |
+| `prove:hero-13` | **RETARGETED**, one line: the `SCREEN` constant, plus the host-identity export name |
+| `prove:p1-1b`'s `"dashboard (30)"` | → `parent-dashboard-screen.tsx`, the surface that actually ships |
+| `P22-9c` | now pins the ruled copy **at `32`** |
+| `features/parent/parent-dashboard.tsx` | **removed** — the card was its only remaining content |
+
+⚠️ **EVERY COPY ASSERTION IN `prove:hero-13` IS BYTE-FOR-BYTE UNCHANGED.** Only
+the file it reads and the export name it proves non-vacuity against moved. ▶
+**That is what keeps this a rehousing rather than a re-decision** — a rewritten
+assertion could have silently accepted new words for a ruling that was made once.
+
+### 59.3 ✅ THE MOVE REPAIRED THE DESTINATION, WHICH WAS NOT THE POINT OF IT
+
+Screen `32`'s own empty branch read:
+
+> *"When a report is ready for **your linked learner**, it will appear here."*
+
+⛔ **That is the exact defect the ruled `none_yet` copy was written to fix** —
+asserting a linked learner in a state that may mean there is none. The old host's
+correction note names it: *"Its old copy said 'your linked learner', asserting
+the very link whose absence produced the state."*
+
+▶ **So the destination was carrying the pre-ruling defect all along, on a surface
+a parent actually reaches.** The rehousing did not merely relocate good copy; it
+replaced bad copy that the ruling had already condemned elsewhere.
+
+⚠️ **AND A THIRD BRANCH WAS NEEDED, DELIBERATELY.** The availability read can be
+**rejected**, which is neither ruled state. It resolves to `null` and renders a
+neutral heading — **never `none_yet`**, because telling a parent no learner is
+linked to their account on the strength of a database fault is precisely the
+defect `C-4d` closed server-side. `P22-9d` asserts the null path.
+
+### 59.4 ⚠️ `P22-9c` WENT RED BY THROWING, WHICH IS THE STRONGEST FORM OF THE REMINDER
+
+The leg read the old host's source. When the file was removed it raised
+**`ENOENT`** rather than failing a comparison. ▶ **A pin written to notice a
+situation changing noticed it in the loudest way available** — the suite could
+not even complete. It now pins the ruled strings on the surface that ships, and
+reds again if either branch is reworded.
+
+### 59.5 ⚠️ FIFTH FALSE RED, SAME ROOT — the rate continues
+
+`P22-9d`'s first draft matched `/availabilityState\)/`, a shape the source never
+takes: the value is read as `: availabilityState;`. ▶ **The detector was written
+against the CONCEPT — *"the component holds the state"* — and run against the
+TEXT.** Identical to three of the four in §58.6.
+
+⛔ **Recorded honestly as the FIFTH, not excluded because it landed in a small
+pass rather than in `P2-23`.** The Operator's watch is on the shape, and the
+shape recurred. It now names the two expressions that carry the governed
+behaviour rather than a paraphrase of them.
+
+### 59.6 Gates
+
+`tsc` **0** · `build` **0** · `prove:hero-13` **PASS** (retargeted, copy
+assertions untouched) · `prove:portal-1` **PASS** · `prove:portal-p2-22`
+**35 PASS** · **`prove:all` 66 PASS · 1 known-red · 0 NOT-RUN · exit 0** (191s).
+
+⛔ **VISUAL / `RENDERED`: `NOT-RUN`.** Screen `32`'s empty branch is now a
+governed surface the Operator's end-of-batch walk should include.

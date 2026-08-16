@@ -11079,3 +11079,65 @@ VISUAL and `RENDERED` remain **`NOT-RUN`**.
 
 **Next: `P2-23` (`31` Parent Calendar) under the batch, with the `C-12` reading
 brought at that boundary as instructed.**
+
+---
+
+## 2026-08-17 — the copy move: R-10 availability card rehoused on screen `32`
+
+**Branch** `develop` · **HEAD in** `60262c4` · **HEAD out** *(this commit)* ·
+ledger **48/48** unchanged · **no schema**.
+
+Its own small pass, as instructed — not folded into `P2-23`.
+
+### What moved
+
+The three-state availability card moved from `features/parent/parent-dashboard.tsx`
+to screen `32`'s empty branch, with its `getParentAvailability()` read and its
+`?preview=` affordance. `prove:hero-13` was **retargeted**, not rewritten: one
+constant plus the host-identity export name; **every copy assertion is
+byte-for-byte unchanged.** `prove:p1-1b`'s `"dashboard (30)"` entry now names
+`parent-dashboard-screen.tsx`, the surface that actually ships. `P22-9c` pins the
+ruled strings at `32`. `parent-dashboard.tsx` was removed — the card was its only
+remaining content, and nothing referenced it after the retargets.
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:hero-13` **PASS** · `prove:portal-1`
+**PASS** · `prove:portal-p2-22` **35 PASS** · **`prove:all` 66 PASS · 1
+known-red · 0 NOT-RUN · exit 0**.
+
+### Findings
+
+1. **The move repaired the destination, which was not its purpose.** Screen
+   `32`'s own empty copy read *"When a report is ready for your linked learner,
+   it will appear here"* — asserting a linked learner in a state that may mean
+   there is none, the exact defect the ruled `none_yet` copy was written to fix.
+   The destination had been carrying the pre-ruling defect all along, on a
+   surface a parent actually reaches.
+
+2. **A third branch was needed and is deliberate.** A rejected availability read
+   is neither ruled state; it resolves to `null` and renders a neutral heading,
+   never `none_yet`. Telling a parent no learner is linked to their account on
+   the strength of a database fault is the defect `C-4d` closed server-side.
+
+3. **`P22-9c` went red by throwing `ENOENT`** when the old host was removed — a
+   pin written to notice a situation changing noticed it in the loudest form
+   available: the suite could not complete.
+
+4. **Fifth false red, same root, recorded as the fifth.** `P22-9d` first matched
+   a shape the source never takes. The detector was written against the concept
+   and run against the text — identical to three of the four in §58.6. Recorded
+   rather than excluded for landing in a small pass.
+
+### Also recorded this pass — two standing clauses ruled by the Operator
+
+- **`NO EVIDENCE CAPTURED`** is now the standing form in §12.16, and
+  `prove-all.mjs` prints those exact words. A gate that cannot explain a failure
+  never prints nothing: a dropped-evidence defect leaves a **false entity**, not
+  a gap, and someone reasons about the false entity.
+- **Never redirect a generator's stdout over a tracked artefact** is now its own
+  §12.14 clause. `>` truncates before the command runs. Generate to scratch,
+  verify the expected symbol, then install.
+
+**Next: `P2-23` (`31` Parent Calendar) under the batch, with the `C-12` reading
+brought at that boundary.**

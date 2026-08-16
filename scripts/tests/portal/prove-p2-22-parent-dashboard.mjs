@@ -369,27 +369,46 @@ check(
   "P22-9b ⛔ AND THE RAIL MOVED WITH IT, WHICH IS THE RULING'S OWN REASON — portal home and the first item both name the DESTINATION. ▶ Leaving the rail at /parent while the screen lives elsewhere would manufacture EXACTLY the navigation dead end P2-21 closed one phase earlier: an item naming one surface and reaching another",
 );
 /*
- * ⚠️ THE RULING ORPHANED RULED COPY, AND THIS LEG EXISTS SO THAT FACT CANNOT
- * GO QUIET.
+ * ✅ THE ORPHANED COPY WAS RULED AND REHOUSED — 2026-08-17.
  *
- * `/parent` used to render `features/parent/parent-dashboard.tsx`, the R-10
- * availability card. It is RETAINED — `prove:hero-13` asserts its
- * Operator-ruled three-state empty copy and `prove:p1-1b` asserts its `Q-27`
- * rating-free-ness — but **no route renders it now**, so that ruled copy is
- * unreachable.
+ * This leg was written to pin an OPEN situation: `/parent` used to render
+ * `features/parent/parent-dashboard.tsx`, the R-10 availability card, and the
+ * route ruling left that Operator-ruled copy rendered by no route. ▶ **It went
+ * red the moment the move landed — by throwing `ENOENT` on a file that no
+ * longer exists — which is exactly the reminder it was written to be.**
  *
- * ▶ That is a CONSEQUENCE of the route ruling, not a decision taken inside it.
- * Where the copy belongs (screen `32`, the reports surface, is the natural
- * candidate) is a ruling, not an inference — so this leg pins the situation
- * rather than resolving it, and reds if anyone deletes the component or
- * quietly re-routes it.
+ * The Operator ruled the destination: screen `32`, the reports list, *"because
+ * the state is 'do you have reports yet', and that is where a parent asks the
+ * question."* The copy is preserved **VERBATIM** — rehoused, not re-decided.
+ *
+ * ⚠️ THE PIN NOW POINTS AT `32`, which is what it must pin: the ruled strings
+ * living on a surface that SHIPS. It reds again if either branch is reworded.
  */
-const orphan = read("features/parent/parent-dashboard.tsx");
+const host = read("features/parent/parent-reports-list.tsx");
+const RULED_COPY = [
+  "No report published yet",
+  "No learner linked to this account yet",
+  "Nothing is wrong and there is nothing to retry",
+  "Your centre’s management links a learner to your account.",
+];
+const missingCopy = RULED_COPY.filter((c) => !host.includes(c));
 check(
-  /export function ParentDashboard\(/.test(orphan) &&
-    !/ParentDashboard\b/.test(entryPage) &&
-    !/ParentDashboard\b/.test(routePage),
-  "P22-9c ⚠️ RECORDED, NOT RESOLVED: parent-dashboard.tsx is RETAINED (prove:hero-13 and prove:p1-1b both assert over it) and is now rendered by NO route, so its Operator-ruled availability copy is unreachable. ▶ A consequence of the route ruling; where that copy belongs is a ruling, not an inference",
+  missingCopy.length === 0 && !existsSync(join(ROOT, "features", "parent", "parent-dashboard.tsx")),
+  `P22-9c ✅ THE RULED THREE-STATE COPY NOW LIVES ON SCREEN 32 (missing: ${missingCopy.join(" | ") || "none"}) and the orphaned host is gone. ⚠️ VERBATIM, NOT REWRITTEN — it was Operator-ruled once and this pass rehoused it; \`prove:hero-13\` was RETARGETED rather than rewritten for the same reason, so a changed word still reds`,
+);
+check(
+  /*
+   * ⚠️ FIFTH FALSE RED OF THIS FAMILY, AND THE SAME ROOT AS THE OTHER FOUR:
+   * this leg first matched `/availabilityState\)/` — a shape the source never
+   * takes, because the value is read as `: availabilityState;`. ▶ The detector
+   * was written against the CONCEPT ("the component holds the state") and run
+   * against the TEXT. It now names the two expressions that actually carry the
+   * governed behaviour.
+   */
+  /getParentAvailability\(\)/.test(host) &&
+    /availability\.outcome === "success" \? availability\.data : null/.test(host) &&
+    /: availabilityState;/.test(host),
+  "P22-9d ⛔ …and screen 32 reads the availability state ITSELF rather than inheriting a claim — ⚠️ a REJECTED availability read leaves it null and renders the neutral heading, never `none_yet`, because telling a parent no learner is linked to their account on the strength of a database fault is the exact defect `C-4d` closed server-side",
 );
 
 // ---------------------------------------------------------------------
