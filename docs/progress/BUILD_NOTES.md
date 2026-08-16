@@ -10373,3 +10373,64 @@ only leg that reaches the joins and the projection.**
 ⛔ **VISUAL: `NOT-RUN`.** The Operator walks all screens in one pass.
 
 **Next authorized step:** `P2-20` (`04` Trainer Students) under the batch.
+
+---
+
+## 2026-08-16 — `P2-19` follow-up: the artefact-read gate made mechanical (branch `develop`)
+
+**Scope.** Three Operator rulings on the `P2-19` findings, and one recurrence caught while recording
+them.
+
+**1. ⛔ The register is now enforced, not remembered.** Operator: *"A gate nothing enforces is not a
+gate … a phase that ships a screen without a register entry FAILS."*
+
+`AR-1b` derives the obligation instead of reading it off a hand-maintained list: the ratified route
+inventory (screen id → canonical route, 36 rows) crossed with `shippedPortalRoutes()` from
+`tests/frontend/app-route-census.mjs` — **imported, not re-implemented**, so the ship signal cannot
+drift from the one the navigation suite trusts. Today **19 shipped = 9 registered + 10 pre-gate**.
+`AR-1a` guards vacuity first: if the parse or the census collapsed, `AR-1b` would iterate an empty set
+and report a green meaning *"no screens exist"*.
+
+**Proved by omission in both directions:**
+
+- **Forgetting the entry** — screen `01`'s block removed → `FAIL AR-1b … (UNREGISTERED: 01)`, and
+  `AR-1`'s double entry went red too.
+- **Exempting yourself instead** — `01` added to `PRE_GATE` → `AR-1b` went **GREEN** (that is what an
+  exemption does) and `AR-1c`/`AR-1d` caught it. ▶ **The escape hatch is itself gated.** A gate with
+  an ungated bypass is not a gate either.
+
+Both files restored and re-measured byte-identical (`57 PASS · 2 FAIL`, the two pre-existing
+`KNOWN-RED`s).
+
+**2. `PRE_GATE` frozen at ten** — `02, 05, 09, 15, 16, 18, 23, 24, 29, 32`. ⛔ **`15`, `16` and `02`
+stay `UNMEASURED` permanently.** Their evidence exists in their component headers, and registering it
+today is precisely the back-fill the rule's own header prohibits. **Leaving them listed is the record;
+erasing them would be the fabrication.** `AR-1c` pins the length, so an eleventh entry is a §12
+stop-and-ask; the list may only shrink, by a screen being rebuilt.
+
+**3. Findings recorded** at plan §41 (mechanism), §42 (a check satisfied by its own compliance —
+`PC16-8d`'s family, fourth instance), §43 (`PT19-3c` beside `RAa-2` and `PC16-8g`), §44 (the
+`studentCount` comment as the file-scope restatement defect in code).
+
+### ⚠️ A §12.14 RECURRENCE, CAUGHT AND REPAIRED IN THE SAME PASS
+
+Writing the STATUS line through `node -e "…"` in a **double-quoted** shell string let the shell
+**command-substitute every backtick**. The edit reported `OK` and exit 0 while silently deleting
+`` `artefact-read` ``, `` `AR-1b` ``, `` `PRE_GATE` ``, the ten-screen list and the three screen ids —
+leaving *"THE  REGISTER IS NOW MECHANICAL"* and *"is FROZEN at ten** ()"* in the canonical status file.
+
+▶ **This is the third instance of §12.14 and the first where the damage was DELETION rather than a
+parse error.** The two earlier ones (a heredoc breaking on an apostrophe, a template literal breaking
+on backticks) were **loud** — nothing ran. This one **ran, succeeded, and reported success**, which is
+the dangerous direction the same day §42 was recorded for exactly that asymmetry.
+
+Repaired via a Write-tool script that anchors on the corrupted text and asserts it occurs exactly
+once. **File content goes through the Write tool, never a shell string — including a `node -e` one.**
+
+### Verification
+
+`npx tsc --noEmit` **0** · `npm run lint` **0** · `prove:portal-p2-19` **0** · `prove:portal-p2-1`
+**0** · `prove:encoding` **0**. `prove:artefact-read` exits **1** on the two pre-existing ruled
+`KNOWN-RED`s (`AR-4-14`, `AR-4-17`) and on nothing else.
+
+**Next authorized step:** `P2-20` (`04` Trainer Students) under the batch.

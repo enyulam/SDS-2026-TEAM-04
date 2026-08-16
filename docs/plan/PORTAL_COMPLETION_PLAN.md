@@ -5572,3 +5572,187 @@ Operator-ruled `KNOWN-RED-AR-4-14` / `AR-4-17` pair, and `prove:serving-discipli
 **Measured before and after this phase; neither moved.**
 
 ⛔ **VISUAL: `NOT-RUN`.** The Operator walks it.
+
+---
+
+## §41 — ⛔ THE `artefact-read` REGISTER IS NOW **MECHANICAL**. A PHASE THAT SHIPS A SCREEN WITHOUT AN ENTRY **FAILS**
+
+*(Operator ruling, 2026-08-16, on the `P2-19` finding. **Process only — no product rule changes.**)*
+
+> ⚠️ **THE RULING, VERBATIM, BECAUSE IT IS THE WHOLE SECTION:**
+> *"BUT FIX THE MECHANISM. The register is hand-maintained and nothing fails when a phase forgets it
+> — three consecutive phases did, and it was only caught because you looked. **A gate nothing
+> enforces is not a gate.** Make it mechanical: a phase that ships a screen without a register entry
+> FAILS. Same shape as the RPC-caller rule and `P24a-CALL` — **the check exists because remembering
+> is not a control.** Prove it fires by omitting an entry."*
+
+### §41.1 — the defect, stated exactly
+
+`MEASURED` was a **hand-maintained array**. `AR-1` checked that every screen *on the list* carried a
+block — ▶ **so a phase that never added itself to the list was never asked for anything.** The list
+was both the obligation and the record of the obligation, which is no obligation at all.
+
+**Three consecutive phases forgot:** `15` (`P2-15`), `16` (`P2-16`), `02` (`P2-17`). Each shipped a
+screen built under the rule, each recorded measured `.html` values in its component header, and none
+appeared in the register. **Nothing went red.** It surfaced only because `P2-19` happened to read the
+list while adding itself to it.
+
+### §41.2 — the mechanism: the obligation is DERIVED, from two sources a phase cannot both forget
+
+`AR-1b` no longer asks the list what is required. It computes it:
+
+| Source | What it supplies |
+|---|---|
+| `docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md` §1 | screen id → **canonical route** (ratified, 36 rows) |
+| `tests/frontend/app-route-census.mjs` → `shippedPortalRoutes()` | the routes that **actually exist** in `app/**/page.tsx` |
+
+**A screen whose canonical route ships must carry a block.** Today: **19 shipped = 9 registered + 10
+pre-gate.**
+
+⛔ **THE CENSUS IS IMPORTED, NOT RE-IMPLEMENTED.** `AR-1b`'s entire strength is that the ship signal
+is read from the app tree; a private copy here could drift from the one the navigation suite trusts,
+and the gate would then be measuring its own copy.
+
+⚠️ **`AR-1a` GUARDS THE VACUITY FIRST.** If the inventory regex broke or the census returned nothing,
+`AR-1b` would iterate an empty set and report a green meaning *"no screens exist"*. It asserts **36
+parsed** and **routes > 0** before `AR-1b` is allowed to mean anything.
+
+### §41.3 — ⛔ THE GRANDFATHER LIST IS **CLOSED**, AND ITS ONLY DIRECTION IS **SHRINK**
+
+`PRE_GATE` = **`02, 05, 09, 15, 16, 18, 23, 24, 29, 32`** — the ten screens already shipped when
+`AR-1b` was written. **Frozen 2026-08-16. Exactly ten.**
+
+⛔ **`15`, `16` AND `02` STAY HERE PERMANENTLY. DO NOT BACK-FILL THEM.** Operator: *"their evidence
+exists in their headers, and registering it now would be exactly the back-fill `AR-1` was written to
+prevent."* ▶ **Leaving them listed IS the record; erasing them would be the fabrication.** *"Do not
+let a later phase tidy them."*
+
+⛔ **NOTHING MAY BE ADDED.** `AR-1c` pins the length at ten. **An eleventh entry is a phase exempting
+itself** — a `CLAUDE.md` §12 stop-and-ask.
+
+✅ **It shrinks by exactly one route:** a screen REBUILT under the rule gains a block, and `AR-1c`
+then goes red *until it is removed from the list*. **The forcing function points at removal and never
+at addition.**
+
+`AR-1d` adds only `PRE_GATE ⊆ UNMEASURED`. ⚠️ Disjointness and coverage are `AR-8a`/`AR-8b`'s and are
+**deliberately not restated** — a second copy of an assertion is free to drift from the first, which
+is the exact failure this whole section exists to close.
+
+### §41.4 — ✅ PROVED BY OMISSION, IN BOTH DIRECTIONS
+
+**Control 1 — a phase forgets its entry.** Screen `01`'s block was temporarily removed:
+
+```
+FAIL AR-1b  … 19 shipped = 9 registered + 10 pre-gate (UNREGISTERED: 01)
+50 PASS · 4 FAIL          (2 pre-existing KNOWN-RED + AR-1b + AR-1's double entry)
+```
+
+**Control 2 — a phase exempts itself instead.** `01` was temporarily added to `PRE_GATE`:
+
+```
+PASS AR-1b  … 19 shipped = 8 registered + 11 pre-gate (UNREGISTERED: none)
+FAIL AR-1c  … CLOSED at exactly 10 (11) and NO member has acquired a block (01)
+FAIL AR-1d  … PRE_GATE ⊆ UNMEASURED (strays: 01)
+```
+
+▶ **Control 2 is the one that matters.** `AR-1b` went **green** under the exemption — because that is
+what an exemption does. **The escape hatch is itself gated**, by two independent legs. A gate with an
+ungated bypass is not a gate either.
+
+Both files were restored and re-measured byte-identical (`57 PASS · 2 FAIL`, the two pre-existing
+`KNOWN-RED`s).
+
+---
+
+## §42 — ⛔ **A CHECK SATISFIED BY ITS OWN COMPLIANCE.** `PC16-8d`'s FAMILY, FOURTH INSTANCE
+
+*(Operator, 2026-08-16: **"FINDING 2 IS THE FINDING."**)*
+
+Three legs of one suite went red on their first run **not because the build was wrong, but because
+each read the artefact that PROVES the rule as a BREACH of the rule.**
+
+| Leg | What it read as a breach | What that artefact actually was |
+|---|---|---|
+| `PT19-4` | the forbidden column names `overview`, `strengths`, `content_hash`, `rating` … | ⚠️ **the migration's own assertion block**, which must NAME every forbidden column **in order to prove the body omits them** |
+| `PT19-6` | the string `Staff Meeting` | ⚠️ **the on-page disclosure §12.12 REQUIRES**: *"This design also lists a staff meeting. Only teaching sessions are recorded in this system."* |
+| `PT19-9b` | the phrase *"screen `01` is a DEFERRED post-48-hour screen"* | ⚠️ **the superseded sentence annotate-never-delete REQUIRES preserved inline** |
+
+> ### ⛔ **THE GENERAL FORM: A PROHIBITION SCANNED OVER A DOCUMENT THAT IS ALSO OBLIGED TO *DESCRIBE* THE PROHIBITION WILL FIRE ON ITS OWN COMPLIANCE.**
+
+### §42.1 — ⚠️ `PT19-9b` IS THE WORST OF THE THREE, AND IT IS NOT CLOSE
+
+The first two were merely wrong. **`PT19-9b` was a check whose green state could be reached by
+DELETING THE RECORD** the governing method requires kept. ▶ A future session, seeing it red and
+wanting it green, had one obvious move available: **erase the preserved history.** The check would
+have gone green and the evidence would be gone.
+
+It now asserts the phrase appears **exactly once** *and* carries its correction marker — so the
+passing state requires the record to **exist**, not to be absent.
+
+### §42.2 — ⚠️ ALL THREE WERE **LOUD**, AND THAT IS THE ONLY REASON THEY WERE FIXED
+
+Operator: *"all three were LOUD, and the same confusion passing silently is the dangerous
+direction."*
+
+▶ **The failure mode is asymmetric.** A check that fires on its own compliance is *annoying*: it goes
+red, someone reads it, it gets fixed the same hour. **A check SATISFIED by a mention of the thing —
+or, as `PT19-9b` would have been, satisfied by erasing the evidence — is silent, green, and cited in
+a completion report.** Nothing distinguishes it from a check that works.
+
+**Prior instances of the family:** `PC16-8d` (banned `/average/i`, fired on the disclosure sentence
+*"never averaged across a class"* — *"a refusal being explained is not the thing being refused"*) ·
+`PS-8` (a slice reading 4.7× what it named) · `PT19-4` / `PT19-6` / `PT19-9b`. **Fourth instance.**
+
+---
+
+## §43 — `PT19-3c` JOINS `RAa-2` AND `PC16-8g`: **THREE PHASES WHERE THE HONEST PROOF HAD TO MANUFACTURE THE CASE**
+
+*(Operator, 2026-08-16: **"That is now three phases where the honest proof required manufacturing the
+case the fixture could not supply."** Recorded beside §39, which paired the first two.)*
+
+| Proof | What the fixture could not supply | What was constructed |
+|---|---|---|
+| `RAa-2` | a **changed meaning** — two readings that had to differ | the divergence, built deliberately |
+| `PC16-8g` | a **changed mechanism** proving an unchanged meaning | the recreated trend pinned value-identical at `44.44, 63.89` |
+| **`PT19-3c`** | **a scope that is VISIBLE** | one assignment deactivated in a transaction: **12 → 11**, then `ROLLBACK` to 17 |
+
+⚠️ **`PT19-3c`'s shape is the most dangerous of the three, because the unconstructed proof PASSES.**
+The trainer reads **12 of 12** reports — *byte-identical to what an unscoped query returns*, since
+the fixture's single trainer holds all 17 assignments. ▶ **A suite asserting "the trainer gets rows"
+would be green against a function with the `class_session_assignments` join deleted entirely.**
+
+> ### ⛔ **A FIXTURE THAT CANNOT DISTINGUISH TWO IMPLEMENTATIONS CANNOT PROVE WHICH ONE SHIPPED.**
+>
+> The positive leg is not wrong; it is **not discriminating**, and those look identical in a green
+> report. The remedy is never to trust the fixture harder — it is to **construct the case the fixture
+> lacks**, inside a transaction, and roll it back. `PT19-3d` re-measures the starting count afterwards
+> so the construction is proved to have left nothing behind.
+
+---
+
+## §44 — THE `studentCount` COMMENT: **THE FILE-SCOPE RESTATEMENT DEFECT, IN CODE**
+
+*(Operator, 2026-08-16: **"the file-scope restatement defect again. Record it."**)*
+
+`readTrainerDashboardCore` carried:
+
+```ts
+// DISTINCT LEARNERS, not the sum      ← the comment
+… classes.reduce((total, c) => total + c.studentCount, 0)   ← the code
+```
+
+**The comment was correct. The code was not.** A learner enrolled in two modules was counted twice.
+Fixed by `countDistinctLearners`; `PT19-7` asserts the function exists **and** that no `studentCount +`
+survives.
+
+⚠️ **THIS IS THE SAME SHAPE AS THE STALE-RESTATEMENT DEFECT `CLAUDE.md` RECORDS FIVE INSTANCES OF**,
+one scope down. The governance form: *a ruling is propagated to the instrument that OWNS a rule and
+not to the documents that RESTATE it.* **The code form: a fact is stated in a comment and not
+implemented in the function beneath it.** In both, the restatement is what a reader trusts, and in
+both **the restatement outranks the truth in practice** — because it is what gets read.
+
+> ### ⛔ **A CORRECT COMMENT SITTING ON INCORRECT CODE IS WORSE THAN NO COMMENT AT ALL.**
+>
+> No comment leaves a reader to check. **A correct one stops them looking** — it answers the exact
+> question that would have caught the bug. ▶ Which is why the fix was to make the code match, and the
+> proof was to assert **both halves**: the right helper present *and* the wrong operation absent.

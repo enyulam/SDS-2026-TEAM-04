@@ -94,6 +94,39 @@ export const UNMEASURED = [
 export const MEASURED = ["01", "11", "12", "13", "14", "17", "25", "26", "27"];
 
 /*
+ * =====================================================================
+ * ⛔ THE GRANDFATHER LIST — FROZEN 2026-08-16, CLOSED, AND IT ONLY SHRINKS
+ * =====================================================================
+ * Screens whose canonical route ALREADY SHIPPED when `AR-1b` was written.
+ * They are exempt from it, permanently, as an honest record of phases that
+ * shipped before the gate existed.
+ *
+ * ⛔ **DO NOT BACK-FILL 15, 16 OR 02** — Operator ruling, 2026-08-16. Their
+ * evidence genuinely exists in their component headers, and registering it
+ * TODAY would be precisely the back-fill this file's own header prohibits:
+ * *"opening the `.html` today and recording it as though the building phase
+ * had."* ▶ **A later phase must not tidy them.** Leaving them here is the
+ * record; erasing them would be the fabrication.
+ *
+ * ⛔ **NOTHING MAY BE ADDED TO THIS LIST.** It is pinned by `AR-1c` at exactly
+ * ten. A screen shipping from now on carries a block or FAILS — that is the
+ * whole point, and an eleventh entry would be a phase exempting itself.
+ * Adding one is a `CLAUDE.md` §12 stop-and-ask.
+ *
+ * ✅ It SHRINKS by one route only: a screen REBUILT under the rule gains a
+ * block, and `AR-1c` then goes red until it is removed from here — so the
+ * forcing function points at removal, never at addition.
+ */
+export const PRE_GATE = ["02", "05", "09", "15", "16", "18", "23", "24", "29", "32"];
+
+/** `screen id → { pack, route }`, parsed from the ratified route inventory. */
+export function screenInventory(root) {
+  const text = readFileSync(join(root, "docs", "plan", "FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md"), "utf8");
+  const ROW = /^\|\s*(AUTH-0\d|\d{2})\s*\|\s*(?:Trainer|Management|Parent|Authentication)\s*\|\s*[^|]+?\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|/gm;
+  return [...text.matchAll(ROW)].map((m) => ({ screen: m[1], pack: m[2], route: m[3] }));
+}
+
+/*
  * ⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.
  *
  * ⚠️ `AR-4-14` FAILS ON PURPOSE AND MUST KEEP FAILING. It is **not a defect**

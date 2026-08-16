@@ -24,14 +24,23 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   MEASURED,
+  PRE_GATE,
   UNMEASURED,
   citedInHtml,
   fractionalValues,
   loadSources,
   normaliseValue,
   readLedger,
+  screenInventory,
   usedInComponent,
 } from "./artefact-read-rule.mjs";
+/*
+ * ⛔ THE SAME CENSUS THE NAVIGATION SUITE USES, IMPORTED RATHER THAN COPIED.
+ * `AR-1b`'s whole strength is that the ship signal is READ FROM THE APP TREE;
+ * a private re-implementation here could drift from the one the rest of the
+ * project trusts, and then this gate would be measuring its own copy.
+ */
+import { shippedPortalRoutes } from "../../../tests/frontend/app-route-census.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
@@ -59,6 +68,65 @@ for (const block of ledger) {
 }
 const missing = MEASURED.filter((id) => (byScreen.get(id) ?? []).length !== 1);
 check("AR-1", missing.length === 0, `every MEASURED screen carries exactly one block (gaps: ${missing.join(", ") || "none"})`);
+
+// ---------------------------------------------------------------------
+// ⛔ AR-1a … AR-1d -- THE MECHANISM. Added 2026-08-16 by Operator ruling.
+// ---------------------------------------------------------------------
+// ⚠️ THE DEFECT: `MEASURED` was HAND-MAINTAINED, and NOTHING FAILED WHEN A
+//    PHASE FORGOT TO EXTEND IT. Three consecutive phases forgot — `15`
+//    (`P2-15`), `16` (`P2-16`) and `02` (`P2-17`) each shipped a screen built
+//    under this rule and left it off the list. ▶ It was caught only because
+//    `P2-19` happened to look.
+//
+//    Operator: *"A gate nothing enforces is not a gate. Make it mechanical:
+//    a phase that ships a screen without a register entry FAILS."*
+//
+// ⛔ SO THE LIST IS NO LONGER THE AUTHORITY. `AR-1b` DERIVES the obligation
+//    from two independent sources that a phase cannot both forget:
+//      1. the ratified route inventory (screen id → canonical route), and
+//      2. the app tree itself (`app/**/page.tsx`), read by the same census
+//         the navigation suite uses.
+//    A screen whose route SHIPS must carry a block. Remembering is not a
+//    control — same shape as the RPC-caller rule and `P24a-CALL`.
+// ---------------------------------------------------------------------
+const inventory = screenInventory(ROOT);
+const shipped = new Set(await shippedPortalRoutes());
+check(
+  "AR-1a",
+  inventory.length === 36 && shipped.size > 0,
+  `⚠️ NON-VACUITY FIRST: the route inventory parsed ${inventory.length} screens (expected 36) and the app tree yielded ${shipped.size} routes — ▶ if either collapsed to nothing, AR-1b below would pass over an EMPTY SET and report a green that means "no screens exist"`,
+);
+
+const shippedScreens = inventory.filter((row) => shipped.has(row.route));
+const unregistered = shippedScreens
+  .filter((row) => (byScreen.get(row.screen) ?? []).length === 0 && !PRE_GATE.includes(row.screen))
+  .map((row) => row.screen);
+check(
+  "AR-1b",
+  inventory.length === 36 && unregistered.length === 0,
+  `⛔ THE MECHANISM: every screen whose canonical route SHIPS carries an artefact-read block, or is on the frozen pre-gate list — ${shippedScreens.length} shipped = ${shippedScreens.length - PRE_GATE.length} registered + ${PRE_GATE.length} pre-gate (UNREGISTERED: ${unregistered.join(", ") || "none"})`,
+);
+
+const preGateWithBlocks = PRE_GATE.filter((id) => (byScreen.get(id) ?? []).length > 0);
+check(
+  "AR-1c",
+  PRE_GATE.length === 10 && preGateWithBlocks.length === 0,
+  `⛔ THE PRE-GATE LIST IS CLOSED at exactly 10 (${PRE_GATE.length}) and NO member has acquired a block (${preGateWithBlocks.join(", ") || "none"}) — ⚠️ it may only SHRINK: a screen REBUILT under the rule gains a block and this leg then goes red until it is removed from the list, so the forcing function points at REMOVAL and never at addition. ⛔ An eleventh entry would be a phase exempting itself: `+
+    `\`CLAUDE.md\` §12 stop-and-ask`,
+);
+
+/*
+ * ⚠️ ONLY THE RELATION `AR-8` DOES NOT ALREADY COVER. `AR-8a`/`AR-8b` prove
+ * MEASURED and UNMEASURED are disjoint and jointly exhaustive; duplicating
+ * that here would be a second copy free to drift from the first — which is
+ * the very failure this whole addition is about.
+ */
+const strays = PRE_GATE.filter((id) => !UNMEASURED.includes(id));
+check(
+  "AR-1d",
+  strays.length === 0,
+  `⚠️ PRE_GATE ⊆ UNMEASURED (strays: ${strays.join(", ") || "none"}) — ▶ a pre-gate screen that had drifted into MEASURED would be claiming a block it does not carry. Disjointness and coverage are AR-8's, deliberately not restated here`,
+);
 
 // --- AR-2 .. AR-6, per block -----------------------------------------
 for (const block of ledger) {
