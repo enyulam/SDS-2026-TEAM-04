@@ -47,10 +47,25 @@
 // placed in an error. The probe reports a three-valued STATUS per selector
 // and nothing else. `PRESENT_DIFFERENT` — the negative control's expected
 // reading — asserts only that a value is NOT the literal, which is exactly
-// enough to decide the gate and never enough to disclose the key. The
-// served child's stdout and stderr are ignored on all three streams, so
-// there is no buffer for a credential-bearing line to leak out of
-// (`CLAUDE.md` §11: never rely on pattern-based redaction).
+// enough to decide the gate and never enough to disclose the key.
+//
+// ⚠️ THE STREAM TRADE CHANGED 2026-08-17, BY OPERATOR RULING, AND THE
+// DISCIPLINE DID NOT. `stdout` is still ignored outright. `stderr` is now
+// captured to a scratch file OUTSIDE the repository, scanned with THE
+// EXISTING credential detector (`credential-shapes.mjs`, one definition,
+// imported never restated), and rendered ONLY IF CLEAN — otherwise the
+// standing `NO EVIDENCE CAPTURED` form with its reason.
+//
+// ▶ This is not the thing §11 forbids. §11 bars RELYING ON PATTERN-BASED
+// REDACTION — deciding what to strip out of a stream and printing the rest.
+// Nothing here is stripped: it is one whole-file decision that FAILS
+// CLOSED, so a scanner miss suppresses nothing a redactor would have caught.
+// ⛔ D-7b/D-7c/D-7d prove both directions before D-8 relies on it.
+//
+// ⚠️ WHY IT CHANGED: three intermittents across five phases (`D-8`, a child
+// that died at startup; `D-10`, a child that survived teardown — opposite
+// ends of one child's lifetime) and NOT ONE of them could be explained,
+// because the stream that would have said why was never buffered.
 //
 // ---------------------------------------------------------------------
 // THE EXIT-CODE CONTRACT
@@ -62,6 +77,9 @@
 // =====================================================================
 
 import { createServer } from 'node:net'
+import { writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 import {
   PROVIDER_NEUTRALISING_LITERAL,
@@ -79,6 +97,7 @@ import {
   readBackThroughNextEnv,
   serveDisciplined,
   stopServed,
+  describeServedStderr,
 } from './serving-discipline.mjs'
 
 /**
@@ -100,6 +119,9 @@ const CHECK_TITLES = new Map([
   ['D-5', 'READ-BACK (start): after @next/env runs, all three selectors still hold the literal'],
   ['D-6', 'NEGATIVE CONTROL (dev): DELETING the selectors lets @next/env refill them from .env.local'],
   ['D-7', 'NEGATIVE CONTROL (start): DELETING the selectors lets @next/env refill them from .env.local'],
+  ['D-7b', 'POSITIVE CONTROL — a CLEAN stderr capture is rendered in full, so a failure explains itself'],
+  ['D-7c', 'NEGATIVE CONTROL — a capture carrying a SHAPED secret is WITHHELD ENTIRELY, refusal names the detector'],
+  ['D-7d', 'FAIL-CLOSED — an absent or unreadable capture produces NO EVIDENCE CAPTURED, never silence-as-clean'],
   ['D-8', 'A disciplined server was actually SERVED and answered on its port'],
   ['D-9', 'S-3 — the armed trip-wire measured ZERO non-loopback peers across the whole served process tree'],
   ['D-10', 'Process hygiene — the served tree is gone and the port is released'],
@@ -269,6 +291,60 @@ async function main() {
       `DELETING the selectors did NOT produce a refill (loaded=${report.loaded}, reason=${report.reason}, ` +
         `${summariseSelectors(report)}), so the read-back assertion has NOT been demonstrated capable of ` +
         'failing and is not evidence. Refusing to report the discipline as proven',
+    )
+  }
+
+  // -------------------------------------------------------------------
+  phase('D-7b — the stderr capture, and that it fails CLOSED')
+  // -------------------------------------------------------------------
+  /*
+   * ⛔ THE CAPTURE IS PROVEN BEFORE IT IS RELIED ON, and it is proven the way
+   * §60 requires — on real text, both directions.
+   *
+   * ⚠️ THIS EXISTS BECAUSE THE SUITE COULD NOT EXPLAIN ITS OWN FAILURES.
+   * Three intermittents across five phases (`D-8` / `D-10`), every one
+   * uncapturable, because `stdio` was ignored on all three streams. The
+   * Operator ruled the trade changed: capture stderr, scan it with the
+   * EXISTING detector, print only if clean.
+   *
+   * ⛔ A RENDERER THAT HAS NEVER REFUSED IS NOT A GATE. The negative control
+   * plants a shaped secret in a capture file and asserts the text is
+   * WITHHELD — if that ever passes through, this whole mechanism is a leak
+   * wearing the words of a safeguard.
+   */
+  {
+    const probe = join(tmpdir(), `best-coach-stderr-control-${process.pid}.log`)
+
+    writeFileSync(probe, 'Error: listen EADDRINUSE 127.0.0.1:3419\n    at Server.setupListenHandle\n', 'utf8')
+    const clean = describeServedStderr({ servedStderrPath: probe })
+    checkFrom(
+      'D-7b',
+      clean.includes('scanned CLEAN') && clean.includes('EADDRINUSE'),
+      'POSITIVE CONTROL: a clean capture holding a REAL Node startup error is rendered in full, so a future ' +
+        'D-8 failure arrives with the reason attached rather than as a bare exit code',
+      'a clean capture was not rendered',
+    )
+
+    writeFileSync(probe, `boot failed\nSUPABASE_SECRET_KEY=sb_secret_${'A'.repeat(32)}\n`, 'utf8')
+    const dirty = describeServedStderr({ servedStderrPath: probe })
+    checkFrom(
+      'D-7c',
+      dirty.startsWith('⛔ NO EVIDENCE CAPTURED') &&
+        dirty.includes('Supabase secret key') &&
+        !dirty.includes('sb_secret_'),
+      'NEGATIVE CONTROL: a capture carrying a SHAPED secret is WITHHELD ENTIRELY — the refusal names the ' +
+        'detector that fired and the matched value never appears in it. ⛔ Whole-file decision, never a redaction',
+      'a capture carrying a shaped secret was rendered, or the refusal echoed it',
+    )
+
+    rmSync(probe, { force: true })
+    checkFrom(
+      'D-7d',
+      describeServedStderr({}).startsWith('⛔ NO EVIDENCE CAPTURED') &&
+        describeServedStderr({ servedStderrPath: probe }).startsWith('⛔ NO EVIDENCE CAPTURED'),
+      'FAIL-CLOSED CONTROL: no capture configured, and a capture file that does not exist, both produce the ' +
+        'refusal with a reason — silence is never rendered as evidence of a clean stream',
+      'an absent or unreadable capture did not fail closed',
     )
   }
 

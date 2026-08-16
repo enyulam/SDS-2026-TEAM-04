@@ -85,17 +85,49 @@ declining this panel at `P2-6` because *"`D-4` names no author, no authoring
 surface exists, and a read for a field nobody can write is a permanently empty
 panel."* The chips need a column, an author and an authoring surface.
 
-**2. `SLIDES & MATERIALS` — blocked on a policy and grant.**
+⛔ **DECLINED AGAIN — the second ruling, and the one that stands.** On this
+stop, the Operator declined the chips a second time, **permanently until an
+authoring surface exists**, superseding the BUILD ruling above: *"a column
+without an author produces a permanently empty panel, and the frame's values
+being six dimension names verbatim means the shortest honest-looking source is
+the governed assessment table. That is not plumbing."* They recorded that the
+first ruling *"was internally inconsistent"* — it authorized the chips on the
+same ground `P2-6` had already declined them on, which is what the stop caught.
 
-`class_session_materials` EXISTS (`P2-6` built the management upload side) but
-returns `permission denied for table` for the fixture trainer and holds **0**
-rows. It needs a trainer policy with its minimum matching grant, or a read RPC.
-Measured at HEAD, not assumed.
+⚠️ **THE SHARPER FORM, RECORDED BECAUSE IT INVERTS THE USUAL READING:**
+*"`G-3`'s prohibition reads the way it does BECAUSE the frame draws the chips in
+the assessment vocabulary. The frame is the REASON for the rule, not merely
+subject to it."*
 
-⚠️ **The frame's empty copy for this panel — *"Slides not uploaded yet"* — is
-DELIBERATELY NOT USED.** It would be false: it asserts the materials are absent
-when the truth is that this screen cannot read them. `P2-10`'s rule one layer
-along — *"not yet"* and *"cannot see"* are different facts, and only one is true.
+**2. ✅ `SLIDES & MATERIALS` — AUTHORIZED AND BUILT.**
+
+~~`class_session_materials` returns `permission denied for table` for the fixture
+trainer. It needs a trainer policy with its minimum matching grant, or a read
+RPC.~~ **The Operator authorized the read side under the batch and left the
+choice to this phase. The call was a READ RPC**, on three grounds:
+
+1. **RLS filters rows, not columns.** The table carries `storage_object_path`
+   and both uploader identity columns. A policy hands a trainer all three; the
+   frame needs `display_name`, `media_type` and `byte_size`.
+2. **`P2-6` shipped this table with 0 policies and 0 client table grants**,
+   SECURITY DEFINER RPCs only. A policy now would be a second access model.
+3. **A raw storage path in a client is what §3.1 forbids outright.**
+
+Shipped as `public.trainer_list_session_materials(uuid)` with `EXECUTE` to
+`authenticated` — **one function, one grant, nothing else.**
+
+⛔ **THIS IS THE LISTING, NOT THE DOWNLOAD.** The signed-URL mint is a separate
+function and is **not** built: the table holds **0 rows**, so no proof could
+exercise it. **No download control is rendered** — a control that can open
+nothing reads as a defect rather than as unbuilt scope. The write split is
+untouched: management uploads, the trainer reads.
+
+✅ **AND THE FRAME'S EMPTY COPY IS NOW USED.** ~~*"Slides not uploaded yet"* is
+DELIBERATELY NOT USED — it would assert the materials are absent when the truth
+is this screen cannot read them.~~ **It became TRUE the moment the read landed**,
+which is exactly the condition the Operator set. `P2-10`'s rule discharging:
+*"not yet"* and *"cannot see"* are different facts, and now the true one is
+*"not yet"*.
 
 ### ⛔ THE SCREEN CARRIES NO GOVERNED PREVIOUS-SESSION-FOCUS LINE
 

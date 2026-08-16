@@ -2292,6 +2292,15 @@ export type Database = {
         }
         Returns: string
       }
+      trainer_list_session_materials: {
+        Args: { p_class_session_id: string }
+        Returns: {
+          byte_size: number
+          display_name: string
+          material_id: string
+          media_type: string
+        }[]
+      }
     }
     Enums: {
       account_status: "active" | "deactivated"

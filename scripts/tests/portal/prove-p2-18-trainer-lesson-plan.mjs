@@ -2,16 +2,36 @@
 // =====================================================================
 // PORTAL PHASE P2-18 -- screen `03` Trainer Lesson Plan.
 //
-// ⛔ ZERO SCHEMA. Named as empty lists: no migration, function, grant,
-//    table, column, enum, policy, client table grant, write path or audit
-//    string. §12.10 for the TENTH consecutive phase.
+// ⛔ THE SCHEMA THIS PHASE ADDED, NAMED AS A LIST AND NOT A COUNT:
+//      function: public.trainer_list_session_materials(uuid)
+//      grant:    EXECUTE to `authenticated`
+//    NOTHING ELSE — no table, column, enum, policy, client table grant,
+//    write path, audit action string, bucket or storage policy.
 //
-// ⛔ THE `KEY FOCUS` CHIPS ARE RULED IN SCOPE AND ARE NOT BUILT. The
-//    Operator ruled 2026-08-17 that `G-3`'s surviving prohibition is about
-//    POSITION and that screen `03` carries no governed focus line for the
-//    chips to displace -- and ruled in the same breath that the schema is a
-//    SEPARATE authorization. The chips need a column. This suite asserts
-//    the refusal at every layer that could leak it.
+// ⚠️ §12.10's zero-schema run ENDS AT NINE, and it ends on an Operator
+//    authorization rather than on drift: the trainer read path to
+//    `class_session_materials` was measured BLOCKED (`permission denied`),
+//    reported as a stop, and authorized read-side under the batch.
+//
+// ⛔ THE `KEY FOCUS` CHIPS WERE RULED IN, THEN DECLINED AGAIN -- AND THE
+//    SECOND RULING IS THE ONE THAT STANDS.
+//
+//    The Operator ruled 2026-08-17 to BUILD them, on the ground that
+//    `G-3`'s surviving prohibition is about POSITION and screen `03`
+//    carries no governed focus line to displace. This phase stopped on
+//    that ruling's own fourth constraint -- the chips need a column -- and
+//    the Operator then DECLINED THEM AGAIN, permanently until an authoring
+//    surface exists: *"a column without an author produces a permanently
+//    empty panel, and the frame's values being six dimension names verbatim
+//    means the shortest honest-looking source is the governed assessment
+//    table. That is not plumbing."*
+//
+// ⚠️ THE SHARPER FORM, RECORDED BECAUSE IT INVERTS THE USUAL READING:
+//    `G-3`'s prohibition reads the way it does BECAUSE the frame draws the
+//    chips in the assessment vocabulary. ▶ The frame is the REASON for the
+//    rule, not merely subject to it.
+//
+//    This suite asserts the refusal at every layer that could leak it.
 //
 // ⛔ EVERY DETECTOR CARRIES A POSITIVE CONTROL ON REAL SOURCE (plan §60):
 //    a pattern that has never matched anything is a hypothesis, not a
@@ -128,6 +148,14 @@ check(
 );
 check(RULING.test(notes), "P18-1i  CITATION 3 of 3 (pack half): the ruling is in the pack's implementation notes");
 
+// ⛔ THE DECLINE IS CITED WHEREVER THE BUILD RULING IS, or a reader finds
+//    an authorization with no outcome attached to it.
+const DECLINE = /DECLINED AGAIN|declined again/;
+check(
+  DECLINE.test(screenSrc) && DECLINE.test(notes),
+  "P18-1j  the SECOND ruling -- declined again, permanently until an authoring surface exists -- is recorded beside the first in the component and the pack",
+);
+
 // =====================================================================
 // ⛔ P18-2 -- THE SCREEN CARRIES NO GOVERNED PREVIOUS-SESSION-FOCUS LINE.
 //    The ruling's third constraint. If a phase ever adds one, the chips
@@ -161,8 +189,8 @@ check(
   "P18-3b  the screen and projection read no materials table -- the stop is a stop, not a silent empty panel",
 );
 check(
-  !/Slides not uploaded yet/.test(screen),
-  "P18-3c  `P2-10` one layer along: the frame's 'not uploaded yet' copy is NOT used -- 'cannot see' is not 'not yet'",
+  /materials\.length === 0 \? \(\s*\n?\s*<p[^>]*>Slides not uploaded yet/.test(screen),
+  "P18-3c  `P2-10` DISCHARGED: the frame's 'not uploaded yet' copy is used ONLY on the measured-empty branch -- it became TRUE when the read landed, and it must never render where the read failed",
 );
 
 // =====================================================================
@@ -313,14 +341,99 @@ check(
 // =====================================================================
 // ⛔ P18-12 -- ZERO SCHEMA, NAMED AS AN EMPTY LIST.
 // =====================================================================
+// ⛔ THE MIGRATION ADDED EXACTLY ONE FUNCTION AND ONE GRANT, AND NOTHING
+//    ELSE. Asserted on the migration TEXT, so a later edit that quietly
+//    adds a table or a policy to this file goes red.
+const migration = read(
+  "supabase/migrations/20260817120000_portal_p2_18_trainer_session_materials.sql",
+);
+// ⛔ BOTH COMMENT FORMS. `--` lines AND `/* */` blocks -- the function body
+//    carries a block comment naming the very column the legs below assert
+//    absent, which is the citation-versus-detector tension again, one layer
+//    along. Prohibitions scan the STRIPPED sql; controls scan the raw file.
+const sql = migration
+  .replace(/\/\*[\s\S]*?\*\//g, " ")
+  .split("\n")
+  .filter((l) => !l.trimStart().startsWith("--"))
+  .join("\n");
 check(
-  !/CREATE (TABLE|TYPE|POLICY|FUNCTION)|ALTER TABLE|GRANT /i.test(projSrc + screenSrc + actionsSrc),
-  "P18-12a  no migration, function, grant, table, column, enum, policy, client grant, write path or audit string",
+  sql.length > 1500 && /CREATE OR REPLACE FUNCTION public\.trainer_list_session_materials/.test(sql),
+  `P18-12a  the migration source is non-vacuous after comment-stripping (${sql.length} chars) and declares the function`,
+);
+check(
+  (sql.match(/CREATE OR REPLACE FUNCTION/g) ?? []).length === 1 &&
+    (sql.match(/GRANT EXECUTE/g) ?? []).length === 1 &&
+    !/CREATE TABLE|CREATE TYPE|CREATE POLICY|ALTER TABLE|CREATE INDEX|GRANT (SELECT|INSERT|UPDATE|DELETE)/i.test(sql),
+  "P18-12b  ONE function, ONE execute grant, and NO table, type, policy, index, alter or table grant",
+);
+check(
+  /GRANT EXECUTE ON FUNCTION public\.trainer_list_session_materials\(uuid\) TO authenticated/.test(sql) &&
+    /REVOKE ALL ON FUNCTION public\.trainer_list_session_materials\(uuid\) FROM PUBLIC/.test(sql),
+  "P18-12c  the grant is EXECUTE to `authenticated` only, with PUBLIC revoked first -- PostgreSQL grants EXECUTE to PUBLIC by default, so revoking is what makes the grant exact",
+);
+check(
+  /SELECT count\(\*\) INTO v_count\s*\n\s*FROM public\.trainer_list_session_materials\(/.test(sql),
+  "P18-12d  `CLAUDE.md` §12: the migration EXECUTES the function it declares -- a refusal call, which traverses the body and writes nothing",
 );
 check(
   !/\.insert\(|\.update\(|\.delete\(|\.upsert\(/.test(projSrc + screenSrc),
-  "P18-12b  the phase is read-only: no insert, update, delete or upsert on any layer",
+  "P18-12e  the application layer is read-only: no insert, update, delete or upsert",
 );
 
-console.log(`\n${23 - bad} PASS · ${bad} FAIL`);
+// =====================================================================
+// ⛔ P18-13 -- `SLIDES & MATERIALS`: THE READ IS AN RPC, AND THE THREE
+//    COLUMNS IT DOES NOT RETURN ARE THE WHOLE ARGUMENT FOR THAT CHOICE.
+// =====================================================================
+check(
+  /class_session_materials/.test(sql) && /storage_object_path/.test(migration),
+  "P18-13a  CONTROL: both the table name and the path column appear in this migration file, so the prohibition below scans a corpus that could fail it",
+);
+check(
+  !/storage_object_path/.test(sql),
+  "P18-13b  ⛔ the FUNCTION never selects `storage_object_path` -- RLS filters rows not columns, which is why this is an RPC and not a table policy",
+);
+check(
+  !/uploaded_by_account_id|uploaded_by_membership_id/.test(sql),
+  "P18-13c  ...and it returns neither uploader identity column",
+);
+check(
+  !/storage_object_path/.test(
+    proj + screen + stripComments(contracts) + stripComments(adapterDtos),
+  ),
+  "P18-13d  no storage path reaches the projection, the screen or either DTO mirror (comments stripped -- all four CITE the omission by name, which is the whole reason it is recorded)",
+);
+check(
+  /app_trainer_reaches_session/.test(sql),
+  "P18-13e  `A-016`: the gate is the SESSION helper, because assignment is authoritative at class-session level",
+);
+check(
+  /Slides not uploaded yet/.test(screen),
+  "P18-13f  the frame's own empty copy is now USED -- it became TRUE the moment the read landed (`P2-10`: 'cannot see' is not 'not yet')",
+);
+check(
+  !/download|href=.*material|signedUrl|createSignedUrl/i.test(screen),
+  "P18-13g  ⛔ NO download control: the signed-URL mint is a separate function and is not built, so a control here could open nothing",
+);
+check(
+  /readRpcRows<TrainerMaterialRow>|readRpcRows<MaterialRow>/.test(projSrc),
+  "P18-13h  the RPC goes through the shared diagnostic helper -- `AppDatabase` excludes `Functions`, so a bare `.rpc()` would be typed `{}` with `any` rows",
+);
+
+/*
+ * ⛔ THE COUNT IS THE COUNTER, NEVER A LITERAL.
+ *
+ * ⚠️ This line read `${23 - bad}` — a number typed in when the suite had 23
+ * checks. It then reported **23 PASS while 56 checks executed**, and the
+ * arithmetic still balanced, so nothing looked wrong. ▶ A hardcoded total is
+ * the "a declared class is not evidence it applied" failure in its cheapest
+ * form: the summary stopped describing the run and nobody could tell.
+ *
+ * ⛔ AND IT IS ALSO §12.16's FAMILY — a number standing between a gate and its
+ * signal. The exit code was always right; the line a human reads was not.
+ */
+if (total < 40) {
+  console.log(`\n⛔ FAIL — only ${total} checks executed; this suite has never had fewer than 40.`);
+  process.exit(1);
+}
+console.log(`\n${total - bad} PASS · ${bad} FAIL  (of ${total} checks)`);
 process.exit(bad === 0 ? 0 : 1);

@@ -1392,8 +1392,8 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
   /**
    * `P2-18` — screen `03`. ⛔ THE FIXTURE REFUSES. A manufactured lesson plan
    * would put invented lesson titles against invented dates on the surface a
-   * trainer uses to prepare — and, worse, would make the two panels this phase
-   * REPORTS AS BLOCKED look built.
+   * trainer uses to prepare — and, worse, would make the KEY FOCUS panel this
+   * phase REPORTS AS BLOCKED look built.
    */
   async readTrainerLessonPlan(
     _classModuleId: string | null,

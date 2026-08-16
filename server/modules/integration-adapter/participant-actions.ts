@@ -652,6 +652,14 @@ export async function adapterReadTrainerLessonPlan(
         sessionDate: l.sessionDate,
         room: l.room,
         timing: l.timing,
+        // ⛔ The allow-list names four material fields and NO path, so the
+        // omission survives a later widening of the projection.
+        materials: l.materials.map((m) => ({
+          materialId: m.materialId,
+          displayName: m.displayName,
+          mediaType: m.mediaType,
+          byteSize: m.byteSize,
+        })),
       })),
     },
   };

@@ -9,7 +9,11 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { StatePanel } from "@/components/ui/state-panel";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
-import type { LessonPlanEntryDto, TrainerLessonPlanDto } from "@/lib/frontend/contracts/physical-test";
+import type {
+  LessonPlanEntryDto,
+  TrainerLessonMaterialDto,
+  TrainerLessonPlanDto,
+} from "@/lib/frontend/contracts/physical-test";
 
 /**
  * Screen `03` — Trainer Lesson Plan. Phase `P2-18`.
@@ -71,6 +75,23 @@ import type { LessonPlanEntryDto, TrainerLessonPlanDto } from "@/lib/frontend/co
  * ACQUIRE ONE.** The ruling's third constraint: if a phase ever adds one, the
  * chips move or go. Nothing on this page presents the trainer's carried-over
  * focus — the roster (screen `06`) does, and that is the surface `G-3` protects.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⛔ **DECLINED AGAIN — the second ruling, and the one that stands**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * On the stop above, the Operator declined the chips a second time, **and this
+ * time permanently until an authoring surface exists**, superseding the BUILD
+ * ruling quoted overhead: *"a column without an author produces a permanently
+ * empty panel, and the frame's values being six dimension names verbatim means
+ * the shortest honest-looking source is the governed assessment table. That is
+ * not plumbing."* They also recorded that the first ruling *"was internally
+ * inconsistent"* — it authorized the chips on the same ground `P2-6` had
+ * already declined them on, which is what the stop caught.
+ *
+ * ⚠️ **THE SHARPER FORM, RECORDED BECAUSE IT INVERTS THE USUAL READING:**
+ * *"`G-3`'s prohibition reads the way it does BECAUSE the frame draws the chips
+ * in the assessment vocabulary. The frame is the REASON for the rule, not
+ * merely subject to it."*
  */
 export function TrainerLessonPlanScreen({
   classModuleId,
@@ -280,33 +301,102 @@ function LessonCard({ lesson }: { readonly lesson: LessonPlanEntryDto }) {
           {timing.label}
         </span>
       </div>
+
+      <MaterialsPanel materials={lesson.materials} />
     </Card>
   );
 }
 
 /**
- * ⛔ TWO PANELS THE FRAME DRAWS ARE NOT BUILT, AND THE PAGE SAYS SO.
+ * ⛔ `SLIDES & MATERIALS` — AUTHORIZED AND BUILT AT `P2-18`, READ-SIDE ONLY.
+ *
+ * ⚠️ THE FRAME'S OWN EMPTY COPY IS NOW CORRECT, AND THAT IS WHY IT IS USED.
+ * Before the read existed, *"Slides not uploaded yet"* would have asserted the
+ * materials were absent when the truth was that this screen could not see
+ * them — `P2-10`'s rule one layer along, *"not yet"* versus *"cannot see"*.
+ * ▶ With `trainer_list_session_materials` in place the screen genuinely knows
+ * the session has none, so the frame's words say the true thing.
+ *
+ * ⛔ THERE IS NO DOWNLOAD CONTROL, AND ITS ABSENCE IS DELIBERATE. Opening an
+ * object needs a short-TTL server-minted URL — a separate function that is not
+ * built, because the table holds zero rows and no proof could exercise it. A
+ * control that cannot open anything is worse than none: it would read as a
+ * defect rather than as unbuilt scope.
+ *
+ * ⛔ AND NO `storage_object_path` REACHES HERE. The RPC does not return one;
+ * that omission is why it is an RPC rather than a table policy.
+ */
+function MaterialsPanel({ materials }: { readonly materials: readonly TrainerLessonMaterialDto[] }) {
+  return (
+    <div className="flex flex-col gap-2 border-t border-line pt-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-subtle">
+        Slides &amp; materials
+      </p>
+      {materials.length === 0 ? (
+        <p className="text-[12px] font-medium text-ink">Slides not uploaded yet</p>
+      ) : (
+        <ul className="flex list-none flex-col gap-1.5 p-0">
+          {materials.map((m) => (
+            <li key={m.materialId} className="flex items-center gap-2 text-[12px] text-ink">
+              <span
+                aria-hidden="true"
+                className="inline-flex shrink-0 items-center rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                style={{ background: "#F5F6FA", color: "#8A93A6" }}
+              >
+                {extensionOf(m.mediaType, m.displayName)}
+              </span>
+              <span className="min-w-0 truncate font-medium text-ink-strong">{m.displayName}</span>
+              <span className="shrink-0 text-ink">{formatSize(m.byteSize)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The frame draws a short type chip (`PPTX`, `PDF`). ⛔ Derived from the
+ * governed `media_type`, falling back to the file name's own extension —
+ * never invented, and never a guess dressed as a fact: an unrecognised type
+ * renders as `FILE`, which claims nothing.
+ */
+function extensionOf(mediaType: string, displayName: string): string {
+  const fromName = /\.([a-z0-9]{2,5})$/i.exec(displayName)?.[1];
+  if (fromName !== undefined) return fromName.toUpperCase();
+  const tail = mediaType.split("/").pop() ?? "";
+  const known = /(pdf|pptx?|docx?|xlsx?|png|jpe?g|mp4|mov)/i.exec(tail)?.[1];
+  return known !== undefined ? known.toUpperCase() : "FILE";
+}
+
+/** The frame writes `4.2 MB`. Bytes are a fact; the rendering is presentation. */
+function formatSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(kb < 10 ? 1 : 0)} KB`;
+  const mb = kb / 1024;
+  return `${mb.toFixed(mb < 10 ? 1 : 0)} MB`;
+}
+
+/**
+ * ⛔ ONE PANEL THE FRAME DRAWS IS NOT BUILT, AND THE PAGE SAYS SO.
  *
  * §12.12 — an omission a user can see is disclosed on the surface, not only in
- * a plan file. Both are BLOCKED ON SCHEMA THIS PHASE WAS NOT AUTHORIZED TO ADD,
- * and neither is a design gap:
+ * a plan file.
  *
- *   · **KEY FOCUS POINTS** — ruled in scope 2026-08-17 and blocked on a column.
- *     See the file header for the full ruling and its four constraints.
- *     `PLMa-KEYFOCUS` additionally records that the Operator declined this panel
- *     at `P2-6` because *"`D-4` names no author, no authoring surface exists,
- *     and a read for a field nobody can write is a permanently empty panel"* —
- *     so a column alone would not be enough either.
- *   · **SLIDES & MATERIALS** — `class_session_materials` EXISTS (`P2-6` built
- *     the management upload side) but returns `permission denied for table` for
- *     a trainer and holds 0 rows. It needs a trainer policy and matching grant,
- *     or a read RPC. Measured at HEAD, not assumed.
+ * ⚠️ THIS COVERED TWO PANELS AND NOW COVERS ONE. `SLIDES & MATERIALS` was
+ * blocked on a trainer read path; the Operator authorized one read-side, it
+ * shipped as `trainer_list_session_materials`, and that panel now renders —
+ * including the frame's own *"Slides not uploaded yet"*, which became a TRUE
+ * statement the moment the read landed. ▶ Narrowing this disclosure is part of
+ * building the thing it disclosed; leaving it would tell a trainer something
+ * false in the other direction.
  *
- * ⚠️ The frame's own empty state for the second panel reads *"Slides not
- * uploaded yet"*. That copy is NOT used here, because it would be false: it
- * says the materials are absent when the truth is that this screen cannot read
- * them. `P2-10`'s rule, one layer along — "not yet" and "cannot see" are
- * different facts and only one of them is true.
+ * ⛔ **KEY FOCUS POINTS remains unbuilt** — ruled IN SCOPE on 2026-08-17 and
+ * then DECLINED AGAIN by the Operator on the stop this phase raised, because
+ * a column without an author produces a permanently empty panel. See the file
+ * header for the full ruling and its four constraints.
  */
 function OmittedPanelsDisclosure() {
   return (
@@ -315,9 +405,9 @@ function OmittedPanelsDisclosure() {
         Not available yet
       </p>
       <p className="mt-2 text-[13px] text-ink">
-        Key focus points and slides &amp; materials are part of this screen&rsquo;s design but are
-        not built. Both need governed data this screen cannot read yet, and neither is available
-        elsewhere in the portal.
+        Key focus points are part of this screen&rsquo;s design but are not built. Lesson focus is
+        not recorded anywhere in the portal yet, and there is no screen on which anyone could enter
+        it.
       </p>
     </Card>
   );

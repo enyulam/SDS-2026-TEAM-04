@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { readRows } from "@/server/platform/query-diagnostics";
+import { readRows, readRpcRows } from "@/server/platform/query-diagnostics";
 import type { AppDatabase } from "@/server/db/app-database";
 
 /**
@@ -100,6 +100,34 @@ export interface LessonPlanEntryDto {
    * presence as a governed fact (the `GC-8` reasoning, one entity over).
    */
   readonly timing: "completed" | "this_week" | "upcoming";
+  /**
+   * ⛔ THE LISTING, NEVER THE OBJECT. `P2-18`'s read RPC returns
+   * `display_name`, `media_type` and `byte_size` and DELIBERATELY NOT
+   * `storage_object_path` — that omission is why this is an RPC rather
+   * than a table policy, and putting a path here would give the whole
+   * argument away. ▶ Opening a file needs a short-TTL server-minted URL,
+   * which is a separate function and is not built.
+   */
+  readonly materials: readonly TrainerLessonMaterialDto[];
+}
+
+/**
+ * The RPC's row shape. ⛔ FOUR COLUMNS, and `storage_object_path` is absent
+ * here because it is absent from the FUNCTION — the type mirrors the
+ * governed projection rather than the table.
+ */
+interface MaterialRow {
+  readonly material_id: string;
+  readonly display_name: string;
+  readonly media_type: string;
+  readonly byte_size: number;
+}
+
+export interface TrainerLessonMaterialDto {
+  readonly materialId: string;
+  readonly displayName: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
 }
 
 export interface TrainerLessonPlanDto {
@@ -227,6 +255,44 @@ export async function readTrainerLessonPlanCore(
   const scheduleSummary =
     times.length === 1 && rooms.length === 1 ? `${times[0].slice(0, 5)} · ${rooms[0]}` : null;
 
+  /*
+   * ⛔ ONE RPC PER SESSION, AND THE REFUSAL IS SILENT BY DESIGN.
+   *
+   * `trainer_list_session_materials` gates on `app_trainer_reaches_session`
+   * and returns ZERO ROWS on refusal (`Q-7`), never an error — so a session
+   * the trainer cannot reach is indistinguishable from one with no
+   * materials, which is correct: neither is a fact about their own class.
+   *
+   * ⚠️ A FAILED RPC IS NOT AN EMPTY LIST. An errored call leaves the
+   * session ABSENT from this map, and the component then says nothing
+   * rather than asserting "none uploaded" — the `C-4d` shape, one layer
+   * down from the component that also enforces it.
+   */
+  const materialsBySession = new Map<string, readonly TrainerLessonMaterialDto[]>();
+  for (const session of own) {
+    /*
+     * ⛔ `readRpcRows` AND NOT A BARE `.rpc()`. `AppDatabase` deliberately
+     * excludes `Functions` from the client generic, so a bare call is typed
+     * `{}` and its rows are `any` — the shared helper is what restores a
+     * checked row type AND routes a failure through the same diagnostic
+     * path as every other read.
+     */
+    const rows = await readRpcRows<MaterialRow>(
+      "readTrainerLessonPlanCore:trainer_list_session_materials",
+      () => client.rpc("trainer_list_session_materials", { p_class_session_id: session.id }),
+    );
+    if (!rows.ok) continue;
+    materialsBySession.set(
+      session.id,
+      rows.rows.map((row) => ({
+        materialId: row.material_id,
+        displayName: row.display_name,
+        mediaType: row.media_type,
+        byteSize: Number(row.byte_size),
+      })),
+    );
+  }
+
   return {
     ok: true,
     data: {
@@ -246,6 +312,7 @@ export async function readTrainerLessonPlanCore(
           sessionDate: s.session_date,
           room: s.room,
           timing: timingOf(s.session_date, todayIso),
+          materials: materialsBySession.get(s.id) ?? [],
         })),
     },
   };

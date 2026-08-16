@@ -55,9 +55,13 @@
 // =====================================================================
 
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { closeSync, existsSync, openSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+// ⛔ THE DETECTOR IS IMPORTED, NEVER RESTATED. See `describeServedStderr`.
+import { loadLiveSecrets, makeScanText } from '../publication/credential-shapes.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -534,28 +538,55 @@ export function nextBinary() {
 /**
  * Spawn a disciplined Next.js server and wait for it to answer.
  *
- * `stdio` is ignored outright on all three streams: nothing the server
- * prints is ever rendered, and there is no buffer for a credential-bearing
- * line to leak out of (`CLAUDE.md` §11 — never rely on pattern-based
- * redaction; ensure no credential-bearing stream is rendered at all).
+ * ═══════════════════════════════════════════════════════════════════════
+ * ⚠️ THE TRADE CHANGED 2026-08-17, BY OPERATOR RULING, AND THE DISCIPLINE
+ * DID NOT.
+ * ═══════════════════════════════════════════════════════════════════════
+ * This function used to ignore `stdio` on all three streams. That was a
+ * PRINCIPLED trade — `CLAUDE.md` §11 forbids relying on pattern-based
+ * redaction, and a stream that is never buffered cannot leak. ▶ **It was
+ * also why this suite could fail without explaining itself**, and it did:
+ * three intermittents across five phases (`D-8`, a child that died at
+ * startup; `D-10`, a child that survived teardown — opposite ends of one
+ * child's lifetime), every one of them uncapturable.
+ *
+ * ⛔ **THE RULING: capture the child's stderr to a scratch file, scan it
+ * with THE EXISTING DETECTOR, and print it ONLY IF CLEAN — otherwise print
+ * `NO EVIDENCE CAPTURED` with the reason.**
+ *
+ * ▶ That is not a relaxation of §11, and the distinction matters: §11 bars
+ * FILTERING a credential-bearing stream after the fact — deciding what to
+ * strip. This decides whether to render AT ALL, and it fails CLOSED. A
+ * scanner miss suppresses nothing that a redactor would have caught,
+ * because there is no redaction: the file is rendered whole or not at all.
+ *
+ * ⚠️ `stdout` STAYS IGNORED. Only `stderr` is captured — it is where a
+ * startup failure speaks, and narrowing the capture narrows the exposure.
+ * The scratch file lives outside the repository and is removed on success.
  */
 export async function serveDisciplined({ mode, port, host = '127.0.0.1', overrides = {}, readyPath = '/login', timeoutMs = 180_000 }) {
   if (mode !== 'dev' && mode !== 'start') {
     throw new ServingDisciplineError(`Unknown serving mode: ${mode}`)
   }
   const { env, record } = buildServedChildEnv(overrides)
+  const errPath = join(tmpdir(), `best-coach-served-stderr-${mode}-${port}-${process.pid}.log`)
+  const errFd = openSync(errPath, 'w')
   const child = spawn(process.execPath, [nextBinary(), mode, '-H', host, '-p', String(port)], {
     cwd: REPO_ROOT,
     env,
-    stdio: ['ignore', 'ignore', 'ignore'],
+    stdio: ['ignore', 'ignore', errFd],
     windowsHide: true,
     shell: false,
   })
+  child.servedStderrPath = errPath
+  child.servedStderrFd = errFd
   const origin = `http://${host}:${port}`
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
     if (child.exitCode !== null) {
-      throw new ServingDisciplineError(`The served application exited during startup (code ${child.exitCode}).`)
+      throw new ServingDisciplineError(
+        `The served application exited during startup (code ${child.exitCode}).\n${describeServedStderr(child)}`,
+      )
     }
     try {
       const response = await fetch(`${origin}${readyPath}`, { redirect: 'manual' })
@@ -566,7 +597,73 @@ export async function serveDisciplined({ mode, port, host = '127.0.0.1', overrid
     }
     await new Promise((r) => setTimeout(r, 500))
   }
-  throw new ServingDisciplineError(`The served application did not answer on port ${port} in time.`)
+  throw new ServingDisciplineError(
+    `The served application did not answer on port ${port} in time.\n${describeServedStderr(child)}`,
+  )
+}
+
+/**
+ * ⛔ RENDER THE SERVED CHILD'S STDERR, OR SAY WHY NOT. NEVER PARTIALLY.
+ *
+ * ⚠️ THIS IS A WHOLE-FILE DECISION, NOT A REDACTION. `CLAUDE.md` §11 forbids
+ * "filtering credential-bearing output"; nothing here is filtered. One
+ * scan, one verdict, and the alternative to printing is printing NOTHING
+ * with a reason — the standing `NO EVIDENCE CAPTURED` form.
+ *
+ * ⛔ EVERY FAILURE PATH FAILS CLOSED. Unreadable, unscannable, a scanner
+ * that threw, a hit of ANY class — all produce the refusal, never the text.
+ * An IDENTIFIER hit refuses too: this is a diagnostic, not the publication
+ * gate, so there is no adjudication register here to make it safe.
+ *
+ * ⛔ THE DETECTOR IS IMPORTED, NOT RESTATED (`credential-shapes.mjs`). A
+ * second copy of those patterns would be a hole that reads as a gate.
+ */
+export function describeServedStderr(child) {
+  const path = child?.servedStderrPath
+  const NONE = (reason) =>
+    `⛔ NO EVIDENCE CAPTURED — the served child's stderr was not rendered. Reason: ${reason}`
+
+  if (!path) return NONE('no stderr capture was configured for this child')
+  let text
+  try {
+    text = readFileSync(path, 'utf8')
+  } catch (error) {
+    return NONE(`the capture file could not be read (${error?.code ?? 'unknown'})`)
+  }
+  if (text.trim() === '') return NONE('the child wrote nothing to stderr')
+
+  let hits
+  try {
+    hits = makeScanText(loadLiveSecrets(REPO_ROOT))(text, 'served-child-stderr')
+  } catch (error) {
+    return NONE(`the credential scan threw (${error?.name ?? 'Error'}), so the text is withheld`)
+  }
+  if (hits.length > 0) {
+    const kinds = [...new Set(hits.map((h) => `${h.cls}:${h.kind}`))].join(', ')
+    return NONE(`the credential detector matched ${hits.length} time(s) — ${kinds}`)
+  }
+
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '')
+  const shown = lines.slice(-40)
+  return [
+    `✅ SERVED CHILD STDERR — scanned CLEAN by the shared detector (${lines.length} non-empty line(s)` +
+      `${lines.length > shown.length ? `, last ${shown.length} shown` : ''}):`,
+    ...shown.map((l) => `    | ${l}`),
+  ].join('\n')
+}
+
+/** Close and remove a served child's stderr capture. Never throws. */
+export function discardServedStderr(child) {
+  try {
+    if (typeof child?.servedStderrFd === 'number') closeSync(child.servedStderrFd)
+  } catch {
+    /* already closed */
+  }
+  try {
+    if (child?.servedStderrPath) rmSync(child.servedStderrPath, { force: true })
+  } catch {
+    /* nothing to remove */
+  }
 }
 
 /** Stop a served child and its whole worker tree, on every exit path. */
@@ -592,6 +689,10 @@ export function stopServed(child) {
   } catch {
     // Already exited.
   }
+  // ⛔ The capture outlives the child otherwise. `D-10` is about a process
+  // surviving teardown; a scratch file surviving it would be the same defect
+  // in a second medium.
+  discardServedStderr(child)
 }
 
 // ---------------------------------------------------------------------

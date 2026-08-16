@@ -57,8 +57,20 @@ import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
+import {
+  SHAPES,
+  SHAPE_EXEMPT,
+  BENIGN_LITERALS,
+  BENIGN_RE,
+  neutralize,
+  IDENTIFIER_VARS,
+  loadLiveSecrets,
+  makeScanText,
+} from "./credential-shapes.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const BRANCH = "develop";
+
 
 let blocked = 0;
 const findings = [];
@@ -94,19 +106,8 @@ function git(args, opts = {}) {
  * is dropped: a short value produces false positives on ordinary text, and
  * a false positive that blocks a push teaches people to bypass the gate.
  */
-function loadLiveSecrets() {
-  const p = join(ROOT, ".env.local");
-  if (!existsSync(p)) return [];
-  const out = [];
-  for (const line of readFileSync(p, "utf8").split(/\r?\n/)) {
-    const m = /^([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line.trim());
-    if (!m) continue;
-    const name = m[1];
-    const value = m[2].replace(/^["']|["']$/g, "");
-    if (value.length >= 20) out.push({ name, value });
-  }
-  return out;
-}
+// ⛔ MOVED 2026-08-17 to `credential-shapes.mjs` so the serving proof can use
+// THE SAME detector rather than a second copy of these patterns.
 
 /**
  * ⛔ NOT EVERY VALUE IN `.env.local` IS A CREDENTIAL, AND TREATING THEM ALIKE
@@ -200,13 +201,9 @@ const ADJUDICATED = new Map([
  *    hide inside a crowd of benign matches**, which is what a 65-finding wall
  *    of noise would have let it do. That is the better half of the fix.
  */
-const IDENTIFIER_VARS = new Set([
-  "BEST_COACH_HOSTED_PROJECT_REF", // 20-char ref; the subdomain of a public URL
-  "NEXT_PUBLIC_SUPABASE_URL", // NEXT_PUBLIC_* is browser-visible by design
-  "BEST_COACH_HOSTED_SUPABASE_URL", // likewise a public https://<ref>.supabase.co
-]);
 
-const LIVE = loadLiveSecrets();
+
+const LIVE = loadLiveSecrets(ROOT);
 
 /** Which adjudications still match the value they were ruled on. */
 const ADJUDICATION_STATE = new Map();
@@ -233,25 +230,7 @@ for (const [name, entry] of ADJUDICATED) {
  */
 const ROTATED_VALUE_AVAILABLE = false;
 
-const SHAPES = [
-  ["JWT (three dot-separated base64url segments)", /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/],
-  ["Supabase secret key", /\bsb_secret_[A-Za-z0-9_-]{20,}/],
-  ["Supabase publishable key", /\bsb_publishable_[A-Za-z0-9_-]{20,}/],
-  ["OpenAI / Anthropic style key", /\bsk-(ant-)?[A-Za-z0-9_-]{24,}/],
-  ["GitHub personal access token", /\b(ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{22,})/],
-  ["AWS access key id", /\bAKIA[0-9A-Z]{16}\b/],
-  ["Postgres URL carrying a password", /\bpostgres(ql)?:\/\/[^\s:/@]+:[^\s@]{6,}@/],
-  ["PEM private key block", /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----/],
-  ["Supabase legacy service_role key literal", /"?service_role"?\s*[:=]\s*["'][A-Za-z0-9._-]{30,}["']/],
-];
 
-/**
- * ⚠️ `.env.example` is TRACKED ON PURPOSE and holds placeholders. It is
- * excluded from SHAPE matching only — exact-containment against the live
- * values still runs on it, because a real value pasted into the example
- * file is precisely the mistake this gate exists to catch.
- */
-const SHAPE_EXEMPT = new Set([".env.example", "scripts/publication/prove-no-secrets.mjs"]);
 
 /**
  * ⛔ ADJUDICATED BENIGN LITERALS — EXEMPT THE STRING, NEVER THE FILE.
@@ -273,49 +252,9 @@ const SHAPE_EXEMPT = new Set([".env.example", "scripts/publication/prove-no-secr
  * Each literal is replaced by an inert token before shape matching, never
  * deleted, so two neighbouring fragments can never splice into a new match.
  */
-const BENIGN_LITERALS = [
-  "sb_publishable_synthetic_shape_fixture", // run-runtime-profile.mjs:53 — adjudicated
-  "sb_secret_synthetic_shape_fixture", // run-runtime-profile.mjs:54 — adjudicated
-];
-/**
- * ⛔ THE BOUNDARY IS NOT DECORATION — ITS CONTROL CAUGHT A REAL DEFECT.
- *
- * The first implementation was `text.split(lit).join(token)`, and the
- * one-character control failed immediately: `…fixtureX` still contains
- * `…fixture` as a substring, so a REAL key that merely BEGAN with the
- * adjudicated string would have been silently suppressed. ▶ **An exact-string
- * exemption implemented by substring replacement is a PREFIX rule wearing an
- * exact-string label** — precisely the kind of quiet widening this whole
- * instrument exists to refuse.
- *
- * The literal is now neutralized only where it is NOT adjacent to a further
- * key character on either side.
- */
-const BENIGN_RE = BENIGN_LITERALS.map(
-  (lit) => new RegExp(`(?<![A-Za-z0-9_-])${lit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-z0-9_-])`, "g"),
-);
-const neutralize = (text) => {
-  let out = text;
-  for (const re of BENIGN_RE) out = out.replace(re, "<ADJUDICATED-BENIGN-LITERAL>");
-  return out;
-};
 
-function scanText(text, path) {
-  const hits = [];
-  for (const { name, value } of LIVE) {
-    if (text.includes(value)) {
-      hits.push({
-        kind: `LIVE VALUE of ${name}`,
-        cls: IDENTIFIER_VARS.has(name) ? "IDENTIFIER" : "CREDENTIAL",
-      });
-    }
-  }
-  if (!SHAPE_EXEMPT.has(path)) {
-    const scannable = neutralize(text);
-    for (const [label, re] of SHAPES) if (re.test(scannable)) hits.push({ kind: label, cls: "CREDENTIAL" });
-  }
-  return hits;
-}
+
+const scanText = makeScanText(LIVE);
 
 say(`Live values loaded into memory for exact containment: ${LIVE.length} (names only: ${LIVE.map((l) => l.name).join(", ")})`);
 say(`Shape patterns: ${SHAPES.length}`);

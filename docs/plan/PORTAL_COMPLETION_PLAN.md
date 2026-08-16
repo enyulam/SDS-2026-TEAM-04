@@ -8021,6 +8021,13 @@ to is precisely what `AR-5` rejects, and the pack's block records the decision.
 
 *(2026-08-17. Closes Part 2 at **23 of 24**, with `P2-24` ruled out by `C-11`.)*
 
+> ⛔ **SUPERSEDED IN PART, SAME DAY — READ §63 BEFORE ACTING ON THIS SECTION.**
+> The BUILD ruling quoted below was **DECLINED AGAIN** by the Operator on the
+> stop this phase raised, permanently until an authoring surface exists. The
+> reasoning below is preserved because it is still the reasoning that decides
+> the POSITION question — but **the chips are not to be built**, and the
+> Operator recorded the first ruling as *"internally inconsistent"*. §63.
+
 ### ⛔ CITATION 3 OF 3 — THE `G-3`/`D-4` RULING FOR SCREEN `03`
 
 The Operator required this ruling recorded **in the component, in the DTO and
@@ -8138,3 +8145,159 @@ saying they are *not built* rather than *empty*.
    rather than absent, because the destination was ratified but unbuilt. ▶ The
    affordance was never removed, so **nothing had to be re-invented, only
    unlocked** — which is the whole argument for preferring disabled over absent.
+
+---
+
+## §63 — the chips DECLINED AGAIN, the materials read, and the serving-suite trade
+
+*(2026-08-17, three Operator rulings in one pass.)*
+
+### ⛔ 1. THE KEY FOCUS CHIPS — DECLINED AGAIN, AND THIS SUPERSEDES THE BUILD RULING
+
+**§62 records the Operator ruling *"BUILD THE KEY FOCUS CHIPS"*. It is superseded
+by this one, and §62 must not be read without it.**
+
+> ⛔ **CHIPS — DECLINED AGAIN, and this time permanently until an authoring
+> surface exists.** *"A column without an author produces a permanently empty
+> panel, and the frame's values being six dimension names verbatim means the
+> shortest honest-looking source is the governed assessment table. That is not
+> plumbing."*
+
+⚠️ **The Operator recorded WHY the first ruling was wrong, and it is the more
+useful half:** *"my ruling was incomplete — I authorized the chips without
+noticing `P2-6` had already declined them on the same ground I then wrote as
+constraint 4. The ruling was internally inconsistent and the stop caught it."*
+
+▶ **That is the stop-and-ask working in the direction it is least often seen
+working: against an instruction rather than against a gap.** A phase that had
+simply built what it was told would have shipped a panel that could only ever be
+empty, and the inconsistency would have survived inside an authorization.
+
+### ⛔ THE SHARPER FORM — the frame is the REASON for the rule, not subject to it
+
+> *"`G-3`'s prohibition reads the way it does BECAUSE the frame draws the chips
+> in the assessment vocabulary. The frame is the reason for the rule, not merely
+> subject to it."*
+
+⚠️ **This inverts the usual reading and is worth keeping in exactly these
+words.** The standing model is a two-ladder separation in which the frame is
+*subject to* governance (`A-045`, §7.4). Here the causation runs the other way:
+the frame's own chip values — `Audience awareness`, `Sentence flow`, `Eye
+contact`, `Vocal projection`, `Tonality`, `Emotional expression`, **six of the
+nine dimension names verbatim** — are what made the prohibition necessary.
+
+### ✅ 2. `SLIDES & MATERIALS` — AUTHORIZED READ-SIDE, AND THE CALL WAS AN RPC
+
+The Operator authorized a trainer read path under the batch and left the choice
+of mechanism to this phase, requiring it be stated first. **It was stated, then
+built: a read RPC, not a policy plus grant.**
+
+| # | Reason |
+|---|---|
+| 1 | **RLS filters rows, not columns.** The table carries `storage_object_path` and both uploader identity columns. A policy hands a trainer all three; the frame needs `display_name`, `media_type`, `byte_size` |
+| 2 | **`P2-6` shipped this table with 0 policies and 0 client table grants**, SECURITY DEFINER RPCs only. A policy now would be a second access model for one table |
+| 3 | **A raw storage path in a client is what §3.1 forbids outright** |
+
+**Shipped — the list, not a count:** function
+`public.trainer_list_session_materials(uuid)`; grant `EXECUTE` to
+`authenticated`. **Nothing else.** Census `T=30 E=12 P=30 R=24 F=74 → F=75`.
+
+⛔ **THE LISTING, NOT THE DOWNLOAD.** The signed-URL mint is a separate function
+and is **not** built — the table holds **0 rows**, so no proof could exercise
+it, and an unprovable path against a storage bucket should wait until it can be
+executed. **No download control is rendered**: a control that opens nothing
+reads as a defect rather than as unbuilt scope. The write split is untouched.
+
+✅ **AND THE FRAME'S EMPTY COPY IS NOW CORRECT, SO IT IS USED.** *"Slides not
+uploaded yet"* was refused at §62 because it asserted absence when the truth was
+blindness. The Operator ruled it *"becomes correct the moment the read lands.
+Use it then."* It landed; it is used — **on the measured-empty branch only**,
+never where the read failed.
+
+### ⛔ 3. THE SERVING-SUITE TRADE CHANGED, AND THREE INTERMITTENTS CLOSED
+
+> *"The suite discards the child's streams by design, which is a principled
+> trade and also why it cannot explain itself. Change the trade: capture the
+> child's stderr to a scratch file, scan it for credential shapes with the
+> existing detector, and print it only if clean — otherwise print
+> `NO EVIDENCE CAPTURED` with the reason."*
+
+**Built exactly that.** `stdout` stays ignored; only `stderr` is captured, to a
+scratch file outside the repository, removed on teardown.
+
+⚠️ **THE DETECTOR IS THE EXISTING ONE, AND MAKING THAT TRUE COST A REFACTOR.**
+`prove-no-secrets.mjs` held its patterns privately and runs a full git scan on
+import, so it could not be imported. ▶ **The pure half was EXTRACTED to
+`scripts/publication/credential-shapes.mjs` and re-imported by its original
+owner** — one definition, two consumers. **A second copy would have been a hole
+that reads as a gate**, green on both sides while one had stopped matching.
+
+✅ **THE EXTRACTION IS PROVEN FAITHFUL BY THE ORIGINAL'S OWN FOUR CONTROLS** —
+its planted `sb_secret_…` value in the working tree, the same in a scratch
+commit, and both neutralizer boundary controls all now exercise the extracted
+module and all pass.
+
+⛔ **AND THIS IS NOT WHAT §11 FORBIDS.** §11 bars *relying on pattern-based
+redaction* — deciding what to strip and printing the rest. Nothing is stripped:
+it is **one whole-file decision that fails closed**, so a scanner miss suppresses
+nothing a redactor would have caught. Unreadable, unscannable, a scanner that
+threw, or a hit of **any** class — all produce the refusal, never the text.
+
+**`D-7b` / `D-7c` / `D-7d` prove it before `D-8` relies on it**: a real Node
+startup error renders in full; a capture carrying a shaped secret is withheld
+entirely and the refusal names the detector without echoing the value; an absent
+or unreadable capture fails closed.
+
+### Findings
+
+1. **A HARDCODED SUMMARY REPORTED 23 WHILE 56 CHECKS RAN, AND THE ARITHMETIC
+   BALANCED.** `prove:portal-p2-18` printed `${23 - bad}` — a literal typed when
+   the suite had 23 legs. ▶ **The exit code was always right; the line a human
+   reads was not**, which is §12.16's family with a number in place of a filter.
+   Repaired to the counter, with a floor that fails if fewer than 40 legs run.
+   **An audit across all three suite directories, comments excluded, found no
+   other instance.**
+
+2. **THE CITATION-VERSUS-DETECTOR TENSION APPEARED IN TWO NEW MEDIA.** §62 found
+   it in TypeScript. Here it recurred in **SQL** — the migration's own block
+   comment explains why `storage_object_path` is omitted, so a scan of the file
+   text found the word it asserted absent — and in a **grep audit**, where the
+   comment quoting `${23 - bad}` matched the search for it. ▶ Same resolution
+   every time: **prohibitions scan stripped source, controls scan raw.**
+
+3. **§60 AGAIN, TWICE MORE, AND ONE ABORTED A CORRECT MIGRATION.** The catalogue
+   stores `SET search_path = ''` as **`search_path=""`** — with quotes — not as
+   `search_path=`. The assertion was written against the concept and failed a
+   posture that was in fact correct. Also `grantee` is
+   `information_schema.sql_identifier`, not `text`, so aggregating it without a
+   cast aborts on a type error rather than a governance finding.
+
+4. **⛔ AND THE MIGRATION TOOL'S FAILURE OUTPUT IS THE MIGRATION SOURCE.** On
+   abort, the CLI echoes the whole failed statement — so `grep`-ing it for
+   `FAIL` returns the file's own `RAISE EXCEPTION` strings, which **look exactly
+   like verdicts**. ▶ Two diagnoses were made from text that was never a result.
+   **The real error only appeared by running the assertion block directly.**
+   Same family as §12.16, in the medium where it is hardest to see: the matched
+   text was genuinely present and genuinely meaningless.
+
+5. **A DUPLICATE DTO WAS CAUGHT BY `tsc`, AND THE FIX WAS TWO TYPES, NOT ONE.**
+   `LessonMaterialDto` already existed from `P2-6`'s management path, with a
+   fifth field. ▶ These are **two different governed reads**: collapsing them
+   would leave one consumer with a field its own read cannot fill, and the
+   obvious repair would be to widen the trainer function toward the management
+   one — the direction the separation exists to prevent. Named
+   `TrainerLessonMaterialDto`, with the reason at the type.
+
+6. **THE GENERATOR GUARD EARNED ITSELF.** `npm run db:types` does not exist; the
+   invocation produced **zero bytes**, and the §12.14 clause refused to write
+   them over `database.types.ts` — the tracked artefact the type gate depends
+   on. **The clause was added after a near-miss; this was the hit.**
+
+7. **§12.14, instances 21–23, and the twenty-first is a NEW FORM: LOUD *AND* IT
+   WROTE.** Backticks inside a double-quoted shell string were substituted away
+   by bash — eight visible errors — **and the script then reported success while
+   having written a file with eight identifiers silently removed.** ▶ The
+   previous twenty were loud and wrote nothing. **A loud failure that is not
+   fatal still produces a success message**, so loudness alone is not the
+   control. Caught by inspection; repaired with the Edit tool. Instances 22 and
+   23 were the familiar forms and wrote nothing.

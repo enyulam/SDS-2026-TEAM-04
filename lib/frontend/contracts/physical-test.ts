@@ -599,6 +599,32 @@ export type TrainerReportsDto = {
   readonly total: number;
 };
 
+/**
+ * ⛔ THE LISTING, NEVER THE OBJECT. The `P2-18` read RPC returns
+ * `display_name`, `media_type` and `byte_size` and DELIBERATELY NOT
+ * `storage_object_path` — that omission is WHY it is an RPC and not a table
+ * policy (RLS filters rows, not columns), and a path here would give the
+ * argument away. ▶ Opening a file needs a short-TTL server-minted URL, a
+ * separate function that is NOT built: the table holds zero rows, so no
+ * proof could exercise it.
+ *
+ * ⚠️ A SECOND MATERIAL TYPE, DELIBERATELY, AND MEASURED FIRST. `P2-6` already
+ * ships `LessonMaterialDto` for screen `14` — five fields, including
+ * `createdAt`. ▶ These are TWO DIFFERENT GOVERNED READS, not one type used
+ * twice: management's comes from a management-scoped path, the trainer's
+ * from `trainer_list_session_materials`, which returns four columns and no
+ * more. ⛔ Collapsing them would leave one consumer with a field its own
+ * read cannot fill — and the obvious repair would be to widen the trainer
+ * function toward the management one, which is the direction this
+ * separation exists to prevent.
+ */
+export type TrainerLessonMaterialDto = {
+  readonly materialId: string;
+  readonly displayName: string;
+  readonly mediaType: string;
+  readonly byteSize: number;
+};
+
 export type LessonPlanEntryDto = {
   readonly sessionId: string;
   readonly lessonNumber: number | null;
@@ -606,6 +632,7 @@ export type LessonPlanEntryDto = {
   readonly sessionDate: string;
   readonly room: string | null;
   readonly timing: "completed" | "this_week" | "upcoming";
+  readonly materials: readonly TrainerLessonMaterialDto[];
 };
 
 /**

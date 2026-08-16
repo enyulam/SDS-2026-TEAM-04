@@ -92,8 +92,8 @@ SELECT 'C<T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHER
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1))
     || ' F=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public') || '>';`);
 check(
-  between(census, "C") === "T=30 E=12 P=30 R=24 F=74",
-  `P22-1c census: everything unmoved EXCEPT the function count, which moved by exactly one (73 -> 74): ${between(census, "C")}`,
+  between(census, "C") === "T=30 E=12 P=30 R=24 F=75",
+  `P22-1c census: everything unmoved EXCEPT the function count. It moved by exactly one at P2-22 (73 -> 74) and again at P2-18 (74 -> 75), both read-side under the batch: ${between(census, "C")}`,
 );
 
 // ---------------------------------------------------------------------

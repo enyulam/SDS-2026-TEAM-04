@@ -184,6 +184,10 @@ export const RPC_MIGRATIONS = [
    * register pairs MIGRATIONS to suites, and that phase shipped none.
    */
   { migration: "20260817090000_portal_p2_22_parent_child_trainer.sql", suite: "prove-p2-22-parent-dashboard.mjs" },
+  {
+    migration: "20260817120000_portal_p2_18_trainer_session_materials.sql",
+    suite: "prove-p2-18-trainer-lesson-plan.mjs",
+  },
   /*
    * P2-12 — the first governed WRITE of Part 2 that adds no audit string.
    * Its apply-time leg exercises the REFUSAL path only (not_permitted at gate

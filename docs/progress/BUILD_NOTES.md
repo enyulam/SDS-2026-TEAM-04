@@ -11323,3 +11323,96 @@ holds 0 rows.
 
 **Next: Part 2 is closed at 23 of 24. `P2-24` (`28`) is DO NOT BUILD (`C-11`),
 with `A-044` knowingly unmet. STOPPED for the Operator's walk.**
+
+---
+
+## 2026-08-17 — three Operator rulings: chips declined again, materials read, serving trade changed
+
+**Branch** `develop` · ledger **48 → 49** · census
+`T=30 E=12 P=30 R=24 F=74 → F=75` · one function, one grant, nothing else.
+
+### 1. KEY FOCUS CHIPS — DECLINED AGAIN, superseding the same-day BUILD ruling
+
+The Operator declined the chips permanently until an authoring surface exists,
+and recorded that the first ruling *"was internally inconsistent"* — it
+authorized them on the same ground `P2-6` had already declined them on, which
+the stop caught. ▶ **The stop-and-ask working against an instruction rather
+than against a gap.** Plan §62 now carries a supersession banner; §63 holds the
+full ruling, its reasoning, and the sharper form: **the frame is the REASON for
+`G-3`, not merely subject to it.**
+
+### 2. `SLIDES & MATERIALS` — read RPC, stated before building
+
+`public.trainer_list_session_materials(uuid)`, `EXECUTE` to `authenticated`.
+Three reasons for RPC over policy: RLS filters rows not columns (the table
+carries `storage_object_path` and two identity columns); `P2-6` shipped this
+table with 0 policies and 0 client grants; a raw storage path in a client is
+what §3.1 forbids. ⛔ **Listing only** — the signed-URL mint is a separate
+function and is not built, because the table holds 0 rows and no proof could
+exercise it. **No download control is rendered.** The frame's *"Slides not
+uploaded yet"* is now used, on the measured-empty branch only.
+
+### 3. The serving suite can now explain itself
+
+`stderr` captured to a scratch file, scanned with the existing detector,
+rendered only if clean. ⚠️ Making *"the existing detector"* literal required
+extracting its pure half to `scripts/publication/credential-shapes.mjs` and
+re-importing it into `prove-no-secrets.mjs` — **one definition, two consumers**.
+The extraction is proven faithful by that script's own four positive controls.
+`D-7b`/`D-7c`/`D-7d` prove render-if-clean, withhold-if-shaped, and fail-closed
+before `D-8` relies on any of it.
+
+### Files
+
+**New:** `supabase/migrations/20260817120000_portal_p2_18_trainer_session_materials.sql` ·
+`scripts/publication/credential-shapes.mjs`
+
+**Modified:** `scripts/publication/prove-no-secrets.mjs` (re-pointed) ·
+`scripts/physical-test/serving-discipline.mjs` ·
+`scripts/physical-test/prove-serving-discipline.mjs` ·
+`server/modules/class-session/trainer-lesson-plan.ts` ·
+`features/trainer/trainer-lesson-plan-screen.tsx` · both DTO mirrors ·
+`participant-actions.ts` · `physical-test-fixture.ts` ·
+`server/db/database.types.ts` · `scripts/tests/portal/rpc-call-rule.mjs` ·
+`prove-p2-18/21/22`, `prove-2-parent-report-list.sql` (ratchets) ·
+`UI_REFERENCE_FINAL_MVP/03-trainer-lesson-plan/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md`
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:portal-p2-18` **56 checks, 0 FAIL** ·
+`prove:no-secrets` CLEAN with all four controls green ·
+`prove:serving-discipline` **PASS** including the three new controls ·
+**`prove:all` 68 PASS · 1 known-red (`S3-T1-r`) · 0 NOT-RUN · exit 0.**
+VISUAL and `RENDERED` **`NOT-RUN`**.
+
+### Findings
+
+1. **A hardcoded summary reported 23 while 56 checks ran, and the arithmetic
+   balanced.** The exit code was always right; the line a human reads was not.
+   Repaired to the counter with a floor; an audit found no other instance.
+
+2. **The citation-versus-detector tension appeared in two new media** — SQL
+   block comments, and a grep audit matching the comment quoting its own target.
+   Prohibitions scan stripped source; controls scan raw.
+
+3. **§60 twice more, and one aborted a correct migration** — `search_path=""`
+   with quotes, and `grantee` being `sql_identifier` rather than `text`.
+
+4. **The migration tool's failure output IS the migration source**, so grepping
+   it for `FAIL` returns the file's own `RAISE EXCEPTION` strings. Two diagnoses
+   were made from text that was never a result.
+
+5. **A duplicate DTO caught by `tsc`, fixed as two types rather than one** —
+   collapsing them would have invited widening the trainer function toward the
+   management one.
+
+6. **The generator guard earned itself** — a zero-byte types generation was
+   refused rather than written over the tracked artefact.
+
+7. **§12.14 instances 21–23; the 21st is a new form: LOUD *and* it wrote.**
+   Eight visible bash errors, a success message, and a file with eight
+   identifiers silently removed. **Loudness alone is not the control.**
+
+**Next: STOPPED for the Operator's walk — screens 03, 09, 20, 21, 22, 24, 30,
+31 and 32's empty branch, in one pass.**
