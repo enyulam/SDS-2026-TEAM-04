@@ -146,10 +146,48 @@ for (const block of ledger) {
   const distinct = new Set(block.htmlValues);
   const fractional = fractionalValues([...distinct]);
   const leakedToNote = [...distinct].filter((v) => src.note.includes(v));
+  /*
+   * ═══════════════════════════════════════════════════════════════════════
+   * ⛔ THE FRACTIONAL MINIMUM IS RETIRED — OPERATOR RULING, 2026-08-16.
+   * ═══════════════════════════════════════════════════════════════════════
+   * The condition was `distinct.size >= 6 && fractional.length >= 2 && …`.
+   * ⚠️ IT IS RETIRED, NOT LOWERED TO FIT. The Operator's words, recorded
+   * because the distinction is the whole ruling:
+   *
+   *   "RETIRE THE FRACTIONAL REQUIREMENT. It was a heuristic for 'did you read
+   *    the .html', and prove:artefact-read now has AR-2, AR-3, AR-5 and AR-6
+   *    doing that work against the file directly. … Record it as retired with
+   *    the three instances as evidence, not as a threshold lowered to fit."
+   *
+   * ▶ THE EVIDENCE IS THREE MEASURED INSTANCES, AND THE THIRD IDENTIFIED THE
+   *   CAUSE AS STRUCTURAL:
+   *     `AR-4-14`  1 fractional (2026-08-14) — escalated, ruled KNOWN-RED
+   *     `AR-4-17`  1 fractional (2026-08-15) — second instance, escalated
+   *     `AR-4-21`  0 fractional (2026-08-16) — third, and the frame's `.html`
+   *                carries 38 fractional values of which EVERY ONE belongs to a
+   *                SHARED CONTROL (icon internals; the sidebar rail's 13.50px)
+   *
+   * ⛔ WHY IT COULD NEVER BE SATISFIED HONESTLY: on those screens the fractional
+   *   values are owned by shared controls, so meeting the minimum meant either
+   *   RESTYLING A SHARED CONTROL to match a citation, or CITING VALUES THE
+   *   COMPONENT DOES NOT USE — and `AR-5` correctly reds on the second. ▶ Both
+   *   were refused by the Operator, which is what makes this a wall rather than
+   *   a bar someone declined to clear.
+   *
+   * ⛔ WHAT REPLACED IT WAS ALREADY THERE, AND IS STRONGER: `AR-3` checks every
+   *   cited value occurs LITERALLY in the `.html`, `AR-5` checks every cited
+   *   value is USED in the component, and `AR-6` verifies a `screen.md`
+   *   quotation at source. The fraction was a PROXY for reading the file; those
+   *   three read the file.
+   *
+   * ⛔ THE DISTINCT-VALUE REQUIREMENT AND THE NOTE-LEAK REQUIREMENT BOTH STAND.
+   *   `leakedToNote` is the one that carries §7.4.1's rule — a value obtainable
+   *   from the prose note is not evidence the `.html` was opened.
+   */
   check(
     `AR-4-${id}`,
-    distinct.size >= 6 && fractional.length >= 2 && leakedToNote.length === 0,
-    `${distinct.size} distinct, ${fractional.length} fractional (${fractional.join(" ")}), none obtainable from the prose note (leaked: ${leakedToNote.join(", ") || "none"})`,
+    distinct.size >= 6 && leakedToNote.length === 0,
+    `${distinct.size} distinct value(s), none obtainable from the prose note (leaked: ${leakedToNote.join(", ") || "none"}) — ⚠️ the >=2 FRACTIONAL minimum is RETIRED by Operator ruling 2026-08-16 after three measured instances, the third at zero with the cause identified as structural: shared controls own the fractional values, so satisfying it meant restyling a shared control or citing values the component does not use, and both were refused. It was a PROXY for reading the .html; AR-3, AR-5 and AR-6 read it. Observed here: ${fractional.length} fractional (${fractional.join(" ") || "none"}), REPORTED and NOT ASSERTED`,
   );
 
   const notUsed = block.htmlValues.filter((v) => !usedInComponent(src.component, v));

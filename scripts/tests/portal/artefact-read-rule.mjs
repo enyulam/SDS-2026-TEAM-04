@@ -134,7 +134,44 @@ export function screenInventory(root) {
 }
 
 /*
- * ⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ✅ SUPERSEDED 2026-08-16 — THE FRACTIONAL MINIMUM IS RETIRED BY OPERATOR
+ *    RULING. THE BLOCK BELOW IS PRESERVED PER ANNOTATE-NEVER-DELETE.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ THE 2026-08-14 BLOCK BELOW SET ITS OWN ESCALATION CONDITION IN ADVANCE —
+ *    *"if a LATER frame hits the same wall, that is a STOP-AND-ASK … two
+ *    instances would make it a RULE problem rather than a FRAME accident."*
+ *    ▶ **THAT CONDITION FIRED, EXACTLY AS WRITTEN**, and the discipline held:
+ *    each instance was escalated rather than fixed locally, and none of the two
+ *    refused routes to green was ever taken.
+ *
+ *      `AR-4-14`  1 fractional (2026-08-14) — ruled KNOWN-RED
+ *      `AR-4-17`  1 fractional (2026-08-15) — second instance, escalated
+ *      `AR-4-21`  0 fractional (2026-08-16) — third, and the one that
+ *                 identified the cause as STRUCTURAL: the frame's `.html`
+ *                 carries 38 fractional values and EVERY ONE belongs to a
+ *                 SHARED CONTROL
+ *
+ * ⛔ THE RULING, AND ITS PRECISE SHAPE: *"RETIRE THE FRACTIONAL REQUIREMENT. …
+ *    Keep the distinct-value requirement. Drop the fractional minimum. Record
+ *    it as retired with the three instances as evidence, NOT AS A THRESHOLD
+ *    LOWERED TO FIT."*
+ *
+ * ⚠️ THE OLD BLOCK'S *"DO NOT LOWER THE THRESHOLD"* IS THEREFORE HONOURED, NOT
+ *    OVERRULED. Lowering `>=2` to `>=1` or `>=0` would have been a rule relaxed
+ *    to fit one frame, which is what it forbade. ▶ **RETIRING a proxy whose job
+ *    three other legs now do directly is a different act from weakening it**:
+ *    `AR-3` (every cited value occurs literally in the `.html`), `AR-5` (every
+ *    cited value is USED in the component) and `AR-6` (a `screen.md` quotation
+ *    verified at source) all read the file, where the fraction only ever
+ *    INFERRED that someone had.
+ *
+ * ⛔ `fractionalValues()` IS KEPT AND STILL CALLED. `AR-4` REPORTS the count and
+ *    no longer ASSERTS on it, so the signal survives for a reader without
+ *    gating anything.
+ *
+ * ─────────────────────── the superseded block, verbatim ───────────────────────
+ * ~~⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.~~
  *
  * ⚠️ `AR-4-14` FAILS ON PURPOSE AND MUST KEEP FAILING. It is **not a defect**
  *    (nothing is wrong with screen `14`, its citation or its build) and it is

@@ -6760,3 +6760,177 @@ emphasis in a `check()` message uses **plain quotes, never backticks**, and any
 line needing a regex escape is written with the **Edit tool**, which involves no
 shell at all. ⚠️ The rule stands as amended: **there is no size below which it
 lapses, and the test is destination, not length.**
+---
+
+## §12.18 — ⛔ A PIN IS ONLY AS EXACT AS THE PATTERN THAT DEFINES ITS POPULATION
+
+*(Operator ruling, 2026-08-16. **Process only — no product rule changes.**)*
+
+> ### ⛔ **AN EXACT LIST FEELS STRONGER THAN A COUNT, AND IS — WITHIN WHAT THE PATTERN CAN SEE. OUTSIDE IT, THE EXACTNESS IS DECORATION.**
+
+**The canonical instance, measured.** `prove:hero-15`'s `M-3a` asserted **"all
+FOUR reads go through `readRows`"** and named all four in `M-3b`, name for name.
+▶ **A FIFTH READ EXISTED.** `gatedReview:report_get_management_review` has used
+`readMaybeRow` **since the day it was written** — measured at `0d2cae4`, before
+the type-gap pass touched anything — and the leg's pattern was `/readRows</`,
+which does not match `readMaybeRow<`.
+
+⚠️ **THE LEG REPORTED COMPLETENESS ACROSS EVERY COMMIT SINCE.** Nobody decided
+that `readMaybeRow` need not be watched; it simply never matched. **A naming
+convention was doing load-bearing work by accident.**
+
+⛔ **WHY THE EXACT-LIST FORM DID NOT SAVE IT.** The list was checked *name for
+name* against the population the pattern produced. Both legs agreed, both were
+green, and both were describing four fifths of the module. ▶ **An exact list
+proves the population has not CHANGED; it says nothing about whether the
+population is COMPLETE.**
+
+### The same defect one layer out — the sweep itself
+
+The Operator's ruling names it: *"a gate that only executes when its name matches
+a pattern is a gate with a population problem, which is Finding 2's shape one
+layer out."*
+
+Every per-phase sweep in this project enumerated the **`portal-p2-N`** suites.
+**Four gates sat outside that naming and went unread**, three of them for many
+phases and none of them anybody's decision:
+
+| Gate | Stale by | For how long |
+|---|---|---|
+| `prove:hero-2` `P2-6` — the project's **SINGLE GLOBAL function ratchet** | 62 vs a live **73** | **EIGHT** authorized phases |
+| `prove:ruling-a` `RAa-4` — the registry pin | 23 vs a live **24** | since `P2-14` |
+| `prove:hero-15` `M-3a` | four vs **five** | since it was written |
+| `prove:artefact-read` `AR-5-11` | a citation left behind by a moved component | one pass |
+
+**The repair is `prove:all`** (`scripts/tests/prove-all.mjs`), which takes its
+population from **`package.json`'s own script list** — there is no list of suites
+in that file, and that is the point. ⚠️ **Measured wall time: 162s for 65 suites**,
+so it runs **per phase**, not only at push.
+
+⛔ **ITS KNOWN-RED REGISTER CANNOT ROT, because a KNOWN-RED that has gone GREEN
+is also a failure.** ▶ That is the half such registers usually omit, and its
+absence is how a waiver outlives the defect it described — the stale `62` shape,
+one layer over.
+
+### ⚠️ AND THE OTHER DIRECTION: A FALSE RED ON CORRECT CODE IS NOT THE SAFE ONE
+
+*(Finding 1, recorded here because it is the same rule read from the other end.)*
+
+`prove:rpc-arguments` was built in this pass and **its own controls caught two
+defects in it, in opposite directions**:
+
+| # | Defect | Direction | Caught by |
+|---|---|---|---|
+| 1 | Keys had to start their own line, so a **single-line multi-key** call lost every key after the first | **UNDER-read** → false `MISSING ARGUMENT` | `PR-3`, as a red |
+| 2 | A **ternary's colon** read as a key separator — `hasId ? input.expectedObservationId : null` yielded two arguments that do not exist | **OVER-read** → false `UNKNOWN ARGUMENT` on an **entirely correct** call site | `PR-4`, on real source |
+
+⛔ **DEFECT 2 IS THE MORE INSTRUCTIVE, AND LOUDNESS IS NOT SAFETY.** It fired on
+`assessment_save_complete_and_open_report`, which was correct, and reported three
+arguments that do not exist. ▶ **A gate that reds on correct code stops being
+read** (§12.13), and a gate nobody reads catches nothing — so the over-read costs
+exactly what the under-read costs, one step later.
+
+⚠️ **THE SAME PAIR RECURRED IMMEDIATELY IN THE SQL HALF.** Extending the guard to
+positional SQL call sites, the first draft flagged **19 sites and every one was
+CORRECT CODE** — three kinds, all real constructs from this repository: a **decoy
+function definition** (`prove-od4-grant-guard` defines an impostor
+`report_content_hash_v2` on purpose), **DDL naming a signature**
+(`REVOKE ALL ON FUNCTION …`, `DROP FUNCTION IF EXISTS …`), and a **string-literal
+grep needle** (`'public.assessment_save_observation('` in a JS array). ▶ **The
+defect §12.13 names, committed inside the gate written to catch it**, and
+`PR-7b` now holds all five shapes as controls that must stay silent.
+
+⛔ **AND THE SURVIVING TWENTIETH WAS THE GATE'S OWN CONTROL SAMPLE** — a
+deliberately stale call picked up by its own sweep, §42's family appearing inside
+a control rather than a subject. **A control file cannot be its own subject**;
+the exclusion is exactly two files and `PR-7c` pins that as a count so it cannot
+grow into an allow-list.
+
+### The standing test
+
+**Before trusting any pin, ask what defines its population, and whether anything
+real can fall outside that definition.** If the answer is a **pattern**, a
+**prefix**, a **naming convention** or a **hand-maintained list**, the pin is
+bounded by that and **must say so** — the way `PL-6`, `PR-5`, `PR-6` and
+`PC-4` state their limits rather than letting a green imply coverage.
+---
+
+## §55 — `AR-4`'s FRACTIONAL MINIMUM: RETIRED BY RULING, WITH THREE INSTANCES AS EVIDENCE
+
+*(Operator ruling, 2026-08-16. **Process only — no product rule changes.**)*
+
+### 55.1 The ruling, and its precise shape
+
+> *"RETIRE THE FRACTIONAL REQUIREMENT. It was a heuristic for 'did you read the
+> `.html`', and `prove:artefact-read` now has `AR-2`, `AR-3`, `AR-5` and `AR-6`
+> doing that work against the file directly. The wall is structural: shared
+> controls own the fractional values, and satisfying it means either restyling a
+> shared control or citing values the component does not use — both of which I
+> have refused. **Keep the distinct-value requirement. Drop the fractional
+> minimum. Record it as retired with the three instances as evidence, not as a
+> threshold lowered to fit.**"*
+
+`AR-4` was `distinct.size >= 6 && fractional.length >= 2 && leakedToNote.length === 0`.
+It is now `distinct.size >= 6 && leakedToNote.length === 0`, and the fractional
+count is **REPORTED, not asserted**.
+
+### 55.2 ⚠️ RETIRED IS NOT LOWERED, AND THE DISTINCTION IS THE RULING
+
+The original 2026-08-14 block said **"DO NOT LOWER THE THRESHOLD"** — *"a rule
+relaxed to fit one frame stops measuring the next."* ▶ **That instruction is
+honoured, not overruled.** Moving `>= 2` to `>= 1` or `>= 0` would have been
+exactly the relaxation it forbade, and would have left a weakened proxy in place
+pretending to measure something.
+
+⛔ **RETIRING A PROXY WHOSE JOB THREE OTHER LEGS NOW DO DIRECTLY IS A DIFFERENT
+ACT FROM WEAKENING IT.** The fraction only ever **INFERRED** that someone had
+opened the `.html`. What replaced it reads the file:
+
+| Leg | What it reads |
+|---|---|
+| `AR-3` | every cited value occurs **LITERALLY** in the `.html` |
+| `AR-5` | every cited value is **USED** in the component |
+| `AR-6` | a `screen.md` quotation **verified at source** |
+
+**Both surviving conditions still bite.** `leakedToNote` is the one carrying
+§7.4.1's rule — **a value obtainable from the prose note is not evidence the
+`.html` was opened** — and the distinct-value minimum survived contact
+immediately: retiring the fraction left `AR-4-17` **still red at 5 distinct**,
+which was repaired honestly by measuring a sixth value (`12px`: `font-size: 12px`
+in the frame ×20, `text-[12px]` on the chip in the component — **same property,
+both artefacts**).
+
+### 55.3 The three instances, and why the third settled it
+
+| Instance | Fractional | Date | Disposition |
+|---|---|---|---|
+| `AR-4-14` | 1 (`11.50px`) | 2026-08-14 | escalated → ruled `KNOWN-RED` |
+| `AR-4-17` | 1 (`12.50px`) | 2026-08-15 | escalated, second instance |
+| `AR-4-21` | **0** | 2026-08-16 | escalated, **cause identified as structural** |
+
+⛔ **THE THIRD IS THE ONE THAT PROVED IT WAS A WALL AND NOT A BAR.** Screen `21`'s
+frame carries **38 fractional values in its `.html`**, and **every one belongs to
+a shared control** — icon internals, and the sidebar rail's `13.50px`. ▶ There
+was no honest citation available at any effort.
+
+⚠️ **THE ESCALATION CONDITION HAD BEEN SET IN ADVANCE AND FIRED EXACTLY AS
+WRITTEN:** *"if a LATER frame hits the same wall, that is a STOP-AND-ASK, not a
+second `KNOWN-RED` … two instances would make it a RULE problem rather than a
+FRAME accident."* Each instance was **escalated rather than fixed locally**, and
+**neither refused route to green was ever taken** — no shared control was
+restyled, and no value the component does not use was ever cited.
+
+▶ **That is why this is evidence and not an excuse.** A rule that had been quietly
+worked around three times would have produced the same green; a rule that was
+reported red three times produced a ruling.
+
+### 55.4 What is kept
+
+`fractionalValues()` is **kept and still called**. `AR-4` prints the count and the
+values, so the signal survives for a reader without gating anything — the same
+treatment `PR-5` gives unchecked call sites and `PL-6` gives content drift:
+**reported, named, and not asserted.**
+
+The superseded `KNOWN-RED-AR-4-14` block is **preserved verbatim** in
+`artefact-read-rule.mjs` under annotate-never-delete, with the supersession, the
+three instances and the honoured *"do not lower"* instruction recorded above it.

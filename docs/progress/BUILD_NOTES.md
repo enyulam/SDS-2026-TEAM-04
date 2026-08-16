@@ -10718,3 +10718,55 @@ ruled cross-cutting change and a new standing gate, not a phase. Remaining:
 `P2-18` (awaiting the `G-3`/`D-4` scope answer), `P2-21` (`09`, `C2C-007` first),
 `P2-22` (`30`), `P2-23` (`31`, owes `C-12`), `P2-24` (**DO NOT BUILD**, `C-11`).
 **Next: `P2-21` under the batch authorization.**
+
+## 2026-08-16 — the four Operator-ruled repairs to the gates themselves (branch `develop`)
+
+**Scope.** Four rulings, all process: make the per-phase sweep enumerate rather
+than pattern-match; record Findings 1 and 2 in §12; extend `prove:rpc-arguments`
+to the SQL suites rather than leaving the boundary implicit; and retire `AR-4`'s
+fractional minimum with the three instances as evidence.
+
+**Starting HEAD** `afe2d60` → this entry's commit. Branch `develop`; `main`
+untouched.
+
+### What shipped
+
+- `scripts/tests/prove-all.mjs` + `prove:all`. Population read from
+  `package.json`'s own script list — **there is no list of suites in the file**.
+  Four outcomes, not two: `PASS` / `FAIL` / `NOT-RUN` / `ERROR`, and **NOT-RUN is
+  never a pass**. Its known-red register **cannot rot**: a known-red that has
+  gone green is also a failure, as is an entry naming a script `package.json` no
+  longer has.
+- `prove:rpc-arguments` gains `PR-7`/`PR-7b`/`PR-7c`/`PR-8` — 904 positional
+  SQL call sites across 122 test files.
+- `AR-4`'s condition drops `fractional.length >= 2`; the count is now reported.
+- Plan §12.18 (a pin is only as exact as the pattern defining its population,
+  plus both directions of the guard's own defect) and §55 (the `AR-4` retirement).
+
+### Verification
+
+**`prove:all`: 64 PASS · 1 FAIL · 0 NOT-RUN in 162s**, exit 0 — the one FAIL
+being the registered known-red `S3-T1-r`. `tsc` 0 · `prove:encoding` 0 ·
+`prove:no-secrets` 0.
+
+**162 seconds answers the Operator's open question directly:** the full set is
+affordable **per phase**, so the "run it at every push instead" fallback is not
+needed.
+
+### Findings
+
+1. **`AR-4-17` stayed red after the fractional minimum came out**, at 5 distinct
+   against a minimum of 6 — the requirement the Operator kept, biting
+   immediately. Repaired by measuring a sixth value honestly rather than by
+   touching the minimum.
+2. **The SQL half's first draft flagged 19 sites and every one was correct
+   code** — a decoy function definition, DDL naming a signature, and a
+   string-literal grep needle. §12.13's defect committed inside the gate written
+   to catch it, one section after recording it.
+3. **The surviving twentieth was the gate's own control sample.** §42's family
+   appearing inside a control rather than a subject. A control file cannot be its
+   own subject; the exclusion is pinned as a count so it cannot become an
+   allow-list.
+
+**Next: `P2-21`, starting with `C2C-007` as the plan requires** — screen `09`
+refuses its canonical route (`returned-reports-queue.tsx:36`).

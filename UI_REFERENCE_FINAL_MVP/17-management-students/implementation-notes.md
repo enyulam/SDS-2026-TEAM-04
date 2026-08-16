@@ -77,7 +77,7 @@ claim about what the frame draws or omits rests on the `.png`.
 screen: 17
 pack: Management - Students
 component: features/management/management-students-screen.tsx
-html-values: 12.50px, 17px, 13px, 11px, 18px
+html-values: 12.50px, 17px, 13px, 11px, 18px, 12px
 screen-md-quote: Management list over the centre's students.
 ```
 

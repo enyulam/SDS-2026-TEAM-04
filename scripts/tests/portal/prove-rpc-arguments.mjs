@@ -17,7 +17,12 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 
 import { resolveLocalTarget } from "../../fixtures/local-target-guard.mjs";
-import { extractRpcCalls, inputParams, argumentMismatches } from "./rpc-argument-rule.mjs";
+import {
+  extractRpcCalls,
+  inputParams,
+  argumentMismatches,
+  sqlArityMismatches,
+} from "./rpc-argument-rule.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const { dbContainer: DB_CONTAINER } = resolveLocalTarget();
@@ -203,6 +208,106 @@ for (const f of findings) {
 }
 
 // ---------------------------------------------------------------------
+// ⛔ PR-7 -- THE SQL SUITES, THE POPULATION THE FIRST DRAFT DID NOT SEE.
+// ---------------------------------------------------------------------
+/*
+ * ⚠️ 22 POSITIONAL CALL SITES IN FOUR SUITES BROKE ON THE `C-14` SIGNATURE
+ * CHANGE, AND THIS GATE WAS GREEN THROUGHOUT. It scanned `server/**`; a
+ * `SELECT … FROM public.admin_create_student('A','B',ARRAY[…])` inside a proof
+ * harness is a different grammar in a different tree. ▶ The FULL SWEEP caught
+ * them, not the guard — which is a sweep working, and a guard with a
+ * population problem.
+ */
+/*
+ * ⛔ THIS RULE'S OWN TWO FILES ARE EXCLUDED, AND THE REASON IS NOT CONVENIENCE.
+ *
+ * They contain DELIBERATELY DEFECTIVE SAMPLES — `staleSql` is a 3-argument call
+ * against a 6-argument signature, written on purpose so `PR-7b` can prove the
+ * detector fires. ▶ Sweeping them makes the gate report its own control as a
+ * defect: §42's family, a check broken by its own compliance, and the second
+ * time that shape has appeared inside a control rather than in the subject.
+ *
+ * ⚠️ A CONTROL FILE CANNOT BE ITS OWN SUBJECT. The exclusion is exactly two
+ * files and `PR-7c` asserts that — it is not an allow-list that can grow.
+ */
+const CONTROL_FILES = new Set(["rpc-argument-rule.mjs", "prove-rpc-arguments.mjs"]);
+const excluded = [];
+const sqlFiles = [];
+(function walkTests(dir) {
+  for (const e of readdirSync(dir)) {
+    if (e === "node_modules") continue;
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) walkTests(p);
+    else if (CONTROL_FILES.has(e)) excluded.push(e);
+    else if (/\.(mjs|sql)$/.test(e)) sqlFiles.push(p);
+  }
+})(join(ROOT, "scripts", "tests"));
+
+let sqlCallCount = 0;
+const sqlFindings = [];
+for (const f of sqlFiles) {
+  const source = readFileSync(f, "utf8");
+  sqlCallCount += (source.match(/public\.[a-z0-9_]+\s*\(/g) ?? []).length;
+  for (const b of sqlArityMismatches(source, signatures)) {
+    sqlFindings.push({ ...b, file: relative(ROOT, f).split("\\").join("/") });
+  }
+}
+
+check(
+  sqlCallCount >= 50,
+  `PR-7  ⚠️ NON-VACUITY FOR THE SQL HALF: ${sqlCallCount} positional \`public.*(\` call site(s) across ${sqlFiles.length} test file(s) — ▶ if the walk collapsed, PR-8 would sweep an EMPTY SET`,
+);
+
+/*
+ * ⛔ THE CONTROL, AND IT USES THE LIVE SIGNATURES DELIBERATELY. Unlike
+ * `CTRL_SIGS` above — which is synthetic because §12.17 warns that a control
+ * derived from the state under test inherits its faults — this one must prove
+ * the SQL scanner reads a REAL signature correctly. The fault class here lives
+ * in SOURCE, never in the catalogue, so the catalogue cannot pollute it.
+ */
+const staleSql = sqlArityMismatches(
+  "SELECT o_reason FROM public.admin_create_student('A', 'B', ARRAY[]::uuid[]);",
+  signatures,
+);
+const goodSql = sqlArityMismatches(
+  "SELECT o_reason FROM public.admin_create_student('A', 'B', ARRAY[]::uuid[], NULL, NULL, NULL);",
+  signatures,
+);
+/*
+ * ⛔ AND FOUR SHAPES THAT MUST STAY SILENT. The first draft of the SQL scanner
+ * flagged 19 sites and EVERY ONE WAS CORRECT CODE — the exact defect §12.13
+ * names, committed inside the gate written to catch it. Each of these four is
+ * a real construct taken from this repository, not an invented case.
+ */
+const NOT_CALLS = [
+  ["a has_function_privilege TYPE-LIST STRING", "SELECT pg_catalog.has_function_privilege('authenticated','public.admin_create_student(text, text, uuid[], date, text, text)','EXECUTE');"],
+  ["a decoy FUNCTION DEFINITION", "CREATE OR REPLACE FUNCTION public.report_content_hash_v2(a text) RETURNS text AS $$ SELECT $1 $$ LANGUAGE sql;"],
+  ["a REVOKE naming a signature", "REVOKE ALL ON FUNCTION public.report_content_hash_v2(text) FROM PUBLIC, anon, authenticated;"],
+  ["a DROP naming a signature", "DROP FUNCTION IF EXISTS public.report_list_management_corrections();"],
+  ["a STRING-LITERAL grep needle", "for (const needle of ['public.assessment_save_observation(', 'public.report_create(']) {"],
+];
+const noisy = NOT_CALLS.filter(([, sample]) => sqlArityMismatches(sample, signatures).length > 0);
+check(
+  staleSql.length === 1 && staleSql[0].passed === 3 && goodSql.length === 0 && noisy.length === 0,
+  `PR-7b ⛔ CONTROL — THE EXACT DEFECT THAT BROKE 22 SITES: the old 3-argument positional call is caught (${staleSql.length} finding, passed=${staleSql[0]?.passed ?? "-"} against required=${staleSql[0]?.required ?? "-"}) and the corrected 6-argument call is silent (${goodSql.length}). ⛔ AND ${NOT_CALLS.length} SHAPES THAT ARE NOT CALLS STAY SILENT — ${noisy.length === 0 ? "all of them" : "NOISY: " + noisy.map(([n]) => n).join("; ")} — ▶ this half matters more: the first draft flagged 19 sites and every one was CORRECT CODE, which is how a gate stops being read`,
+);
+
+check(
+  excluded.length === 2 && CONTROL_FILES.size === 2,
+  `PR-7c ⛔ THE EXCLUSION IS EXACTLY THIS RULE'S OWN TWO FILES (${excluded.sort().join(", ") || "NONE FOUND"}) — ▶ pinned as a COUNT so it cannot quietly grow into an allow-list for inconvenient files, and asserted as FOUND so a rename cannot silently empty it`,
+);
+
+check(
+  sqlFindings.length === 0,
+  `PR-8  every positional SQL call site supplies an argument count the live signature accepts (${sqlFindings.length} mismatch(es))`,
+);
+for (const f of sqlFindings) {
+  console.log(
+    `          ⛔ ${f.file}: ${f.fn}() passed ${f.passed}, signature takes ${f.required}${f.accepted !== f.required ? `..${f.accepted}` : ""}`,
+  );
+}
+
+// ---------------------------------------------------------------------
 // PR-5 -- STATED LIMITS, not implied by a green run.
 // ---------------------------------------------------------------------
 console.log(
@@ -210,7 +315,11 @@ console.log(
 );
 for (const s of dynamicSites) console.log(`          ⚠️ UNCHECKED  ${s}`);
 console.log(
-  `INFO    PR-6  ⚠️ STATED LIMIT: this checks argument NAMES against the signature, not argument TYPES or VALUES. A caller passing a \`text\` where the function takes \`uuid\` is invisible here and surfaces as a runtime cast error.`,
+  "INFO    PR-6  ⚠️ STATED LIMIT, AND THE TWO HALVES ARE NOT EQUALLY STRONG:" +
+    " the TypeScript half (PR-4) checks argument NAMES; the SQL half (PR-8) checks ARITY ONLY," +
+    " because a positional call has no names to check. ▶ A SQL caller passing the right COUNT in the" +
+    " WRONG ORDER is invisible to PR-8 and surfaces as a runtime cast error. Neither half checks" +
+    " argument TYPES or VALUES.",
 );
 
 console.log(`\nRESULT: ${bad === 0 ? "PASS" : "FAIL"}  (${bad} failed checks)`);

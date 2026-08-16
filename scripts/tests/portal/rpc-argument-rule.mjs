@@ -164,6 +164,107 @@ export function inputParams(signatureText) {
 }
 
 /**
+ * ⛔ POSITIONAL SQL CALL SITES — THE POPULATION THE FIRST DRAFT DID NOT SEE.
+ *
+ * Operator ruling, 2026-08-16: *"extend `prove:rpc-arguments` to the SQL
+ * suites, or state the boundary in the gate the way `PL-6` does. Do not leave
+ * it implicit; 22 call sites broke and the sweep caught them, not the guard."*
+ *
+ * ⚠️ MEASURED, NOT HYPOTHETICAL. `20260816230000` widened four signatures, and
+ * **22 positional calls inside `prove-p2-11/12/13/14` broke at once** — every
+ * leg in those four suites went blank, because the whole transaction errored.
+ * The TypeScript half of this gate was green throughout: it scans `server/**`,
+ * and a `SELECT … FROM public.admin_create_student('A','B',ARRAY[…])` is a
+ * different grammar in a different tree.
+ *
+ * ⛔ NAMED ARGUMENTS DO NOT EXIST HERE, SO THE CHECK IS ARITY, NOT NAMES. A
+ * positional call supplies values in order; what can go wrong is the COUNT.
+ * ▶ That is a weaker check than the TypeScript half and `PR-8` says so rather
+ * than letting a green imply parity.
+ *
+ * ⚠️ DEFAULTED PARAMETERS MAKE THE ARITY A RANGE, not a number: a call may
+ * supply anywhere from `required.length` to `accepted.length` arguments.
+ */
+export function sqlArityMismatches(source, signatures) {
+  const clean = source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*(?:--|\/\/)[^\n]*$/gm, " ");
+  const bad = [];
+  const HEAD = /public\.([a-z0-9_]+)\s*\(/g;
+  for (const m of clean.matchAll(HEAD)) {
+    const sig = signatures.get(m[1]);
+    if (sig === undefined) continue; // not a governed function, or not in this schema
+
+    /*
+     * ⛔ THREE THINGS THAT LOOK EXACTLY LIKE A CALL AND ARE NOT. The first
+     * draft flagged 19 of them and every one was CORRECT CODE — the precise
+     * defect this gate recorded one section earlier, committed inside the gate
+     * built to catch it.
+     *
+     *   1. A DEFINITION or DDL naming a signature:
+     *        CREATE OR REPLACE FUNCTION public.f(a text)
+     *        DROP FUNCTION IF EXISTS public.f()
+     *        REVOKE ALL ON FUNCTION public.f(text) FROM PUBLIC
+     *      ▶ `prove-od4-grant-guard` DEFINES a decoy `report_content_hash_v2`
+     *        to prove the guard catches an impostor; counting its parameter
+     *        list as arguments reds a suite for doing its job.
+     *   2. A STRING-LITERAL NEEDLE — `'public.assessment_save_observation('`
+     *      sits in a JS array of grep targets in `c3-static.mjs`.
+     *   3. A `has_function_privilege` TYPE-LIST STRING, handled below as well.
+     *
+     * ⚠️ A REAL CALL IS NEVER PRECEDED DIRECTLY BY A QUOTE, and never by the
+     * keyword `FUNCTION`. Both tests are on what comes BEFORE the match, which
+     * is why they cannot be fooled by the argument list.
+     */
+    const before = clean.slice(Math.max(0, m.index - 48), m.index);
+    if (/["'`]$/.test(before)) continue;
+    if (/\bFUNCTION\s+(?:IF\s+EXISTS\s+)?$/i.test(before)) continue;
+    let i = m.index + m[0].length;
+    let depth = 1;
+    let quote = null;
+    let commas = 0;
+    let body = "";
+    for (; i < clean.length && depth > 0; i += 1) {
+      const c = clean[i];
+      if (quote) {
+        if (c === quote) quote = null;
+        body += c;
+        continue;
+      }
+      if (c === "'" || c === '"') { quote = c; body += c; continue; }
+      if (c === "(" || c === "[") { depth += 1; body += c; continue; }
+      if (c === ")" || c === "]") {
+        depth -= 1;
+        if (depth === 0) break;
+        body += c;
+        continue;
+      }
+      if (c === "," && depth === 1) commas += 1;
+      body += c;
+    }
+    /*
+     * ⛔ A BARE TYPE LIST IS A `has_function_privilege` SIGNATURE STRING, NOT A
+     * CALL. Counting it as one would flag every privilege assertion in the
+     * project — a false red on correct code, which is how a gate stops being
+     * read (§12.13).
+     */
+    const inner = body.replace(/\s+/g, " ").trim();
+    if (inner.length === 0) {
+      if (sig.required.length > 0) {
+        bad.push({ fn: m[1], passed: 0, required: sig.required.length, accepted: sig.accepted.length });
+      }
+      continue;
+    }
+    if (/^(?:text|uuid|date|integer|bigint|boolean|numeric|jsonb|timestamptz)(\[\])?(?:\s*,\s*(?:text|uuid|date|integer|bigint|boolean|numeric|jsonb|timestamptz)(\[\])?)*$/i.test(inner)) {
+      continue;
+    }
+    const passed = commas + 1;
+    if (passed < sig.required.length || passed > sig.accepted.length) {
+      bad.push({ fn: m[1], passed, required: sig.required.length, accepted: sig.accepted.length });
+    }
+  }
+  return bad;
+}
+
+/**
  * @param calls      from `extractRpcCalls`
  * @param signatures Map<fnName, {required, accepted}> from the LIVE catalogue
  * @returns mismatches, each naming what the site passes and what the function takes
