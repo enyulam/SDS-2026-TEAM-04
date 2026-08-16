@@ -30,6 +30,7 @@ import {
   type LessonStatisticsDto,
   type ClassStatisticsDto,
   type TrainerMyClassesDto,
+  type TrainerDashboardDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1334,6 +1335,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * thing `A-016` makes authoritative.
    */
   async readTrainerMyClasses(): Promise<UiActionResult<TrainerMyClassesDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-19` — screen `01`. ⛔ THE FIXTURE REFUSES: `pendingReviews` and the
+   * recent list come from a governed read over tables no client may touch, and
+   * a manufactured count would tell a trainer they have work they do not.
+   */
+  async readTrainerDashboard(): Promise<UiActionResult<TrainerDashboardDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

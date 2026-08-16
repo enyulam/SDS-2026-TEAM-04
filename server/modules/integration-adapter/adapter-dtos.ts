@@ -480,6 +480,37 @@ export interface AdapterTrainerMyClassesDto {
   readonly cards: readonly AdapterTrainerClassCardDto[];
 }
 
+export interface AdapterTrainerRecentReportDto {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  readonly reportState: string;
+  readonly updatedAt: string;
+}
+
+export interface AdapterTrainerTodaySessionDto {
+  readonly classSessionId: string;
+  readonly classLabel: string;
+  readonly startsAt: string | null;
+  readonly room: string | null;
+  readonly isNow: boolean;
+}
+
+export interface AdapterTrainerDashboardDto {
+  readonly displayName: string | null;
+  readonly classCount: number;
+  readonly studentCount: number;
+  readonly pendingReviews: number;
+  readonly classes: readonly AdapterTrainerClassCardDto[];
+  readonly recent: readonly AdapterTrainerRecentReportDto[];
+  readonly today: readonly AdapterTrainerTodaySessionDto[];
+  readonly monthSessionDates: readonly string[];
+  readonly monthLabel: string;
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

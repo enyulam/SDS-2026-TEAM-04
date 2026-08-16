@@ -161,6 +161,23 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/trainer/my-classes", { role: "trainer", label: "My Classes" }],
   /*
+   * `P2-19` -- screen `01` Trainer Dashboard, and a NEW trainer rail item, the
+   * same shape as `My Classes` one phase earlier: the rail carried no
+   * `Dashboard` item, so the route would have resolved to ZERO active items.
+   *
+   * ⚠️ THE ITEM IS `exact: true`, AND THAT IS THE CHOICE `C2C-002` PUNISHES
+   * WHEN IT IS MADE BY HABIT. It is made here on a MEASURED ground: the
+   * ratified 36 allocates no `/trainer/dashboard/*` screen, so there is no
+   * child for it to acquire -- unlike `My Classes`, which already knew about
+   * screen `03`. ▶ If a child is ever added under this route, THIS ROW IS THE
+   * ONE THAT GOES RED, which is why it exists.
+   *
+   * ⛔ `/trainer` IS UNCHANGED -- still the `R-B1` redirect onto
+   * `/trainer/schedule`, and still expected to show `Schedule`. Screen `01`
+   * existing does not move where the portal lands.
+   */
+  ["/trainer/dashboard", { role: "trainer", label: "Dashboard" }],
+  /*
    * `P2-16` -- screen `16` Class Statistics, a child of Classes.
    * ⚠️ Unlike `15`, this route IS reachable from the UI: the `View Overall
    * Class Statistics` control on screen `13` was built INERT at `P2-4` with

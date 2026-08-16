@@ -5284,3 +5284,291 @@ abandoning it half-built would have been worse than a clean stop** — it would 
 surface in the tree and break the checkpoint rule the Operator set. **The measurement above is the
 part that was worth doing now**, because it converts `P2-19` from "unknown" into "one governed read,
 two known refusals, and an `.html` still to open".
+
+
+---
+
+# §37 — ⛔ **THE DECOY REGISTER** — A LIVING REGISTER, CHECKED BEFORE SOURCING ANY RULED-OUT FIELD
+
+*(Operator ruling, 2026-08-16: **"THE DECOY REGISTER IS THE BEST OUTPUT OF THIS PHASE. Seven, not
+one … Keep it as a living register. Any phase reaching for a column whose NAME matches a ruled-out
+field checks it first."** Placed at top level, not inside a phase section, because a register buried
+in `§35` of a phase report is one nobody opens.)*
+
+> ## ⛔ **THE STANDING RULE**
+>
+> **BEFORE SOURCING ANY FIELD FROM A COLUMN WHOSE NAME MATCHES A RULED-OUT OR NOT-YET-RULED FIELD,
+> CHECK THIS REGISTER AND READ THE COLUMN'S `CHECK` CONSTRAINT.**
+>
+> ⚠️ **THE REGISTER EXISTS BECAUSE THE SOURCING LOOKS CORRECT.** These are not obscure columns. Each
+> one has the name a developer would search for, sits on the table they would search in, and is of a
+> type that reads like the field. ▶ **The `CHECK` is the only thing that says otherwise, and nothing
+> surfaces it at the call site.**
+>
+> ⛔ **IF A FIELD YOU ARE ABOUT TO BUILD WOULD BE SOURCED FROM ONE OF THESE: STOP AND TELL THE
+> OPERATOR.** Operator instruction, verbatim: *"Any field you were about to source from one of the
+> seven decoys: **STOP and tell me instead.**"*
+
+## §37.1 — CLASS 1: **`*_role` COLUMNS THAT ARE COMPOSITE-FK COMPONENTS, NOT SEMANTIC FIELDS**
+
+**Seven entries.** Every one exists so a **multi-column foreign key** can assert in the database —
+*"this membership really is a trainer of this centre"* — rather than in application code. ▶ **None is
+editable, none is a semantic field, and every one will REFUSE the value a frame wants to put in it.**
+
+| # | Column | `CHECK` pins it to | The field it reads like — and the trap |
+|---|---|---|---|
+| **1** | `parent_student_links.parent_role` | `'parent'` | ⛔ Screen `21` draws **`Relationship`** (`Mother`). **Writing `Mother` here fails the CHECK.** The first decoy found, and the reason this register exists |
+| **2** | ⚠️ **`trainer_profiles.membership_role`** | `'trainer'` | ⛔ **THE DANGEROUS ONE.** `GC-11` bars screen `24`'s **Role dropdown**, and **this is the exact column someone builds it from.** ▶ Operator's framing: *"it reads like the implementation rather than the trap"* |
+| **3** | `parent_profiles.membership_role` | `'parent'` | the same shape on the parent side |
+| **4** | `class_session_assignments.trainer_role` | `'trainer'` | ⛔ reads like *"what role is this person in this session"* — **the natural place to try to seat an `Assist.`/TA**, which `A-014`/`G-7` bar |
+| **5** | `observations.trainer_role` | `'trainer'` | the same, on the assessment record |
+| **6** | `attendance.recorded_by_role` | `NULL` **or** `'trainer'` | ⚠️ **the subtlest.** It reads like *"who marked attendance"* **and semantically it IS** — but it can never say `management`. A frame showing *"Marked by: Management"* would find this column and be refused |
+| **7** | `invitations.invited_by_role` · `report_correction_requests.requester_role` / `resolver_role` · `report_versions.submitted_by_role` | `'management'` / `'trainer'` | the same pattern across the governed workflow. ⚠️ **`submitted_by_role` is pinned by `A-040` DELIBERATELY** — narrowing it was a ratified decision, and widening it is a §12 stop-and-ask |
+
+⛔ **THE DETECTION RULE:** *before writing to a `*_role` column, read its `CHECK`. In this schema
+every one of them is a composite-FK component — never a place to store what a person is to somebody.*
+
+**How this register was built, so it can be rebuilt:** a scan of `pg_constraint` for `contype='c'`
+where the definition matches `= '<literal>'::`. ▶ **Re-run it after any migration that adds a
+`CHECK`**, and add what it finds here.
+
+## §37.2 — CLASS 2: ⛔ **A COLUMN EXISTING IS NOT EVIDENCE THE DATUM DOES**
+
+*(Operator: **"The second class belongs beside it."** Found while scanning for class 1, which is why
+it is here rather than in a phase report.)*
+
+> ⛔ **A BUILD READS THE SCHEMA, SEES THE COLUMN, AND ASSUMES THE DATA.** The column is real, the
+> type is right, the projection compiles, the screen renders — **and every row is NULL**.
+
+| Column | Measured 2026-08-16 | What the surface does |
+|---|---|---|
+| `class_sessions.lesson_title` | ⛔ **NULL in 17 of 17 rows** | screen `15`'s lesson strip shows **no title** |
+| `class_sessions.room` | ⛔ **NULL in 17 of 17 rows** | screen `02`'s schedule line renders **weekday ONLY**; `15` shows no room |
+
+✅ **THE SURFACES ARE ALREADY CORRECT** — hero `0B` omits a NULL rather than showing it empty, so
+nothing asserts a room nobody entered. ⚠️ **BUT IT LOOKS LIKE A DEFECT ON A WALK**, and the Operator
+has recorded it as noted for theirs: *"screen 02 rendering weekday-only is the fixture, not the
+build."*
+
+▶ **This is the same family as §34's time-pinning finding:** the schema and the code are right, and
+**the fixture is what is thin.** ⛔ **Never "fix" a surface to make an empty column look full.**
+
+---
+
+## §38 — ⛔ THE `STABLE` / `CREATE TABLE AS` DEFECT IS **§26.1's CEILING FIRING INSIDE THE PHASE THAT RULED ON IT**
+
+*(Operator ruling, 2026-08-16: **"That is the general form, not a Postgres trivium."** Recorded as a
+general form accordingly, and cross-referenced from §26.1.)*
+
+### §38.1 — THE THREE PARTS, AND EACH IS GENERAL
+
+**1. ⛔ BOTH HALVES WERE INDIVIDUALLY CORRECT.** `STABLE` is the right volatility for a read — it is
+what every other governed read in this project declares. A temp table is an ordinary way to stage an
+intermediate result. ▶ **Neither is a mistake. The PAIR is impossible**, and nothing about either
+half hints at the other.
+
+**2. ⛔ `CREATE FUNCTION` ACCEPTED THE PAIR SILENTLY.** No warning, no error, no notice. The
+incompatibility is enforced **at execution**, by the executor, not at declaration by the parser. ▶
+**Same mechanism as the `coalesce` defect one phase earlier**: `plpgsql` defers, and *"it compiled"*
+means only *"it parsed"*.
+
+**3. ⛔ THE OWNER PATH RETURNED TWENTY LINES ABOVE THE FAULT.** `PI-6` **executed the function** —
+the very leg `CLAUDE.md` §12's standing rule requires — and passed. As `postgres` there is no
+application account, so `app_current_account_id()` returned NULL and the body returned at its
+**first gate**. The `CREATE TEMP TABLE` sat at line 29.
+
+> ### ⛔ **THE GENERAL FORM**
+>
+> **A DECLARATION AND A BODY CAN EACH BE CORRECT AND BE INCOMPATIBLE, THE DECLARATION SITE CAN ACCEPT
+> THE PAIR WITHOUT COMPLAINT, AND AN APPLY-TIME PROBE CAN EXECUTE THE FUNCTION AND STILL NEVER REACH
+> THE INCOMPATIBILITY — BECAUSE IT RETURNS AT A GATE.**
+>
+> ▶ **Only a call as a real authorized caller, past every gate, against real data, reaches the body.**
+
+### §38.2 — ⚠️ WHY IT LANDING IN *THIS* PHASE IS THE POINT
+
+**§26.1's ceiling was written one phase earlier**, and the Operator had just ruled on it: *"apply-time
+execution proves resolution only up to the FIRST GATE. `P2-11`'s defect was caught by luck of
+placement … `P2-9`'s was not, because its body sits behind three."*
+
+⛔ **`P2-16` then shipped a third instance — knowing the rule, having written the rule, and with the
+apply-time leg in place and green.** ▶ **That is what makes it a general form rather than a
+recurrence:** the rule was understood and the defect happened anyway, because **the leg that catches
+it is structurally incapable of being the apply-time one.** No amount of care at apply time closes it.
+
+**Both legs, restated, and neither substitutes for the other:**
+
+| Leg | Proves |
+|---|---|
+| **Apply time** | the function resolves **to its first gate**, and the gate fails closed |
+| **The paired suite** | it runs **as a real authorized caller, past every gate, against fixture data** — ⛔ **the only leg that reaches the body** |
+
+---
+
+## §39 — ⛔ `PC16-8g` AND `RAa-2`: **PROVING A CHANGED MECHANISM PRODUCED AN UNCHANGED MEANING**
+
+*(Operator ruling, 2026-08-16: **"Record it beside `RAa-2` — both are proofs that a changed mechanism
+produced an unchanged meaning, which is the only thing a refactor can honestly claim."** This is the
+companion to §12.15, and it points the opposite way.)*
+
+### §39.1 — THE TWO SHAPES ARE MIRRORS
+
+| | §12.15 — `RAa-2` | §39 — `PC16-8g` |
+|---|---|---|
+| What changed | the **MEANING**, behind an unchanged name | the **MECHANISM**, behind an unchanged meaning |
+| The lazy proof | assert the value — **both readings were 13** | assert the shape — **the signature never moved** |
+| Why it fails | ⛔ passes against the OLD function | ⛔ passes against a WRONGLY extracted mapping |
+| The honest proof | **CONSTRUCT the divergence** — withdraw a learner, watch the readings split | **PIN the values across the change** — `44.44, 63.89`, before and after |
+
+> ### ⛔ **A REFACTOR CAN HONESTLY CLAIM EXACTLY ONE THING: THE MEANING DID NOT MOVE. SO THAT IS WHAT IT MUST PROVE — AND SHAPE CANNOT PROVE IT.**
+
+### §39.2 — WHAT `PC16-8g` ACTUALLY GUARDS
+
+`P2-16` extracted `D-2`'s band → percentage mapping out of `report_management_student_trend` into
+`competency_score`, because **`D-2` requires the mapping to live in one place** and a second inline
+copy would have violated it.
+
+⛔ **A mapping extracted WRONGLY changes every score silently.** Swap two bands, drop the `::numeric`,
+mistype a threshold — and:
+
+- the signature is unchanged;
+- the result type is unchanged;
+- `PI-3`/`PJ-2`'s string-for-string pins still pass;
+- every rating-family scan still passes;
+- **the trend still draws a line.**
+
+▶ **`PC16-8g` pins `44.44, 63.89`** — the exact figures `PS-3c` measured **before** the extraction,
+chosen originally because they sit **strictly between band floors**. **They are unchanged, and that
+is the only evidence that exists** that the refactor was faithful.
+
+⚠️ **AND THE RPC-CALLER RULE IS WHAT FORCED IT.** The rule observed that the migration declares a
+function its paired suite never calls. ▶ **The rule's real content is broader than "call your RPCs":
+THE PHASE THAT CHANGES A FUNCTION IS THE PHASE THAT MUST PROVE IT STILL WORKS** — even when the
+change is *"only a refactor"*, and **especially** then, because that is when nobody thinks to look.
+
+---
+
+## §40 — `P2-19`: screen `01` Trainer Dashboard, **BUILT** (2026-08-16)
+
+**Under the `P2-9 → P2-16` batch.** Named, not counted, as the batch requires:
+
+| Added | |
+|---|---|
+| function | `public.report_list_trainer_reports()` |
+| grant | `EXECUTE ON public.report_list_trainer_reports() TO authenticated` |
+
+**Nothing else.** No table, column, enum, policy, client table grant, write path or audit string.
+`PT19-1c` measures the census unmoved at `T=30 E=12 P=30 R=23` — **including the registry at 23**,
+because this phase is a read and emits no governed action, so `A-029` has nothing to register.
+
+**The Operator's ruling that shaped it:** *"Build it next, with the single governed trainer-scoped
+read. **NOT `report_get_working`**"* — which would have shipped report bodies into a landing-page
+payload. The function returns identifiers, a lifecycle status and a timestamp; `PT19-4` asserts the
+`$$`-delimited body names no panel, note, hash or rating column, and `PT19-4b` asserts the same of
+the DTO.
+
+### §40.1 — ⛔ TWO OF THE FRAME'S SIX REGIONS ARE REFUSED, AND THE FRAME REALLY DRAWS BOTH
+
+| Frame element | Disposition |
+|---|---|
+| `My Recent Report`'s rating chips | **REFUSED.** `GC-7` — the pack's own `screen.md` §8 says *"Not rating-bearing"* and its notes say *"DO NOT BUILD the rating column"*. And `G-2` independently: one chip for a whole report is a **roll-up**, barred on every surface regardless of audience |
+| …**and its prose** | **REFUSED WITH THE CHIPS.** *"Mastered eye contact, clear projection"* is a rating **attributed in words** (`A-052`) — the same fact in a form a chip-shaped check steps straight over |
+| `13:30 Staff Meeting · Staff Room` | **REFUSED.** No staff-meeting entity exists; `A-016` makes calendars **projections** of class sessions. Building it needs a second event entity — the exact shape `GC-13` barred on screen `25` |
+| `March 2035` | **NOT a refusal.** An artefact of the frame; the calendar projects real months |
+| `Start Class` | **BUILT.** Its destination, the session roster, exists |
+
+Both refusals are stated **on the page** (§12.12), not only in a comment.
+
+⚠️ **`PT19-5b0` IS THE COMPANION THAT MAKES THE BANS MEAN ANYTHING** — the `PS-7c` lesson, applied
+in advance. Measured in the pack's `.html`: `Mastered:1, eye contact:1, Staff Meeting:1, Staff
+Room:1`. ▶ **The frame really draws all four**, so the prohibitions refuse something that exists
+rather than passing because nobody ever proposed it.
+
+### §40.2 — ⚠️ `PT19-3c`: THE SCOPE WAS **INVISIBLE** UNTIL IT WAS FORCED
+
+The trainer reads **12 of 12** reports — *identical to the whole table*. The fixture has ONE trainer
+holding all 17 assignments, so **a passing positive leg is exactly what an unscoped query would
+produce.**
+
+▶ So the divergence was **constructed** (§12.15): inside a transaction, deactivate one assignment;
+the function drops to **11**; `ROLLBACK`; `PT19-3d` re-measures **17 active assignments**, the count
+it started at. **The `class_session_assignments` join is proved load-bearing by divergence, never by
+agreement.**
+
+The discriminating negative is the **PARENT**, not a second trainer — the `PT-3b` defect caught at
+`P2-10`: with one trainer holding everything, a trainer-vs-trainer control passes while proving
+nothing. Parent reads **0 rows**, which is also `Q-7`: the refusal **is** zero rows, not an error
+that would disclose reports exist.
+
+### §40.3 — ⛔ THREE CHECKS IN ONE SUITE COULD NOT TELL **THE THING** FROM **A STATEMENT ABOUT THE THING**
+
+All three went red on the first run. **This is `PC16-8d`'s family, and it is now at four instances —
+enough to be a class rather than a coincidence.**
+
+| Leg | What it read as a breach | Why |
+|---|---|---|
+| `PT19-4` | the migration's **own assertion block**, which NAMES every forbidden column in order to prove the body omits them | the slice ran to end-of-file — the `PS-8` over-wide-slice defect. **Bounded to the `$$` body** |
+| `PT19-6` | the on-page disclosure *"This design also lists a staff meeting"* | §12.12 **requires** that sentence. **The disclosure paragraphs are now removed before any prohibition is scanned**, and `PT19-4c` asserts the stripper removed exactly 2 — a stripper that matched nothing would silently turn every ban back into a whole-file scan |
+| `PT19-9b` | the **preserved superseded sentence** in the rail comment | annotate-never-delete **requires** it preserved inline. ▶ **A check demanding its ABSENCE would be satisfied by deleting the history.** Rewritten to assert it appears **exactly once and carries its correction marker** |
+
+> ### ⛔ **THE GENERAL FORM: A PROHIBITION SCANNED OVER A DOCUMENT THAT IS ALSO OBLIGED TO *DESCRIBE* THE PROHIBITION WILL FIRE ON ITS OWN COMPLIANCE.**
+>
+> ⚠️ **And the failure mode is asymmetric.** Here all three went **red**, which is loud and gets
+> fixed. ▶ **The dangerous direction is the same confusion passing**: a check satisfied by a
+> *mention* of the thing, or — as `PT19-9b` would have been — **satisfied by erasing the evidence
+> that the correction happened.**
+
+### §40.4 — ⚠️ THE `artefact-read` REGISTER HAD DRIFTED, AND ONLY ONE SCREEN COULD BE FIXED HERE
+
+Screen `01` moved `UNMEASURED → MEASURED` with a ledger block: 9 values, 3 fractional, all literal
+in the `.html`, none obtainable from the prose note, all used in the component. `AR-2-01` … `AR-6-01`
+all pass. **That is not a back-fill** — the values were read from the `.html` **during this phase**
+and are in the component header.
+
+⛔ **BUT SCREENS `15`, `16` AND `02` ARE STILL LISTED `UNMEASURED` AND WERE ALSO BUILT UNDER THIS
+RULE**, each recording measured `.html` values in its own component header. ▶ **Adding them now
+would be exactly the back-fill the rule's own header prohibits** — opening the `.html` today and
+recording it as though the building phase had. **Reported to the Operator, not silently corrected:
+the phases are closed, so whether their evidence may be registered late is a ruling, not a judgement
+this phase makes.**
+
+⚠️ **The register is hand-maintained, and nothing fails when a phase forgets to extend it** — which
+is why three consecutive phases did. That is *"a declared class is not evidence it applied"*, in the
+one register whose whole job is to prove the artefacts were opened.
+
+### §40.5 — the three KPI numbers, and one comment that contradicted its own code
+
+- **`Total Students`** counts **distinct** learners. ⚠️ The comment saying so sat on code that
+  **summed the per-class counts** until it was measured; `countDistinctLearners` now does what the
+  comment always claimed. ▶ **A correct comment on incorrect code is worse than no comment**, because
+  it stops the next reader looking.
+- **`Pending Reviews`** = `draft_ready` + `needs_edit` only. ⛔ Not `trainer_approved` (with
+  management) and not `submitted` (done) — a KPI counting those tells a trainer they have work they
+  do not have. `PT19-7c` proves it non-vacuous **and not the whole list**: 6 of 12.
+- **"Now"** is the row whose **own window contains the server clock**, never the first row — which is
+  what a single highlighted row invites, and which would label a finished 08:00 class as in progress
+  at 15:00. NULL on either bound yields `false`, so an unrecorded time is never silently "now"
+  (hero `0B`).
+
+### §40.6 — the rail, and `C2C-002` decided rather than inherited
+
+`Dashboard` is **first** in the trainer rail, `exact: true`. ⚠️ **That is the choice `C2C-002`
+punishes when it is made by habit** — it has blanked three sidebars. Made here on a measured ground:
+**the ratified 36 allocates no `/trainer/dashboard/*` screen**, so there is no child to acquire —
+unlike `My Classes`, which already knew about screen `03`. `PT19-9` is the row that goes red if one
+is ever added.
+
+⛔ **`home` stays `/trainer/schedule`.** Screen `01` existing does not by itself decide where the
+portal **lands**; `R-B1` ruled that route, and `/trainer` remains its compatibility redirect. Same
+treatment `/management` got at `P2-7`.
+
+### §40.7 — gates, every verdict read from an exit code
+
+`tsc<0>` · `lint<0>` · `build<0>` · `prove:portal-p2-19<0>` (30 checks) · nav census `<0>` (30
+routes, 12 rail items) · 33 further suites `<0>`.
+
+**Two suites exit non-zero and both are pre-existing and unrelated:** `prove:artefact-read` on the
+Operator-ruled `KNOWN-RED-AR-4-14` / `AR-4-17` pair, and `prove:serving-discipline` on `D-10`.
+**Measured before and after this phase; neither moved.**
+
+⛔ **VISUAL: `NOT-RUN`.** The Operator walks it.

@@ -134,6 +134,7 @@ import type {
   AdapterLessonStatisticsDto,
   AdapterClassStatisticsDto,
   AdapterTrainerMyClassesDto,
+  AdapterTrainerDashboardDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -180,6 +181,7 @@ import { readStudentProfileCore } from "@/server/modules/management-view/student
 import { readLessonStatisticsCore } from "@/server/modules/management-view/lesson-statistics-projections";
 import { readClassStatisticsCore } from "@/server/modules/management-view/class-statistics-projections";
 import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
+import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2057,6 +2059,62 @@ export async function adapterReadTrainerMyClasses(
         scheduleSummary: c.scheduleSummary,
         nextSessionDate: c.nextSessionDate,
       })),
+    },
+  };
+}
+
+
+/**
+ * `P2-19` — screen `01` Trainer Dashboard.
+ *
+ * ⛔ THE ALLOW-LIST CARRIES NO RATING, NO PANEL, NO NOTE AND NO HASH. Each is
+ * refused by NOT BEING WRITTEN DOWN, which survives a later column appearing
+ * upstream.
+ *
+ * ⚠️ `now` is resolved SERVER-SIDE. A browser-supplied clock would let the
+ * caller choose which session is "Now" and which month the calendar shows.
+ */
+export async function adapterReadTrainerDashboard(): Promise<ActionResult<AdapterTrainerDashboardDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readTrainerDashboardCore(client, new Date().toISOString());
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      displayName: d.displayName,
+      classCount: d.classCount,
+      studentCount: d.studentCount,
+      pendingReviews: d.pendingReviews,
+      classes: d.classes.map((c) => ({
+        classModuleId: c.classModuleId,
+        title: c.title,
+        gradeLabel: c.gradeLabel,
+        displayLabel: c.displayLabel,
+        initials: c.initials,
+        studentCount: c.studentCount,
+        scheduleSummary: c.scheduleSummary,
+        nextSessionDate: c.nextSessionDate,
+      })),
+      recent: d.recent.map((r) => ({
+        reportId: r.reportId,
+        classSessionId: r.classSessionId,
+        studentId: r.studentId,
+        studentName: r.studentName,
+        classLabel: r.classLabel,
+        sessionDate: r.sessionDate,
+        reportState: r.reportState,
+        updatedAt: r.updatedAt,
+      })),
+      today: d.today.map((t) => ({
+        classSessionId: t.classSessionId,
+        classLabel: t.classLabel,
+        startsAt: t.startsAt,
+        room: t.room,
+        isNow: t.isNow,
+      })),
+      monthSessionDates: [...d.monthSessionDates],
+      monthLabel: d.monthLabel,
     },
   };
 }

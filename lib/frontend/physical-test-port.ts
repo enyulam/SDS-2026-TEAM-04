@@ -29,6 +29,7 @@ import type {
   LessonStatisticsDto,
   ClassStatisticsDto,
   TrainerMyClassesDto,
+  TrainerDashboardDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -248,6 +249,9 @@ export interface PhysicalTestPort {
 
   /** `P2-17` — screen `02`. ⛔ No rating, no report state. */
   readTrainerMyClasses(termId: string | null): Promise<UiActionResult<TrainerMyClassesDto>>;
+
+  /** `P2-19` — screen `01`. ⛔ No rating, panel, note or hash. */
+  readTrainerDashboard(): Promise<UiActionResult<TrainerDashboardDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

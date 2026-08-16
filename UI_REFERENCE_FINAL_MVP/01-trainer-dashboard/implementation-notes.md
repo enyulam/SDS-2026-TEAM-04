@@ -132,6 +132,33 @@ Recorded, not fixed:           app/globals.css still declares *, body, h1-h4, :f
 
 ---
 
+## `P2-19` — artefact-read record (2026-08-16)
+
+All three artefacts were opened. Every layout value below was derived from the `.html`, and every
+claim about what the frame draws or omits rests on the `.png`.
+
+```artefact-read
+screen: 01
+pack: Trainer - Dashboard
+component: features/trainer/trainer-dashboard-screen.tsx
+html-values: 17px, 16px, 11.50px, 22px, 12.50px, 10.50px, 11px, 13px, 12px
+screen-md-quote: Not rating-bearing.
+```
+
+### ⛔ Refusals recorded at this screen
+
+| Frame element | Disposition |
+|---|---|
+| `My Recent Report`’s rating chips | **REFUSED, NEVER ENDS.** `GC-7` above, and `G-2` independently: one chip for a whole report is a roll-up. **Absent, not empty** |
+| …and its prose, *“Mastered eye contact, clear projection”* | **REFUSED WITH THE CHIPS.** A rating attributed in words (`A-052`) leaks the same fact in a form a chip-shaped check steps straight over |
+| `13:30 Staff Meeting · Staff Room` | **REFUSED.** No staff-meeting entity exists; `A-016` makes calendars projections of class sessions, and a second event entity is the shape `GC-13` barred on screen `25` |
+| `March 2035` | **NOT A REFUSAL — an artefact of the frame.** The calendar projects real months from `class_sessions` |
+
+Both refusals are stated **on the page**, not only here (`CLAUDE.md` §12.12). `Start Class` is **built**: its
+destination, the session roster, exists.
+
+---
+
 ## GOVERNANCE CONFLICTS RECORDED - 2026-08-08 (Final MVP Phase A2, operator ruling Q-24)
 
 **These are conflicts between the ratified Figma reference for this screen and B.E.S.T governance. Governance WINS. Do not build the reference behaviour described below.**

@@ -474,6 +474,43 @@ export type TrainerMyClassesDto = {
   readonly cards: readonly TrainerClassCardDto[];
 };
 
+
+/**
+ * `P2-19` — screen `01` Trainer Dashboard.
+ * ⛔ NO rating, panel, note or hash. Identifiers, a status and a timestamp.
+ */
+export type TrainerRecentReportDto = {
+  readonly reportId: string;
+  readonly classSessionId: string;
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classLabel: string;
+  readonly sessionDate: string;
+  /** ⛔ A LIFECYCLE STATUS, never a rating. */
+  readonly reportState: string;
+  readonly updatedAt: string;
+};
+
+export type TrainerTodaySessionDto = {
+  readonly classSessionId: string;
+  readonly classLabel: string;
+  readonly startsAt: string | null;
+  readonly room: string | null;
+  readonly isNow: boolean;
+};
+
+export type TrainerDashboardDto = {
+  readonly displayName: string | null;
+  readonly classCount: number;
+  readonly studentCount: number;
+  readonly pendingReviews: number;
+  readonly classes: readonly TrainerClassCardDto[];
+  readonly recent: readonly TrainerRecentReportDto[];
+  readonly today: readonly TrainerTodaySessionDto[];
+  readonly monthSessionDates: readonly string[];
+  readonly monthLabel: string;
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;

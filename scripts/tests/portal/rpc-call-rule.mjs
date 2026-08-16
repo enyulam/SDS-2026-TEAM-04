@@ -160,6 +160,18 @@ export const RPC_MIGRATIONS = [
    * the only leg that reaches the body.**
    */
   { migration: "20260816093000_portal_p2_16_improved_dimension_fix.sql", suite: "prove-p2-16-class-statistics.mjs" },
+  /*
+   * `P2-19` — screen `01` Trainer Dashboard. ONE function,
+   * `report_list_trainer_reports`, and one `EXECUTE` grant.
+   *
+   * ⚠️ THE PAIRING MATTERS PARTICULARLY HERE. The apply-time leg `PK-6`
+   * executes the function as `postgres`, where `app_current_account_id()` is
+   * NULL, so it returns at the FIRST of two gates and proves resolution over
+   * roughly a tenth of the body. ▶ The join onto `class_session_assignments`,
+   * the `students`/`class_modules`/`class_grades` joins and the whole result
+   * projection are reached only by the suite, calling as a real trainer.
+   */
+  { migration: "20260816120000_portal_p2_19_trainer_reports.sql", suite: "prove-p2-19-trainer-dashboard.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

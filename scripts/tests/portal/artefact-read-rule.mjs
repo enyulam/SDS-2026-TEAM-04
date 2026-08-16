@@ -70,7 +70,20 @@ const REF_ROOT = join(PACK_ROOT, "reference");
  * being BUILT OR REBUILT under the rule, never by being annotated.
  */
 export const UNMEASURED = [
-  "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
+  // ⛔ `01` LEFT THIS LIST AT `P2-19` — by being BUILT UNDER THE RULE. Its
+  // nine cited values were read from the `.html` DURING that phase and are in
+  // the component header, so registering it is completing that phase's own
+  // obligation, NOT a back-fill.
+  //
+  // ⚠️ AND THE REGISTER HAD DRIFTED, WHICH IS THE FINDING. Screens `15`
+  // (`P2-15`), `16` (`P2-16`) and `02` (`P2-17`) were ALSO built under this
+  // rule, each recording measured `.html` values in its component header, and
+  // all three are still listed below. ▶ Adding them NOW would be exactly the
+  // back-fill this rule's own header prohibits — opening the `.html` today and
+  // recording it as though the building phase had. **Reported to the Operator,
+  // not silently corrected**: the phases are closed, so whether their evidence
+  // may be registered late is a ruling, not a judgement this phase makes.
+  "02", "03", "04", "05", "06", "07", "08", "09", "10",
   // ⛔ `17` LEFT THIS LIST AT `P2-8` — by being BUILT UNDER THE RULE, which is
   // the only exit this list has. It was never annotated out.
   "15", "16", "18", "19", "20", "21", "22", "23", "24", "28",
@@ -78,7 +91,7 @@ export const UNMEASURED = [
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["11", "12", "13", "14", "17", "25", "26", "27"];
+export const MEASURED = ["01", "11", "12", "13", "14", "17", "25", "26", "27"];
 
 /*
  * ⛔ `KNOWN-RED-AR-4-14` -- OPERATOR RULING, 2026-08-14. A THIRD STATUS.

@@ -10278,3 +10278,98 @@ PASS — 29 canonical routes, 31 with aliases, 11 rail items. `tsc` exit 0 · `n
 Trainer Dashboard) and `P2-20` (`04` Trainer Students) follow `P2-17` and need measuring at HEAD.
 `P2-12`/`P2-13`/`P2-14` remain stated and waiting (plan §29); `P2-16`'s slot 2 remains held
 (plan §28.3).
+
+---
+
+## 2026-08-16 — `P2-19`: screen `01` Trainer Dashboard (branch `develop`)
+
+**Scope.** Build screen `01` at its canonical route `/trainer/dashboard`, under the standing
+`P2-9 → P2-16` batch authorization, on the Operator's ruling: *"Build it next, with the single
+governed trainer-scoped read. **NOT `report_get_working`** — you are right that it would ship report
+bodies into a landing-page payload."*
+
+**Added, named not counted, as the batch requires:**
+
+| | |
+|---|---|
+| function | `public.report_list_trainer_reports()` — plpgsql, `STABLE`, `SECURITY DEFINER`, `SET search_path = ''` |
+| grant | `EXECUTE ON public.report_list_trainer_reports() TO authenticated` |
+
+⛔ **No table, column, enum, policy, client table grant, write path or audit string.** Census measured
+unmoved at `T=30 E=12 P=30 R=23` — **registry included**, because a read emits no governed action and
+`A-029` has nothing to register.
+
+**Files.** `supabase/migrations/20260816120000_portal_p2_19_trainer_reports.sql` ·
+`server/modules/report-workflow/trainer-dashboard.ts` ·
+`features/trainer/trainer-dashboard-screen.tsx` · `app/(portals)/trainer/dashboard/page.tsx` ·
+`scripts/tests/portal/prove-p2-19-trainer-dashboard.mjs` · plus the contracts/port/adapter/fixture
+wiring, the rail item, the nav census row, the `P2-1` route ratchet (29 → 30), the `RPC_MIGRATIONS`
+pairing, and the artefact-read ledger.
+
+**Two of the six regions refused, both disclosed on the page (§12.12):** `My Recent Report`'s rating
+chips **and its prose** — `GC-7` (*"Not rating-bearing … DO NOT BUILD the rating column"*) and `G-2`
+independently, since one chip for a whole report is a roll-up — and `13:30 Staff Meeting`, which has
+no entity (`A-016`; the second-event-entity shape `GC-13` barred on screen `25`).
+
+### What the phase found
+
+**1. The trainer scope was invisible until it was forced.** The function returns **12 of 12**
+reports — exactly what an *unscoped* query would return, because the fixture's single trainer holds
+all 17 assignments. The positive leg therefore proved nothing on its own. `PT19-3c` **constructs**
+the divergence: deactivate one assignment inside a transaction → the function drops to **11** →
+`ROLLBACK` → `PT19-3d` re-measures 17 active assignments. The discriminating negative is the
+**parent** (0 rows, `Q-7`), not a second trainer — the `PT-3b` defect from `P2-10`.
+
+**2. ⛔ Three checks in one suite fired on their own compliance.** All three went red on the first
+run:
+
+- `PT19-4` read the migration's **own assertion block**, which names every forbidden column in order
+  to prove the body omits them. The slice ran to end-of-file — `PS-8`'s over-wide slice. Bounded to
+  the `$$` body.
+- `PT19-6` read the **on-page disclosure** *"This design also lists a staff meeting"* as the banned
+  `Staff Meeting`. §12.12 **requires** that sentence. Disclosure paragraphs are now removed before
+  any prohibition is scanned, and `PT19-4c` asserts the stripper removed exactly 2.
+- `PT19-9b` read the **preserved superseded comment** as the stale claim itself. Annotate-never-delete
+  **requires** it preserved inline — ▶ **a check demanding its absence would have been satisfied by
+  deleting the record.** Rewritten to assert it appears exactly once *and* carries its correction
+  marker.
+
+▶ **The general form: a prohibition scanned over a document that is also obliged to *describe* the
+prohibition will fire on its own compliance.** Here all three were loud. The dangerous direction is
+the same confusion **passing** — a check satisfied by a mention, or by erasure of the evidence.
+Recorded at plan §40.3 as `PC16-8d`'s family, fourth instance.
+
+**3. ⚠️ The `artefact-read` register had drifted, and only one screen could be fixed here.** Screen
+`01` moved `UNMEASURED → MEASURED` with a ledger block (9 values, 3 fractional, all literal in the
+`.html`, none in the prose note, all used in the component; `AR-2-01 … AR-6-01` green). That is not a
+back-fill — the values were read during this phase. ⛔ **But screens `15`, `16` and `02` were also
+built under this rule and are still listed `UNMEASURED`.** Adding them now would be the exact
+back-fill the rule's own header prohibits. **Reported, not silently corrected** — those phases are
+closed, so registering their evidence late is a ruling, not this phase's judgement. The register is
+hand-maintained and nothing fails when a phase forgets to extend it, which is why three consecutive
+phases did.
+
+**4. A comment that contradicted its own code.** `readTrainerDashboardCore`'s comment said
+`studentCount` was distinct learners; the code summed the per-class counts. `countDistinctLearners`
+now does what the comment claimed. A correct comment on incorrect code is worse than none — it stops
+the next reader looking.
+
+### Verification — every verdict read from an exit code
+
+`npx tsc --noEmit` **0** · `npm run lint` **0** · `npm run build` **0** ·
+`npm run prove:portal-p2-19` **0** (30 checks) · `tests/frontend/portal-navigation-active-state.mjs`
+**0** (`N-0 … N-4`; 30 routes, 12 rail items) · 33 further suites **0**.
+
+The migration applied with 7 PASS notices (`PK-1 … PK-7`), then was executed as a **real trainer**
+past both gates: `ROWS<12> STATES<draft_ready,submitted,trainer_approved>`. ⚠️ §26.1's ceiling
+applies as always — `PK-6` runs as `postgres`, where `app_current_account_id()` is NULL, so it
+returns at the first gate having proved resolution over about a tenth of the body. **The suite is the
+only leg that reaches the joins and the projection.**
+
+**Two suites exit non-zero; both pre-existing and unrelated, measured before and after:**
+`prove:artefact-read` on the Operator-ruled `KNOWN-RED-AR-4-14` / `AR-4-17` pair, and
+`prove:serving-discipline` on `D-10`.
+
+⛔ **VISUAL: `NOT-RUN`.** The Operator walks all screens in one pass.
+
+**Next authorized step:** `P2-20` (`04` Trainer Students) under the batch.

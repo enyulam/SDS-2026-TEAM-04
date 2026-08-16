@@ -67,12 +67,40 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
      * F-04 / operator ruling R-B1: `/trainer/schedule` is the canonical Trainer entry
      * route and `/trainer` is preserved as a compatibility redirect onto it. The rail
      * therefore names Schedule — the destination it actually reaches — rather than a
-     * "Dashboard" item that would redirect away from the dashboard. Screen `01` Trainer
-     * Dashboard is a DEFERRED post-48-hour screen whose canonical route is
-     * `/trainer/dashboard` (inventory §7.2); it gets its own checkpoint and its own item.
+     * "Dashboard" item that would redirect away from the dashboard.
+     *
+     * ⚠️ CORRECTED AT `P2-19`, 2026-08-16 (§12.11): this read *"screen `01` Trainer
+     * Dashboard is a DEFERRED post-48-hour screen … it gets its own checkpoint and its
+     * own item."* ▶ **It got both — this phase.** The item is first in the rail below,
+     * at `/trainer/dashboard`.
+     *
+     * ⛔ `home` STAYS `/trainer/schedule`. Screen `01` existing does not by itself
+     * decide where the Trainer portal LANDS, and `R-B1` ruled that route. Moving it
+     * is a separate decision with its own authorization.
      */
     home: "/trainer/schedule",
     navigation: [
+      {
+        /*
+         * `P2-19` — screen `01` Trainer Dashboard, at its canonical route.
+         *
+         * ⚠️ `exact: true` IS CHECKED, NOT ASSUMED. `C2C-002` has bitten three
+         * rail items, always the same way: an `exact` item that later grew a
+         * child. ▶ **The ratified 36 contains no `/trainer/dashboard/*`
+         * screen** — the trainer's deep routes hang off Schedule
+         * (`/trainer/sessions/*`, already declared as `owns` below) and off My
+         * Classes (`03`, at `P2-18`). So this one has no child to acquire.
+         *
+         * ⛔ `/trainer` STILL REDIRECTS TO `/trainer/schedule` (`R-B1`) and is
+         * NOT repointed here. Where the bare portal route lands is its own
+         * decision — the same treatment `/management` got at `P2-7`.
+         */
+        href: "/trainer/dashboard",
+        label: "Dashboard",
+        path: "/trainer/dashboard",
+        exact: true,
+        icon: "dashboard",
+      },
       {
         href: "/trainer/schedule",
         label: "Schedule",
