@@ -144,6 +144,12 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/students/register", { role: "management", label: "Students" }],
   /*
+   * `P2-13` -- screen `21` Create Parent Account, a second LITERAL child of
+   * Students. Same reasoning as the row above: `Students` is not `exact`, so
+   * this resolves to one item. Measured, not assumed.
+   */
+  ["/management/students/create-parent-account", { role: "management", label: "Students" }],
+  /*
    * `P2-15` -- screen `15` Lesson Statistics, a DEEP child of Classes.
    * ⚠️ `Classes` already dropped `exact` at `P2-2`, so no rail change was
    * needed here -- VERIFIED rather than assumed, because `C2C-002` has now

@@ -91,12 +91,13 @@ export const UNMEASURED = [
   "02", "03", "05", "06", "07", "08", "09", "10",
   // ⛔ `17` LEFT THIS LIST AT `P2-8` — by being BUILT UNDER THE RULE, which is
   // the only exit this list has. It was never annotated out.
-  "15", "16", "18", "19", "21", "22", "23", "24", "28",
+  // ⛔ `21` LEFT THIS LIST AT `P2-13`, built under the rule.
+  "15", "16", "18", "19", "22", "23", "24", "28",
   "29", "30", "31", "32", "33", "AUTH-01", "AUTH-02", "AUTH-03",
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["01", "04", "11", "12", "13", "14", "17", "20", "25", "26", "27"];
+export const MEASURED = ["01", "04", "11", "12", "13", "14", "17", "20", "21", "25", "26", "27"];
 
 /*
  * =====================================================================

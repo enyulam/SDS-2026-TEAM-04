@@ -554,6 +554,26 @@ export type RegisterStudentOutcomeDto = {
   readonly reason: string;
 };
 
+
+/**
+ * `P2-13` — screen `21` Create Parent Account.
+ * ⛔ NO `relationship` AND NO `phone`. Neither has a column, and a DTO field
+ * with nowhere to go is how an invented column starts.
+ */
+export type CreateParentInput = {
+  readonly fullName: string;
+  readonly email: string;
+  readonly studentIds: readonly string[];
+};
+
+export type CreateParentOutcomeDto = {
+  readonly membershipId: string;
+  readonly invitationId: string;
+  readonly links: number;
+  /** `created`. ⛔ A refusal never arrives here — it arrives as a failure. */
+  readonly reason: string;
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;

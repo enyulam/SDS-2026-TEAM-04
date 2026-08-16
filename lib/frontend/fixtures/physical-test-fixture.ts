@@ -33,6 +33,8 @@ import {
   type TrainerDashboardDto,
   type TrainerStudentsDto,
   type RegisterStudentInput,
+  type CreateParentInput,
+  type CreateParentOutcomeDto,
   type RegisterStudentOutcomeDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
@@ -1368,6 +1370,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * child is registered and enrolled when no row exists anywhere.
    */
   async registerStudent(_input: RegisterStudentInput): Promise<UiActionResult<RegisterStudentOutcomeDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-13` — screen `21`. ⛔ THE FIXTURE REFUSES. A fabricated success would
+   * tell an operator a guardian has portal access to a named child when no
+   * account, membership, invitation or link exists anywhere.
+   */
+  async createParentAccount(_input: CreateParentInput): Promise<UiActionResult<CreateParentOutcomeDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

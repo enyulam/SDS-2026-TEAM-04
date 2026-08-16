@@ -186,6 +186,12 @@ export const RPC_MIGRATIONS = [
    * emissions and the hash chain, as a real management caller.
    */
   { migration: "20260816160000_portal_p2_12_admin_create_student.sql", suite: "prove-p2-12-register-student.mjs" },
+  /*
+   * `P2-13` — the parent account. Its apply-time leg exercises the REFUSAL
+   * path only; the suite reaches five inserts, four audit emissions and the
+   * hash chain, as a real management caller.
+   */
+  { migration: "20260816180000_portal_p2_13_admin_create_parent.sql", suite: "prove-p2-13-create-parent.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

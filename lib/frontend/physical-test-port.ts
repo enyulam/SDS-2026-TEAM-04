@@ -32,6 +32,8 @@ import type {
   TrainerDashboardDto,
   TrainerStudentsDto,
   RegisterStudentInput,
+  CreateParentInput,
+  CreateParentOutcomeDto,
   RegisterStudentOutcomeDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
@@ -261,6 +263,9 @@ export interface PhysicalTestPort {
 
   /** `P2-12` — screen `20`. A GOVERNED WRITE: student + enrolments + audit, one transaction. */
   registerStudent(input: RegisterStudentInput): Promise<UiActionResult<RegisterStudentOutcomeDto>>;
+
+  /** `P2-13` — screen `21`. A GOVERNED WRITE: account + membership + profile + invitation + links. */
+  createParentAccount(input: CreateParentInput): Promise<UiActionResult<CreateParentOutcomeDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

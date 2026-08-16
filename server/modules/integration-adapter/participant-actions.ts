@@ -137,6 +137,8 @@ import type {
   AdapterTrainerDashboardDto,
   AdapterTrainerStudentsDto,
   AdapterRegisterStudentInput,
+  AdapterCreateParentInput,
+  AdapterCreateParentOutcomeDto,
   AdapterRegisterStudentOutcomeDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
@@ -187,6 +189,7 @@ import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer
 import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
 import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
 import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
+import { createParentAccountCore } from "@/server/modules/identity-access/parent-account-creation";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2171,5 +2174,30 @@ export async function adapterRegisterStudent(
   return {
     outcome: "success",
     data: { studentId: result.studentId, enrolments: result.enrolments, reason: result.reason },
+  };
+}
+
+
+/**
+ * `P2-13` — screen `21` Create Parent Account.
+ *
+ * ⛔ A GOVERNED REFUSAL IS REPORTED AS `unavailable`, NEVER AS A SUCCESS
+ * CARRYING A REASON — the screen must not render "created" over rows that do
+ * not exist.
+ */
+export async function adapterCreateParentAccount(
+  input: AdapterCreateParentInput,
+): Promise<ActionResult<AdapterCreateParentOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await createParentAccountCore(client, input);
+  if (!result.ok) return { outcome: "unavailable" };
+  return {
+    outcome: "success",
+    data: {
+      membershipId: result.membershipId,
+      invitationId: result.invitationId,
+      links: result.links,
+      reason: result.reason,
+    },
   };
 }

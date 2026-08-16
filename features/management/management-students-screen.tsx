@@ -227,10 +227,20 @@ export function ManagementStudentsScreen() {
             than to be remembered — the same discipline `AR-1b` now applies to
             the artefact register.
 
-            ⏸ `Add Parent` STAYS OMITTED. Screen `21` is `P2-13` and
-            `/management/students/parents/new` does not exist at HEAD; a
-            control that points nowhere is still worse than an absent one.
+            ✅ `Add Parent` IS NOW RENDERED TOO — `P2-13` shipped screen `21`
+            at `/management/students/create-parent-account`.
+
+            ⚠️ ITS LIFT WAS ALMOST MISSED. `PDTa-ACTIONS` probed
+            `app/(portals)/management/parents/page.tsx` — not the ratified
+            route — so it stayed GREEN while the condition had already arrived.
+            ▶ The probe now DERIVES the path from the route inventory.
           */}
+          <Link
+            href="/management/students/create-parent-account"
+            className="inline-flex min-h-11 items-center rounded-[10px] border border-line bg-surface px-4 text-[13.5px] font-semibold text-ink-strong no-underline"
+          >
+            Add Parent
+          </Link>
           <Link
             href="/management/students/register"
             className="inline-flex min-h-11 items-center rounded-[10px] bg-brand-600 px-4 text-[13.5px] font-semibold text-white no-underline"

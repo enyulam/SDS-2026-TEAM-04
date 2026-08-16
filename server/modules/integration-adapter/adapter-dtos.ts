@@ -538,6 +538,19 @@ export interface AdapterRegisterStudentOutcomeDto {
   readonly reason: string;
 }
 
+export interface AdapterCreateParentInput {
+  readonly fullName: string;
+  readonly email: string;
+  readonly studentIds: readonly string[];
+}
+
+export interface AdapterCreateParentOutcomeDto {
+  readonly membershipId: string;
+  readonly invitationId: string;
+  readonly links: number;
+  readonly reason: string;
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

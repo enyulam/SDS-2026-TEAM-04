@@ -176,7 +176,32 @@ check(/\bJunior\b/.test("Junior · Public Speaking"), "PDTa-GRADEc CONTROL: the 
  * defect the Operator named at `P2-3`.
  */
 const registerRoute = existsSync(join(ROOT, "app/(portals)/management/students/register/page.tsx"));
-const parentRoute = existsSync(join(ROOT, "app/(portals)/management/parents/page.tsx"));
+/*
+ * ⚠️ THE PATH WAS WRONG, AND IT PASSED — CORRECTED AT `P2-13`, 2026-08-16.
+ * This probe looked for `app/(portals)/management/parents/page.tsx`. Screen
+ * `21`’s ratified canonical route is
+ * `/management/students/create-parent-account` (inventory §7.2), so when
+ * `P2-13` shipped it, this leg went on reporting `route=false` and stayed
+ * GREEN while the omission’s end condition had already arrived.
+ *
+ * ▶ **A CHECK WHOSE SUBJECT MOVED IS WORSE THAN ONE THAT FAILS**: the failing
+ * form announces itself, and this form is indistinguishable from a check that
+ * is working. Same asymmetry as plan §47.
+ *
+ * ⛔ THE PATH IS NOW DERIVED FROM THE RATIFIED INVENTORY, not restated here,
+ * so a route that moves again cannot leave this probe pointing at nothing.
+ */
+const inventoryText = readFileSync(join(ROOT, "docs/plan/FINAL_MVP_UI_SCREEN_ROUTE_INVENTORY.md"), "utf8");
+const parentRouteFromInventory =
+  (inventoryText.match(/^\|\s*21\s*\|[^|]*\|[^|]*\|[^|]*\|\s*`([^`]+)`/m) ?? [])[1] ?? "";
+/*
+ * ⛔ THE DERIVATION MUST NOT BE ABLE TO YIELD NOTHING. An empty match would
+ * make `parentRoute` permanently `false` and this leg permanently green — the
+ * exact failure being corrected. `PDTa-ACTIONSd` asserts it resolved.
+ */
+const parentRoute =
+  parentRouteFromInventory.length > 0 &&
+  existsSync(join(ROOT, `app/(portals)${parentRouteFromInventory}/page.tsx`));
 const registerShown = /Register Student/.test(builtCode);
 const parentShown = /Add Parent/.test(builtCode);
 /*
@@ -202,8 +227,12 @@ check(
   `PDTa-ACTIONSb ✅ …and \`Register Student\`'s omission ENDED exactly when \`P2-12\` shipped its route (route=${registerRoute}, shown=${registerShown}) — ⚠️ **THE PROOF NOTICED, NOT A READER**: this leg went red on the run that shipped \`/management/students/register\`, which is a lift condition written to FIRE rather than to be remembered`,
 );
 check(
-  !parentShown && !parentRoute,
-  `PDTa-ACTIONSc ⏸ \`Add Parent\` REMAINS OMITTED and its route remains absent (shown=${parentShown}, route=${parentRoute}) — screen \`21\` is \`P2-13\`. ▶ This leg will go red the moment that route ships, which is the whole design`,
+  parentRoute === parentShown,
+  `PDTa-ACTIONSc ✅ \`Add Parent\`'s omission ENDED when \`P2-13\` shipped screen \`21\` (route=${parentRoute}, shown=${parentShown}) — ⚠️ **AND THIS LEG WAS SILENTLY GREEN UNTIL \`P2-13\` LOOKED**: it probed \`app/(portals)/management/parents/page.tsx\`, while the ratified route is \`${parentRouteFromInventory}\`. ▶ **A CHECK WHOSE SUBJECT MOVED IS WORSE THAN ONE THAT FAILS** — the failing form announces itself; this form is indistinguishable from a check that works (plan §47's asymmetry)`,
+);
+check(
+  parentRouteFromInventory.length > 0,
+  `PDTa-ACTIONSd ⚠️ NON-VACUITY: the route was DERIVED from the ratified inventory rather than restated here, and it resolved to \`${parentRouteFromInventory || "NOTHING"}\` — ▶ an empty derivation would make \`parentRoute\` permanently false and this pair permanently green, which is the exact failure being corrected`,
 );
 
 /* ⛔ NO DIRECT CLIENT DML, and no write of any kind: screen 17 is a read. */

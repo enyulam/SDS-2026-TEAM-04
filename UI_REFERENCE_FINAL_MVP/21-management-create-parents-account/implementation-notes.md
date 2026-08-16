@@ -40,3 +40,35 @@ Acceptance status:
 ## Entries
 
 *(none yet)*
+
+---
+
+## `P2-13` — artefact-read record (2026-08-16)
+
+All three artefacts were opened. Every layout value below was derived from the `.html`, and every
+claim about what the frame draws or omits rests on the `.png`.
+
+```artefact-read
+screen: 21
+pack: Management - Create Parents Account
+component: features/management/management-create-parent-screen.tsx
+html-values: 16px, 12px, 13px, 14px, 20px, 16px, 2px, 3px
+screen-md-quote: Not rating-bearing.
+```
+
+### ⛔ Refusals and omissions recorded at this screen
+
+| Frame element | Disposition |
+|---|---|
+| `Relationship: Mother` | **NO COLUMN.** One enum + one column on `parent_student_links`, and the vocabulary is an untaken product decision. ⚠️ **`parent_student_links.parent_role` is the DECOY** (living register entry 1) — its `CHECK` pins it to `'parent'` and would refuse `Mother` |
+| `Phone` | **NO COLUMN**, and the open part is WHERE it would live — `accounts` or the profile table. Open since `P2-11` |
+| `Send email invite` switch | ⛔ **REFUSED, and not because it is unimplemented.** External delivery is deferred, so nothing sends either way — a switch between two identical outcomes is a control that lies about what it does, and drawn ON it asserts a link was sent |
+| `Search Trainer` caption | ⚠️ **A FRAME DEFECT, not a requirement.** This is a student picker on a parent screen; the caption reads `Search students` |
+| `Junior · Public Speaking` | ⛔ `Junior` is not a ratified Class Grade (`A-016`, `A-054`). Grade labels are read from data |
+| `ID 2025-113` | ⛔ `students` holds no code column. **Cited, not invented** |
+
+All three omissions are stated **on the page** (`CLAUDE.md` §12.12), and the success banner states
+plainly that **nothing has left this system**.
+
+---
+
