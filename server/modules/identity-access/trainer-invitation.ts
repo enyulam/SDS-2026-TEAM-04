@@ -80,6 +80,12 @@ export interface CreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
+  /**
+   * ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and never an authentication factor
+   * (`A-027`) — no sign-in path reads it. Optional; blank becomes `null`,
+   * never `""`, so an unrecorded number and an empty one stay distinguishable.
+   */
+  readonly phone?: string | null;
 }
 
 export interface TrainerInvitationOutcome {
@@ -134,9 +140,13 @@ export async function createTrainerCore(
   if (displayName.length === 0 || displayName.length > 120) return { outcome: "unavailable" };
   if (email.length < 3 || !email.includes("@")) return { outcome: "unavailable" };
 
+  const phone = (input.phone ?? "").trim();
+  if (phone.length > 40) return { outcome: "unavailable" };
+
   const call = await client.rpc("admin_create_trainer", {
     p_display_name: displayName,
     p_email: email,
+    p_phone: phone.length === 0 ? null : phone,
   });
   if (call.error) return { outcome: "unavailable" };
 

@@ -10643,3 +10643,78 @@ it shows the wall is a structural property of some frames rather than a near-mis
 **Position: 19 of 24 Part 2 phases complete.** Remaining: `P2-18` (awaiting the `G-3`/`D-4` scope
 answer), `P2-21` (`09`, `C2C-007` first), `P2-22` (`30`), `P2-23` (`31`, owes `C-12`), `P2-24`
 (**DO NOT BUILD**, `C-11`). ⛔ **STOPPED for the Operator's walk. `P2-21` NOT started.**
+## 2026-08-16 — `C-14` write path, the `.rpc()` argument guard, and a 64-suite sweep (branch `develop`)
+
+**Scope.** Three Operator instructions in one pass: record the control-pollution
+finding (§12.17); build a guard for the `.rpc()` argument class *"since the type
+system no longer covers it"*; and **PROCEED with the migration and its callers in
+ONE pass — no intermediate commit where the migration has landed and the callers
+have not.**
+
+**Starting HEAD** `1d3c2a1` → **`5b3ed4c`** (the guard) → this entry's commit.
+Working tree clean at both ends; branch `develop` throughout; `main` untouched.
+
+### What shipped
+
+- `scripts/tests/portal/rpc-argument-rule.mjs` + `prove-rpc-arguments.mjs` +
+  `prove:rpc-arguments`. Reads each call site's argument set from source and
+  compares it against `pg_get_function_arguments` from the **live catalogue** —
+  never `database.types.ts`, which has been stale once and no longer types
+  `Functions` at all. 73 functions · 58 call sites · 0 mismatches · **1 site
+  named** as unchecked.
+- `supabase/migrations/20260816230000_portal_c14_write_path.sql` — four
+  `DROP`+`CREATE` signature changes, grants restored and asserted as an **exact
+  set** before and after. Applied with `supabase migration up --local` against
+  `best-coach-dev` (9 containers up, `best-coach-mvp` **0 and left stopped**).
+  Ledger **47/47**; census tables 30 · enums 12 · policies 30 · registry 24 ·
+  functions **73, net zero**.
+- All four TypeScript callers, both DTO mirrors, the four adapter actions
+  (rebuilt **field by field**, which this module's own rule already required and
+  these three were the exception to), screens `20`/`21`/`24`, and screen `22`.
+- `scripts/tests/portal/prove-c14-guardian.mjs` + `prove:c14-guardian` — ten legs.
+
+### Verification
+
+`tsc` 0 · `build` 0 · `prove:no-secrets` 0 · `prove:encoding` 0 ·
+`prove:types-current` 0 · `prove:ledger-current` 0 · `prove:projection-columns` 0
+· `prove:rpc-arguments` 0 · `prove:c14-guardian` 0.
+
+**Full sweep of all 64 `prove:*` scripts: 62 green, 2 red.** Both reds are
+carried-open and unchanged — `AR-4-14`/`17`/`21` (the fractional-value wall,
+escalated) and `S3-T1-r` (fixture vintage).
+
+### Findings
+
+1. **The one-pass rule was measured, not assumed.** With all four write paths
+   broken, `tsc` exited 0, `build` exited 0, every SQL suite was green and
+   `prove:projection-columns` was green. Only the new guard failed. An
+   intermediate commit would have been a fully green tree over four dead write
+   paths — exactly the cost the Operator named when accepting the `AppDatabase`
+   trade.
+2. **The guard's own controls caught two defects in it, in opposite directions** —
+   an under-read (single-line multi-key calls) and an over-read on real source (a
+   ternary's colon read as a key separator, flagging three arguments on a correct
+   call site). A false red on correct code is not the safe direction merely
+   because it is loud. The first repair also shipped a dead branch for one
+   iteration.
+3. **The full sweep found four stale gates, three of them not this pass's fault
+   and all four outside the `portal-p2-N` naming** the per-phase sweeps use. The
+   sharpest: `prove:hero-15`'s `M-3a` asserted *"all FOUR reads"* while a fifth
+   existed that its pattern could not match — since the leg was written. **A pin
+   is only as exact as the pattern that defines its population.**
+4. **The new guard does not cover its own class everywhere.** 22 positional SQL
+   call sites in four suites broke on the signature change; the guard scans
+   `server/**` and says so (`PR-5`/`PR-6`). The sweep caught them.
+5. **A consequence outside the three named screens.** Screen `22` was not in the
+   Operator's list, but `admin_update_student` takes the new fields as a full
+   replacement — a blank form would have wiped a child's date of birth on a
+   rename, silently, reporting success.
+6. **§12.14 reaches sixteen**, all six this pass in one operation shape: writing a
+   message string into a JS template literal through a shell heredoc. The durable
+   fix is a different destination, not more care.
+
+**Position: 19 of 24 Part 2 phases complete**, unchanged — this pass shipped a
+ruled cross-cutting change and a new standing gate, not a phase. Remaining:
+`P2-18` (awaiting the `G-3`/`D-4` scope answer), `P2-21` (`09`, `C2C-007` first),
+`P2-22` (`30`), `P2-23` (`31`, owes `C-12`), `P2-24` (**DO NOT BUILD**, `C-11`).
+**Next: `P2-21` under the batch authorization.**

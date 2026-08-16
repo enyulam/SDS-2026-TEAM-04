@@ -161,9 +161,27 @@ check(
 const census = psql(
   "SELECT (SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE')||'|'||(SELECT count(DISTINCT typname) FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public' AND typtype='e')||'|'||(SELECT count(*) FROM pg_policies WHERE schemaname='public')||'|'||(SELECT array_length(public.audit_action_registry(),1));",
 );
+/*
+ * ⛔ THE REGISTRY PIN GOES 23 -> 24 BY RULING, AND THIS LEG WAS RED FOR THREE
+ *    PHASES WITHOUT ANYONE SEEING IT.
+ *
+ * `20260816200000` (`P2-14`) added `admin.student_updated` under an EXPLICIT
+ * Operator authorization — *"registry 23 -> 24"*, written into the migration's
+ * own header. ▶ This pin was correct when it was written and has been stale
+ * ever since, and it stayed stale because this suite is not named
+ * `portal-p2-N`: the sweep that ran after each phase enumerated the phase
+ * suites, and this one was never in it.
+ *
+ * ⚠️ THAT IS PLAN §48.1 A THIRD TIME — *"I re-ran the suites I expected to be
+ * affected, so I found the suites I expected to be affected."* It was caught
+ * only by running ALL 64 `prove:*` scripts rather than the portal subset.
+ *
+ * ⛔ RE-PINNED, NOT RELAXED. The leg stays an EQUALITY over all four counts,
+ * because the authorization it guards was an exhaustive negative.
+ */
 check(
-  census === "30|12|30|23",
-  `RAa-4  ⛔ tables 30 · enums 12 · policies 30 · registry 23 — UNMOVED (saw ${census}). ⚠️ Asserted as EQUALITIES because the authorization was an exhaustive negative: *"No table, column, enum, policy, grant or audit string. Registry unmoved."*`,
+  census === "30|12|30|24",
+  `RAa-4  ⛔ tables 30 · enums 12 · policies 30 · registry 24 — UNMOVED (saw ${census}). ⚠️ Asserted as EQUALITIES because the authorization was an exhaustive negative: *"No table, column, enum, policy, grant or audit string. Registry unmoved."* The registry figure is 24 since P2-14's authorized "admin.student_updated"; the other three have not moved since this leg was written.`,
 );
 check(
   psql("SELECT has_function_privilege('authenticated','public.report_centre_dashboard_summary()','EXECUTE');") === "t" &&

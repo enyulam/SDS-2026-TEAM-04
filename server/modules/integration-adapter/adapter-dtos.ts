@@ -416,6 +416,18 @@ export interface AdapterManagementStudentProfileDto {
   readonly fullName: string;
   readonly isActive: boolean;
   readonly guardianName: string | null;
+  /**
+   * `C-14`. ⛔ `guardianContact` IS PRE-LINK ONLY and is `null` the moment a
+   * parent is linked — the linked account is the living record. `guardianLinked`
+   * says WHICH source decided the pair, which is not derivable from the
+   * resolved value itself, and screen `22` needs it to know whether the fields
+   * are writable at all.
+   * ⛔ `guardianLinked` DISCLOSES NO PARENT IDENTITY — a boolean, not an
+   * account, an email or a link id.
+   */
+  readonly guardianContact: string | null;
+  readonly guardianLinked: boolean;
+  readonly dateOfBirth: string | null;
   readonly enrolledOn: string | null;
   readonly attendancePresent: number;
   readonly attendanceTotal: number;
@@ -530,6 +542,18 @@ export interface AdapterRegisterStudentInput {
   readonly firstName: string;
   readonly lastName: string;
   readonly classModuleIds: readonly string[];
+  /**
+   * `C-14` (Operator ruling, 2026-08-16) — the three optional profile fields
+   * screen `20`'s frame draws. ⚠️ ALL OPTIONAL, and blank becomes `null`,
+   * never `""`: hero `0B` makes NULL mean NOT RECORDED, so an empty string
+   * would render as a present-but-empty fact.
+   * ⛔ `Gender`, `Student ID`, `Home address`, `Email` and `Upload photo` are
+   * drawn by that same frame and are REFUSED — they are absent from this type,
+   * which is a stronger refusal than a filter that has to remember them.
+   */
+  readonly dateOfBirth?: string | null;
+  readonly guardianName?: string | null;
+  readonly guardianContact?: string | null;
 }
 
 export interface AdapterRegisterStudentOutcomeDto {
@@ -542,6 +566,16 @@ export interface AdapterCreateParentInput {
   readonly fullName: string;
   readonly email: string;
   readonly studentIds: readonly string[];
+  /**
+   * `C-14` (Operator ruling, 2026-08-16) — `accounts.phone`.
+   * ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and never an authentication factor
+   * (`A-027`): no sign-in path reads it. Optional; blank becomes `null`.
+   */
+  readonly phone?: string | null;
+  /*
+   * ⛔ `Relationship` IS DRAWN BY SCREEN `21`'S FRAME AND IS REFUSED. It is
+   * absent from this type, so no caller can supply one.
+   */
 }
 
 export interface AdapterCreateParentOutcomeDto {
@@ -556,6 +590,18 @@ export interface AdapterUpdateStudentInput {
   readonly firstName: string;
   readonly lastName: string;
   readonly classModuleIds: readonly string[];
+  /**
+   * `C-14` (Operator ruling, 2026-08-16) — the three optional profile fields
+   * screen `20`'s frame draws. ⚠️ ALL OPTIONAL, and blank becomes `null`,
+   * never `""`: hero `0B` makes NULL mean NOT RECORDED, so an empty string
+   * would render as a present-but-empty fact.
+   * ⛔ `Gender`, `Student ID`, `Home address`, `Email` and `Upload photo` are
+   * drawn by that same frame and are REFUSED — they are absent from this type,
+   * which is a stronger refusal than a filter that has to remember them.
+   */
+  readonly dateOfBirth?: string | null;
+  readonly guardianName?: string | null;
+  readonly guardianContact?: string | null;
 }
 
 export interface AdapterUpdateStudentOutcomeDto {
@@ -574,6 +620,17 @@ export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
+  /**
+   * `C-14` (Operator ruling, 2026-08-16) — `accounts.phone`.
+   * ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and never an authentication factor
+   * (`A-027`): no sign-in path reads it. Optional; blank becomes `null`.
+   */
+  readonly phone?: string | null;
+  /*
+   * ⛔ `Employee ID` AND `Role` ARE DRAWN BY SCREEN `24`'S FRAME AND ARE
+   * REFUSED — `Role` additionally because the Assist./TA vocabulary is
+   * prohibited. Both are absent from this type.
+   */
 }
 
 /**

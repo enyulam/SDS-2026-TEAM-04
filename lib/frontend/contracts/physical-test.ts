@@ -310,6 +310,17 @@ export type CreateTrainerInput = {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
+  /**
+   * `C-14` — `accounts.phone`. ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and
+   * never an authentication factor (`A-027`). Optional; blank travels as
+   * `null`.
+   */
+  readonly phone?: string | null;
+  /*
+   * ⛔ `employeeId` AND `role` are drawn by screen `24`'s frame and are
+   * REFUSED — `role` additionally because the Assist./TA vocabulary is
+   * prohibited.
+   */
 };
 
 export type TrainerInvitationOutcomeDto = {
@@ -381,6 +392,18 @@ export type ManagementStudentProfileDto = {
   readonly fullName: string;
   readonly isActive: boolean;
   readonly guardianName: string | null;
+  /**
+   * `C-14`. ⛔ `guardianContact` IS PRE-LINK ONLY and is `null` the moment a
+   * parent is linked — the linked account is the living record. `guardianLinked`
+   * says WHICH source decided the pair, which is not derivable from the
+   * resolved value itself, and screen `22` needs it to know whether the fields
+   * are writable at all.
+   * ⛔ `guardianLinked` DISCLOSES NO PARENT IDENTITY — a boolean, not an
+   * account, an email or a link id.
+   */
+  readonly guardianContact: string | null;
+  readonly guardianLinked: boolean;
+  readonly dateOfBirth: string | null;
   readonly enrolledOn: string | null;
   readonly attendancePresent: number;
   readonly attendanceTotal: number;
@@ -545,6 +568,17 @@ export type RegisterStudentInput = {
   readonly firstName: string;
   readonly lastName: string;
   readonly classModuleIds: readonly string[];
+  /**
+   * `C-14` (Operator ruling, 2026-08-16). ⚠️ ALL OPTIONAL; blank travels as
+   * `null`, NEVER `""` — hero `0B` makes NULL mean NOT RECORDED, and an empty
+   * string would render on screen `18` as a present-but-empty fact.
+   * ⛔ `gender`, `studentId`, `homeAddress`, guardian `email` and `photo` are
+   * drawn by screen `20`'s frame and are REFUSED — absent from this type, so
+   * no caller can supply one.
+   */
+  readonly dateOfBirth?: string | null;
+  readonly guardianName?: string | null;
+  readonly guardianContact?: string | null;
 };
 
 export type RegisterStudentOutcomeDto = {
@@ -564,6 +598,13 @@ export type CreateParentInput = {
   readonly fullName: string;
   readonly email: string;
   readonly studentIds: readonly string[];
+  /**
+   * `C-14` — `accounts.phone`. ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and
+   * never an authentication factor (`A-027`). Optional; blank travels as
+   * `null`.
+   */
+  readonly phone?: string | null;
+  /* ⛔ `relationship` is drawn by screen `21`'s frame and is REFUSED. */
 };
 
 export type CreateParentOutcomeDto = {
@@ -585,6 +626,22 @@ export type UpdateStudentInput = {
   readonly firstName: string;
   readonly lastName: string;
   readonly classModuleIds: readonly string[];
+  /**
+   * `C-14` (Operator ruling, 2026-08-16). ⚠️ ALL OPTIONAL; blank travels as
+   * `null`, NEVER `""` — hero `0B` makes NULL mean NOT RECORDED, and an empty
+   * string would render on screen `18` as a present-but-empty fact.
+   * ⛔ `gender`, `studentId`, `homeAddress`, guardian `email` and `photo` are
+   * drawn by screen `20`'s frame and are REFUSED — absent from this type, so
+   * no caller can supply one.
+   */
+  readonly dateOfBirth?: string | null;
+  readonly guardianName?: string | null;
+  readonly guardianContact?: string | null;
+  /*
+   * ⛔ SEND `null` FOR BOTH GUARDIAN FIELDS ONCE THE LEARNER HAS A LINKED
+   * PARENT ACCOUNT. The linked account always wins, and `admin_update_student`
+   * REFUSES rather than silently ignoring a value.
+   */
 };
 
 export type UpdateStudentOutcomeDto = {

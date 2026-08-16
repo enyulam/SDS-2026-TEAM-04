@@ -109,11 +109,43 @@ check(discarded.length === 0, `M-2c: ⛔ no read discards \`error\` (${discarded
 // pending-queue spine, the fourth is a report-detail read. Calling them all
 // "spine" would have made the next reader think a rating read had been
 // added to the queue enumeration, which C-9 expressly forbids.
-const contexts = [...code.matchAll(/readRows<[^>]*>\(\s*"([^"]+)"/g)].map((m) => m[1]);
-check(contexts.length === 4, `M-3a: all FOUR reads go through \`readRows\` (${contexts.length})`);
+/*
+ * ⚠️ THREE HELPER NAMES, NOT ONE — 2026-08-16, and the ratchet fired for the
+ * RIGHT REASON AGAIN. The type-gap pass split the seam into `readRows` (TABLE
+ * selects, strictly typed, where wrong-column detection holds) and
+ * `readRpcRows` / `readMaybeRow` (`.rpc()` only, which CANNOT catch a wrong
+ * column and say so in their own types). `getManagementRatingsCore` reads an
+ * RPC, so it became `readRpcRows` — and this leg dropped to 3, correctly
+ * noticing that a read had left the name it was watching.
+ *
+ * ⛔ THE PIN IS STILL EXACT AND STILL A RATCHET. Widening the pattern to the
+ * three helper names keeps a read from slipping in UNNAMED; it does not
+ * weaken the list, which `M-3b` still checks name for name.
+ */
+const contexts = [...code.matchAll(/read(?:Rows|RpcRows|MaybeRow)<[^>]*>\(\s*"([^"]+)"/g)].map((m) => m[1]);
+/*
+ * ⛔ THE PIN GOES 4 -> 5, AND THE FIFTH WAS NEVER A NEW READ.
+ *
+ * `gatedReview:report_get_management_review` has used `readMaybeRow` since it
+ * was WRITTEN — measured at `0d2cae4`, before the type-gap pass touched
+ * anything. ▶ The old pattern `readRows<` never matched `readMaybeRow<`, so
+ * this leg was blind to it the whole time WHILE ASSERTING “all FOUR reads”.
+ *
+ * ⚠️ THAT IS THE FINDING, AND IT GENERALISES: A PIN IS ONLY AS EXACT AS THE
+ * PATTERN THAT DEFINES ITS POPULATION. An exact-list assertion feels stronger
+ * than a count — and it is, WITHIN the population it can see. Outside it the
+ * exactness is decoration: five reads existed, four were named, and the leg
+ * reported completeness across every commit since.
+ *
+ * ▶ Same family as `prove:projection-columns`' stated limit and `PR-5`'s named
+ * dynamic sites: what a checker CANNOT see must be said out loud, because a
+ * green run cannot say it.
+ */
+check(contexts.length === 5, `M-3a: all FIVE reads go through a query-diagnostics helper — readRows, readRpcRows or readMaybeRow (${contexts.length})`);
 check(
   contexts.join(",") ===
     "listCentrePairs:class_sessions,listCentrePairs:enrolments,listCentrePairs:students," +
+      "gatedReview:report_get_management_review," +
       "getManagementRatingsCore:report_get_management_ratings",
   `M-3b: each names the read and its relation — ${contexts.join(", ")}`,
 );

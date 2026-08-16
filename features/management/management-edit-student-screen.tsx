@@ -27,13 +27,26 @@ import { asFailure, type FailureResult } from "@/features/trainer/resource-state
  * pack's `screen.md` — §7.4.1.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * ⛔ THE SAME SEVEN FIELDS HAVE NO COLUMN — AND ONE SENTENCE IS DROPPED BY RULING
+ * ⛔ ~~THE SAME SEVEN FIELDS HAVE NO COLUMN~~ **FOUR DO** — AND ONE SENTENCE IS
+ *    DROPPED BY RULING
  * ═══════════════════════════════════════════════════════════════════════════
- * Date of birth · Gender · Student ID · Guardian name, contact, email and home
- * address · the photo. Each is **cited, not disabled**, for the reasons stated
- * once at screen `20`; the guardian four are refused because screen `21`
- * already creates the guardian properly and columns here would be a second,
- * unlinked copy.
+ * ✅ **NARROWED 2026-08-16 BY `C-14`**, struck text preserved per
+ * annotate-never-delete. ~~Date of birth ·~~ Gender · Student ID ·
+ * ~~Guardian name, contact,~~ email and home address · the photo. Each
+ * remaining one is **cited, not disabled**, for the reasons stated once at
+ * screen `20`.
+ *
+ * ⛔ **THIS SCREEN CARRIES THE HALF OF `C-14` THAT SCREEN `20` CANNOT: THE
+ *    PRECEDENCE RULE AT EDIT TIME.** The guardian pair is a PRE-LINK capture,
+ *    so once `parent_student_links` holds a live row the account wins and the
+ *    fields are **not rendered at all** — not disabled, not blank.
+ *    `admin_update_student` independently REFUSES a guardian write in that
+ *    state (`guardian_locked`), so the screen and the server agree.
+ *
+ * ⚠️ **AND THE LOAD IS A DATA-LOSS GUARD.** The three fields are a FULL
+ *    REPLACEMENT, like the name and the class set. Rendering them blank would
+ *    send `null` and **wipe a child's date of birth on a rename**, silently,
+ *    while reporting success.
  *
  * ⛔ **AND THE WITHDRAWAL CARD'S *"Can be undone within 30 days"* IS DROPPED.**
  * Operator ruling, 2026-08-16: **build the withdrawal, drop the sentence** —
@@ -69,6 +82,9 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
   const [allClasses, setAllClasses] = useState<ManagementClassListDto | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianContact, setGuardianContact] = useState("");
   const [selected, setSelected] = useState<readonly string[]>([]);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -104,6 +120,24 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
         const parts = one.data.fullName.trim().split(/\s+/);
         setLastName(parts.length > 1 ? parts[parts.length - 1] : "");
         setFirstName(parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] ?? "");
+        /*
+         * ⛔ LOADED, NOT LEFT BLANK — AND THIS IS A DATA-LOSS GUARD, NOT
+         *    CONVENIENCE. `admin_update_student` takes the three `C-14` fields
+         *    as a FULL REPLACEMENT, exactly like the name and the class set. A
+         *    form that rendered them empty would send `null` for all three and
+         *    ▶ **WIPE A CHILD'S DATE OF BIRTH ON A RENAME**, silently, with the
+         *    save reporting success.
+         *
+         * ⚠️ The guardian pair loads only when NOT linked. Once linked the
+         *    projection already returns `guardianContact: null` and a
+         *    `guardianName` belonging to the ACCOUNT — loading that account's
+         *    name into an editable box would invite an edit the server refuses
+         *    (`guardian_locked`), and would look like the account had been
+         *    renamed if it appeared to save.
+         */
+        setDateOfBirth(one.data.dateOfBirth ?? "");
+        setGuardianName(one.data.guardianLinked ? "" : one.data.guardianName ?? "");
+        setGuardianContact(one.data.guardianLinked ? "" : one.data.guardianContact ?? "");
         setSelected(one.data.classes.map((c) => c.classModuleId));
         setStatus({ kind: "ready" });
       },
@@ -127,6 +161,19 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       classModuleIds: [...selected],
+      dateOfBirth: dateOfBirth.trim().length === 0 ? null : dateOfBirth.trim(),
+      /*
+       * ⛔ `null` FOR BOTH WHEN LINKED. Sending a value would be REFUSED
+       * outright with `guardian_locked` — the RPC refuses rather than silently
+       * ignoring, so this is not belt-and-braces: sending anything here would
+       * fail the whole save, including the name change.
+       */
+      guardianName:
+        profile?.guardianLinked || guardianName.trim().length === 0 ? null : guardianName.trim(),
+      guardianContact:
+        profile?.guardianLinked || guardianContact.trim().length === 0
+          ? null
+          : guardianContact.trim(),
     });
     setBusy(false);
     if (result.outcome === "success") {
@@ -192,7 +239,9 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
         <form className="flex flex-col gap-[22px]" onSubmit={save} noValidate>
           <Card className="p-6">
             <h2 className="text-[15px] font-semibold text-ink-strong">Student Profile</h2>
-            <p className="mt-0.5 text-[12px] text-ink">Update name and class enrolment</p>
+            <p className="mt-0.5 text-[12px] text-ink">
+              Update name, date of birth and guardian contact
+            </p>
 
             <div className="mt-[16px] grid gap-[16px] sm:grid-cols-2">
               <Field id="first-name" label="First name">
@@ -213,7 +262,67 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
                   onChange={(e) => setLastName(e.target.value)}
                 />
               </Field>
+              <Field id="date-of-birth" label="Date of birth">
+                <TextInput
+                  id="date-of-birth"
+                  name="dateOfBirth"
+                  type="date"
+                  max={new Date().toISOString().slice(0, 10)}
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </Field>
             </div>
+          </Card>
+
+          <Card className="p-6">
+            <h2 className="text-[15px] font-semibold text-ink-strong">Guardian</h2>
+            {/*
+              ⛔ THE LINKED CASE IS NOT A DISABLED FORM, IT IS A DIFFERENT
+                 ANSWER. `P2-10` established the rule on these screens: DISABLED
+                 means "not yet", ABSENT means "not a thing". A linked guardian
+                 is not a pending edit — the account IS the record, and the
+                 fields have no writable counterpart at all, which is why the
+                 server refuses (`guardian_locked`) rather than ignoring.
+            */}
+            {profile.guardianLinked ? (
+              <p className="mt-0.5 text-[12px] leading-5 text-ink">
+                This learner is linked to a parent account
+                {profile.guardianName === null ? "" : ` (${profile.guardianName})`}. That
+                account&rsquo;s name and phone number are the guardian record now, and are changed
+                on the parent&rsquo;s own account rather than here.
+              </p>
+            ) : (
+              <>
+                <p className="mt-0.5 text-[12px] text-ink">
+                  Captured at registration. Once a parent account is created and linked, that
+                  account takes over and these stop being editable.
+                </p>
+                <div className="mt-[16px] grid gap-[16px] sm:grid-cols-2">
+                  <Field id="guardian-name" label="Guardian name">
+                    <TextInput
+                      id="guardian-name"
+                      name="guardianName"
+                      autoComplete="off"
+                      maxLength={120}
+                      value={guardianName}
+                      onChange={(e) => setGuardianName(e.target.value)}
+                    />
+                  </Field>
+                  <Field id="guardian-contact" label="Guardian contact">
+                    <TextInput
+                      id="guardian-contact"
+                      name="guardianContact"
+                      autoComplete="off"
+                      inputMode="tel"
+                      maxLength={40}
+                      value={guardianContact}
+                      onChange={(e) => setGuardianContact(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              </>
+            )}
           </Card>
 
           <Card className="p-6">
@@ -309,9 +418,9 @@ export function ManagementEditStudentScreen({ studentId }: { readonly studentId:
 
           {/* ⛔ THE SEVEN OMISSIONS, ON THE PAGE (§12.12). */}
           <p className="text-[11.5px] leading-5 text-ink">
-            This design also edits a date of birth, gender, student reference number, photograph, and
-            guardian name, contact, email and home address. This system holds none of those. A
-            guardian is managed as their own account and linked to this learner, so one guardian
+            This design also edits a gender, a student reference number, a photograph, and a
+            guardian email and home address. This system holds none of those. The guardian&rsquo;s
+            email belongs to their own account, which is linked to this learner, so one guardian
             record serves every child rather than a separate copy stored against each student.
           </p>
         </form>

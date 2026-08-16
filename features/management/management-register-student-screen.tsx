@@ -23,35 +23,61 @@ import { asFailure, type FailureResult } from "@/features/trainer/resource-state
  * pack's `screen.md` — §7.4.1.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * ⛔ THE FRAME DRAWS NINE PROFILE FIELDS AND A PHOTO. THIS BUILDS TWO.
- *    SEVEN OMISSIONS, AND THEY ARE NOT ONE REASON REPEATED.
+ * ⛔ THE FRAME DRAWS NINE PROFILE FIELDS AND A PHOTO. THIS BUILDS FIVE.
+ *    FOUR OMISSIONS, AND THEY ARE NOT ONE REASON REPEATED.
  * ═══════════════════════════════════════════════════════════════════════════
- * `students` holds, measured: `id · centre_id · full_name · is_active ·
- * created_at · updated_at · deactivated_at`. **Nothing else.** Operator ruling
- * 2026-08-16: every field with no column **stays out and is CITED, NOT
- * DISABLED** — a greyed input implies the field is coming; an absent one with
- * a stated reason says what is true.
+ * ✅ **AMENDED 2026-08-16 BY OPERATOR RULING `C-14`.** The struck text below is
+ * preserved per annotate-never-delete: it recorded an EARLIER ruling on the
+ * same day, and acting on it now would leave three authorized fields unbuilt.
  *
- *   · **Date of birth** — one column, and a child's DOB is personal data. Not
- *     a decision this phase may take.
- *   · **Gender** — an enum whose value set is a product decision nobody has
- *     made (`A-026`: a closed, non-runtime-editable vocabulary is an enum).
- *   · **Student ID `2025-113`** — a column, a unique index, **and a generation
- *     rule**: who mints it and in what format is the whole question. Drawn on
- *     six screens, which is why leaving it undecided keeps costing.
- *   · **Guardian name · contact · email · home address** — ⛔ **REFUSED BY
+ * ~~`students` holds, measured: `id · centre_id · full_name · is_active ·
+ * created_at · updated_at · deactivated_at`. **Nothing else.**~~ It now also
+ * holds `date_of_birth · guardian_name · guardian_contact`, added at
+ * `20260816220000` under `C-14`. The **discipline is unchanged**: every field
+ * with no column **stays out and is CITED, NOT DISABLED** — a greyed input
+ * implies the field is coming; an absent one with a stated reason says what is
+ * true.
+ *
+ *   · ~~**Date of birth** — one column, and a child's DOB is personal data. Not
+ *     a decision this phase may take.~~ ✅ **AUTHORIZED AND BUILT** (`C-14`).
+ *   · **Gender** — ⛔ STILL OUT. An enum whose value set is a product decision
+ *     nobody has made (`A-026`: a closed, non-runtime-editable vocabulary is an
+ *     enum).
+ *   · **Student ID `2025-113`** — ⛔ STILL OUT. A column, a unique index, **and
+ *     a generation rule**: who mints it and in what format is the whole
+ *     question. Drawn on six screens, which is why leaving it undecided keeps
+ *     costing.
+ *   · ~~**Guardian name · contact · email · home address** — ⛔ **REFUSED BY
  *     RULING**, and not over four columns. Screen `21` already creates the
  *     guardian properly, as an `accounts` row linked through
  *     `parent_student_links`. Four columns here would be **a second, unlinked
  *     copy of the guardian that nothing keeps in step** — *"a data defect, not
- *     four columns."*
- *   · **Photo** — deferred by `C-15`: a bucket, its policies, an upload
- *     transport and a column.
+ *     four columns."*~~ ✅ **SPLIT BY `C-14`. Guardian NAME and CONTACT are
+ *     AUTHORIZED AND BUILT; EMAIL and HOME ADDRESS remain REFUSED.**
+ *
+ *     ⚠️ **THE ORIGINAL OBJECTION WAS ANSWERED, NOT OVERRULED.** The concern
+ *     was an unlinked second copy of the guardian that nothing keeps in step.
+ *     The ruling answers it with a **PRECEDENCE RULE**: these two are a
+ *     **PRE-LINK CAPTURE**, and once a `parent_student_links` row exists the
+ *     **linked account always wins**. That rule is enforced in BOTH directions —
+ *     `readStudentProfileCore` applies it on READ, and `admin_update_student`
+ *     **REFUSES** a guardian write once a link exists (`guardian_locked`). ▶ The
+ *     two copies cannot drift, because after linking there is only ever one
+ *     writable copy.
+ *   · **Email · Home address** — ⛔ STILL REFUSED, and for the original reason
+ *     unchanged: screen `21` creates the guardian's account properly, and an
+ *     email here would be a second, unlinked identity.
+ *   · **Photo** — ⛔ STILL OUT, deferred by `C-15`: a bucket, its policies, an
+ *     upload transport and a column.
  *
  * ✅ **BUILT:** first and last name — **joined into `full_name` SERVER-SIDE**,
  * in `admin_create_student`, so the two halves cannot be stored apart and
- * re-joined differently by a later caller — and `Assign Classes`, which is
- * `enrolments` and already exists.
+ * re-joined differently by a later caller — date of birth, guardian name,
+ * guardian contact, and `Assign Classes`, which is `enrolments`.
+ *
+ * ⚠️ **BLANK IS SENT AS `null`, NEVER `""`.** Hero `0B`: NULL means NOT
+ * RECORDED. An empty string would render on screen `18` as a
+ * present-but-empty guardian, which is a different and false claim.
  *
  * ⚠️ **THE CLASS LIST IS `listManagementClasses()`, NOT A NEW READ** (§12.10,
  * ninth consecutive phase). The row already carried it.
@@ -83,6 +109,9 @@ export function ManagementRegisterStudentScreen() {
   >({ kind: "loading" });
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianContact, setGuardianContact] = useState("");
   const [selected, setSelected] = useState<readonly string[]>([]);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -119,16 +148,28 @@ export function ManagementRegisterStudentScreen() {
     if (!ready || busy || data === null) return;
     setBusy(true);
     setProblem(null);
+    /*
+     * ⚠️ EMPTY BECOMES `null`, NEVER `""` — hero `0B`. `blank()` is applied at
+     * this one boundary rather than in three places, so a future field cannot
+     * be added while forgetting the conversion.
+     */
+    const blank = (value: string) => (value.trim().length === 0 ? null : value.trim());
     const result = await port.registerStudent({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       classModuleIds: [...selected],
+      dateOfBirth: blank(dateOfBirth),
+      guardianName: blank(guardianName),
+      guardianContact: blank(guardianContact),
     });
     setBusy(false);
     if (result.outcome === "success") {
       setStatus({ kind: "sent", data });
       setFirstName("");
       setLastName("");
+      setDateOfBirth("");
+      setGuardianName("");
+      setGuardianContact("");
       setSelected([]);
       return;
     }
@@ -174,7 +215,7 @@ export function ManagementRegisterStudentScreen() {
           <form className="flex flex-col gap-[22px]" onSubmit={submit} noValidate>
             <div>
               <h2 className="text-[15px] font-semibold text-ink-strong">Student Profile</h2>
-              <p className="mt-0.5 text-[12px] text-ink">Name and class enrolment</p>
+              <p className="mt-0.5 text-[12px] text-ink">Basic details, guardian contact and class enrolment</p>
             </div>
 
             <div className="grid gap-[16px] sm:grid-cols-2">
@@ -196,6 +237,68 @@ export function ManagementRegisterStudentScreen() {
                   onChange={(e) => setLastName(e.target.value)}
                 />
               </Field>
+              {/*
+                ⚠️ THE FRAME PUTS DATE OF BIRTH IN A THREE-COLUMN ROW beside
+                `Gender` and `Student ID`. Both of those are REFUSED, so the
+                row is not built as three: the field takes ONE cell of the
+                existing two-column grid rather than stretching to fill space
+                its neighbours vacated. ▶ A refused field leaves a gap; it does
+                not license a different layout.
+
+                ⛔ `max` IS TODAY. A future date of birth is refused by the RPC
+                (`invalid_dob`); this stops the caller reaching that refusal,
+                and is UX only (ADR-3) — the database carries the real gate.
+              */}
+              <Field id="date-of-birth" label="Date of birth">
+                <TextInput
+                  id="date-of-birth"
+                  name="dateOfBirth"
+                  type="date"
+                  max={new Date().toISOString().slice(0, 10)}
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </Field>
+            </div>
+
+            <div>
+              <h2 className="text-[15px] font-semibold text-ink-strong">Guardian</h2>
+              {/*
+                ⛔ THE HINT IS THE PRECEDENCE RULE, STATED WHERE IT APPLIES.
+                These two are a PRE-LINK capture: once this child is linked to a
+                parent account on `Create Parent Account`, that account's name
+                and contact become authoritative and these fields stop being
+                writable (`admin_update_student` refuses with `guardian_locked`).
+                Saying so here is what stops someone editing screen `22` later
+                and believing the change took.
+              */}
+              <p className="mt-0.5 text-[12px] text-ink">
+                Captured now so the child has a contact on file. Once a parent account is created and
+                linked, that account&rsquo;s details take over and these stop being editable.
+              </p>
+              <div className="mt-3 grid gap-[16px] sm:grid-cols-2">
+                <Field id="guardian-name" label="Guardian name">
+                  <TextInput
+                    id="guardian-name"
+                    name="guardianName"
+                    autoComplete="off"
+                    maxLength={120}
+                    value={guardianName}
+                    onChange={(e) => setGuardianName(e.target.value)}
+                  />
+                </Field>
+                <Field id="guardian-contact" label="Guardian contact">
+                  <TextInput
+                    id="guardian-contact"
+                    name="guardianContact"
+                    autoComplete="off"
+                    inputMode="tel"
+                    maxLength={40}
+                    value={guardianContact}
+                    onChange={(e) => setGuardianContact(e.target.value)}
+                  />
+                </Field>
+              </div>
             </div>
 
             <div>
@@ -247,16 +350,19 @@ export function ManagementRegisterStudentScreen() {
             </div>
 
             {/*
-              ⛔ THE SEVEN OMISSIONS, STATED WHERE THE OPERATOR READS (§12.12).
-              Absent with a reason — never a disabled input implying it is
-              coming, which is what "cited, not disabled" rules out.
+              ⛔ THE FOUR REMAINING OMISSIONS, STATED WHERE THE OPERATOR READS
+              (§12.12). Absent with a reason — never a disabled input implying
+              it is coming, which is what "cited, not disabled" rules out.
+              ⚠️ NARROWED FROM SEVEN BY `C-14`: date of birth, guardian name and
+              guardian contact are now BUILT above, so continuing to claim the
+              system holds none of them would be a stale note on a live screen.
             */}
             <p className="text-[11.5px] leading-5 text-ink">
-              This design also collects a date of birth, gender, student reference number,
-              photograph, and guardian name, contact, email and home address. This system holds none
-              of those. A guardian is created and linked on the Create Parent Account screen, so one
-              guardian record serves every child rather than a separate copy stored against each
-              student.
+              This design also collects a gender, a student reference number, a photograph, and a
+              guardian email and home address. This system holds none of those. The guardian&rsquo;s
+              email is captured on the Create Parent Account screen instead, where it creates a real
+              account the guardian signs in with, rather than a second copy stored against this
+              child.
             </p>
           </form>
         </Card>

@@ -287,7 +287,7 @@ samples**, so the four absences are measurements rather than four patterns that 
 ```artefact-read
 screen: 11
 pack: Management - Dashboard
-component: features/management/management-dashboard-screen.tsx
+component: features/management/management-dashboard-screen.tsx, components/ui/month-calendar.tsx
 html-values: 14.50px, 13.50px, 12.50px, 9.50px, 23px, 16px, 12px, 11px
 screen-md-quote: Management landing surface for the final MVP.
 ```

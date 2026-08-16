@@ -107,6 +107,21 @@ export interface StudentProfileDto {
    * live account would be the two-sources defect wearing a different label.
    */
   readonly guardianContact: string | null;
+  /**
+   * ⛔ WHETHER A LIVE `parent_student_links` ROW DECIDED THE TWO FIELDS ABOVE.
+   *
+   * ⚠️ IT IS NOT DERIVABLE FROM `guardianName` BEING NON-NULL — that value is
+   * ALREADY the resolved one, so a pre-link registration name and a linked
+   * account name are indistinguishable downstream. Screen `22` needs the
+   * distinction to know whether the guardian fields are writable at all:
+   * `admin_update_student` REFUSES a guardian write once a link exists
+   * (`guardian_locked`), and an editor that cannot tell would offer an edit the
+   * server will reject.
+   *
+   * ⛔ IT DISCLOSES NO PARENT IDENTITY — a boolean, not an account, an email or
+   * a link id.
+   */
+  readonly guardianLinked: boolean;
   /** ⛔ `null` where not captured — omitted, never a placeholder date. */
   readonly dateOfBirth: string | null;
   /** The earliest active enrolment, or `null`. */
@@ -310,6 +325,7 @@ export async function readStudentProfileCore(
        */
       guardianName: guardians ?? row.guardian_name,
       guardianContact: guardians !== null ? null : row.guardian_contact,
+      guardianLinked: guardians !== null,
       dateOfBirth: row.date_of_birth,
       enrolledOn,
       attendancePresent: attendanceRows.filter((a) => a.status === "present").length,

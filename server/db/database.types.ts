@@ -1694,6 +1694,7 @@ export type Database = {
         Args: {
           p_display_name: string
           p_email: string
+          p_phone: string
           p_student_ids: string[]
         }
         Returns: Record<string, unknown>
@@ -1701,13 +1702,16 @@ export type Database = {
       admin_create_student: {
         Args: {
           p_class_module_ids: string[]
+          p_date_of_birth: string
           p_first_name: string
+          p_guardian_contact: string
+          p_guardian_name: string
           p_last_name: string
         }
         Returns: Record<string, unknown>
       }
       admin_create_trainer: {
-        Args: { p_display_name: string; p_email: string }
+        Args: { p_display_name: string; p_email: string; p_phone: string }
         Returns: Record<string, unknown>
       }
       admin_update_class_module: {
@@ -1732,7 +1736,10 @@ export type Database = {
       admin_update_student: {
         Args: {
           p_class_module_ids: string[]
+          p_date_of_birth: string
           p_first_name: string
+          p_guardian_contact: string
+          p_guardian_name: string
           p_last_name: string
           p_student_id: string
         }

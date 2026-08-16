@@ -116,7 +116,16 @@ check(
 // ---------------------------------------------------------------------
 // P-4 — labels are static, unique, and name read + relation.
 // ---------------------------------------------------------------------
-const contexts = [...code.matchAll(/readRows<[^>]*>\(\s*"([^"]+)"/g)].map((m) => m[1]);
+/*
+ * ⚠️ WIDENED TO ALL THREE HELPERS 2026-08-16, AND THE COUNT DOES NOT MOVE.
+ * Measured: parent-view has 4 reads under the narrow pattern and 4 under the
+ * wide one — no blind spot here. ⛔ `prove:hero-15`'s sibling leg DID have one
+ * (`gatedReview` used `readMaybeRow` and was never watched), so the pattern is
+ * widened here PREVENTIVELY: this module is one `readMaybeRow` away from the
+ * same silent gap, and a pin is only as exact as the pattern defining its
+ * population.
+ */
+const contexts = [...code.matchAll(/read(?:Rows|RpcRows|MaybeRow)<[^>]*>\(\s*"([^"]+)"/g)].map((m) => m[1]);
 check(contexts.length === 4, `P-4a: all FOUR reads go through \`readRows\` (${contexts.length})`);
 check(
   contexts.every((c) => /^[A-Za-z]+:[a-z_]+$/.test(c)) && new Set(contexts).size === 4,

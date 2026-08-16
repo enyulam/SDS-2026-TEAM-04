@@ -273,6 +273,39 @@ BEGIN
   -- growing totals. ▶ One site to update per phase, and it is this one,
   -- where moving the number requires writing down which authorization did it.
   --
+  -- ⛔ THE FUNCTION COUNT MOVED 62 -> 73 ACROSS EIGHT PHASES, AND THE RATCHET
+  -- WAS NEVER UPDATED BY ANY OF THEM. Corrected 2026-08-16, with each of the
+  -- eleven attributed to the authorization that added it:
+  --
+  --   `20260815120000` P2-11  +1  admin_create_trainer
+  --   `20260815150000` P2-9   +2  report_management_student_trend,
+  --                               report_management_student_reports
+  --   `20260816090000` P2-16  +2  competency_score,
+  --                               report_class_improved_dimension
+  --   `20260816120000` P2-19  +1  report_list_trainer_reports
+  --   `20260816140000` P2-20  +1  report_list_trainer_students
+  --   `20260816160000` P2-12  +1  admin_create_student
+  --   `20260816180000` P2-13  +1  admin_create_parent
+  --   `20260816200000` P2-14  +2  admin_update_student, admin_withdraw_student
+  --
+  -- ⚠️ `20260815090000` (Ruling A) and `20260816230000` (C-14 write path) are
+  -- NET ZERO: both DROP and recreate functions that already existed — one, and
+  -- four, respectively. ▶ A recreation is invisible to a count, which is
+  -- exactly why the count is not the only thing this project pins.
+  --
+  -- ⛔ WHY IT WENT UNSEEN FOR EIGHT PHASES, WHICH IS THE FINDING. This suite is
+  -- `prove:hero-2`. The per-phase sweeps enumerated the `portal-p2-N` suites,
+  -- so the project's SINGLE GLOBAL function ratchet was outside every one of
+  -- them. It was caught only by running all 64 `prove:*` scripts at once —
+  -- plan §48.1, third instance: *"I re-ran the suites I expected to be
+  -- affected, so I found the suites I expected to be affected."*
+  --
+  -- ⚠️ THE PARENT BOUNDARY IS UNCHANGED AND IS NOT GUARDED BY THIS COUNT. What
+  -- guards it is the context field-set assertion below — still EXACTLY 7 — and
+  -- P2-7a/b/c over the parent DTO. A growing function total says the project
+  -- grew; it says nothing on its own about what a parent can read, and the pin
+  -- exists so that growth must be WRITTEN DOWN rather than noticed later.
+  --
   -- ⚠️ THE FUNCTION COUNT MOVED 61 -> 62 ON 2026-08-14, AND THE ONE IS
   -- NAMED. Portal phase P2-7 (screen `11` Management Dashboard, migration
   -- `20260814140000`) added exactly one, `report_centre_dashboard_summary`,
@@ -398,12 +431,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 62 THEN
+  IF v_n = 1 AND v_listed = 73 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 62 functions (Phase 2 added none; Phase 7 and P1-1b one each, P1-2 six, P2-2 two, P2-2b one, P2-3 two, P2-4 two, P2-6 five, P2-7 one) and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet';
+    RAISE NOTICE 'PASS P2-6 -- 73 functions and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet, and the eleven added since it last read 62 are attributed one by one in the comment above (P2-11, P2-9, P2-16, P2-19, P2-20, P2-12, P2-13, P2-14)';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 62) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 73) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

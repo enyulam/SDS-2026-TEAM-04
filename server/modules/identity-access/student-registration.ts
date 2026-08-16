@@ -24,12 +24,27 @@ export type StudentRegistrationResult =
 
 export async function registerStudentCore(
   client: SupabaseClient<AppDatabase>,
-  input: { readonly firstName: string; readonly lastName: string; readonly classModuleIds: readonly string[] },
+  input: {
+    readonly firstName: string;
+    readonly lastName: string;
+    readonly classModuleIds: readonly string[];
+    /**
+     * ⚠️ ALL THREE ARE OPTIONAL AND DEFAULT TO `null`, NEVER `""`. Hero `0B`:
+     * NULL means NOT RECORDED, and an empty string would render as a
+     * present-but-empty fact on screen `21`.
+     */
+    readonly dateOfBirth?: string | null;
+    readonly guardianName?: string | null;
+    readonly guardianContact?: string | null;
+  },
 ): Promise<StudentRegistrationResult> {
   const result = await client.rpc("admin_create_student", {
     p_first_name: input.firstName,
     p_last_name: input.lastName,
     p_class_module_ids: [...input.classModuleIds],
+    p_date_of_birth: input.dateOfBirth ?? null,
+    p_guardian_name: input.guardianName ?? null,
+    p_guardian_contact: input.guardianContact ?? null,
   });
   if (result.error !== null) return { ok: false, reason: "unavailable" };
 

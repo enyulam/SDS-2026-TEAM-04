@@ -123,10 +123,10 @@ SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
 SELECT 'CREATED<' || r.o_reason || '|' || r.o_enrolments || '|' || (r.o_student_id IS NOT NULL)::text || '>'
   FROM public.admin_create_student('Walkthrough','Registered',
-       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 2)) r;
-SELECT 'R_UNKNOWN<' || (SELECT o_reason FROM public.admin_create_student('A','B', ARRAY['00000000-0000-4000-8000-000000000000'::uuid])) || '>';
-SELECT 'R_NOCLASS<' || (SELECT o_reason FROM public.admin_create_student('A','B', ARRAY[]::uuid[])) || '>';
-SELECT 'R_NONAME<' || (SELECT o_reason FROM public.admin_create_student('','B', ARRAY[]::uuid[])) || '>';
+       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 2), NULL, NULL, NULL) r;
+SELECT 'R_UNKNOWN<' || (SELECT o_reason FROM public.admin_create_student('A','B', ARRAY['00000000-0000-4000-8000-000000000000'::uuid], NULL, NULL, NULL)) || '>';
+SELECT 'R_NOCLASS<' || (SELECT o_reason FROM public.admin_create_student('A','B', ARRAY[]::uuid[], NULL, NULL, NULL)) || '>';
+SELECT 'R_NONAME<' || (SELECT o_reason FROM public.admin_create_student('','B', ARRAY[]::uuid[], NULL, NULL, NULL)) || '>';
 RESET ROLE;
 SELECT 'AUDIT_NOW<' || pg_catalog.count(*) || '>' FROM public.audit_events;
 SELECT 'EMITTED<' || string_agg(t.action || ':' || t.n, ',' ORDER BY t.action) || '>'
@@ -171,7 +171,7 @@ SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'T_REASON<' || r.o_reason || '|' || (r.o_student_id IS NULL)::text || '>'
   FROM public.admin_create_student('Should','NotExist',
-       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 1)) r;
+       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 1), NULL, NULL, NULL) r;
 RESET ROLE;
 SELECT 'T_AUDIT<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_created';
 ROLLBACK;`);
@@ -187,12 +187,30 @@ check(
 // ---------------------------------------------------------------------
 // ⛔ PM-E -- NO FIELD WITHOUT A COLUMN IS INVENTED, AT THREE LAYERS.
 // ---------------------------------------------------------------------
-const MISSING = ["date_of_birth", "gender", "guardian", "home_address", "photo", "student_code"];
-const bodyStart = sql.indexOf("$fn$");
-const body = sql.slice(bodyStart, sql.indexOf("$fn$;", bodyStart + 4));
+/*
+ * ⚠️ NARROWED FROM SIX TO FOUR BY OPERATOR RULING C-14 (2026-08-16), which
+ * authorized date_of_birth, guardian_name and guardian_contact as real
+ * columns. The remaining four are refused for four DIFFERENT reasons.
+ *
+ * ⛔ AND LAYER 1 NOW READS THE LIVE DEFINITION, NOT THIS PHASE'S MIGRATION.
+ * 20260816230000 DROPPED and recreated admin_create_student, so the body in
+ * this phase's own migration file is SUPERSEDED — a leg still scanning it
+ * would report on a function that no longer exists, and pass for the rest of
+ * the project's life. ▶ The same "subject replaced underneath the check"
+ * shape the stale database.types.ts had.
+ */
+const MISSING = ["gender", "home_address", "photo", "student_code"];
+const liveBody = psql(
+  "SELECT pg_catalog.pg_get_functiondef(p.oid) FROM pg_proc p " +
+    "JOIN pg_namespace n ON n.oid = p.pronamespace " +
+    "WHERE n.nspname = 'public' AND p.proname = 'admin_create_student';",
+);
 check(
-  MISSING.every((f) => !new RegExp(`\\b${f}`, "i").test(stripComments(body))),
-  "PM-E ⛔ LAYER 1, THE SQL: the body names no DOB, gender, guardian, address, photo or student code",
+  liveBody.length > 500 &&
+    MISSING.every((f) => !new RegExp(`\b${f}`, "i").test(liveBody)) &&
+    /date_of_birth/.test(liveBody) &&
+    /guardian_name/.test(liveBody),
+  `PM-E ⛔ LAYER 1, THE LIVE SQL (${liveBody.length} chars): the shipped body WRITES date_of_birth and guardian_name (C-14) and names no gender, home address, photo or student code — ▶ read from the CATALOGUE, because this phase's migration body was superseded by 20260816230000`,
 );
 const contracts = read("lib/frontend/contracts/physical-test.ts");
 const dtoStart = contracts.indexOf("export type RegisterStudentInput");
@@ -200,9 +218,9 @@ const dtoStart = contracts.indexOf("export type RegisterStudentInput");
 const dtoBody = contracts.slice(dtoStart, contracts.indexOf("\n};", dtoStart));
 check(
   dtoStart > 0 &&
-    dtoBody.length < 400 &&
+    dtoBody.length < 1200 &&
     MISSING.every((f) => !new RegExp(f.replace(/_/g, "[_]?"), "i").test(stripComments(dtoBody))),
-  `PM-Ea ⛔ LAYER 2, THE DTO: three fields only, over ${dtoBody.length} bounded chars — ▶ a DTO field with nowhere to go is how an invented column starts`,
+  `PM-Ea ⛔ LAYER 2, THE DTO: six fields, over ${dtoBody.length} bounded chars, and NOT ONE of the four refused — ▶ a DTO field with nowhere to go is how an invented column starts`,
 );
 const screen = read("features/management/management-register-student-screen.tsx");
 const stripped = stripComments(screen);
@@ -214,14 +232,13 @@ check(
   `PM-Eb ⚠️ the on-page disclosure is SET ASIDE before the prohibition is scanned (${disclosures.length}) — the \`PT19-6\` defect: §12.12 REQUIRES that sentence`,
 );
 check(
-  !/<input|<TextInput/.test(rendered.replace(/id="(first|last)-name"[\s\S]{0,400}?\/>/g, "")) ||
-    (rendered.match(/<TextInput/g) ?? []).length === 2,
-  `PM-Ec ⛔ LAYER 3, THE SCREEN: exactly TWO inputs render (${(rendered.match(/<TextInput/g) ?? []).length}) — ▶ **CITED, NOT DISABLED**: a greyed field implies it is coming; an absent one with a stated reason says what is true`,
+  (rendered.match(/<TextInput/g) ?? []).length === 5,
+  `PM-Ec ⛔ LAYER 3, THE SCREEN: exactly FIVE inputs render (${(rendered.match(/<TextInput/g) ?? []).length}) — first name, last name, date of birth, guardian name, guardian contact. ▶ CITED, NOT DISABLED: a greyed field implies it is coming; an absent one with a stated reason says what is true`,
 );
 check(
-  /date of birth, gender, student reference number/i.test(screen) &&
-    /guardian name, contact, email and home address/i.test(screen),
-  "PM-Ed …and all seven omissions are named ON THE PAGE (§12.12), not only in a comment",
+  /gender, a student reference number, a photograph/i.test(screen) &&
+    /guardian email and home address/i.test(screen),
+  "PM-Ed …and all FOUR remaining omissions are named ON THE PAGE (§12.12), not only in a comment — ⚠️ narrowed from seven by C-14: a page still claiming the system holds no date of birth, beside a working date-of-birth field, is a stale note on a live screen",
 );
 
 // ---------------------------------------------------------------------

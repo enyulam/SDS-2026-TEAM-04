@@ -30,12 +30,23 @@ export type ParentAccountResult =
 
 export async function createParentAccountCore(
   client: SupabaseClient<AppDatabase>,
-  input: { readonly fullName: string; readonly email: string; readonly studentIds: readonly string[] },
+  input: {
+    readonly fullName: string;
+    readonly email: string;
+    readonly studentIds: readonly string[];
+    /**
+     * ⛔ A CONTACT DETAIL, NEVER A CREDENTIAL and never an authentication
+     * factor (`A-027`) — no sign-in path reads it. Optional; blank becomes
+     * `null`, never `""`.
+     */
+    readonly phone?: string | null;
+  },
 ): Promise<ParentAccountResult> {
   const result = await client.rpc("admin_create_parent", {
     p_display_name: input.fullName,
     p_email: input.email,
     p_student_ids: [...input.studentIds],
+    p_phone: input.phone ?? null,
   });
   if (result.error !== null) return { ok: false, reason: "unavailable" };
 

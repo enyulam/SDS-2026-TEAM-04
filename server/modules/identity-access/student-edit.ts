@@ -26,6 +26,17 @@ export async function updateStudentCore(
     readonly firstName: string;
     readonly lastName: string;
     readonly classModuleIds: readonly string[];
+    readonly dateOfBirth?: string | null;
+    /**
+     * ⛔ SEND `null` FOR BOTH WHENEVER THE LEARNER HAS A LINKED PARENT ACCOUNT.
+     * The RPC REFUSES with `guardian_locked` rather than silently ignoring a
+     * value, because a linked account always wins (Operator ruling 2026-08-16,
+     * option (c)) — and a silent ignore would let a caller believe it had
+     * corrected a guardian's details while the screen kept showing the
+     * account's, with nothing to say why they disagreed.
+     */
+    readonly guardianName?: string | null;
+    readonly guardianContact?: string | null;
   },
 ): Promise<UpdateStudentResult> {
   const result = await client.rpc("admin_update_student", {
@@ -33,6 +44,9 @@ export async function updateStudentCore(
     p_first_name: input.firstName,
     p_last_name: input.lastName,
     p_class_module_ids: [...input.classModuleIds],
+    p_date_of_birth: input.dateOfBirth ?? null,
+    p_guardian_name: input.guardianName ?? null,
+    p_guardian_contact: input.guardianContact ?? null,
   });
   if (result.error !== null) return { ok: false, reason: "unavailable" };
   const row = result.data as

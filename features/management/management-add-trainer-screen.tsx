@@ -32,9 +32,20 @@ import { asFailure, type FailureResult } from "@/features/trainer/resource-state
  * 1. **`Role` — `GC-11`** (pack `24`, ruling `Q-24`). `Assistant Trainer` is
  *    not a member of `centre_membership_role`, so the option is UNPERSISTABLE,
  *    not merely unbuilt. TA is a deferred persona (`A-014`, `G-7`).
- * 2. **`Phone`** and 3. **`Employee ID`** — ⛔ NO COLUMN EXISTS, measured in
- *    the catalogue. ▶ **THE ONE OPEN OPERATOR DECISION ON THIS SCREEN**, and
- *    it is disclosed ON THE PAGE rather than only in a source comment (§12.12).
+ * 2. ~~**`Phone`** and~~ 3. **`Employee ID`** — ⛔ NO COLUMN EXISTS, measured
+ *    in the catalogue. ~~▶ **THE ONE OPEN OPERATOR DECISION ON THIS SCREEN**~~,
+ *    and it is disclosed ON THE PAGE rather than only in a source comment
+ *    (§12.12).
+ *
+ *    ✅ **`Phone` IS RULED AND BUILT** (`C-14`, 2026-08-16): `accounts.phone`,
+ *    one number per person shared across roles, added at `20260816220000`. ▶
+ *    **The open decision this file named is CLOSED**; `Employee ID` alone
+ *    remains, and it is a column, a unique index AND a minting rule, not one
+ *    column.
+ *
+ *    ⛔ **A CONTACT DETAIL, NEVER A CREDENTIAL** (`A-027`). No sign-in path
+ *    reads it, and `accounts` still holds no column able to store an
+ *    authentication secret.
  * 4. **`Upload photo`** — no column, no bucket, no policy; `C-15` is the
  *    adjacent precedent.
  * 5. **`Assign Classes`** — `A-016` puts assignment at CLASS SESSION level and
@@ -82,6 +93,7 @@ export function ManagementAddTrainerScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   /*
@@ -97,7 +109,13 @@ export function ManagementAddTrainerScreen() {
     event.preventDefault();
     if (!submittable || status.kind === "saving") return;
     setStatus({ kind: "saving" });
-    const result = await port.createTrainer({ firstName, lastName, email });
+    // ⚠️ EMPTY BECOMES `null`, NEVER `""` — hero `0B`.
+    const result = await port.createTrainer({
+      firstName,
+      lastName,
+      email,
+      phone: phone.trim().length === 0 ? null : phone.trim(),
+    });
     if (result.outcome === "success") {
       setStatus({ kind: "sent", outcome: result.data });
       setFirstName("");
@@ -183,7 +201,6 @@ export function ManagementAddTrainerScreen() {
               id="email"
               label="Email"
               error={fieldError("email")}
-              className="sm:col-span-2"
               hint="Where the activation invitation will be addressed."
             >
               <TextInput
@@ -198,6 +215,27 @@ export function ManagementAddTrainerScreen() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Field>
+            {/*
+              ⚠️ THE FRAME PAIRS `Phone` WITH `Email` ON ONE ROW, so `Email`
+              gives up the two-column span it held while `Phone` had no column
+              to write to. ⛔ The `Employee ID`/`Role` row below it is still
+              REFUSED and is NOT back-filled — a refused field leaves a gap.
+
+              ⛔ `type="tel"`, never anything treating this as a secret
+              (`A-027`).
+            */}
+            <Field id="phone" label="Phone">
+              <TextInput
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="off"
+                maxLength={40}
+                placeholder="+65"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </Field>
           </div>
 
           {/*
@@ -209,7 +247,7 @@ export function ManagementAddTrainerScreen() {
           */}
           <section className="rounded-[12px] border border-line bg-surface-muted px-4 py-3.5">
             <h3 className="text-[12px] font-semibold text-ink-strong">
-              Four fields on the design are not collected
+              Three fields on the design are not collected
             </h3>
             <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-5 text-[12px] leading-5 text-ink">
               <li>
@@ -217,8 +255,8 @@ export function ManagementAddTrainerScreen() {
                 does not exist in this system.
               </li>
               <li>
-                <strong>Phone</strong> and <strong>Employee ID</strong> — there is nowhere to store
-                them yet. This one is a pending decision, not a rule.
+                <strong>Employee ID</strong> — there is nowhere to store it yet, and it needs a
+                format and someone to issue it. This one is a pending decision, not a rule.
               </li>
               <li>
                 <strong>Photo</strong> — deferred with the student photo.

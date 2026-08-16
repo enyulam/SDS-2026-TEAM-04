@@ -1038,6 +1038,9 @@ export async function adapterReadManagementStudentProfile(
       fullName: d.fullName,
       isActive: d.isActive,
       guardianName: d.guardianName,
+      guardianContact: d.guardianContact,
+      guardianLinked: d.guardianLinked,
+      dateOfBirth: d.dateOfBirth,
       enrolledOn: d.enrolledOn,
       attendancePresent: d.attendancePresent,
       attendanceTotal: d.attendanceTotal,
@@ -1125,6 +1128,7 @@ export async function adapterCreateTrainer(
     firstName: input.firstName,
     lastName: input.lastName,
     email: input.email,
+    phone: input.phone ?? null,
   });
   if (result.outcome !== "success") return result;
   return {
@@ -2174,7 +2178,21 @@ export async function adapterRegisterStudent(
   input: AdapterRegisterStudentInput,
 ): Promise<ActionResult<AdapterRegisterStudentOutcomeDto>> {
   const client = await createRequestSupabaseClient();
-  const result = await registerStudentCore(client, input);
+  /*
+   * ⛔ RE-BUILT FIELD BY FIELD, NOT FORWARDED — this file's own rule, which
+   * these three were the exception to until `C-14`. Forwarding `input` means
+   * any property a caller attaches travels to the core; naming each field is
+   * what makes the frame's REFUSED fields unreachable rather than merely
+   * unmentioned.
+   */
+  const result = await registerStudentCore(client, {
+    firstName: input.firstName,
+    lastName: input.lastName,
+    classModuleIds: input.classModuleIds,
+    dateOfBirth: input.dateOfBirth ?? null,
+    guardianName: input.guardianName ?? null,
+    guardianContact: input.guardianContact ?? null,
+  });
   if (!result.ok) return { outcome: "unavailable" };
   return {
     outcome: "success",
@@ -2194,7 +2212,19 @@ export async function adapterCreateParentAccount(
   input: AdapterCreateParentInput,
 ): Promise<ActionResult<AdapterCreateParentOutcomeDto>> {
   const client = await createRequestSupabaseClient();
-  const result = await createParentAccountCore(client, input);
+  /*
+   * ⛔ RE-BUILT FIELD BY FIELD, NOT FORWARDED — this file's own rule, which
+   * these three were the exception to until `C-14`. Forwarding `input` means
+   * any property a caller attaches travels to the core; naming each field is
+   * what makes the frame's REFUSED fields unreachable rather than merely
+   * unmentioned.
+   */
+  const result = await createParentAccountCore(client, {
+    fullName: input.fullName,
+    email: input.email,
+    studentIds: input.studentIds,
+    phone: input.phone ?? null,
+  });
   if (!result.ok) return { outcome: "unavailable" };
   return {
     outcome: "success",
@@ -2213,7 +2243,22 @@ export async function adapterUpdateStudent(
   input: AdapterUpdateStudentInput,
 ): Promise<ActionResult<AdapterUpdateStudentOutcomeDto>> {
   const client = await createRequestSupabaseClient();
-  const result = await updateStudentCore(client, input);
+  /*
+   * ⛔ RE-BUILT FIELD BY FIELD, NOT FORWARDED — this file's own rule, which
+   * these three were the exception to until `C-14`. Forwarding `input` means
+   * any property a caller attaches travels to the core; naming each field is
+   * what makes the frame's REFUSED fields unreachable rather than merely
+   * unmentioned.
+   */
+  const result = await updateStudentCore(client, {
+    studentId: input.studentId,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    classModuleIds: input.classModuleIds,
+    dateOfBirth: input.dateOfBirth ?? null,
+    guardianName: input.guardianName ?? null,
+    guardianContact: input.guardianContact ?? null,
+  });
   if (!result.ok) return { outcome: "unavailable" };
   return {
     outcome: "success",

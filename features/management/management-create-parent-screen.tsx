@@ -23,8 +23,11 @@ import { asFailure, type FailureResult } from "@/features/trainer/resource-state
  * pack's `screen.md` — §7.4.1.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * ⛔ THREE OMISSIONS, THREE DIFFERENT REASONS. NONE OF THEM IS "LATER".
+ * ⛔ ~~THREE~~ **TWO** OMISSIONS, ~~THREE~~ **TWO** DIFFERENT REASONS. NEITHER
+ *    OF THEM IS "LATER".
  * ═══════════════════════════════════════════════════════════════════════════
+ * ✅ **NARROWED 2026-08-16 BY OPERATOR RULING `C-14`**, which answered omission
+ * 2's open question directly. Struck text preserved per annotate-never-delete.
  * 1. **`Relationship: Mother`** — no column. It would be one enum plus one
  *    column on `parent_student_links`, and the **vocabulary is a product
  *    decision nobody has taken**.
@@ -37,9 +40,16 @@ import { asFailure, type FailureResult } from "@/features/trainer/resource-state
  *    centre"*. ▶ Writing `Mother` into it **fails the CHECK**. The register was
  *    consulted before the write path was written, which is what it is for.
  *
- * 2. **`Phone`** — no column, and the open part is **where it would live**:
+ * 2. ~~**`Phone`** — no column, and the open part is **where it would live**:
  *    `accounts` (one number per person, shared across roles) or the profile
- *    table (one per role). ⏸ Already open from `P2-11`, unchanged here.
+ *    table (one per role). ⏸ Already open from `P2-11`, unchanged here.~~
+ *    ✅ **RULED AND BUILT.** `C-14` placed it on **`accounts`** — one number per
+ *    person, shared across roles — added at `20260816220000`. ▶ The open part
+ *    was never whether to build it; it was WHERE, and that is what was ruled.
+ *
+ *    ⛔ **A CONTACT DETAIL, NEVER A CREDENTIAL** and never an authentication
+ *    factor (`A-027`). No sign-in path reads it, and `accounts` still holds no
+ *    column capable of storing an authentication secret.
  *
  * 3. **The `Send email invite` toggle** — ⛔ **NOT BUILT, AND NOT BECAUSE IT
  *    IS UNIMPLEMENTED.** External delivery is deferred, so **nothing sends
@@ -70,6 +80,7 @@ export function ManagementCreateParentScreen() {
   >({ kind: "loading" });
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<readonly string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -117,12 +128,16 @@ export function ManagementCreateParentScreen() {
       fullName: fullName.trim(),
       email: email.trim(),
       studentIds: [...selected],
+      // ⚠️ EMPTY BECOMES `null`, NEVER `""` — hero `0B`. An empty string would
+      // record a guardian as having a blank phone rather than none.
+      phone: phone.trim().length === 0 ? null : phone.trim(),
     });
     setBusy(false);
     if (result.outcome === "success") {
       setStatus({ kind: "sent", data });
       setFullName("");
       setEmail("");
+      setPhone("");
       setSelected([]);
       setQuery("");
       return;
@@ -192,6 +207,29 @@ export function ManagementCreateParentScreen() {
                   autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+              {/*
+                ⚠️ THE FRAME PLACES `Phone` IN THE RIGHT COLUMN BESIDE
+                `Email address`, under a `Relationship` select that is REFUSED.
+                It takes that cell; the vacated `Relationship` cell is NOT
+                back-filled — a refused field leaves a gap rather than licensing
+                a re-flow.
+
+                ⛔ `type="tel"`, NEVER `type="password"` or anything treating
+                this as a secret: `A-027`. It is a contact detail and no sign-in
+                path reads it.
+              */}
+              <Field id="parent-phone" label="Phone">
+                <TextInput
+                  id="parent-phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="off"
+                  maxLength={40}
+                  placeholder="+65 8123 4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </Field>
             </div>
@@ -281,13 +319,16 @@ export function ManagementCreateParentScreen() {
           </div>
 
           {/*
-            ⛔ THE THREE OMISSIONS, STATED WHERE THE OPERATOR READS (§12.12).
+            ⛔ THE TWO REMAINING OMISSIONS, STATED WHERE THE OPERATOR READS
+            (§12.12). ⚠️ NARROWED FROM THREE BY `C-14`: the phone is BUILT
+            above, so continuing to say the system does not hold it would be a
+            stale claim printed beside a working field.
           */}
           <p className="text-[12px] leading-5 text-ink">
-            This design also collects a relationship to the child and a phone number, and offers a
-            switch to send the invitation email. This system holds neither field, and no email is
-            sent — the invitation is recorded here and the guardian activates it in person, so a
-            switch would offer a choice between two identical outcomes.
+            This design also collects a relationship to the child, and offers a switch to send the
+            invitation email. This system holds no relationship field, and no email is sent — the
+            invitation is recorded here and the guardian activates it in person, so a switch would
+            offer a choice between two identical outcomes.
           </p>
         </form>
       )}

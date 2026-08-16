@@ -6587,3 +6587,176 @@ another**. ⛔ **Do not retire one on the strength of another being green.**
 **There is deliberately no aggregate runner.** Each is invoked by name, as its
 siblings are; inventing an aggregate here would add a construct rather than
 repair one.
+---
+
+## §54 — `C-14` WRITE PATH: FOUR SIGNATURES REBUILT, AND THE SWEEP THAT FOUND FOUR STALE GATES
+
+*(2026-08-16, under the Operator's explicit signature authorization and the `PROCEED … in ONE pass` instruction.)*
+
+### 54.1 What was authorized, and what shipped
+
+> *"AUTHORIZED: `admin_create_student` +3 params · `admin_update_student` +3 ·
+> `admin_create_parent` +1 · `admin_create_trainer` +1, each by DROP+CREATE with
+> its EXECUTE grant restored to exactly what it held before. No new grant, no
+> widened grant, no new audit string, registry unmoved at 24."*
+
+`supabase/migrations/20260816230000_portal_c14_write_path.sql`. **Census after:
+tables 30 · enums 12 · policies 30 · registry 24 · functions 73 · ledger 47/47** —
+functions **net zero**, because four were dropped and four recreated.
+
+⛔ **`DROP` AND NOT `CREATE OR REPLACE`, AND THE DIFFERENCE IS NOT STYLISTIC.**
+`CREATE OR REPLACE` with a **different parameter list** creates an **OVERLOAD**.
+Both signatures would exist, PostgREST would hold two candidates, and the old
+body would keep serving any caller that matched it. `C14W-1` asserts exactly four
+functions survive, so no overload can hide.
+
+⛔ **THE GRANT IS ASSERTED AS AN EXACT SET, BEFORE AND AFTER** (`C14W-PRE` /
+`C14W-POST`), per the Operator's instruction — *"not a presence check"*. ▶ The
+reason is mechanical: **a newly created function grants `EXECUTE` to `PUBLIC` by
+default**, and only `REVOKE ALL … FROM PUBLIC` takes it away. A presence check
+(*"does `authenticated` hold EXECUTE?"*) passes happily while `PUBLIC` sits
+beside it. Measured before and after: all four hold exactly
+`authenticated:EXECUTE, postgres:EXECUTE`.
+
+### 54.2 ⚠️ WHY THE MIGRATION AND ITS CALLERS HAD TO LAND TOGETHER — measured, not argued
+
+The Operator named this as their own ruling's cost:
+
+> *"Dropping `Functions` from `AppDatabase` is what lets a stale three-arg
+> `.rpc()` compile. I accepted that trade to remove twelve false errors, and this
+> is its cost surfacing exactly where you say."*
+
+**Measured immediately after applying the migration and before touching a caller:**
+
+| Gate | Result with FOUR broken write paths |
+|---|---|
+| `tsc --noEmit` | ⛔ **exit 0** |
+| `npm run build` | ⛔ **exit 0** |
+| every SQL suite | ⛔ **green** (they call the functions directly) |
+| `prove:projection-columns` | ⛔ **green** (it checks columns, these are arguments) |
+| **`prove:rpc-arguments`** | ✅ **exit 1, naming all four and the exact missing arguments** |
+
+▶ **That is §53's claim measured rather than argued**, and it is why an
+intermediate commit with the migration landed and the callers not would have been
+a fully green tree over four dead write paths.
+
+### 54.3 ⛔ THE FULL SWEEP FOUND FOUR STALE GATES — §48.1, FOURTH INSTANCE, AND THE WORST ONE
+
+The per-phase sweeps in this project have enumerated the **`portal-p2-N`** suites.
+Running **all 64 `prove:*` scripts** instead surfaced four gates that had been red
+or blind, three of them for **many phases**:
+
+| Gate | What was wrong | Whose |
+|---|---|---|
+| `prove:hero-2` `P2-6` | ⛔ The project's **SINGLE GLOBAL function ratchet** read **62** against a live **73** — stale across **EIGHT** phases (`P2-11`, `P2-9`, `P2-16`, `P2-19`, `P2-20`, `P2-12`, `P2-13`, `P2-14`), every one of them an authorized addition | **not this pass** |
+| `prove:ruling-a` `RAa-4` | The registry pin read **23** against a live **24** — stale since `P2-14`'s authorized `admin.student_updated` | **not this pass** |
+| `prove:hero-15` `M-3a` | ⛔ Asserted *"all FOUR reads"* while a **FIFTH existed it could not see** — `gatedReview` has used `readMaybeRow` since it was written, and the pattern only matched `readRows<` | **pre-existing blind spot** |
+| `prove:artefact-read` `AR-5-11` | `14.50px` cited for screen `11` but unused — the calendar moved into the shared `components/ui/month-calendar.tsx` in the type-gap pass and took the value with it | **this session, earlier** |
+
+> ### ⛔ **A PIN IS ONLY AS EXACT AS THE PATTERN THAT DEFINES ITS POPULATION.**
+>
+> `M-3a` is the sharpest of the four and the one that generalises. An **exact
+> list** feels stronger than a count — and it is, **within the population the
+> pattern can see**. Outside it, the exactness is decoration: **five reads
+> existed, four were named, and the leg reported completeness across every commit
+> since it was written.**
+>
+> ▶ Same family as `prove:projection-columns`' stated limit and `PR-5`'s **named**
+> unchecked sites: **what a checker cannot see must be said out loud, because a
+> green run cannot say it.**
+
+⚠️ **AND THE FOUR STALE GATES SHARE ONE CAUSE, NOT FOUR.** Every one sits outside
+the `portal-p2-N` naming. ▶ **The sweep must be the whole set, always** — *"I
+re-ran the suites I expected to be affected, so I found the suites I expected to
+be affected."*
+
+### 54.4 ⚠️ AND THE NEW GUARD DID NOT COVER ITS OWN CLASS EVERYWHERE
+
+`prove:rpc-arguments` caught all four **TypeScript** callers. It did **not** catch
+the **22 positional SQL call sites** inside `prove-p2-11/12/13/14`, which broke
+the instant the signatures changed and took **every leg in those four suites**
+down with them — each transaction errored, so each leg reported an empty value
+rather than a failure.
+
+⛔ **THE GUARD SCANS `server/**` FOR `.rpc()` SITES. SQL CALLS IN TEST HARNESSES
+ARE A DIFFERENT POPULATION AND IT SAYS SO** (`PR-5`, `PR-6`). The full sweep is
+what caught them — the same instrument as §54.3, one paragraph later.
+
+### 54.5 The guardian precedence rule, both directions
+
+`scripts/tests/portal/prove-c14-guardian.mjs` + `prove:c14-guardian`, discharging
+the Operator's two required assertions.
+
+| Leg | What it establishes | Executed? |
+|---|---|---|
+| `CG-1` | Both sources exist and **DISAGREE** — constructed, because no fixture student has a link *and* a conflicting free-text guardian, so a leg over live data would be **vacuously true** | ✅ |
+| `CG-2` | The construction **left no residue** | ✅ |
+| `CG-3` | `admin_update_student` **REFUSES** (`guardian_locked`) once a link exists | ✅ |
+| `CG-4` | **and the column is unchanged** — a function can return a refusal *after* writing | ✅ |
+| `CG-5` | **CONTROL** — the same learner saves normally with `null` guardians, so the lock is **narrow**, not "linked learners are uneditable" | ✅ |
+| `CG-6` | The shipped projection applies the ruled precedence, inverted form absent | ⚠️ **SOURCE ASSERTION** |
+| `CG-9`/`9b`/`9c` | **All four rebuilt signatures execute past every gate** as real management, and the three new columns are **actually written** on create *and* on edit | ✅ |
+| `CG-10` | `CG-9` left nothing behind | ✅ |
+
+⚠️ **`CG-6b` STATES ITS LIMIT RATHER THAN IMPLYING IT.** The read rule is
+TypeScript and this project's suites have no TS runner. ▶ What makes the gap
+tolerable is that the **write** half IS executed: with the columns unwritable
+after a link, **the read rule has no divergence left to hide**.
+
+⚠️ **`CG-9b` EXISTS BECAUSE A SIGNATURE CAN ACCEPT THREE PARAMETERS AND DISCARD
+THEM** — and every structural assertion in the migration would still call that a
+pass.
+
+### 54.6 A consequence the three named screens did not contain
+
+Screen `22` Edit Student was **not** in the Operator's list, and `C-14` reaches it
+anyway: `admin_update_student` takes the three fields as a **FULL REPLACEMENT**,
+like the name and the class set. ⛔ **A form rendering them blank would send
+`null` and WIPE A CHILD'S DATE OF BIRTH ON A RENAME** — silently, reporting
+success. Built and pinned by `CG-8`.
+
+The guardian pair on that screen is **not rendered at all** once a parent is
+linked — **not disabled**. `P2-10`'s rule: DISABLED means *"not yet"*, ABSENT
+means *"not a thing"*, and a linked guardian has **no writable counterpart**.
+
+### 54.7 What the screens now build, and what stays refused
+
+| Screen | Built | ⛔ Still refused, and each for its own reason |
+|---|---|---|
+| `20` Register Student | date of birth, guardian name, guardian contact | gender (unratified vocabulary) · student ID (column + index + **minting rule**) · photo (`C-15`) · guardian email + home address (screen `21` owns the guardian's identity) |
+| `21` Create Parent | phone | relationship (unratified vocabulary; and `parent_role` is **decoy register entry 1**) · the `Send email invite` switch (a control offering a choice between two identical outcomes) |
+| `24` Add Trainer | phone | role (`GC-11` — `Assistant Trainer` is **unpersistable**) · employee ID · photo · assign classes (`A-016`: assignment is SESSION-level) |
+| `22` Edit Student | date of birth, guardian pair (pre-link only) | gender · student ID · photo · guardian email + home address |
+
+⚠️ **EVERY ON-PAGE OMISSION NOTE WAS NARROWED IN THE SAME PASS** (§12.12). A page
+still stating *"this system holds no date of birth"* beside a working
+date-of-birth field is a **stale note on a live screen**, which is worse than no
+note.
+
+⚠️ **AND FOUR RATCHETS WERE RE-PINNED POSITIVELY, NOT RELAXED.** `PA-10`,
+`PN-Eb` and their siblings now **REQUIRE** `phone` to be present and optional. ▶
+A ruling that adds a field must make the gate fail if the field is later
+**removed**, or the ratchet only ever catches additions.
+
+### 54.8 ⚠️ ONE CHECK WAS READING A SUPERSEDED SUBJECT
+
+`prove:portal-p2-12`'s `PM-E` scanned **its own phase's migration body** for
+prohibited field names. `20260816230000` **dropped and recreated**
+`admin_create_student`, so that body describes **a function that no longer
+exists** — and the leg would have passed over it for the rest of the project's
+life. ▶ Now reads `pg_get_functiondef` from the **live catalogue**.
+
+⛔ **SAME SHAPE AS THE STALE `database.types.ts` AND THE 38-ROW LEDGER: an
+authoritative artefact that something kept consulting after its subject moved.**
+
+### 54.9 §12.14 — the count reaches **sixteen**
+
+Six more this pass, **all in one operation shape**: writing a message string into
+a **JS template literal** through a shell heredoc. Backticks closed the literal
+(4×), and `\s` / `\t` lost a backslash level (2×).
+
+▶ **THE DURABLE FIX IS NOT MORE CARE, IT IS A DIFFERENT DESTINATION.** Prose
+emphasis in a `check()` message uses **plain quotes, never backticks**, and any
+line needing a regex escape is written with the **Edit tool**, which involves no
+shell at all. ⚠️ The rule stands as amended: **there is no size below which it
+lapses, and the test is destination, not length.**

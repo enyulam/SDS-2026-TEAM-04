@@ -198,6 +198,26 @@ export const RPC_MIGRATIONS = [
    * the suite reaches both bodies, the audit emissions and the hash chain.
    */
   { migration: "20260816200000_portal_p2_14_admin_update_student.sql", suite: "prove-p2-14-edit-student.mjs" },
+  /*
+   * `C-14` WRITE PATH — four functions DROPPED and recreated with wider
+   * parameter lists (2026-08-16).
+   *
+   * ⚠️ IT PAIRS TO FOUR SUITES' WORTH OF CALLERS, and the pairing names the
+   * one that exercises the RULED behaviour: `prove-c14-guardian.mjs` calls
+   * `admin_update_student` as a real management caller and asserts BOTH
+   * directions of the guardian precedence rule. The other three functions are
+   * called by `prove-p2-11/12/13`, which were REWRITTEN in the same pass —
+   * their positional SQL calls carried the OLD ARITY and broke the moment the
+   * signatures changed.
+   *
+   * ⛔ THAT BREAKAGE IS THE POINT AND IT WAS NOT CAUGHT BY THE NEW
+   *   `prove:rpc-arguments` GATE. That gate scans `server/**` for `.rpc()`
+   *   call sites; these are POSITIONAL SQL calls inside test suites, a
+   *   population it does not see. ▶ The full-sweep run caught them instead,
+   *   which is why the sweep is every suite and not the ones expected to be
+   *   affected (plan §48.1).
+   */
+  { migration: "20260816230000_portal_c14_write_path.sql", suite: "prove-c14-guardian.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

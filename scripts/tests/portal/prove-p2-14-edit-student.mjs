@@ -115,24 +115,24 @@ SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
 CREATE TEMP TABLE pinned AS SELECT s.id FROM public.students s WHERE s.is_active ORDER BY s.full_name LIMIT 1;
 SELECT 'RENAME<' || r.o_reason || '|' || r.o_name_changed::text || '|' || r.o_added || '|' || r.o_removed || '>'
   FROM public.admin_update_student((SELECT id FROM pinned), 'Renamed', 'Learner',
-       ARRAY(SELECT e.class_module_id FROM public.enrolments e WHERE e.student_id=(SELECT id FROM pinned) AND e.is_active)) r;
+       ARRAY(SELECT e.class_module_id FROM public.enrolments e WHERE e.student_id=(SELECT id FROM pinned) AND e.is_active), NULL, NULL, NULL) r;
 SELECT 'NOOP<' || r.o_reason || '|' || r.o_name_changed::text || '|' || r.o_added || '|' || r.o_removed || '>'
   FROM public.admin_update_student((SELECT id FROM pinned), 'Renamed', 'Learner',
-       ARRAY(SELECT e.class_module_id FROM public.enrolments e WHERE e.student_id=(SELECT id FROM pinned) AND e.is_active)) r;
+       ARRAY(SELECT e.class_module_id FROM public.enrolments e WHERE e.student_id=(SELECT id FROM pinned) AND e.is_active), NULL, NULL, NULL) r;
 RESET ROLE;
 SELECT 'AFTER_NOOP<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_updated';
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
 SELECT 'MOVE<' || r.o_reason || '|' || r.o_added || '|' || r.o_removed || '>'
   FROM public.admin_update_student((SELECT id FROM pinned), 'Renamed', 'Learner',
-       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 2)) r;
+       ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 2), NULL, NULL, NULL) r;
 SELECT 'WITHDRAW<' || r.o_reason || '|' || r.o_removed || '>'
   FROM public.admin_withdraw_student((SELECT id FROM pinned)) r;
 SELECT 'R_NOCLASS<' || (SELECT o_reason FROM public.admin_update_student(
-    (SELECT s.id FROM public.students s WHERE s.is_active ORDER BY s.full_name DESC LIMIT 1),'A','B',ARRAY[]::uuid[])) || '>';
+    (SELECT s.id FROM public.students s WHERE s.is_active ORDER BY s.full_name DESC LIMIT 1),'A','B',ARRAY[]::uuid[], NULL, NULL, NULL)) || '>';
 SELECT 'R_UNKNOWN<' || (SELECT o_reason FROM public.admin_withdraw_student('00000000-0000-4000-8000-000000000000')) || '>';
 SELECT 'R_WITHDRAWN<' || (SELECT o_reason FROM public.admin_update_student((SELECT id FROM pinned),'A','B',
-    ARRAY(SELECT cm.id FROM public.class_modules cm LIMIT 1))) || '>';
+    ARRAY(SELECT cm.id FROM public.class_modules cm LIMIT 1), NULL, NULL, NULL)) || '>';
 RESET ROLE;
 SELECT 'DEACTIVATED<' || (SELECT (NOT s.is_active AND s.deactivated_at IS NOT NULL)::text FROM public.students s WHERE s.id=(SELECT id FROM pinned)) || '>';
 SELECT 'STILL_EXISTS<' || (SELECT pg_catalog.count(*) FROM public.students s WHERE s.id=(SELECT id FROM pinned)) || '>';
@@ -220,7 +220,7 @@ const asTrainer = psql(`
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
-SELECT 'U<' || (SELECT o_reason FROM public.admin_update_student((SELECT s.id FROM public.students s WHERE s.is_active LIMIT 1),'X','Y',ARRAY(SELECT cm.id FROM public.class_modules cm LIMIT 1))) || '>';
+SELECT 'U<' || (SELECT o_reason FROM public.admin_update_student((SELECT s.id FROM public.students s WHERE s.is_active LIMIT 1),'X','Y',ARRAY(SELECT cm.id FROM public.class_modules cm LIMIT 1), NULL, NULL, NULL)) || '>';
 SELECT 'W<' || (SELECT o_reason FROM public.admin_withdraw_student((SELECT s.id FROM public.students s WHERE s.is_active LIMIT 1))) || '>';
 RESET ROLE;
 SELECT 'T_EVENTS<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_updated';
@@ -255,12 +255,12 @@ check(
   "PE-7b ✅ …and what replaces it is TRUE AND CARRIES NO DEADLINE: nothing is deleted, and re-enrolment is a management action. ▶ A statement about the data, not a promise about time",
 );
 check(
-  !/date of birth|gender|guardian|home address|photo|ID 20\d\d-/i.test(rendered),
-  "PE-7c ⛔ and the seven no-column fields are ABSENT from the form, not disabled",
+  !/gender|home address|photo|ID 20dd-/i.test(rendered),
+  "PE-7c ⛔ and the FOUR remaining no-column fields are ABSENT from the form, not disabled — ⚠️ narrowed from seven by C-14. Date of birth and the guardian pair are now BUILT, and the guardian pair additionally DISAPPEARS once a parent account is linked, which is a different thing from being refused",
 );
 check(
-  /date of birth, gender, student reference number/i.test(screen),
-  "PE-7d …with all seven named ON THE PAGE (§12.12)",
+  /gender, a student reference number, a photograph/i.test(screen),
+  "PE-7d …with all FOUR named ON THE PAGE (§12.12)",
 );
 
 // ---------------------------------------------------------------------

@@ -114,13 +114,13 @@ SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
 SELECT 'CREATED<' || r.o_reason || '|' || r.o_links || '|' || (r.o_membership_id IS NOT NULL)::text
     || '|' || (r.o_invitation_id IS NOT NULL)::text || '>'
   FROM public.admin_create_parent('Walkthrough Guardian','wg.p213@example.test',
-       ARRAY(SELECT s.id FROM public.students s ORDER BY s.full_name LIMIT 2)) r;
-SELECT 'R_NOSTU<' || (SELECT o_reason FROM public.admin_create_parent('A','a@b.co', ARRAY[]::uuid[])) || '>';
-SELECT 'R_UNKNOWN<' || (SELECT o_reason FROM public.admin_create_parent('A','a@b.co', ARRAY['00000000-0000-4000-8000-000000000000'::uuid])) || '>';
-SELECT 'R_BADMAIL<' || (SELECT o_reason FROM public.admin_create_parent('A','nope', ARRAY[]::uuid[])) || '>';
+       ARRAY(SELECT s.id FROM public.students s ORDER BY s.full_name LIMIT 2), NULL) r;
+SELECT 'R_NOSTU<' || (SELECT o_reason FROM public.admin_create_parent('A','a@b.co', ARRAY[]::uuid[], NULL)) || '>';
+SELECT 'R_UNKNOWN<' || (SELECT o_reason FROM public.admin_create_parent('A','a@b.co', ARRAY['00000000-0000-4000-8000-000000000000'::uuid], NULL)) || '>';
+SELECT 'R_BADMAIL<' || (SELECT o_reason FROM public.admin_create_parent('A','nope', ARRAY[]::uuid[], NULL)) || '>';
 SELECT 'R_INUSE<' || (SELECT o_reason FROM public.admin_create_parent('A',
     (SELECT a.normalized_email FROM public.accounts a WHERE a.status='active' ORDER BY a.created_at LIMIT 1),
-    ARRAY(SELECT s.id FROM public.students s LIMIT 1))) || '>';
+    ARRAY(SELECT s.id FROM public.students s LIMIT 1), NULL)) || '>';
 RESET ROLE;
 SELECT 'PENDING<' || (SELECT m.status::text FROM public.centre_memberships m ORDER BY m.created_at DESC LIMIT 1) || '>';
 SELECT 'AUTHNULL<' || (SELECT (a.auth_user_id IS NULL)::text FROM public.accounts a ORDER BY a.created_at DESC LIMIT 1) || '>';
@@ -170,7 +170,7 @@ BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'T<' || r.o_reason || '|' || (r.o_membership_id IS NULL)::text || '>'
-  FROM public.admin_create_parent('No','no@x.co', ARRAY(SELECT s.id FROM public.students s LIMIT 1)) r;
+  FROM public.admin_create_parent('No','no@x.co', ARRAY(SELECT s.id FROM public.students s LIMIT 1), NULL) r;
 RESET ROLE;
 SELECT 'T_ACCOUNTS<' || pg_catalog.count(*) || '>' FROM public.accounts;
 ROLLBACK;`);
@@ -202,8 +202,11 @@ const contracts = read("lib/frontend/contracts/physical-test.ts");
 const dtoStart = contracts.indexOf("export type CreateParentInput");
 const dtoBody = contracts.slice(dtoStart, contracts.indexOf("\n};", dtoStart));
 check(
-  dtoStart > 0 && dtoBody.length < 400 && !/relationship|phone|sendInvite/i.test(stripComments(dtoBody)),
-  `PN-Eb ⛔ LAYER 2, THE DTO: three fields, over ${dtoBody.length} bounded chars`,
+  dtoStart > 0 &&
+    dtoBody.length < 900 &&
+    /phone?: string | null/.test(dtoBody) &&
+    !/relationship|sendInvite/i.test(stripComments(dtoBody)),
+  `PN-Eb ⛔ LAYER 2, THE DTO: four fields, over ${dtoBody.length} bounded chars — phone IS present and OPTIONAL (C-14 ruled it onto accounts); relationship and the invite switch are NOT. ▶ Asserted POSITIVELY, so a later REMOVAL of phone fails here too, not only a later addition`,
 );
 const screen = read("features/management/management-create-parent-screen.tsx");
 const stripped = stripComments(screen);
@@ -215,12 +218,12 @@ check(
   `PN-Ec ⚠️ the on-page disclosure is SET ASIDE before the prohibition is scanned (${disclosures.length}) — the \`PT19-6\` defect`,
 );
 check(
-  !/Relationship|Send email invite|\bPhone\b|Search Trainer|\bJunior\b|ID 20\d\d-/.test(rendered),
-  "PN-Ed ⛔ LAYER 3, THE SCREEN: no Relationship, no Phone, no `Send email invite` switch, no `Search Trainer` caption, no `Junior`, no `ID 2025-113`",
+  !/Relationship|Send email invite|Search Trainer|Junior|ID 20dd-/.test(rendered),
+  "PN-Ed ⛔ LAYER 3, THE SCREEN: no Relationship, no Send-email-invite switch, no Search Trainer caption, no Junior, no ID 2025-113 — ⚠️ Phone is REMOVED from this prohibition by C-14 and is now BUILT; every other refusal stands",
 );
 check(
-  /relationship to the child and a phone number/i.test(screen) && /no email is\s*\n?\s*sent/i.test(screen),
-  "PN-Ee …and all three omissions are named ON THE PAGE (§12.12)",
+  /relationship to the child/i.test(screen) && /no email is\s*\n?\s*sent/i.test(screen),
+  "PN-Ee …and both REMAINING omissions are named ON THE PAGE (§12.12) — ⚠️ narrowed from three by C-14: a page still saying the system holds no phone number, beside a working phone field, is a stale note on a live screen",
 );
 
 // ---------------------------------------------------------------------

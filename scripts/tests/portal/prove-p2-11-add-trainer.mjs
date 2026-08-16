@@ -96,8 +96,8 @@ check(
 // PA-2 -- EXACTLY ONE FUNCTION AND ONE GRANT WERE ADDED.
 // ---------------------------------------------------------------------
 const grants = psql(`
-SELECT 'AUTH=' || pg_catalog.has_function_privilege('authenticated','public.admin_create_trainer(text, text)','EXECUTE')::text
-    || ' ANON=' || pg_catalog.has_function_privilege('anon','public.admin_create_trainer(text, text)','EXECUTE')::text;`);
+SELECT 'AUTH=' || pg_catalog.has_function_privilege('authenticated','public.admin_create_trainer(text, text, text)','EXECUTE')::text
+    || ' ANON=' || pg_catalog.has_function_privilege('anon','public.admin_create_trainer(text, text, text)','EXECUTE')::text;`);
 check(
   grants === "AUTH=true ANON=false",
   `PA-2   the ONE grant, and only the one: ${grants} -- an anon EXECUTE would let an unauthenticated caller create staff`,
@@ -234,7 +234,7 @@ BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
 SELECT 'R1=' || coalesce(o_reason,'(null)') || ' M1=' || (o_membership_id IS NOT NULL)::text || ' I1=' || (o_invitation_id IS NOT NULL)::text
-  FROM public.admin_create_trainer('Pa6 Probe', 'PA6.Probe@Example.Test');
+  FROM public.admin_create_trainer('Pa6 Probe', 'PA6.Probe@Example.Test', NULL);
 SELECT 'ACCOUNTS=' || pg_catalog.count(*) FROM public.accounts a
  WHERE a.normalized_email = 'pa6.probe@example.test' AND a.auth_user_id IS NULL;
 SELECT 'MEMBERSHIP=' || coalesce(pg_catalog.string_agg(m.role::text || '/' || m.status::text, ','), '(none)')
@@ -292,15 +292,15 @@ BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'TRAINER=' || coalesce(o_reason,'(null)') || '/' || (o_membership_id IS NULL)::text
-  FROM public.admin_create_trainer('Should Not Exist', 'pa7.trainer@example.test');
+  FROM public.admin_create_trainer('Should Not Exist', 'pa7.trainer@example.test', NULL);
 SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
 SELECT 'DUP=' || coalesce(t.o_reason,'(null)')
   FROM (SELECT a.normalized_email AS e FROM public.accounts a WHERE a.status='active' LIMIT 1) s
-  CROSS JOIN LATERAL public.admin_create_trainer('Duplicate Probe', s.e) t;
+  CROSS JOIN LATERAL public.admin_create_trainer('Duplicate Probe', s.e, NULL) t;
 SELECT 'BADMAIL=' || coalesce(o_reason,'(null)')
-  FROM public.admin_create_trainer('Bad Mail', 'not-an-address');
+  FROM public.admin_create_trainer('Bad Mail', 'not-an-address', NULL);
 SELECT 'NONAME=' || coalesce(o_reason,'(null)')
-  FROM public.admin_create_trainer('   ', 'pa7.noname@example.test');
+  FROM public.admin_create_trainer('   ', 'pa7.noname@example.test', NULL);
 RESET ROLE;
 SELECT 'RESIDUE=' || pg_catalog.count(*) FROM public.accounts a
  WHERE a.normalized_email LIKE 'pa7.%@example.test';
@@ -376,8 +376,15 @@ const input = contracts.slice(
   contracts.indexOf("export type TrainerInvitationOutcomeDto"),
 );
 check(
-  input.length > 40 && !/role|phone|employee|photo|avatar|classIds/i.test(input),
-  `PA-10  ⛔ THE INPUT TYPE CARRIES THREE FIELDS AND NO FOURTH (${input.length} chars): no role (GC-11 — \`Assistant Trainer\` is not in the enum, so it is UNPERSISTABLE), no phone, no employee id (⚠️ NO COLUMN EXISTS — the one open Operator decision here), no photo (C-15 adjacent), no class ids (A-016 — assignment is SESSION-level)`,
+/*
+ * ⚠️ THE RATCHET MOVED 3 -> 4 BY RULING, AND IT IS ASSERTED POSITIVELY.
+ * `phone` is not merely allowed through the old negative pattern — it is
+ * REQUIRED to be present and optional. ▶ A ruling that adds a field must make
+ * the gate fail if the field is later REMOVED, or the ratchet only ever
+ * catches additions and silently permits a regression.
+ */
+  input.length > 40 && /phone?: string | null/.test(input) && !/role|employee|photo|avatar|classIds/i.test(input),
+  `PA-10  ⛔ THE INPUT TYPE CARRIES FOUR FIELDS AND NO FIFTH (${input.length} chars): phone IS present and OPTIONAL — ✅ C-14 ruled it onto "accounts", closing the one open Operator decision this suite used to name. ⛔ Still refused: no role (GC-11 — "Assistant Trainer" is not in the enum, so it is UNPERSISTABLE), no employee id (a column, a unique index AND a minting rule), no photo (C-15 adjacent), no class ids (A-016 — assignment is SESSION-level)`,
 );
 const outcome = contracts.slice(
   contracts.indexOf("export type TrainerInvitationOutcomeDto"),
