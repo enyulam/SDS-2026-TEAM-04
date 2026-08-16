@@ -6349,3 +6349,82 @@ question** if a later phase needs it.
 ledger, so `supabase migration up` tries to re-apply them and dies on assertions that were true at
 their own HEAD. ⛔ **Not repaired** — `supabase migration repair` is migration bookkeeping and its own
 decision, and `supabase db reset` is prohibited outright. **Operator decision.**
+
+## §52 — ⛔ **R-1 APPLICATIONS BY `psql` BYPASS THE CLI LEDGER. RECONCILE IN THE SAME PASS.**
+
+*(Operator instruction, 2026-08-16: **"record the cause: R-1 applications by psql bypass the CLI
+ledger. Every future R-1 application must reconcile the ledger in the same pass, or this recurs
+silently — which it did, eight times, unnoticed."**)*
+
+### THE STANDING RULE
+
+> ⛔ **A MIGRATION APPLIED BY `docker exec … psql -f` IS NOT RECORDED IN
+> `supabase_migrations.schema_migrations`.** The CLI writes that table; `psql` does not know it
+> exists. ▶ **Every R-1 application must reconcile the ledger in the same pass** — apply, then record
+> — or the file and the database agree while the *history* silently diverges.
+
+⚠️ **IT RECURRED EIGHT TIMES WITHOUT ANYONE NOTICING, AND THAT IS THE POINT.** Nothing in this
+project reads the ledger: every census assertion, every suite and every gate measures the
+**catalogue**. The database was right, every proof was green, and the divergence was invisible to all
+of them. ▶ **A record nothing reads is a record that rots in silence** — the same shape as the stale
+`database.types.ts`, one layer over.
+
+### WHAT WAS MEASURED (2026-08-16), NOT ASSUMED
+
+**38 ledger rows against 46 files. Eight absent, and ⛔ ZERO ORPHANS** — no ledger row lacks a file,
+so nothing was recorded that did not happen. The eight:
+
+| Version | File | Declared objects, all CONFIRMED PRESENT in the catalogue |
+|---|---|---|
+| `20260816090000` | `p2_16_improved_dimension` | `competency_score` · `report_management_student_trend` · `report_class_improved_dimension` |
+| `20260816093000` | `p2_16_improved_dimension_fix` | `report_class_improved_dimension` |
+| `20260816120000` | `p2_19_trainer_reports` | `report_list_trainer_reports` |
+| `20260816140000` | `p2_20_trainer_students` | `report_list_trainer_students` |
+| `20260816160000` | `p2_12_admin_create_student` | `admin_create_student` · 2 registry strings |
+| `20260816180000` | `p2_13_admin_create_parent` | `admin_create_parent` · 3 registry strings |
+| `20260816200000` | `p2_14_admin_update_student` | `audit_action_registry` · `admin_update_student` · `admin_withdraw_student` · registry **24** |
+| `20260816220000` | `c14_guardian_dob_phone` | 4 columns |
+
+⛔ **Confirmed by EFFECT, never by reading the file.** A file saying `CREATE FUNCTION f` is not
+evidence `f` exists — that is precisely what a ledger is for.
+
+### §52.1 — the detector's two defects, and one of them is `§42` a third time
+
+The first run of the diagnostic reported a **false GAP** and a **partial pass**:
+
+1. ⛔ **It flagged `admin.student_withdrawn` as missing** — a string migration `20260816200000` names
+   **only to assert it is ABSENT** (`IF audit_action_registry() @> ARRAY['admin.student_withdrawn']
+   THEN RAISE`). ▶ **The detector read a PROHIBITION as a DECLARATION.** ⚠️ This is `PC16-8d`'s
+   family in a **third medium**: after a proof scanning a document that must describe what it
+   forbids, and a migration *comment*, now a migration's own **negative assertion in executable
+   SQL** — which comment-stripping cannot reach and a quoted-literal heuristic cannot distinguish.
+   ▶ **Verified directly instead:** registry **24**, `admin.student_updated` **present**,
+   `admin.student_withdrawn` **absent**, both functions present — **exactly the ruled state.**
+2. ⚠️ **It derived 2 of the 4 new columns** and still printed `APPLIED`, because the regex took only
+   the first `ADD COLUMN` of a multi-column `ALTER`. ▶ **A check that under-samples its evidence
+   reports a pass about less than it claims to have measured** — `PS-8`'s defect inverted.
+
+### §52.2 — what is actually broken, stated more narrowly than the worst case
+
+⚠️ **The recovery-from-empty path appears INTACT, and saying otherwise would overstate it.** Every
+registry assertion across the 46 files is **monotonic in sequence** — `19 → 19 → 21 → 23 → 23 → 24` —
+so each is true at its own point in a from-empty replay. ▶ **What is broken is INCREMENTAL
+application:** `supabase migration up` re-runs the eight against a database where their effects
+already exist, and dies on assertions that were true at their own HEAD and are not true now.
+
+⛔ **Still worth fixing, and not merely bookkeeping:** every future CLI migration, `db diff`, and any
+history reconciliation runs through that table. **A recovery path that is only *probably* intact and
+cannot be exercised is not a recovery path.**
+
+### §52.3 — the cost of repairing, measured
+
+`supabase migration repair --status applied <version> --local`, eight times.
+
+- ✅ **It writes ledger rows only.** No DDL, no DML on any application table, no function replaced.
+- ⚠️ **`statements` will be NULL on the repaired rows** — and that is **already normal here**:
+  measured, **34 of 38** existing rows carry `statements` and **35 of 38** carry `name`, so four rows
+  predate this and the column is nullable by design.
+- ⛔ **The real risk is what repair does NOT do: it marks a version applied WITHOUT VERIFYING IT.**
+  Had any of the eight been *partially* applied, repair would freeze that gap permanently and remove
+  the only signal. ▶ **That is why diagnosis came first, and it is the reason to keep that order every
+  time.**
