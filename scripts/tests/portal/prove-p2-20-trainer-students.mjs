@@ -81,7 +81,7 @@ SELECT 'T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || ' E=' || (SELECT pg_catalog.count(DISTINCT t.typname) FROM pg_catalog.pg_type t JOIN pg_catalog.pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public' AND t.typtype='e')
     || ' P=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_policies WHERE schemaname='public')
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1));`);
-check(census === "T=30 E=12 P=30 R=23", `PT20-1c census UNMOVED, registry included: ${census}`);
+check(census === "T=30 E=12 P=30 R=24", `PT20-1c census UNMOVED, registry included: ${census}`);
 
 // ---------------------------------------------------------------------
 // ⛔ PT20-2 -- SECURITY POSTURE, FROM THE CATALOGUE.

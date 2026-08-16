@@ -150,6 +150,12 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/management/students/create-parent-account", { role: "management", label: "Students" }],
   /*
+   * `P2-14` -- screen `22` Edit Student, a child of the DYNAMIC student
+   * route. Same reasoning: `Students` is not `exact`, so a two-deep child
+   * still resolves to the one item. Measured, not assumed.
+   */
+  ["/management/students/[studentId]/edit", { role: "management", label: "Students" }],
+  /*
    * `P2-15` -- screen `15` Lesson Statistics, a DEEP child of Classes.
    * ⚠️ `Classes` already dropped `exact` at `P2-2`, so no rail change was
    * needed here -- VERIFIED rather than assumed, because `C2C-002` has now

@@ -192,6 +192,12 @@ export const RPC_MIGRATIONS = [
    * hash chain, as a real management caller.
    */
   { migration: "20260816180000_portal_p2_13_admin_create_parent.sql", suite: "prove-p2-13-create-parent.mjs" },
+  /*
+   * `P2-14` — the edit and withdrawal paths, and the AUTHORIZED registry
+   * extension 23 -> 24. ⚠️ Its apply-time legs exercise the refusal path only;
+   * the suite reaches both bodies, the audit emissions and the hash chain.
+   */
+  { migration: "20260816200000_portal_p2_14_admin_update_student.sql", suite: "prove-p2-14-edit-student.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

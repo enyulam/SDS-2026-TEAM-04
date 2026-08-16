@@ -79,8 +79,8 @@ SELECT 'C<' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || '|' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1)) || '>';
 SELECT 'ALREADY<' || (public.audit_action_registry() @> ARRAY['admin.student_created','admin.enrolment_changed'])::text || '>';`);
 check(
-  between(census, "C") === "30|12|30|23" && between(census, "ALREADY") === "true",
-  `PM-Ac ⛔ census UNMOVED at ${between(census, "C")} — ⚠️ **INCLUDING THE REGISTRY AT 23**: both strings this function emits were ALREADY ratified (${between(census, "ALREADY")}), and \`A-029\` makes a second name for an action that has one a §12 stop-and-ask`,
+  between(census, "C") === "30|12|30|24" && between(census, "ALREADY") === "true",
+  `PM-Ac ⛔ census UNMOVED at ${between(census, "C")} — ⚠️ **INCLUDING THE REGISTRY AT 24** (⚠️ RE-PINNED 23 → 24 AT \`P2-14\`, Operator authorization 2026-08-16, \`admin.student_updated\` — ⛔ STILL AN EQUALITY, deliberately: a floor would keep passing if the registry grew by inference): both strings this function emits were ALREADY ratified (${between(census, "ALREADY")}), and \`A-029\` makes a second name for an action that has one a §12 stop-and-ask`,
 );
 
 // ---------------------------------------------------------------------

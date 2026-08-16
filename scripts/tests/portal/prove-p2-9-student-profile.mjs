@@ -223,7 +223,7 @@ SELECT 'T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || ' P=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_policies WHERE schemaname='public')
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1));`);
 check(
-  census === "T=30 E=12 P=30 R=23",
+  census === "T=30 E=12 P=30 R=24",
   `PS-5   census UNMOVED: ${census} — the batch authorization is READ FUNCTIONS ONLY: no table, column, enum, policy, client table grant or audit string`,
 );
 

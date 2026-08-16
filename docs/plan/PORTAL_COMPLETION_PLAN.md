@@ -5974,3 +5974,141 @@ that fired on their own compliance were loud and were fixed within the hour, whi
 direction — the same confusion **passing** — is the one nothing announces. ▶ **Two independent
 instances of one principle on one day: the failure mode worth engineering against is never the one
 that shouts.**
+
+### §47.1 — ⚠️ **A FOURTH INSTANCE, PRODUCED BY THE REPAIR ITSELF — AND THE RULE GENERALIZES BEYOND SHELLS**
+
+*(Measured 2026-08-16, immediately after §47 was written. **Process only.**)*
+
+The `P2-14` registry move `23 → 24` turned five suites red — the ratchet working, since each had
+asserted *"the registry did not move"* and it had. The re-pin was written as a Node script using
+`readFileSync`/`writeFileSync` (§12.14-compliant: **no shell string, no `node -e`**), and it still
+produced the same class of fault:
+
+```js
+const NOTE = "⚠️ RE-PINNED 23 → 24 AT `P2-14` (…, `admin.student_updated`).";   // ⛔ backticks
+s = s.replace("⚠️ INCLUDING THE AUDIT REGISTRY AT 23", `… ${NOTE} …`);          // ⛔ into a template literal
+```
+
+The note landed **inside a JavaScript template literal** in two suites, terminating it. Both files
+became parse errors; `prove:portal-p2-12` and `prove:portal-p2-19` exited **1**.
+
+| # | Form | Failure | Signal |
+|---|---|---|---|
+| 4 | note containing backticks inserted into a **JS template literal**, by a compliant Node writer | parse error | ⚠️ **LOUD** — nothing ran |
+
+> ### ⛔ **§12.14 NAMES THE SHELL, BUT THE DEFECT IS *INSERTION INTO A QUOTED CONTEXT WITHOUT ESCAPING FOR THAT CONTEXT*.**
+>
+> Avoiding the shell removed one delivery mechanism, not the fault. ▶ **Whenever text is injected
+> into a quoted region — a shell word, a template literal, a heredoc, a SQL dollar-quoted body — the
+> injected text must be escaped for THAT context**, and a constant reused across several call sites
+> is escaped for **none** of them.
+
+⚠️ **AND THE INSTANCE-3 LESSON HELD IN REVERSE, WHICH IS THE ONLY REASON THIS COST NOTHING.** Four of
+the six suites were re-pinned by the same script and came back green; the two that broke broke
+**loudly**, and were caught by re-running **by exit code** rather than by reading output — the §12
+rule *a gate is read from its exit code, never from its output*. ▶ A silent variant of this same
+insertion — one whose backticks happened to land in a comment or an ordinary string — would have
+re-pinned the number and left a **mangled message asserting the wrong authorization**, which is §44's
+defect with a governance citation attached.
+
+⚠️ **A FIFTH, SAME-HOUR INSTANCE OF THE *NAMING* HALF, RECORDED FOR HONESTY.** The first re-run
+after the repair used `npm run test:portal-p2-N`; the real scripts are `prove:portal-p2-N`. **All six
+reported `<1>`** — npm's exit code for an unknown script, indistinguishable at a glance from six
+failing suites. ▶ **It failed in the safe direction** (a wrong name cannot manufacture a green), and
+it is the same principle as `AR-1b`'s derived subject: **a gate must be pinned to a target proven to
+exist, or its verdict is about the harness rather than the code.** The corrected run gave
+`9<0> 12<0> 13<0> 14<0> 19<0> 20<0>`.
+
+## §48 — `P2-12`, `P2-13`, `P2-14`: the three management write screens, **BUILT** (2026-08-16)
+
+*(One phase per screen, each delivered complete before the next began. All three under the
+`P2-9 → P2-16` batch authorization for read-side schema **plus** — for `P2-12`/`P2-13`/`P2-14` — the
+Operator's explicit per-phase write-path authorizations, `C-7` shape.)*
+
+| Phase | Screen | Route | Functions added | Grants added | Registry |
+|---|---|---|---|---|---|
+| `P2-12` | `20` Register Student | `/management/students/register` | `admin_create_student(text,text,uuid[])` | 1 × `EXECUTE … TO authenticated` | ⛔ **UNMOVED at 23** |
+| `P2-13` | `21` Create Parent Account | `/management/students/create-parent-account` | `admin_create_parent(text,text,uuid[])` | 1 × `EXECUTE … TO authenticated` | ⛔ **UNMOVED at 23** |
+| `P2-14` | `22` Edit Student | `/management/students/[studentId]/edit` | `admin_update_student(uuid,text,text,uuid[])` · `admin_withdraw_student(uuid)` | 2 × `EXECUTE … TO authenticated` | ⚠️ **23 → 24**, `admin.student_updated` |
+
+**The list, not a count** — every object the three phases added:
+
+- **Functions (4):** `public.admin_create_student(text, text, uuid[])` ·
+  `public.admin_create_parent(text, text, uuid[])` ·
+  `public.admin_update_student(uuid, text, text, uuid[])` ·
+  `public.admin_withdraw_student(uuid)`. All four `plpgsql`, `VOLATILE`, `SECURITY DEFINER`,
+  `search_path = ''`.
+- **Grants (4):** one `GRANT EXECUTE … TO authenticated` per function. **No table grant, no policy,
+  no column, no enum, no table.**
+- **Audit strings (1):** `admin.student_updated`, at the single declaration site in
+  `public.audit_action_registry()`. `P2-12` and `P2-13` added **none** — both reuse strings ratified
+  earlier, because `A-029` makes a second name for an action that already has one a §12 stop-and-ask.
+
+### ⛔ The `P2-12` open sub-question, resolved: **withdrawal SHARES `admin.student_updated`**
+
+`admin.student_withdrawn` was **considered and NOT minted**. A withdrawal sets `is_active = false` on
+a learner row — it is a **state change on the student record**, which is exactly what
+`admin.student_updated` names. ▶ Minting a second string would have encoded **which UI control was
+pressed**, not which governed action occurred, and `A-029` registers **actions**. Assertion `PO-1`
+enforces both halves: the string is present **and** no second string appeared.
+⚠️ **No 30-day promise appears anywhere** in the migration, the module, the screen or the suite — the
+frame's retention copy is a `REGISTERED-OMISSION`, not a behaviour, and nothing in this phase implies
+it.
+
+### `PO-6` — the non-vacuity leg the Operator required
+
+The chain-verification assertion asserts `ok` **and** `events_checked >= 100` in the same statement.
+▶ A chain verifier over **zero** events returns `ok` truthfully and proves nothing; pinning the
+floor is what makes the green mean *the chain was walked*. Measured at apply time: **164 events**.
+
+### Two findings kept from the `P2-14` verification, rather than tidied away
+
+1. ⚠️ **The probe renamed a SECOND child.** The verification re-selected its subject with
+   `ORDER BY full_name LIMIT 1` **after** the rename had already changed `full_name` — so the second
+   call landed on a different learner. ▶ **A probe that re-derives its subject from a value it just
+   mutated has no subject.** Fixed by pinning the id into a `TEMP TABLE` before the first call.
+   *(Same family as `PT20-3c`, §43.1: the apparatus is evidence-generating and is subject to every
+   rule evidence is.)*
+2. ⚠️ **`PE-3d` went red for the RIGHT reason and the finding was KEPT.** It expected `no_classes`
+   and got `unknown_student`, because the probe ran **after** the withdrawal and the edit path's
+   `AND s.is_active` gate fires first. The function was correct; the probe's ordering was not. The
+   probe moved to an active learner and the accidental discovery — *a withdrawn learner is
+   unreachable by the edit path, gate order proven* — was **kept as `PE-3e`** rather than discarded
+   as a test bug.
+
+## §49 — ⛔ `AR-4-21`: THE FRACTIONAL-VALUE WALL, THIRD INSTANCE — AND THE FIRST WITH **ZERO**
+
+*(Measured 2026-08-16 at the `P2-12`/`P2-13`/`P2-14` gate run. **Escalation, nothing changed.** The
+rule question was reserved to the Operator at `P2-8` (`AR-4-17`) and is unchanged; this records a
+third instance that arrives through a different door and carries stronger evidence.)*
+
+`AR-4` demands **≥6 distinct and ≥2 FRACTIONAL** cited values, on the sound ground that a session
+cannot guess `13.50px`. Screen `21` cites **7 distinct, 0 fractional**, where `AR-4-14` and
+`AR-4-17` each carry **1**.
+
+⚠️ **MEASURED BEFORE ESCALATING, because *"the frame has none"* would have been the easy answer and
+is FALSE.** The `.html` carries **38 distinct fractional values**. Where they live is the finding:
+
+| Value | Count | Where it lives |
+|---|---|---|
+| `1.67px` · `0.83px` · `2.50px` · `5.83px` · `11.67px` | 16 · 15 · 13 · 10 · 7 | ⛔ **inside 20×20 icon glyph constructions** — absolutely-positioned divs forming an icon |
+| `13.50px` | 7 | ⛔ a genuine **font-size**, and all seven are the **shared sidebar rail's labels** (`Dashboard` … `Logout`) |
+
+> ### ⛔ **EVERY FRACTIONAL VALUE IN THIS FRAME BELONGS TO A SHARED CONTROL.**
+>
+> Satisfying `AR-4-21` would require one of exactly two things, and **both are refused**:
+> **(a)** restyling a shared control so a check goes green — already refused at `AR-5-20`, where the
+> resolution was *"cite less, never restyle a shared control"*; or **(b)** citing values the
+> component does not use — which `AR-5` would immediately fail, and which would be **fabrication** if
+> it did not.
+
+▶ **This is stronger evidence than the first two instances.** One fractional value reads as a
+near-miss — a phase that cited a little thinly. **Zero, with the cause measured to a shared control,
+shows the wall is a structural property of certain frames**: a screen composed of shared primitives
+over an integer-gridded form has no fractional geometry of its own to cite, however carefully its
+`.html` was read.
+
+⚠️ **AND THE PHASE'S OWN REPORT HAD ALREADY GOT THIS WRONG.** The `BUILD_NOTES` entry written
+minutes earlier said *"exits 1 on the two ruled `KNOWN-RED`s only"* — **carried forward from the
+previous entry rather than measured**, which is precisely the §15.8.1 defect. **The gate caught it;
+the sentence did not.** Corrected in the same pass (§12.11).

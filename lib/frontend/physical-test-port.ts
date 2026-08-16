@@ -33,6 +33,9 @@ import type {
   TrainerStudentsDto,
   RegisterStudentInput,
   CreateParentInput,
+  UpdateStudentInput,
+  UpdateStudentOutcomeDto,
+  WithdrawStudentOutcomeDto,
   CreateParentOutcomeDto,
   RegisterStudentOutcomeDto,
   ManagementTrainerListDto,
@@ -266,6 +269,12 @@ export interface PhysicalTestPort {
 
   /** `P2-13` — screen `21`. A GOVERNED WRITE: account + membership + profile + invitation + links. */
   createParentAccount(input: CreateParentInput): Promise<UiActionResult<CreateParentOutcomeDto>>;
+
+  /** `P2-14` — screen `22`. A GOVERNED WRITE: name and enrolment changes, one transaction. */
+  updateStudent(input: UpdateStudentInput): Promise<UiActionResult<UpdateStudentOutcomeDto>>;
+
+  /** `P2-14` — screen `22`. ⛔ Deactivates; NEVER deletes, and promises no window. */
+  withdrawStudent(studentId: string): Promise<UiActionResult<WithdrawStudentOutcomeDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

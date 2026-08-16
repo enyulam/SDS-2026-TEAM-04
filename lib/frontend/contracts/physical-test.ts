@@ -574,6 +574,33 @@ export type CreateParentOutcomeDto = {
   readonly reason: string;
 };
 
+
+/**
+ * `P2-14` — screen `22` Edit Student.
+ * ⛔ THE SAME THREE FIELDS AS REGISTRATION, plus the id. No DOB, gender,
+ * student code, guardian field or photo — none has a column.
+ */
+export type UpdateStudentInput = {
+  readonly studentId: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly classModuleIds: readonly string[];
+};
+
+export type UpdateStudentOutcomeDto = {
+  /** `saved`. ⛔ A refusal never arrives here — it arrives as a failure. */
+  readonly reason: string;
+  readonly added: number;
+  readonly removed: number;
+  readonly nameChanged: boolean;
+};
+
+export type WithdrawStudentOutcomeDto = {
+  /** `withdrawn`. */
+  readonly reason: string;
+  readonly removed: number;
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;

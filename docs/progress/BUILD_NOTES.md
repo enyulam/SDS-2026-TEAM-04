@@ -10500,3 +10500,131 @@ case. Executed as a real trainer past both gates: **13 rows across 3 modules, 10
 **Position: 16 of 24 Part 2 phases complete.** Remaining: `P2-12`/`P2-13`/`P2-14` (write-path, all
 three authorized), `P2-21`/`P2-22`/`P2-23` (read-side, batch covers), `P2-18` (awaiting the
 `G-3`/`D-4` scope answer), `P2-24` (**DO NOT BUILD**, `C-11`).
+
+## 2026-08-16 — `P2-12` · `P2-13` · `P2-14`: the three management write screens (branch `develop`)
+
+**Scope.** One phase per screen, each delivered complete before the next began, under the Operator's
+explicit per-phase write-path authorizations (`C-7` shape) rather than the `P2-9 → P2-16` read-side
+batch. Screens `20` Register Student, `21` Create Parent Account, `22` Edit Student.
+
+### Schema — the list, not a count
+
+| Phase | Function | Grant | Registry |
+|---|---|---|---|
+| `P2-12` | `public.admin_create_student(text, text, uuid[])` | 1 × `EXECUTE … TO authenticated` | ⛔ UNMOVED at 23 |
+| `P2-13` | `public.admin_create_parent(text, text, uuid[])` | 1 × `EXECUTE … TO authenticated` | ⛔ UNMOVED at 23 |
+| `P2-14` | `public.admin_update_student(uuid, text, text, uuid[])` · `public.admin_withdraw_student(uuid)` | 2 × `EXECUTE … TO authenticated` | ⚠️ **23 → 24** |
+
+⛔ **No table, no column, no enum, no policy, no client table grant, across all three.** All four
+functions are `plpgsql`, `VOLATILE`, `SECURITY DEFINER`, `search_path = ''`.
+
+**One new audit string in total: `admin.student_updated`.** `P2-12` and `P2-13` added **none** —
+measured first: the live registry already carried `admin.student_created`, `admin.enrolment_changed`,
+`admin.profile_created`, `invitation.created` and `admin.parent_link_changed`, so ▶ **minting a second
+name for an action that already has one would itself have been an `A-029` §12 stop-and-ask.**
+
+### The `P2-12` open sub-question, decided: the withdrawal SHARES the string
+
+`admin.student_withdrawn` was considered and **not** minted. A withdrawal sets `is_active = false` on
+a learner row — a **state change on the student record**, which is what `admin.student_updated`
+names. ▶ **A second string would have recorded which UI control was pressed, and `A-029` registers
+actions.** `PO-1` asserts both halves: the string is present, **and** no second string appeared.
+
+`A-057` was amended in the `C-4` shape — `Amendment_008.md` §A-057.2a, annotate-never-delete —
+recording all three post-evidence extensions `19 → 21 → 23 → 24`, with a note under the A-057 header
+that *"exactly THREE"* names the **evidence family**, not the registry size (live = 24).
+
+### `PO-6` — the non-vacuity leg
+
+The chain verification asserts `ok` **and** `events_checked >= 100` in one statement. ▶ **A chain
+verifier over zero events returns `ok` truthfully and proves nothing.** Measured at apply time:
+**164 events**.
+
+### Refusals, disclosed on the page rather than in a comment (§12.12)
+
+⛔ **`Date of birth` · `Gender` · `Student ID 2025-113` · `Guardian name/contact/email/address` ·
+`Photo` have NO COLUMN.** ⚠️ The guardian four are **screen `21`'s job** — collecting them on `20`
+would have created a second, unlinked copy of the guardian. ⛔ **`Relationship` on `21` is not built,
+and `parent_role` is the reason:** typed `centre_membership_role` with `CHECK (parent_role =
+'parent')`, a composite-FK component; writing `Mother` there would have shipped a relationship into a
+role column pinned to one literal. It is written as the pinned literal `'parent'` instead. ⛔
+**`Send email invite` is inert by construction** — no email is sent anywhere — and says so. ⛔ **`22`'s
+*"can be undone within 30 days"* appears nowhere:** a retention mechanism (Phase 4), not a column.
+
+### Five defects, four of them in my own apparatus
+
+**1. `PN-3` fired on the migration's OWN COMMENT** — fifth instance of a prohibition scan satisfied by
+its own compliance (plan §42), and the **first inside a migration**. The body is now comment-stripped
+before every prohibition scan, ⚠️ **with a leg asserting the stripper removed something**, because a
+stripper that removes nothing makes every scan below it vacuous.
+
+**2. `permission denied for table audit_events`** in the suite's own `SELECT`. ⛔ **The HINT offering
+`GRANT SELECT ON public.audit_events TO authenticated` is a trap** — taking it would widen a client
+grant to make a test pass. Read after `RESET ROLE` inside the same transaction.
+
+**3. The `P2-14` verification RENAMED A SECOND CHILD.** It re-selected its subject with
+`ORDER BY full_name LIMIT 1` **after** the rename had already changed `full_name`. ▶ **A probe that
+re-derives its subject from a value it just mutated has no subject.** Pinned in a `TEMP TABLE`.
+
+**4. `PE-3d` went red for the right reason and the finding was KEPT.** It expected `no_classes` and
+got `unknown_student`, because it ran **after** the withdrawal and the edit path's `AND s.is_active`
+gate fires first. **The function was correct; the probe's ordering was not.** Moved to an active
+learner, and the accidental discovery — *a withdrawn learner is unreachable by the edit path, gate
+order proven* — was kept as `PE-3e` rather than discarded as a test bug.
+
+**5. The registry move turned five suites red, and the repair broke two of them.** Each suite had
+asserted *"the registry did not move"* and it had — the ratchet working. ⛔ **Re-pinned to 24 as
+EQUALITIES, never relaxed to floors**, since a `>=` would keep passing if the registry grew by
+inference. But the re-pin script's note contained **backticks** and was inserted **inside JavaScript
+template literals**, terminating them: `prove:portal-p2-12` and `prove:portal-p2-19` exited **1**.
+▶ **§12.14 names the shell, but the defect is INSERTION INTO A QUOTED CONTEXT WITHOUT ESCAPING FOR
+THAT CONTEXT** — the script itself used `writeFileSync` and was §12.14-compliant (plan §47.1). It
+failed **loudly**, which is the lucky direction §47 recorded the same day.
+
+⚠️ **And a fifth-instance footnote:** the first re-run used `npm run test:portal-p2-N`; the real
+scripts are `prove:portal-p2-N`. **All six reported `<1>`** — npm's unknown-script code,
+indistinguishable at a glance from six failing suites. It failed safely (a wrong name cannot
+manufacture a green), and it is the same principle as `AR-1b`'s derived subject: **a gate must be
+pinned to a target proven to exist.**
+
+### Verification — every verdict from an exit code
+
+`prove:portal-p2-12` **0** (24 checks) · `prove:portal-p2-13` **0** (23 checks) ·
+`prove:portal-p2-14` **0** · and the four suites the registry move touched, re-run after the repair:
+`prove:portal-p2-9` **0** · `prove:portal-p2-19` **0** · `prove:portal-p2-20` **0**.
+`prove:portal-p2-1` **0**, its route census reading **34** routes from the app tree with `20`, `21`
+and `22` named. Nav census **0**.
+
+~~`prove:artefact-read` exits **1** on the two ruled `KNOWN-RED`s only~~ ⛔ **THAT SENTENCE WAS FALSE
+WHEN I WROTE IT, AND THE GATE CAUGHT IT MINUTES LATER — CORRECTED IN THE SAME PASS (§12.11).** It was
+carried forward from the previous entry rather than measured, which is the exact defect §15.8.1
+exists for. **Measured: `prove:artefact-read` exits 1 on THREE — `AR-4-14`, `AR-4-17` and the NEW
+`AR-4-21`.** `prove:serving-discipline` on `D-10`, pre-existing.
+
+### ⛔ `AR-4-21` — a THIRD instance of the fractional-value wall, and the strongest
+
+`AR-4` requires **≥2 fractional** cited values as its proof-of-reading heuristic: you cannot guess
+`13.50px`. Screen `21` cites **7 distinct values, 0 fractional**, where the two ruled `KNOWN-RED`s
+each carry 1. ⚠️ **Measured before escalating, because "the frame has none" would have been the easy
+and wrong answer:** the `.html` carries **38 distinct fractional values**, so the phase did not
+simply miss them. Where they live is the finding:
+
+- `1.67px` ×16 · `0.83px` ×15 · `2.50px` ×13 · `5.83px` ×10 · `11.67px` ×7 — **all inside 20×20 icon
+  glyph constructions**, absolutely-positioned divs forming an icon. The build uses the shared `Icon`
+  component, so these are correctly not reproduced.
+- `13.50px` ×7 — a genuine **font-size**, and all seven occurrences are the **shared sidebar rail's
+  labels** (`Dashboard`, `Students`, `Trainers`, `Classes`, `Schedule`, `Reports`, `Logout`), not
+  this screen's content.
+
+▶ **Every fractional value in this frame belongs to a shared control.** Satisfying `AR-4-21` would
+require either **restyling a shared control to make a check go green** — refused once already at
+`AR-5-20`, and the wrong direction — or **citing values the component does not use**, which `AR-5`
+would then fail and which would be fabrication if it did not. ⛔ **NOT FIXED, and not fixable without
+the ruling the Operator reserved.** It is stronger evidence than the first two: with **0** fractional
+it shows the wall is a structural property of some frames rather than a near-miss.
+
+⛔ **VISUAL: `NOT-RUN` on all three** — the Operator walks the estate in one pass.
+
+**Position: 19 of 24 Part 2 phases complete.** Remaining: `P2-18` (awaiting the `G-3`/`D-4` scope
+answer), `P2-21` (`09`, `C2C-007` first), `P2-22` (`30`), `P2-23` (`31`, owes `C-12`), `P2-24`
+(**DO NOT BUILD**, `C-11`). ⛔ **STOPPED for the Operator's walk. `P2-21` NOT started.**

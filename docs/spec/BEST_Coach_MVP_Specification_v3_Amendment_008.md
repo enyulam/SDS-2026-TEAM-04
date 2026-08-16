@@ -36,6 +36,13 @@ Specification v3 remains the **authoritative baseline**. Amendment 001 (**A-001 
 
 ## A-057 — Minimal evidence audit-registry extension: ~~exactly two~~ ~~exactly four~~ ✅ **exactly THREE** governed actions *(extended 2026-08-11, `C-4`)*
 
+> ⚠️ **"EXACTLY THREE" IS AND REMAINS TRUE OF THE *EVIDENCE* EXTENSION THIS CLAUSE RATIFIED, AND MUST
+> NOT BE READ AS THE REGISTRY'S SIZE.** The live registry is **24** as of 2026-08-16. Three later
+> Operator rulings extended it outside the evidence family, each in the `C-4` shape — see
+> **§A-057.2a**, added the same day for exactly this reason: a clause that owns a count and does not
+> carry the count's history is how a ratified document comes to disagree with the database it
+> governs.
+
 ### A-057.1 The extension
 
 ~~The Step 7H governed action registry is extended **additively by exactly two strings**:~~ ✅ **EXTENDED 2026-08-11 BY OPERATOR RULING `C-4`** (`FINAL_MVP_PORTAL_DECISIONS.md` §C), under an explicit bounded `CLAUDE.md` §12 authorization issued for that run — **to four strings, then collapsed the same day to THREE** when `evidence.uploaded` and `evidence.attached` were found to be one governed action (`A-057.1a`). The registry is extended **additively by exactly three strings**:
@@ -76,6 +83,46 @@ No application evidence-delete workflow was authorized **when this clause was wr
 ⛔ **THE PROHIBITION RE-ARMS AT THREE.** **The registry must not be extended beyond these three strings** — a fourth evidence action is a fresh `CLAUDE.md` §12 stop-and-ask, not an extension of this clause. **`C-4` is not a standing licence.**
 
 ⚠️ **The Operator's own record of why the arithmetic changed, preserved because it is the reasoning that decides the clause:** the ruling first read *"16 → 18"*, which was **arithmetic from a wrong premise — that `A-057` had not already named two strings**. Corrected to **`16 → 20`**, then **collapsed to `16 → 19`** the same day. ▶ **`evidence.accessed` was the string most at risk from the wrong premise, and it is the one that mattered most: it is the ONLY trace that a short-TTL signed URL to a child's video was minted, for whom, and when.** That is an **audit control**, not bookkeeping — and it carries more weight since **`C-3` removed the scan gate**, leaving access logging as one of the few remaining controls on the media path.
+
+### A-057.2a ✅ THE REGISTRY BEYOND EVIDENCE — LATER OPERATOR RULINGS, RECORDED HERE BECAUSE THIS CLAUSE OWNS THE COUNT
+
+*(Added 2026-08-16 under an explicit bounded Operator instruction — **"Amend `A-057` in the `C-4`
+shape, extend the single declaration site, and prove chain verification accepts it with a
+non-vacuity leg."** **Annotate-never-delete**: nothing above is rewritten.)*
+
+⚠️ **WHY IT IS RECORDED HERE AND NOT ONLY IN A MIGRATION.** `A-057` is the ratified instrument that
+**owns the registry's size**. A phase that extends the registry in SQL and leaves this clause saying
+`16 → 19` produces exactly the stale-restatement defect `CLAUDE.md` records five instances of: the
+ratified document and the live database disagree, and **the document is what the next session reads
+first.**
+
+**The registry has since been extended THREE further times, each by its own explicit Operator ruling
+in the `C-4` shape — string and count STATED IN ADVANCE, approved before the migration was written:**
+
+| Ruling date | Strings added | Registry | Phase |
+|---|---|---|---|
+| 2026-08-13 | `admin.module_updated` · `admin.session_updated` | `19 → 21` | `P2-3` |
+| 2026-08-13/14 | `material.attached` · `material.removed` | `21 → 23` | `P2-6` |
+| **2026-08-16** | **`admin.student_updated`** | **`23 → 24`** | **`P2-14`** |
+
+⛔ **THE 2026-08-16 RULING ADDS EXACTLY ONE STRING, AND THE WITHDRAWAL SHARES IT.** At `P2-12` a
+sub-question was raised and expressly left open — *whether withdraw is that same string or a second
+one*. ▶ **It is the same one.** A withdrawal is a student **state change** (`admin.student_updated`)
+plus one **enrolment change** per class (`admin.enrolment_changed`, ratified since Step 7H), and
+`A-029` counts **ACTIONS**. Minting `admin.student_withdrawn` would be a **second name for something
+already named** — precisely the defect `A-057.1a`'s collapse closed. **`admin.student_withdrawn`
+must not be introduced.**
+
+⛔ **THE PROHIBITION RE-ARMS, AS IT DOES AFTER EVERY EXTENSION.** A further student action is a fresh
+`CLAUDE.md` §12 stop-and-ask. **None of these rulings is a standing licence**, and the pattern —
+raise, state the count in advance, obtain a bounded authorization, extend the **one** declaration
+site — is the mechanism, not a formality.
+
+⚠️ **AND THE COUNT ALONE IS NOT EVIDENCE THE CHAIN SURVIVED.** `P2-14` was required to prove
+verification still accepts the log **with a non-vacuity leg**, because `audit_verify_chain()` over
+**zero events returns `ok = true`** — a green with `events_checked = 0` proves nothing. The
+migration's `PO-6` and the suite's `PE-5a` both assert the **events-checked count** alongside the
+verdict.
 
 ### A-057.3 Denied attempts are never recorded as successes
 

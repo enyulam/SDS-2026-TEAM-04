@@ -34,6 +34,9 @@ import {
   type TrainerStudentsDto,
   type RegisterStudentInput,
   type CreateParentInput,
+  type UpdateStudentInput,
+  type UpdateStudentOutcomeDto,
+  type WithdrawStudentOutcomeDto,
   type CreateParentOutcomeDto,
   type RegisterStudentOutcomeDto,
   type ManagementClassListDto,
@@ -1380,6 +1383,22 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * account, membership, invitation or link exists anywhere.
    */
   async createParentAccount(_input: CreateParentInput): Promise<UiActionResult<CreateParentOutcomeDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /** `P2-14` — screen `22`. ⛔ THE FIXTURE REFUSES. */
+  async updateStudent(_input: UpdateStudentInput): Promise<UiActionResult<UpdateStudentOutcomeDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-14` — screen `22`. ⛔ THE FIXTURE REFUSES, AND A WITHDRAWAL IS THE
+   * WORST THING TO FAKE: a fabricated success would tell an operator a child
+   * is off every roster while they remain on all of them.
+   */
+  async withdrawStudent(_studentId: string): Promise<UiActionResult<WithdrawStudentOutcomeDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

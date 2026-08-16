@@ -52,7 +52,7 @@ claim about what the frame draws or omits rests on the `.png`.
 screen: 21
 pack: Management - Create Parents Account
 component: features/management/management-create-parent-screen.tsx
-html-values: 16px, 12px, 13px, 14px, 20px, 16px, 2px, 3px
+html-values: 16px, 12px, 13px, 14px, 20px, 2px, 3px
 screen-md-quote: Not rating-bearing.
 ```
 

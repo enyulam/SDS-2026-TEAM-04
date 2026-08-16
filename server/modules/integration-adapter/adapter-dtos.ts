@@ -551,6 +551,25 @@ export interface AdapterCreateParentOutcomeDto {
   readonly reason: string;
 }
 
+export interface AdapterUpdateStudentInput {
+  readonly studentId: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly classModuleIds: readonly string[];
+}
+
+export interface AdapterUpdateStudentOutcomeDto {
+  readonly reason: string;
+  readonly added: number;
+  readonly removed: number;
+  readonly nameChanged: boolean;
+}
+
+export interface AdapterWithdrawStudentOutcomeDto {
+  readonly reason: string;
+  readonly removed: number;
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

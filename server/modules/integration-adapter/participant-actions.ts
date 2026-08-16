@@ -138,6 +138,9 @@ import type {
   AdapterTrainerStudentsDto,
   AdapterRegisterStudentInput,
   AdapterCreateParentInput,
+  AdapterUpdateStudentInput,
+  AdapterUpdateStudentOutcomeDto,
+  AdapterWithdrawStudentOutcomeDto,
   AdapterCreateParentOutcomeDto,
   AdapterRegisterStudentOutcomeDto,
   AdapterTrainerInvitationOutcomeDto,
@@ -190,6 +193,7 @@ import { readTrainerDashboardCore } from "@/server/modules/report-workflow/train
 import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
 import { registerStudentCore } from "@/server/modules/identity-access/student-registration";
 import { createParentAccountCore } from "@/server/modules/identity-access/parent-account-creation";
+import { updateStudentCore, withdrawStudentCore } from "@/server/modules/identity-access/student-edit";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2200,4 +2204,28 @@ export async function adapterCreateParentAccount(
       reason: result.reason,
     },
   };
+}
+
+
+/** `P2-14` — screen `22`. ⛔ A governed refusal is `unavailable`, never a success. */
+export async function adapterUpdateStudent(
+  input: AdapterUpdateStudentInput,
+): Promise<ActionResult<AdapterUpdateStudentOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await updateStudentCore(client, input);
+  if (!result.ok) return { outcome: "unavailable" };
+  return {
+    outcome: "success",
+    data: { reason: "saved", added: result.added, removed: result.removed, nameChanged: result.nameChanged },
+  };
+}
+
+/** `P2-14` — screen `22`. ⛔ Deactivates; never deletes. */
+export async function adapterWithdrawStudent(
+  studentId: string,
+): Promise<ActionResult<AdapterWithdrawStudentOutcomeDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await withdrawStudentCore(client, studentId);
+  if (!result.ok) return { outcome: "unavailable" };
+  return { outcome: "success", data: { reason: "withdrawn", removed: result.removed } };
 }

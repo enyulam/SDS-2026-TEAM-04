@@ -76,6 +76,9 @@ import type {
   TrainerStudentsDto,
   RegisterStudentInput,
   CreateParentInput,
+  UpdateStudentInput,
+  UpdateStudentOutcomeDto,
+  WithdrawStudentOutcomeDto,
   CreateParentOutcomeDto,
   RegisterStudentOutcomeDto,
   ManagementTrainerListDto,
@@ -149,6 +152,8 @@ import {
   adapterReadTrainerStudents,
   adapterRegisterStudent,
   adapterCreateParentAccount,
+  adapterUpdateStudent,
+  adapterWithdrawStudent,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -393,6 +398,16 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** `P2-13` — screen `21`. */
     createParentAccount(input: CreateParentInput): Promise<UiActionResult<CreateParentOutcomeDto>> {
       return guard(() => adapterCreateParentAccount(input));
+    },
+
+    /** `P2-14` — screen `22`. */
+    updateStudent(input: UpdateStudentInput): Promise<UiActionResult<UpdateStudentOutcomeDto>> {
+      return guard(() => adapterUpdateStudent(input));
+    },
+
+    /** `P2-14` — screen `22`. */
+    withdrawStudent(studentId: string): Promise<UiActionResult<WithdrawStudentOutcomeDto>> {
+      return guard(() => adapterWithdrawStudent(studentId));
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

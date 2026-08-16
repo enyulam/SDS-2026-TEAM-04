@@ -75,7 +75,7 @@ SELECT 'C<' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || '|' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1)) || '>';
 SELECT 'ALREADY<' || (public.audit_action_registry() @> ARRAY['admin.profile_created','invitation.created','admin.parent_link_changed'])::text || '>';`);
 check(
-  between(census, "C") === "30|12|30|23" && between(census, "ALREADY") === "true",
+  between(census, "C") === "30|12|30|24" && between(census, "ALREADY") === "true",
   `PN-Ac ⛔ census UNMOVED at ${between(census, "C")} — all THREE emitted strings were ALREADY ratified (${between(census, "ALREADY")})`,
 );
 
