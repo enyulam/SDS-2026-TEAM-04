@@ -123,8 +123,9 @@ SELECT 'T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || ' P=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_policies WHERE schemaname='public')
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1));`);
 check(
-  census === "T=30 E=12 P=30 R=23",
-  `PA-3   census UNMOVED: ${census} (expected T=30 E=12 P=30 R=23) -- "Registry unmoved, since both strings exist" was explicit`,
+  // re-pinned 23 -> 24 at P2-14 (Operator authorization, 2026-08-16, admin.student_updated); STILL AN EQUALITY, deliberately
+  census === "T=30 E=12 P=30 R=24",
+  `PA-3   census UNMOVED: ${census} (expected T=30 E=12 P=30 R=24) -- "Registry unmoved, since both strings exist" was explicit`,
 );
 
 // ---------------------------------------------------------------------

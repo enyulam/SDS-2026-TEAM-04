@@ -10589,11 +10589,26 @@ pinned to a target proven to exist.**
 
 ### Verification — every verdict from an exit code
 
-`prove:portal-p2-12` **0** (24 checks) · `prove:portal-p2-13` **0** (23 checks) ·
-`prove:portal-p2-14` **0** · and the four suites the registry move touched, re-run after the repair:
-`prove:portal-p2-9` **0** · `prove:portal-p2-19` **0** · `prove:portal-p2-20` **0**.
-`prove:portal-p2-1` **0**, its route census reading **34** routes from the app tree with `20`, `21`
-and `22` named. Nav census **0**.
+**ALL 24 PORTAL SUITES EXIT 0**, swept individually. `prove:portal-p2-1`'s route census reads **34**
+routes from the app tree with `20`, `21` and `22` named. `tsc` **0** · `lint` **0** · `build` **0** ·
+`prove:no-secrets` **0**. Live census re-measured directly against the dev database:
+**tables 30 · enums 12 · policies 30 · registry 24 · functions 73**. Containers **dev 9 · mvp 0** —
+the demonstration stack was never started or queried.
+
+### ⛔ The registry pin was in NINE suites, and I re-ran FIVE
+
+I identified five suites pinning the census as an equality, re-pinned them, **re-ran those five**, got
+six greens and **reported the set as closed**. The stop sweep then ran **all 24** and found **four
+more red** on the identical cause — `prove:portal-p2-11` (`PA-3`), `p2-15` (`PL-1b`), `p2-16`
+(`PC16-1b`), `p2-17` (`PT17-1b`).
+
+▶ **I re-ran the suites I expected to be affected, so I found the suites I expected to be affected.**
+⚠️ **This is the false-`CLEAN` lesson in a new medium** — *a propagation run is not complete until the
+restatements have been swept for across the tree, not against the list the run was handed.* The list
+being **mine** rather than someone else's is what made it feel like a measurement; it was a
+recollection. **A census equality is a global assertion, so the only sound verification after a census
+move is running every suite** — which cost ninety seconds. Re-pinned as **equalities** again, never
+floors, and the note is **plain ASCII with no backticks** this time (plan §48.1, §47.1).
 
 ~~`prove:artefact-read` exits **1** on the two ruled `KNOWN-RED`s only~~ ⛔ **THAT SENTENCE WAS FALSE
 WHEN I WROTE IT, AND THE GATE CAUGHT IT MINUTES LATER — CORRECTED IN THE SAME PASS (§12.11).** It was

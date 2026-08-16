@@ -6076,6 +6076,34 @@ floor is what makes the green mean *the chain was walked*. Measured at apply tim
    unreachable by the edit path, gate order proven* — was **kept as `PE-3e`** rather than discarded
    as a test bug.
 
+### §48.1 — ⛔ **THE REGISTRY PIN WAS IN NINE SUITES, AND I RE-RAN FIVE**
+
+*(Measured 2026-08-16 at the stop sweep, after the `P2-14` commit was already pushed. **Process
+only.**)*
+
+The registry move `23 → 24` invalidated every suite asserting the census as an equality. I identified
+**five**, re-pinned them, re-ran **those five**, and got six greens — ▶ **and reported the set as
+closed.** The stop sweep then ran **all 24 portal suites** and found **four more red**:
+`prove:portal-p2-11` (`PA-3`), `prove:portal-p2-15` (`PL-1b`), `prove:portal-p2-16` (`PC16-1b`),
+`prove:portal-p2-17` (`PT17-1b`) — the same cause, the same pin, in files I had not thought to look
+at.
+
+> ### ⛔ **I RE-RAN THE SUITES I EXPECTED TO BE AFFECTED, SO I FOUND THE SUITES I EXPECTED TO BE AFFECTED.**
+>
+> ▶ **This is the Operator's own false-`CLEAN` lesson in a new medium:** *a propagation run is not
+> complete until the restatements have been swept for across the tree — not against the list the run
+> was handed.* The list was mine rather than someone else's, which made it feel like a measurement.
+> It was a recollection.
+
+⚠️ **The repair is the sweep, not a better list.** A census equality is a **global** assertion: any
+suite may hold one, so the only sound verification after a census move is **running every suite**,
+by exit code. The four were found in the ~90 seconds that costs.
+
+⛔ **Re-pinned as EQUALITIES again, never floors** — a `>=` would keep passing if the registry grew by
+inference, which is the exact drift the equality exists to catch. ⚠️ **And the note is plain ASCII
+with no backticks this time** (§47.1): escaping is for the context you land in, and these land inside
+`.mjs` source.
+
 ## §49 — ⛔ `AR-4-21`: THE FRACTIONAL-VALUE WALL, THIRD INSTANCE — AND THE FIRST WITH **ZERO**
 
 *(Measured 2026-08-16 at the `P2-12`/`P2-13`/`P2-14` gate run. **Escalation, nothing changed.** The

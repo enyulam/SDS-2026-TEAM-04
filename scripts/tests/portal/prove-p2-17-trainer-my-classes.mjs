@@ -65,7 +65,8 @@ SELECT 'T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables WHERE 
     || ' E=' || (SELECT pg_catalog.count(DISTINCT t.typname) FROM pg_catalog.pg_type t JOIN pg_catalog.pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public' AND t.typtype='e')
     || ' P=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_policies WHERE schemaname='public')
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1));`);
-check(census === "T=30 E=12 P=30 R=23", `PT17-1b census UNMOVED: ${census}`);
+  // re-pinned 23 -> 24 at P2-14 (Operator authorization, 2026-08-16, admin.student_updated); STILL AN EQUALITY, deliberately
+check(census === "T=30 E=12 P=30 R=24", `PT17-1b census UNMOVED: ${census}`);
 
 // ---------------------------------------------------------------------
 // PT17-2 -- ALL THREE LAYERS EXIST AT HEAD, MEASURED (not inherited).
