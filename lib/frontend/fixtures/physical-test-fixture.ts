@@ -32,6 +32,7 @@ import {
   type TrainerMyClassesDto,
   type TrainerDashboardDto,
   type TrainerStudentsDto,
+  type ParentDashboardDto,
   type TrainerReportsDto,
   type RegisterStudentInput,
   type CreateParentInput,
@@ -1376,6 +1377,18 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * has been submitted, or is awaiting them, when no row exists anywhere.
    */
   async readTrainerReports(): Promise<UiActionResult<TrainerReportsDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-22` — screen `30`. ⛔ THE FIXTURE REFUSES. This surface shows a parent
+   * their own child's date of birth, guardian, contact and assigned trainer.
+   * ▶ Invented values there are not a placeholder — they are a fabricated
+   * PERSONAL RECORD about a named child, and an honest `unavailable` is
+   * strictly better than a plausible one.
+   */
+  async readParentDashboard(): Promise<UiActionResult<ParentDashboardDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

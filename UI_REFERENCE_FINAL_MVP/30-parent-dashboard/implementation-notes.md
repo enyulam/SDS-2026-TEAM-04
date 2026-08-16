@@ -260,3 +260,26 @@ current authorization carries. None manufactured, no hosted service contacted. `
 `tsc` 0 · `eslint` 0 · `build` 0 · route census **17** unchanged · emitted-CSS 4/4 · no governed
 surface touched. Full detail: `docs/plan/UI_RECONCILIATION_BATCH_3_ADJUDICATION.md` Phase 11.
 **`Accepted` is Operator-set only and has NOT been set.**
+
+---
+
+## Artefact-read record — `P2-22`, 2026-08-17
+
+Screen `30` was built under the `AR-1b` rule, so it leaves `UNMEASURED` by the
+only exit that list has: being built, never annotated out.
+
+⚠️ **THE PROSE NOTE AND THE FRAME DISAGREE ON ONE ROW, AND THE FRAME WINS
+(§7.4.1).** `Parent - Dashboard.md` states Profile Details displays *"date of
+birth, Parent, contact, Class, assigned Trainer, **Trainer Assistant (TA)**, and
+enrolment date"*. **The `.png` draws no TA row and the `.html` contains
+`Assist` ×0 and `Trainer Assistant` ×0.** ▶ A note-derived build would have added
+a TA field that `A-014` prohibits and §6.2 names — the exact failure §7.4.1 was
+written after.
+
+```artefact-read
+screen: 30
+pack: Parent - Dashboard
+component: features/parent/parent-dashboard-screen.tsx
+html-values: 12.50px, 12px, 11px, 16px, 22px, 18px, 14px, 999px
+screen-md-quote: Not rating-bearing.
+```

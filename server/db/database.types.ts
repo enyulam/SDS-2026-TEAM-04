@@ -1942,6 +1942,12 @@ export type Database = {
         Args: { p_material_id: string }
         Returns: Record<string, unknown>
       }
+      parent_get_child_trainer: {
+        Args: { p_student_id: string }
+        Returns: {
+          trainer_display_name: string
+        }[]
+      }
       report_cancel_draft: {
         Args: { p_expected_lock_version: number; p_report_id: string }
         Returns: Record<string, unknown>

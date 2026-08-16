@@ -31,6 +31,7 @@ import type {
   TrainerMyClassesDto,
   TrainerDashboardDto,
   TrainerStudentsDto,
+  ParentDashboardDto,
   TrainerReportsDto,
   RegisterStudentInput,
   CreateParentInput,
@@ -267,6 +268,9 @@ export interface PhysicalTestPort {
 
   /** `P2-21` — screen `09` Trainer Reports. */
   readTrainerReports(): Promise<UiActionResult<TrainerReportsDto>>;
+
+  /** Screen `30` Parent Dashboard (`P2-22`). Carries no rating — `Q-27`. */
+  readParentDashboard(): Promise<UiActionResult<ParentDashboardDto>>;
 
   /** `P2-12` — screen `20`. A GOVERNED WRITE: student + enrolments + audit, one transaction. */
   registerStudent(input: RegisterStudentInput): Promise<UiActionResult<RegisterStudentOutcomeDto>>;

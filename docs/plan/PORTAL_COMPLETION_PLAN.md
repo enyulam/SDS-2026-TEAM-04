@@ -649,7 +649,7 @@ The scan alternated **`management|MANAGEMENT`** — and **missed `Management`, t
 | **P2-19** | `01` Trainer Dashboard | Trainer landing at `/trainer/dashboard` | P2-17 | `GC-7` — no rating column |
 | **P2-20** | `04` Trainer Students | Trainer student list | P2-17 | `GC-7` |
 | ~~**P2-21**~~ ✅ **BUILT 2026-08-16** | `09` Trainer Reports | ⛔ **`C2C-007` FIXED**, then the frame's table | — | `GC-7`, `GC-8` — **both refused**; §56 |
-| **P2-22** | `30` Parent Dashboard | Profile Details promoted, selector, calendar, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27`; ⛔ **no TA field** (§6.2) |
+| ~~**P2-22**~~ ⏸ **BUILT AND NOT ROUTED — 2026-08-17** | `30` Parent Dashboard | Profile Details promoted, selector, upcoming | P2-5 | ✅ `C-13`; ⛔ `Q-27` held at FOUR layers; ⛔ **no TA field** (§6.2 — and the FRAME agrees; the pack's PROSE NOTE did not, §7.4.1). ⏸ **ONE STOP OPEN: the `/parent` route-compatibility treatment, §57.6** |
 | **P2-23** | `31` Parent Calendar | **Only what §6.1 lists as surviving** | P2-22 | ⛔ **`C-12` — report delivered, ruling owed** |
 | **P2-24** | `28` Term Report | ⛔ **DEFERRED by `C-11` — do not build** | — | ⚠️ **`A-044` noted and unmet, deliberately** |
 
@@ -1166,6 +1166,9 @@ inert treatment was chosen for.
 | ⚠️ **`RENDERED CAPTURE` `NOT-RUN` on every authenticated surface** | `OPEN` | Not closed by any phase unless one runs a capture |
 | ⚠️ **The Phase 8/11 gap** | `OPEN` | Structural consistency is **neither a visual nor a functional acceptance** |
 | ~~⛔ **`09` refuses its canonical route** (`C2C-007`)~~ ✅ **CLOSED 2026-08-16** | ~~`OPEN`, measured~~ ✅ **FIXED at `P2-21`, first thing, as the plan required** | `/trainer/reports` now BRANCHES: `?status=needs_edit` keeps the returned-correction queue, the bare route renders screen `09`. ⚠️ **The alias is PRESERVED, not moved** — two live links still point at it (`PT21-5b`). ⛔ The rail was ALSO retargeted: it read `/trainer/reports?status=needs_edit` / `Returned reports`, **naming the alias as though it were the screen**, so a trainer had no route to `09` at all |
+| ⚠️ **`prove:serving-discipline` — AN OPEN FLAKE WHOSE FIRST OCCURRENCE PRODUCED NO EVIDENCE** | ⛔ **`OPEN`**, opened 2026-08-16 at `P2-21`. **Do not close it and do not chase it now — do not let it drift either** (Operator instruction) | It failed once inside a 214-second `prove:all` sweep and has been **green on every run since**: standalone, in sequence after `prove:ruling-a`, and on the next full sweep. ⛔ **ITS OUTPUT WAS LOST TO §12.16's INSTANCE 4** — the excerpt filter was anchored at column zero and that suite indents its `FAIL` lines, so the red printed with **nothing under it**. ▶ **The one run that mattered produced no evidence, and it is gone permanently.** ⚠️ **CAUSE UNKNOWN — a green run is not a diagnosis** (§18.5's own rule, which withdrew a `LAPSED` call for exactly this reason). ⛔ **IF IT RECURS, CAPTURE EVERYTHING BEFORE ANYTHING ELSE** — full stdout and stderr, `netstat` on `3419`, the surviving process tree — **before re-running, before diagnosing, before touching the port.** ⚠️ **AND IT IS THE SECOND INTERMITTENT ON THIS ONE SUITE**: `D-10` (teardown timing — port `3419` verifiably free, one surviving `node.exe` holding neither `3419` nor `3000`) has been carried since `P2-7` with **no remedy identified**. ▶ **The Operator's reading, recorded because it is the most likely shape: they may be one thing.** This is the only suite in the project that **serves a real Next.js child process and samples its process tree**, so both intermittents sit on the only code path with either property |
+| ✅ **…AND IT RECURRED ON 2026-08-17, WITH EVIDENCE: IT IS `D-10`** | ⛔ **STILL `OPEN` — MERGED, NOT CLOSED** | The captured excerpt names **`D-10 the served process or port 3419 survived teardown`**, and live state immediately after was **no `netstat` entry for 3419 with one surviving `node.exe`** — ▶ the historical `D-10` description **exactly**. **`D-10` is the only leg that has ever failed in this suite**, so the `P2-21` "new flake" was `D-10` all along. ⚠️ **§12.16's INSTANCE 4 DID NOT MERELY COST EVIDENCE — IT MANUFACTURED A PHANTOM SECOND ISSUE**, carried as an unknown for a whole phase when the leg name alone would have identified a defect open since `P2-7`. ⛔ **Neither is closed and neither is being chased**: still a Windows teardown-timing finding with **no remedy identified**, and green on the sweep immediately after. Full record §57.7 |
+| ⚠️ **NAVIGATION DEAD END — a rail item that points at an ALIAS and names the alias as though it were the screen** | ✅ **CLOSED for `09` at `P2-21`, 2026-08-16** · ⛔ **RECORDED AS A CLASS, because the class is what survived** | The trainer rail read `href: "/trainer/reports?status=needs_edit"` / `label: "Returned reports"`. ▶ **A trainer had no route to their own reports list at all** — the canonical route refused itself (`C2C-007`) and the only link to it went to the correction queue instead. ⛔ **IT SURVIVED WEEKS BECAUSE THE LABEL READ PLAUSIBLY** (Operator's framing): *"Returned reports"* is a real surface, it is a trainer's surface, and the item worked — clicking it produced a correct page. **Nothing about the rail looked broken; the screen it should have reached was simply unreachable.** ⚠️ **NO GATE IN THIS PROJECT COULD SEE IT.** `N-2`/`N-3` assert that every route resolves to exactly one active item and that no item is unreachable — **both were satisfied**, because the expectation table had been written to match the defect. `tsc` sees a string; `prove:artefact-read` was not armed for `09`, which sat in `PRE_GATE` **exempt because its canonical ROUTE had shipped**. ▶ **Four independent mechanisms recorded the defect as the intended state.** ⛔ **STANDING TEST for every remaining phase: a rail `href` carrying a QUERY STRING is a candidate dead end** — check that the item's bare canonical route renders the screen the label names, not merely that the item lights up. ✅ Measured across all three rails at `P2-21`: the three remaining `?status=` links are **management** ones pointing at `/management/reports`, whose rail item is already the bare canonical route (`N-1`) |
 | ⚠️ **`A-044` is knowingly unmet for `28`** | **RULED** (`C-11`) | Deliberate. Recorded so it is never read as an oversight |
 | ~~⛔ **`B-P2-3-1` — `T-P44` has been FAILING SINCE PART 1 and had NEVER BEEN RUN**~~ ✅ **CLOSED** | ~~`OPEN` · **Operator decision required**~~ ✅ **RULED 2026-08-13** | `P1-2b`'s `lib/frontend/evidence-upload.ts` imports **both** `lib/supabase/browser.ts` and `lib/supabase/public-config.ts`, which `T-P44` pins as unimported / four-importer-only. **Measured:** both that file and the runner are byte-identical at HEAD, so the failure reproduces at `62ee67b` and is **not** a `P2-3` regression. ⛔ **NOT FIXED** — extending a security guard's allow-list is a §12 stop-and-ask, and *"the guard's premise lapsed under `D-5`"* must be **ruled, not inferred by the session that tripped over it**. Full record in the `P2-3` section. ✅ **RULED AND CLOSED 2026-08-13 — BOUNDED §12 AUTHORIZATION.** The Operator authorized extending the allow-list **for `evidence-upload.ts` SPECIFICALLY, not as a class**, on the ground that **the premise lapsed BY AUTHORIZATION, NOT BY DRIFT**: `T-P44` pinned those modules as unimported when nothing imported them, and `D-5`'s client-direct upload — a bounded **ADR-3 exception** — legitimately does. ⛔ **Any other module importing either one still fails**, proved TWICE: `T-P44c` plants a synthetic module and requires **both detectors to see it and both allow-lists to reject it** while the one authorized module is **admitted**; and a **real file was planted on disk**, measured **exit 1**, and removed, with **exit 0** after. ⚠️ **The control shares the LIVE sets and regexes** — the first draft gave it private copies, which is the very defect its own comment warned about. ▶ **Operator: *"A guard whose premise lapsed still needs a ruling, because 'the premise lapsed' is exactly what someone says when they want the guard out of the way."*** |
 | ⚠️ **No ratified frame draws an inbound control to screen `27`** | **`AWAITING_OPERATOR` — DEFERRED TO `P2-4` BY RULING, 2026-08-13** | `Management - Classes` sends a card to Class Overview; `Management - Class Overview` names **no Edit control at all**. **No affordance was invented on `12`.** `27` is reachable at its canonical route. ~~✅ **OPERATOR RULING: WAIT FOR SCREEN `13`** … ⛔ **If `13` draws no Edit control either, THAT IS A FINDING**~~ ✅ **CLOSED 2026-08-13 BY THE AUTHORIZATION-A REBUILD — THE CONTROL IS BUILT AND WIRED.** ~~THE PREMISE WAS FALSE AND THE FINDING IS WITHDRAWN.~~ **`Edit class` IS in frame `13`'s HEADER CARD**, top-right, beside ASSIGNED TRAINER and ASSISTANT. The *"no inbound affordance"* report was a `grep` over the pack's **prose note**, never a reading of the frame (§12). ▶ **This is `TRUE-DRIFT`, not a design gap**: the control is drawn and simply was not built. The Operator rules the rebuild |
@@ -6429,6 +6432,76 @@ cannot be exercised is not a recovery path.**
   the only signal. ▶ **That is why diagnosis came first, and it is the reason to keep that order every
   time.**
 
+## §12.16 — ⛔ A GATE IS READ FROM ITS **EXIT CODE**, NEVER FROM ITS OUTPUT
+
+*(Operator ruling, 2026-08-16, carried into `CLAUDE.md` §12 verbatim. **Process
+only — no product rule changes.**)*
+
+> ⚠️ **THIS SECTION WAS MISSING UNTIL 2026-08-16, AND `CLAUDE.md` HAD BEEN CITING
+> IT.** `CLAUDE.md:806` closes the exit-code rule with *"Full record:
+> `docs/plan/PORTAL_COMPLETION_PLAN.md` §12.16."* — and **no `§12.16` existed in
+> this file.** The three instances were recorded, but scattered through §47's
+> prose rather than gathered under the heading the standing contract points at.
+> ▶ **A dangling citation in the highest-precedence file is a real defect**: a
+> reader following it finds nothing and concludes the rule has no record.
+> Creating the section repairs the citation **without editing `CLAUDE.md`**,
+> which is a §12 stop-and-ask.
+
+**The rule.** ⛔ **Never decide whether a gate passed by looking at what it
+printed.** Run it, read `$?`. Where output must also be inspected, inspect it **in
+addition to** the exit code, never instead of it.
+
+### The family — four ways a filter has been put between a gate and its signal
+
+| # | Form | How the signal was lost | Direction |
+|---|---|---|---|
+| 1 | `… \| tail -2 && git commit` | a pipeline's exit status is the **last** command's; `tail` succeeded, so `&&` proceeded — over a printed `RESULT: FAIL` | ⛔ **silent false green** |
+| 2 | `… \| sed … \|\| echo "none"` | `sed` always exits 0, so the `\|\|` branch could never fire and an empty result was indistinguishable from a broken command | ⛔ **silent false green** |
+| 3 | `npm run build \| grep -E "Compiled\|error"` | Next.js prints `✓ Compiled successfully` and **then** type-checks; the worker exited **1** several lines later. **The matched phrase was TRUE and the build had FAILED** | ⛔ **silent false green** |
+| 4 | **`prove:all`'s own excerpt filter, `/^FAIL\|NOT-RUN/`** | anchored at column zero against a suite that **indents** its `FAIL` lines | ⚠️ **verdict correct, EVIDENCE lost** |
+
+### ⛔ INSTANCE 4 — THE DEFECT APPEARED INSIDE THE SWEEP THAT EXISTS TO MAKE FAILURES LEGIBLE
+
+*(`P2-21`, 2026-08-16. Recorded at the Operator's instruction: **"the
+evidence-printing pattern failed inside the sweep that exists to make failures
+legible. Anchored at column zero against a suite that indents. Same family, one
+layer in."**)*
+
+`prove:all` reported `⛔ UNEXPECTED FAIL: prove:serving-discipline` **and printed
+nothing beneath it.** That suite prints `  FAIL  D-x` with a two-space indent; the
+excerpt pattern required column zero.
+
+⚠️ **INSTANCE 4 IS DIFFERENT FROM 1–3 IN THE ONE WAY THAT MATTERS, AND SAYING SO
+IS NOT SOFTENING IT.** The first three produced a **false green**. This one
+produced a **correct red with no evidence** — because the sweep already obeys its
+own rule and decides from `run.status`, never from output. ▶ **The rule protected
+the verdict; the same defect one layer in destroyed the diagnosis.**
+
+⛔ **AND THAT IS EXPENSIVE IN ITS OWN WAY.** A red with nothing under it forces the
+reader to re-run a 214-second sweep, or the suite by hand, to learn what the gate
+already knew — and **an empty red is exactly the shape that gets waved through**
+as "probably environmental". It did in fact cost this phase the flake's only
+evidence: the failure has not reproduced since, so **what that suite printed on
+the one run that mattered is gone permanently.**
+
+**Fixed three ways, because each covers a different way the excerpt can be
+empty:**
+
+1. the pattern tolerates leading whitespace and recognises `⛔ FAIL` / `✗`;
+2. **`stderr` is captured** — a suite that dies before printing a single `FAIL`
+   line (an import error, an absent container, a thrown assertion) says
+   everything useful there and nothing at all on stdout;
+3. where **nothing** matches, the excerpt **falls back to the last six non-empty
+   lines**, labelled as such, rather than printing an empty red.
+
+> ### ⛔ **A REPORTING FILTER IS A GATE'S SECOND SIGNAL, AND IT NEEDS THE SAME DISCIPLINE AS THE FIRST.**
+>
+> The verdict answers *did it fail*; the excerpt answers *why*. ▶ **A pattern
+> that can match nothing must say so and fall back — never print silence**, which
+> is indistinguishable from a suite that failed without complaint.
+
+---
+
 ## §12.17 — ⛔ **A CONTROL DERIVED FROM LIVE STATE IS POLLUTED BY THE VERY FAULT IT DETECTS**
 
 *(Operator ruling, 2026-08-16: **"it generalises well past this gate, and every constructed-divergence
@@ -6853,6 +6926,42 @@ real can fall outside that definition.** If the answer is a **pattern**, a
 **prefix**, a **naming convention** or a **hand-maintained list**, the pin is
 bounded by that and **must say so** — the way `PL-6`, `PR-5`, `PR-6` and
 `PC-4` state their limits rather than letting a green imply coverage.
+
+### ✅ THE CLEAREST JUSTIFICATION THIS RULE WILL GET — a **phase-21** change caught by a **phase-1** suite
+
+*(`P2-21`, 2026-08-16. Recorded at the Operator's instruction: **"prove:all
+catching a phase-1 suite from a phase-21 change is the fix earning itself
+immediately — record that, it is the clearest justification the population-problem
+rule will get."**)*
+
+`P2-21` retargeted one trainer rail item. The second half of that change lives in
+**`tests/frontend/portal-navigation-active-state.mjs`**, whose expectation table
+still named `Returned reports` for five trainer routes — and whose `N-3` leg
+additionally found the new `Reports` item **unreachable from any asserted route**.
+
+⛔ **NOTHING ELSE COULD HAVE SEEN IT.** `tsc` passed: a label is a string. `next
+build` passed. `prove:portal-p2-21` passed: it asserts the rail's *new* shape,
+which was correct. **The suite that held the contradiction is `prove:portal-p2-1`
+— a PHASE-ONE suite — reached through `P21a-13`, which spawns the navigation
+runner.**
+
+▶ **Under the old prefix-matched sweep, a `P2-21` phase would have run
+`portal-p2-21` and stopped.** The defect would have shipped, and would have been
+found — if ever — by whoever next touched phase 1.
+
+> ### ⛔ **THE DISTANCE BETWEEN THE CHANGE AND THE GATE IS THE WHOLE ARGUMENT.**
+>
+> Twenty phases separate them. **No naming convention connects a rail rename to a
+> phase-1 suite**, and no plausible one could — the relationship is *this test
+> happens to assert something my change invalidates*, which is not expressible as
+> a prefix. ▶ **A population defined by names can only ever catch what someone
+> already knew to connect.**
+
+⚠️ **AND IT COST 214 SECONDS TO LEARN, ONCE.** The measured price of the whole
+sweep is ~3.5 minutes per phase. **That is the entire cost of the rule**, against
+a defect class that is invisible to every compiler and every phase-scoped proof.
+
+
 ---
 
 ## §55 — `AR-4`'s FRACTIONAL MINIMUM: RETIRED BY RULING, WITH THREE INSTANCES AS EVIDENCE
@@ -7088,3 +7197,228 @@ change is the response; care is not.
 
 ⚠️ **`S3-T1-r` remains the single known-red**, unchanged: fixture vintage, awaiting
 its own bounded authorization (§34).
+
+---
+
+## §57 — `P2-22`: screen `30` Parent Dashboard, **built and NOT ROUTED**
+
+*(2026-08-17. `P2-22` under the standing batch. **One stop is open and it is
+stated at §57.6 — the phase is deliberately incomplete, not finished.**)*
+
+### 57.1 What this phase added, named rather than counted
+
+| | |
+|---|---|
+| **Function** | `public.parent_get_child_trainer(uuid)` |
+| **Grant** | `EXECUTE ON public.parent_get_child_trainer(uuid) TO authenticated` |
+| **Everything else** | ⛔ **none** — no table, column, enum, policy, client table grant, write path or audit string |
+
+Census `T=30 E=12 P=30 R=24` unmoved; **`F=73 → 74`**, moved by exactly the one
+function above.
+
+### 57.2 §12.10 eliminated five of the six `Profile Details` rows
+
+Measured as the fixture parent **before a line was written**:
+
+| Frame row | Source | Reachable? |
+|---|---|---|
+| Date of birth · Guardian · Contact | `students.*` (the `C-14` columns) | ✅ 8 rows under RLS |
+| Class | `class_grades` · `class_modules` | ✅ 3 / 3 |
+| Enrolled | `enrolments.enrolled_at` | ✅ 8 rows |
+| **Trainer** | `class_session_assignments` → `trainer_profiles` | ⛔ **0 / 0** |
+
+▶ **One row of six needed anything.** The function reads
+`class_session_staff_identity()` — the Phase 0A path
+`report_get_canonical_context` already uses — rather than re-joining
+memberships, so there is one source of truth for staff identity rather than two
+free to drift. **`G-5` expressly permits the assigned trainer on a Parent
+surface**, and it already ships to parents on screens `32`/`33`; this makes an
+already-permitted field reachable **without a submitted report**, which is what a
+profile card needs.
+
+⚠️ **THE THREE `C-14` COLUMNS ARE EMPTY ON EVERY FIXTURE ROW** — `dob=0
+guardian=0 contact=0 of=13`. They were added for the management create/update
+paths, so only a learner created since then carries them. `P22-6b` **asserts
+that fixture fact**, so filling one turns the leg red and the next reader learns
+the emptiness was never a defect. Same shape as `P2-21`'s Lesson column.
+
+### 57.3 `Q-27` at four layers, and the strongest one is not mine
+
+| Layer | Assertion |
+|---|---|
+| **1. the database** | `P22-3` — a parent session is refused **both** rating tables with **`permission denied for table`**: a **GRANT-layer** refusal, not an RLS filter returning zero rows. ▶ The nine ratings cannot reach a Parent session even if this application asked for them |
+| **2. the function** | `P22-2b` — result type pinned string-for-string at `TABLE(trainer_display_name text)` |
+| **3. the DTO** | `P22-7` — all nine expected fields present, no rating/level/band/score/mastery/skill field |
+| **4. the page** | `P22-7b`/`c`/`d` — no rating vocabulary, no `This Term's Skills` title, **not one of the nine dimension labels by name**, and no bar/meter/computed-width **shape** |
+
+⚠️ **`P22-7d` REFUSES THE SHAPE AS WELL AS THE VALUES**, because `Q-27` names
+*"rendering empty bars"* and *"collapsing the values while keeping the
+container"* as non-compliance in their own right.
+
+**Profile Details is the first card in the main column** — the promotion `Q-27`
+requires. No blank rectangle, no invented filler card, right-hand column intact.
+
+### 57.4 Four more refusals, and one **agreement** worth recording
+
+`P22-8` proves the frame really draws all seven refused tokens, so none of these
+passes because nobody proposed it:
+
+- **`Parent–Teacher Meeting`** — `GC-13`'s family: a second event entity beside
+  the class session. Upcoming renders **real `class_sessions`** (`A-016`).
+- **`Grade 7 Speaking Assessment`** — a school-year label the model does not hold.
+- **`Junior`** — not a ratified Class Grade (`A-016`, `A-054`).
+- **The notification bell** — notifications are ruled **OUT** (`G-04`). **Absent,
+  not disabled**: `P2-10`'s rule.
+
+⚠️ **AND §7.4.1 EARNED ITSELF AGAIN, ON A LIVE DISAGREEMENT (`P22-8c`).** The
+pack's **prose note** states Profile Details shows *"assigned Trainer, **Trainer
+Assistant (TA)**, and enrolment date"*. The `.png` draws no TA row and the
+`.html` contains **`Assist` ×0**. ▶ **A note-derived build would have added a
+field `A-014` prohibits** — the exact failure §7.4.1 was written after. This is
+**agreement with the frame**, not a refusal of it, which is why it needed
+recording: nothing else would have shown the note was wrong.
+
+### 57.5 ⚠️ SIX LEGS OF MY OWN SUITE WENT RED ON CORRECT CODE
+
+**Every one was a defect in the check, not in the screen** — and four are
+§12.18's *false red on correct code* direction, in one sitting:
+
+| Leg | Why it fired | Repair |
+|---|---|---|
+| `P22-3a` | `stripComments` removes **JavaScript** comments; SQL uses `--`. The migration's own explanation of why it carries no rating stayed in the subject | bounded to the `$$` body with **SQL** comments stripped |
+| `P22-7` | a **guessed** 400-character floor against a declaration measuring **394** | asserts the **nine field names** — which also catches a silently dropped field, as a length never would |
+| `P22-7a` | the disclosure regex required the class attribute to *start* `text-[11px]`; one block reads `mt-4 text-[11px]` | tolerant attribute match |
+| `P22-7d` | `/progress/i` matched **the page title** — the frame's own heading is *"Alicia's Progress"* | names the **shapes** a bar takes |
+| `P22-10a` | fired on the **comment recording the removed helper** | `stripComments` first |
+| `P22-10b` | sliced to end-of-file and swept in the private **row types**, whose `class_module_id` is the column they exist to describe | bounded to the exported DTOs |
+
+⛔ **`P22-10a` IS THE ONE THAT MATTERED, AND IT CAUGHT A REAL DEFECT FIRST.** The
+projection's first draft carried a flat `sessions` array plus
+`sessionsForChild(data, studentId)` — **which ignored its own `studentId` and
+returned everything**. ▶ It would have shown **one child's timetable under
+another child's name**, on a screen whose entire subject is which child you are
+looking at, and the signature read as though it filtered. Sessions are now
+**nested per child**, so the attribution is structural and there is no array to
+hand the wrong child.
+
+### 57.6 ⛔ THE STOP: THE CANONICAL ROUTE IS NOT BUILT
+
+| | |
+|---|---|
+| Canonical route (ratified inventory) | **`/parent/dashboard`** |
+| Where the parent landing lives today | **`/parent`** — `page.tsx` renders the availability card |
+| What the pack proposes | *"Build the canonical `/parent/dashboard` route to node `420:9`; **preserve `/parent` as a redirect**."* |
+
+⛔ **THAT IS A ROUTE-COMPATIBILITY TREATMENT AND `CLAUDE.md` §12 NAMES IT A
+STOP-AND-ASK** — *"execute a route-compatibility treatment (move / redirect /
+alias / replace) without its own authorization"*. It also moves the parent
+portal **home** and the first **rail item's `href` and label**, which is a shared
+control on accepted surfaces.
+
+⚠️ **AND THE TREATMENT IS STRUCTURALLY ENTAILED, WHICH IS WHY IT CANNOT BE
+DEFERRED WHILE SHIPPING THE ROUTE.** Measured against the nav resolver
+(`own = item.exact ? pathname === item.path : ownsPath(item.path)`):
+
+- rail item at `/parent/dashboard` with `exact` → **`/parent` resolves to ZERO
+  active items** and `N-2` reds;
+- rail item at `/parent` **not** exact → `/parent/reports` matches **two** items
+  and `N-2` reds;
+- `owns: ["/parent"]` → the same prefix collision.
+
+▶ **`/parent` must redirect, or the route census cannot be consistent.** That is
+exactly why the ratified inventory records this treatment for screen `30`.
+
+**Three options, stated — none executed:**
+
+1. **Build at `/parent`** (where the landing already is). No treatment, no
+   shared-control change, and a **recorded divergence** from the ratified
+   canonical route.
+2. **`/parent/dashboard` canonical + `/parent` redirects**, per the pack and on
+   the ratified **`R-B1`** precedent — the identical treatment `/trainer` and
+   `/management` already carry.
+3. **Option 2 plus re-pointing the rail** (`href` → `/parent/dashboard`, label
+   `Home` → `Overview`, nav census and expectations).
+
+⚠️ **My recommendation is option 3.** `/parent` and `/management` were the same
+question and `P2-7` ruled option 2 there; the rail is coupled here because
+leaving it at `Home` → `/parent` while the screen lives elsewhere manufactures
+**precisely the navigation dead end `P2-21` just closed** — an item naming one
+surface and reaching another. ▶ **But the pack proposing a treatment is not the
+treatment being authorized**, which is the distinction §12 draws and the reason
+`P2-7` stopped.
+
+⛔ **`P22-9` ASSERTS THE ABSENCE**, so this suite cannot go quietly green on a
+screen nobody can reach — **and it reds the moment the route ships**, which is
+the reminder to delete it.
+
+### 57.7 ⚠️ THE `prove:serving-discipline` FLAKE RECURRED — AND IT IS **`D-10`**
+
+**Captured before anything else, per the standing instruction.** The full
+excerpt, which the previous occurrence could not produce:
+
+```
+FAIL  D-10 the served process or port 3419 survived teardown
+FAIL  D-10  Process hygiene — the served tree is gone and the port is released
+```
+
+Live state immediately after: **no `netstat` entry for `3419`**, one surviving
+`node.exe`. ▶ **That matches the historical `D-10` description exactly** —
+*"port `3419` verifiably free (`HTTP 000`, no `netstat` entry) with one surviving
+`node.exe` holding neither `3419` nor `3000`."*
+
+> ### ⛔ **THE TWO INTERMITTENTS ARE ONE THING, AND THE `P2-21` "NEW FLAKE" WAS `D-10` ALL ALONG.**
+>
+> The Operator's reading — *"that is now two intermittents on the same suite —
+> this and `D-10`. Worth noticing they may be one thing"* — is supported by the
+> only evidence either occurrence produced. **`D-10` is the sole leg that has
+> ever failed in this suite.**
+>
+> ⚠️ **SO §12.16's INSTANCE 4 DID NOT MERELY COST EVIDENCE — IT MANUFACTURED A
+> PHANTOM SECOND ISSUE.** An empty red was recorded as an unknown new flake for a
+> whole phase, when the leg name alone would have identified a defect already
+> carried since `P2-7`. ▶ **A reporting filter that drops evidence does not just
+> slow diagnosis; it invents work.**
+
+⛔ **STILL NOT CLOSED, AND STILL NOT CHASED.** `D-10` remains a Windows
+teardown-timing finding with **no remedy identified**, carried since `P2-7`, and
+green on the sweep immediately after this one. The open-item row is updated to
+record the merge rather than to close either.
+
+### 57.8 ⚠️ THE RATCHET CAUGHT THE VERY NEXT PHASE
+
+`PT21-1a` — written **one phase earlier**, with the function count in the pin
+*"because a read-side function is exactly what this phase was PRE-AUTHORIZED to
+add and therefore exactly what an unmeasured phase could add without noticing"*
+— went red at `F=74`. ▶ **It was not a hypothetical.** Re-pinned `73 → 74` with
+the attribution written down, and `prove:hero-2`'s global ratchet with it.
+
+**Twelve suites went red on this phase's one function, and every one was the
+ratchet working**: nine on the migration↔suite **pairing register**, two on the
+function count, one on stale generated types.
+
+### 57.9 ⚠️ EIGHTEENTH §12.14 INSTANCE
+
+A backtick inside a `node -e` shell string, re-pinning `PT21-1a`. **Loud** — a
+`SyntaxError` before anything was written. Repaired with the **Edit tool**, which
+is the adopted destination for any line needing an escape. ⛔ Also worth
+recording: the failed `node -e` short-circuited an `&&` chain whose next command
+was `… > server/db/database.types.ts`, so the generated-types file **was never
+truncated**. That was luck, not design — and the subsequent regeneration was
+written **to scratch first, verified to contain the new function, and only then
+installed.**
+
+### 57.10 Gates
+
+| Gate | Verdict |
+|---|---|
+| `tsc --noEmit` | ✅ **0** |
+| `next build` | ✅ **0** |
+| `supabase migration up` | ✅ ledger **48/48**, 5 in-transaction assertions incl. `P22T-4`, which **EXECUTES** the body |
+| `prove:portal-p2-22` | ✅ **32 PASS · 0 FAIL** |
+| `prove:artefact-read` | ✅ **89 PASS · 0 FAIL** |
+| `prove:types-current` | ✅ regenerated and matching |
+| **`prove:all`** | ✅ **66 PASS · 1 known-red · 0 NOT-RUN · exit 0** (185s) |
+| VISUAL acceptance | ⛔ **`NOT-RUN`** |
+| `RENDERED` proof | ⛔ **`NOT-RUN`** — and it **cannot** run for screen `30` until the route exists |
+
+⚠️ **`S3-T1-r` remains the single known-red**, unchanged.

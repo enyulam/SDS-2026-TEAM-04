@@ -180,6 +180,11 @@ export const RPC_MIGRATIONS = [
    */
   { migration: "20260816140000_portal_p2_20_trainer_students.sql", suite: "prove-p2-20-trainer-students.mjs" },
   /*
+   * ⚠️ `P2-21` DECLARED NO FUNCTION AND THEREFORE HAS NO ENTRY HERE — the
+   * register pairs MIGRATIONS to suites, and that phase shipped none.
+   */
+  { migration: "20260817090000_portal_p2_22_parent_child_trainer.sql", suite: "prove-p2-22-parent-dashboard.mjs" },
+  /*
    * P2-12 — the first governed WRITE of Part 2 that adds no audit string.
    * Its apply-time leg exercises the REFUSAL path only (not_permitted at gate
    * 1); the suite is the only leg that reaches the inserts, the two audit

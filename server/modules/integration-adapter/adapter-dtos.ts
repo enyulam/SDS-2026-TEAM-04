@@ -573,6 +573,42 @@ export interface AdapterTrainerReportsDto {
   readonly total: number;
 }
 
+export interface AdapterParentUpcomingSessionDto {
+  readonly sessionId: string;
+  readonly sessionDate: string;
+  readonly lessonNumber: number | null;
+  readonly lessonTitle: string | null;
+}
+
+export interface AdapterParentChildDto {
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classLabel: string | null;
+  readonly dateOfBirth: string | null;
+  readonly guardianName: string | null;
+  readonly guardianContact: string | null;
+  readonly enrolledAt: string | null;
+  readonly trainerDisplayName: string | null;
+  readonly sessions: readonly AdapterParentUpcomingSessionDto[];
+}
+
+/**
+ * Screen `30` Parent Dashboard — `P2-22`.
+ *
+ * ⛔ `Q-27` IS HELD IN THIS TYPE. The frame draws nine B.E.S.T dimensions with
+ * rating bars; the ruling makes the COMPLETE card absent and states it as a
+ * DATA boundary — the nine ratings must not reach a Parent-facing DTO,
+ * projection, RPC result, server action or client payload. ▶ There is no field
+ * here a rating could occupy, which is a stronger refusal than a component
+ * choosing not to render one.
+ *
+ * ⚠️ Every nullable field means NOT RECORDED (hero `0B`) and is rendered by
+ * OMITTING its row. Never a dash, never "TBC", never a fabricated value.
+ */
+export interface AdapterParentDashboardDto {
+  readonly children: readonly AdapterParentChildDto[];
+}
+
 export interface AdapterRegisterStudentInput {
   readonly firstName: string;
   readonly lastName: string;

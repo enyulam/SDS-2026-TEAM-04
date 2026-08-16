@@ -10888,3 +10888,108 @@ is a genuine child.
 **Next: `P2-22` (`30` Parent Dashboard) under the batch** — `C-13` applies, `Q-27`
 is absolute, and the `This Term's Skills` card is `DO_NOT_IMPLEMENT` in full with
 Profile Details promoting into the vacated space.
+
+---
+
+## 2026-08-17 — `P2-22`: screen `30` Parent Dashboard, built and **not routed**
+
+**Branch** `develop` · **HEAD in** `e79b0e6` · **HEAD out** *(this commit)* ·
+**worktree** main tree only · **ledger** 47 → **48**.
+
+### Scope
+
+`P2-22` under the standing batch. Screen `30` built through every layer; **the
+canonical route is deliberately not built** and that stop is stated at plan
+§57.6.
+
+### Schema — named as a list
+
+- **function** `public.parent_get_child_trainer(uuid)`
+- **grant** `EXECUTE ON public.parent_get_child_trainer(uuid) TO authenticated`
+- nothing else. Census `T=30 E=12 P=30 R=24` unmoved, `F=73 → 74`.
+
+Five of the frame's six `Profile Details` rows needed **nothing** — measured
+before writing. Only the Trainer row was unreachable (`class_session_assignments`
+0, `trainer_profiles` 0 as the fixture parent). The function reuses
+`class_session_staff_identity()` rather than re-joining memberships.
+
+### Files
+
+**New:** `supabase/migrations/20260817090000_portal_p2_22_parent_child_trainer.sql` ·
+`server/modules/parent-view/parent-dashboard-projections.ts` ·
+`features/parent/parent-dashboard-screen.tsx` ·
+`scripts/tests/portal/prove-p2-22-parent-dashboard.mjs`
+
+**Modified:** `server/db/database.types.ts` (regenerated) ·
+`server/modules/integration-adapter/adapter-dtos.ts` ·
+`server/modules/integration-adapter/participant-actions.ts` ·
+`lib/frontend/contracts/physical-test.ts` · `lib/frontend/physical-test-port.ts` ·
+`lib/frontend/adapters/real-participant-port.ts` ·
+`lib/frontend/fixtures/physical-test-fixture.ts` ·
+`scripts/tests/portal/rpc-call-rule.mjs` (pair registered) ·
+`scripts/tests/portal/prove-p2-21-trainer-reports.mjs` (ratchet re-pinned) ·
+`scripts/tests/hero/prove-2-parent-report-list.sql` (global ratchet re-pinned) ·
+`scripts/tests/portal/artefact-read-rule.mjs` ·
+`UI_REFERENCE_FINAL_MVP/30-parent-dashboard/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` · `package.json`
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | **0** |
+| `next build` | **0** |
+| `supabase migration up` | ledger **48/48**; five in-transaction assertions, `P22T-4` **executes** the body |
+| `prove:portal-p2-22` | **32 PASS · 0 FAIL** |
+| `prove:artefact-read` | **89 PASS · 0 FAIL** |
+| `prove:types-current` | regenerated, matching |
+| `prove:all` | **66 PASS · 1 known-red · 0 NOT-RUN · exit 0** (185s) |
+| VISUAL / `RENDERED` | **`NOT-RUN`**; RENDERED cannot run until the route exists |
+
+### Findings
+
+1. **The `prove:serving-discipline` flake recurred and it is `D-10`.** Captured
+   before anything else, per the standing instruction. The excerpt names
+   `D-10 the served process or port 3419 survived teardown`; live state
+   immediately after was no `netstat` entry for 3419 with one surviving
+   `node.exe` — the historical `D-10` description exactly. **`D-10` is the only
+   leg that has ever failed in this suite**, so the `P2-21` "new flake" was
+   `D-10` all along. ▶ §12.16's instance 4 did not merely cost evidence, it
+   **manufactured a phantom second issue** carried for a whole phase. Neither is
+   closed and neither is being chased.
+
+2. **The `PT21-1a` ratchet caught the very next phase.** Written one phase
+   earlier with the function count in the pin *because a read-side function is
+   exactly what the batch pre-authorizes*. Twelve suites went red on this
+   phase's one function — nine on the pairing register, two on the function
+   count, one on stale generated types — and every one was the ratchet working.
+
+3. **Six legs of my own suite went red on correct code**, four of them §12.18's
+   false-red direction: SQL comments stripped as JavaScript; a guessed 400-char
+   floor against a 394-char declaration; a class-attribute anchor missing an
+   `mt-4` prefix; `/progress/i` matching the frame's own page title; a scan
+   firing on the comment that records a removed helper; a slice reaching
+   end-of-file into private row types. All six repaired in the check.
+
+4. **One of those legs caught a real defect first.** The projection's first draft
+   carried `sessionsForChild(data, studentId)` that **ignored its own
+   `studentId`** and returned every session — it would have shown one child's
+   timetable under another child's name, with a signature that read as though it
+   filtered. Sessions are now nested per child.
+
+5. **§7.4.1 earned itself on a live disagreement.** The pack's prose note claims
+   Profile Details shows a `Trainer Assistant (TA)` row; the `.png` draws none
+   and the `.html` holds `Assist` ×0. A note-derived build would have added a
+   field `A-014` prohibits.
+
+6. **Eighteenth and nineteenth §12.14 instances**, both loud, both writing
+   nothing: a backtick inside a `node -e` string, then a `"` inside a
+   single-quoted JS string inside a double-quoted shell string. ⚠️ The first
+   short-circuited an `&&` chain whose next command redirected into
+   `server/db/database.types.ts` — **the file was not truncated, by luck rather
+   than design**. The regeneration was then written to scratch, verified to
+   contain the new function, and only then installed.
+
+**Next: the `/parent` route-compatibility treatment awaits an Operator ruling
+(plan §57.6, three options, recommendation option 3), and `P2-23` (`31` Parent
+Calendar) owes the `C-12` ruling at that boundary.**

@@ -431,12 +431,12 @@ BEGIN
   SELECT pg_catalog.count(*) INTO v_listed
     FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
    WHERE n.nspname = 'public';
-  IF v_n = 1 AND v_listed = 73 THEN
+  IF v_n = 1 AND v_listed = 74 THEN
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS P2-6 -- 73 functions and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet, and the eleven added since it last read 62 are attributed one by one in the comment above (P2-11, P2-9, P2-16, P2-19, P2-20, P2-12, P2-13, P2-14)';
+    RAISE NOTICE 'PASS P2-6 -- 74 functions and the context return set is still exactly 7. This is the project''s SINGLE global function ratchet, and the eleven added since it last read 62 are attributed one by one in the comment above (P2-11, P2-9, P2-16, P2-19, P2-20, P2-12, P2-13, P2-14, P2-22)';
   ELSE
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 73) and context field-set match = %', v_listed, v_n;
+    RAISE WARNING 'FAIL P2-6 -- % function(s) in public (expected 74) and context field-set match = %', v_listed, v_n;
   END IF;
 
   RAISE NOTICE '--- Phase 2 parent-list suite: % passed, % failed ---', v_pass, v_fail;

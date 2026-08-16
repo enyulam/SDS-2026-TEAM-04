@@ -76,8 +76,17 @@ SELECT 'CENSUS<T=' || (SELECT pg_catalog.count(*) FROM information_schema.tables
     || ' R=' || (SELECT pg_catalog.array_length(public.audit_action_registry(),1))
     || ' F=' || (SELECT pg_catalog.count(*) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public') || '>';`);
 check(
-  between(census, "CENSUS") === "T=30 E=12 P=30 R=24 F=73",
-  `PT21-1a ⛔ …and the CATALOGUE is unmoved, functions INCLUDED: ${between(census, "CENSUS")} — ▶ the function count is in the pin deliberately, because a read-side function is exactly what this phase was PRE-AUTHORIZED to add and therefore exactly what an unmeasured phase could add without noticing`,
+  /*
+   * ⚠️ RE-PINNED `F=73` -> `F=74` AT `P2-22`, WHICH ADDED EXACTLY ONE
+   * READ-SIDE FUNCTION — and the re-pin is the evidence, not the maintenance.
+   *
+   * ▶ **THIS LEG CAUGHT THE VERY NEXT PHASE, ONE PHASE AFTER IT WAS WRITTEN.**
+   * The function count went into the pin because a read-side function is what
+   * the standing batch PRE-AUTHORIZES, and therefore what a phase could add
+   * without anyone noticing. It was not a hypothetical.
+   */
+  between(census, "CENSUS") === "T=30 E=12 P=30 R=24 F=74",
+  `PT21-1a ⛔ …and the CATALOGUE is unmoved for THIS phase, functions INCLUDED: ${between(census, "CENSUS")} — ▶ the function count is in the pin deliberately, because a read-side function is exactly what this phase was PRE-AUTHORIZED to add and therefore exactly what an unmeasured phase could add without noticing`,
 );
 
 // ---------------------------------------------------------------------
