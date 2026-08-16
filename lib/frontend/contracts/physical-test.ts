@@ -511,6 +511,29 @@ export type TrainerDashboardDto = {
   readonly monthLabel: string;
 };
 
+
+/**
+ * `P2-20` — screen `04` Trainer Students.
+ * ⛔ NO RATING FIELD EXISTS ON THIS TYPE, and none can: the governed read
+ * returns none (`GC-7`, and `G-2` independently).
+ */
+export type TrainerStudentRowDto = {
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly initials: string;
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  /** ⚠️ NULL means NOT ASSESSED — rendered as the frame's own dash. */
+  readonly lastAssessed: string | null;
+};
+
+export type TrainerStudentsDto = {
+  /** ⛔ DISTINCT learners, never the row count. */
+  readonly studentCount: number;
+  readonly rows: readonly TrainerStudentRowDto[];
+  readonly classes: readonly { readonly classModuleId: string; readonly classLabel: string }[];
+};
+
 export type ClassStatisticsDto = {
   readonly classModuleId: string;
   readonly classLabel: string;

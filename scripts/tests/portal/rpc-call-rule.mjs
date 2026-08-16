@@ -172,6 +172,13 @@ export const RPC_MIGRATIONS = [
    * projection are reached only by the suite, calling as a real trainer.
    */
   { migration: "20260816120000_portal_p2_19_trainer_reports.sql", suite: "prove-p2-19-trainer-dashboard.mjs" },
+  /*
+   * `P2-20` — screen `04` Trainer Students. ONE function, ONE grant.
+   * ⚠️ Its apply-time leg returns ZERO rows at gate 1; the suite is the only
+   * leg that reaches the rating-EXISTENCE semi-join, which is the one piece
+   * of this body a mistake would silently turn into a rating VALUE.
+   */
+  { migration: "20260816140000_portal_p2_20_trainer_students.sql", suite: "prove-p2-20-trainer-students.mjs" },
 ];
 
 /** Every `public.<name>` a migration declares, in file order. */

@@ -511,6 +511,21 @@ export interface AdapterTrainerDashboardDto {
   readonly monthLabel: string;
 }
 
+export interface AdapterTrainerStudentRowDto {
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly initials: string;
+  readonly classModuleId: string;
+  readonly classLabel: string;
+  readonly lastAssessed: string | null;
+}
+
+export interface AdapterTrainerStudentsDto {
+  readonly studentCount: number;
+  readonly rows: readonly AdapterTrainerStudentRowDto[];
+  readonly classes: readonly { readonly classModuleId: string; readonly classLabel: string }[];
+}
+
 export interface AdapterCreateTrainerInput {
   readonly firstName: string;
   readonly lastName: string;

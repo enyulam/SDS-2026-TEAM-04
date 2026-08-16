@@ -5332,6 +5332,8 @@ every one of them is a composite-FK component — never a place to store what a 
 where the definition matches `= '<literal>'::`. ▶ **Re-run it after any migration that adds a
 `CHECK`**, and add what it finds here.
 
+> ✅ **EXTENDED 2026-08-16 at `P2-20`, and the register worked as intended: the phase checked it BEFORE sourcing.** New entry — **`class_grades.code`**, which holds `beginner`/`intermediate`/`advanced` while the column it looks like holds `Beginning`/`Developing`/`Mastering`/`Mastered`. ⚠️ **One letter apart, and different vocabularies** (`A-054`). Full record at §45.2.
+
 ## §37.2 — CLASS 2: ⛔ **A COLUMN EXISTING IS NOT EVIDENCE THE DATUM DOES**
 
 *(Operator: **"The second class belongs beside it."** Found while scanning for class 1, which is why
@@ -5756,3 +5758,91 @@ both **the restatement outranks the truth in practice** — because it is what g
 > No comment leaves a reader to check. **A correct one stops them looking** — it answers the exact
 > question that would have caught the bug. ▶ Which is why the fix was to make the code match, and the
 > proof was to assert **both halves**: the right helper present *and* the wrong operation absent.
+
+---
+
+## §45 — `P2-20`: screen `04` Trainer Students, **BUILT** (2026-08-16)
+
+**Under the batch.** Named, not counted:
+
+| Added | |
+|---|---|
+| function | `public.report_list_trainer_students()` |
+| grant | `EXECUTE ON public.report_list_trainer_students() TO authenticated` |
+
+Census unmoved at `T=30 E=12 P=30 R=23`, registry included.
+
+### §45.1 — the `Level` column, refused at three layers
+
+The `.png` draws `Mastering` / `Developing` / `Mastered` / `Beginning` chips per learner. Refused
+twice over — **`GC-7`**, recorded in this pack's **own** `implementation-notes.md`, and **`G-2`**
+independently, since one chip for a learner's whole assessment history is a **roll-up**, barred on
+every surface **regardless of audience**. The trainer authored these ratings, so this is not a
+disclosure question: **no roll-up exists to render.**
+
+**Asserted at three layers, because each can widen without the others noticing:** `PT20-4` (the SQL
+body), `PT20-4b` (the DTO, bounded), `PT20-4d` (the rendered screen, with the disclosure set aside
+first per `PT19-6`). `PT20-5` measures the frame really drawing all six refused strings
+(`Mastering:4, Developing:3, Mastered:2, Beginning:1, Level:1, ID 2025-113:1`), so the bans refuse
+something that exists.
+
+⚠️ **`PT20-4a` IS THE ONE THAT MATTERS MOST.** `last_assessed` needs the ratings table, and the whole
+correctness of the column is that it touches it as an **EXISTENCE semi-join** and never reads a
+value. ▶ *"An assessment happened on this date"* is not *"the assessment said X"* — and an
+observation row saved with **no** ratings must not be dated as assessed at all.
+
+### §45.2 — ⛔ A NEW ENTRY FOR THE LIVING DECOY REGISTER (§37): **`class_grades.code`**
+
+| Column | Reads like | Actually holds |
+|---|---|---|
+| `class_grades.code` | the refused `Level` column's values | `beginner` / `intermediate` / `advanced` — **Class Grade**, a different vocabulary (`A-054`) |
+
+⚠️ **`Beginner` AND `Beginning` ARE ONE LETTER APART.** A phase building the refused column from this
+would ship a **Class Grade dressed as a competency rating** — and the frame would look satisfied,
+because a chip reading `Beginner` beside a chip reading `Beginning` is indistinguishable at a glance.
+▶ **It is the register's exact shape**: the sourcing looks correct.
+
+**Also confirmed by the same scan:** `students` carries **no** external-code column, so the frame's
+`ID 2025-113` has no source. **Cited, not disabled** — rendering the UUID instead would put a
+governed internal identifier where the frame intends a human roll number, and `PT20-6a` asserts it is
+not done.
+
+### §45.3 — ⛔ THE CONSTRUCTION THAT CONSTRUCTED NOTHING
+
+`PT20-3c` repeats `PT19-3c`'s shape: the trainer reads **13 of 13** active enrolments, identical to
+an unscoped query, so the divergence had to be manufactured.
+
+⚠️ **THE FIRST DRAFT MANUFACTURED THE WRONG ONE.** It picked a module by `ORDER BY class_module_id
+LIMIT 1` and selected **`Beginner - Dance`** — which holds **13 of the 17 active assignments and ZERO
+enrolments**. Deactivating all thirteen changed the function's output by **nothing**, and the leg went
+red.
+
+> ### ⛔ **A CONSTRUCTION THAT REMOVES SOMETHING NOTHING DEPENDS ON HAS CONSTRUCTED NOTHING.**
+>
+> ▶ And it would have **PASSED under a weaker assertion.** `after <= rows` is true when `after ===
+> rows`; `after < rows` is what caught it. The leg now reads its target **from the function's own
+> output** and asserts the **exact expected drop** (`after === rows - targetRows`, modules `− 1`).
+>
+> ⚠️ This is the **fourth** phase where the honest proof required manufacturing the case the fixture
+> could not supply (§43) — and the first where **the manufacture itself was wrong**. The construction
+> needs its own non-vacuity check, exactly as the thing it is constructing does.
+
+### §45.4 — the parent control is meaningful here for a stated reason
+
+`PT20-3e`: through RLS the fixture parent legitimately reads **8 `students` rows**, so *"the parent
+sees fewer students"* would prove nothing. **Through this function they see none**, because the
+trainer gate refuses them outright — `Q-7`'s zero rows, not an error that would disclose there is
+something to refuse.
+
+### §45.5 — the register gate's first real use
+
+✅ **`AR-1b` REQUIRED screen `04`'s entry rather than trusting it.** Shipped one phase earlier
+(§41), so omitting the block would have failed this run instead of waiting to be noticed three phases
+later. `AR-1b` now reads **20 shipped = 10 registered + 10 pre-gate**, and `AR-2-04 … AR-6-04` are all
+green (8 values, 2 fractional).
+
+### §45.6 — gates, every verdict from an exit code
+
+`tsc<0>` · `lint<0>` · `build<0>` · `prove:portal-p2-20<0>` (28 checks) · nav census `<0>` (31 routes,
+13 rail items) · 20 further suites `<0>`. `prove:artefact-read` exits 1 on the two ruled `KNOWN-RED`s
+only. ⛔ **VISUAL: `NOT-RUN`.**

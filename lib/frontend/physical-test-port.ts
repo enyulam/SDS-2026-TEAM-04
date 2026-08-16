@@ -30,6 +30,7 @@ import type {
   ClassStatisticsDto,
   TrainerMyClassesDto,
   TrainerDashboardDto,
+  TrainerStudentsDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -252,6 +253,9 @@ export interface PhysicalTestPort {
 
   /** `P2-19` — screen `01`. ⛔ No rating, panel, note or hash. */
   readTrainerDashboard(): Promise<UiActionResult<TrainerDashboardDto>>;
+
+  /** `P2-20` — screen `04`. ⛔ No rating: the `Level` column is refused. */
+  readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>>;
   /**
    * `P2-10` — screen `23`. ⛔ A READ ONLY; trainer creation is `P2-11` and
    * needs an audit string this read does not touch.

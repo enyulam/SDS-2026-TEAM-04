@@ -31,6 +31,7 @@ import {
   type ClassStatisticsDto,
   type TrainerMyClassesDto,
   type TrainerDashboardDto,
+  type TrainerStudentsDto,
   type ManagementClassListDto,
   type ManagementScheduleDto,
   type ManagementLessonPlansDto,
@@ -1345,6 +1346,16 @@ export class DeterministicFixturePhysicalTestPort implements PhysicalTestPort {
    * a manufactured count would tell a trainer they have work they do not.
    */
   async readTrainerDashboard(): Promise<UiActionResult<TrainerDashboardDto>> {
+    await delay(140);
+    return { outcome: "unavailable" };
+  }
+
+  /**
+   * `P2-20` — screen `04`. ⛔ THE FIXTURE REFUSES. A manufactured roster would
+   * put invented learner names on a trainer's own students page, and a
+   * manufactured `last assessed` date would claim an assessment happened.
+   */
+  async readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>> {
     await delay(140);
     return { outcome: "unavailable" };
   }

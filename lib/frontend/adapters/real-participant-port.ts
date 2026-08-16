@@ -73,6 +73,7 @@ import type {
   ClassStatisticsDto,
   TrainerMyClassesDto,
   TrainerDashboardDto,
+  TrainerStudentsDto,
   ManagementTrainerListDto,
   CreateTrainerInput,
   TrainerInvitationOutcomeDto,
@@ -141,6 +142,7 @@ import {
   adapterReadClassStatistics,
   adapterReadTrainerMyClasses,
   adapterReadTrainerDashboard,
+  adapterReadTrainerStudents,
   adapterReadAddClassOptions,
   adapterListManagementCorrectionTracking,
   adapterListManagementPendingReviews,
@@ -370,6 +372,11 @@ export function createRealParticipantPhysicalTestPort(): RealParticipantPhysical
     /** `P2-19` — screen `01`. */
     readTrainerDashboard(): Promise<UiActionResult<TrainerDashboardDto>> {
       return guard(() => adapterReadTrainerDashboard());
+    },
+
+    /** `P2-20` — screen `04`. */
+    readTrainerStudents(): Promise<UiActionResult<TrainerStudentsDto>> {
+      return guard(() => adapterReadTrainerStudents());
     },
 
     /** P2-3 — the governed edit. Carries no removal and no unassign. */

@@ -102,6 +102,24 @@ export const roleConfig: Readonly<Record<SessionRole, PortalNavigationConfig>> =
         icon: "dashboard",
       },
       {
+        /*
+         * `P2-20` — screen `04` Trainer Students, at its canonical route.
+         *
+         * ⚠️ `exact: true`, CHECKED THE SAME WAY `Dashboard` WAS ONE PHASE
+         * EARLIER. The trainer's student-facing deep route is screen `10`
+         * Trainer Student Report, whose ratified route is
+         * `/trainer/reports/[reportId]` — a child of **Reports**, not of this
+         * one. ▶ **No `/trainer/students/*` screen exists in the ratified
+         * 36**, so this item has no child to acquire, and the nav census row
+         * is what goes red if one is ever added (`C2C-002`).
+         */
+        href: "/trainer/students",
+        label: "Students",
+        path: "/trainer/students",
+        exact: true,
+        icon: "user",
+      },
+      {
         href: "/trainer/schedule",
         label: "Schedule",
         path: "/trainer/schedule",

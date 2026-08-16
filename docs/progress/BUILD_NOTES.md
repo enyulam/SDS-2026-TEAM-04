@@ -10434,3 +10434,69 @@ once. **File content goes through the Write tool, never a shell string — inclu
 `KNOWN-RED`s (`AR-4-14`, `AR-4-17`) and on nothing else.
 
 **Next authorized step:** `P2-20` (`04` Trainer Students) under the batch.
+
+---
+
+## 2026-08-16 — `P2-20`: screen `04` Trainer Students (branch `develop`)
+
+**Added under the batch, named not counted:** function `public.report_list_trainer_students()` and
+grant `EXECUTE … TO authenticated`. Nothing else; census unmoved at `T=30 E=12 P=30 R=23`,
+registry included.
+
+**Files.** `supabase/migrations/20260816140000_portal_p2_20_trainer_students.sql` ·
+`server/modules/class-session/trainer-students.ts` ·
+`features/trainer/trainer-students-screen.tsx` · `app/(portals)/trainer/students/page.tsx` ·
+`scripts/tests/portal/prove-p2-20-trainer-students.mjs` · the rail item, the nav census row, the
+route ratchet (30 → 31), the `RPC_MIGRATIONS` pairing and the artefact-read ledger entry.
+
+**The `Level` column is refused at three layers** — `GC-7` (this pack's own notes) and `G-2`
+independently. `PT20-5` measures the frame really drawing all six refused strings, so the bans
+refuse something that exists. `ID 2025-113` has no column in `students`; **cited, not invented**,
+and `PT20-6a` asserts the UUID is not rendered in its place.
+
+### What the phase found
+
+**1. ⛔ A construction that constructed nothing.** `PT20-3c` repeats `PT19-3c`'s shape — the trainer
+reads 13 of 13 active enrolments, identical to an unscoped query — so the divergence is manufactured.
+**The first draft manufactured the wrong one:** it picked a module by `ORDER BY class_module_id LIMIT
+1` and selected `Beginner - Dance`, which holds **13 of the 17 active assignments and ZERO
+enrolments**. Deactivating all thirteen changed the output by nothing. ▶ **It would have passed under
+`after <= rows`**; `after < rows` caught it, and the leg now reads its target from the function's own
+output and asserts the **exact expected drop**. **The construction needs its own non-vacuity check,
+exactly as the thing it constructs does.**
+
+**2. A new living-decoy entry: `class_grades.code`.** It holds `beginner`/`intermediate`/`advanced`
+while the refused column reads `Beginning`/`Developing`/`Mastering`/`Mastered`. **One letter apart,
+different vocabularies (`A-054`).** Building the refused column from it would ship a Class Grade
+dressed as a competency rating and the frame would look satisfied. ✅ **The register was checked
+before sourcing, which is what it exists for.**
+
+**3. `last_assessed` touches the ratings table as an EXISTENCE semi-join only.** *"An assessment
+happened on this date"* is not *"the assessment said X"*, and an observation saved with no ratings
+must not be dated as assessed. `PT20-3b` proves the column non-vacuous in **both** directions —
+10 dated, 3 NULL, so the frame's own `—` is exercised.
+
+**4. The parent control is meaningful for a stated reason.** Through RLS the fixture parent
+legitimately reads 8 `students` rows, so *"the parent sees fewer"* would prove nothing. Through this
+function they see **none** (`Q-7`).
+
+**5. ✅ The register gate's first real use.** `AR-1b` (shipped one phase earlier) **required** screen
+`04`'s entry rather than trusting it — omitting it would have failed this run instead of surfacing
+three phases later. It now reads **20 shipped = 10 registered + 10 pre-gate**.
+
+### Verification — every verdict from an exit code
+
+`tsc` **0** · `lint` **0** · `build` **0** · `prove:portal-p2-20` **0** (28 checks) · nav census
+**0** (31 routes, 13 rail items) · 20 further suites **0**. The migration applied with 7 PASS notices
+(`PL-1 … PL-7`) after one loud failure — `proconfig @> ARRAY['search_path=']` where the stored form
+is `search_path=""`; the transaction aborted, nothing applied, so it was an edit and not an `R-1`
+case. Executed as a real trainer past both gates: **13 rows across 3 modules, 10 dated, 3 NULL**.
+
+`prove:artefact-read` exits **1** on the two ruled `KNOWN-RED`s only; `prove:serving-discipline` on
+`D-10`. Both pre-existing.
+
+⛔ **VISUAL: `NOT-RUN`.**
+
+**Position: 16 of 24 Part 2 phases complete.** Remaining: `P2-12`/`P2-13`/`P2-14` (write-path, all
+three authorized), `P2-21`/`P2-22`/`P2-23` (read-side, batch covers), `P2-18` (awaiting the
+`G-3`/`D-4` scope answer), `P2-24` (**DO NOT BUILD**, `C-11`).

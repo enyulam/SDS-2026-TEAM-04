@@ -135,6 +135,7 @@ import type {
   AdapterClassStatisticsDto,
   AdapterTrainerMyClassesDto,
   AdapterTrainerDashboardDto,
+  AdapterTrainerStudentsDto,
   AdapterTrainerInvitationOutcomeDto,
   AdapterManagementScheduleDto,
   AdapterLessonPlanDto,
@@ -182,6 +183,7 @@ import { readLessonStatisticsCore } from "@/server/modules/management-view/lesso
 import { readClassStatisticsCore } from "@/server/modules/management-view/class-statistics-projections";
 import { readTrainerMyClassesCore } from "@/server/modules/class-session/trainer-my-classes";
 import { readTrainerDashboardCore } from "@/server/modules/report-workflow/trainer-dashboard";
+import { readTrainerStudentsCore } from "@/server/modules/class-session/trainer-students";
 
 // ---------------------------------------------------------------------
 // internal helpers (not exported — a "use server" module may export only
@@ -2115,6 +2117,36 @@ export async function adapterReadTrainerDashboard(): Promise<ActionResult<Adapte
       })),
       monthSessionDates: [...d.monthSessionDates],
       monthLabel: d.monthLabel,
+    },
+  };
+}
+
+
+/**
+ * `P2-20` — screen `04` Trainer Students.
+ *
+ * ⛔ THE ALLOW-LIST CARRIES NO RATING FIELD, and none can arrive by accident:
+ * the governed read does not return one, and `PT20-4` asserts that at three
+ * layers — the SQL body, this DTO and the rendered screen.
+ */
+export async function adapterReadTrainerStudents(): Promise<ActionResult<AdapterTrainerStudentsDto>> {
+  const client = await createRequestSupabaseClient();
+  const result = await readTrainerStudentsCore(client);
+  if (!result.ok) return { outcome: "unavailable" };
+  const d = result.data;
+  return {
+    outcome: "success",
+    data: {
+      studentCount: d.studentCount,
+      rows: d.rows.map((r) => ({
+        studentId: r.studentId,
+        studentName: r.studentName,
+        initials: r.initials,
+        classModuleId: r.classModuleId,
+        classLabel: r.classLabel,
+        lastAssessed: r.lastAssessed,
+      })),
+      classes: d.classes.map((c) => ({ classModuleId: c.classModuleId, classLabel: c.classLabel })),
     },
   };
 }

@@ -83,7 +83,11 @@ export const UNMEASURED = [
   // recording it as though the building phase had. **Reported to the Operator,
   // not silently corrected**: the phases are closed, so whether their evidence
   // may be registered late is a ruling, not a judgement this phase makes.
-  "02", "03", "04", "05", "06", "07", "08", "09", "10",
+  // ⛔ `04` LEFT THIS LIST AT `P2-20` — built under the rule, its nine values
+  // read from the `.html` during that phase. ⚠️ It is the FIRST screen whose
+  // register entry was REQUIRED rather than remembered: `AR-1b` shipped one
+  // phase earlier, so omitting it would have failed the run.
+  "02", "03", "05", "06", "07", "08", "09", "10",
   // ⛔ `17` LEFT THIS LIST AT `P2-8` — by being BUILT UNDER THE RULE, which is
   // the only exit this list has. It was never annotated out.
   "15", "16", "18", "19", "20", "21", "22", "23", "24", "28",
@@ -91,7 +95,7 @@ export const UNMEASURED = [
 ];
 
 /** Screens that MUST carry a citation block. */
-export const MEASURED = ["01", "11", "12", "13", "14", "17", "25", "26", "27"];
+export const MEASURED = ["01", "04", "11", "12", "13", "14", "17", "25", "26", "27"];
 
 /*
  * =====================================================================

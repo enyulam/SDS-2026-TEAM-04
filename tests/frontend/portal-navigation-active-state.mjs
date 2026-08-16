@@ -178,6 +178,17 @@ const EXPECTED_BY_ROUTE = new Map([
    */
   ["/trainer/dashboard", { role: "trainer", label: "Dashboard" }],
   /*
+   * `P2-20` -- screen `04` Trainer Students, a NEW trainer rail item, third
+   * of three added in three consecutive phases (`My Classes`, `Dashboard`,
+   * `Students`).
+   *
+   * ⚠️ `exact: true` on a MEASURED ground, not by habit: screen `10` Trainer
+   * Student Report lives at `/trainer/reports/[reportId]` -- a child of
+   * Reports -- so nothing in the ratified 36 hangs under this route. ▶ This
+   * row is the one that goes red if that ever stops being true.
+   */
+  ["/trainer/students", { role: "trainer", label: "Students" }],
+  /*
    * `P2-16` -- screen `16` Class Statistics, a child of Classes.
    * ⚠️ Unlike `15`, this route IS reachable from the UI: the `View Overall
    * Class Statistics` control on screen `13` was built INERT at `P2-4` with
