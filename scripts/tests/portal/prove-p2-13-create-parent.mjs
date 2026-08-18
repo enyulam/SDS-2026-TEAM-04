@@ -109,6 +109,9 @@ SELECT 'BEFORE<' || (SELECT pg_catalog.count(*) FROM public.accounts) || '|'
     || (SELECT pg_catalog.count(*) FROM public.parent_student_links) || '|'
     || (SELECT pg_catalog.count(*) FROM public.audit_events) || '>';
 BEGIN;
+CREATE TEMP TABLE _mark ON COMMIT DROP AS
+  SELECT action, pg_catalog.count(*) AS n FROM public.audit_events
+   WHERE action IN ('admin.profile_created','invitation.created','admin.parent_link_changed') GROUP BY action;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
 SELECT 'CREATED<' || r.o_reason || '|' || r.o_links || '|' || (r.o_membership_id IS NOT NULL)::text
@@ -124,9 +127,13 @@ SELECT 'R_INUSE<' || (SELECT o_reason FROM public.admin_create_parent('A',
 RESET ROLE;
 SELECT 'PENDING<' || (SELECT m.status::text FROM public.centre_memberships m ORDER BY m.created_at DESC LIMIT 1) || '>';
 SELECT 'AUTHNULL<' || (SELECT (a.auth_user_id IS NULL)::text FROM public.accounts a ORDER BY a.created_at DESC LIMIT 1) || '>';
-SELECT 'EMITTED<' || string_agg(t.action || ':' || t.n, ',' ORDER BY t.action) || '>'
-  FROM (SELECT action, pg_catalog.count(*) AS n FROM public.audit_events
-         WHERE action IN ('admin.profile_created','invitation.created','admin.parent_link_changed') GROUP BY action) t;
+SELECT 'EMITTED<' || coalesce(string_agg(d.action || ':' || d.n, ',' ORDER BY d.action), '(none)') || '>'
+  FROM (SELECT a.action, pg_catalog.count(*) - coalesce(pg_catalog.max(m.n), 0) AS n
+          FROM public.audit_events a
+          LEFT JOIN _mark m ON m.action = a.action
+         WHERE a.action IN ('admin.profile_created','invitation.created','admin.parent_link_changed')
+         GROUP BY a.action
+        HAVING pg_catalog.count(*) - coalesce(pg_catalog.max(m.n), 0) > 0) d;
 SELECT 'LEAK<' || pg_catalog.count(*) || '>' FROM public.audit_events
  WHERE payload::text ILIKE '%wg.p213%' OR payload::text ILIKE '%Walkthrough%'
     OR coalesce(target_label,'') ILIKE '%Walkthrough%' OR coalesce(target_label,'') ILIKE '%example.test%';
@@ -167,16 +174,25 @@ check(
 // ---------------------------------------------------------------------
 const asTrainer = psql(`
 BEGIN;
+SELECT 'T_ACC_BEFORE<' || pg_catalog.count(*) || '>' FROM public.accounts;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'T<' || r.o_reason || '|' || (r.o_membership_id IS NULL)::text || '>'
   FROM public.admin_create_parent('No','no@x.co', ARRAY(SELECT s.id FROM public.students s LIMIT 1), NULL) r;
 RESET ROLE;
-SELECT 'T_ACCOUNTS<' || pg_catalog.count(*) || '>' FROM public.accounts;
+SELECT 'T_ACC_AFTER<' || pg_catalog.count(*) || '>' FROM public.accounts;
 ROLLBACK;`);
 check(
-  between(asTrainer, "T") === "not_permitted|true" && between(asTrainer, "T_ACCOUNTS") === "3",
-  `PN-D ⛔ a TRAINER holding the same EXECUTE grant is refused and NOTHING was written: ${between(asTrainer, "T")}, accounts still ${between(asTrainer, "T_ACCOUNTS")} — ▶ the grant is reachability, never authorization`,
+    // ⛔ UNCHANGED, NOT A CONSTANT. Re-aimed 2026-08-19, same root as PE-6 and
+  //    PS-3: the claim is 'a denied attempt changed NOTHING', and a pinned
+  //    absolute total says that only while nobody uses the product. An
+  //    Operator walk on 2026-08-18 moved it and the leg went red on a fact it
+  //    was never about.
+  // ⚠️ BEFORE-vs-AFTER IS ALSO STRICTLY STRONGER: a pin is satisfied by a
+  //    denied attempt that changed the count to some other constant.
+  between(asTrainer, "T") === "not_permitted|true" &&
+    between(asTrainer, "T_ACC_AFTER") === between(asTrainer, "T_ACC_BEFORE"),
+  `PN-D ⛔ a TRAINER holding the same EXECUTE grant is refused and NOTHING was written: ${between(asTrainer, "T")}, accounts UNCHANGED at ${between(asTrainer, "T_ACC_BEFORE")} → ${between(asTrainer, "T_ACC_AFTER")} — ▶ the grant is reachability, never authorization`,
 );
 
 // ---------------------------------------------------------------------

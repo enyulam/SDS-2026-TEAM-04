@@ -218,20 +218,28 @@ check(
 // ---------------------------------------------------------------------
 const asTrainer = psql(`
 BEGIN;
+SELECT 'T_BEFORE<' || pg_catalog.count(*) || '>' FROM public.students WHERE is_active;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'U<' || (SELECT o_reason FROM public.admin_update_student((SELECT s.id FROM public.students s WHERE s.is_active LIMIT 1),'X','Y',ARRAY(SELECT cm.id FROM public.class_modules cm LIMIT 1), NULL, NULL, NULL)) || '>';
 SELECT 'W<' || (SELECT o_reason FROM public.admin_withdraw_student((SELECT s.id FROM public.students s WHERE s.is_active LIMIT 1))) || '>';
 RESET ROLE;
 SELECT 'T_EVENTS<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_updated';
-SELECT 'T_ACTIVE<' || pg_catalog.count(*) || '>' FROM public.students WHERE is_active;
+SELECT 'T_AFTER<' || pg_catalog.count(*) || '>' FROM public.students WHERE is_active;
 ROLLBACK;`);
 check(
   between(asTrainer, "U") === "not_permitted" &&
     between(asTrainer, "W") === "not_permitted" &&
     between(asTrainer, "T_EVENTS") === "0" &&
-    between(asTrainer, "T_ACTIVE") === "13",
-  `PE-6 ⛔ a TRAINER holding both EXECUTE grants is refused on BOTH paths (update=${between(asTrainer, "U")}, withdraw=${between(asTrainer, "W")}), emitted ${between(asTrainer, "T_EVENTS")} events and left ${between(asTrainer, "T_ACTIVE")} learners active — ▶ the grant is reachability, never authorization, and a denied attempt must not record an action that never happened`,
+    // ⛔ UNCHANGED, NOT A CONSTANT. Re-aimed 2026-08-19: this pinned `13`
+    //    and went red when the Operator created a learner during a walk --
+    //    a fact the leg was never about. Comparing BEFORE to AFTER inside
+    //    the same transaction is immune to that AND strictly stronger: it
+    //    also catches a denied attempt that changed the count to some
+    //    other constant, which a pin never could.
+    between(asTrainer, "T_AFTER") === between(asTrainer, "T_BEFORE") &&
+    Number(between(asTrainer, "T_BEFORE")) > 0,
+  `PE-6 ⛔ a TRAINER holding both EXECUTE grants is refused on BOTH paths (update=${between(asTrainer, "U")}, withdraw=${between(asTrainer, "W")}), emitted ${between(asTrainer, "T_EVENTS")} events and left the active-learner count UNCHANGED at ${between(asTrainer, "T_BEFORE")} → ${between(asTrainer, "T_AFTER")} — ▶ the grant is reachability, never authorization, and a denied attempt must not record an action that never happened`,
 );
 
 // ---------------------------------------------------------------------

@@ -8301,3 +8301,158 @@ or unreadable capture fails closed.
    fatal still produces a success message**, so loudness alone is not the
    control. Caught by inspection; repaired with the Edit tool. Instances 22 and
    23 were the familiar forms and wrote nothing.
+
+---
+
+## §64 — the walk: a locked affordance, one control, and a systemic pin defect
+
+*(2026-08-19, from an Operator walk of nine screens.)*
+
+### ⛔ 1. SCREEN `18`'s `Edit` WAS LOCKED, AND SCREEN `22` SAT BUILT AND UNREACHABLE
+
+**Diagnosed at source, not inferred.** It was **a stale disabled-with-a-reason** —
+not state, not a missing handler. Its own note read: *"`22` Edit Student EXISTS
+in the ratified 36 and lands at `P2-14`, so this control has a known destination
+and WILL become live."* ▶ **`P2-14` built screen `22` and its route and left
+this shut.** The screen, the route and the write path all existed; the only
+affordance that reaches them did not open.
+
+⛔ **BUILT AND UNREACHABLE IS WORSE THAN UNBUILT.** Nothing reports it, every
+proof passes, and the work looks done. **Same shape as the `View more` gap the
+previous walk found** — the screen exists, the route exists, the affordance does
+not open it.
+
+### ⛔ THE PATTERN IS RIGHT AND IT CARRIES A DEBT MEMORY DOES NOT PAY
+
+`P2-10` ruled it and the ruling stands: **DISABLED says *not yet*, ABSENT says
+*not a thing*, and only one is ever true.** ▶ What it lacked was a way to
+**collect**. It discharged correctly at `P2-18` only because the same phase
+happened to build the destination.
+
+**`prove:stale-disabled` now collects it mechanically.** A control that is
+disabled **and names a screen number in its reason** is stale the moment that
+screen's canonical route exists on disk. A reason naming no destination — *"no
+notification path is in scope"* (`G-04`) — carries no debt and is never flagged.
+
+⚠️ **ITS NEGATIVE CONTROL REPLAYS THE ACTUAL DEFECT.** `SD-2` asserts an EMPTY
+result, so it would pass identically if the resolution silently returned nothing.
+`SD-1d` feeds it the real pre-fix control and requires it to be **flagged**.
+**Without that, `SD-2`'s emptiness proves nothing.**
+
+**Audit at the time of writing: 17 disabled controls, 3 with a stated reason, 1
+stale — this one.** The two `Send Reminder to Trainer` controls are correctly
+disabled and correctly not flagged.
+
+### ⚠️ 2. ONE CHILD SELECTOR — AND THE FRAMES SAY NOTHING, WHICH DECIDES IT
+
+Three parent surfaces performed one act in two languages: `/parent/reports` a
+dropdown, `/parent/dashboard` and `/parent/calendar` a row of pill buttons.
+
+> ⛔ **STANDING RULE (Operator, 2026-08-19, on the third instance):** **WHERE TWO
+> SURFACES PERFORM THE SAME ACT, THEY USE ONE CONTROL, AND THE FIRST BUILT IS
+> THE ONE REUSED UNLESS A FRAME SAYS OTHERWISE.**
+>
+> The first two instances were the **rating tiles** and the **back links**.
+> Recorded as a rule rather than a third instance, by instruction.
+
+**The frames were measured first, as required — and none draws a selector at
+all.** `Parent - Dashboard`, `Parent - Calendar`, `Parent - Report`: **0
+`<select>` elements, no chevron or caret, no button row**, in any of the three.
+All three draw a single child as a static identity line (`Alicia Gomez ·
+Junior`).
+
+▶ **So neither treatment came from a frame.** Both were implementation
+inventions, made because a parent may be linked to more than one child while
+every frame assumes exactly one. **No frame says otherwise, so the rule applies
+unmodified** and the first-built control wins — `/parent/reports`, 2026-08-05,
+twelve days before the other two.
+
+✅ **AND THE FIRST-BUILT CONTROL WAS ALREADY FRAME-FAITHFUL.** Its single-child
+branch renders exactly the static identity line the frames draw, so screens `30`
+and `31` are now **closer to their frames than before**. That was not the reason
+for the ruling; it is why the ruling costs nothing.
+
+**`components/ui/child-selector.tsx`, three consumers, one definition.** The
+source screen was re-pointed too — leaving the original inline would have made
+two definitions of one control, the exact defect being removed. The one real
+difference between the surfaces is carried as a **prop**: `allOption` is passed
+only by `/parent/reports`, because a LIST can meaningfully show every linked
+learner and a dashboard or a month calendar cannot.
+
+⛔ **Reach is untouched.** `students_select_parent` already filters by
+`parent_student_links` in the database, so the list cannot offer a child the
+parent has no live link to (`ADR-4`). **Changing the widget changes nothing
+about authorization.**
+
+### ⛔ 3. THE PINS: A WALK BROKE SIX LEGS AND NOT ONE WAS A DEFECT
+
+The Operator's walk created a learner and filled one student's `C-14` columns.
+**Six legs across five suites went red**, every one a pin on an absolute fixture
+count. ▶ **The suites were mistaking USE for REGRESSION.**
+
+| Leg | Pinned | Actually meant |
+|---|---|---|
+| `PE-6` | `13` active learners | a denied attempt changed **nothing** |
+| `PM-Da` | `0` audit events | ditto |
+| `PN-D` | `3` accounts | ditto |
+| `PM-Ca` / `PN-Ca` | all-time event totals | **this call** emitted exactly these |
+| `PS-3`/`3b`/`3c` | `ORDER BY id LIMIT 1` | a student that **has data** |
+| `P22-6b` | `dob=0 … of=13` | a NULL column is **omitted**, never blank |
+
+**Every one was re-aimed at what it meant, and each repair is strictly
+stronger:**
+
+* before-vs-after invariance also catches a denied attempt that changed a count
+  to some **other** constant — which a pin never could;
+* a per-action **delta** also catches the right events having been written at
+  some **other** time — which an all-time total never could;
+* selecting from `reports` **states** the requirement instead of proxying it.
+
+⚠️ **`PS-3` is the sharpest of them.** It took `ORDER BY id LIMIT 1` as a proxy
+for *"a student with data"*. The walk's new learner sorts first by UUID and has
+zero reports, so the leg measured an empty trend and **reported a defect in a
+body that was working**. ▶ A proxy that holds only while the fixture is static
+is a pin wearing a query's clothes.
+
+⛔ **AND ITS REPAIR EXPOSED A SECOND LAYER.** Resolving the subject inside the
+`authenticated` block returns NULL, because management cannot read `reports`
+directly (`A-030` routes every report read through an RPC). The subject is now
+resolved **as owner, before the role switch**, into a temp table carrying one id
+and no report content — **fixture selection, never authorization**; every
+governed read still goes through its RPC.
+
+✅ **`P22-6b` is the one that did its job.** Its own message said it was
+*"asserted so that filling one turns this leg red and the next reader learns the
+emptiness was never a defect."* The walk filled one through the `C-14` write
+path — **the write path working end to end** — and the leg turned red exactly as
+designed. It is re-aimed at the mixed state, which is what the omit-never-
+fabricate rule now has to survive.
+
+### ⚠️ 4. TRAINER ACTIVATION IS A DEAD END — REPORTED, NOT BUILT
+
+The Operator's question was whether a route exists to activate a pending
+trainer. **Measured: no.**
+
+| Probe | Result |
+|---|---|
+| `UPDATE ... centre_memberships` anywhere in **49 migrations** | **0** |
+| Functions matching `%activat%` / `%invit%` / `%accept%` | **0** |
+| Routes under `app/**` matching accept / activate / invite | **0** |
+| Invitation rows | **2, both `pending`** |
+| Membership states | `management` 1 active · `trainer` 1 pending, 1 active · `parent` 1 pending, 1 active |
+
+▶ **There is no writer that can move a membership from `pending` to `active`.**
+The `active` rows are Step 7F fixture rows inserted directly as `active`; they
+never travelled through a workflow.
+
+⛔ **THIS IS TWO GAPS, AND THE SECOND IS THE LOAD-BEARING ONE:**
+
+1. **No delivery.** Notifications are `OUT` by `G-04` — a **ruled deferral**,
+   not a defect.
+2. **No acceptance path at all.** No function, no route, no `UPDATE`. **Not
+   covered by any ruling found in the corpus.** Even a manual admin activation
+   would need a writer that does not exist.
+
+**So a manager can create a trainer who can never appear.** `P2-11` writes the
+account, the `pending` membership, the profile and the invitation — and nothing
+can complete it. **Reported for a ruling; nothing built.**

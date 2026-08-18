@@ -189,20 +189,33 @@ export function ManagementStudentProfileScreen({ studentId }: { readonly student
               </p>
             </div>
             {/*
-              ⚠️ DISABLED WITH A STATED REASON, and the distinction from screen `23`'s
-              `Edit` is the whole of §12.12: `22` Edit Student EXISTS in the ratified
-              36 and lands at `P2-14`, so this control has a known destination and
-              WILL become live. `23`'s `Edit` had none and is absent instead.
-              ⛔ `Generate Term Report` gets no control at all — `C-11` defers `28`.
+              ✅ ENABLED 2026-08-19 — AND IT SHOULD HAVE BEEN ENABLED AT `P2-14`.
+
+              ⚠️ THE ORIGINAL NOTE WAS CORRECT AND WENT STALE: *"disabled with a
+              stated reason … `22` Edit Student EXISTS in the ratified 36 and lands
+              at `P2-14`, so this control has a known destination and WILL become
+              live."* ▶ `P2-14` BUILT screen `22` AND LEFT THIS LOCKED, so the
+              screen and its route both existed while the only affordance that
+              reaches them stayed shut. **Built and unreachable is worse than
+              unbuilt** — nothing reports it, and the work looks done.
+
+              ⛔ THE PATTERN ONLY DISCHARGES IF SOMEONE DISCHARGES IT. Disabled-
+              with-a-reason is right, and it carries a debt that memory does not
+              pay: it worked at `P2-18` only because the same phase built the
+              destination. `PS18-EDIT` in this screen's suite now fails whenever a
+              named destination's route exists and the control is still disabled.
+
+              ⛔ `Generate Term Report` still gets no control at all — `C-11`
+              defers `28`, and `23`'s `Edit` is absent for the same reason: no
+              destination, so no affordance.
             */}
-            <button
-              type="button"
-              disabled
-              title="Editing a student arrives with screen 22"
-              className="inline-flex min-h-11 items-center rounded-[10px] border border-line px-4 text-[13px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-45"
+            <Link
+              href={`/management/students/${encodeURIComponent(studentId)}/edit`}
+              className="inline-flex min-h-11 items-center rounded-[10px] border border-line px-4 text-[13px] font-semibold text-ink no-underline transition hover:bg-neutral-soft"
             >
               Edit
-            </button>
+              <span className="sr-only"> {data.fullName}</span>
+            </Link>
           </Card>
 
           <div className="grid gap-4 sm:grid-cols-3">

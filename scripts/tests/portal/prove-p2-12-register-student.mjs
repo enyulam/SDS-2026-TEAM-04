@@ -118,6 +118,9 @@ check(
 const run = psql(`
 SELECT 'BEFORE_STUDENTS<' || pg_catalog.count(*) || '>' FROM public.students;
 SELECT 'BEFORE_AUDIT<' || pg_catalog.count(*) || '>' FROM public.audit_events;
+CREATE TEMP TABLE _mark ON COMMIT DROP AS
+  SELECT action, pg_catalog.count(*) AS n FROM public.audit_events
+   WHERE action IN ('admin.student_created','admin.enrolment_changed') GROUP BY action;
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MANAGEMENT)}', true);
@@ -129,9 +132,13 @@ SELECT 'R_NOCLASS<' || (SELECT o_reason FROM public.admin_create_student('A','B'
 SELECT 'R_NONAME<' || (SELECT o_reason FROM public.admin_create_student('','B', ARRAY[]::uuid[], NULL, NULL, NULL)) || '>';
 RESET ROLE;
 SELECT 'AUDIT_NOW<' || pg_catalog.count(*) || '>' FROM public.audit_events;
-SELECT 'EMITTED<' || string_agg(t.action || ':' || t.n, ',' ORDER BY t.action) || '>'
-  FROM (SELECT action, pg_catalog.count(*) AS n FROM public.audit_events
-         WHERE action IN ('admin.student_created','admin.enrolment_changed') GROUP BY action) t;
+SELECT 'EMITTED<' || coalesce(string_agg(d.action || ':' || d.n, ',' ORDER BY d.action), '(none)') || '>'
+  FROM (SELECT a.action, pg_catalog.count(*) - coalesce(pg_catalog.max(m.n), 0) AS n
+          FROM public.audit_events a
+          LEFT JOIN _mark m ON m.action = a.action
+         WHERE a.action IN ('admin.student_created','admin.enrolment_changed')
+         GROUP BY a.action
+        HAVING pg_catalog.count(*) - coalesce(pg_catalog.max(m.n), 0) > 0) d;
 SELECT 'NAME_LEAK<' || pg_catalog.count(*) || '>' FROM public.audit_events
  WHERE payload::text ILIKE '%Walkthrough%' OR coalesce(target_label,'') ILIKE '%Walkthrough%';
 ROLLBACK;
@@ -167,21 +174,29 @@ check(
 // ---------------------------------------------------------------------
 const asTrainer = psql(`
 BEGIN;
+SELECT 'T_AUDIT_BEFORE<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_created';
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'T_REASON<' || r.o_reason || '|' || (r.o_student_id IS NULL)::text || '>'
   FROM public.admin_create_student('Should','NotExist',
        ARRAY(SELECT cm.id FROM public.class_modules cm ORDER BY cm.title LIMIT 1), NULL, NULL, NULL) r;
 RESET ROLE;
-SELECT 'T_AUDIT<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_created';
+SELECT 'T_AUDIT_AFTER<' || pg_catalog.count(*) || '>' FROM public.audit_events WHERE action='admin.student_created';
 ROLLBACK;`);
 check(
   between(asTrainer, "T_REASON") === "not_permitted|true",
   `PM-D ⛔ a TRAINER holding the same EXECUTE grant is refused: ${between(asTrainer, "T_REASON")} — ▶ the grant is reachability, never authorization; the function re-resolves management live (\`ADR-4\`)`,
 );
 check(
-  between(asTrainer, "T_AUDIT") === "0",
-  `PM-Da ⛔ AND THE REFUSAL EMITTED NOTHING (${between(asTrainer, "T_AUDIT")} events) — ⚠️ a denied attempt must not write an audit row: it would record an action that never happened`,
+    // ⛔ UNCHANGED, NOT A CONSTANT. Re-aimed 2026-08-19, same root as PE-6 and
+  //    PS-3: the claim is 'a denied attempt changed NOTHING', and a pinned
+  //    absolute total says that only while nobody uses the product. An
+  //    Operator walk on 2026-08-18 moved it and the leg went red on a fact it
+  //    was never about.
+  // ⚠️ BEFORE-vs-AFTER IS ALSO STRICTLY STRONGER: a pin is satisfied by a
+  //    denied attempt that changed the count to some other constant.
+  between(asTrainer, "T_AUDIT_AFTER") === between(asTrainer, "T_AUDIT_BEFORE"),
+  `PM-Da ⛔ AND THE REFUSAL EMITTED NOTHING (${between(asTrainer, "T_AUDIT_BEFORE")} → ${between(asTrainer, "T_AUDIT_AFTER")} events) — ⚠️ a denied attempt must not write an audit row: it would record an action that never happened`,
 );
 
 // ---------------------------------------------------------------------

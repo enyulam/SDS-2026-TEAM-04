@@ -11416,3 +11416,100 @@ VISUAL and `RENDERED` **`NOT-RUN`**.
 
 **Next: STOPPED for the Operator's walk — screens 03, 09, 20, 21, 22, 24, 30,
 31 and 32's empty branch, in one pass.**
+
+---
+
+## 2026-08-19 — the walk: a locked affordance, one control, and a systemic pin defect
+
+**Branch** `develop` · ledger **49/49** unchanged · **no schema.**
+
+### 1. Screen `18`'s `Edit` was locked; screen `22` sat built and unreachable
+
+Diagnosed at source: a **stale disabled-with-a-reason**, not state and not a
+missing handler. `P2-14` built screen `22` and its route and left the only
+affordance that reaches them shut. **Built and unreachable is worse than
+unbuilt** — nothing reports it and the work looks done.
+
+Fixed, and the pattern now has a mechanical collector: `prove:stale-disabled`
+flags any disabled control naming a screen whose canonical route ships. Its
+negative control replays the actual pre-fix control and requires it flagged,
+because `SD-2` asserts an empty result and would otherwise pass on a broken
+resolution.
+
+### 2. One child selector across three parent surfaces
+
+Standing rule recorded by instruction: **where two surfaces perform the same
+act, they use one control, and the first built is the one reused unless a frame
+says otherwise.** Third instance, after the rating tiles and the back links.
+
+⚠️ **The frames were measured first and none draws a selector at all** — 0
+`<select>`, no chevron, no button row, on any of the three; each draws one child
+as a static identity line. So neither treatment came from a frame, no frame
+overruled the rule, and the first-built control (`/parent/reports`) won. Its
+single-child branch is exactly the identity line the frames draw, so screens
+`30` and `31` are now closer to their frames than before.
+
+### 3. Six legs broke on the walk and none was a defect
+
+Creating a learner and filling one student's `C-14` columns turned red every leg
+pinning an absolute fixture count. **The suites were mistaking use for
+regression.** Each was re-aimed at what it meant, and each repair is strictly
+stronger than the pin it replaced.
+
+`PS-3` was the sharpest: `ORDER BY id LIMIT 1` was a proxy for "a student with
+data", the walk's learner sorts first with zero reports, and the leg reported a
+defect in a working body. Repairing it exposed a second layer — management
+cannot read `reports` directly (`A-030`), so the subject is now resolved as
+owner before the role switch.
+
+`P22-6b` did its job: it was written to turn red when someone filled a column,
+and the walk filled one through the `C-14` write path.
+
+### 4. Trainer activation — reported, not built
+
+Measured: **0** `UPDATE ... centre_memberships` in 49 migrations, **0**
+activation/invitation/acceptance functions, **0** routes, **2 pending
+invitations**. No writer can move a membership from `pending` to `active`; the
+`active` rows are fixture rows inserted directly. **A manager can create a
+trainer who can never appear.** Two gaps: no delivery (a ruled deferral,
+`G-04`) and **no acceptance path at all** (covered by no ruling found).
+
+### Files
+
+**New:** `components/ui/child-selector.tsx` ·
+`scripts/tests/portal/stale-disabled-rule.mjs`
+
+**Modified:** `features/management/management-student-profile-screen.tsx` ·
+`features/parent/parent-dashboard-screen.tsx` ·
+`features/parent/parent-calendar-screen.tsx` ·
+`features/parent/parent-reports-list.tsx` ·
+`prove-p2-9`, `prove-p2-12`, `prove-p2-13`, `prove-p2-14`, `prove-p2-22` ·
+`UI_REFERENCE_FINAL_MVP/30-parent-dashboard/implementation-notes.md` ·
+`docs/plan/PORTAL_COMPLETION_PLAN.md` · `package.json`
+
+### Verification
+
+`tsc` **0** · `build` **0** · `prove:stale-disabled` **10 PASS** ·
+`prove:artefact-read` **99 PASS** ·
+**`prove:all` 69 PASS · 1 known-red (`S3-T1-r`) · 0 NOT-RUN · exit 0.**
+VISUAL and `RENDERED` **`NOT-RUN`**.
+
+### Findings
+
+1. **A disabled-with-a-reason has a debt, and memory does not pay it.** The
+   pattern is right; it needed a collector. It discharged at `P2-18` only
+   because that phase happened to build the destination.
+
+2. **A pinned fixture count mistakes use for regression.** Six legs, five
+   suites, one walk. Every repair is strictly stronger than the pin.
+
+3. **A proxy that holds only while the fixture is static is a pin wearing a
+   query's clothes** — `ORDER BY id LIMIT 1` for "a student with data".
+
+4. **The frames' silence was the deciding measurement**, not a missing one:
+   because no frame draws a selector, the standing rule applied unmodified.
+
+5. **§12.14 instances 24 and 25**, both backticks inside a template literal —
+   the shape the adopted fix forbids. Both loud, both repaired with Edit.
+
+**Next: STOPPED. Awaiting a ruling on trainer activation.**

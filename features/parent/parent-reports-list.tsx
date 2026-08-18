@@ -6,6 +6,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { Icon, IconTile } from "@/components/ui/icon";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
+import { ChildSelector } from "@/components/ui/child-selector";
 import { StatePanel } from "@/components/ui/state-panel";
 import { asFailure, type ResourceState } from "@/features/trainer/resource-state";
 import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
@@ -193,42 +194,30 @@ export function ParentReportsList() {
           </p>
         </div>
 
-        {linkedChildren.length > 0 && (
-          <div className="shrink-0 rounded-card border border-line bg-surface px-4 py-2.5 shadow-raised">
-            {linkedChildren.length === 1 ? (
-              <>
-                <p className="block text-[0.59375rem] font-medium text-ink">Viewing</p>
-                <p className="mt-0.5 text-[0.78125rem] font-semibold text-ink-strong">
-                  {linkedChildren[0].classGradeLabel
-                    ? `${linkedChildren[0].displayName} · ${linkedChildren[0].classGradeLabel}`
-                    : linkedChildren[0].displayName}
-                </p>
-              </>
-            ) : (
-              <>
-                <label
-                  className="block text-[0.59375rem] font-medium text-ink"
-                  htmlFor={childSelectId}
-                >
-                  Viewing
-                </label>
-                <select
-                  id={childSelectId}
-                  value={selectedStudentId}
-                  onChange={(event) => setSelectedStudentId(event.target.value)}
-                  className="mt-0.5 block cursor-pointer border-0 bg-transparent p-0 text-[0.78125rem] font-semibold text-ink-strong"
-                >
-                  <option value="all">All linked learners</option>
-                  {linkedChildren.map((child) => (
-                    <option key={child.studentId} value={child.studentId}>
-                      {child.displayName}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-          </div>
-        )}
+        {/*
+          ⛔ THE SHARED CHILD SELECTOR (`components/ui/child-selector.tsx`),
+          2026-08-19. ⚠️ THIS SURFACE IS WHERE THE CONTROL CAME FROM — it was
+          built first (2026-08-05) and is therefore the one the Operator's
+          standing rule reuses. It is re-pointed rather than left inline,
+          because leaving the original in place would make TWO definitions of
+          one control — the exact defect the extraction removes, and the same
+          reasoning recorded on `back-link.tsx`.
+
+          ⚠️ `allOption` IS PASSED HERE AND NOWHERE ELSE. A reports LIST can
+          meaningfully show every linked learner at once; a dashboard or a
+          month calendar cannot. That is a real difference between the
+          surfaces, carried as a prop rather than as a second control.
+        */}
+        <ChildSelector
+          childrenList={linkedChildren.map((child) => ({
+            studentId: child.studentId,
+            label: child.displayName,
+            qualifier: child.classGradeLabel,
+          }))}
+          value={selectedStudentId}
+          onChange={setSelectedStudentId}
+          allOption={{ value: "all", label: "All linked learners" }}
+        />
       </div>
 
       {visibleRows.length === 0 ? (

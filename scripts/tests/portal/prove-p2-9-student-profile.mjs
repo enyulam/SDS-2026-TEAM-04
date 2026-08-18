@@ -116,18 +116,42 @@ check(
 //         `class_grades.label` fault survived TEN green assertions and was
 //         found here, by calling as management against fixture data.
 // ---------------------------------------------------------------------
+/*
+ * ⛔ THE SUBJECT IS A STUDENT THAT HAS A REPORT, NOT THE LOWEST ID.
+ *
+ * ⚠️ Re-aimed 2026-08-19. This read `ORDER BY id LIMIT 1` -- a PROXY for
+ * "a student with data" that held only while the fixture was static. An
+ * Operator walk created a learner whose UUID sorts first and which has
+ * ZERO reports, so the leg measured an empty trend and reported a defect
+ * in a body that was working.
+ *
+ * ▶ Selecting from `reports` states the requirement instead of proxying
+ * it, and no number of new learners can move it.
+ */
 const live = psql(`
 BEGIN;
+-- RESOLVED AS OWNER, BEFORE THE ROLE SWITCH. Management cannot read the
+--    reports table directly (A-030 routes every report read through an RPC),
+--    so resolving the subject INSIDE the authenticated block returns NULL
+--    and the function is called with nothing. The subject is fixture
+--    selection, never authorization -- the call itself still runs as a real
+--    management caller past every gate, which is what these legs prove.
+CREATE TEMP TABLE _subject ON COMMIT DROP AS
+  SELECT r.student_id AS id FROM public.reports r ORDER BY r.student_id LIMIT 1;
+-- The temp table is owned by the superuser, so the authenticated role cannot
+--    read it without this. It carries ONE id and no report content, so it
+--    widens nothing: every governed read below still goes through its RPC.
+GRANT SELECT ON _subject TO authenticated;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
 SELECT 'TREND_ROWS=' || pg_catalog.count(*)
-  FROM public.report_management_student_trend((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_trend((SELECT id FROM _subject));
 SELECT 'TREND_SCORES=' || coalesce(pg_catalog.string_agg(session_score::text, ','), '(none)')
-  FROM public.report_management_student_trend((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_trend((SELECT id FROM _subject));
 SELECT 'REPORT_ROWS=' || pg_catalog.count(*)
-  FROM public.report_management_student_reports((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_reports((SELECT id FROM _subject));
 SELECT 'REPORT_LABELS=' || coalesce(pg_catalog.string_agg(class_label || '/' || report_state::text, ','), '(none)')
-  FROM public.report_management_student_reports((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_reports((SELECT id FROM _subject));
 ROLLBACK;`);
 check(
   Number(grab(live, "TREND_ROWS")) > 0,
@@ -195,14 +219,21 @@ check(
  */
 const values = psql(`
 BEGIN;
+-- The same owner-resolved subject as the positive block. It is fixture
+--    selection, never authorization: this block's whole point is that the
+--    identity below is REFUSED by the function even while holding a valid
+--    student id, so handing it the id is what makes the refusal meaningful.
+CREATE TEMP TABLE _subject ON COMMIT DROP AS
+  SELECT r.student_id AS id FROM public.reports r ORDER BY r.student_id LIMIT 1;
+GRANT SELECT ON _subject TO authenticated;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(MGMT)}', true);
 SELECT 'VALS=' || coalesce(pg_catalog.string_agg(v, '|'), '(none)') FROM (
   SELECT pg_catalog.lower(coalesce(lesson_title, '')) AS v
-    FROM public.report_management_student_trend((SELECT id FROM public.students ORDER BY id LIMIT 1))
+    FROM public.report_management_student_trend((SELECT id FROM _subject))
   UNION ALL
   SELECT pg_catalog.lower(class_label || ' ' || coalesce(lesson_title,'') || ' ' || coalesce(term_label,''))
-    FROM public.report_management_student_reports((SELECT id FROM public.students ORDER BY id LIMIT 1))
+    FROM public.report_management_student_reports((SELECT id FROM _subject))
 ) x;
 ROLLBACK;`);
 const vals = grab(values, "VALS");
@@ -260,13 +291,20 @@ check(
 // ---------------------------------------------------------------------
 const deny = psql(`
 BEGIN;
+-- The same owner-resolved subject as the positive block. It is fixture
+--    selection, never authorization: this block's whole point is that the
+--    identity below is REFUSED by the function even while holding a valid
+--    student id, so handing it the id is what makes the refusal meaningful.
+CREATE TEMP TABLE _subject ON COMMIT DROP AS
+  SELECT r.student_id AS id FROM public.reports r ORDER BY r.student_id LIMIT 1;
+GRANT SELECT ON _subject TO authenticated;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '${claims(TRAINER)}', true);
 SELECT 'T_CAN_READ_STUDENTS=' || pg_catalog.count(*) FROM public.students;
 SELECT 'T_TREND=' || pg_catalog.count(*)
-  FROM public.report_management_student_trend((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_trend((SELECT id FROM _subject));
 SELECT 'T_REPORTS=' || pg_catalog.count(*)
-  FROM public.report_management_student_reports((SELECT id FROM public.students ORDER BY id LIMIT 1));
+  FROM public.report_management_student_reports((SELECT id FROM _subject));
 ROLLBACK;`);
 check(
   Number(grab(deny, "T_CAN_READ_STUDENTS")) > 0,

@@ -276,10 +276,28 @@ enrolment date"*. **The `.png` draws no TA row and the `.html` contains
 a TA field that `A-014` prohibits and §6.2 names — the exact failure §7.4.1 was
 written after.
 
+
+### ⛔ `999px` WAS CITED AND IS NO LONGER BUILT
+
+The child selector on this screen was a row of pill buttons carrying
+`rounded-[999px]`. On 2026-08-19 an Operator ruling standardised all three
+parent surfaces on **one** control — the dropdown first built at
+`/parent/reports` — so the pills are gone and the radius with them.
+
+⚠️ **The frames were measured before that ruling was applied, and NONE of the
+three draws a selector at all**: 0 `<select>` elements, no chevron, no button
+row, on `Parent - Dashboard`, `Parent - Calendar` or `Parent - Report`. All
+three draw a single child as a static identity line. ▶ So neither treatment
+came from a frame; both were implementation inventions, and the standing rule
+(*the first built is the one reused unless a frame says otherwise*) decided it
+with no frame to overrule it.
+
+✅ **The shared control's single-child branch renders exactly the identity line
+the frames DO draw**, so this screen is now closer to its frame than before.
 ```artefact-read
 screen: 30
 pack: Parent - Dashboard
 component: features/parent/parent-dashboard-screen.tsx
-html-values: 12.50px, 12px, 11px, 16px, 22px, 18px, 14px, 999px
+html-values: 12.50px, 12px, 11px, 16px, 22px, 18px, 14px
 screen-md-quote: Not rating-bearing.
 ```

@@ -6,6 +6,7 @@ import { usePhysicalTestPort } from "@/features/portal/portal-runtime-context";
 import type { ParentChildDto, ParentDashboardDto } from "@/lib/frontend/contracts/physical-test";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Card } from "@/components/ui/surface";
+import { ChildSelector } from "@/components/ui/child-selector";
 import { StatePanel } from "@/components/ui/state-panel";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { asFailure, type FailureResult } from "@/features/trainer/resource-state";
@@ -154,26 +155,32 @@ export function ParentDashboardScreen() {
             ⚠️ Rendered only when there is a choice to make: one linked child
             means no selector, because a picker with one option is furniture.
           */}
-          {data.children.length > 1 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[12.5px] text-ink">Viewing:</span>
-              {data.children.map((c) => (
-                <button
-                  key={c.studentId}
-                  type="button"
-                  aria-pressed={c.studentId === selected.studentId}
-                  onClick={() => setSelectedId(c.studentId)}
-                  className={
-                    c.studentId === selected.studentId
-                      ? "min-h-11 rounded-[999px] bg-brand-700 px-4 text-[12.5px] font-semibold text-white"
-                      : "min-h-11 rounded-[999px] border border-line bg-surface px-4 text-[12.5px] font-medium text-ink-strong"
-                  }
-                >
-                  {c.classLabel === null ? c.studentName : `${c.studentName} · ${c.classLabel}`}
-                </button>
-              ))}
-            </div>
-          )}
+          {/*
+            ⛔ THE SHARED CHILD SELECTOR (`components/ui/child-selector.tsx`),
+            2026-08-19. Operator standing rule: WHERE TWO SURFACES PERFORM THE
+            SAME ACT, THEY USE ONE CONTROL, AND THE FIRST BUILT IS THE ONE
+            REUSED UNLESS A FRAME SAYS OTHERWISE.
+
+            ⚠️ This surface previously drew a ROW OF PILL BUTTONS. All three
+            parent frames were measured and NONE draws a selector at all — 0
+            select elements, no chevron, no button row — so no frame said
+            otherwise and the first-built control (`/parent/reports`,
+            2026-08-05) wins.
+
+            ⛔ REACH IS UNCHANGED. `students_select_parent` already filters by
+            `parent_student_links` in the database, so this list cannot offer a
+            child the parent has no live link to (`ADR-4`). Changing the widget
+            changes nothing about authorization.
+          */}
+          <ChildSelector
+            childrenList={data.children.map((c) => ({
+              studentId: c.studentId,
+              label: c.studentName,
+              qualifier: c.classLabel,
+            }))}
+            value={selected.studentId}
+            onChange={setSelectedId}
+          />
 
           <div className="grid gap-[22px] lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex flex-col gap-[22px]">

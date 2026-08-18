@@ -242,14 +242,39 @@ check(
   /assignments=0/.test(rls) && /trainer_profiles=0/.test(rls),
   `P22-6a ⛔ …and the Trainer row is the ONE that was genuinely unreachable — ${rls.match(/assignments=\d+ trainer_profiles=\d+/)?.[0]} — ▶ which is why this phase added a function for that row and nothing else`,
 );
+/*
+ * ⛔ PARSED INTO NUMBERS, NOT COMPARED AS A STRING. The previous form
+ * compared the whole rendered line, so the TOTAL was load-bearing and any
+ * new learner broke a leg that has nothing to do with learner counts.
+ */
 const dobFill = psql(`
 SELECT 'FILL<dob=' || pg_catalog.count(*) FILTER (WHERE date_of_birth IS NOT NULL)
     || ' guardian=' || pg_catalog.count(*) FILTER (WHERE guardian_name IS NOT NULL)
     || ' contact=' || pg_catalog.count(*) FILTER (WHERE guardian_contact IS NOT NULL)
     || ' of=' || pg_catalog.count(*) || '>' FROM public.students;`);
+const fillRaw = between(dobFill, "FILL");
+const fillCounts = [...fillRaw.matchAll(/(?:dob|guardian|contact)=(\d+)/g)].map((m) => Number(m[1]));
+const fillTotal = Number(/of=(\d+)/.exec(fillRaw)?.[1] ?? 0);
 check(
-  between(dobFill, "FILL") === "dob=0 guardian=0 contact=0 of=13",
-  `P22-6b ⚠️ THE THREE C-14 COLUMNS ARE EMPTY ON EVERY FIXTURE ROW — ${between(dobFill, "FILL")} — ▶ so three Profile Details rows are OMITTED on every child today. A FIXTURE fact, asserted so that filling one turns this leg red and the next reader learns the emptiness was never a defect`,
+  fillCounts.length === 3 && fillTotal > 0,
+  `P22-6b0  NON-VACUITY: the fill line parsed into three counts and a total (${fillRaw}) -- an unparsed line would make the leg below true of nothing`,
+);
+check(
+  // ⚠️ RE-AIMED 2026-08-19, AFTER THIS LEG DID ITS JOB. It pinned
+  //    "dob=0 guardian=0 contact=0 of=13" and turned RED when the
+  //    Operator's walk filled ONE student through the `C-14` write path
+  //    (`student fixture three`, 2026-08-18). ▶ That is the write path
+  //    working end to end, which is the opposite of a regression.
+  //
+  // ⛔ A PINNED FIXTURE TOTAL MISTAKES USE FOR REGRESSION. The claim worth
+  //    protecting is that a NULL column is OMITTED rather than rendered as
+  //    a blank row (hero `0B`), and that PARTIAL fill is the live state --
+  //    both are asserted below, and neither moves when a learner is added
+  //    or edited.
+  fillCounts.every((n) => n >= 0 && n <= fillTotal) &&
+    fillCounts.some((n) => n > 0) &&
+    fillCounts.some((n) => n < fillTotal),
+  `P22-6b ⚠️ THE THREE C-14 COLUMNS ARE PARTIALLY FILLED — ${between(dobFill, "FILL")} — ▶ so those Profile Details rows are OMITTED on some children and RENDERED on others, which is exactly the mixed state the omit-never-fabricate rule has to survive. The Operator's walk filled the first one through the C-14 write path on 2026-08-18`,
 );
 
 // ---------------------------------------------------------------------
