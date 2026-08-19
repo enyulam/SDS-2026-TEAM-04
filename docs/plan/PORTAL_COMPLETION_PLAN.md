@@ -8456,3 +8456,159 @@ never travelled through a workflow.
 **So a manager can create a trainer who can never appear.** `P2-11` writes the
 account, the `pending` membership, the profile and the invitation — and nothing
 can complete it. **Reported for a ruling; nothing built.**
+
+---
+
+## §65 — activation authorized, and stopped on both conditions the authorization set
+
+*(2026-08-19. **Nothing was built.** The Operator authorized a bounded management
+activation path and named two conditions that would stop it. **Both are hit.**)*
+
+### ⛔ STOP 1 — NO REGISTERED AUDIT STRING COVERS THIS, AND ONE MUST NOT BE INFERRED
+
+**Instruction:** *"The audit string: check whether the registry already covers
+it. If it does, registry unmoved. If not, STOP and state it — do not infer
+one."*
+
+**The live registry holds 24 strings.** Two are membership-scoped, and **neither
+names this action:**
+
+| String | What it names | Why it is not activation |
+|---|---|---|
+| `membership.role_changed` | a **role** change | ⛔ `A-025` is explicit: *"A role change deactivates the old membership and creates a new one; it never overwrites a live row."* ▶ It names a **two-row operation on the role attribute**. Activation is a **one-row `pending → active` status transition with the role unchanged.** |
+| `membership.bootstrap` | the reserved system-origin action | ⛔ **System-only and structurally unreachable here.** Step 7H §5.4 makes it *"the only system-actor-allowed action"*, and it is **rejected on the authenticated path** — which is the only path a manager can call on. Its design is additionally *"name reserved only, deferred with N-4"*. |
+
+▶ **So the registry does not cover it.** Reusing either name would be the
+`evidence.uploaded` / `evidence.attached` lesson run backwards: **`A-029`'s
+one-event-per-action rule forbids one name for two actions exactly as it forbids
+two names for one.**
+
+⚠️ **AND THIS IS WHY THE FUNCTION CANNOT BE WRITTEN WITHOUT THE RULING.** §4
+non-negotiable 2 requires a state transition and its audit write to commit in
+the **same transaction**. A governed write with no legal action string is not a
+smaller version of this feature — it is a governance breach.
+
+⛔ **`CLAUDE.md` §12 makes extending the Step 7H registry a stop-and-ask, and
+`A-057`'s stop-and-ask expressly RE-ARMS after each grant.** No string is
+proposed here, because proposing one is the inference the instruction forbids.
+
+### ⛔ STOP 2 — NO FRAME DRAWS AN ACTIVATION AFFORDANCE
+
+**Instruction:** *"check the frames for 23 and 24 before placing it, and if none
+draws an activation affordance, tell me and I will rule it as an Operator
+addition on the same grounds as the back links."*
+
+**Measured — every text node in both frames:**
+
+* **`Management - Trainers` (`23`)** draws a **`Status` column**, an `Edit`
+  control per row, `Add Trainer`, `Search trainers`, `All Trainers`, `16 staff`.
+  **No `Activate`, no `Pending`, no activation control of any kind.**
+* **`Management - Add Trainer` (`24`)** is the create form — names, contact,
+  employee id, role, class assignment, `Cancel`. **No status field at all.**
+
+⚠️ **AND THE FRAME'S STATUS VOCABULARY IS NOT THE GOVERNED ONE.** It draws
+`Active` and `On leave`. The ratified `centre_membership_status` values are
+**`pending` · `active` · `deactivated`** (`A-025`). ▶ **`On leave` is not a
+governed state and `pending` is not drawn** — so the column cannot simply be
+read as the governed status either. Placing a control against that column is a
+second decision, not a consequence of the first.
+
+**Both screens are shipped** (`/management/trainers`, `/management/trainers/add`),
+so this is placement on a built surface, not a new screen.
+
+### ✅ THE SCHEMA, STATED AS INSTRUCTED — one function, one grant, nothing else
+
+**Instruction:** *"State the schema before writing it. If it needs anything
+beyond one function and one grant, stop."* ▶ **It does not.** Stated so the
+ruling can cover it in one pass:
+
+```
+function : public.admin_activate_membership(p_membership_id uuid)
+           RETURNS TABLE (o_reason text, o_activated boolean)
+           plpgsql · VOLATILE · SECURITY DEFINER · SET search_path = ''
+grant    : EXECUTE to authenticated   (PUBLIC revoked first)
+```
+
+**Nothing else.** No table, no column, no enum, no policy, no client table
+grant, no index, no bucket. `centre_memberships` already carries every column
+required — `status`, `activated_at`, `updated_at` — measured at HEAD.
+
+**The body, in the shape `P2-11` established:**
+
+1. **Re-resolve authorization live** (`ADR-4`) — the caller's own **single
+   active management membership**, with `HAVING count(*) = 1` so two active
+   management memberships refuse rather than pick one.
+2. **Centre-scope it** — the target membership must be in **that** centre.
+3. **Guard the transition** — `pending → active` only, compare-and-set; any
+   other current status is a refusal, never a silent no-op.
+4. **Set `activated_at`**, which is currently NULL on every pending row.
+5. **Emit its audit event in the same transaction** — ⛔ **blocked on Stop 1.**
+6. **A refusal returns a reason and writes nothing**, and emits no event.
+
+⛔ **Deliberately NOT included, per the authorization:** no invitation delivery,
+no acceptance-by-recipient, no token flow. Those stay deferred under `G-04`.
+**This is a manager activating a record they created, not a recipient accepting
+an invitation.**
+
+### ⚠️ ONE SCOPE QUESTION THE AUTHORIZATION DID NOT NAME
+
+The authorization speaks of **trainers**. **The hole is identical for parents:**
+`P2-13` creates a `pending` parent membership by exactly the same route, and
+**both live pending rows — one trainer, one parent — were created during the
+Operator's walk on 2026-08-18.**
+
+▶ A function over `centre_memberships` is **role-agnostic by construction**;
+restricting it to `role = 'trainer'` would be an added condition, and widening
+it to parents would be an added grant of reach. **Both are the Operator's call,
+so neither is assumed.**
+
+### ⛔ THE FINDING: FIXTURE-SHAPED BLINDNESS
+
+**The fixture's `active` memberships were INSERTED DIRECTLY as `active` and
+never travelled a workflow.** Step 7F wrote them that way, so every screen,
+every proof and every walk since has run against a database that **looked
+activated without anything having activated it.**
+
+▶ **The absence was therefore invisible for the whole project.** Not
+under-tested — **unobservable**: there was no state in which a correct system
+and a broken one would have differed, because nothing ever needed the
+transition.
+
+⚠️ **THIS IS THE SAME CLASS AS THE ATTENDANCE DEFECT**, which survived until a
+real learner hit it. **A fixture that starts in the end state cannot exercise
+the path to it**, and a proof suite built on that fixture will be green about a
+journey nobody has taken.
+
+⛔ **AND IT TOOK A HUMAN WALK TO SURFACE IT, TWICE.** The Operator created a
+trainer, watched it not appear, and asked the right question — *is there a route
+to activate them?* **No automated proof in this project asks that question**,
+because every one of them starts from rows that are already `active`.
+
+### Findings accepted from the previous pass, recorded as instructed
+
+1. **⛔ NEITHER SELECTOR TREATMENT CAME FROM A FRAME, BECAUSE EVERY PARENT FRAME
+   ASSUMES ONE CHILD.** `Parent - Dashboard`, `Parent - Calendar` and `Parent -
+   Report` each draw a single child as a static identity line — 0 `<select>`, no
+   chevron, no button row. ▶ **Both treatments were implementation inventions
+   filling a gap the design never addressed**, and the standing rule resolved it
+   **without needing a frame to arbitrate**. That is the useful property: the
+   rule decides the case the frames are silent on, which is the case that
+   actually produced the divergence.
+
+2. **`prove:stale-disabled` is the generalisation, and one stale of seventeen is
+   a good first reading.** A disabled-with-a-reason **carries a debt memory does
+   not pay**, and this one **discharged by coincidence** — `P2-18` happened to
+   build the destination.
+
+3. **§12.8 working at scale: six legs, five suites, one walk, no defects, every
+   repair stronger than the pin it replaced.**
+
+4. **⚠️ `P22-6b` WENT RED EXACTLY AS ITS OWN COMMENT PREDICTED**, having been
+   written *"so that filling one turns this leg red and the next reader learns
+   the emptiness was never a defect."* ▶ **A pin that documents its own trigger
+   is a pin that reads as INFORMATION rather than as a failure.** It cost no
+   diagnosis at all: the leg explained itself in the message it printed.
+
+5. **§12.14 stands at twenty-five**, and the last two were **the exact shape the
+   adopted fix forbids** — backticks inside a template literal. Both loud, both
+   wrote nothing beyond a parse error, both repaired with the Edit tool.

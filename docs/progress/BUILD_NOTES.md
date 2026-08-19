@@ -11513,3 +11513,90 @@ VISUAL and `RENDERED` **`NOT-RUN`**.
    the shape the adopted fix forbids. Both loud, both repaired with Edit.
 
 **Next: STOPPED. Awaiting a ruling on trainer activation.**
+
+---
+
+## 2026-08-19 — activation authorized, stopped on both its own conditions
+
+**Branch** `develop` · ledger **49/49** · **no schema, no code — records only.**
+
+The Operator authorized a bounded management activation path and named two
+conditions that would stop it. **Both are hit, so nothing was built.**
+
+### Stop 1 — no registered audit string covers this
+
+The live registry holds 24 strings. `membership.role_changed` names a **role**
+change, and `A-025` makes that a two-row operation that never overwrites a live
+row — activation is a one-row `pending → active` status transition with the role
+unchanged. `membership.bootstrap` is the reserved system-origin action, rejected
+on the authenticated path, which is the only path a manager can call on.
+
+⚠️ This blocks the function, not just its logging: §4 non-negotiable 2 requires
+the transition and its audit write in the same transaction, so a governed write
+with no legal string is a governance breach rather than a smaller feature. No
+string is proposed, because proposing one is the inference the instruction
+forbids.
+
+### Stop 2 — no frame draws an activation affordance
+
+Screen `23` draws a `Status` column, a per-row `Edit`, `Add Trainer` and a
+search — no `Activate`, no `Pending`. Screen `24` is the create form with no
+status field at all. And the frame's vocabulary is `Active` / `On leave`, while
+the governed values are `pending` / `active` / `deactivated` — so the column
+cannot simply be read as the governed status either.
+
+### The schema, stated as instructed
+
+One function, one grant, nothing else: `admin_activate_membership(uuid)`,
+`SECURITY DEFINER`, `search_path` pinned, `EXECUTE` to `authenticated`.
+`centre_memberships` already carries `status`, `activated_at` and `updated_at`.
+Body in the `P2-11` shape: live re-resolved authorization, centre-scoped,
+compare-and-set `pending → active` only, sets `activated_at`, emits its event in
+the same transaction — blocked on Stop 1.
+
+### One scope question the authorization did not name
+
+The hole is identical for parents. Both live pending rows — one trainer, one
+parent — were created during the walk on 2026-08-18. A function over
+`centre_memberships` is role-agnostic by construction, so restricting it to
+trainers is an added condition and widening it to parents is an added grant of
+reach. Neither assumed.
+
+### Finding — fixture-shaped blindness
+
+The fixture's `active` memberships were inserted directly as `active` and never
+travelled a workflow. Every screen, proof and walk since has run against a
+database that looked activated without anything having activated it. ▶ The
+absence was not under-tested but **unobservable**: no state existed in which a
+correct system and a broken one would have differed.
+
+Same class as the attendance defect, which survived until a real learner hit it.
+**A fixture that starts in the end state cannot exercise the path to it.** It
+took a human walk to surface, and no automated proof here asks the question,
+because every one starts from rows already `active`.
+
+### Findings recorded from the previous pass
+
+1. **Neither selector treatment came from a frame, because every parent frame
+   assumes one child.** Both were implementation inventions filling a gap the
+   design never addressed, and the standing rule resolved it without needing a
+   frame to arbitrate — which is the useful property, since the silent case is
+   the one that produced the divergence.
+
+2. `prove:stale-disabled` is the right generalisation; a disabled-with-a-reason
+   carries a debt memory does not pay, and this one discharged by coincidence.
+   One stale of seventeen is a good first reading.
+
+3. §12.8 at scale: six legs, five suites, one walk, no defects, every repair
+   stronger than the pin it replaced.
+
+4. **`P22-6b` went red exactly as its own comment predicted.** A pin that
+   documents its own trigger reads as information rather than as a failure — it
+   cost no diagnosis at all, because the leg explained itself in the message it
+   printed.
+
+5. §12.14 stands at twenty-five, the last two being the shape the adopted fix
+   forbids.
+
+**Next: STOPPED. Awaiting a ruling on the audit action string and on the control
+placement.**
