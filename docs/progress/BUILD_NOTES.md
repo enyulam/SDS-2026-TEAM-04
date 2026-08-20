@@ -11600,3 +11600,78 @@ because every one starts from rows already `active`.
 
 **Next: STOPPED. Awaiting a ruling on the audit action string and on the control
 placement.**
+
+---
+
+## 2026-08-19 — activation written (unapplied), and the fixture-start sweep
+
+**Branch** `develop` · ledger **49/49** (the new migration is **NOT** applied) ·
+**Docker daemon down mid-pass.**
+
+### The finding, at full weight
+
+**The absence was not under-tested. It was unobservable.** No state existed in
+which a correct system and a broken one would have differed, because every
+fixture row starts in the end state.
+
+**A fixture that begins in the end state cannot exercise the path to it, and no
+proof will ask the question, because none of them has ever seen the beginning.**
+
+Second confirmed instance after the attendance defect.
+
+### What was built
+
+`membership.activated`, registry 24 → 25, `A-057` amended in the `C-4` shape at
+both its size line and its ruling table. `admin_activate_membership(uuid)` —
+role-agnostic, management-only, centre-scoped, compare-and-set `pending →
+active`, refusing rather than no-opping, with the guard on the `UPDATE` as well
+as the read. Six assertions including the §12 execute-at-apply-time leg and a
+chain-verification leg with its non-vacuity floor.
+
+### The third layer the ruling did not know about
+
+`trainer-list-projections.ts:136` filters `pending` out of the only trainer
+list. **No visibility · no affordance · no writer** — and the first is why the
+hole needed a human to create a record and watch it not appear.
+
+### The sweep — four more of this class, none built
+
+1. **Three registry strings have zero emitters** — `invitation.revoked`,
+   `invitation.reissued`, `membership.role_changed`. `invitations` has zero
+   `UPDATE` writers, so an invitation can be created and nothing else ever.
+   `P2-11` tells a manager to "revoke the pending invitation first" — an
+   instruction to perform an action no code can perform. **Worse than the
+   activation hole, because a name makes them look implemented.**
+2. **`accounts` has no lifecycle writer** — `deactivated` is unreachable.
+3. **`trainer_profiles` / `parent_profiles` inserted directly**, with no
+   invitation behind them.
+4. **Attendance roster initialization never run** — rows exist as `present`
+   without anything having created them.
+
+`reports` is the one exception, and also the only lifecycle proved end to end.
+
+### Verification state
+
+⛔ **The Docker daemon went down mid-pass.** The migration is **written and
+unapplied** — `supabase migration up` failed on connection, not content — so its
+assertions have never executed and `AC-5` is `NOT-RUN`, not `PASS`. No SQL suite
+ran. The screen `23` control and the projection change were **not built**:
+lifting the `pending` filter changes what several suites measure, and building a
+write path whose migration cannot be applied would produce a large unverifiable
+surface.
+
+⛔ **Docker was not restarted** — it restores containers with restart policies,
+and the demonstration stack is frozen and must stay stopped.
+
+`tsc` **0** · `build` **0** · `prove:no-secrets` **CLEAN**.
+
+### Files
+
+**New:** `supabase/migrations/20260819090000_portal_membership_activation.sql`
+*(unapplied)*
+
+**Modified:** `docs/spec/BEST_Coach_MVP_Specification_v3_Amendment_008.md`
+(`A-057`, `C-4` shape) · `docs/plan/PORTAL_COMPLETION_PLAN.md`
+
+**Next: STOPPED. Resume on the daemon's return — apply, assert, then build the
+screen `23` control against a proven function.**

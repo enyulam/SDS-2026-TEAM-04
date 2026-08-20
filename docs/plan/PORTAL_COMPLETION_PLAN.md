@@ -8612,3 +8612,161 @@ because every one of them starts from rows that are already `active`.
 5. **§12.14 stands at twenty-five**, and the last two were **the exact shape the
    adopted fix forbids** — backticks inside a template literal. Both loud, both
    wrote nothing beyond a parse error, both repaired with the Edit tool.
+
+---
+
+## §66 — the activation path, and the fixture-start sweep
+
+*(2026-08-19, three Operator rulings. ⛔ **Read the verification state at the end
+before treating any of this as shipped: the Docker daemon went down mid-pass and
+the migration is WRITTEN AND UNAPPLIED.**)*
+
+### ⛔ THE FINDING, AT FULL WEIGHT — recorded first because it is the largest thing in this pass
+
+> ⛔ **THE ABSENCE WAS NOT UNDER-TESTED. IT WAS UNOBSERVABLE.**
+>
+> There was no state in which a correct system and a broken one would have
+> differed, because **every fixture row starts in the end state.**
+>
+> ⛔ **THE GENERAL FORM: A FIXTURE THAT BEGINS IN THE END STATE CANNOT EXERCISE
+> THE PATH TO IT — and no proof will ask the question, because none of them has
+> ever seen the beginning.**
+
+**This is now the second confirmed instance**, after the attendance defect that
+survived until a real learner hit it. ▶ Two is a class, not a coincidence, which
+is why the Operator ordered the sweep below.
+
+### 1 · Audit string — `membership.activated`, registry 24 → 25
+
+**Authorized after both candidates were measured and rejected.**
+`membership.role_changed` names a **role** change, and `A-025` makes that a
+**two-row operation on a different attribute** — it deactivates and re-creates,
+never overwriting a live row. `membership.bootstrap` is **system-origin** and is
+**rejected on the authenticated path**, the only path a manager can call on.
+
+▶ Reusing either runs the `evidence.uploaded` / `evidence.attached` lesson
+**backwards**: **`A-029` forbids one name for two actions as firmly as two names
+for one.** Amended in the `C-4` shape at the single declaration site, with the
+prohibition re-armed and `membership.deactivated` expressly not added.
+
+### 2 · Scope — role-agnostic, by ruling and by construction
+
+Built over `centre_memberships` with **no role condition**. The Operator's
+reasoning is the deciding one: *"restricting to trainers is the added condition
+rather than widening being the added reach, and the hole is identical for
+parents — which I proved myself by hitting it twice."*
+
+**Management-only · centre-scoped · compare-and-set `pending → active` · any
+other status refuses rather than no-ops.** The guard sits on the `UPDATE` itself
+as well as the read, so two managers activating one row concurrently produce one
+event, not two.
+
+### 3 · Placement — an Operator addition on back-link grounds
+
+⛔ **AND THE MEASUREMENT FOUND A THIRD LAYER THE RULING DID NOT KNOW ABOUT.**
+
+The dead end was reported as two gaps — no delivery (a ruled `G-04` deferral)
+and no acceptance path. **There is a third, and it is why the hole was invisible
+to a human until a record was created and watched not to appear:**
+
+> **`server/modules/class-session/trainer-list-projections.ts:136`**
+> `const staff = memberships.rows.filter((m) => m.status === "active" || m.status === "deactivated");`
+
+▶ **Screen `23` filters `pending` out of the only list of trainers that exists.**
+Its own header says so: *"`pending` never reaches this list: an invited trainer
+who has not activated is not a member of staff (`A-027`)."*
+
+**So the layers are: no visibility · no affordance · no writer.** The Operator's
+ruling — *"per row, visible only where status is pending"* — **entails
+surfacing them**, so lifting that filter is inside the ruling rather than a
+widening of it. ⚠️ **But it changes what screen `23` means** (a staff list that
+now shows not-yet-staff), and it is recorded here rather than assumed.
+
+⛔ **THE STATUS COLUMN MUST NOT BE MAPPED.** The frame draws `Active` / `On
+leave`; the governed values are `pending` / `active` / `deactivated`. **`On
+leave` is not a governed state and `pending` is not drawn.** The governed values
+render under their own label, and the divergence is cited — `GC-12` already
+refuses the leave concept for the same reason.
+
+---
+
+## ⛔ THE BOUNDED SWEEP — which other governed transitions does the fixture start past?
+
+**Asked once, as instructed. Nothing built for any of it.** Measured from the
+fixture SQL and the migration corpus, which are the right evidence for this
+question and need no running database.
+
+### ⛔ FINDING A — THREE REGISTRY STRINGS HAVE NO EMITTER AT ALL
+
+**The sharpest result, and worse than a fixture problem: these actions have
+NAMES, which makes them look implemented.**
+
+| String | Emitters | Reality |
+|---|---|---|
+| `invitation.revoked` | **0** | ⛔ nothing can revoke an invitation |
+| `invitation.reissued` | **0** | ⛔ nothing can reissue one |
+| `membership.role_changed` | **0** | ⛔ nothing can change a role |
+
+▶ **`invitations` has ZERO `UPDATE` writers across all 49 migrations.** An
+invitation can be **created and nothing else, ever** — not accepted, not
+expired, not revoked, not reissued. Three of the four `invitation_status` values
+are unreachable, and `P2-11`'s refusal path tells a manager to *"revoke the
+pending invitation first"* — **an instruction to perform an action no code can
+perform.**
+
+### ⛔ FINDING B — `accounts` HAS NO LIFECYCLE WRITER
+
+**Zero `UPDATE public.accounts` in the corpus.** `account_status` carries
+`deactivated`, and **nothing can set it.** Every account is `active` forever.
+
+### ⚠️ FINDING C — WHAT THE FIXTURE ITSELF STARTS PAST
+
+**Thirteen tables are populated by direct `INSERT`.** For each, whether the
+governed path that would normally create or advance the row was exercised:
+
+| Row class | Fixture start | Starts past? |
+|---|---|---|
+| `centre_memberships` | **all `active`** | ⛔ **YES — `pending → active`.** The instance that produced this sweep |
+| `accounts` | `active` | ⚠️ first value, but the only transition **has no writer** (Finding B) |
+| `trainer_profiles` · `parent_profiles` | inserted directly | ⛔ **YES** — normally created by `P2-11` / `P2-13` together with an invitation; here they exist with no invitation behind them |
+| `attendance` | **all `present`** | ⚠️ **PARTLY.** `present → absent` **has a writer** and the expansion fixture does carry `absent` rows — but the **roster initialization** that creates the `present` rows was never run |
+| `invitations` | **none inserted** | ✅ creation exercised — ⛔ but every onward transition is unreachable (Finding A) |
+| `reports` · `report_versions` | **none inserted** | ✅ **fully exercised from `incomplete`.** The one lifecycle this fixture does not short-circuit |
+| `enrolments` · `students` | mixed `is_active` | ✅ writers exist and both states appear |
+
+### ▶ THE PATTERN THE SWEEP EXPOSES
+
+**The fixture is a snapshot of a system mid-operation, not a system that was
+operated.** Every identity, membership and profile row was placed in the state a
+workflow *would have* produced, and **the workflows themselves were never the
+thing under test.** Reports are the exception — and reports are also the only
+lifecycle this project has proved end to end.
+
+⚠️ **THE COUNT THE OPERATOR ASKED FOR: four more of this class.** One writer-less
+transition already named in the registry (three strings), one writer-less table
+(`accounts`), two row classes created past their governing workflow
+(`trainer_profiles`, `parent_profiles`), and one initialization step never run
+(attendance roster). ⛔ **None is built. All are reported.**
+
+### ⚠️ VERIFICATION STATE — READ THIS BEFORE TREATING ANY OF THIS AS SHIPPED
+
+⛔ **THE DOCKER DAEMON WENT DOWN MID-PASS** (`open //./pipe/dockerDesktopLinuxEngine:
+The system cannot find the file specified`). Consequences, stated exactly:
+
+* **The migration is WRITTEN AND UNAPPLIED.** `supabase migration up` failed on
+  connection, not on content. **Its six assertions have never executed**, and
+  `AC-5` — the §12 leg that executes the body — is therefore **`NOT-RUN`, not
+  `PASS`.**
+* **No SQL suite ran**, so `prove:all` was not attempted at full population.
+* **The screen `23` control and the projection change were NOT built.** Lifting
+  the `pending` filter changes what several suites measure, and building a write
+  path whose migration cannot be applied would produce a large unverifiable
+  surface — **the opposite of this project's method.**
+
+⛔ **I DID NOT RESTART DOCKER.** Docker Desktop restores containers with restart
+policies, and **the demonstration stack is FROZEN and must stay stopped** by
+standing instruction. Restarting the daemon could bring it back up, which is not
+a risk this pass is authorized to take.
+
+**Ready to resume the moment the daemon is back: apply, assert, then build the
+screen `23` control against a proven function.**

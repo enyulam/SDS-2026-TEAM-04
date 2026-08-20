@@ -37,7 +37,8 @@ Specification v3 remains the **authoritative baseline**. Amendment 001 (**A-001 
 ## A-057 — Minimal evidence audit-registry extension: ~~exactly two~~ ~~exactly four~~ ✅ **exactly THREE** governed actions *(extended 2026-08-11, `C-4`)*
 
 > ⚠️ **"EXACTLY THREE" IS AND REMAINS TRUE OF THE *EVIDENCE* EXTENSION THIS CLAUSE RATIFIED, AND MUST
-> NOT BE READ AS THE REGISTRY'S SIZE.** The live registry is **24** as of 2026-08-16. Three later
+> NOT BE READ AS THE REGISTRY'S SIZE.** The live registry is ~~**24** as of 2026-08-16~~ ✅ **25 as of
+> 2026-08-19**. Four later
 > Operator rulings extended it outside the evidence family, each in the `C-4` shape — see
 > **§A-057.2a**, added the same day for exactly this reason: a clause that owns a count and does not
 > carry the count's history is how a ratified document comes to disagree with the database it
@@ -104,6 +105,30 @@ in the `C-4` shape — string and count STATED IN ADVANCE, approved before the m
 | 2026-08-13 | `admin.module_updated` · `admin.session_updated` | `19 → 21` | `P2-3` |
 | 2026-08-13/14 | `material.attached` · `material.removed` | `21 → 23` | `P2-6` |
 | **2026-08-16** | **`admin.student_updated`** | **`23 → 24`** | **`P2-14`** |
+| **2026-08-19** | **`membership.activated`** | **`24 → 25`** | management activation |
+
+⛔ **THE 2026-08-19 RULING ADDS EXACTLY ONE STRING, AND NEITHER EXISTING `membership.*` NAME WOULD
+DO.** Both were measured and rejected before it was authorized. **`membership.role_changed`** names a
+**role** change, and **`A-025` makes that a TWO-ROW operation on a DIFFERENT ATTRIBUTE** — it
+deactivates the old membership and creates a new one, *"never overwrites a live row"*. Activation is
+a **one-row `pending → active` status transition with the role unchanged**. **`membership.bootstrap`**
+is the reserved **system-origin** action — Step 7H §5.4's *"only system-actor-allowed action"* — and
+is **rejected on the authenticated path**, which is the only path a manager can call on.
+
+▶ **Reusing either would run the `evidence.uploaded` / `evidence.attached` lesson BACKWARDS: `A-029`
+forbids ONE NAME FOR TWO ACTIONS as firmly as it forbids two names for one.**
+
+⛔ **`membership.deactivated` IS EXPRESSLY NOT ADDED.** The column exists; the action does not, and no
+deactivation workflow is authorized. ⛔ **The prohibition RE-ARMS** — a further membership action is a
+fresh `CLAUDE.md` §12 stop-and-ask, and this is not a standing licence.
+
+⚠️ **WHY THE STRING WAS NEEDED AT ALL, recorded because it is larger than the string.** A manager
+could create a trainer or a parent whose membership was `pending`, and **nothing in the system could
+ever activate it** — no writer, no affordance, and no visibility, since screen `23` filters `pending`
+out of the only trainer list. ▶ **The absence was not under-tested but UNOBSERVABLE: the fixture's
+`active` memberships were INSERTED DIRECTLY as `active` and never travelled a workflow, so no state
+existed in which a correct system and a broken one would have differed.** **A fixture that begins in
+the end state cannot exercise the path to it.**
 
 ⛔ **THE 2026-08-16 RULING ADDS EXACTLY ONE STRING, AND THE WITHDRAWAL SHARES IT.** At `P2-12` a
 sub-question was raised and expressly left open — *whether withdraw is that same string or a second
